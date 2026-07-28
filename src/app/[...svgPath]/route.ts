@@ -1,0 +1,72 @@
+import { NextResponse } from 'next/server';
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
+import { createConfiguration } from '@/engine/core/TemplateRenderer';
+import { renderSvg } from '@/engine/core/SVGEngine';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ svgPath: string[] }> }
+) {
+  try {
+    const { svgPath } = await params;
+
+    if (!svgPath || svgPath.length === 0) {
+      return new NextResponse('Invalid SVG route', { status: 400 });
+    }
+
+    let username = '';
+    let profileSlug = 'default';
+    let theme: 'dark' | 'light' = 'dark';
+
+    if (svgPath.length === 1) {
+      const file = svgPath[0];
+      if (file.endsWith('.svg')) {
+        const parts = file.split('.');
+        username = parts[0];
+      } else {
+        username = file;
+      }
+    } else if (svgPath.length === 2) {
+      username = svgPath[0];
+      const file = svgPath[1];
+      if (file.endsWith('.svg')) {
+        const variant = file.replace('.svg', '');
+        if (variant === 'light') theme = 'light';
+        else if (variant === 'dark') theme = 'dark';
+        else profileSlug = variant;
+      } else {
+        profileSlug = file;
+      }
+    } else if (svgPath.length >= 3) {
+      username = svgPath[0];
+      profileSlug = svgPath[1];
+      const file = svgPath[2];
+      if (file.endsWith('.svg')) {
+        const variant = file.replace('.svg', '');
+        theme = variant === 'light' ? 'light' : 'dark';
+      }
+    }
+
+    const data = await fetchGitHubProfile(username);
+    const config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug);
+
+    const svgContent = renderSvg(config, data, { theme });
+
+    return new NextResponse(svgContent, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/svg+xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=86400',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error rendering SVG';
+    return new NextResponse(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${message}</text></svg>`, {
+      status: 500,
+      headers: { 'Content-Type': 'image/svg+xml' },
+    });
+  }
+}

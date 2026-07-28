@@ -1,0 +1,49 @@
+@theme {
+  /* Colors */
+  --color-void-black: #000000;
+  --color-carbon: #060606;
+  --color-graphite: #252525;
+  --color-onyx: #1f1f1f;
+  --color-iron: #313131;
+  --color-slate: #3d3d3d;
+  --color-fog: #525252;
+  --color-ash: #7a7a7a;
+  --color-smoke: #8a8a8a;
+  --color-pearl: #c5c5c5;
+  --color-bone: #e5e5e5;
+  --color-chalk: #ffffff;
+  --color-signal-lime: #c5ff4a;
+  --color-olive-depth: #597321;
+  --color-moss-shadow: #314013;
+
+  /* Typography */
+  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-inter-tight: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui-monospace: 'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Typography — Scale */
+  --text-caption: 10px;
+  --leading-caption: 1.2;
+  --tracking-caption: 0.24px;
+  --text-body: 14px;
+  --leading-body: 1.55;
+  --text-subheading: 20px;
+  --leading-subheading: 1.3;
+  --tracking-subheading: -0.2px;
+  --text-heading-sm: 32px;
+  --leading-heading-sm: 1.15;
+  --tracking-heading-sm: -0.4px;
+  --text-heading: 49px;
+  --leading-heading: 1.05;
+  --tracking-heading: -1px;
+  --text-heading-lg: 72px;
+  --leading-heading-lg: 0.98;
+  --tracking-heading-lg: -1.8px;
+  --text-display: 89px;
+  --leading-display: 0.94;
+  --tracking-display: -3.1px;
+
+  /* Shadows */
+  --shadow-sm: rgba(197, 255, 74, 0.45) 0px 0px 8px 0px;
+}

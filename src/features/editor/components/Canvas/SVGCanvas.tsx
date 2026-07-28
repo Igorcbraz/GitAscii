@@ -1,0 +1,310 @@
+'use client';
+
+import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { Lock, Move, Layers, X } from 'lucide-react';
+import { useEditorStore } from '../../store/editorStore';
+import { renderSvg } from '@/engine/core/SVGEngine';
+import { LayersPanel } from '../Sidebar/LayersPanel';
+
+export function SVGCanvas() {
+  const {
+    config,
+    githubData,
+    selectedInstanceId,
+    selectWidget,
+    updateWidgetPosition,
+    updateWidgetSize,
+    recordHistorySnapshot,
+    zoom,
+  } = useEditorStore();
+
+  const [isLayersOpen, setIsLayersOpen] = useState(false);
+
+  const [activeDrag, setActiveDrag] = useState<{
+    instanceId: string;
+    type: 'move' | 'resize-r' | 'resize-b' | 'resize-br';
+    startX: number;
+    startY: number;
+    initialPos: { x: number; y: number };
+    initialSize: { width: number; height: number };
+  } | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const renderedSvgString = useMemo(() => {
+    if (!config || !githubData) return '';
+    return renderSvg(config, githubData, { theme: 'dark' });
+  }, [config, githubData]);
+
+  useEffect(() => {
+    if (!isLayersOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLayersOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLayersOpen]);
+
+  useEffect(() => {
+    if (!activeDrag) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = Math.round((e.clientX - activeDrag.startX) / zoom);
+      const deltaY = Math.round((e.clientY - activeDrag.startY) / zoom);
+
+      const targetWidget = config?.widgets.find((w) => w.instanceId === activeDrag.instanceId);
+      const isAspectLocked = targetWidget
+        ? targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art' || Boolean(targetWidget.config.lockAspectRatio !== false && (targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art')) || Boolean(targetWidget.config.lockAspectRatio)
+        : false;
+
+      if (activeDrag.type === 'move') {
+        const rawX = activeDrag.initialPos.x + deltaX;
+        const rawY = activeDrag.initialPos.y + deltaY;
+
+        const snappedX = Math.max(0, Math.min(800 - activeDrag.initialSize.width, Math.round(rawX / 4) * 4));
+        const snappedY = Math.max(0, Math.round(rawY / 4) * 4);
+
+        updateWidgetPosition(activeDrag.instanceId, { x: snappedX, y: snappedY }, false);
+      } else if (activeDrag.type === 'resize-r') {
+        const newWidth = Math.max(40, Math.min(800 - activeDrag.initialPos.x, Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4));
+        const newHeight = isAspectLocked ? newWidth : activeDrag.initialSize.height;
+        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false);
+      } else if (activeDrag.type === 'resize-b') {
+        const newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4);
+        const newWidth = isAspectLocked ? Math.min(800 - activeDrag.initialPos.x, newHeight) : activeDrag.initialSize.width;
+        updateWidgetSize(activeDrag.instanceId, { width: isAspectLocked ? newHeight : newWidth, height: newHeight }, false);
+      } else if (activeDrag.type === 'resize-br') {
+        let newWidth = Math.max(40, Math.min(800 - activeDrag.initialPos.x, Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4));
+        let newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4);
+
+        if (isAspectLocked) {
+          const side = Math.min(newWidth, Math.min(800 - activeDrag.initialPos.x, newHeight));
+          newWidth = side;
+          newHeight = side;
+        }
+
+        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setActiveDrag(null);
+      recordHistorySnapshot();
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [activeDrag, zoom, updateWidgetPosition, updateWidgetSize, recordHistorySnapshot, config?.widgets]);
+
+  if (!config || !githubData) {
+    return (
+      <div className="flex-1 h-full bg-carbon flex items-center justify-center text-ash">
+        Carregando canvas...
+      </div>
+    );
+  }
+
+  let canvasHeight = 400;
+  config.widgets.forEach((w) => {
+    if (w.visible) {
+      const bottom = w.position.y + w.size.height + 40;
+      if (bottom > canvasHeight) canvasHeight = bottom;
+    }
+  });
+
+  return (
+    <main
+      className="flex-1 h-full bg-carbon overflow-auto p-8 flex flex-col items-center justify-start relative select-none"
+      onClick={() => selectWidget(null)}
+    >
+      <div
+        ref={containerRef}
+        className="relative transition-transform origin-top duration-150 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-graphite rounded-none bg-void-black overflow-hidden shrink-0 mb-16"
+        style={{
+          transform: `scale(${zoom})`,
+          width: 800,
+          height: canvasHeight,
+        }}
+      >
+        <div
+          dangerouslySetInnerHTML={{ __html: renderedSvgString }}
+          className="w-full h-full pointer-events-none"
+        />
+
+        <div className="absolute inset-0 pointer-events-auto">
+          {config.widgets.map((widget) => {
+            if (!widget.visible) return null;
+
+            const isSelected = widget.instanceId === selectedInstanceId;
+            const displayName =
+              widget.name || `${widget.widgetId.charAt(0).toUpperCase() + widget.widgetId.slice(1)}`;
+
+            return (
+              <div
+                key={widget.instanceId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectWidget(widget.instanceId);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  selectWidget(widget.instanceId);
+                  if (!widget.locked) {
+                    setActiveDrag({
+                      instanceId: widget.instanceId,
+                      type: 'move',
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      initialPos: { ...widget.position },
+                      initialSize: { ...widget.size },
+                    });
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  left: widget.position.x,
+                  top: widget.position.y,
+                  width: widget.size.width,
+                  height: widget.size.height,
+                  zIndex: widget.zIndex,
+                }}
+                className={`group transition-all ${widget.locked
+                  ? 'cursor-not-allowed'
+                  : isSelected
+                    ? 'cursor-grab active:cursor-grabbing ring-2 ring-signal-lime ring-offset-2 ring-offset-carbon'
+                    : 'cursor-grab hover:ring-1 hover:ring-ash/50'
+                  }`}
+              >
+                {isSelected && (
+                  <div className="absolute -top-7 left-0 flex items-center gap-1.5 bg-signal-lime text-black font-inter-tight text-caption uppercase tracking-wider font-semibold px-2 py-0.5 rounded-xs shadow-md z-30">
+                    {widget.locked ? <Lock size={10} className="text-black" /> : <Move size={10} />}
+                    <span>{displayName}</span>
+                    <span className="font-jetbrains-mono opacity-60">
+                      ({widget.size.width}x{widget.size.height})
+                    </span>
+                  </div>
+                )}
+
+                {isSelected && !widget.locked && (
+                  <>
+                    <div
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-r',
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        });
+                      }}
+                      className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
+                      title="Arraste para ajustar largura (Width)"
+                    >
+                      <div className="w-1 h-6 bg-signal-lime rounded-[1px] shadow-sm" />
+                    </div>
+
+                    <div
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-b',
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        });
+                      }}
+                      className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
+                      title="Arraste para ajustar altura (Height)"
+                    >
+                      <div className="h-1 w-6 bg-signal-lime rounded-[1px] shadow-sm" />
+                    </div>
+
+                    <div
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-br',
+                          startX: e.clientX,
+                          startY: e.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        });
+                      }}
+                      className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
+                      title="Arraste para redimensionar ambos"
+                    />
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className="fixed bottom-6 left-81 z-40 flex flex-col items-start select-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {isLayersOpen && (
+          <div className="mb-3 w-[320px] max-h-130 bg-onyx/95 backdrop-blur-xl border border-graphite rounded-sm shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center justify-between px-3.5 py-2.5 bg-void-black border-b border-graphite">
+              <div className="flex items-center gap-2">
+                <Layers size={14} className="text-signal-lime" />
+                <span className="font-inter-tight text-eyebrow font-semibold text-chalk uppercase tracking-[0.12em]">
+                  Camadas
+                </span>
+                <span className="text-caption font-jetbrains-mono bg-graphite text-ash px-1.5 py-0.5 rounded-xs">
+                  {config.widgets.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setIsLayersOpen(false)}
+                className="text-ash hover:text-chalk p-1 rounded hover:bg-graphite transition-colors cursor-pointer"
+                title="Fechar painel de camadas"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="p-3.5 overflow-y-auto flex-1 max-h-110">
+              <LayersPanel />
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLayersOpen((prev) => !prev);
+          }}
+          className={`group relative flex items-center justify-center w-12 h-12 rounded-full border shadow-2xl transition-all cursor-pointer ${isLayersOpen
+            ? 'bg-signal-lime text-black border-signal-lime shadow-[0_0_20px_rgba(204,255,0,0.4)] scale-105'
+            : 'bg-onyx/90 text-ash border-graphite hover:border-signal-lime hover:text-signal-lime hover:scale-105 backdrop-blur-md'
+            }`}
+          title={isLayersOpen ? 'Fechar camadas' : 'Camadas (Ver e reordenar)'}
+        >
+          <Layers size={20} className="transition-transform group-hover:scale-110" />
+
+          {!isLayersOpen && config.widgets.length > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-signal-lime text-[9px] font-bold font-jetbrains-mono text-black shadow-md">
+              {config.widgets.length}
+            </span>
+          )}
+        </button>
+      </div>
+    </main>
+  );
+}
