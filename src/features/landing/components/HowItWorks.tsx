@@ -1,17 +1,20 @@
 'use client';
 
 import { Copy } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 export function HowItWorks() {
+  const { t } = useI18n();
+
   return (
     <section id="how-it-works" className="bg-carbon py-32 px-6 md:px-12 w-full relative overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col">
         <div className="mb-24 flex flex-col items-center text-center">
-          <span className="font-sans font-medium text-[11px] uppercase tracking-[0.22em] text-ash mb-4">
-            [ THREE STEPS ]
+          <span className="font-sans font-medium text-eyebrow uppercase tracking-[0.22em] text-ash mb-4">
+            {t('landing.how_it_works.eyebrow', '[ THREE STEPS ]')}
           </span>
           <h2 className="font-serif font-light text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
-            Simple. <em className="italic text-signal-lime">Powerful.</em>
+            {t('landing.how_it_works.title_normal', 'Simple. ')}<em className="italic text-signal-lime">{t('landing.how_it_works.title_italic', 'Powerful.')}</em>
           </h2>
         </div>
 
@@ -24,15 +27,15 @@ export function HowItWorks() {
                 01
               </div>
               <div className="w-full max-w-50 h-10 border border-graphite bg-carbon flex items-center px-3 z-10 group-hover:border-iron transition-colors duration-300">
-                <span className="font-mono text-[13px] text-bone">
+                <span className="font-mono text-label text-bone">
                   Igorcbraz<span className="animate-pulse text-signal-lime">_</span>
                 </span>
               </div>
               <div className="hidden lg:block absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-signal-lime z-20 shadow-[0_0_8px_rgba(197,255,74,0.45)]" />
             </div>
-            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">Enter Your Username</h3>
+            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">{t('landing.how_it_works.step1_title', 'Enter Your Username')}</h3>
             <p className="font-sans font-normal text-body text-bone leading-body">
-              Just type your GitHub username. We fetch everything automatically.
+              {t('landing.how_it_works.step1_desc', 'Just type your GitHub username. We fetch everything automatically.')}
             </p>
           </div>
 
@@ -52,9 +55,9 @@ export function HowItWorks() {
                 <div className="w-12.5 h-full border border-graphite bg-carbon group-hover:border-iron transition-colors duration-300" />
               </div>
             </div>
-            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">Customize Everything</h3>
+            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">{t('landing.how_it_works.step2_title', 'Customize Everything')}</h3>
             <p className="font-sans font-normal text-body text-bone leading-body">
-              Use our visual editor to drag widgets, pick templates, and tune every detail. Or let us generate the best profile for you.
+              {t('landing.how_it_works.step2_desc', 'Use our visual editor to drag widgets, pick templates, and tune every detail. Or let us generate the best profile for you.')}
             </p>
           </div>
 
@@ -66,7 +69,7 @@ export function HowItWorks() {
               <div className="hidden lg:block absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-signal-lime z-20 shadow-[0_0_8px_rgba(197,255,74,0.45)]" />
 
               <div className="w-full max-w-65 h-20 border border-graphite bg-carbon p-3 z-10 relative flex flex-col justify-center group-hover:border-iron transition-colors duration-300">
-                <div className="font-mono text-[11px] text-ash flex flex-col gap-1">
+                <div className="font-mono text-eyebrow text-ash flex flex-col gap-1">
                   <span>&lt;picture&gt;</span>
                   <span className="pl-4 text-graphite">...</span>
                   <span>&lt;/picture&gt;</span>
@@ -76,9 +79,9 @@ export function HowItWorks() {
                 </div>
               </div>
             </div>
-            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">Copy & Paste</h3>
+            <h3 className="font-sans font-medium text-subheading text-chalk mb-3">{t('landing.how_it_works.step3_title', 'Copy & Paste')}</h3>
             <p className="font-sans font-normal text-body text-bone leading-body">
-              Copy one line of code to your README. Your profile SVG stays always up-to-date via our URL.
+              {t('landing.how_it_works.step3_desc', 'Copy one line of code to your README. Your profile SVG stays always up-to-date via our URL.')}
             </p>
           </div>
         </div>

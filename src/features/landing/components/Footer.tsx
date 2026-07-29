@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/i18n';
 
 export function Footer() {
   const router = useRouter();
+  const { t } = useI18n();
 
   return (
     <footer className="relative w-full bg-void-black border-t border-graphite">
@@ -25,13 +27,13 @@ export function Footer() {
 
         <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-8">
           <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
-            [ GET STARTED TODAY ]
+            {t('landing.footer.eyebrow', '[ GET STARTED TODAY ]')}
           </span>
           <h2 className="font-pt-serif font-light text-4xl sm:text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
-            Ready to Transform Your <span className="italic text-signal-lime">Profile?</span>
+            {t('landing.footer.title_normal', 'Ready to Transform Your ')}<span className="italic text-signal-lime">{t('landing.footer.title_italic', 'Profile?')}</span>
           </h2>
           <p className="font-inter-tight text-body text-bone leading-body max-w-md">
-            Join developers who already elevated their GitHub presence with stunning ASCII art and premium SVGs.
+            {t('landing.footer.subtitle', 'Join developers who already elevated their GitHub presence with stunning ASCII art and premium SVGs.')}
           </p>
           <button
             onClick={() => {
@@ -42,7 +44,7 @@ export function Footer() {
             }}
             className="bg-signal-lime text-black font-inter-tight font-medium text-body py-4 px-8 rounded-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 flex items-center gap-2 cursor-pointer uppercase tracking-wide"
           >
-            Start Building <ArrowRight size={16} />
+            {t('landing.footer.start_building', 'Start Building')} <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -60,7 +62,7 @@ export function Footer() {
                 <span className="font-pt-serif font-light italic text-signal-lime">Ascii</span>
               </div>
               <p className="font-inter-tight text-note text-ash mb-5 max-w-xs leading-relaxed">
-                Transform your GitHub contributions into stunning ASCII art. Premium SVGs and a visual editor for developers.
+                {t('landing.footer.description', 'Transform your GitHub contributions into stunning ASCII art. Premium SVGs and a visual editor for developers.')}
               </p>
               <div className="inline-flex items-center justify-center px-3 py-1 rounded-full border border-signal-lime bg-transparent">
                 <span className="font-inter-tight text-signal-lime text-eyebrow uppercase tracking-[0.22em]">
@@ -71,13 +73,13 @@ export function Footer() {
 
             <div className="md:col-span-2 flex flex-col">
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
-                [ PRODUCT ]
+                {t('landing.footer.product', '[ PRODUCT ]')}
               </span>
               <ul className="flex flex-col gap-4">
                 {['Features', 'Templates', 'Editor', 'Generate'].map((item) => (
                   <li key={item}>
                     <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
-                      {item}
+                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
                 ))}
@@ -86,13 +88,13 @@ export function Footer() {
 
             <div className="md:col-span-2 flex flex-col">
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
-                [ RESOURCES ]
+                {t('landing.footer.resources', '[ RESOURCES ]')}
               </span>
               <ul className="flex flex-col gap-4">
                 {['Documentation', 'API', 'Changelog', 'Status'].map((item) => (
                   <li key={item}>
                     <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
-                      {item}
+                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
                 ))}
@@ -101,13 +103,13 @@ export function Footer() {
 
             <div className="md:col-span-3 flex flex-col">
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
-                [ COMMUNITY ]
+                {t('landing.footer.community', '[ COMMUNITY ]')}
               </span>
               <ul className="flex flex-col gap-4">
                 {['GitHub', 'Documentation', 'Contributing', 'Discussions'].map((item) => (
                   <li key={item}>
                     <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
-                      {item}
+                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
                 ))}

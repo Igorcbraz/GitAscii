@@ -17,6 +17,7 @@ import {
 import { useEditorStore } from '../../store/editorStore';
 import { CHARSETS } from '@/engine/ascii/converter';
 import { ColorPicker } from './ColorPicker';
+import { useI18n } from '@/i18n';
 import { AsciiArtControls } from './AsciiArtControls';
 import { TerminalInfoControls } from './TerminalInfoControls';
 import { TechStackControls } from './TechStackControls';
@@ -31,6 +32,7 @@ const WIDTH_PRESETS = [
 ];
 
 export function PropertiesPanel() {
+  const { t } = useI18n();
   const {
     config,
     selectedInstanceId,
@@ -47,10 +49,10 @@ export function PropertiesPanel() {
       <aside className="w-[320px] h-full bg-onyx border-l border-graphite p-6 flex flex-col items-center justify-center text-center shrink-0">
         <Sliders className="w-8 h-8 text-ash mb-3 stroke-[1.5px]" />
         <h4 className="font-inter-tight font-medium text-base text-chalk mb-1">
-          Nenhum Widget Selecionado
+          {t('editor.properties.none_selected_title', 'Nenhum Widget Selecionado')}
         </h4>
         <p className="font-inter-tight text-note text-ash max-w-50">
-          Clique em qualquer widget no canvas para inspecionar e editar suas propriedades.
+          {t('editor.properties.none_selected_desc', 'Clique em qualquer widget no canvas para inspecionar e editar suas propriedades.')}
         </p>
       </aside>
     );
@@ -67,7 +69,7 @@ export function PropertiesPanel() {
     <aside className="w-[320px] h-full bg-onyx border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
       <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
         <div>
-          <span className="label-stamp">[ PROPRIEDADES ]</span>
+          <span className="label-stamp">{t('editor.properties.title', '[ PROPRIEDADES ]')}</span>
           <h3 className="font-inter-tight font-medium text-base text-chalk capitalize mt-0.5">
             {displayName}
           </h3>
@@ -76,7 +78,7 @@ export function PropertiesPanel() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => toggleWidgetLock(selectedWidget.instanceId)}
-            title={selectedWidget.locked ? 'Desbloquear Widget' : 'Bloquear Widget'}
+            title={selectedWidget.locked ? t('editor.properties.unlock', 'Desbloquear Widget') : t('editor.properties.lock', 'Bloquear Widget')}
             className={`p-1.5 rounded-xs hover:bg-graphite transition-colors cursor-pointer ${selectedWidget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
               }`}
           >
@@ -85,7 +87,7 @@ export function PropertiesPanel() {
 
           <button
             onClick={() => toggleWidgetVisibility(selectedWidget.instanceId)}
-            title={selectedWidget.visible ? 'Ocultar Widget' : 'Exibir Widget'}
+            title={selectedWidget.visible ? t('editor.properties.hide', 'Ocultar Widget') : t('editor.properties.show', 'Exibir Widget')}
             className="p-1.5 rounded-xs hover:bg-graphite text-ash hover:text-chalk transition-colors cursor-pointer"
           >
             {selectedWidget.visible ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -93,7 +95,7 @@ export function PropertiesPanel() {
 
           <button
             onClick={() => removeWidget(selectedWidget.instanceId)}
-            title="Excluir Widget"
+            title={t('editor.properties.delete', 'Excluir Widget')}
             className="p-1.5 rounded-xs hover:bg-red-500/20 text-ash hover:text-red-400 transition-colors cursor-pointer"
           >
             <Trash2 size={16} />
@@ -105,7 +107,7 @@ export function PropertiesPanel() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
             <Palette size={14} />
-            <span>Cores & Tema</span>
+            <span>{t('editor.properties.colors_theme', 'Cores & Tema')}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -117,21 +119,21 @@ export function PropertiesPanel() {
             />
 
             <ColorPicker
-              label="Cor de Destaque"
+              label={t('editor.properties.color_destaque', 'Cor de Destaque')}
               align="right"
               value={(cfg.accentColor as string) || config.globalStyles.accentColor || '#c5ff4a'}
               onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { accentColor: color })}
             />
 
             <ColorPicker
-              label="Cor do Texto"
+              label={t('editor.properties.color_texto', 'Cor do Texto')}
               align="left"
               value={(cfg.textColor as string) || config.globalStyles.textColor || '#ffffff'}
               onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { textColor: color })}
             />
 
             <ColorPicker
-              label="Cor da Borda"
+              label={t('editor.properties.color_borda', 'Cor da Borda')}
               align="right"
               value={(cfg.borderColor as string) || config.globalStyles.borderColor || '#252525'}
               onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { borderColor: color })}
@@ -143,13 +145,13 @@ export function PropertiesPanel() {
           <div className="space-y-3 pt-3 border-t border-graphite">
             <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
               <Type size={14} />
-              <span>Edição de Biografia & Links</span>
+              <span>{t('editor.properties.bio_title', 'Edit Bio & Links')}</span>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-eyebrow text-ash font-inter-tight">Texto da Biografia</label>
-                <span className="text-caption text-ash font-jetbrains-mono">(Sugestão do perfil)</span>
+                <label className="text-eyebrow text-ash font-inter-tight">{t('editor.properties.bio_label', 'Biography Text')}</label>
+                <span className="text-caption text-ash font-jetbrains-mono">{t('editor.properties.bio_suggestion', '(Profile suggestion)')}</span>
               </div>
               <textarea
                 rows={3}
@@ -159,13 +161,13 @@ export function PropertiesPanel() {
                     : useEditorStore.getState().githubData?.user.bio || ''
                 }
                 onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customBio: e.target.value })}
-                placeholder="Digite qualquer biografia livremente..."
+                placeholder={t('editor.properties.bio_placeholder', 'Digite qualquer biografia livremente...')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-2 rounded-xs focus:border-signal-lime focus:outline-none resize-none"
               />
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Localização</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.location', 'Localização')}</label>
               <input
                 type="text"
                 value={
@@ -174,13 +176,13 @@ export function PropertiesPanel() {
                     : useEditorStore.getState().githubData?.user.location || ''
                 }
                 onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customLocation: e.target.value })}
-                placeholder="Ex: São Paulo, Brasil"
+                placeholder={t('editor.properties.location_placeholder', 'Ex: São Paulo, Brasil')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Website / Blog (Link Clicável)</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.website', 'Website / Blog (Link Clicável)')}</label>
               <input
                 type="text"
                 value={
@@ -189,7 +191,7 @@ export function PropertiesPanel() {
                     : useEditorStore.getState().githubData?.user.blog || ''
                 }
                 onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customBlog: e.target.value })}
-                placeholder="Ex: https://meusite.com"
+                placeholder={t('editor.properties.website_placeholder', 'Ex: https://meusite.com')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
             </div>
@@ -200,11 +202,11 @@ export function PropertiesPanel() {
           <div className="space-y-3 pt-3 border-t border-graphite">
             <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
               <Type size={14} />
-              <span>URL da Imagem do Avatar</span>
+              <span>{t('editor.properties.avatar_title', 'URL da Imagem do Avatar')}</span>
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">URL da Imagem</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.avatar_label', 'URL da Imagem')}</label>
               <input
                 type="text"
                 value={
@@ -258,14 +260,14 @@ export function PropertiesPanel() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
               <Maximize2 size={14} />
-              <span>Largura & Altura</span>
+              <span>{t('editor.properties.size_title', 'Largura & Altura')}</span>
             </div>
             <span className="text-caption text-signal-lime font-jetbrains-mono">[ RESIZE ]</span>
           </div>
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Manter proporção quadrada (1:1)
+              {t('editor.properties.size_aspect', 'Manter proporção quadrada (1:1)')}
             </label>
             <input
               type="checkbox"
@@ -282,7 +284,7 @@ export function PropertiesPanel() {
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">Atalhos de Largura (Width)</label>
+            <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">{t('editor.properties.size_shortcuts', 'Atalhos de Largura (Width)')}</label>
             <div className="grid grid-cols-4 gap-1.5">
               {WIDTH_PRESETS.map((preset) => {
                 const isAspectLocked =
@@ -412,7 +414,7 @@ export function PropertiesPanel() {
 
           <div className="grid grid-cols-2 gap-2 pt-2 text-eyebrow">
             <div>
-              <label className="text-ash block mb-1 font-inter-tight">Posição X</label>
+              <label className="text-ash block mb-1 font-inter-tight">{t('editor.properties.pos_x', 'Posição X')}</label>
               <input
                 type="number"
                 value={selectedWidget.position.x}
@@ -427,7 +429,7 @@ export function PropertiesPanel() {
             </div>
 
             <div>
-              <label className="text-ash block mb-1 font-inter-tight">Posição Y</label>
+              <label className="text-ash block mb-1 font-inter-tight">{t('editor.properties.pos_y', 'Posição Y')}</label>
               <input
                 type="number"
                 value={selectedWidget.position.y}

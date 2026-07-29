@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Check, Copy, ChevronDown, Pipette } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 interface ColorPickerProps {
   label?: string;
@@ -26,6 +27,7 @@ const PRESET_SWATCHES = [
 ];
 
 export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right' }: ColorPickerProps) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [hexInput, setHexInput] = useState(value);
   const [copied, setCopied] = useState(false);
@@ -91,14 +93,14 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
             } top-full mt-1 w-55 bg-onyx border border-slate p-3 rounded-md shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100`}
         >
           <div className="text-caption uppercase font-inter-tight font-semibold tracking-wider text-ash mb-2 flex items-center justify-between">
-            <span>Color Swatches</span>
+            <span>{t('editor.properties.color_picker.swatches', 'Color Swatches')}</span>
             <button
               onClick={handleCopy}
               className="text-ash hover:text-signal-lime transition-colors flex items-center gap-1 cursor-pointer"
-              title="Copy Hex"
+              title={t('editor.properties.color_picker.copy_hex', 'Copy Hex')}
             >
               {copied ? <Check size={12} className="text-signal-lime" /> : <Copy size={12} />}
-              <span className="text-caption">{copied ? 'Copied' : 'Copy'}</span>
+              <span className="text-caption">{copied ? t('common.copied', 'Copied') : t('editor.properties.color_picker.copy', 'Copy')}</span>
             </button>
           </div>
 

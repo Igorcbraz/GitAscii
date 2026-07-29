@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
+import { useI18n } from '@/i18n';
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types';
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer';
 import { getMockGitHubData } from '@/features/github/api/fetchProfile';
@@ -61,6 +62,7 @@ export function WidgetPreviewTooltip({
   globalStyles,
   githubData,
 }: WidgetPreviewTooltipProps) {
+  const { t } = useI18n();
   const [asciiArtCache, setAsciiArtCache] = useState<{ lines: string[]; colors?: string[][] } | null>(null);
 
   const size = widgetItem ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 } : { width: 800, height: 120 };
@@ -97,10 +99,16 @@ export function WidgetPreviewTooltip({
 
   if (!widgetItem || !targetRect) return null;
 
+  const translatedName = t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name);
+  const translatedDesc = t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc);
+  const translatedBadgeText = widgetItem.badge
+    ? t(`widget.badge.${widgetItem.badge.text.toLowerCase().replace(/\s+/g, '_')}`, widgetItem.badge.text)
+    : '';
+
   const previewWidget: WidgetInstance = {
     instanceId: `preview_${widgetItem.id}`,
     widgetId: widgetItem.id,
-    name: widgetItem.name,
+    name: translatedName,
     position: { x: 0, y: 0 },
     size,
     config: {
@@ -145,11 +153,11 @@ export function WidgetPreviewTooltip({
         <div className="flex items-center gap-1.5 overflow-hidden">
           <span className="w-1.5 h-1.5 rounded-full bg-signal-lime animate-pulse shrink-0" />
           <span className="font-inter-tight text-caption font-medium uppercase tracking-[0.16em] text-signal-lime truncate">
-            [ PREVIEW: {widgetItem.name} ]
+            [ {t('editor.sidebar.preview', 'PREVIEW')}: {translatedName} ]
           </span>
           {widgetItem.badge && (
             <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 uppercase tracking-wider shrink-0">
-              {widgetItem.badge.text}
+              {translatedBadgeText}
             </span>
           )}
         </div>
@@ -168,11 +176,11 @@ export function WidgetPreviewTooltip({
 
       <div className="mt-2.5 flex items-center justify-between text-eyebrow">
         <p className="text-ash font-inter-tight line-clamp-1 flex-1 mr-2">
-          {widgetItem.desc}
+          {translatedDesc}
         </p>
         <div className="text-signal-lime font-inter-tight font-medium flex items-center gap-1 shrink-0 bg-signal-lime/10 px-2 py-0.5 rounded-xs border border-signal-lime/20">
           <Plus size={12} />
-          <span>Inserir</span>
+          <span>{t('editor.sidebar.insert', 'Inserir')}</span>
         </div>
       </div>
     </div>

@@ -6,8 +6,10 @@ import { useEditorStore } from '../../store/editorStore';
 import { renderSvg } from '@/engine/core/SVGEngine';
 import { LayersPanel } from '../Sidebar/LayersPanel';
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter';
+import { useI18n } from '@/i18n';
 
 export function SVGCanvas() {
+  const { t } = useI18n();
   const {
     config,
     githubData,
@@ -309,7 +311,7 @@ export function SVGCanvas() {
                         });
                       }}
                       className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
-                      title="Arraste para redimensionar ambos"
+                      title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
                     />
                   </>
                 )}
@@ -329,7 +331,7 @@ export function SVGCanvas() {
               <div className="flex items-center gap-2">
                 <Layers size={14} className="text-signal-lime" />
                 <span className="font-inter-tight text-eyebrow font-semibold text-chalk uppercase tracking-[0.12em]">
-                  Camadas
+                  {t('editor.canvas.layers', 'Camadas')}
                 </span>
                 <span className="text-caption font-jetbrains-mono bg-graphite text-ash px-1.5 py-0.5 rounded-xs">
                   {config.widgets.length}
@@ -338,7 +340,7 @@ export function SVGCanvas() {
               <button
                 onClick={() => setIsLayersOpen(false)}
                 className="text-ash hover:text-chalk p-1 rounded hover:bg-graphite transition-colors cursor-pointer"
-                title="Fechar painel de camadas"
+                title={t('editor.canvas.close_layers', 'Fechar painel de camadas')}
               >
                 <X size={14} />
               </button>
@@ -360,7 +362,7 @@ export function SVGCanvas() {
             ? 'bg-signal-lime text-black border-signal-lime shadow-[0_0_20px_rgba(204,255,0,0.4)] scale-105'
             : 'bg-onyx/90 text-ash border-graphite hover:border-signal-lime hover:text-signal-lime hover:scale-105 backdrop-blur-md'
             }`}
-          title={isLayersOpen ? 'Fechar camadas' : 'Camadas (Ver e reordenar)'}
+          title={isLayersOpen ? t('editor.canvas.close_layers', 'Fechar camadas') : t('editor.canvas.view_reorder_layers', 'Camadas (Ver e reordenar)')}
         >
           <Layers size={20} className="transition-transform group-hover:scale-110" />
 

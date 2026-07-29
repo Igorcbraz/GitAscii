@@ -34,6 +34,7 @@ import {
 import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
 import { WidgetPreviewTooltip, type WidgetCatalogItem, type WidgetBadgeType } from './WidgetPreviewTooltip';
+import { useI18n } from '@/i18n';
 
 const WIDGET_CATALOG: WidgetCatalogItem[] = [
   {
@@ -215,6 +216,7 @@ function renderWidgetBadge(badge?: { text: string; type: WidgetBadgeType }) {
 }
 
 export function WidgetLibrary() {
+  const { t } = useI18n();
   const { config, githubData, addWidget, applyTemplate, importLayout } = useEditorStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -257,7 +259,7 @@ export function WidgetLibrary() {
 
         const data = JSON.parse(result);
         if (!data || !Array.isArray(data.widgets)) {
-          alert('Formato de arquivo inválido: lista de widgets não encontrada.');
+          alert(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
           return;
         }
 
@@ -268,7 +270,7 @@ export function WidgetLibrary() {
         }
       } catch (err) {
         console.error('Failed to parse import file:', err);
-        alert('Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.');
+        alert(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
       }
     };
     reader.readAsText(file);
@@ -326,8 +328,20 @@ export function WidgetLibrary() {
     setTimeout(() => setIsDragging(false), 50);
   };
 
+  const translatedCatalog = useMemo(() => {
+    return WIDGET_CATALOG.map((item) => ({
+      ...item,
+      name: t(`widget.catalog.${item.id}.name`, item.name),
+      desc: t(`widget.catalog.${item.id}.desc`, item.desc),
+      badge: item.badge ? {
+        ...item.badge,
+        text: t(`widget.badge.${item.badge.text.toLowerCase().replace(/\s+/g, '_')}`, item.badge.text)
+      } : undefined
+    }));
+  }, [t]);
+
   const filteredWidgets = useMemo(() => {
-    return WIDGET_CATALOG.filter((item) => {
+    return translatedCatalog.filter((item) => {
       if (categoryFilter === 'popular') {
         if (!item.badge || (item.badge.type !== 'popular' && item.badge.type !== 'highlight' && item.badge.type !== 'trending')) {
           return false;
@@ -349,7 +363,7 @@ export function WidgetLibrary() {
         item.id.toLowerCase().includes(q)
       );
     });
-  }, [categoryFilter, searchQuery]);
+  }, [categoryFilter, searchQuery, translatedCatalog]);
 
   if (!config) return null;
 
@@ -400,10 +414,10 @@ export function WidgetLibrary() {
   };
 
   const FILTER_ITEMS = [
-    { id: 'all', label: 'Todos', icon: Grid },
-    { id: 'popular', label: 'Destaques', icon: Flame },
-    { id: 'essential', label: 'Essenciais', icon: ShieldCheck },
-    { id: 'external', label: 'Externos', icon: Globe },
+    { id: 'all', label: t('editor.sidebar.filter.all', 'Todos'), icon: Grid },
+    { id: 'popular', label: t('editor.sidebar.filter.popular', 'Destaques'), icon: Flame },
+    { id: 'essential', label: t('editor.sidebar.filter.essential', 'Essenciais'), icon: ShieldCheck },
+    { id: 'external', label: t('editor.sidebar.filter.external', 'Externos'), icon: Globe },
   ];
 
   return (
@@ -416,7 +430,7 @@ export function WidgetLibrary() {
             : 'border-transparent text-ash hover:text-chalk'
             }`}
         >
-          Widgets
+          {t('editor.sidebar.widgets', 'Widgets')}
         </button>
         <button
           onClick={() => setSidebarTab('templates')}
@@ -425,7 +439,7 @@ export function WidgetLibrary() {
             : 'border-transparent text-ash hover:text-chalk'
             }`}
         >
-          Templates
+          {t('editor.sidebar.templates', 'Templates')}
         </button>
       </div>
 
@@ -439,7 +453,7 @@ export function WidgetLibrary() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar widget..."
+                  placeholder={t('editor.sidebar.search_placeholder', 'Buscar widget...')}
                   className="w-full bg-void-black text-chalk text-note font-inter-tight pl-8 pr-7 py-1.5 border border-graphite rounded-xs focus:outline-none focus:border-signal-lime placeholder:text-ash/60 transition-colors"
                 />
                 {searchQuery && (
@@ -493,7 +507,7 @@ export function WidgetLibrary() {
 
             {filteredWidgets.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-graphite rounded-xs text-ash text-note font-inter-tight">
-                Nenhum widget encontrado para &quot;{searchQuery}&quot;
+                {t('editor.sidebar.no_widgets', 'Nenhum widget encontrado para "{query}"', { query: searchQuery })}
               </div>
             ) : (
               <div className="space-y-2">
@@ -505,7 +519,7 @@ export function WidgetLibrary() {
 
         {sidebarTab === 'templates' && (
           <>
-            <div className="label-stamp mb-2">[ PORTABILITY ]</div>
+            <div className="label-stamp mb-2">{t('editor.sidebar.portability', '[ PORTABILITY ]')}</div>
             <input
               type="file"
               ref={fileInputRef}
@@ -524,10 +538,10 @@ export function WidgetLibrary() {
                   </div>
                   <div>
                     <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
-                      Import Layout
+                      {t('editor.sidebar.import_layout', 'Import Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
-                      Carregar layout a partir de arquivo JSON
+                      {t('editor.sidebar.import_layout_desc', 'Carregar layout de arquivo JSON')}
                     </p>
                   </div>
                 </div>
@@ -543,19 +557,19 @@ export function WidgetLibrary() {
                   </div>
                   <div>
                     <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
-                      Export Layout
+                      {t('editor.sidebar.export_layout', 'Export Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
-                      Salvar layout atual como arquivo JSON
+                      {t('editor.sidebar.export_layout_desc', 'Salvar layout atual em arquivo JSON')}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="label-stamp mb-2">[ PRESET TEMPLATES ]</div>
+            <div className="label-stamp mb-2">{t('editor.sidebar.preset_templates', '[ PRESET TEMPLATES ]')}</div>
             <p className="text-note text-ash font-inter-tight mb-4">
-              Switching templates updates colors and layout while preserving your GitHub data.
+              {t('editor.sidebar.templates_desc', 'Switching templates updates colors and layout while preserving your GitHub data.')}
             </p>
             {Object.values(TEMPLATE_PRESETS).map((tmpl) => (
               <div
@@ -572,7 +586,7 @@ export function WidgetLibrary() {
                   </h4>
                   {config.templateId === tmpl.id && (
                     <span className="text-caption uppercase font-inter-tight font-medium text-signal-lime px-2 py-0.5 border border-signal-lime rounded-[9999px]">
-                      Active
+                      {t('editor.sidebar.active', 'Active')}
                     </span>
                   )}
                 </div>

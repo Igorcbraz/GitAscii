@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Search, X, Check, Sparkles, Layers, Globe, Server, Cloud, Moon, Sun } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
+import { useI18n } from '@/i18n';
 
 export interface TechItem {
   id: string;
@@ -93,6 +94,7 @@ interface TechStackControlsProps {
 }
 
 export function TechStackControls({ instanceId, config }: TechStackControlsProps) {
+  const { t } = useI18n();
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState<'all' | 'languages' | 'frontend' | 'backend' | 'devops'>('all');
@@ -135,16 +137,16 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Sparkles size={14} />
-          <span>Tecnologias & Skills</span>
+          <span>{t('editor.tech.title', 'Tecnologias & Skills')}</span>
         </div>
         <span className="text-caption font-jetbrains-mono text-ash bg-carbon px-1.5 py-0.5 rounded border border-graphite">
-          {selectedTechs.length} selecionadas
+          {t('editor.tech.selected_count', '{count} selecionadas', { count: String(selectedTechs.length) })}
         </span>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-eyebrow text-ash font-medium">Exibir Título</label>
+          <label className="text-eyebrow text-ash font-medium">{t('editor.properties.show_title_label', 'Exibir Título')}</label>
           <input
             type="checkbox"
             checked={showTitle}
@@ -166,20 +168,20 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
       <div>
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-eyebrow text-ash font-medium">Tecnologias Ativas</span>
+          <span className="text-eyebrow text-ash font-medium">{t('editor.tech.active_techs', 'Tecnologias Ativas')}</span>
           {selectedTechs.length > 0 && (
             <button
               onClick={clearAll}
               className="text-caption text-red-400 hover:underline cursor-pointer"
             >
-              Limpar todas
+              {t('editor.tech.clear_all', 'Limpar todas')}
             </button>
           )}
         </div>
 
         {selectedTechs.length === 0 ? (
           <div className="p-3 text-center border border-dashed border-graphite rounded-xs text-eyebrow text-ash">
-            Nenhuma tecnologia selecionada. Clique no catálogo abaixo para adicionar.
+            {t('editor.tech.none_selected', 'Nenhuma tecnologia selecionada. Clique no catálogo abaixo para adicionar.')}
           </div>
         ) : (
           <div className="flex flex-wrap gap-1 max-h-27.5 overflow-y-auto p-1.5 bg-void-black border border-graphite rounded-xs">
@@ -206,7 +208,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
       </div>
 
       <div>
-        <label className="text-eyebrow text-ash block mb-1.5 font-medium">Atalhos de Stacks Populares</label>
+        <label className="text-eyebrow text-ash block mb-1.5 font-medium">{t('editor.tech.presets', 'Atalhos de Stacks Populares')}</label>
         <div className="grid grid-cols-2 gap-1.5">
           {PRESETS.map((preset) => {
             const Icon = preset.icon;
@@ -227,7 +229,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
       <div className="space-y-3 pt-2 border-t border-graphite/50">
         <div>
-          <label className="text-eyebrow text-ash block mb-1.5 font-medium">Tema dos Ícones</label>
+          <label className="text-eyebrow text-ash block mb-1.5 font-medium">{t('editor.tech.icon_theme', 'Tema dos Ícones')}</label>
           <div className="grid grid-cols-2 gap-1 bg-carbon p-1 rounded-xs border border-graphite">
             <button
               type="button"
@@ -238,7 +240,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                 }`}
             >
               <Moon size={13} />
-              <span>Escuro (Dark)</span>
+              <span>{t('editor.tech.theme_dark', 'Escuro (Dark)')}</span>
             </button>
             <button
               type="button"
@@ -249,16 +251,16 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                 }`}
             >
               <Sun size={13} />
-              <span>Claro (Light)</span>
+              <span>{t('editor.tech.theme_light', 'Claro (Light)')}</span>
             </button>
           </div>
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-eyebrow">
-            <span className="text-ash font-medium">Ícones por Linha</span>
+            <span className="text-ash font-medium">{t('editor.tech.icons_per_line', 'Ícones por Linha')}</span>
             <span className="text-signal-lime font-jetbrains-mono font-bold bg-carbon px-2 py-0.5 rounded border border-graphite">
-              {perLine} / linha
+              {t('editor.tech.per_line_count', '{count} / linha', { count: String(perLine) })}
             </span>
           </div>
           <input
@@ -276,7 +278,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
       <div className="space-y-2 pt-2 border-t border-graphite">
         <div className="flex items-center justify-between">
           <label className="text-eyebrow text-chalk font-medium">
-            Catálogo de Ícones (Clique para selecionar)
+            {t('editor.tech.catalog_title', 'Catálogo de Ícones (Clique para selecionar)')}
           </label>
         </div>
 
@@ -286,7 +288,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar tecnologia (ex: React, Docker, Python)..."
+            placeholder={t('editor.tech.search_placeholder', 'Buscar tecnologia (ex: React, Docker, Python)...')}
             className="w-full bg-graphite border border-graphite text-chalk text-eyebrow pl-8 pr-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
           />
         </div>
@@ -301,7 +303,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                   : 'border-transparent text-ash hover:text-chalk'
                 }`}
             >
-              {cat === 'all' ? 'Todas' : cat}
+              {cat === 'all' ? t('editor.tech.cat_all', 'Todas') : cat}
             </button>
           ))}
         </div>

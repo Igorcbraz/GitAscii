@@ -64,6 +64,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { I18nProvider } from "@/i18n";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -74,7 +76,11 @@ export default function RootLayout({
       lang="en"
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <I18nProvider>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }

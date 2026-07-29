@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ColorPicker } from './ColorPicker';
 import { useEditorStore } from '../../store/editorStore';
+import { useI18n } from '@/i18n';
 
 interface TerminalInfoControlsProps {
   instanceId: string;
@@ -22,6 +23,7 @@ interface TerminalInfoControlsProps {
 }
 
 export function TerminalInfoControls({ instanceId, config }: TerminalInfoControlsProps) {
+  const { t } = useI18n();
   const { githubData, updateWidgetConfig } = useEditorStore();
   const [activeTab, setActiveTab] = useState<'toggles' | 'custom' | 'style'>('toggles');
   const [openAccordion, setOpenAccordion] = useState<'profile' | 'contact' | 'stats'>('profile');
@@ -124,7 +126,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Terminal size={14} />
-          <span>Configuração do Terminal</span>
+          <span>{t('editor.terminal.title', 'Configuração do Terminal')}</span>
         </div>
       </div>
 
@@ -138,7 +140,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             }`}
         >
           <CheckSquare size={12} className="shrink-0" />
-          <span>Ativar Campos</span>
+          <span>{t('editor.terminal.tab_fields', 'Ativar Campos')}</span>
         </button>
 
         <button
@@ -150,7 +152,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             }`}
         >
           <Edit3 size={12} className="shrink-0" />
-          <span>Textos/Valores</span>
+          <span>{t('editor.terminal.tab_texts', 'Textos/Valores')}</span>
         </button>
 
         <button
@@ -162,14 +164,14 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             }`}
         >
           <Palette size={12} className="shrink-0" />
-          <span>Estilo & Cores</span>
+          <span>{t('editor.terminal.tab_style', 'Estilo & Cores')}</span>
         </button>
       </div>
 
       {activeTab === 'toggles' && (
         <div className="space-y-4">
           <div className="space-y-1.5 bg-carbon p-2.5 rounded border border-graphite">
-            <div className="label-stamp text-caption text-ash mb-1">[ SEÇÕES EXIBIDAS ]</div>
+            <div className="label-stamp text-caption text-ash mb-1">{t('editor.terminal.sections_displayed', '[ SEÇÕES EXIBIDAS ]')}</div>
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
@@ -179,7 +181,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                   : 'bg-graphite text-ash border-graphite line-through opacity-60'
                   }`}
               >
-                Perfil / Info
+                {t('editor.terminal.section_profile', 'Perfil / Info')}
               </button>
               <button
                 type="button"
@@ -189,7 +191,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                   : 'bg-graphite text-ash border-graphite line-through opacity-60'
                   }`}
               >
-                Contatos
+                {t('editor.terminal.section_contact', 'Contatos')}
               </button>
               <button
                 type="button"
@@ -199,7 +201,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                   : 'bg-graphite text-ash border-graphite line-through opacity-60'
                   }`}
               >
-                Métricas
+                {t('editor.terminal.section_stats', 'Métricas')}
               </button>
             </div>
           </div>
@@ -209,9 +211,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
               <div className="flex items-center justify-between text-eyebrow font-medium text-chalk">
                 <span className="flex items-center gap-1.5 text-signal-lime">
                   <User size={13} />
-                  <span>Informações do Perfil</span>
+                  <span>{t('editor.terminal.profile_info', 'Informações do Perfil')}</span>
                 </span>
-                <span className="text-caption text-ash font-jetbrains-mono">(ON por padrão / extras OFF)</span>
+                <span className="text-caption text-ash font-jetbrains-mono">{t('editor.terminal.profile_info_hint', '(ON por padrão / extras OFF)')}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-1.5">
@@ -236,7 +238,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
               <div className="flex items-center justify-between text-eyebrow font-medium text-chalk">
                 <span className="flex items-center gap-1.5 text-signal-lime">
                   <Globe size={13} />
-                  <span>Contatos & Redes</span>
+                  <span>{t('editor.terminal.contact_networks', 'Contatos & Redes')}</span>
                 </span>
               </div>
 
@@ -255,7 +257,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
               <div className="flex items-center justify-between text-eyebrow font-medium text-chalk">
                 <span className="flex items-center gap-1.5 text-signal-lime">
                   <BarChart2 size={13} />
-                  <span>Métricas & Stats</span>
+                  <span>{t('editor.terminal.metrics_stats', 'Métricas & Stats')}</span>
                 </span>
               </div>
 
@@ -274,7 +276,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
       {activeTab === 'custom' && (
         <div className="space-y-3">
           <p className="text-eyebrow text-ash">
-            Altere os títulos das seções ou valores das linhas se quiser personalizar além dos dados automáticos do GitHub.
+            {t('editor.terminal.custom_desc', 'Altere os títulos das seções ou valores das linhas se quiser personalizar além dos dados automáticos do GitHub.')}
           </p>
 
           <div className="bg-carbon border border-graphite rounded overflow-hidden">
@@ -285,7 +287,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <User size={13} className="text-signal-lime" />
-                <span>Textos do Perfil</span>
+                <span>{t('editor.terminal.profile_texts', 'Textos do Perfil')}</span>
               </span>
               <ChevronDown size={14} className={`text-ash transition-transform ${openAccordion === 'profile' ? 'rotate-180' : ''}`} />
             </button>
@@ -293,7 +295,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             {openAccordion === 'profile' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Título da Seção</label>
+                  <label className="text-caption text-ash block mb-0.5">{t('editor.terminal.section_title', 'Título da Seção')}</label>
                   <input
                     type="text"
                     value={customTitle}
@@ -309,7 +311,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                     type="text"
                     value={customUptime}
                     onChange={(e) => updateWidgetConfig(instanceId, { customUptime: e.target.value })}
-                    placeholder="Automático (ex: 5 years, 3 months...)"
+                    placeholder={t('editor.terminal.auto_uptime', 'Automático (ex: 5 years, 3 months...)')}
                     className={flatInputClassText}
                   />
                 </div>
@@ -391,7 +393,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <Globe size={13} className="text-signal-lime" />
-                <span>Textos de Contato & Links</span>
+                <span>{t('editor.terminal.contact_texts', 'Textos de Contato & Links')}</span>
               </span>
               <ChevronDown size={14} className={`text-ash transition-transform ${openAccordion === 'contact' ? 'rotate-180' : ''}`} />
             </button>
@@ -399,7 +401,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             {openAccordion === 'contact' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Título da Seção Contato</label>
+                  <label className="text-caption text-ash block mb-0.5">{t('editor.terminal.section_contact_title', 'Título da Seção Contato')}</label>
                   <input
                     type="text"
                     value={customContactTitle}
@@ -475,7 +477,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <BarChart2 size={13} className="text-signal-lime" />
-                <span>Textos de Métricas & Stats</span>
+                <span>{t('editor.terminal.stats_texts', 'Textos de Métricas & Stats')}</span>
               </span>
               <ChevronDown size={14} className={`text-ash transition-transform ${openAccordion === 'stats' ? 'rotate-180' : ''}`} />
             </button>
@@ -483,7 +485,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             {openAccordion === 'stats' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Título da Seção Stats</label>
+                  <label className="text-caption text-ash block mb-0.5">{t('editor.terminal.section_stats_title', 'Título da Seção Stats')}</label>
                   <input
                     type="text"
                     value={customStatsTitle}
@@ -535,8 +537,8 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         <div className="space-y-4">
           <div className="flex items-center justify-between p-2.5 bg-carbon rounded border border-graphite">
             <div>
-              <span className="text-eyebrow text-chalk font-semibold block">Preencher Espaços com Pontos</span>
-              <span className="text-caption text-ash block">Ajusta pontilhado automático (...)</span>
+              <span className="text-eyebrow text-chalk font-semibold block">{t('editor.terminal.dot_leaders', 'Preencher Espaços com Pontos')}</span>
+              <span className="text-caption text-ash block">{t('editor.terminal.dot_leaders_desc', 'Ajusta pontilhado automático (...)')}</span>
             </div>
             <input
               type="checkbox"
@@ -549,42 +551,42 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
           <div className="space-y-3 pt-2 border-t border-graphite/50">
             <div className="flex items-center gap-1.5 text-ash text-eyebrow font-medium">
               <Palette size={13} />
-              <span>Cores Customizadas das Linhas Terminal</span>
+              <span>{t('editor.terminal.custom_colors', 'Cores Customizadas das Linhas Terminal')}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <ColorPicker
-                label="Cor dos Títulos"
+                label={t('editor.terminal.color_headers', 'Cor dos Títulos')}
                 align="left"
                 value={headerColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { headerColor: c })}
               />
               <ColorPicker
-                label="Cor dos Rótulos (. Key)"
+                label={t('editor.terminal.color_labels', 'Cor dos Rótulos (. Key)')}
                 align="right"
                 value={labelColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { labelColor: c })}
               />
               <ColorPicker
-                label="Cor dos Pontos (....)"
+                label={t('editor.terminal.color_dots', 'Cor dos Pontos (....)')}
                 align="left"
                 value={dotColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { dotColor: c })}
               />
               <ColorPicker
-                label="Cor dos Valores"
+                label={t('editor.terminal.color_values', 'Cor dos Valores')}
                 align="right"
                 value={valueColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { valueColor: c })}
               />
               <ColorPicker
-                label="Cor das Métricas"
+                label={t('editor.terminal.color_metrics', 'Cor das Métricas')}
                 align="left"
                 value={statsValColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { statsValColor: c })}
               />
               <ColorPicker
-                label="Cor dos Divisores"
+                label={t('editor.terminal.color_dividers', 'Cor dos Divisores')}
                 align="right"
                 value={dividerColor}
                 onChange={(c) => updateWidgetConfig(instanceId, { dividerColor: c })}

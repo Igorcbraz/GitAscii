@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useI18n } from '@/i18n';
 import {
   Eye,
   EyeOff,
@@ -39,6 +40,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 export function LayersPanel() {
+  const { t } = useI18n();
   const {
     config,
     selectedInstanceId,
@@ -96,19 +98,19 @@ export function LayersPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
-        <div className="label-stamp">[ CAMADAS / LAYERS ]</div>
+        <div className="label-stamp">{t('editor.canvas.layers_panel_title', '[ CAMADAS / LAYERS ]')}</div>
         <span className="text-eyebrow font-jetbrains-mono text-ash">
-          {config.widgets.length} items
+          {t('editor.canvas.layers_count', '{count} items', { count: String(config.widgets.length) })}
         </span>
       </div>
 
       <p className="text-note text-ash font-inter-tight mb-3">
-        Arraste para reordenar a sobreposição das camadas igual no Photoshop.
+        {t('editor.canvas.layers_reorder_desc', 'Arraste para reordenar a sobreposição das camadas igual no Photoshop.')}
       </p>
 
       {config.widgets.length === 0 ? (
         <div className="p-8 text-center border border-dashed border-graphite rounded-sm text-ash text-note">
-          Nenhuma camada. Adicione widgets da biblioteca.
+          {t('editor.canvas.no_layers', 'Nenhuma camada. Adicione widgets da biblioteca.')}
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -181,7 +183,7 @@ export function LayersPanel() {
                             handleStartRename(widget);
                           }}
                           className="opacity-0 group-hover:opacity-100 text-ash hover:text-chalk transition-opacity p-0.5"
-                          title="Renomear camada"
+                          title={t('editor.canvas.rename_layer', 'Renomear camada')}
                         >
                           <Edit2 size={11} />
                         </button>
@@ -193,7 +195,7 @@ export function LayersPanel() {
                 <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => toggleWidgetVisibility(widget.instanceId)}
-                    title={widget.visible ? 'Ocultar camada' : 'Exibir camada'}
+                    title={widget.visible ? t('editor.canvas.hide_layer', 'Ocultar camada') : t('editor.canvas.show_layer', 'Exibir camada')}
                     className={`p-1 rounded hover:bg-void-black transition-colors ${widget.visible ? 'text-ash hover:text-chalk' : 'text-amber-400'
                       }`}
                   >
@@ -202,7 +204,7 @@ export function LayersPanel() {
 
                   <button
                     onClick={() => toggleWidgetLock(widget.instanceId)}
-                    title={widget.locked ? 'Desbloquear camada' : 'Bloquear camada'}
+                    title={widget.locked ? t('editor.canvas.unlock_layer', 'Desbloquear camada') : t('editor.canvas.lock_layer', 'Bloquear camada')}
                     className={`p-1 rounded hover:bg-void-black transition-colors ${widget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
                       }`}
                   >
@@ -211,7 +213,7 @@ export function LayersPanel() {
 
                   <button
                     onClick={() => removeWidget(widget.instanceId)}
-                    title="Excluir camada"
+                    title={t('editor.canvas.delete_layer', 'Excluir camada')}
                     className="p-1 rounded hover:bg-red-500/20 text-ash hover:text-red-400 transition-colors"
                   >
                     <Trash2 size={13} />

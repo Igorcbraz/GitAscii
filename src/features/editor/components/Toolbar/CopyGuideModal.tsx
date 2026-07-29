@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useI18n } from '@/i18n';
 import {
   X,
   Check,
@@ -63,6 +64,28 @@ export function CopyGuideModal({
   const [reCopied, setReCopied] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const { t } = useI18n();
+
+  const steps = [
+    {
+      ...STEPS[0],
+      title: t('editor.guide.step1_title', 'Edite o README.md'),
+      description: t('editor.guide.step1_desc', 'Abra o seu repositório especial (username/username) no GitHub, clique no arquivo README.md e depois no ícone de editar [icon] para modificá-lo.'),
+      linkLabel: t('editor.guide.step1_link', 'Editar README'),
+    },
+    {
+      ...STEPS[1],
+      title: t('editor.guide.step2_title', 'Cole o código'),
+      description: t('editor.guide.step2_desc', 'Cole o código copiado (Ctrl+V / ⌘+V) no local desejado do seu README.'),
+      linkLabel: null,
+    },
+    {
+      ...STEPS[2],
+      title: t('editor.guide.step3_title', 'Salve e confira'),
+      description: t('editor.guide.step3_desc', 'Clique em "Commit changes" para salvar. Depois, acesse seu perfil para ver o resultado!'),
+      linkLabel: t('editor.guide.step3_link', 'Ver meu perfil'),
+    },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -109,7 +132,7 @@ export function CopyGuideModal({
   };
 
   const nextStep = () => {
-    if (currentStep < STEPS.length - 1) setCurrentStep((s) => s + 1);
+    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
   };
 
   const prevStep = () => {
@@ -118,10 +141,10 @@ export function CopyGuideModal({
 
   if (!isOpen || !mounted) return null;
 
-  const step = STEPS[currentStep];
+  const step = steps[currentStep];
   const StepIcon = step.icon;
   const linkUrl = step.getLinkUrl(username);
-  const isLastStep = currentStep === STEPS.length - 1;
+  const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
   return createPortal(
@@ -142,10 +165,10 @@ export function CopyGuideModal({
                 </div>
                 <div>
                   <h2 className="font-inter-tight font-semibold text-body text-chalk">
-                    Código copiado!
+                    {t('editor.guide.copied_title', 'Código copiado!')}
                   </h2>
                   <p className="text-caption text-ash mt-0.5">
-                    Siga os passos para adicionar ao seu perfil
+                    {t('editor.guide.copied_subtitle', 'Siga os passos para adicionar ao seu perfil')}
                   </p>
                 </div>
               </div>
@@ -153,13 +176,13 @@ export function CopyGuideModal({
               <button
                 onClick={handleClose}
                 className="p-1.5 rounded-md hover:bg-graphite text-ash hover:text-chalk transition-colors cursor-pointer"
-                title="Fechar"
+                title={t('common.close', 'Fechar')}
               >
                 <X size={16} />
               </button>
             </div>
             <div className="flex gap-1.5 mt-4">
-              {STEPS.map((_, idx) => (
+              {steps.map((_, idx) => (
                 <div
                   key={idx}
                   className="flex-1 h-1 rounded-full overflow-hidden bg-iron cursor-pointer transition-colors"
@@ -194,10 +217,13 @@ export function CopyGuideModal({
                 <p className="text-label text-pearl leading-relaxed mb-3 inline-flex items-center flex-wrap gap-1">
                   {step.descriptionIcon ? (
                     <>
-                      {step.description.split('ícone de editar').map((part, i, arr) =>
+                      {step.description.split('[icon]').map((part, i, arr) =>
                         i < arr.length - 1 ? (
                           <React.Fragment key={i}>
-                            {part}<span className="inline-flex items-center gap-0.5">ícone de editar <step.descriptionIcon size={14} className="text-signal-lime inline" /></span>
+                            {part}
+                            <span className="inline-flex items-center gap-0.5">
+                              <step.descriptionIcon size={14} className="text-signal-lime inline align-middle" />
+                            </span>
                           </React.Fragment>
                         ) : (
                           <React.Fragment key={i}>{part}</React.Fragment>
@@ -230,7 +256,7 @@ export function CopyGuideModal({
                       ) : (
                         <Copy size={12} />
                       )}
-                      <span>{reCopied ? 'Copiado!' : 'Copiar novamente'}</span>
+                      <span>{reCopied ? t('common.copied', 'Copiado!') : t('editor.guide.step2_recopy', 'Copiar novamente')}</span>
                     </button>
                   )}
                 </div>
@@ -256,12 +282,12 @@ export function CopyGuideModal({
                 }`}>
                 {dontShowAgain && <Check size={10} strokeWidth={3.5} />}
               </div>
-              <span className="font-inter-tight font-medium text-label">Não mostrar este guia novamente</span>
+              <span className="font-inter-tight font-medium text-label">{t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}</span>
             </button>
           </div>
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between">
             <div className="text-caption text-ash font-inter-tight">
-              Passo {currentStep + 1} de {STEPS.length}
+              {t('common.step', 'Passo')} {currentStep + 1} {t('common.of', 'de')} {steps.length}
             </div>
 
             <div className="flex items-center gap-2">
@@ -271,7 +297,7 @@ export function CopyGuideModal({
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-graphite hover:bg-iron border border-iron rounded-md text-note text-chalk font-inter-tight font-medium transition-colors cursor-pointer"
                 >
                   <ChevronLeft size={14} />
-                  <span>Voltar</span>
+                  <span>{t('common.back', 'Voltar')}</span>
                 </button>
               )}
 
@@ -280,7 +306,7 @@ export function CopyGuideModal({
                   onClick={nextStep}
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-signal-lime text-black rounded-md text-note font-inter-tight font-semibold glow-lime hover:brightness-110 transition-all cursor-pointer"
                 >
-                  <span>Próximo</span>
+                  <span>{t('common.next', 'Próximo')}</span>
                   <ChevronRight size={14} />
                 </button>
               ) : (
@@ -289,7 +315,7 @@ export function CopyGuideModal({
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-signal-lime text-black rounded-md text-note font-inter-tight font-semibold glow-lime hover:brightness-110 transition-all cursor-pointer"
                 >
                   <Check size={14} />
-                  <span>Concluir</span>
+                  <span>{t('common.finish', 'Concluir')}</span>
                 </button>
               )}
             </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Share2, Check, X, ChevronDown } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
+import { useI18n } from '@/i18n';
 
 export interface SocialPlatform {
   id: string;
@@ -35,11 +36,11 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
   { id: 'hashnode', label: 'Hashnode', logo: 'hashnode', color: '2962FF', defaultUrl: 'https://hashnode.com/@{username}' },
 ];
 
-const BADGE_STYLES = [
-  { id: 'for-the-badge', name: 'SHIELDS BOLD', preview: 'for-the-badge', info: 'Caixa alta preenchida' },
-  { id: 'flat-square', name: 'SHIELDS FLAT', preview: 'flat-square', info: 'Badge retangular clean' },
-  { id: 'social', name: 'SHIELDS SOCIAL', preview: 'social', info: 'Estilo contador social' },
-  { id: 'skillicons', name: 'SKILL ICONS', preview: 'skillicons', info: 'Ícones circulares minimalistas' },
+const BADGE_STYLES = (t: (key: string, def?: string) => string) => [
+  { id: 'for-the-badge', name: 'SHIELDS BOLD', preview: 'for-the-badge', info: t('editor.social.bold_info', 'Caixa alta preenchida') },
+  { id: 'flat-square', name: 'SHIELDS FLAT', preview: 'flat-square', info: t('editor.social.flat_info', 'Badge retangular clean') },
+  { id: 'social', name: 'SHIELDS SOCIAL', preview: 'social', info: t('editor.social.social_info', 'Estilo contador social') },
+  { id: 'skillicons', name: 'SKILL ICONS', preview: 'skillicons', info: t('editor.social.skill_info', 'Ícones circulares minimalistas') },
 ];
 
 interface SocialMediaControlsProps {
@@ -48,6 +49,7 @@ interface SocialMediaControlsProps {
 }
 
 export function SocialMediaControls({ instanceId, config }: SocialMediaControlsProps) {
+  const { t } = useI18n();
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig);
   const githubData = useEditorStore((state) => state.githubData);
   const username = githubData?.user.login || 'user';
@@ -63,7 +65,8 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
   const showTitle = config.showTitle !== false;
   const customTitle = (config.customTitle as string) || '[ SOCIAL MEDIA ]';
 
-  const selectedBadgeStyleObj = BADGE_STYLES.find((b) => b.id === badgeStyle) || BADGE_STYLES[0];
+  const badgeStylesList = BADGE_STYLES(t);
+  const selectedBadgeStyleObj = badgeStylesList.find((b) => b.id === badgeStyle) || badgeStylesList[0];
 
   const toggleSocial = (id: string) => {
     let updated: string[];
@@ -86,17 +89,17 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Share2 size={14} />
-          <span>Redes Sociais & Badges</span>
+          <span>{t('editor.social.title', 'Redes Sociais & Badges')}</span>
         </div>
         <span className="text-caption font-jetbrains-mono text-ash bg-carbon px-1.5 py-0.5 rounded-sm border border-graphite">
-          {selectedSocials.length} redes
+          {t('editor.social.count', '{count} redes', { count: String(selectedSocials.length) })}
         </span>
       </div>
 
       {/* Title Customization */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-eyebrow text-ash font-medium">Exibir Título</label>
+          <label className="text-eyebrow text-ash font-medium">{t('editor.properties.show_title_label', 'Exibir Título')}</label>
           <input
             type="checkbox"
             checked={showTitle}
@@ -119,7 +122,7 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
       {/* Visual Badge Style Selector (Matching AsciiArtControls charset selector) */}
       <div className="space-y-2 pt-1 relative">
         <label className="text-eyebrow text-ash font-medium block">
-          Estilo das Badges (Base)
+          {t('editor.social.badge_style', 'Estilo das Badges (Base)')}
         </label>
 
         {/* Custom Visual Select Trigger */}
@@ -143,7 +146,7 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
         {/* Dropdown Options List */}
         {isBadgeMenuOpen && (
           <div className="absolute z-50 left-0 right-0 top-15 bg-carbon border border-graphite rounded-xs shadow-xl max-h-55 overflow-y-auto p-1 space-y-1">
-            {BADGE_STYLES.map((item) => {
+            {badgeStylesList.map((item) => {
               const isSelected = item.id === badgeStyle;
               return (
                 <button
@@ -175,7 +178,7 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
       {/* Social Platforms Picker Grid */}
       <div className="space-y-2 pt-1">
         <label className="text-eyebrow text-chalk font-medium block">
-          Selecione as Redes Sociais
+          {t('editor.social.select_socials', 'Selecione as Redes Sociais')}
         </label>
         <div className="grid grid-cols-2 gap-1.5 max-h-45 overflow-y-auto p-1 bg-void-black border border-graphite rounded-xs">
           {SOCIAL_PLATFORMS.map((platform) => {
@@ -210,7 +213,7 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
       {selectedSocials.length > 0 && (
         <div className="space-y-2.5 pt-2 border-t border-graphite">
           <label className="text-eyebrow text-chalk font-medium block">
-            Personalizar URLs / Links de Destino
+            {t('editor.social.customize_links', 'Personalizar URLs / Links de Destino')}
           </label>
           <div className="space-y-2 max-h-55 overflow-y-auto pr-1">
             {selectedSocials.map((platformId) => {
@@ -231,7 +234,7 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
                     <button
                       onClick={() => toggleSocial(platformId)}
                       className="text-ash hover:text-red-400 p-0.5 transition-colors cursor-pointer"
-                      title="Remover"
+                      title={t('common.delete', 'Remover')}
                     >
                       <X size={12} />
                     </button>

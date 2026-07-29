@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { CHARSETS, convertImageToAsciiCanvas, type AsciiConvertOptions } from '@/engine/ascii/converter';
 import { useEditorStore } from '../../store/editorStore';
+import { useI18n } from '@/i18n';
 
 interface AsciiArtControlsProps {
   instanceId: string;
@@ -38,6 +39,7 @@ const CHARSET_OPTIONS = [
 ];
 
 export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) {
+  const { t } = useI18n();
   const { githubData, updateWidgetConfig } = useEditorStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -103,7 +105,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
       });
     } catch (err: unknown) {
       console.warn('ASCII Conversion Warning:', err);
-      setErrorMsg('Não foi possível converter a imagem (CORS/URL restrita). Faça o upload do arquivo para melhores resultados.');
+      setErrorMsg(t('editor.ascii.error_cors', 'Não foi possível converter a imagem (CORS/URL restrita). Faça o upload do arquivo para melhores resultados.'));
     } finally {
       setIsProcessing(false);
     }
@@ -132,7 +134,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('Por favor selecione um arquivo de imagem válido.');
+      setErrorMsg(t('editor.ascii.error_invalid_image', 'Por favor selecione um arquivo de imagem válido.'));
       return;
     }
 
@@ -156,21 +158,21 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Terminal size={14} />
-          <span>Editor de Foto em ASCII</span>
+          <span>{t('editor.ascii.title', 'Editor de Foto em ASCII')}</span>
         </div>
         <button
           onClick={() => processImageToAscii()}
           disabled={isProcessing}
           className="flex items-center gap-1 text-caption text-ash hover:text-signal-lime transition-colors disabled:opacity-50"
-          title="Regerar Arte ASCII"
+          title={t('editor.ascii.regenerate', 'Regerar Arte ASCII')}
         >
           <RefreshCw size={12} className={isProcessing ? 'animate-spin text-signal-lime' : ''} />
-          <span>{isProcessing ? 'Convertendo...' : 'Atualizar'}</span>
+          <span>{isProcessing ? t('editor.ascii.converting', 'Convertendo...') : t('editor.ascii.update', 'Atualizar')}</span>
         </button>
       </div>
 
       <div className="space-y-2">
-        <label className="text-eyebrow text-ash font-medium block">Origem da Foto</label>
+        <label className="text-eyebrow text-ash font-medium block">{t('editor.ascii.source', 'Origem da Foto')}</label>
         <div className="grid grid-cols-3 gap-1 bg-carbon p-1 rounded border border-graphite">
           <button
             type="button"
@@ -237,7 +239,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
               className="w-full border border-dashed border-graphite hover:border-signal-lime/60 bg-carbon hover:bg-graphite/40 text-chalk text-eyebrow py-2 px-3 rounded flex items-center justify-center gap-2 transition-all"
             >
               <Upload size={13} className="text-signal-lime" />
-              <span>{uploadedImageData ? 'Trocar Foto Uploaded' : 'Selecionar Foto Local'}</span>
+              <span>{uploadedImageData ? t('editor.ascii.change_photo', 'Trocar Foto Uploaded') : t('editor.ascii.select_photo', 'Selecionar Foto Local')}</span>
             </button>
           </div>
         )}
@@ -311,7 +313,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         )}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">Inverter Caracteres (Invert)</span>
+          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.invert_chars', 'Inverter Caracteres (Invert)')}</span>
           <input
             type="checkbox"
             checked={invert}
@@ -323,16 +325,16 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
       <div className="space-y-3 pt-2 border-t border-graphite/50">
         <div className="flex items-center justify-between">
-          <label className="text-eyebrow text-ash font-medium">Nível de Detalhe (Colunas)</label>
+          <label className="text-eyebrow text-ash font-medium">{t('editor.ascii.detail_level', 'Nível de Detalhe (Colunas)')}</label>
           <span className="text-eyebrow text-signal-lime font-mono font-semibold">{cols} cols</span>
         </div>
 
         <div className="grid grid-cols-4 gap-1">
           {[
-            { id: 'low', label: 'Baixo', c: 28 },
-            { id: 'medium', label: 'Médio', c: 45 },
-            { id: 'high', label: 'Alto', c: 85 },
-            { id: 'ultra', label: 'Ultra', c: 150 },
+            { id: 'low', label: t('editor.ascii.low', 'Baixo'), c: 28 },
+            { id: 'medium', label: t('editor.ascii.medium', 'Médio'), c: 45 },
+            { id: 'high', label: t('editor.ascii.high', 'Alto'), c: 85 },
+            { id: 'ultra', label: t('editor.ascii.ultra', 'Ultra'), c: 150 },
           ].map((item) => (
             <button
               key={item.id}
@@ -362,13 +364,13 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
       <div className="space-y-3 pt-2 border-t border-graphite/50">
         <div className="flex items-center gap-1.5 text-ash text-eyebrow font-medium">
           <Sliders size={13} />
-          <span>Ajustes de Fotografia</span>
+          <span>{t('editor.ascii.photo_adjustments', 'Ajustes de Fotografia')}</span>
         </div>
 
         <div>
           <div className="flex items-center justify-between text-eyebrow mb-1">
             <span className="text-ash flex items-center gap-1">
-              <Contrast size={12} /> Contraste
+              <Contrast size={12} /> {t('editor.ascii.contrast', 'Contraste')}
             </span>
             <span className="text-chalk font-mono">{contrast > 0 ? `+${contrast}` : contrast}</span>
           </div>
@@ -386,7 +388,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         <div>
           <div className="flex items-center justify-between text-eyebrow mb-1">
             <span className="text-ash flex items-center gap-1">
-              <Sun size={12} /> Brilho
+              <Sun size={12} /> {t('editor.ascii.brightness', 'Brilho')}
             </span>
             <span className="text-chalk font-mono">{brightness > 0 ? `+${brightness}` : brightness}</span>
           </div>
@@ -403,7 +405,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-eyebrow text-chalk font-medium flex items-center gap-1.5">
-            <Sparkles size={13} className="text-signal-lime" /> Realçar Contornos (Rosto)
+            <Sparkles size={13} className="text-signal-lime" /> {t('editor.ascii.edge_enhance', 'Realçar Contornos (Rosto)')}
           </span>
           <input
             type="checkbox"
@@ -414,7 +416,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">Auto-Contraste (Gama Dinâmica)</span>
+          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.auto_contrast', 'Auto-Contraste (Gama Dinâmica)')}</span>
           <input
             type="checkbox"
             checked={autoContrast}
@@ -424,7 +426,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">Pontilhado Fotográfico (Dithering)</span>
+          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.dithering', 'Pontilhado Fotográfico (Dithering)')}</span>
           <input
             type="checkbox"
             checked={dithering}
@@ -435,7 +437,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-eyebrow text-chalk font-medium flex items-center gap-1.5">
-            <Palette size={13} className="text-signal-lime" /> Modo de Cores
+            <Palette size={13} className="text-signal-lime" /> {t('editor.ascii.color_mode', 'Modo de Cores')}
           </span>
           <div className="flex items-center gap-1 bg-carbon p-0.5 rounded border border-graphite">
             <button

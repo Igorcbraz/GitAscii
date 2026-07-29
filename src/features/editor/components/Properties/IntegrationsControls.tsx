@@ -4,6 +4,7 @@ import React from 'react';
 import { Sliders, User, Palette, Layout, Shield, Type, Layers, Globe, Code } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import type { WidgetConfig } from '@/engine/types';
+import { useI18n } from '@/i18n';
 
 interface IntegrationsControlsProps {
   instanceId: string;
@@ -16,6 +17,7 @@ export function IntegrationsControls({
   widgetId,
   config,
 }: IntegrationsControlsProps) {
+  const { t } = useI18n();
   const { updateWidgetConfig, githubData } = useEditorStore();
   const defaultUsername = githubData?.user.login || '';
 
@@ -32,14 +34,14 @@ export function IntegrationsControls({
       {/* Section Header */}
       <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
         <Sliders size={14} />
-        <span>Configurações da Integração</span>
+        <span>{t('editor.integrations.title', 'Configurações da Integração')}</span>
       </div>
 
       {/* Title Toggle & Custom Title Input */}
       <div className="space-y-2">
         <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
           <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            Exibir Título do Widget
+            {t('editor.integrations.show_title', 'Exibir Título do Widget')}
           </label>
           <input
             type="checkbox"
@@ -52,7 +54,7 @@ export function IntegrationsControls({
         {showTitle && (
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Título Personalizado
+              {t('editor.integrations.custom_title', 'Título Personalizado')}
             </label>
             <input
               type="text"
@@ -70,7 +72,7 @@ export function IntegrationsControls({
         <div>
           <label className="text-eyebrow text-ash mb-1 font-inter-tight flex items-center gap-1">
             <User size={12} />
-            <span>Usuário do GitHub</span>
+            <span>{t('editor.integrations.github_user', 'Usuário do GitHub')}</span>
           </label>
           <input
             type="text"
@@ -87,22 +89,22 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tipo de Card
+              {t('editor.integrations.card_type', 'Tipo de Card')}
             </label>
             <select
               value={(config.statType as string) || 'stats'}
               onChange={(e) => handleUpdate({ statType: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="stats">Estatísticas Gerais (Stats Card)</option>
-              <option value="top-langs">Top Linguagens (Top Languages)</option>
-              <option value="pin">Repositório Fixado (Pinned Repo)</option>
+              <option value="stats">{t('editor.integrations.stats_card', 'Estatísticas Gerais (Stats Card)')}</option>
+              <option value="top-langs">{t('editor.integrations.top_languages', 'Top Linguagens (Top Languages)')}</option>
+              <option value="pin">{t('editor.integrations.pinned_repo', 'Repositório Fixado (Pinned Repo)')}</option>
             </select>
           </div>
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
             </label>
             <select
               value={(config.theme as string) || 'dark'}
@@ -127,7 +129,7 @@ export function IntegrationsControls({
           {(config.statType as string) === 'pin' && (
             <div>
               <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-                Nome do Repositório
+                {t('editor.integrations.repo_name', 'Nome do Repositório')}
               </label>
               <input
                 type="text"
@@ -143,23 +145,23 @@ export function IntegrationsControls({
             <>
               <div>
                 <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-                  Estilo do Layout
+                  {t('editor.integrations.layout_style', 'Estilo do Layout')}
                 </label>
                 <select
                   value={(config.layout as string) || 'compact'}
                   onChange={(e) => handleUpdate({ layout: e.target.value })}
                   className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
                 >
-                  <option value="compact">Compacto (Lista)</option>
-                  <option value="normal">Normal (Barras)</option>
-                  <option value="donut">Donut (Gráfico Rosca)</option>
-                  <option value="pie">Pie (Gráfico Pizza)</option>
+                  <option value="compact">{t('editor.integrations.layout_compact', 'Compacto (Lista)')}</option>
+                  <option value="normal">{t('editor.integrations.layout_normal', 'Normal (Barras)')}</option>
+                  <option value="donut">{t('editor.integrations.layout_donut', 'Donut (Gráfico Rosca)')}</option>
+                  <option value="pie">{t('editor.integrations.layout_pie', 'Pie (Gráfico Pizza)')}</option>
                 </select>
               </div>
 
               <div>
                 <div className="flex justify-between text-eyebrow mb-1">
-                  <span className="text-ash font-inter-tight">Qtd. Máxima de Linguagens</span>
+                  <span className="text-ash font-inter-tight">{t('editor.integrations.max_languages', 'Qtd. Máxima de Linguagens')}</span>
                   <span className="text-chalk font-jetbrains-mono">{Number(config.langsCount) || 5}</span>
                 </div>
                 <input
@@ -174,7 +176,7 @@ export function IntegrationsControls({
 
               <div>
                 <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-                  Ocultar Linguagens (Separadas por vírgula)
+                  {t('editor.integrations.hide_languages', 'Ocultar Linguagens (Separadas por vírgula)')}
                 </label>
                 <input
                   type="text"
@@ -191,7 +193,7 @@ export function IntegrationsControls({
             <div className="space-y-2">
               <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-                  Exibir Ícones de Métricas
+                  {t('editor.integrations.show_metric_icons', 'Exibir Ícones de Métricas')}
                 </label>
                 <input
                   type="checkbox"
@@ -203,7 +205,7 @@ export function IntegrationsControls({
 
               <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-                  Incluir Commits Privados
+                  {t('editor.integrations.include_private_commits', 'Incluir Commits Privados')}
                 </label>
                 <input
                   type="checkbox"
@@ -215,7 +217,7 @@ export function IntegrationsControls({
 
               <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-                  Incluir Todos os Commits (Ano Todo)
+                  {t('editor.integrations.include_all_commits', 'Incluir Todos os Commits (Ano Todo)')}
                 </label>
                 <input
                   type="checkbox"
@@ -227,7 +229,7 @@ export function IntegrationsControls({
 
               <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-                  Ocultar Ranking (Rank Badge)
+                  {t('editor.integrations.hide_rank', 'Ocultar Ranking (Rank Badge)')}
                 </label>
                 <input
                   type="checkbox"
@@ -241,7 +243,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Ocultar Borda Padrão
+              {t('editor.integrations.hide_border', 'Ocultar Borda Padrão')}
             </label>
             <input
               type="checkbox"
@@ -258,7 +260,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
             </label>
             <select
               value={(config.theme as string) || 'dark'}
@@ -282,21 +284,21 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Modo de Sequência
+              {t('editor.integrations.streak_mode', 'Modo de Sequência')}
             </label>
             <select
               value={(config.mode as string) || 'daily'}
               onChange={(e) => handleUpdate({ mode: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="daily">Diário (Daily Streaks)</option>
-              <option value="weekly">Semanal (Weekly Streaks)</option>
+              <option value="daily">{t('editor.integrations.streak_daily', 'Diário (Daily Streaks)')}</option>
+              <option value="weekly">{t('editor.integrations.streak_weekly', 'Semanal (Weekly Streaks)')}</option>
             </select>
           </div>
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Formato de Data
+              {t('editor.integrations.date_format', 'Formato de Data')}
             </label>
             <select
               value={(config.dateFormat as string) || 'M j, Y'}
@@ -312,7 +314,7 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">Raio do Canto (Border Radius)</span>
+              <span className="text-ash font-inter-tight">{t('editor.integrations.border_radius', 'Raio do Canto (Border Radius)')}</span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.streakBorderRadius) || 4}px</span>
             </div>
             <input
@@ -327,7 +329,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Ocultar Borda Padrão
+              {t('editor.integrations.hide_border', 'Ocultar Borda Padrão')}
             </label>
             <input
               type="checkbox"
@@ -344,7 +346,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
             </label>
             <select
               value={(config.theme as string) || 'flat'}
@@ -370,7 +372,7 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">Número de Colunas</span>
+              <span className="text-ash font-inter-tight">{t('editor.integrations.num_columns', 'Número de Colunas')}</span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.column) || 6}</span>
             </div>
             <input
@@ -385,7 +387,7 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">Número de Linhas</span>
+              <span className="text-ash font-inter-tight">{t('editor.integrations.num_rows', 'Número de Linhas')}</span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.row) || 1}</span>
             </div>
             <input
@@ -400,7 +402,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Remover Moldura das Troféus
+              {t('editor.integrations.remove_trophy_frame', 'Remover Moldura das Troféus')}
             </label>
             <input
               type="checkbox"
@@ -412,7 +414,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Fundo Transparente
+              {t('editor.integrations.transparent_bg', 'Fundo Transparente')}
             </label>
             <input
               type="checkbox"
@@ -429,7 +431,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
             </label>
             <select
               value={(config.theme as string) || 'github-dark'}
@@ -452,7 +454,7 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">Período de Atividade (Dias)</span>
+              <span className="text-ash font-inter-tight">{t('editor.integrations.activity_period', 'Período de Atividade (Dias)')}</span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.days) || 31} dias</span>
             </div>
             <input
@@ -467,7 +469,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Preenchimento de Gradiente Sob a Linha
+              {t('editor.integrations.gradient_fill', 'Preenchimento de Gradiente Sob a Linha')}
             </label>
             <input
               type="checkbox"
@@ -479,7 +481,7 @@ export function IntegrationsControls({
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-              Ocultar Borda
+              {t('editor.integrations.hide_border_only', 'Ocultar Borda')}
             </label>
             <input
               type="checkbox"
@@ -496,14 +498,14 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual da Snake
+              {t('editor.integrations.snake_theme', 'Tema Visual da Snake')}
             </label>
             <select
               value={(config.theme as string) || 'dark'}
               onChange={(e) => handleUpdate({ theme: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="dark">Dark Theme (Padrão)</option>
+              <option value="dark">{t('editor.integrations.snake_dark', 'Dark Theme (Padrão)')}</option>
               <option value="light">Light Theme</option>
               <option value="ocean">Ocean Blue</option>
             </select>
@@ -511,14 +513,14 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Branch do Repositório (Action Output)
+              {t('editor.integrations.repo_branch', 'Branch do Repositório (Action Output)')}
             </label>
             <select
               value={(config.branch as string) || 'output'}
               onChange={(e) => handleUpdate({ branch: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="output">Branch `output` (Recomendado)</option>
+              <option value="output">{t('editor.integrations.branch_output', 'Branch `output` (Recomendado)')}</option>
               <option value="main">Branch `main`</option>
               <option value="master">Branch `master`</option>
             </select>
@@ -531,7 +533,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Template do Metrics
+              {t('editor.integrations.metrics_template', 'Template do Metrics')}
             </label>
             <select
               value={(config.template as string) || 'classic'}
@@ -547,17 +549,17 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Seções de Conteúdo (Base)
+              {t('editor.integrations.content_sections', 'Seções de Conteúdo (Base)')}
             </label>
             <select
               value={(config.baseSections as string) || 'header,activity,community,repositories'}
               onChange={(e) => handleUpdate({ baseSections: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="header,activity,community,repositories">Completo (Header, Activity, Community, Repos)</option>
-              <option value="header,activity">Resumido (Header & Activity)</option>
-              <option value="header,repositories">Apenas Repositórios</option>
-              <option value="header">Apenas Cabeçalho</option>
+              <option value="header,activity,community,repositories">{t('editor.integrations.metrics_full', 'Completo (Header, Activity, Community, Repos)')}</option>
+              <option value="header,activity">{t('editor.integrations.metrics_summary', 'Resumido (Header & Activity)')}</option>
+              <option value="header,repositories">{t('editor.integrations.metrics_repos', 'Apenas Repositórios')}</option>
+              <option value="header">{t('editor.integrations.metrics_header', 'Apenas Cabeçalho')}</option>
             </select>
           </div>
         </div>
@@ -568,7 +570,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Texto do Label
+              {t('editor.integrations.label_text', 'Texto do Label')}
             </label>
             <input
               type="text"
@@ -581,7 +583,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Estilo da Badge
+              {t('editor.integrations.badge_style_label', 'Estilo da Badge')}
             </label>
             <select
               value={(config.style as string) || 'for-the-badge'}
@@ -597,7 +599,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Cor do Contador
+              {t('editor.integrations.counter_color', 'Cor do Contador')}
             </label>
             <select
               value={(config.color as string) || '00f0ff'}
@@ -618,7 +620,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Valor Inicial do Contador (Offset)
+              {t('editor.integrations.initial_value', 'Valor Inicial do Contador (Offset)')}
             </label>
             <input
               type="number"
@@ -636,21 +638,21 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Modo da Citação
+              {t('editor.integrations.quote_mode', 'Modo da Citação')}
             </label>
             <select
               value={(config.quoteType as string) || 'random'}
               onChange={(e) => handleUpdate({ quoteType: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="random">Citação Aleatória (Random Quote)</option>
-              <option value="quote-day">Citação do Dia (Quote of the Day)</option>
+              <option value="random">{t('editor.integrations.quote_random', 'Citação Aleatória (Random Quote)')}</option>
+              <option value="quote-day">{t('editor.integrations.quote_day', 'Citação do Dia (Quote of the Day)')}</option>
             </select>
           </div>
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Tema Visual
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
             </label>
             <select
               value={(config.theme as string) || 'dark'}
@@ -670,7 +672,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Layout do Cartão
+              {t('editor.integrations.card_layout', 'Layout do Cartão')}
             </label>
             <select
               value={(config.layout as string) || 'horizontal'}
@@ -689,7 +691,7 @@ export function IntegrationsControls({
         <div className="space-y-3 pt-2">
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Texto da Badge
+              {t('editor.integrations.badge_text_label', 'Texto da Badge')}
             </label>
             <input
               type="text"
@@ -702,7 +704,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Estilo da Badge
+              {t('editor.integrations.badge_style_label', 'Estilo da Badge')}
             </label>
             <select
               value={(config.badgeStyle as string) || 'for-the-badge'}
@@ -717,7 +719,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Cor da Badge
+              {t('editor.integrations.badge_color_label', 'Cor da Badge')}
             </label>
             <select
               value={(config.badgeColor as string) || 'brightgreen'}
@@ -735,7 +737,7 @@ export function IntegrationsControls({
 
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-              Ícone do Logo
+              {t('editor.integrations.logo_icon', 'Ícone do Logo')}
             </label>
             <select
               value={(config.logo as string) || 'github'}

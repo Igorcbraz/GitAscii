@@ -17,8 +17,11 @@ import {
 import { CopyGuideModal } from './CopyGuideModal';
 import { useEditorStore } from '../../store/editorStore';
 import { APP_URL } from '../../../../constants';
+import { useI18n } from '@/i18n';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 
 export function EditorToolbar() {
+  const { t } = useI18n();
   const {
     config,
     githubData,
@@ -95,7 +98,7 @@ export function EditorToolbar() {
 
         const data = JSON.parse(result);
         if (!data || !Array.isArray(data.widgets)) {
-          alert('Formato de arquivo inválido: lista de widgets não encontrada.');
+          alert(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
           return;
         }
 
@@ -107,7 +110,7 @@ export function EditorToolbar() {
         }
       } catch (err) {
         console.error('Failed to parse import file:', err);
-        alert('Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.');
+        alert(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
       }
     };
     reader.readAsText(file);
@@ -445,7 +448,7 @@ export function EditorToolbar() {
         <button
           onClick={undo}
           disabled={!canUndo}
-          title="Undo"
+          title={t('editor.toolbar.undo', 'Undo')}
           className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
         >
           <Undo2 size={16} />
@@ -454,7 +457,7 @@ export function EditorToolbar() {
         <button
           onClick={redo}
           disabled={!canRedo}
-          title="Redo"
+          title={t('editor.toolbar.redo', 'Redo')}
           className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
         >
           <Redo2 size={16} />
@@ -464,7 +467,7 @@ export function EditorToolbar() {
 
         <button
           onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-          title="Zoom Out"
+          title={t('editor.toolbar.zoom_out', 'Zoom Out')}
           className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
         >
           <ZoomOut size={16} />
@@ -476,7 +479,7 @@ export function EditorToolbar() {
 
         <button
           onClick={() => setZoom(Math.min(1.5, zoom + 0.1))}
-          title="Zoom In"
+          title={t('editor.toolbar.zoom_in', 'Zoom In')}
           className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
         >
           <ZoomIn size={16} />
@@ -484,6 +487,8 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <LanguageSelector align="right" />
+
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
@@ -504,12 +509,12 @@ export function EditorToolbar() {
           )}
           <span>
             {saveStatus === 'saving'
-              ? 'Saving...'
+              ? t('common.saving', 'Saving...')
               : saveStatus === 'saved'
-              ? 'Saved!'
+              ? t('common.saved', 'Saved!')
               : saveStatus === 'error'
-              ? 'Error!'
-              : 'Save Profile'}
+              ? t('common.error', 'Error!')
+              : t('common.save_profile', 'Save Profile')}
           </span>
         </button>
 
@@ -518,7 +523,7 @@ export function EditorToolbar() {
           className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
-          <span>{copied ? 'Copied!' : 'Copy Code'}</span>
+          <span>{copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}</span>
         </button>
       </div>
 

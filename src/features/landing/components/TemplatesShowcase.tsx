@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useI18n } from '@/i18n';
 
 const templates = [
   { name: 'Terminal', gradient: 'from-[#000000] to-[#1a1a2e]', accent: '#c5ff4a', tags: ['Classic', 'CLI'], preview: 'root@host:~$ ./run\n[OK] System Ready\n> Executing ASCII...' },
@@ -19,22 +20,24 @@ const templates = [
 ];
 
 export default function TemplatesShowcase() {
+  const { t } = useI18n();
+
   return (
     <section id="templates" className="bg-carbon py-24 relative z-10">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col items-center text-center mb-16">
-          <div className="inline-flex items-center justify-center px-4 py-1.5 border border-signal-lime text-signal-lime rounded-none text-[11px] font-inter-tight font-medium tracking-[0.22em] bg-transparent mb-8 uppercase">
-            [ 13 TEMPLATES ]
+          <div className="inline-flex items-center justify-center px-4 py-1.5 border border-signal-lime text-signal-lime rounded-none text-eyebrow font-inter-tight font-medium tracking-[0.22em] bg-transparent mb-8 uppercase">
+            {t('landing.templates.badge', '[ 13 TEMPLATES ]')}
           </div>
 
-          <span className="font-inter-tight text-[11px] uppercase tracking-[0.22em] text-ash mb-4">
-            [ CHOOSE YOUR STYLE ]
+          <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-4">
+            {t('landing.templates.eyebrow', '[ CHOOSE YOUR STYLE ]')}
           </span>
           <h2 className="font-pt-serif font-light text-heading text-chalk leading-[0.9] tracking-tight mb-6">
-            Premium <span className="italic text-signal-lime">Templates.</span>
+            {t('landing.templates.title_normal', 'Premium ')}<span className="italic text-signal-lime">{t('landing.templates.title_italic', 'Templates.')}</span>
           </h2>
           <p className="font-inter-tight text-body text-bone max-w-lg mx-auto">
-            13+ beautifully crafted templates. Pick one, customize everything.
+            {t('landing.templates.subtitle', '13+ beautifully crafted templates. Pick one, customize everything.')}
           </p>
         </div>
 
@@ -47,7 +50,7 @@ export default function TemplatesShowcase() {
               <div
                 className={`h-40 w-full bg-linear-to-br ${template.gradient} relative overflow-hidden flex items-center justify-center`}
               >
-                <div className="font-jetbrains-mono text-[10px] sm:text-[12px] leading-tight whitespace-pre opacity-50 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 text-center" style={{ color: template.accent }}>
+                <div className="font-jetbrains-mono text-caption sm:text-note leading-tight whitespace-pre opacity-50 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500 text-center" style={{ color: template.accent }}>
                   {template.preview}
                 </div>
               </div>
@@ -63,7 +66,7 @@ export default function TemplatesShowcase() {
                   {template.tags.map((tag, tagIdx) => (
                     <span
                       key={tagIdx}
-                      className="px-2 py-0.5 border border-graphite rounded-none font-inter-tight text-[10px] uppercase text-ash tracking-wide bg-transparent"
+                      className="px-2 py-0.5 border border-graphite rounded-none font-inter-tight text-caption uppercase text-ash tracking-wide bg-transparent"
                     >
                       {tag}
                     </span>

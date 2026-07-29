@@ -10,6 +10,7 @@ import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
 import { createConfiguration } from '@/engine/core/TemplateRenderer';
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer';
 import type { SavedConfiguration, NormalizedGitHubData } from '@/engine/types';
+import { useI18n } from '@/i18n';
 
 interface EditorLayoutProps {
   username: string;
@@ -74,11 +75,13 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
     };
   }, [username, profileSlug, autoGenerate, initEditor]);
 
+  const { t } = useI18n();
+
   if (loading) {
     return (
       <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
         <div className="w-8 h-8 border-2 border-signal-lime border-t-transparent rounded-full animate-spin mb-4" />
-        <span className="text-label uppercase tracking-[0.2em] text-ash">[ FETCHING GITHUB DATA ]</span>
+        <span className="text-label uppercase tracking-[0.2em] text-ash">{t('editor.fetching_data', '[ FETCHING GITHUB DATA ]')}</span>
         <span className="text-body text-chalk font-medium mt-1">@{username}</span>
       </div>
     );
@@ -87,10 +90,10 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
   if (error || !config) {
     return (
       <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
-        <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">[ ERROR ]</span>
+        <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">{t('editor.error_fetching', '[ ERROR ]')}</span>
         <h2 className="text-subheading font-pt-serif font-light text-chalk mb-4">{error}</h2>
         <a href="/" className="px-4 py-2 bg-signal-lime text-black font-medium text-label rounded-sm glow-lime">
-          Return to Home
+          {t('editor.return_home', 'Return to Home')}
         </a>
       </div>
     );

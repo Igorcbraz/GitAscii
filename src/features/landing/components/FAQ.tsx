@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useI18n } from '@/i18n';
 
 const faqs = [
   {
@@ -41,10 +42,16 @@ const faqs = [
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { t } = useI18n();
 
   const toggleOpen = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  const translatedFaqs = faqs.map((faq, index) => ({
+    question: t(`landing.faq.q${index + 1}`, faq.question),
+    answer: t(`landing.faq.a${index + 1}`, faq.answer),
+  }));
 
   return (
     <section id="faq" className="relative w-full bg-carbon py-24 px-4 sm:px-6 lg:px-8 border-t border-graphite">
@@ -52,15 +59,15 @@ export function FAQ() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
           <span className="block text-ash font-inter-tight text-eyebrow uppercase tracking-[0.22em] mb-4">
-            [ QUESTIONS & ANSWERS ]
+            {t('landing.faq.eyebrow', '[ QUESTIONS & ANSWERS ]')}
           </span>
           <h2 className="text-chalk font-pt-serif font-light text-heading leading-[0.9] tracking-[-0.02em]">
-            Frequently Asked <span className="italic text-signal-lime">Questions.</span>
+            {t('landing.faq.title_normal', 'Frequently Asked ')}<span className="italic text-signal-lime">{t('landing.faq.title_italic', 'Questions.')}</span>
           </h2>
         </div>
 
         <div className="flex flex-col gap-2">
-          {faqs.map((faq, index) => {
+          {translatedFaqs.map((faq, index) => {
             const isOpen = openIndex === index;
             const qNumber = `Q ${(index + 1).toString().padStart(2, '0')}`;
             return (

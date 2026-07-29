@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { Copy, Check, Terminal as TerminalIcon } from 'lucide-react';
+import { useI18n } from '@/i18n';
 import { APP_URL, APP_DOMAIN } from '../../../constants';
 
 export default function DemoSection() {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   const embedCode = `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="${APP_URL}/api/Igorcbraz?theme=dark" />
@@ -26,10 +28,10 @@ export default function DemoSection() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
           <div className="flex flex-col items-start text-left">
             <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-4">
-              [ SEE IT IN ACTION ]
+              {t('landing.demo.eyebrow', '[ SEE IT IN ACTION ]')}
             </span>
             <h2 className="font-pt-serif font-light text-heading text-chalk leading-[0.9] tracking-tight">
-              From Username to <span className="italic text-signal-lime">Masterpiece.</span>
+              {t('landing.demo.title_normal', 'From Username to ')}<span className="italic text-signal-lime">{t('landing.demo.title_italic', 'Masterpiece.')}</span>
             </h2>
           </div>
           <div className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash shrink-0 hidden md:block">
@@ -78,19 +80,19 @@ export default function DemoSection() {
                   </div>
 
                   <div className="text-bone grid grid-cols-[100px_1fr] md:grid-cols-[120px_1fr] gap-x-3 gap-y-2 text-[13px] md:text-body">
-                    <span className="text-signal-lime">Name:</span>
+                    <span className="text-signal-lime">{t('common.name', 'Name:')}</span>
                     <span className="text-chalk font-medium">Igor Braz</span>
 
-                    <span className="text-signal-lime">Role:</span>
-                    <span className="text-chalk font-medium">Developer</span>
+                    <span className="text-signal-lime">{t('common.role', 'Role:')}</span>
+                    <span className="text-chalk font-medium">{t('common.developer', 'Developer')}</span>
 
-                    <span className="text-signal-lime">Languages:</span>
+                    <span className="text-signal-lime">{t('common.languages', 'Languages:')}</span>
                     <span className="text-chalk font-medium">TypeScript, React, Node.js</span>
 
-                    <span className="text-signal-lime">Stars:</span>
+                    <span className="text-signal-lime">{t('common.stars', 'Stars:')}</span>
                     <span className="text-chalk font-medium">142</span>
 
-                    <span className="text-signal-lime">Repos:</span>
+                    <span className="text-signal-lime">{t('common.repos', 'Repos:')}</span>
                     <span className="text-chalk font-medium">38</span>
                   </div>
                 </div>
