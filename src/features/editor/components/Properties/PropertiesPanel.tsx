@@ -19,6 +19,7 @@ import { CHARSETS } from '@/engine/ascii/converter';
 import { ColorPicker } from './ColorPicker';
 import { useI18n } from '@/i18n';
 import { AsciiArtControls } from './AsciiArtControls';
+import { AsciiTextControls } from './AsciiTextControls';
 import { TerminalInfoControls } from './TerminalInfoControls';
 import { TechStackControls } from './TechStackControls';
 import { SocialMediaControls } from './SocialMediaControls';
@@ -224,6 +225,10 @@ export function PropertiesPanel() {
 
         {selectedWidget.widgetId === 'ascii-art' && (
           <AsciiArtControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === 'ascii-text' && (
+          <AsciiTextControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {(selectedWidget.widgetId === 'terminal-info' || selectedWidget.widgetId === 'terminal-card') && (

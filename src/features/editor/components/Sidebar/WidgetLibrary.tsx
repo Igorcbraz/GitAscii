@@ -30,7 +30,8 @@ import {
   Globe,
   Download,
   Upload,
-  GitFork
+  GitFork,
+  Type
 } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
@@ -45,6 +46,14 @@ const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Name, handle & company badge',
     category: 'essential',
     badge: { text: 'Mais Usado', type: 'popular' },
+  },
+  {
+    id: 'ascii-text',
+    name: 'ASCII Text',
+    icon: Type,
+    desc: 'Custom text rendered in ASCII art font',
+    category: 'interactive',
+    badge: { text: 'Novo', type: 'highlight' },
   },
   {
     id: 'ascii-art',

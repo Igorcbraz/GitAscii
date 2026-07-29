@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { SavedConfiguration, WidgetInstance, NormalizedGitHubData } from '@/engine/types';
 import { createConfiguration } from '@/engine/core/TemplateRenderer';
+import { convertTextToAscii } from '@/engine/ascii/textConverter';
 
 interface HistoryState {
   past: SavedConfiguration[];
@@ -245,6 +246,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         header: { width: 800, height: 90 },
         avatar: { width: 160, height: 160 },
         'ascii-art': { width: 280, height: 280 },
+        'ascii-text': { width: 800, height: 120 },
         'terminal-info': { width: 504, height: 280 },
         'tech-stack': { width: 800, height: 140 },
         'social-media': { width: 800, height: 120 },
@@ -276,6 +278,17 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         size: widgetSize,
         config: {
           ...(widgetId === 'avatar' || widgetId === 'ascii-art' ? { lockAspectRatio: true } : {}),
+          ...(widgetId === 'ascii-text'
+            ? {
+                customText: 'GitAscii',
+                asciiFont: 'block',
+                charSpacing: 1,
+                fontSize: 12,
+                charset: 'default',
+                customCharset: '',
+                asciiLines: convertTextToAscii('GitAscii', 'block', 1, 'default', ''),
+              }
+            : {}),
         },
         locked: false,
         visible: true,

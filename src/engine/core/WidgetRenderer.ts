@@ -1,6 +1,7 @@
 import type { WidgetInstance, NormalizedGitHubData, GlobalStyles } from '../types';
 import { APP_DOMAIN } from '../../constants';
 import { generateAsciiArt } from '../ascii/converter';
+import { convertTextToAscii, type AsciiFontName } from '../ascii/textConverter';
 
 function escapeXml(str: string): string {
   return str
@@ -200,6 +201,38 @@ export function renderWidgetSvg(
       contentSvg = `
         <svg x="16" y="16" width="${width - 32}" height="${height - 32}" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
           ${innerContent}
+        </svg>
+      `;
+      break;
+    }
+
+    case 'ascii-text': {
+      const fontSize = Number(cfg.fontSize) || 12;
+      const charWidth = fontSize * 0.6;
+      const lineHeight = fontSize * 1.2;
+      const asciiLines = Array.isArray(cfg.asciiLines)
+        ? (cfg.asciiLines as string[])
+        : convertTextToAscii(
+            (cfg.customText as string) || 'GitAscii',
+            (cfg.asciiFont as AsciiFontName) || 'block',
+            cfg.charSpacing !== undefined ? Number(cfg.charSpacing) : 1,
+            (cfg.charset as string) || 'default',
+            (cfg.customCharset as string) || ''
+          );
+
+      const maxCols = Math.max(...asciiLines.map((l) => l.length), 1);
+      const viewW = maxCols * charWidth;
+      const viewH = asciiLines.length * lineHeight;
+
+      const linesContent = asciiLines
+        .map((line, i) => `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`)
+        .join('');
+
+      contentSvg = `
+        <svg x="16" y="16" width="${width - 32}" height="${height - 32}" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
+          <text x="0" y="${fontSize * 0.85}" font-family="'JetBrains Mono', monospace" font-size="${fontSize}" fill="${accent}" xml:space="preserve">
+            ${linesContent}
+          </text>
         </svg>
       `;
       break;
@@ -789,6 +822,38 @@ export function renderWidgetSvg(
       contentSvg = `
         <svg x="16" y="16" width="${width - 32}" height="${height - 32}" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
           ${innerContent}
+        </svg>
+      `;
+      break;
+    }
+
+    case 'ascii-text': {
+      const fontSize = Number(cfg.fontSize) || 12;
+      const charWidth = fontSize * 0.6;
+      const lineHeight = fontSize * 1.2;
+      const asciiLines = Array.isArray(cfg.asciiLines)
+        ? (cfg.asciiLines as string[])
+        : convertTextToAscii(
+            (cfg.customText as string) || 'GitAscii',
+            (cfg.asciiFont as AsciiFontName) || 'block',
+            cfg.charSpacing !== undefined ? Number(cfg.charSpacing) : 1,
+            (cfg.charset as string) || 'default',
+            (cfg.customCharset as string) || ''
+          );
+
+      const maxCols = Math.max(...asciiLines.map((l) => l.length), 1);
+      const viewW = maxCols * charWidth;
+      const viewH = asciiLines.length * lineHeight;
+
+      const linesContent = asciiLines
+        .map((line, i) => `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`)
+        .join('');
+
+      contentSvg = `
+        <svg x="16" y="16" width="${width - 32}" height="${height - 32}" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
+          <text x="0" y="${fontSize * 0.85}" font-family="'JetBrains Mono', monospace" font-size="${fontSize}" fill="${accent}" xml:space="preserve">
+            ${linesContent}
+          </text>
         </svg>
       `;
       break;
