@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
 import { createConfiguration } from '@/engine/core/TemplateRenderer';
-import { renderSvg } from '@/engine/core/SVGEngine';
+import { renderSvg, embedExternalImages } from '@/engine/core/SVGEngine';
 import { loadProfileConfig } from '@/lib/profileStorage';
 
 export const dynamic = 'force-dynamic';
@@ -75,7 +75,8 @@ export async function GET(
       config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug);
     }
 
-    const svgContent = renderSvg(config, data, { theme, widgets });
+    const rawSvgContent = renderSvg(config, data, { theme, widgets });
+    const svgContent = await embedExternalImages(rawSvgContent);
 
     return new NextResponse(svgContent, {
       status: 200,

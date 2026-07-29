@@ -78,6 +78,94 @@ export function renderSvg(
 </svg>`;
 }
 
+function getAttributeValue(attrsString: string, name: string): string | null {
+  const regex = new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i');
+  const match = attrsString.match(regex);
+  if (!match) return null;
+  return match[1] || match[2] || match[3] || null;
+}
+
+function removeAttributes(attrsString: string, names: string[]): string {
+  let cleaned = attrsString;
+  for (const name of names) {
+    const regex = new RegExp(`\\b${name}\\s*=\\s*(?:"[^"]*"|'[^']*'|[^\\s>]+)`, 'gi');
+    cleaned = cleaned.replace(regex, '');
+  }
+  return cleaned;
+}
+
+function inlineSvg(fetchedSvg: string, x: string, y: string, width: string, height: string, preserve: string): string {
+  let svg = fetchedSvg.replace(/<\?xml[\s\S]*?\?>/i, '').trim();
+  svg = svg.replace(/<!DOCTYPE[\s\S]*?>/i, '').trim();
+
+  const svgTagRegex = /<svg([^>]*)>/i;
+  const match = svg.match(svgTagRegex);
+  if (!match) {
+    throw new Error('No opening <svg> tag found in fetched content');
+  }
+
+  let attributesString = match[1];
+
+  const originalWidth = getAttributeValue(attributesString, 'width');
+  const originalHeight = getAttributeValue(attributesString, 'height');
+  let viewBox = getAttributeValue(attributesString, 'viewBox');
+
+  if (!viewBox && originalWidth && originalHeight) {
+    const w = parseFloat(originalWidth);
+    const h = parseFloat(originalHeight);
+    if (!isNaN(w) && !isNaN(h)) {
+      viewBox = `0 0 ${w} ${h}`;
+    }
+  }
+
+  attributesString = removeAttributes(attributesString, ['x', 'y', 'width', 'height', 'preserveAspectRatio', 'viewBox']);
+
+  let newAttrs = ` x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}"`;
+  if (viewBox) {
+    newAttrs += ` viewBox="${viewBox}"`;
+  }
+
+  attributesString = attributesString.replace(/\s+/g, ' ').trim();
+  const newSvgTag = `<svg ${attributesString} ${newAttrs}>`.replace(/\s+/g, ' ');
+
+  return svg.replace(svgTagRegex, newSvgTag);
+}
+
+async function fetchAndProcessExternalImage(
+  url: string,
+  x: string,
+  y: string,
+  width: string,
+  height: string,
+  preserve: string
+): Promise<string> {
+  const response = await fetch(url, { headers: { accept: 'image/svg+xml, */*' } });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+  const contentType = response.headers.get('content-type') || '';
+  const buffer = await response.arrayBuffer();
+
+  const isSvg = contentType.includes('image/svg+xml') ||
+    contentType.includes('xml') ||
+    url.toLowerCase().split('?')[0].endsWith('.svg');
+
+  if (isSvg) {
+    try {
+      const text = Buffer.from(buffer).toString('utf-8');
+      return inlineSvg(text, x, y, width, height, preserve);
+    } catch (inlineErr) {
+      console.error('Failed to inline SVG, falling back to base64 image tag:', inlineErr);
+      const base64 = Buffer.from(buffer).toString('base64');
+      return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
+    }
+  } else {
+    const base64 = Buffer.from(buffer).toString('base64');
+    let mimeType = contentType.split(';')[0].trim();
+    if (!mimeType) mimeType = 'image/png';
+    return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
+  }
+}
+
 export async function embedExternalImages(svgContent: string): Promise<string> {
   const regex = /<!-- EXTERNAL_WIDGET_START:\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([\s\S]*?)\s*-->([\s\S]*?)<!-- EXTERNAL_WIDGET_END -->/g;
 
@@ -97,29 +185,14 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet';
 
     try {
-      const response = await fetch(url, { headers: { accept: 'image/svg+xml' } });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const buffer = await response.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      const dataUri = `data:image/svg+xml;base64,${base64}`;
-
-      const replacement = `<image href="${dataUri}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
-
+      const replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve);
       finalSvg = finalSvg.replace(fullMatch, replacement);
     } catch (err) {
       console.error('Failed to fetch external widget:', url, err);
 
       if (fallbackUrl) {
         try {
-          const fbResponse = await fetch(fallbackUrl, { headers: { accept: 'image/svg+xml' } });
-          if (!fbResponse.ok) throw new Error(`HTTP ${fbResponse.status}`);
-
-          const fbBuffer = await fbResponse.arrayBuffer();
-          const fbBase64 = Buffer.from(fbBuffer).toString('base64');
-          const fbDataUri = `data:image/svg+xml;base64,${fbBase64}`;
-
-          const replacement = `<image href="${fbDataUri}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
+          const replacement = await fetchAndProcessExternalImage(fallbackUrl, x, y, width, height, preserve);
           finalSvg = finalSvg.replace(fullMatch, replacement);
           continue;
         } catch (fbErr) {
