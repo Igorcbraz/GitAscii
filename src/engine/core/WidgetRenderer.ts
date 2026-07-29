@@ -77,12 +77,14 @@ function renderExternalWidgetSvg(
 
   return `
     ${showTitle ? `<text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">${escapeXml(title)}</text>` : ''}
+    <!-- EXTERNAL_WIDGET_START: ${escapeXml(url)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
     <foreignObject x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}">
       <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;">
         ${innerContentHtml}
       </div>
     </foreignObject>
     <image href="${escapeXml(url)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" opacity="0" />
+    <!-- EXTERNAL_WIDGET_END -->
   `;
 }
 

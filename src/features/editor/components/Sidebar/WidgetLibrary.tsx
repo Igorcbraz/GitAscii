@@ -29,7 +29,8 @@ import {
   Grid,
   Globe,
   Download,
-  Upload
+  Upload,
+  GitFork
 } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
@@ -264,7 +265,7 @@ export function WidgetLibrary() {
         }
 
         importLayout(data.widgets, data.globalStyles, data.templateId);
-        
+
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -512,6 +513,25 @@ export function WidgetLibrary() {
             ) : (
               <div className="space-y-2">
                 {filteredWidgets.map(renderWidgetCard)}
+
+                <a
+                  href="https://github.com/Igorcbraz/GitAscii/fork"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all rounded-xs cursor-pointer flex items-center gap-2.5 hover:shadow-[0_0_20px_rgba(197,255,74,0.15)]"
+                >
+                  <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
+                    <GitFork size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-inter-tight font-medium text-note text-signal-lime leading-tight">
+                      {t('editor.sidebar.contribute_widget', 'Adicione seu próprio Widget!')}
+                    </h4>
+                    <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
+                      {t('editor.sidebar.contribute_widget_desc', 'Faça um fork e contribua com a comunidade')}
+                    </p>
+                  </div>
+                </a>
               </div>
             )}
           </>
@@ -600,6 +620,27 @@ export function WidgetLibrary() {
                 </div>
               </div>
             ))}
+
+            <a
+              href="https://github.com/Igorcbraz/GitAscii/fork"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all rounded-none cursor-pointer hover:shadow-[0_0_20px_rgba(197,255,74,0.15)]"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
+                  <GitFork size={14} />
+                </div>
+                <div>
+                  <h4 className="font-inter-tight font-medium text-note text-signal-lime leading-tight">
+                    {t('editor.sidebar.contribute_template', 'Crie seu próprio Template!')}
+                  </h4>
+                  <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
+                    {t('editor.sidebar.contribute_template_desc', 'Faça um fork e compartilhe com a comunidade')}
+                  </p>
+                </div>
+              </div>
+            </a>
           </>
         )}
       </div>

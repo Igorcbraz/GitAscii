@@ -42,9 +42,16 @@ export function EditorToolbar() {
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const [currentOrigin, setCurrentOrigin] = useState(APP_URL);
   const [copied, setCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentOrigin(window.location.origin);
+    }
+  }, []);
 
   const handleSave = async () => {
     setSaveStatus('saving');
@@ -220,197 +227,16 @@ export function EditorToolbar() {
 
   const embedUrl =
     profileSlug === 'default'
-      ? `${APP_URL}/api/${username}`
-      : `${APP_URL}/api/${username}/${profileSlug}`;
+      ? `${currentOrigin}/api/${username}`
+      : `${currentOrigin}/api/${username}/${profileSlug}`;
 
-  // Helper functions to generate correct URLs for external widgets
-  const getGithubReadmeStatsUrl = (cfg: any, themeMode: 'dark' | 'light') => {
-    const u = cfg.username || username;
-    const type = cfg.statType || 'stats';
-    const th = themeMode === 'light' ? 'default' : (cfg.theme || 'dark');
-    const showIcons = cfg.showIcons !== false;
-    const countPrivate = !!cfg.countPrivate;
-    const includeAllCommits = !!cfg.includeAllCommits;
-    const hideRank = !!cfg.hideRank;
-    const hideBorder = !!cfg.hideBorder;
-    if (type === 'top-langs') {
-      const layout = cfg.layout || 'compact';
-      const langsCount = cfg.langsCount || 5;
-      const hideLangs = cfg.hideLangs || '';
-      return `https://github-readme-stats-fast.vercel.app/api/top-langs/?username=${encodeURIComponent(u)}&layout=${layout}&langs_count=${langsCount}&theme=${th}${hideLangs ? `&hide=${encodeURIComponent(hideLangs)}` : ''}${hideBorder ? '&hide_border=true' : ''}`;
-    } else if (type === 'pin') {
-      const repo = cfg.repoName || 'gitascii';
-      return `https://github-readme-stats-fast.vercel.app/api/pin/?username=${encodeURIComponent(u)}&repo=${encodeURIComponent(repo)}&theme=${th}${hideBorder ? '&hide_border=true' : ''}`;
-    }
-    return `https://github-readme-stats-fast.vercel.app/api?username=${encodeURIComponent(u)}&show_icons=${showIcons}&theme=${th}${countPrivate ? '&count_private=true' : ''}${includeAllCommits ? '&include_all_commits=true' : ''}${hideRank ? '&hide_rank=true' : ''}${hideBorder ? '&hide_border=true' : ''}`;
-  };
 
-  const getStreakStatsUrl = (cfg: any, themeMode: 'dark' | 'light') => {
-    const u = cfg.username || username;
-    const th = themeMode === 'light' ? 'default' : (cfg.theme || 'dark');
-    const mode = cfg.mode || 'daily';
-    const dateFormat = cfg.dateFormat || 'M j, Y';
-    const streakBorderRadius = cfg.streakBorderRadius || 4;
-    const hideBorder = !!cfg.hideBorder;
-    return `https://streak-stats.demolab.com/?user=${encodeURIComponent(u)}&theme=${th}&mode=${mode}&date_format=${encodeURIComponent(dateFormat)}&border_radius=${streakBorderRadius}${hideBorder ? '&hide_border=true' : ''}`;
-  };
 
-  const getProfileTrophyUrl = (cfg: any, themeMode: 'dark' | 'light') => {
-    const u = cfg.username || username;
-    const th = themeMode === 'light' ? 'flat' : (cfg.theme || 'dark');
-    const column = cfg.column || 6;
-    const row = cfg.row || 1;
-    const noFrame = !!cfg.noFrame;
-    const noBg = !!cfg.noBg;
-    return `https://github-profile-trophy-fast.vercel.app/?username=${encodeURIComponent(u)}&theme=${th}&column=${column}&row=${row}${noFrame ? '&margin-w=0' : ''}${noBg ? '&no-bg=true' : ''}`;
-  };
-
-  const getActivityGraphUrl = (cfg: any, themeMode: 'dark' | 'light') => {
-    const u = cfg.username || username;
-    const th = themeMode === 'light' ? 'github-light' : (cfg.theme || 'dark');
-    const days = cfg.days || 30;
-    const area = cfg.showArea !== false;
-    const hideBorder = !!cfg.hideBorder;
-    return `https://github-readme-activity-graph.vercel.app/graph?username=${encodeURIComponent(u)}&theme=${th}&days=${days}&area=${area}${hideBorder ? '&hide_border=true' : ''}`;
-  };
-
-  const getContributionSnakeUrl = (cfg: any, isDark: boolean) => {
-    const u = cfg.username || username;
-    const branch = cfg.branch || 'output';
-    const snakeFileName = isDark ? 'github-contribution-grid-snake-dark.svg' : 'github-contribution-grid-snake.svg';
-    return `https://raw.githubusercontent.com/${encodeURIComponent(u)}/${encodeURIComponent(u)}/${encodeURIComponent(branch)}/${snakeFileName}`;
-  };
-
-  const getMetricsCardUrl = (cfg: any) => {
-    const u = cfg.username || username;
-    const template = cfg.template || 'classic';
-    const baseSections = cfg.baseSections || 'header,activity,community,repositories';
-    return `https://metrics.lecoq.io/${encodeURIComponent(u)}?template=${encodeURIComponent(template)}&base=${encodeURIComponent(baseSections)}`;
-  };
-
-  const getViewsCounterUrl = (cfg: any) => {
-    const u = cfg.username || username;
-    const color = cfg.color || '00f0ff';
-    const style = cfg.style || 'for-the-badge';
-    const label = cfg.label || 'PROFILE VIEWS';
-    const baseVal = cfg.baseVal || 0;
-    return `https://komarev.com/ghpvc/?username=${encodeURIComponent(u)}&color=${color}&style=${style}&label=${encodeURIComponent(label)}${baseVal > 0 ? `&base=${baseVal}` : ''}`;
-  };
-
-  const getReadmeQuotesUrl = (cfg: any, themeMode: 'dark' | 'light') => {
-    const quoteType = cfg.quoteType || 'random';
-    const th = themeMode === 'light' ? 'default' : (cfg.theme || 'dark');
-    const layout = cfg.layout || 'horizontal';
-    return `https://quotes-github-readme.vercel.app/api?type=${quoteType === 'quote-day' ? 'quote-day' : layout}&theme=${th}`;
-  };
-
-  const getAwesomeBadgeUrl = (cfg: any) => {
-    const badgeStyle = cfg.badgeStyle || 'for-the-badge';
-    const badgeColor = cfg.badgeColor || 'brightgreen';
-    const label = cfg.label || 'Awesome GitHub Profile';
-    const logo = cfg.logo || 'github';
-    return `https://img.shields.io/badge/${encodeURIComponent(label)}-Featured-${badgeColor}?style=${badgeStyle}&logo=${encodeURIComponent(logo)}`;
-  };
-
-  const EXTERNAL_WIDGET_IDS = [
-    'github-readme-stats',
-    'streak-stats',
-    'profile-trophy',
-    'activity-graph',
-    'contribution-snake',
-    'metrics-card',
-    'views-counter',
-    'readme-quotes',
-    'awesome-badge',
-  ];
-
-  // Sort visible widgets by vertical position (Y coordinate)
-  const visibleWidgets = [...config.widgets]
-    .filter((w) => w.visible)
-    .sort((a, b) => a.position.y - b.position.y);
-
-  const codeBlocks: string[] = [];
-  let currentGroup: string[] = [];
-
-  const flushGroup = () => {
-    if (currentGroup.length > 0) {
-      const ids = currentGroup.join(',');
-      codeBlocks.push(`<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="${embedUrl}?theme=dark&widgets=${ids}" />
-  <source media="(prefers-color-scheme: light)" srcset="${embedUrl}?theme=light&widgets=${ids}" />
-  <img alt="${username}'s GitAscii Section" src="${embedUrl}?widgets=${ids}" />
-</picture>`);
-      currentGroup = [];
-    }
-  };
-
-  visibleWidgets.forEach((w) => {
-    if (EXTERNAL_WIDGET_IDS.includes(w.widgetId)) {
-      flushGroup();
-
-      let darkUrl = '';
-      let lightUrl = '';
-
-      switch (w.widgetId) {
-        case 'github-readme-stats':
-          darkUrl = getGithubReadmeStatsUrl(w.config, 'dark');
-          lightUrl = getGithubReadmeStatsUrl(w.config, 'light');
-          break;
-        case 'streak-stats':
-          darkUrl = getStreakStatsUrl(w.config, 'dark');
-          lightUrl = getStreakStatsUrl(w.config, 'light');
-          break;
-        case 'profile-trophy':
-          darkUrl = getProfileTrophyUrl(w.config, 'dark');
-          lightUrl = getProfileTrophyUrl(w.config, 'light');
-          break;
-        case 'activity-graph':
-          darkUrl = getActivityGraphUrl(w.config, 'dark');
-          lightUrl = getActivityGraphUrl(w.config, 'light');
-          break;
-        case 'contribution-snake':
-          darkUrl = getContributionSnakeUrl(w.config, true);
-          lightUrl = getContributionSnakeUrl(w.config, false);
-          break;
-        case 'metrics-card':
-          darkUrl = getMetricsCardUrl(w.config);
-          lightUrl = darkUrl;
-          break;
-        case 'views-counter':
-          darkUrl = getViewsCounterUrl(w.config);
-          lightUrl = darkUrl;
-          break;
-        case 'readme-quotes':
-          darkUrl = getReadmeQuotesUrl(w.config, 'dark');
-          lightUrl = getReadmeQuotesUrl(w.config, 'light');
-          break;
-        case 'awesome-badge':
-          darkUrl = getAwesomeBadgeUrl(w.config);
-          lightUrl = darkUrl;
-          break;
-      }
-
-      let markdownElement = '';
-      if (w.widgetId === 'contribution-snake') {
-        const u = (w.config.username as string) || username;
-        const branch = (w.config.branch as string) || 'output';
-        const snakeUrl = `https://github.com/${encodeURIComponent(u)}/${encodeURIComponent(u)}/raw/${encodeURIComponent(branch)}/github-contribution-grid-snake.svg`;
-        markdownElement = `![Snake animation](${snakeUrl})`;
-      } else if (w.widgetId === 'awesome-badge') {
-        markdownElement = `[![Featured Awesome Profile Badge](${darkUrl})](https://github.com/abhisheknaiidu/awesome-github-profile-readme)`;
-      } else {
-        markdownElement = `![${w.name || w.widgetId}](${darkUrl})`;
-      }
-
-      codeBlocks.push(markdownElement);
-    } else {
-      currentGroup.push(w.instanceId);
-    }
-  });
-
-  flushGroup();
-
-  const embedCode = codeBlocks.join('\n\n');
+  const embedCode = `<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="${embedUrl}?theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="${embedUrl}?theme=light" />
+  <img alt="${username}'s GitAscii Section" src="${embedUrl}" />
+</picture>`;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(embedCode);

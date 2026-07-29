@@ -20,7 +20,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 1,
-      "instanceId": "widget_1785330997870_0",
+      "instanceId": "widget_1785335328550_0",
       "name": "Header Widget"
     },
     {
@@ -1247,7 +1247,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 2,
-      "instanceId": "widget_1785330997870_1",
+      "instanceId": "widget_1785335328550_1",
       "name": "Ascii-art Widget"
     },
     {
@@ -1260,11 +1260,15 @@
         "width": 504,
         "height": 280
       },
-      "config": {},
+      "config": {
+        "showMainSection": true,
+        "showContactSection": true,
+        "showStatsSection": true
+      },
       "locked": false,
       "visible": true,
       "zIndex": 3,
-      "instanceId": "widget_1785330997870_2",
+      "instanceId": "widget_1785335328550_2",
       "name": "Terminal-info Widget"
     },
     {
@@ -1281,7 +1285,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 4,
-      "instanceId": "widget_1785330997870_3",
+      "instanceId": "widget_1785335328550_3",
       "name": "Languages Widget"
     },
     {
@@ -1298,7 +1302,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 5,
-      "instanceId": "widget_1785330997870_4",
+      "instanceId": "widget_1785335328550_4",
       "name": "Repositories Widget"
     },
     {
@@ -1315,8 +1319,178 @@
       "locked": false,
       "visible": true,
       "zIndex": 6,
-      "instanceId": "widget_1785330997870_5",
+      "instanceId": "widget_1785335328550_5",
       "name": "Footer Widget"
+    },
+    {
+      "instanceId": "widget_1785338551450",
+      "widgetId": "tech-stack",
+      "name": "Tech-stack Widget",
+      "position": {
+        "x": 0,
+        "y": 820
+      },
+      "size": {
+        "width": 800,
+        "height": 140
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 7
+    },
+    {
+      "instanceId": "widget_1785338553856",
+      "widgetId": "profile-trophy",
+      "name": "Profile-trophy Widget",
+      "position": {
+        "x": 0,
+        "y": 976
+      },
+      "size": {
+        "width": 800,
+        "height": 160
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 8
+    },
+    {
+      "instanceId": "widget_1785338559609",
+      "widgetId": "bio",
+      "name": "Bio Widget",
+      "position": {
+        "x": 0,
+        "y": 1152
+      },
+      "size": {
+        "width": 800,
+        "height": 160
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 9
+    },
+    {
+      "instanceId": "widget_1785339106410",
+      "widgetId": "stats",
+      "name": "Stats Widget",
+      "position": {
+        "x": 0,
+        "y": 1328
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 10
+    },
+    {
+      "instanceId": "widget_1785339114817",
+      "widgetId": "social-media",
+      "name": "Social-media Widget",
+      "position": {
+        "x": 0,
+        "y": 1464
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 11
+    },
+    {
+      "instanceId": "widget_1785339116745",
+      "widgetId": "github-readme-stats",
+      "name": "Github-readme-stats Widget",
+      "position": {
+        "x": 0,
+        "y": 1600
+      },
+      "size": {
+        "width": 500,
+        "height": 210
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 12
+    },
+    {
+      "instanceId": "widget_1785339122793",
+      "widgetId": "activity-graph",
+      "name": "Activity-graph Widget",
+      "position": {
+        "x": 0,
+        "y": 1820
+      },
+      "size": {
+        "width": 800,
+        "height": 300
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 14
+    },
+    {
+      "instanceId": "widget_1785339124136",
+      "widgetId": "contribution-snake",
+      "name": "Contribution-snake Widget",
+      "position": {
+        "x": 0,
+        "y": 2168
+      },
+      "size": {
+        "width": 800,
+        "height": 200
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 15
+    },
+    {
+      "instanceId": "widget_1785339141488",
+      "widgetId": "readme-quotes",
+      "name": "Readme-quotes Widget",
+      "position": {
+        "x": 0,
+        "y": 2384
+      },
+      "size": {
+        "width": 500,
+        "height": 180
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 15
+    },
+    {
+      "instanceId": "widget_1785339142953",
+      "widgetId": "awesome-badge",
+      "name": "Awesome-badge Widget",
+      "position": {
+        "x": 0,
+        "y": 2580
+      },
+      "size": {
+        "width": 360,
+        "height": 80
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 16
     }
   ],
   "globalStyles": {
@@ -1331,8 +1505,8 @@
     "templateStyle": "terminal"
   },
   "metadata": {
-    "createdAt": "2026-07-29T13:16:37.870Z",
-    "updatedAt": "2026-07-29T13:16:37.925Z",
+    "createdAt": "2026-07-29T14:28:48.550Z",
+    "updatedAt": "2026-07-29T15:32:22.953Z",
     "schemaVersion": 1
   }
 }

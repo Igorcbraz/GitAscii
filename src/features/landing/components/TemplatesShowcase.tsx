@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { GitFork } from 'lucide-react';
 import { useI18n } from '@/i18n';
 
 const templates = [
@@ -75,6 +76,36 @@ export default function TemplatesShowcase() {
               </div>
             </div>
           ))}
+
+          <a
+            href="https://github.com/Igorcbraz/GitAscii/fork"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-onyx border-2 border-signal-lime rounded-none transition-all duration-300 cursor-pointer group flex flex-col hover:shadow-[0_0_30px_rgba(197,255,74,0.2)]"
+          >
+            <div className="h-40 w-full bg-linear-to-br from-[#0a0a0a] to-[#1a1a0a] relative overflow-hidden flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3 group-hover:scale-110 transition-transform duration-500">
+                <div className="p-3 rounded-full bg-signal-lime/10 border border-signal-lime/30 group-hover:bg-signal-lime/20 transition-colors">
+                  <GitFork size={28} className="text-signal-lime" />
+                </div>
+                <span className="font-jetbrains-mono text-caption text-signal-lime/60 group-hover:text-signal-lime/90 transition-colors">
+                  fork → contribute → PR
+                </span>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-signal-lime/30 bg-signal-lime/5 flex items-center justify-between z-10 relative group-hover:bg-signal-lime/10 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-signal-lime animate-pulse" />
+                <span className="font-inter-tight font-semibold text-body text-signal-lime">
+                  {t('landing.templates.contribute', 'Crie o Seu!')}
+                </span>
+              </div>
+              <span className="px-2 py-0.5 border border-signal-lime rounded-none font-inter-tight text-caption uppercase text-signal-lime tracking-wide bg-signal-lime/10">
+                Fork
+              </span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
