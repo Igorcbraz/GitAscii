@@ -410,7 +410,21 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           body: JSON.stringify(config),
         });
         if (!response.ok) {
-          throw new Error('Failed to save configuration to server');
+          let errorMessage = `Failed to save configuration to server (Status: ${response.status})`;
+          try {
+            const data = await response.json();
+            if (data && data.error) {
+              errorMessage = data.error;
+            }
+          } catch {
+            try {
+              const text = await response.text();
+              if (text) {
+                errorMessage = text.slice(0, 150);
+              }
+            } catch {}
+          }
+          throw new Error(errorMessage);
         }
       } catch (err) {
         console.error('Save to server failed:', err);
