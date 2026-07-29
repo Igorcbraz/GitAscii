@@ -1531,6 +1531,8 @@ export function renderWidgetSvg(
 
   let templateDecorationSvg = '';
   const tmplStyle = globalStyles.templateStyle || 'terminal';
+  let strokeWidth = 1;
+  let shadowRect = '';
 
   if (tmplStyle === 'dracula') {
     templateDecorationSvg = `
@@ -1563,11 +1565,30 @@ export function renderWidgetSvg(
       <text x="6" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="${accent}">+</text>
       <text x="${width - 12}" y="14" font-family="'JetBrains Mono', monospace" font-size="10" fill="${accent}">+</text>
     `;
+  } else if (tmplStyle === 'tokyonight') {
+    templateDecorationSvg = `
+      <rect x="0" y="0" width="${width}" height="3" fill="#7aa2f7" rx="1" />
+      <circle cx="${width - 16}" cy="16" r="3" fill="#bb9af7" opacity="0.8" />
+    `;
+  } else if (tmplStyle === 'gruvbox') {
+    templateDecorationSvg = `
+      <rect x="0" y="0" width="${width}" height="3" fill="#fe8019" rx="1" />
+      <line x1="12" y1="12" x2="24" y2="12" stroke="#b8bb26" stroke-width="1.5" />
+      <line x1="12" y1="16" x2="20" y2="16" stroke="#fb4934" stroke-width="1.5" />
+    `;
+  } else if (tmplStyle === 'githubdark') {
+    templateDecorationSvg = `
+      <rect x="0" y="0" width="${width}" height="3" fill="#30363d" rx="1" />
+    `;
+  } else if (tmplStyle === 'neobrutalism') {
+    strokeWidth = 2.5;
+    shadowRect = `<rect x="6" y="6" width="${width}" height="${height}" fill="#000000" rx="${rx}" />`;
   }
 
   return `
     <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
-      <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="1" rx="${rx}" />
+      ${shadowRect}
+      <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />
       ${templateDecorationSvg}
       ${contentSvg}
     </g>
