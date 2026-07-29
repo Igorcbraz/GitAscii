@@ -1,82 +1,103 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Paintbrush, Terminal, Layout, Zap, Users, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { FeatureCard } from '@/components/ui/grid-feature-cards';
 
 const features = [
-  {
-    icon: Paintbrush,
-    title: 'Visual Editor',
-    description: 'Drag-and-drop editor inspired by Canva and Figma. See every change in real-time.',
-    index: 'F 01'
-  },
-  {
-    icon: Terminal,
-    title: 'ASCII Art Engine',
-    description: 'Convert any image to stunning ASCII art with 6+ character sets, adjustable density and color.',
-    index: 'F 02'
-  },
-  {
-    icon: Layout,
-    title: 'Premium Templates',
-    description: '13+ handcrafted templates. From Terminal to Cyberpunk. One-click apply, fully customizable.',
-    index: 'F 03'
-  },
-  {
-    icon: Zap,
-    title: 'Live Rendering',
-    description: 'Your SVG is served via URL — always up to date. No manual uploads, no stale data.',
-    index: 'F 04'
-  },
-  {
-    icon: Users,
-    title: 'Multiple Profiles',
-    description: 'Create different profiles for different purposes. Portfolio, Resume, Open Source — all from one account.',
-    index: 'F 05'
-  },
-  {
-    icon: Sparkles,
-    title: 'Smart Generation',
-    description: 'Let GitAscii analyze your GitHub and generate the perfect profile automatically.',
-    index: 'F 06'
-  }
+	{
+		title: 'Visual Editor',
+		icon: Paintbrush,
+		description: 'Drag-and-drop editor inspired by Canva and Figma. See every change in real-time.',
+	},
+	{
+		title: 'ASCII Art Engine',
+		icon: Terminal,
+		description: 'Convert any image to stunning ASCII art with 6+ character sets, adjustable density and color.',
+	},
+	{
+		title: 'Premium Templates',
+		icon: Layout,
+		description: '13+ handcrafted templates. From Terminal to Cyberpunk. One-click apply, fully customizable.',
+	},
+	{
+		title: 'Live Rendering',
+		icon: Zap,
+		description: 'Your SVG is served via URL — always up to date. No manual uploads, no stale data.',
+	},
+	{
+		title: 'Multiple Profiles',
+		icon: Users,
+		description: 'Create different profiles for different purposes. Portfolio, Resume, Open Source — all from one account.',
+	},
+	{
+		title: 'Smart Generation',
+		icon: Sparkles,
+		description: 'Let GitAscii analyze your GitHub and generate the perfect profile automatically.',
+	},
 ];
 
 export function FeaturesGrid() {
-  return (
-    <section id="features" className="bg-carbon py-24 px-6 md:px-12 w-full">
-      <div className="max-w-7xl mx-auto flex flex-col items-center">
-        <div className="mb-16 flex flex-col items-center text-center">
-          <span className="font-sans font-medium text-[11px] uppercase tracking-[0.22em] text-ash mb-4">
-            [ WHY GITASCII ]
-          </span>
-          <h2 className="font-serif font-light text-[49px] leading-[0.95] tracking-[-0.02em] text-chalk">
-            Everything You <em className="not-italic italic text-signal-lime">Need.</em>
-          </h2>
-        </div>
+	return (
+		<section id="features" className="py-16 md:py-32 relative z-10 w-full bg-carbon">
+			<div className="mx-auto w-full max-w-7xl space-y-8 px-6 md:px-12">
+				<AnimatedContainer className="mx-auto max-w-3xl text-center">
+					<span className="font-inter-tight font-medium text-eyebrow uppercase tracking-[0.22em] text-ash mb-4 block">
+						[ WHY GITASCII ]
+					</span>
+					<h2 className="font-pt-serif font-light text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
+						Everything You <em className="italic text-signal-lime">Need.</em>
+					</h2>
+					<p className="font-inter-tight text-body text-bone leading-body max-w-lg mx-auto mt-4">
+						Everything you need to build, customize, and share beautiful GitHub profiles.
+					</p>
+				</AnimatedContainer>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {features.map((feature, i) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={i}
-                className="bg-onyx p-8 border border-graphite hover:border-iron transition-colors duration-300 relative group flex flex-col rounded-none"
-              >
-                <div className="absolute top-8 right-8 font-sans font-medium text-[11px] text-[#3d3d3d] uppercase">
-                  {feature.index}
-                </div>
-                <div className="mb-6">
-                  <Icon className="w-8 h-8 text-signal-lime stroke-[1.5px]" />
-                </div>
-                <h3 className="font-sans font-medium text-[16px] text-chalk mb-2">
-                  {feature.title}
-                </h3>
-                <p className="font-sans font-normal text-[14px] text-bone leading-[1.55]">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
+				<AnimatedContainer
+					delay={0.4}
+					className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+				>
+					{features.map((feature, i) => (
+						<FeatureCard key={i} feature={feature} index={i} />
+					))}
+				</AnimatedContainer>
+			</div>
+		</section>
+	);
+}
+
+type ViewAnimationProps = {
+	delay?: number;
+	className?: React.ComponentProps<typeof motion.div>['className'];
+	children: React.ReactNode;
+};
+
+function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationProps) {
+	const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
+
+	useEffect(() => {
+		const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		setShouldReduceMotion(mediaQuery.matches);
+		const listener = (event: MediaQueryListEvent) => {
+			setShouldReduceMotion(event.matches);
+		};
+		mediaQuery.addEventListener('change', listener);
+		return () => mediaQuery.removeEventListener('change', listener);
+	}, []);
+
+	if (shouldReduceMotion) {
+		return <div className={className}>{children}</div>;
+	}
+
+	return (
+		<motion.div
+			initial={{ filter: 'blur(4px)', translateY: -8, opacity: 0 }}
+			animate={{ filter: 'blur(0px)', translateY: 0, opacity: 1 }}
+			transition={{ delay, duration: 0.8 }}
+			className={className}
+		>
+			{children}
+		</motion.div>
+	);
 }

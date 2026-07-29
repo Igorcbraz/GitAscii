@@ -6,18 +6,21 @@ import { FeaturesGrid } from "@/features/landing/components/FeaturesGrid";
 import { HowItWorks } from "@/features/landing/components/HowItWorks";
 import { FAQ } from "@/features/landing/components/FAQ";
 import { Footer } from "@/features/landing/components/Footer";
+import KineticGrid from "@/components/ui/kinetic-grid";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-carbon">
-      <Navbar />
-      <Hero />
-      <DemoSection />
-      <TemplatesShowcase />
-      <FeaturesGrid />
-      <HowItWorks />
-      <FAQ />
-      <Footer />
+    <main className="min-h-screen">
+      <KineticGrid className="min-h-screen!">
+        <Navbar />
+        <Hero />
+        <DemoSection />
+        <TemplatesShowcase />
+        <FeaturesGrid />
+        <HowItWorks />
+        <FAQ />
+        <Footer />
+      </KineticGrid>
     </main>
   );
 }

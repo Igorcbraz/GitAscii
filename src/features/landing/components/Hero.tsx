@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Github } from 'lucide-react';
 
+import AsciiHands from '@/components/ui/ascii-hands';
+
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState('');
@@ -24,54 +26,17 @@ export default function Hero() {
     router.push(`/${handle}?generate=true`);
   };
 
-  const particles = mounted
-    ? Array.from({ length: 45 }).map((_, i) => ({
-      id: i,
-      size: Math.random() * 2 + 1,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      duration: `${Math.random() * 15 + 15}s`,
-      delay: `${Math.random() * 10}s`,
-      opacity: Math.random() * 0.3 + 0.1,
-    }))
-    : [];
-
   return (
-    <div className="relative min-h-screen w-full bg-carbon flex flex-col overflow-hidden">
-      <style>{`
-        @keyframes float {
-          0% {
-            transform: translateY(0) translateX(0);
-          }
-          100% {
-            transform: translateY(-25px) translateX(15px);
-          }
-        }
-        .animate-float {
-          animation: float infinite alternate ease-in-out;
-        }
-      `}</style>
-
+    <section className="relative min-h-screen">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute rounded-full bg-signal-lime animate-float"
-            style={{
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              left: p.left,
-              top: p.top,
-              opacity: p.opacity,
-              animationDuration: p.duration,
-              animationDelay: p.delay,
-            }}
-          />
-        ))}
+        {mounted && (
+          <AsciiHands className="absolute inset-0 opacity-60" />
+        )}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 grow flex-col items-center justify-center px-6 pt-20 pb-32">
-        <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
             <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
               [ THE FUTURE OF GITHUB PROFILES ]
@@ -91,11 +56,12 @@ export default function Hero() {
               <div className="relative grow flex items-center">
                 <Github className="absolute left-4 w-5 h-5 text-ash" />
                 <input
+                  id="hero-username-input"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your GitHub username"
-                  className="w-full bg-onyx border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all"
+                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all"
                 />
               </div>
               <button
@@ -111,14 +77,14 @@ export default function Hero() {
               onClick={handleGenerateBest}
               className="font-inter-tight font-medium text-label text-signal-lime flex items-center gap-1 group/btn relative cursor-pointer hover:text-signal-lime bg-transparent border-none"
             >
-              ✨ Generate Best Profile
+              Generate Best Profile
               <span className="absolute bottom-0 left-0 w-full h-px bg-signal-lime transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300"></span>
             </button>
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)]"></div>
-    </div>
+      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)] z-20"></div>
+    </section>
   );
 }

@@ -20,7 +20,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 1,
-      "instanceId": "widget_1785292267478_0",
+      "instanceId": "widget_1785298105632_0",
       "name": "Header Widget"
     },
     {
@@ -1247,7 +1247,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 2,
-      "instanceId": "widget_1785292267478_1",
+      "instanceId": "widget_1785298105632_1",
       "name": "Ascii-art Widget"
     },
     {
@@ -1264,7 +1264,7 @@
       "locked": false,
       "visible": true,
       "zIndex": 3,
-      "instanceId": "widget_1785292267478_2",
+      "instanceId": "widget_1785298105632_2",
       "name": "Terminal-info Widget"
     },
     {
@@ -1281,14 +1281,14 @@
       "locked": false,
       "visible": true,
       "zIndex": 4,
-      "instanceId": "widget_1785292267478_3",
+      "instanceId": "widget_1785298105632_3",
       "name": "Languages Widget"
     },
     {
       "widgetId": "repositories",
       "position": {
         "x": 0,
-        "y": 768
+        "y": 558
       },
       "size": {
         "width": 800,
@@ -1298,42 +1298,25 @@
       "locked": false,
       "visible": true,
       "zIndex": 5,
-      "instanceId": "widget_1785292267478_4",
+      "instanceId": "widget_1785298105632_4",
       "name": "Repositories Widget"
     },
     {
-      "instanceId": "widget_1785292309944",
-      "widgetId": "social-media",
-      "name": "Social-media Widget",
+      "widgetId": "footer",
       "position": {
         "x": 0,
-        "y": 984
+        "y": 754
       },
       "size": {
         "width": 800,
-        "height": 120
+        "height": 50
       },
       "config": {},
       "locked": false,
       "visible": true,
-      "zIndex": 7
-    },
-    {
-      "instanceId": "widget_1785292334392",
-      "widgetId": "github-readme-stats",
-      "name": "Github-readme-stats Widget",
-      "position": {
-        "x": 0,
-        "y": 540
-      },
-      "size": {
-        "width": 500,
-        "height": 210
-      },
-      "config": {},
-      "locked": false,
-      "visible": true,
-      "zIndex": 8
+      "zIndex": 6,
+      "instanceId": "widget_1785298105632_5",
+      "name": "Footer Widget"
     }
   ],
   "globalStyles": {
@@ -1348,8 +1331,8 @@
     "templateStyle": "terminal"
   },
   "metadata": {
-    "createdAt": "2026-07-29T02:31:07.478Z",
-    "updatedAt": "2026-07-29T02:32:37.216Z",
+    "createdAt": "2026-07-29T04:08:25.632Z",
+    "updatedAt": "2026-07-29T04:08:25.705Z",
     "schemaVersion": 1
   }
 }
