@@ -232,11 +232,7 @@ export function EditorToolbar() {
 
 
 
-  const embedCode = `<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="${embedUrl}?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="${embedUrl}?theme=light" />
-  <img alt="${username}'s GitAscii Section" src="${embedUrl}" />
-</picture>`;
+  const embedCode = `![Widget](${embedUrl})`;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(embedCode);

@@ -9,11 +9,7 @@ export default function DemoSection() {
   const [copied, setCopied] = useState(false);
   const { t } = useI18n();
 
-  const embedCode = `<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="${APP_URL}/api/Igorcbraz?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="${APP_URL}/api/Igorcbraz?theme=light" />
-  <img alt="Igorcbraz's GitAscii Stats" src="${APP_URL}/api/Igorcbraz" />
-</picture>`;
+  const embedCode = `![Widget](${APP_URL}/api/Igorcbraz)`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);
@@ -118,14 +114,7 @@ export default function DemoSection() {
 
               <pre className="m-0 overflow-x-auto whitespace-pre-wrap break-all pr-8">
                 <code className="text-bone leading-relaxed">
-                  <span className="text-signal-lime">{'<picture>'}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: dark)"</span>{'\n'}
-                  {'    '}srcset=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz?theme=dark\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: light)"</span>{'\n'}
-                  {'    '}srcset=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz?theme=light\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<img'}</span> alt=<span className="text-chalk">"Igorcbraz's GitAscii Stats"</span>{'\n'}
-                  {'    '}src=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
-                  <span className="text-signal-lime">{'</picture>'}</span>
+                  ![Widget](<span className="text-signal-lime">{`${APP_URL}/api/Igorcbraz`}</span>)
                 </code>
               </pre>
             </div>
