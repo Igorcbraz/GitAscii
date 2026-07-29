@@ -120,7 +120,7 @@ export function Footer() {
           <div className="mt-12 pt-8 border-t border-graphite flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="font-inter-tight text-note text-ash flex items-center gap-2">
               <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>
-              © 2026 GitAscii. MIT License.
+              © {new Date().getFullYear()} GitAscii. MIT License.
             </p>
             <p className="font-jetbrains-mono text-caption text-ash/50 uppercase tracking-[0.18em]">
               v1.0.0 · BUILD 2026.07

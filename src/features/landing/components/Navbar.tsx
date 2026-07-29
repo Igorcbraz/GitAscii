@@ -31,8 +31,8 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-void-black border-b border-graphite transition-all duration-300">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-1">
+      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <Link href="/" className="flex items-center gap-1 z-10">
           <span className="font-inter-tight text-subheading font-medium text-white tracking-tight">
             Git
           </span>
@@ -40,7 +40,7 @@ export default function Navbar() {
             Ascii
           </span>
         </Link>
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2 h-full">
           {menuItems.map((item) => (
             <Link
               key={item.id}
@@ -51,7 +51,7 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3 z-10">
           <LanguageSelector align="right" />
 
           <a

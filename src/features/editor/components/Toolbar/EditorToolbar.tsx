@@ -18,7 +18,6 @@ import { CopyGuideModal } from './CopyGuideModal';
 import { useEditorStore } from '../../store/editorStore';
 import { APP_URL } from '../../../../constants';
 import { useI18n } from '@/i18n';
-import LanguageSelector from '@/components/ui/LanguageSelector';
 
 export function EditorToolbar() {
   const { t } = useI18n();
@@ -487,8 +486,6 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <LanguageSelector align="right" />
-
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
