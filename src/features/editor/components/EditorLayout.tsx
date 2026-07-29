@@ -6,7 +6,6 @@ import { EditorToolbar } from './Toolbar/EditorToolbar';
 import { WidgetLibrary } from './Sidebar/WidgetLibrary';
 import { SVGCanvas } from './Canvas/SVGCanvas';
 import { PropertiesPanel } from './Properties/PropertiesPanel';
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
 import { createConfiguration } from '@/engine/core/TemplateRenderer';
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer';
 import type { SavedConfiguration, NormalizedGitHubData } from '@/engine/types';
@@ -29,7 +28,18 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
     async function loadData() {
       try {
         setLoading(true);
-        const data: NormalizedGitHubData = await fetchGitHubProfile(username);
+        const res = await fetch(`/api/github/${username}`);
+        if (!res.ok) {
+          let errMsg = 'Failed to fetch GitHub profile';
+          try {
+            const errJson = await res.json();
+            errMsg = errJson.error || errMsg;
+          } catch {
+            errMsg = await res.text() || errMsg;
+          }
+          throw new Error(errMsg);
+        }
+        const data: NormalizedGitHubData = await res.json();
 
         let initialConfig: SavedConfiguration;
 

@@ -308,8 +308,18 @@ export function renderWidgetSvg(
     }
 
     case 'languages': {
-      const langs = Object.entries(data.languages);
-      const totalCount = Object.values(data.languages).reduce((a, b) => a + b, 0) || 1;
+      const hideLangs = typeof cfg.hideLangs === 'string'
+        ? cfg.hideLangs.split(',').map(l => l.trim().toLowerCase()).filter(Boolean)
+        : [];
+
+      let filteredLangs = Object.entries(data.languages);
+      if (hideLangs.length > 0) {
+        filteredLangs = filteredLangs.filter(([lang]) => !hideLangs.includes(lang.toLowerCase()));
+      }
+
+      const maxLangs = Number(cfg.langsCount) || 5;
+      const topLangs = filteredLangs.slice(0, maxLangs);
+      const totalCount = topLangs.reduce((sum, [_, count]) => sum + count, 0) || 1;
 
       const colors: Record<string, string> = {
         TypeScript: '#3178c6',
@@ -322,7 +332,7 @@ export function renderWidgetSvg(
 
       let currentX = 24;
       const barWidth = width - 48;
-      const barSvg = langs
+      const barSvg = topLangs
         .map(([lang, count]) => {
           const w = (count / totalCount) * barWidth;
           const rect = `<rect x="${currentX}" y="52" width="${w}" height="8" fill="${colors[lang] || accent}" rx="2" />`;
@@ -331,8 +341,7 @@ export function renderWidgetSvg(
         })
         .join('');
 
-      const legendSvg = langs
-        .slice(0, 4)
+      const legendSvg = topLangs
         .map(([lang, count], i) => {
           const pct = Math.round((count / totalCount) * 100);
           return `
@@ -396,7 +405,9 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false;
       const customTitle = (cfg.customTitle as string) || '[ TECHNOLOGIES & SKILLS ]';
 
-      const techString = selectedTechs.join(',');
+      const mappedTechs = selectedTechs.map((t) => (t === 'reactnative' ? 'react' : t));
+      const uniqueTechs = Array.from(new Set(mappedTechs));
+      const techString = uniqueTechs.join(',');
       const skillIconsUrl = `https://skillicons.dev/icons?i=${techString}&theme=${theme}&perline=${perLine}`;
 
       const titleY = 32;

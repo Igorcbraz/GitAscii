@@ -10,6 +10,7 @@ import AsciiHands from '@/components/ui/ascii-hands';
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { t } = useI18n();
 
@@ -19,11 +20,13 @@ export default function Hero() {
 
   const handleOpenEditor = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const handle = username.trim() || 'Igorcbraz';
     router.push(`/${handle}`);
   };
 
   const handleGenerateBest = () => {
+    setIsLoading(true);
     const handle = username.trim() || 'Igorcbraz';
     router.push(`/${handle}?generate=true`);
   };
@@ -64,25 +67,46 @@ export default function Hero() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  disabled={isLoading}
                   placeholder={t('landing.hero.placeholder', 'Enter your GitHub username')}
-                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all"
+                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all disabled:opacity-50"
                 />
               </div>
               <button
                 type="submit"
-                className="shrink-0 bg-signal-lime text-black font-inter-tight font-medium text-body py-3.5 px-6 rounded-r-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_12px_rgba(197,255,74,0.65)] hover:brightness-110 flex items-center gap-2 cursor-pointer"
+                disabled={isLoading}
+                className="shrink-0 bg-signal-lime text-black font-inter-tight font-medium text-body py-3.5 px-6 rounded-r-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_12px_rgba(197,255,74,0.65)] hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                {t('landing.hero.open_editor', 'Open Editor')} <ArrowRight size={16} />
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                    <span>{t('landing.hero.loading', 'Loading...')}</span>
+                  </>
+                ) : (
+                  <>
+                    {t('landing.hero.open_editor', 'Open Editor')} <ArrowRight size={16} />
+                  </>
+                )}
               </button>
             </form>
 
             <button
               type="button"
               onClick={handleGenerateBest}
-              className="font-inter-tight font-medium text-label text-signal-lime flex items-center gap-1 group/btn relative cursor-pointer hover:text-signal-lime bg-transparent border-none"
+              disabled={isLoading}
+              className="font-inter-tight font-medium text-label text-signal-lime flex items-center gap-1 group/btn relative cursor-pointer hover:text-signal-lime bg-transparent border-none disabled:opacity-75 disabled:cursor-not-allowed"
             >
-              {t('landing.hero.generate_best', 'Generate Best Profile')}
-              <span className="absolute bottom-0 left-0 w-full h-px bg-signal-lime transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300"></span>
+              {isLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-signal-lime border-t-transparent rounded-full animate-spin mr-1"></span>
+                  <span>{t('landing.hero.generating', 'Generating...')}</span>
+                </>
+              ) : (
+                <>
+                  {t('landing.hero.generate_best', 'Generate Best Profile')}
+                  <span className="absolute bottom-0 left-0 w-full h-px bg-signal-lime transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300"></span>
+                </>
+              )}
             </button>
           </div>
         </div>

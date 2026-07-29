@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import zlib from 'zlib';
 import { put, list, del } from '@vercel/blob';
 import type { SavedConfiguration } from '@/engine/types';
 
@@ -59,20 +60,37 @@ export class LocalProfileRepository implements ProfileRepository {
 
 export class BlobProfileRepository implements ProfileRepository {
   private getPath(username: string, slug: string): string {
-    return `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json`;
+    return `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json.gz`;
   }
 
   async get(username: string, slug: string): Promise<SavedConfiguration | null> {
     const pathName = this.getPath(username, slug);
+    const legacyPathName = `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json`;
     try {
-      const { blobs } = await list({ prefix: pathName });
-      const blob = blobs.find((b) => b.pathname === pathName);
+      const { blobs } = await list({ prefix: `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json` });
+
+      let blob = blobs.find((b) => b.pathname === pathName);
+      let isCompressed = true;
+
+      if (!blob) {
+        blob = blobs.find((b) => b.pathname === legacyPathName);
+        isCompressed = false;
+      }
+
       if (blob) {
         const response = await fetch(blob.url);
         if (!response.ok) {
           throw new Error(`Failed to fetch blob contents from Vercel Blob: ${response.statusText}`);
         }
-        return (await response.json()) as SavedConfiguration;
+
+        if (isCompressed) {
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const decompressed = zlib.gunzipSync(buffer).toString('utf-8');
+          return JSON.parse(decompressed) as SavedConfiguration;
+        } else {
+          return (await response.json()) as SavedConfiguration;
+        }
       }
     } catch (error) {
       console.warn(`BlobProfileRepository: Failed to load profile config for ${username}_${slug}:`, error);
@@ -85,12 +103,26 @@ export class BlobProfileRepository implements ProfileRepository {
     const slug = (config.profileSlug || 'default').toLowerCase();
     const pathName = this.getPath(username, slug);
     try {
-      await put(pathName, JSON.stringify(config, null, 2), {
-        contentType: 'application/json',
+      const minifiedJson = JSON.stringify(config);
+      const compressedBuffer = zlib.gzipSync(minifiedJson);
+
+      await put(pathName, compressedBuffer, {
+        contentType: 'application/gzip',
         addRandomSuffix: false,
         access: 'public',
         allowOverwrite: true,
       });
+
+      try {
+        const legacyPathName = `profiles/${username}_${slug}.json`;
+        const { blobs } = await list({ prefix: legacyPathName });
+        const legacyBlob = blobs.find((b) => b.pathname === legacyPathName);
+        if (legacyBlob) {
+          await del(legacyBlob.url);
+        }
+      } catch (cleanupError) {
+        console.warn(`BlobProfileRepository: Failed to cleanup legacy uncompressed file for ${username}_${slug}:`, cleanupError);
+      }
     } catch (error) {
       console.error(`BlobProfileRepository: Failed to save profile config for ${username}_${slug}:`, error);
       throw error;
@@ -99,11 +131,18 @@ export class BlobProfileRepository implements ProfileRepository {
 
   async delete(username: string, slug: string): Promise<void> {
     const pathName = this.getPath(username, slug);
+    const legacyPathName = `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json`;
     try {
-      const { blobs } = await list({ prefix: pathName });
-      const blob = blobs.find((b) => b.pathname === pathName);
-      if (blob) {
-        await del(blob.url);
+      const { blobs } = await list({ prefix: `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json` });
+
+      const compressedBlob = blobs.find((b) => b.pathname === pathName);
+      if (compressedBlob) {
+        await del(compressedBlob.url);
+      }
+
+      const legacyBlob = blobs.find((b) => b.pathname === legacyPathName);
+      if (legacyBlob) {
+        await del(legacyBlob.url);
       }
     } catch (error) {
       console.error(`BlobProfileRepository: Failed to delete profile config for ${username}_${slug}:`, error);

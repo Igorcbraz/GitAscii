@@ -32,6 +32,8 @@ export const TECH_CATALOG: TechItem[] = [
   { id: 'graphql', name: 'GraphQL', category: 'languages' },
   { id: 'r', name: 'R', category: 'languages' },
   { id: 'elixir', name: 'Elixir', category: 'languages' },
+  { id: 'solidity', name: 'Solidity', category: 'languages' },
+  { id: 'haskell', name: 'Haskell', category: 'languages' },
 
   { id: 'react', name: 'React', category: 'frontend' },
   { id: 'nextjs', name: 'Next.js', category: 'frontend' },
@@ -48,6 +50,10 @@ export const TECH_CATALOG: TechItem[] = [
   { id: 'threejs', name: 'Three.js', category: 'frontend' },
   { id: 'vite', name: 'Vite', category: 'frontend' },
   { id: 'astro', name: 'Astro', category: 'frontend' },
+  { id: 'solidjs', name: 'SolidJS', category: 'frontend' },
+  { id: 'remix', name: 'Remix', category: 'frontend' },
+  { id: 'recoil', name: 'Recoil', category: 'frontend' },
+  { id: 'zustand', name: 'Zustand', category: 'frontend' },
 
   { id: 'nodejs', name: 'Node.js', category: 'backend' },
   { id: 'express', name: 'Express', category: 'backend' },
@@ -64,6 +70,9 @@ export const TECH_CATALOG: TechItem[] = [
   { id: 'supabase', name: 'Supabase', category: 'backend' },
   { id: 'firebase', name: 'Firebase', category: 'backend' },
   { id: 'prisma', name: 'Prisma', category: 'backend' },
+  { id: 'bun', name: 'Bun', category: 'backend' },
+  { id: 'deno', name: 'Deno', category: 'backend' },
+  { id: 'sqlite', name: 'SQLite', category: 'backend' },
 
   { id: 'git', name: 'Git', category: 'devops' },
   { id: 'github', name: 'GitHub', category: 'devops' },
@@ -79,6 +88,10 @@ export const TECH_CATALOG: TechItem[] = [
   { id: 'figma', name: 'Figma', category: 'devops' },
   { id: 'postman', name: 'Postman', category: 'devops' },
   { id: 'vscode', name: 'VS Code', category: 'devops' },
+  { id: 'terraform', name: 'Terraform', category: 'devops' },
+  { id: 'githubactions', name: 'GitHub Actions', category: 'devops' },
+  { id: 'jest', name: 'Jest', category: 'devops' },
+  { id: 'vitest', name: 'Vitest', category: 'devops' },
 ];
 
 const PRESETS = [
@@ -194,7 +207,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                   className="group flex items-center gap-1 bg-graphite border border-signal-lime/40 text-signal-lime px-2 py-0.5 rounded-xs text-eyebrow font-jetbrains-mono cursor-pointer hover:bg-red-500/20 hover:border-red-500 hover:text-red-400 transition-colors"
                 >
                   <img
-                    src={`https://skillicons.dev/icons?i=${techId}&theme=${theme}`}
+                    src={`https://skillicons.dev/icons?i=${techId === 'reactnative' ? 'react' : techId}&theme=${theme}`}
                     alt={techId}
                     className="w-3.5 h-3.5 object-contain"
                   />
@@ -326,7 +339,7 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                   </div>
                 )}
                 <img
-                  src={`https://skillicons.dev/icons?i=${tech.id}&theme=${theme}`}
+                  src={`https://skillicons.dev/icons?i=${tech.id === 'reactnative' ? 'react' : tech.id}&theme=${theme}`}
                   alt={tech.name}
                   className="w-6 h-6 object-contain"
                   loading="lazy"

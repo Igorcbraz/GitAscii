@@ -3,7 +3,21 @@ import { APP_URL } from '../../../constants';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 
+interface CacheEntry {
+  data: NormalizedGitHubData;
+  timestamp: number;
+}
+
+const profileCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
+
 export async function fetchGitHubProfile(username: string): Promise<NormalizedGitHubData> {
+  const cacheKey = username.toLowerCase();
+  const cached = profileCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   try {
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
@@ -49,13 +63,20 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       }
     });
 
-    return {
+    const result: NormalizedGitHubData = {
       user,
       repos: repos.filter((r) => !r.fork).slice(0, 6),
       languages,
       totalStars,
       totalForks,
     };
+
+    profileCache.set(cacheKey, {
+      data: result,
+      timestamp: Date.now(),
+    });
+
+    return result;
   } catch (error) {
     console.warn(`Falling back to mock data for user '${username}':`, error);
     return getMockGitHubData(username);
