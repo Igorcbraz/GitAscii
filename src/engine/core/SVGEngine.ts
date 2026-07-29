@@ -99,26 +99,26 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     try {
       const response = await fetch(url, { headers: { accept: 'image/svg+xml' } });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+
       const buffer = await response.arrayBuffer();
       const base64 = Buffer.from(buffer).toString('base64');
       const dataUri = `data:image/svg+xml;base64,${base64}`;
-      
+
       const replacement = `<image href="${dataUri}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
-      
+
       finalSvg = finalSvg.replace(fullMatch, replacement);
     } catch (err) {
       console.error('Failed to fetch external widget:', url, err);
-      
+
       if (fallbackUrl) {
         try {
           const fbResponse = await fetch(fallbackUrl, { headers: { accept: 'image/svg+xml' } });
           if (!fbResponse.ok) throw new Error(`HTTP ${fbResponse.status}`);
-          
+
           const fbBuffer = await fbResponse.arrayBuffer();
           const fbBase64 = Buffer.from(fbBuffer).toString('base64');
           const fbDataUri = `data:image/svg+xml;base64,${fbBase64}`;
-          
+
           const replacement = `<image href="${fbDataUri}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`;
           finalSvg = finalSvg.replace(fullMatch, replacement);
           continue;
@@ -126,8 +126,36 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           console.error('Failed to fetch fallback widget:', fallbackUrl, fbErr);
         }
       }
-      
+
       finalSvg = finalSvg.replace(fullMatch, `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`);
+    }
+  }
+
+  const imageRegex = /<image\s+([^>]*?)href="((?:https?:\/\/|www\.)[^"]+?)"([^>]*?)(\/?)>/g;
+  const imageMatches = [...finalSvg.matchAll(imageRegex)];
+
+  for (const m of imageMatches) {
+    const fullMatch = m[0];
+    const beforeAttr = m[1];
+    const url = m[2].replace(/&amp;/g, '&');
+    const afterAttr = m[3];
+    const selfClosing = m[4];
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+
+      let contentType = response.headers.get('content-type') || 'image/svg+xml';
+      contentType = contentType.split(';')[0].trim();
+
+      const dataUri = `data:${contentType};base64,${base64}`;
+      const replacement = `<image ${beforeAttr}href="${dataUri}"${afterAttr}${selfClosing}>`;
+      finalSvg = finalSvg.replace(fullMatch, replacement);
+    } catch (err) {
+      console.error('Failed to embed inline image:', url, err);
     }
   }
 
