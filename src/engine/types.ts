@@ -92,6 +92,7 @@ export interface RenderOptions {
   height?: number;
   embedFonts?: boolean;
   optimize?: boolean;
+  widgets?: string[];
 }
 
 export type { NormalizedGitHubData };

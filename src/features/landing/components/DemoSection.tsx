@@ -2,14 +2,15 @@
 
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { APP_URL, APP_DOMAIN } from '../../../constants';
 
 export default function DemoSection() {
   const [copied, setCopied] = useState(false);
 
   const embedCode = `<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/Igorcbraz?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/Igorcbraz?theme=light" />
-  <img alt="Igorcbraz's GitAscii Stats" src="https://gitascii.com/api/Igorcbraz" />
+  <source media="(prefers-color-scheme: dark)" srcset="${APP_URL}/api/Igorcbraz?theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="${APP_URL}/api/Igorcbraz?theme=light" />
+  <img alt="Igorcbraz's GitAscii Stats" src="${APP_URL}/api/Igorcbraz" />
 </picture>`;
 
   const handleCopy = () => {
@@ -39,7 +40,7 @@ export default function DemoSection() {
                 <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
               </div>
               <div className="font-jetbrains-mono text-label text-ash mx-auto -ml-12">
-                gitascii.com/Igorcbraz
+                {APP_DOMAIN}/Igorcbraz
               </div>
             </div>
 
@@ -88,9 +89,9 @@ export default function DemoSection() {
               <pre>
                 <code className="text-bone">
                   <span className="text-signal-lime">{'<picture>'}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: dark)"</span> srcset=<span className="text-chalk">"https://gitascii.com/api/Igorcbraz?theme=dark"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: light)"</span> srcset=<span className="text-chalk">"https://gitascii.com/api/Igorcbraz?theme=light"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
-                  {'  '}<span className="text-signal-lime">{'<img'}</span> alt=<span className="text-chalk">"Igorcbraz's GitAscii Stats"</span> src=<span className="text-chalk">"https://gitascii.com/api/Igorcbraz"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
+                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: dark)"</span> srcset=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz?theme=dark\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
+                  {'  '}<span className="text-signal-lime">{'<source'}</span> media=<span className="text-chalk">"(prefers-color-scheme: light)"</span> srcset=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz?theme=light\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
+                  {'  '}<span className="text-signal-lime">{'<img'}</span> alt=<span className="text-chalk">"Igorcbraz's GitAscii Stats"</span> src=<span className="text-chalk">"{`\"${APP_URL}/api/Igorcbraz\"`}"</span> <span className="text-signal-lime">{`/>`}</span>{'\n'}
                   <span className="text-signal-lime">{'</picture>'}</span>
                 </code>
               </pre>

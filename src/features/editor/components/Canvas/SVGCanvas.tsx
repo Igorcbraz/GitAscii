@@ -5,6 +5,7 @@ import { Lock, Move, Layers, X } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { renderSvg } from '@/engine/core/SVGEngine';
 import { LayersPanel } from '../Sidebar/LayersPanel';
+import { convertImageToAsciiCanvas } from '@/engine/ascii/converter';
 
 export function SVGCanvas() {
   const {
@@ -14,6 +15,7 @@ export function SVGCanvas() {
     selectWidget,
     updateWidgetPosition,
     updateWidgetSize,
+    updateWidgetConfig,
     recordHistorySnapshot,
     zoom,
   } = useEditorStore();
@@ -35,6 +37,70 @@ export function SVGCanvas() {
     if (!config || !githubData) return '';
     return renderSvg(config, githubData, { theme: 'dark' });
   }, [config, githubData]);
+
+  // Background processing of ASCII Art widgets
+  useEffect(() => {
+    if (!config || !githubData) return;
+
+    const asciiWidgets = config.widgets.filter(
+      (w) => w.widgetId === 'ascii-art' && !w.config.asciiText
+    );
+
+    if (asciiWidgets.length === 0) return;
+
+    asciiWidgets.forEach(async (widget) => {
+      const cfg = widget.config;
+      const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar';
+      const customImageUrl = (cfg.imageUrl as string) || '';
+      const uploadedImageData = (cfg.uploadedImageData as string) || '';
+
+      let imgSrc = githubData.user.avatar_url || 'https://github.com/github.png';
+      if (sourceType === 'upload' && uploadedImageData) {
+        imgSrc = uploadedImageData;
+      } else if (sourceType === 'url' && customImageUrl) {
+        imgSrc = customImageUrl;
+      }
+
+      const charset = (cfg.charset as string) || 'dense';
+      const customCharset = (cfg.customCharset as string) || '';
+      const invert = Boolean(cfg.invert);
+      const detail = (cfg.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium';
+      const cols = Number(cfg.cols) || (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150);
+
+      const contrast = Number(cfg.contrast !== undefined ? cfg.contrast : 10);
+      const brightness = Number(cfg.brightness !== undefined ? cfg.brightness : 0);
+      const edgeEnhance = Boolean(cfg.edgeEnhance !== undefined ? cfg.edgeEnhance : true);
+      const autoContrast = Boolean(cfg.autoContrast !== false);
+      const dithering = Boolean(cfg.dithering !== false);
+      const colorMode = (cfg.colorMode as 'monochrome' | 'color') || 'monochrome';
+
+      try {
+        const options = {
+          charset,
+          customCharset,
+          invert,
+          cols,
+          contrast,
+          brightness,
+          edgeEnhance,
+          autoContrast,
+          dithering,
+          colorMode,
+        };
+
+        const result = await convertImageToAsciiCanvas(imgSrc, options);
+
+        updateWidgetConfig(widget.instanceId, {
+          asciiText: result.lines,
+          asciiColors: result.colorMatrix,
+          cols: result.cols,
+          rows: result.rows,
+        });
+      } catch (err) {
+        console.warn('Background ASCII Conversion Warning:', err);
+      }
+    });
+  }, [config, githubData, updateWidgetConfig]);
 
   useEffect(() => {
     if (!isLayersOpen) return;

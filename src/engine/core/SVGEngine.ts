@@ -12,18 +12,37 @@ export function renderSvg(
     ? '#ffffff'
     : config.globalStyles.backgroundColor || '#060606';
 
-  let maxY = 400;
-  config.widgets.forEach((w) => {
-    if (w.visible) {
-      const bottom = w.position.y + w.size.height;
-      if (bottom > maxY) maxY = bottom;
-    }
+  const targetWidgetIds = options.widgets;
+  let visibleWidgets = config.widgets.filter(
+    (w) => w.visible && (!targetWidgetIds || targetWidgetIds.includes(w.instanceId))
+  );
+
+  if (targetWidgetIds && visibleWidgets.length === 0) {
+    visibleWidgets = config.widgets.filter((w) => w.visible);
+  }
+
+  const minY = targetWidgetIds && visibleWidgets.length > 0
+    ? Math.min(...visibleWidgets.map((w) => w.position.y))
+    : 0;
+
+  const adjustedWidgets = visibleWidgets.map((w) => ({
+    ...w,
+    position: {
+      ...w.position,
+      y: w.position.y - minY,
+    },
+  }));
+
+  let maxY = 100;
+  adjustedWidgets.forEach((w) => {
+    const bottom = w.position.y + w.size.height;
+    if (bottom > maxY) maxY = bottom;
   });
 
   const width = options.width || 800;
   const height = options.height || maxY + 16;
 
-  const widgetsSvg = config.widgets
+  const widgetsSvg = adjustedWidgets
     .sort((a, b) => a.zIndex - b.zIndex)
     .map((widget) => renderWidgetSvg(widget, data, config.globalStyles))
     .join('\n');
@@ -41,7 +60,7 @@ export function renderSvg(
       user-select: none;
     }
   </style>
-
+ 
   <rect width="${width}" height="${height}" fill="${bg}" rx="${config.globalStyles.borderRadius || 0}" />
 
   ${widgetsSvg}

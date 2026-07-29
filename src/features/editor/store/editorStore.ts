@@ -15,6 +15,18 @@ function saveToLocalStorage(config: SavedConfiguration) {
   } catch (e) {
     console.warn('Auto-save failed:', e);
   }
+
+  if (typeof window !== 'undefined') {
+    fetch('/api/save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    }).catch((err) => {
+      console.warn('Auto-save to server failed:', err);
+    });
+  }
 }
 
 export interface EditorStore {

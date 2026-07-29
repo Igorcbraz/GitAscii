@@ -1,4 +1,5 @@
 import type { GitHubUser, GitHubRepo, NormalizedGitHubData } from '../types/github';
+import { APP_URL } from '../../../constants';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 
@@ -71,7 +72,7 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
       bio: 'Full Stack Software Engineer & Open Source Creator. Building high performance tools.',
       company: '@GitAscii',
       location: 'Brazil',
-      blog: 'https://gitascii.com',
+      blog: APP_URL,
       twitter_username: 'igorcbraz',
       public_repos: 38,
       public_gists: 12,

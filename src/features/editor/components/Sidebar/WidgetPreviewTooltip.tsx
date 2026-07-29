@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types';
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer';
 import { getMockGitHubData } from '@/features/github/api/fetchProfile';
+import { convertImageToAsciiCanvas } from '@/engine/ascii/converter';
 
 export type WidgetBadgeType = 'popular' | 'essential' | 'highlight' | 'interactive' | 'trending';
 
@@ -60,10 +61,41 @@ export function WidgetPreviewTooltip({
   globalStyles,
   githubData,
 }: WidgetPreviewTooltipProps) {
-  if (!widgetItem || !targetRect) return null;
+  const [asciiArtCache, setAsciiArtCache] = useState<{ lines: string[]; colors?: string[][] } | null>(null);
 
-  const size = DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 };
+  const size = widgetItem ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 } : { width: 800, height: 120 };
   const data = githubData || getMockGitHubData('Igorcbraz');
+
+  useEffect(() => {
+    if (widgetItem?.id !== 'ascii-art' || asciiArtCache) return;
+
+    let isCurrent = true;
+    async function loadPreviewAscii() {
+      const avatarUrl = data.user.avatar_url || 'https://github.com/github.png';
+      try {
+        const result = await convertImageToAsciiCanvas(avatarUrl, {
+          charset: 'dense',
+          cols: 45,
+          colorMode: 'monochrome',
+        });
+        if (isCurrent) {
+          setAsciiArtCache({
+            lines: result.lines,
+            colors: result.colorMatrix,
+          });
+        }
+      } catch (err) {
+        console.warn('Preview ASCII art generation failed:', err);
+      }
+    }
+
+    loadPreviewAscii();
+    return () => {
+      isCurrent = false;
+    };
+  }, [widgetItem?.id, data.user.avatar_url, asciiArtCache]);
+
+  if (!widgetItem || !targetRect) return null;
 
   const previewWidget: WidgetInstance = {
     instanceId: `preview_${widgetItem.id}`,
@@ -73,6 +105,10 @@ export function WidgetPreviewTooltip({
     size,
     config: {
       ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art' ? { lockAspectRatio: true } : {}),
+      ...(widgetItem.id === 'ascii-art' && asciiArtCache ? {
+        asciiText: asciiArtCache.lines,
+        asciiColors: asciiArtCache.colors,
+      } : {}),
     },
     locked: false,
     visible: true,
