@@ -8,7 +8,11 @@ import {
   ZoomIn,
   ZoomOut,
   Copy,
-  Check
+  Check,
+  Save,
+  Loader2,
+  Download,
+  Upload
 } from 'lucide-react';
 import { CopyGuideModal } from './CopyGuideModal';
 import { useEditorStore } from '../../store/editorStore';
@@ -29,10 +33,85 @@ export function EditorToolbar() {
     selectWidget,
     updateWidgetPosition,
     duplicateWidget,
+    saveToServer,
+    isSaving,
+    importLayout,
   } = useEditorStore();
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [copied, setCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const handleSave = async () => {
+    setSaveStatus('saving');
+    try {
+      await saveToServer();
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (err) {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  };
+
+  const handleExport = () => {
+    if (!config) return;
+    try {
+      const exportData = {
+        widgets: config.widgets,
+        globalStyles: config.globalStyles,
+        templateId: config.templateId,
+      };
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `gitascii_layout_${config.username}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export layout:', err);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const result = event.target?.result;
+        if (typeof result !== 'string') return;
+
+        const data = JSON.parse(result);
+        if (!data || !Array.isArray(data.widgets)) {
+          alert('Formato de arquivo inválido: lista de widgets não encontrada.');
+          return;
+        }
+
+        // Import widgets and optionally global styles & templateId
+        importLayout(data.widgets, data.globalStyles, data.templateId);
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } catch (err) {
+        console.error('Failed to parse import file:', err);
+        alert('Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.');
+      }
+    };
+    reader.readAsText(file);
+  };
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -334,7 +413,12 @@ export function EditorToolbar() {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(embedCode);
     setCopied(true);
-    setShowGuide(true);
+    
+    const skipGuide = typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_copy_guide') === 'true';
+    if (!skipGuide) {
+      setShowGuide(true);
+    }
+    
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -400,6 +484,35 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={handleSave}
+          disabled={saveStatus === 'saving'}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
+            saveStatus === 'saved'
+              ? 'bg-signal-lime text-black glow-lime'
+              : saveStatus === 'error'
+              ? 'bg-red-500 text-white'
+              : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
+          }`}
+        >
+          {saveStatus === 'saving' ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : saveStatus === 'saved' ? (
+            <Check size={14} />
+          ) : (
+            <Save size={14} />
+          )}
+          <span>
+            {saveStatus === 'saving'
+              ? 'Saving...'
+              : saveStatus === 'saved'
+              ? 'Saved!'
+              : saveStatus === 'error'
+              ? 'Error!'
+              : 'Save Profile'}
+          </span>
+        </button>
+
         <button
           onClick={handleCopyCode}
           className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"

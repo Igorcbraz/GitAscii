@@ -28,6 +28,8 @@ import {
   ShieldCheck,
   Grid,
   Globe,
+  Download,
+  Upload
 } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
@@ -213,7 +215,64 @@ function renderWidgetBadge(badge?: { text: string; type: WidgetBadgeType }) {
 }
 
 export function WidgetLibrary() {
-  const { config, githubData, addWidget, applyTemplate } = useEditorStore();
+  const { config, githubData, addWidget, applyTemplate, importLayout } = useEditorStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    if (!config) return;
+    try {
+      const exportData = {
+        widgets: config.widgets,
+        globalStyles: config.globalStyles,
+        templateId: config.templateId,
+      };
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `gitascii_layout_${config.username}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export layout:', err);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const result = event.target?.result;
+        if (typeof result !== 'string') return;
+
+        const data = JSON.parse(result);
+        if (!data || !Array.isArray(data.widgets)) {
+          alert('Formato de arquivo inválido: lista de widgets não encontrada.');
+          return;
+        }
+
+        importLayout(data.widgets, data.globalStyles, data.templateId);
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } catch (err) {
+        console.error('Failed to parse import file:', err);
+        alert('Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.');
+      }
+    };
+    reader.readAsText(file);
+  };
   const [sidebarTab, setSidebarTab] = useState<'widgets' | 'templates'>('widgets');
   const [hoveredWidget, setHoveredWidget] = useState<{
     item: WidgetCatalogItem;
@@ -446,6 +505,54 @@ export function WidgetLibrary() {
 
         {sidebarTab === 'templates' && (
           <>
+            <div className="label-stamp mb-2">[ PORTABILITY ]</div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportFile}
+              accept=".json"
+              className="hidden"
+            />
+            <div className="space-y-2 mb-4">
+              <div
+                onClick={handleImportClick}
+                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all rounded-xs cursor-pointer flex items-center justify-between shadow-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors shrink-0">
+                    <Upload size={14} />
+                  </div>
+                  <div>
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
+                      Import Layout
+                    </h4>
+                    <p className="font-inter-tight text-caption text-ash line-clamp-1">
+                      Carregar layout a partir de arquivo JSON
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={handleExport}
+                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all rounded-xs cursor-pointer flex items-center justify-between shadow-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors shrink-0">
+                    <Download size={14} />
+                  </div>
+                  <div>
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
+                      Export Layout
+                    </h4>
+                    <p className="font-inter-tight text-caption text-ash line-clamp-1">
+                      Salvar layout atual como arquivo JSON
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="label-stamp mb-2">[ PRESET TEMPLATES ]</div>
             <p className="text-note text-ash font-inter-tight mb-4">
               Switching templates updates colors and layout while preserving your GitHub data.

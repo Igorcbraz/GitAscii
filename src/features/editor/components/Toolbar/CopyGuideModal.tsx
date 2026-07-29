@@ -94,6 +94,14 @@ export function CopyGuideModal({
     }, 200);
   }, [onClose]);
 
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      setDontShowAgain(localStorage.getItem('gitascii_skip_copy_guide') === 'true');
+    }
+  }, [isOpen]);
+
   const handleReCopy = () => {
     navigator.clipboard.writeText(embedCode);
     setReCopied(true);
@@ -123,7 +131,7 @@ export function CopyGuideModal({
         onClick={handleClose}
       />
       <div
-        className={`fixed z-101 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[520px] transition-all duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+        className={`fixed z-101 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-130 transition-all duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
       >
         <div className="bg-onyx border border-graphite rounded-lg overflow-hidden shadow-2xl">
           <div className="relative px-6 pt-5 pb-4 border-b border-graphite">
@@ -159,10 +167,10 @@ export function CopyGuideModal({
                 >
                   <div
                     className={`h-full rounded-full transition-all duration-500 ease-out ${idx < currentStep
-                        ? 'bg-signal-lime w-full'
-                        : idx === currentStep
-                          ? 'bg-signal-lime w-full animate-pulse-glow-bar'
-                          : 'w-0'
+                      ? 'bg-signal-lime w-full'
+                      : idx === currentStep
+                        ? 'bg-signal-lime w-full animate-pulse-glow-bar'
+                        : 'w-0'
                       }`}
                   />
                 </div>
@@ -228,6 +236,28 @@ export function CopyGuideModal({
                 </div>
               </div>
             </div>
+          </div>
+          <div className="px-6 pb-5">
+            <button
+              onClick={() => {
+                const newValue = !dontShowAgain;
+                setDontShowAgain(newValue);
+                if (newValue) {
+                  localStorage.setItem('gitascii_skip_copy_guide', 'true');
+                } else {
+                  localStorage.removeItem('gitascii_skip_copy_guide');
+                }
+              }}
+              className="inline-flex items-center gap-2.5 text-ash hover:text-chalk transition-colors cursor-pointer select-none group"
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${dontShowAgain
+                  ? 'bg-signal-lime border-signal-lime text-black'
+                  : 'bg-void-black border-graphite group-hover:border-ash'
+                }`}>
+                {dontShowAgain && <Check size={10} strokeWidth={3.5} />}
+              </div>
+              <span className="font-inter-tight font-medium text-label">Não mostrar este guia novamente</span>
+            </button>
           </div>
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between">
             <div className="text-caption text-ash font-inter-tight">

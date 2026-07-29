@@ -15,18 +15,6 @@ function saveToLocalStorage(config: SavedConfiguration) {
   } catch (e) {
     console.warn('Auto-save failed:', e);
   }
-
-  if (typeof window !== 'undefined') {
-    fetch('/api/save', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(config),
-    }).catch((err) => {
-      console.warn('Auto-save to server failed:', err);
-    });
-  }
 }
 
 export interface EditorStore {
@@ -55,11 +43,13 @@ export interface EditorStore {
   setZoom: (zoom: number) => void;
   setActiveTab: (tab: 'widgets' | 'layers' | 'templates') => void;
   recordHistorySnapshot: () => void;
+  saveToServer: () => Promise<void>;
 
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  importLayout: (widgets: WidgetInstance[], globalStyles?: SavedConfiguration['globalStyles'], templateId?: string) => void;
 }
 
 export const useEditorStore = create<EditorStore>((set, get) => {
@@ -394,6 +384,29 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     setZoom: (zoom) => set({ zoom }),
     setActiveTab: (tab) => set({ activeTab: tab }),
 
+    saveToServer: async () => {
+      const { config } = get();
+      if (!config) return;
+      set({ isSaving: true });
+      try {
+        const response = await fetch('/api/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to save configuration to server');
+        }
+      } catch (err) {
+        console.error('Save to server failed:', err);
+        throw err;
+      } finally {
+        set({ isSaving: false });
+      }
+    },
+
     undo: () => {
       const { config, history } = get();
       if (history.past.length === 0 || !config) return;
@@ -434,6 +447,25 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       });
 
       saveToLocalStorage(next);
+    },
+
+    importLayout: (widgets, globalStyles, templateId) => {
+      const { config } = get();
+      if (!config) return;
+
+      const newConfig = {
+        ...config,
+        widgets,
+        globalStyles: globalStyles || config.globalStyles,
+        templateId: templateId || config.templateId,
+        metadata: {
+          ...config.metadata,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+
+      applyConfigChange(newConfig, true);
+      set({ selectedInstanceId: newConfig.widgets[0]?.instanceId || null });
     },
   };
 });
