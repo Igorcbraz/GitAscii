@@ -98,6 +98,16 @@ function inlineSvg(fetchedSvg: string, x: string, y: string, width: string, heig
   let svg = fetchedSvg.replace(/<\?xml[\s\S]*?\?>/i, '').trim();
   svg = svg.replace(/<!DOCTYPE[\s\S]*?>/i, '').trim();
 
+  // Extract all <style> blocks
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  let extractedStyles = '';
+  const styleMatches = [...svg.matchAll(styleRegex)];
+  for (const match of styleMatches) {
+    extractedStyles += match[1] + '\n';
+  }
+  // Strip style tags from the SVG content
+  svg = svg.replace(styleRegex, '');
+
   const svgTagRegex = /<svg([^>]*)>/i;
   const match = svg.match(svgTagRegex);
   if (!match) {
@@ -128,7 +138,14 @@ function inlineSvg(fetchedSvg: string, x: string, y: string, width: string, heig
   attributesString = attributesString.replace(/\s+/g, ' ').trim();
   const newSvgTag = `<svg ${attributesString} ${newAttrs}>`.replace(/\s+/g, ' ');
 
-  return svg.replace(svgTagRegex, newSvgTag);
+  const inlinedSvgContent = svg.replace(svgTagRegex, newSvgTag);
+
+  // If we have extracted styles, wrap them in a <style> block and prepend to the inlined SVG
+  if (extractedStyles.trim()) {
+    return `<style>\n${extractedStyles.trim()}\n</style>\n${inlinedSvgContent}`;
+  }
+
+  return inlinedSvgContent;
 }
 
 async function fetchAndProcessExternalImage(
