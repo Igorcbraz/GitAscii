@@ -89,6 +89,7 @@ export class BlobProfileRepository implements ProfileRepository {
         contentType: 'application/json',
         addRandomSuffix: false,
         access: 'public',
+        allowOverwrite: true,
       });
     } catch (error) {
       console.error(`BlobProfileRepository: Failed to save profile config for ${username}_${slug}:`, error);

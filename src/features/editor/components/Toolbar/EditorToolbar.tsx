@@ -46,7 +46,6 @@ export function EditorToolbar() {
   const [copied, setCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,19 +55,13 @@ export function EditorToolbar() {
 
   const handleSave = async () => {
     setSaveStatus('saving');
-    setSaveError(null);
     try {
       await saveToServer();
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (err) {
       setSaveStatus('error');
-      const message = err instanceof Error ? err.message : String(err);
-      setSaveError(message);
-      setTimeout(() => {
-        setSaveStatus((prev) => prev === 'error' ? 'idle' : prev);
-        setSaveError(null);
-      }, 8000);
+      setTimeout(() => setSaveStatus((prev) => prev === 'error' ? 'idle' : prev), 3000);
     }
   };
 
@@ -319,14 +312,6 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        {saveError && (
-          <span
-            className="hidden sm:inline-block text-red-500 text-[11px] font-mono max-w-[200px] lg:max-w-[300px] truncate bg-red-950/20 border border-red-900/30 px-2 py-0.5 rounded"
-            title={saveError}
-          >
-            {saveError}
-          </span>
-        )}
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
