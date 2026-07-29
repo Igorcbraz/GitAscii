@@ -1,8 +1,6 @@
-import fs from 'fs';
-import path from 'path';
 import type { SavedConfiguration } from '@/engine/types';
+import { profileRepository } from './profileRepository';
 
-const PROFILES_DIR = path.join(process.cwd(), 'src', 'data', 'profiles');
 const memoryCache = new Map<string, SavedConfiguration>();
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
@@ -10,17 +8,9 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
   const slug = (config.profileSlug || 'default').toLowerCase();
   const cacheKey = `${username}_${slug}`;
 
-  memoryCache.set(cacheKey, config);
+  await profileRepository.save(config);
 
-  try {
-    if (!fs.existsSync(PROFILES_DIR)) {
-      fs.mkdirSync(PROFILES_DIR, { recursive: true });
-    }
-    const filePath = path.join(PROFILES_DIR, `${username}_${slug}.json`);
-    await fs.promises.writeFile(filePath, JSON.stringify(config, null, 2), 'utf-8');
-  } catch (error) {
-    console.warn('Failed to save profile config to disk (this is expected in read-only environments like Vercel):', error);
-  }
+  memoryCache.set(cacheKey, config);
 }
 
 export async function loadProfileConfig(username: string, slug: string): Promise<SavedConfiguration | null> {
@@ -32,16 +22,9 @@ export async function loadProfileConfig(username: string, slug: string): Promise
     return memoryCache.get(cacheKey) || null;
   }
 
-  try {
-    const filePath = path.join(PROFILES_DIR, `${usernameLower}_${slugLower}.json`);
-    if (fs.existsSync(filePath)) {
-      const content = await fs.promises.readFile(filePath, 'utf-8');
-      const config = JSON.parse(content) as SavedConfiguration;
-      memoryCache.set(cacheKey, config);
-      return config;
-    }
-  } catch (error) {
-    console.warn(`Failed to load profile config from disk for ${username}_${slug}:`, error);
+  const config = await profileRepository.get(usernameLower, slugLower);
+  if (config) {
+    memoryCache.set(cacheKey, config);
   }
-  return null;
+  return config;
 }
