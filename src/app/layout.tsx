@@ -66,6 +66,8 @@ export const metadata: Metadata = {
 
 import { I18nProvider } from "@/i18n";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { AutoAnalyticsTracker } from "@/lib/analytics";
+import { WebVitalsReporter } from "@/lib/analytics/web-vitals";
 
 export default function RootLayout({
   children,
@@ -79,7 +81,10 @@ export default function RootLayout({
     >
       <body>
         <I18nProvider>
-          {children}
+          <AutoAnalyticsTracker>
+            <WebVitalsReporter />
+            {children}
+          </AutoAnalyticsTracker>
         </I18nProvider>
         <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
       </body>
