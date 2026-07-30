@@ -35,7 +35,8 @@ interface WidgetPreviewTooltipProps {
 const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   header: { width: 800, height: 90 },
   avatar: { width: 160, height: 160 },
-  'ascii-art': { width: 280, height: 210 },
+  'ascii-art': { width: 280, height: 280 },
+  'ascii-text': { width: 800, height: 120 },
   'terminal-info': { width: 504, height: 280 },
   'tech-stack': { width: 800, height: 140 },
   'social-media': { width: 800, height: 120 },
@@ -43,6 +44,7 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   stats: { width: 800, height: 120 },
   languages: { width: 800, height: 140 },
   repositories: { width: 800, height: 180 },
+  'gitfest-lineup': { width: 500, height: 650 },
   'github-readme-stats': { width: 500, height: 210 },
   'streak-stats': { width: 500, height: 210 },
   'profile-trophy': { width: 800, height: 160 },
