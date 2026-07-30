@@ -31,7 +31,7 @@ import {
   Download,
   Upload,
   GitFork,
-  Type
+  Type,
 } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
@@ -419,22 +419,19 @@ export function WidgetLibrary() {
             boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)'
           }}
         >
-          {/* Hover Glow Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#c084fc]/20 via-[#a855f7]/20 to-[#e9d5ff]/20 transition-opacity duration-700 opacity-0 group-hover:opacity-80" style={{ filter: 'blur(15px)' }}></div>
-          
-          {/* Animated Border Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#c084fc] via-[#a855f7] to-[#e9d5ff] rounded-2xl transition-all duration-500 opacity-0 group-hover:opacity-40 animate-pulse" style={{ filter: 'blur(10px)', zIndex: -1 }}></div>
-          
-          <div className='absolute inset-0 rounded-2xl bg-gradient-to-b from-transparent via-transparent to-black/50'></div>
+          <div className="absolute inset-0 bg-linear-to-br from-[#c084fc]/20 via-[#a855f7]/20 to-[#e9d5ff]/20 transition-opacity duration-700 opacity-0 group-hover:opacity-80" style={{ filter: 'blur(15px)' }}></div>
+
+          <div className="absolute -inset-1 bg-linear-to-r from-[#c084fc] via-[#a855f7] to-[#e9d5ff] rounded-2xl transition-all duration-500 opacity-0 group-hover:opacity-40 animate-pulse" style={{ filter: 'blur(10px)', zIndex: -1 }}></div>
+
+          <div className='absolute inset-0 rounded-2xl bg-linear-to-b from-transparent via-transparent to-black/50'></div>
 
           <div className='relative z-20 flex items-center justify-between gap-2'>
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 flex-shrink-0 transition-transform duration-500 group-hover:scale-110">
-                {/* Icon Glow */}
-                <div className="absolute -inset-2 bg-gradient-to-br from-[#c084fc]/60 via-[#a855f7]/60 to-[#e9d5ff]/60 transition-all duration-500 blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg"></div>
+              <div className="relative w-10 h-10 shrink-0 transition-transform duration-500 group-hover:scale-110">
+                <div className="absolute -inset-2 bg-linear-to-br from-[#c084fc]/60 via-[#a855f7]/60 to-[#e9d5ff]/60 transition-all duration-500 blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg"></div>
 
                 <div className='relative w-full h-full flex items-center justify-center'>
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6] to-[#C084FC] rounded-lg transition-transform duration-500 group-hover:rotate-12" style={{
+                  <div className="absolute inset-0 bg-linear-to-br from-[#8B5CF6] to-[#C084FC] rounded-lg transition-transform duration-500 group-hover:rotate-12" style={{
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.4)'
                   }}></div>
 
@@ -460,14 +457,14 @@ export function WidgetLibrary() {
                 />
               </div>
             </div>
-            
+
             <div className="text-white/60 group-hover:text-white transition-colors duration-300 p-1 shrink-0 self-center">
               <Plus size={15} />
             </div>
           </div>
 
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-            <div className='absolute inset-0 bg-gradient-to-r from-transparent via-[#d8b4fe]/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
+            <div className='absolute inset-0 bg-linear-to-r from-transparent via-[#d8b4fe]/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
           </div>
         </div>
       );
@@ -593,7 +590,58 @@ export function WidgetLibrary() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            {categoryFilter === 'all' && !searchQuery && (
+              <div className="mb-6 space-y-2">
+                <div className="label-stamp text-signal-lime/80 mb-3">
+                  {t('editor.sidebar.featured_widgets', '[ FEATURED WIDGETS ]')}
+                </div>
+                {translatedCatalog.find(w => w.id === 'gitfest-lineup') && renderWidgetCard(translatedCatalog.find(w => w.id === 'gitfest-lineup')!)}
+
+                <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xs bg-graphite/50 group-hover:bg-signal-lime/10 text-ash group-hover:text-signal-lime transition-colors shrink-0">
+                      <Plus size={16} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-inter-tight font-medium text-label text-ash group-hover:text-chalk transition-colors">
+                          {t('editor.sidebar.featured_slot', 'Espaço Disponível')}
+                        </h4>
+                        <span className="text-[9px] font-inter-tight font-medium text-signal-lime bg-signal-lime/10 border border-signal-lime/20 px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
+                          {t('editor.sidebar.announce', 'Anuncie Aqui')}
+                        </span>
+                      </div>
+                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                        {t('editor.sidebar.featured_slot_desc', 'Destaque seu widget para a comunidade')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xs bg-graphite/50 group-hover:bg-signal-lime/10 text-ash group-hover:text-signal-lime transition-colors shrink-0">
+                      <Plus size={16} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-inter-tight font-medium text-label text-ash group-hover:text-chalk transition-colors">
+                          {t('editor.sidebar.featured_slot', 'Espaço Disponível')}
+                        </h4>
+                        <span className="text-[9px] font-inter-tight font-medium text-signal-lime bg-signal-lime/10 border border-signal-lime/20 px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
+                          {t('editor.sidebar.announce', 'Anuncie Aqui')}
+                        </span>
+                      </div>
+                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                        {t('editor.sidebar.featured_slot_desc', 'Destaque seu widget para a comunidade')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mb-2">
               <div className="label-stamp">
                 {categoryFilter === 'all' && !searchQuery
                   ? '[ WIDGET CATALOG ]'
@@ -607,7 +655,9 @@ export function WidgetLibrary() {
               </div>
             ) : (
               <div className="space-y-2">
-                {filteredWidgets.map(renderWidgetCard)}
+                {(categoryFilter === 'all' && !searchQuery
+                  ? filteredWidgets.filter(w => w.id !== 'gitfest-lineup')
+                  : filteredWidgets).map(renderWidgetCard)}
 
                 <a
                   href="https://github.com/Igorcbraz/GitAscii/fork"
