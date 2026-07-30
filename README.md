@@ -14,13 +14,13 @@
 
 ---
 
-### `[ STATUS: CLASSIFIED // SYSTEM OVERVIEW ]`
+## ⚡ What is GitAscii?
 
-**GitAscii** is a platform that transforms GitHub profiles and commit histories into high-impact ASCII art and dynamic badges, wrapped in a sophisticated editorial design.
+**GitAscii** is a complete platform designed to transform standard GitHub profiles into high-impact, self-updating visual experiences. 
 
-Unlike generic README generators, GitAscii combines the technical aesthetics of *command-line interfaces* with the elegance of classic newspaper layouts — featuring deep dark backgrounds (`Void Black`) accented by energetic neon green (`Signal Lime` / `#c5ff4a`) to spotlight crucial information.
+Instead of dealing with static markdown tables or generic badges, GitAscii provides developers with a **visual drag-and-drop editor** backed by a powerful **ASCII and SVG rendering engine**. It combines the raw, technical aesthetics of a command-line interface with the elegance of a classic newspaper layout, resulting in a premium "classified document" look.
 
-Here is an example of a final profile generated with GitAscii:
+Once your profile is designed, GitAscii serves it via a dynamic URL, meaning your GitHub README stays updated automatically without any manual commits on your part.
 
 <div align="center">
   <img src="public/example.svg" width="800" alt="GitAscii Example Profile Preview" />
@@ -28,59 +28,87 @@ Here is an example of a final profile generated with GitAscii:
 
 ---
 
-## ⚡ Main Features
+## 🚀 Product Features & Widget Library
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  FEATURE                │ DESCRIPTION                                  │
-├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🎨 Visual Editor        │ Drag-and-drop interface inspired by Figma    │
-│                         │ and Canva with real-time rendering.          │
-├─────────────────────────┼──────────────────────────────────────────────┤
-│ 📟 ASCII Engine         │ Convert images and photos into ASCII art     │
-│                         │ with 6+ character sets and fine controls.    │
-├─────────────────────────┼──────────────────────────────────────────────┤
-│ 📐 Premium Templates    │ +13 ready-to-use layouts, from Minimalist    │
-│                         │ Terminal to Industrial Cyberpunk.            │
-├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🔗 Direct Rendering     │ Your SVGs are served via a dynamic URL,      │
-│                         │ always keeping your GitHub profile updated.  │
-├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🤖 Smart Generation     │ Analyze the user profile and automatically   │
-│                         │ create the perfect layout in seconds.        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+GitAscii comes packed with a rich library of internal widgets and seamless integrations with the most popular GitHub stats services, giving you ultimate control over your profile's aesthetic.
+
+### 🎨 Visual Drag-and-Drop Editor
+A robust, browser-based editor inspired by tools like Figma and Canva. It features real-time SVG rendering, allowing you to drag widgets, adjust layouts, and preview your final README instantly.
+
+### 🔓 Frictionless Access (Two Ways to Play)
+We respect your privacy and workflow. You don't necessarily need to authenticate via OAuth to use GitAscii. There are two ways to interact with the product:
+1. **Public Sandbox (No Login)**: Just type any GitHub username and instantly start designing based on public data. Perfect for quick edits or trying out templates.
+2. **Authenticated Mode**: Log in via GitHub OAuth to unlock private repositories data, save your layouts directly to your account, and manage your dynamic rendering links with ease.
+
+### 📦 Portability (Import/Export Layouts)
+You can seamlessly export your custom-crafted profile layout as a JSON file and import it anytime, or share it with other users in the community.
+
+### 📟 Core & ASCII Widgets
+- **ASCII Art Engine**: Convert photos, logos, or raw images into highly detailed character art directly in the browser (with 6+ character sets and contrast controls).
+- **ASCII Text**: Render custom texts using true ASCII art fonts.
+- **Terminal Info**: A Neofetch-style terminal info card summarizing your profile.
+- **Tech Stack Gallery**: An interactive gallery of skill icons (React, Node, etc.).
+- **Top Languages & GitHub Stats**: Clean, built-in metrics blocks for languages, repos, stars, and followers.
+- **Featured Repos**: Highlight your best work in stylized repository cards.
+- **Headers, Avatars, Bio & Footers**: Essential structural widgets that maintain the editorial newspaper look.
+
+### 🌐 External Integrations
+GitAscii embraces the open-source ecosystem. We natively support wrapping popular community tools into our design system:
+- **GitFest**: Generate a festival lineup style poster of your top repos!
+- **Contribution Snake**: The famous animated snake eating your commit graph.
+- **GitHub Readme Stats & Streak Stats**: Fully integrated blocks tracking your commits and current streaks.
+- **Profile Trophy**: Display achievements and trophies based on your GitHub activity.
+- **Activity Graph**: A line chart mapping your last 31 days of commits.
+- **Metrics Card & Views Counter**: Advanced infographics and real-time visitor counters.
+- **Readme Quotes**: Daily motivational quotes for developers.
+
+### 🔗 Dynamic Direct Rendering
+Say goodbye to manual repository updates. GitAscii generates your layout as an SVG served via our dynamic URL system. Just paste one link into your GitHub README, and your stats, ASCII art, and badges will update automatically.
+
+### 📐 Premium Templates & Smart Generation
+Not a designer? No problem. GitAscii includes over 13 ready-to-use, premium layouts (such as "Minimalist Terminal" or "Industrial Cyberpunk"). Additionally, the Smart Generation feature can analyze your GitHub profile and instantly assemble the perfect layout tailored to your activity.
+
+### 📊 Comprehensive Dashboard & Analytics
+GitAscii tracks usage gracefully using a decoupled SaaS-level analytics architecture (supporting GA4, PostHog, etc.), complete with Consent Mode v2 and Web Vitals monitoring, ensuring optimal performance and user experience.
+
+### 🌗 Adaptive Theme Rendering (Dark & Light)
+GitAscii generates separate SVGs for both dark and light themes. By leveraging the HTML `<picture>` element in your GitHub README, your profile will automatically adapt to match the viewer's current GitHub theme preference.
+
+### 📂 Multiple Profiles
+Create different profiles for different purposes. Maintain separate configurations for a "Portfolio", a "Resume", or an "Open Source Contributor" look — all saved within a single account.
+
+### 🌍 Full Internationalization (i18n)
+The platform is fully localized in **English**, **Portuguese**, and **Spanish**, automatically detecting and adapting to the developer's native language.
 
 ---
 
-## 🎨 Color Palette & Design System
+## 🏗️ Technical Architecture
 
-The visual identity of GitAscii follows strict rules documented in our [Design Guide](file:///C:/Repos/GitAscii/design.md):
+GitAscii is built to scale, using a modern stack and a modular architecture:
 
-*   **`Void Black` (`#000000`)** — The absolute background of the entire application.
-*   **`Carbon` (`#060606`)** — The dominant canvas color to prevent visual fatigue.
-*   **`Graphite` (`#252525`)** — The mid-neutral tone for elevated panels, navbars, and cards.
-*   **`Signal Lime` (`#c5ff4a`)** — The only chromatic color. Strictly used for call-to-actions, active borders, and keyword emphasis.
-*   **`Chalk` (`#ffffff`) & `Bone` (`#e5e5e5`)** — Text for high emphasis and readability without visual vibration.
-
----
-
-## 🛠️ Tech Stack
-
-The GitAscii ecosystem is built using modern technologies optimized for performance:
-
--   **Framework:** [Next.js 15.3](https://nextjs.org/) (App Router)
--   **Core Library:** [React 19](https://react.dev/)
--   **Styling:** [Tailwind CSS 4.0](https://tailwindcss.com/) & PostCSS
--   **Animations:** [Motion (Framer Motion 12)](https://motion.dev/)
--   **State Management:** [Zustand](https://github.com/pmndrs/zustand)
--   **Language:** [TypeScript](https://www.typescriptlang.org/)
+*   **Frontend Ecosystem:** Built on [Next.js 15.3](https://nextjs.org/) (App Router) and [React 19](https://react.dev/), leveraging [Tailwind CSS 4.0](https://tailwindcss.com/) for styling and [Framer Motion 12](https://motion.dev/) for fluid micro-animations. State is managed elegantly via [Zustand](https://github.com/pmndrs/zustand).
+*   **Rendering Engine (`src/engine/`):** The core logic handling the complex conversion of images to ASCII matrices and assembling dynamic SVGs on the fly.
+*   **Modular Features (`src/features/`):** The visual editor, templates gallery, and GitHub API integrations are decoupled into modular feature folders for maintainability.
+*   **Analytics Subsystem (`src/lib/analytics/`):** A strictly typed, IoC (Inversion of Control) based tracking system that abstracts away the provider, allowing seamless event logging (e.g., `generate_readme`, `copy_svg`) without polluting business logic.
 
 ---
 
-## 🚀 How to Run Locally
+## 🎨 Design Philosophy
 
-Follow these steps to run the project in a development environment:
+Our visual identity follows strict rules documented in our [Design Guide](design.md). The concept is **"Encrypted terminal meets classified broadsheet"**.
+
+*   **The Void:** We use `Void Black` (`#000000`) and `Carbon` (`#060606`) as our absolute backgrounds to eliminate visual fatigue.
+*   **The Signal:** `Signal Lime` (`#c5ff4a`) acts as an emergency light in a dark room. It is the *only* chromatic color used, strictly reserved for CTAs, glowing borders, and crucial keywords.
+*   **Typography:** 
+    *   **PT Serif (Weight 300)** brings an unexpected, whisper-weight editorial authority to display headlines.
+    *   **Inter Tight** handles all UI chrome and tracked-out, uppercase metadata labels (like `[ BUILT FOR AGENTS ]`).
+    *   **JetBrains Mono** is used exclusively for code snippets, providing a technical "proof" layer.
+
+---
+
+## 💻 How to Run Locally
+
+Get the platform running on your machine in seconds:
 
 ### 1. Clone the repository
 ```bash
@@ -98,28 +126,27 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+Open [http://localhost:3000](http://localhost:3000) in your browser to start building.
 
 ---
 
 ## 📂 Directory Structure
 
-```
+```text
 GitAscii/
-├── public/                 # Static public assets (Icons, Illustrations, Examples)
-│   ├── icon-512.png        # Official main logo
-│   └── example.svg         # Final result preview file
+├── public/                 # Static assets, logos, and preview images
 ├── src/
-│   ├── app/                # Next.js application routes, layouts, and pages
-│   ├── components/         # Shared UI components
-│   ├── constants/          # Static constants and data
-│   ├── engine/             # ASCII conversion engines and renderers
-│   ├── features/           # Modular features (editor, landing page, github api)
-│   ├── lib/                # Auxiliary configurations and utilities
-│   └── middleware.ts       # Route and security middleware
-├── design.md               # Design System technical specifications
-├── theme.css               # Custom CSS variable definitions
-└── package.json            # Project dependencies and scripts
+│   ├── app/                # Next.js App Router (Pages & Layouts)
+│   ├── components/         # Shared UI components (Buttons, Cards, Modals)
+│   ├── constants/          # Static data and configuration
+│   ├── engine/             # Core logic for ASCII generation & SVG rendering
+│   ├── features/           # Domains (Visual Editor, Smart Generator, Landing)
+│   ├── lib/                # Utilities, Hooks, and the Analytics subsystem
+│   └── middleware.ts       # Route protection and security
+├── design.md               # Detailed Design System specifications
+├── analytics.md            # SaaS analytics & event tracking documentation
+├── theme.css               # Global CSS variables (Colors & Tokens)
+└── package.json            # Dependencies and scripts
 ```
 
 ---
