@@ -18,9 +18,11 @@ import { CopyGuideModal } from './CopyGuideModal';
 import { useEditorStore } from '../../store/editorStore';
 import { APP_URL } from '../../../../constants';
 import { useI18n } from '@/i18n';
+import { useToast } from '@/components/ui/toast';
 
 export function EditorToolbar() {
   const { t } = useI18n();
+  const { error, success } = useToast();
   const {
     config,
     githubData,
@@ -104,19 +106,20 @@ export function EditorToolbar() {
 
         const data = JSON.parse(result);
         if (!data || !Array.isArray(data.widgets)) {
-          alert(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
+          error(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
           return;
         }
 
         // Import widgets and optionally global styles & templateId
         importLayout(data.widgets, data.globalStyles, data.templateId);
+        success('Layout importado com sucesso!');
         
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       } catch (err) {
         console.error('Failed to parse import file:', err);
-        alert(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
+        error(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
       }
     };
     reader.readAsText(file);

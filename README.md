@@ -3,7 +3,7 @@
 
   # ── GitAscii ──
   
-  > **O terminal criptográfico encontra o editorial de jornal** — a sua presença no GitHub elevada ao nível de design premium de forma dinâmica e automatizada.
+  > **Where cryptic terminals meet editorial newspaper design** — elevate your GitHub presence to a premium design level dynamically and automatically.
 
   [![Next.js](https://img.shields.io/badge/Next.js-15.3-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
   [![React](https://img.shields.io/badge/React-19.0-20232a?style=flat-square&logo=react&logoColor=61dafb)](https://react.dev/)
@@ -16,107 +16,114 @@
 
 ### `[ STATUS: CLASSIFIED // SYSTEM OVERVIEW ]`
 
-**GitAscii** é uma plataforma que transforma perfis e históricos de commits do GitHub em arte ASCII de alto impacto e badges dinâmicos, envelopados em um design editorial sofisticado. 
+**GitAscii** is a platform that transforms GitHub profiles and commit histories into high-impact ASCII art and dynamic badges, wrapped in a sophisticated editorial design.
 
-Diferente de geradores genéricos de README, o GitAscii combina o estilo técnico de *command-line interfaces* com a sofisticação de tipografias clássicas de jornais de grande circulação — utilizando fundos escuros profundos (`Void Black`) pontuados por um verde neon enérgico (`Signal Lime` / `#c5ff4a`) para destacar informações cruciais.
+Unlike generic README generators, GitAscii combines the technical aesthetics of *command-line interfaces* with the elegance of classic newspaper layouts — featuring deep dark backgrounds (`Void Black`) accented by energetic neon green (`Signal Lime` / `#c5ff4a`) to spotlight crucial information.
+
+Here is an example of a final profile generated with GitAscii:
+
+<div align="center">
+  <img src="public/example.svg" width="800" alt="GitAscii Example Profile Preview" />
+</div>
 
 ---
 
-## ⚡ Recursos Principais
+## ⚡ Main Features
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  FEATURE                │ DESCRIPTION                                  │
 ├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🎨 Editor Visual        │ Interface de arrastar e soltar inspirada no  │
-│                         │ Figma/Canva com renderização instantânea.    │
+│ 🎨 Visual Editor        │ Drag-and-drop interface inspired by Figma    │
+│                         │ and Canva with real-time rendering.          │
 ├─────────────────────────┼──────────────────────────────────────────────┤
-│ 📟 Motor ASCII          │ Converta imagens e fotos em arte ASCII com   │
-│                         │ mais de 6 conjuntos de caracteres e controle.│
+│ 📟 ASCII Engine         │ Convert images and photos into ASCII art     │
+│                         │ with 6+ character sets and fine controls.    │
 ├─────────────────────────┼──────────────────────────────────────────────┤
-│ 📐 Templates Premium    │ +13 layouts prontos, do estilo Terminal      │
-│                         │ Minimalista ao Cyberpunk Industrial.         │
+│ 📐 Premium Templates    │ +13 ready-to-use layouts, from Minimalist    │
+│                         │ Terminal to Industrial Cyberpunk.            │
 ├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🔗 Renderização Direta  │ Seus SVGs são servidos via URL dinâmica,     │
-│                         │ mantendo-se sempre atualizados no GitHub.    │
+│ 🔗 Direct Rendering     │ Your SVGs are served via a dynamic URL,      │
+│                         │ always keeping your GitHub profile updated.  │
 ├─────────────────────────┼──────────────────────────────────────────────┤
-│ 🤖 Geração Inteligente  │ Analise o perfil do usuário e crie o layout  │
-│                         │ perfeito em poucos segundos automaticamente. │
+│ 🤖 Smart Generation     │ Analyze the user profile and automatically   │
+│                         │ create the perfect layout in seconds.        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎨 Paleta de Cores & Design System
+## 🎨 Color Palette & Design System
 
-A identidade visual do GitAscii segue regras rígidas documentadas no nosso [Design Guide](file:///C:/Repos/GitAscii/design.md):
+The visual identity of GitAscii follows strict rules documented in our [Design Guide](file:///C:/Repos/GitAscii/design.md):
 
-*   **`Void Black` (`#000000`)** — O pano de fundo absoluto de toda a aplicação.
-*   **`Carbon` (`#060606`)** — A cor de canvas dominante para evitar fadiga visual.
-*   **`Graphite` (`#252525`)** — O tom mid-neutral para painéis elevados, navbars e cartões.
-*   **`Signal Lime` (`#c5ff4a`)** — A única cor cromática. Usada estritamente para call-to-actions, bordas ativas e ênfase de palavras-chave.
-*   **`Chalk` (`#ffffff`) & `Bone` (`#e5e5e5`)** — Textos de alta ênfase e legibilidade sem vibração visual.
+*   **`Void Black` (`#000000`)** — The absolute background of the entire application.
+*   **`Carbon` (`#060606`)** — The dominant canvas color to prevent visual fatigue.
+*   **`Graphite` (`#252525`)** — The mid-neutral tone for elevated panels, navbars, and cards.
+*   **`Signal Lime` (`#c5ff4a`)** — The only chromatic color. Strictly used for call-to-actions, active borders, and keyword emphasis.
+*   **`Chalk` (`#ffffff`) & `Bone` (`#e5e5e5`)** — Text for high emphasis and readability without visual vibration.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tech Stack
 
-O ecossistema do GitAscii é construído com tecnologia moderna e otimizada para performance:
+The GitAscii ecosystem is built using modern technologies optimized for performance:
 
 -   **Framework:** [Next.js 15.3](https://nextjs.org/) (App Router)
--   **Biblioteca Principal:** [React 19](https://react.dev/)
--   **Estilização:** [Tailwind CSS 4.0](https://tailwindcss.com/) & PostCSS
--   **Animações:** [Motion (Framer Motion 12)](https://motion.dev/)
--   **Gerenciamento de Estado:** [Zustand](https://github.com/pmndrs/zustand)
--   **Linguagem:** [TypeScript](https://www.typescriptlang.org/)
+-   **Core Library:** [React 19](https://react.dev/)
+-   **Styling:** [Tailwind CSS 4.0](https://tailwindcss.com/) & PostCSS
+-   **Animations:** [Motion (Framer Motion 12)](https://motion.dev/)
+-   **State Management:** [Zustand](https://github.com/pmndrs/zustand)
+-   **Language:** [TypeScript](https://www.typescriptlang.org/)
 
 ---
 
-## 🚀 Como Iniciar Localmente
+## 🚀 How to Run Locally
 
-Siga o passo a passo para rodar o projeto em ambiente de desenvolvimento:
+Follow these steps to run the project in a development environment:
 
-### 1. Clonar o repositório
+### 1. Clone the repository
 ```bash
 git clone https://github.com/Igorcbraz/GitAscii.git
 cd GitAscii
 ```
 
-### 2. Instalar as dependências
+### 2. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Executar o servidor de desenvolvimento
+### 3. Start the development server
 ```bash
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
 ---
 
-## 📂 Estrutura de Diretórios
+## 📂 Directory Structure
 
 ```
 GitAscii/
-├── public/                 # Assets públicos estáticos (Ícones, Ilustrações)
-│   └── icon-512.png        # Logotipo principal oficial
+├── public/                 # Static public assets (Icons, Illustrations, Examples)
+│   ├── icon-512.png        # Official main logo
+│   └── example.svg         # Final result preview file
 ├── src/
-│   ├── app/                # Rotas, layouts e páginas da aplicação Next.js
-│   ├── components/         # Componentes UI de uso compartilhado
-│   ├── constants/          # Constantes estáticas e dados estáticos
-│   ├── engine/             # Motores de conversão ASCII e renderizadores
-│   ├── features/           # Funcionalidades modulares (editor, landing page, github api)
-│   ├── lib/                # Configurações auxiliares e utilitários
-│   └── middleware.ts       # Middlewares de rota e segurança
-├── design.md               # Especificação técnica do Design System
-├── theme.css               # Definições das variáveis CSS customizadas
-└── package.json            # Dependências e scripts do projeto
+│   ├── app/                # Next.js application routes, layouts, and pages
+│   ├── components/         # Shared UI components
+│   ├── constants/          # Static constants and data
+│   ├── engine/             # ASCII conversion engines and renderers
+│   ├── features/           # Modular features (editor, landing page, github api)
+│   ├── lib/                # Auxiliary configurations and utilities
+│   └── middleware.ts       # Route and security middleware
+├── design.md               # Design System technical specifications
+├── theme.css               # Custom CSS variable definitions
+└── package.json            # Project dependencies and scripts
 ```
 
 ---
 
 <div align="center">
-  <sub>Construído com obsessão por design por <a href="https://github.com/Igorcbraz">Igorcbraz</a>.</sub>
+  <sub>Built with design obsession by <a href="https://github.com/Igorcbraz">Igorcbraz</a>.</sub>
 </div>

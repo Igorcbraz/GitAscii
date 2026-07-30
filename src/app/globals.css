@@ -79,6 +79,17 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 1000px #060606 inset !important;
+    box-shadow: 0 0 0 1000px #060606 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }
 
 ::selection {

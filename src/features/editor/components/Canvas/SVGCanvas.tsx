@@ -40,7 +40,8 @@ export function SVGCanvas() {
     return renderSvg(config, githubData, { theme: 'dark' });
   }, [config, githubData]);
 
-  // Background processing of ASCII Art widgets
+  const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([]);
+
   useEffect(() => {
     if (!config || !githubData) return;
 
@@ -128,12 +129,75 @@ export function SVGCanvas() {
         : false;
 
       if (activeDrag.type === 'move') {
-        const rawX = activeDrag.initialPos.x + deltaX;
-        const rawY = activeDrag.initialPos.y + deltaY;
+        let rawX = activeDrag.initialPos.x + deltaX;
+        let rawY = activeDrag.initialPos.y + deltaY;
 
-        const snappedX = Math.max(0, Math.min(800 - activeDrag.initialSize.width, Math.round(rawX / 4) * 4));
-        const snappedY = Math.max(0, Math.round(rawY / 4) * 4);
+        const SNAP_THRESHOLD = 8;
+        const width = activeDrag.initialSize.width;
+        const height = activeDrag.initialSize.height;
 
+        let snapX: number | undefined;
+        let snapY: number | undefined;
+        const newGuides: { x?: number; y?: number }[] = [];
+
+        if (config?.widgets) {
+          for (const other of config.widgets) {
+            if (other.instanceId === activeDrag.instanceId || !other.visible) continue;
+
+            const otherLeft = other.position.x;
+            const otherRight = other.position.x + other.size.width;
+            const otherCenterX = other.position.x + other.size.width / 2;
+            const otherTop = other.position.y;
+            const otherBottom = other.position.y + other.size.height;
+            const otherCenterY = other.position.y + other.size.height / 2;
+
+            const left = rawX;
+            const right = rawX + width;
+            const centerX = rawX + width / 2;
+            const top = rawY;
+            const bottom = rawY + height;
+            const centerY = rawY + height / 2;
+
+            if (Math.abs(left - otherLeft) < SNAP_THRESHOLD) {
+              snapX = otherLeft;
+              newGuides.push({ x: otherLeft });
+            } else if (Math.abs(left - otherRight) < SNAP_THRESHOLD) {
+              snapX = otherRight;
+              newGuides.push({ x: otherRight });
+            } else if (Math.abs(right - otherLeft) < SNAP_THRESHOLD) {
+              snapX = otherLeft - width;
+              newGuides.push({ x: otherLeft });
+            } else if (Math.abs(right - otherRight) < SNAP_THRESHOLD) {
+              snapX = otherRight - width;
+              newGuides.push({ x: otherRight });
+            } else if (Math.abs(centerX - otherCenterX) < SNAP_THRESHOLD) {
+              snapX = otherCenterX - width / 2;
+              newGuides.push({ x: otherCenterX });
+            }
+
+            if (Math.abs(top - otherTop) < SNAP_THRESHOLD) {
+              snapY = otherTop;
+              newGuides.push({ y: otherTop });
+            } else if (Math.abs(top - otherBottom) < SNAP_THRESHOLD) {
+              snapY = otherBottom;
+              newGuides.push({ y: otherBottom });
+            } else if (Math.abs(bottom - otherTop) < SNAP_THRESHOLD) {
+              snapY = otherTop - height;
+              newGuides.push({ y: otherTop });
+            } else if (Math.abs(bottom - otherBottom) < SNAP_THRESHOLD) {
+              snapY = otherBottom - height;
+              newGuides.push({ y: otherBottom });
+            } else if (Math.abs(centerY - otherCenterY) < SNAP_THRESHOLD) {
+              snapY = otherCenterY - height / 2;
+              newGuides.push({ y: otherCenterY });
+            }
+          }
+        }
+
+        const snappedX = snapX !== undefined ? snapX : Math.max(0, Math.min(800 - width, Math.round(rawX / 4) * 4));
+        const snappedY = snapY !== undefined ? snapY : Math.max(0, Math.round(rawY / 4) * 4);
+
+        setAlignmentGuides(newGuides);
         updateWidgetPosition(activeDrag.instanceId, { x: snappedX, y: snappedY }, false);
       } else if (activeDrag.type === 'resize-r') {
         const newWidth = Math.max(40, Math.min(800 - activeDrag.initialPos.x, Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4));
@@ -159,6 +223,7 @@ export function SVGCanvas() {
 
     const handleMouseUp = () => {
       setActiveDrag(null);
+      setAlignmentGuides([]);
       recordHistorySnapshot();
     };
 
@@ -205,6 +270,28 @@ export function SVGCanvas() {
           dangerouslySetInnerHTML={{ __html: renderedSvgString }}
           className="w-full h-full pointer-events-none"
         />
+
+        {alignmentGuides.map((guide, idx) => {
+          if (guide.x !== undefined) {
+            return (
+              <div
+                key={`v-guide-${idx}`}
+                className="absolute top-0 bottom-0 w-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
+                style={{ left: guide.x }}
+              />
+            );
+          }
+          if (guide.y !== undefined) {
+            return (
+              <div
+                key={`h-guide-${idx}`}
+                className="absolute left-0 right-0 h-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
+                style={{ top: guide.y }}
+              />
+            );
+          }
+          return null;
+        })}
 
         <div className="absolute inset-0 pointer-events-auto">
           {config.widgets.map((widget) => {

@@ -65,6 +65,7 @@ export const metadata: Metadata = {
 };
 
 import { I18nProvider } from "@/i18n";
+import { ToastProvider } from "@/components/ui/toast";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { AutoAnalyticsTracker } from "@/lib/analytics";
 import { WebVitalsReporter } from "@/lib/analytics/web-vitals";
@@ -81,10 +82,12 @@ export default function RootLayout({
     >
       <body>
         <I18nProvider>
-          <AutoAnalyticsTracker>
-            <WebVitalsReporter />
-            {children}
-          </AutoAnalyticsTracker>
+          <ToastProvider>
+            <AutoAnalyticsTracker>
+              <WebVitalsReporter />
+              {children}
+            </AutoAnalyticsTracker>
+          </ToastProvider>
         </I18nProvider>
         <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
       </body>

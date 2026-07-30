@@ -37,6 +37,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
 import { WidgetPreviewTooltip, type WidgetCatalogItem, type WidgetBadgeType } from './WidgetPreviewTooltip';
 import { useI18n } from '@/i18n';
+import { useToast } from '@/components/ui/toast';
 
 const WIDGET_CATALOG: WidgetCatalogItem[] = [
   {
@@ -253,6 +254,8 @@ export function WidgetLibrary() {
     }
   };
 
+  const { error } = useToast();
+
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
@@ -269,7 +272,7 @@ export function WidgetLibrary() {
 
         const data = JSON.parse(result);
         if (!data || !Array.isArray(data.widgets)) {
-          alert(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
+          error(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
           return;
         }
 
@@ -280,7 +283,7 @@ export function WidgetLibrary() {
         }
       } catch (err) {
         console.error('Failed to parse import file:', err);
-        alert(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
+        error(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
       }
     };
     reader.readAsText(file);

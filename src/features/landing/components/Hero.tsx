@@ -6,6 +6,7 @@ import { ArrowRight, Github } from 'lucide-react';
 import { useI18n } from '@/i18n';
 
 import AsciiHands from '@/components/ui/ascii-hands';
+import { useToast } from '@/components/ui/toast';
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -13,21 +14,39 @@ export default function Hero() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { t } = useI18n();
+  const { error } = useToast();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const validateUsername = (val: string) => {
+    const clean = val.trim();
+    if (clean.includes('/') || clean.includes('.') || clean.includes('http') || clean.includes('www')) {
+      return false;
+    }
+    const githubUsernameRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+    return githubUsernameRegex.test(clean);
+  };
+
   const handleOpenEditor = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     const handle = username.trim() || 'Igorcbraz';
+    if (username.trim() && !validateUsername(handle)) {
+      error('Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).');
+      return;
+    }
+    setIsLoading(true);
     router.push(`/${handle}`);
   };
 
   const handleGenerateBest = () => {
-    setIsLoading(true);
     const handle = username.trim() || 'Igorcbraz';
+    if (username.trim() && !validateUsername(handle)) {
+      error('Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).');
+      return;
+    }
+    setIsLoading(true);
     router.push(`/${handle}?generate=true`);
   };
 
@@ -61,7 +80,7 @@ export default function Hero() {
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-6 w-full max-w-md mx-auto">
             <form onSubmit={handleOpenEditor} className="flex w-full group">
               <div className="relative grow flex items-center">
-                <Github className="absolute left-4 w-5 h-5 text-ash" />
+                <Github className="absolute left-4 w-5 h-5 text-ash z-10" />
                 <input
                   id="hero-username-input"
                   type="text"
@@ -69,7 +88,7 @@ export default function Hero() {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
                   placeholder={t('landing.hero.placeholder', 'Enter your GitHub username')}
-                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all disabled:opacity-50"
+                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all disabled:opacity-50 [&:-webkit-autofill]:[WebkitTextFillColor:#ffffff] [&:-webkit-autofill]:[WebkitBoxShadow:0_0_0_1000px_#060606_inset] [&:-webkit-autofill]:[transition:background-color_5000s_ease-in-out_0s]"
                 />
               </div>
               <button
