@@ -575,43 +575,43 @@ export function renderWidgetSvg(
 
         if (showUptime) {
           const uptimeVal = (cfg.customUptime as string) || formatUptime(data.user.created_at);
-          mainItems.push({ label: '. Uptime: ', val: ` ${uptimeVal}` });
+          if (uptimeVal) mainItems.push({ label: '. Uptime: ', val: ` ${uptimeVal}` });
         }
         if (showLocation) {
-          const locVal = (cfg.customLocation as string) || data.user.location || 'São Paulo';
-          mainItems.push({ label: '. Location: ', val: ` ${locVal}` });
+          const locVal = (cfg.customLocation as string) || data.user.location;
+          if (locVal) mainItems.push({ label: '. Location: ', val: ` ${locVal}` });
         }
         if (showCompany) {
-          const compVal = (cfg.customCompany as string) || data.user.company || '@GrupoRaotes';
-          mainItems.push({ label: '. Company: ', val: ` ${compVal}` });
+          const compVal = (cfg.customCompany as string) || data.user.company;
+          if (compVal) mainItems.push({ label: '. Company: ', val: ` ${compVal}` });
         }
         if (showLanguages) {
-          const topLangs = (cfg.customLanguages as string) || Object.keys(data.languages).slice(0, 5).join(', ') || 'TypeScript, JavaScript, HTML, Vue, PHP';
-          mainItems.push({ label: '. Languages: ', val: ` ${topLangs}` });
+          const topLangs = (cfg.customLanguages as string) || (Object.keys(data.languages).length > 0 ? Object.keys(data.languages).slice(0, 5).join(', ') : '');
+          if (topLangs) mainItems.push({ label: '. Languages: ', val: ` ${topLangs}` });
         }
         if (showJoined) {
-          const joinedVal = (cfg.customJoined as string) || new Date(data.user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-          mainItems.push({ label: '. Joined: ', val: ` ${joinedVal}` });
+          const joinedVal = (cfg.customJoined as string) || (data.user.created_at ? new Date(data.user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '');
+          if (joinedVal) mainItems.push({ label: '. Joined: ', val: ` ${joinedVal}` });
         }
         if (showStatus) {
-          const statusVal = (cfg.customStatus as string) || '🚀 Building awesome apps';
-          mainItems.push({ label: '. Status: ', val: ` ${statusVal}` });
+          const statusVal = (cfg.customStatus as string);
+          if (statusVal) mainItems.push({ label: '. Status: ', val: ` ${statusVal}` });
         }
         if (showPronouns) {
-          const pronounsVal = (cfg.customPronouns as string) || 'he/him';
-          mainItems.push({ label: '. Pronouns: ', val: ` ${pronounsVal}` });
+          const pronounsVal = (cfg.customPronouns as string);
+          if (pronounsVal) mainItems.push({ label: '. Pronouns: ', val: ` ${pronounsVal}` });
         }
         if (showTimezone) {
-          const tzVal = (cfg.customTimezone as string) || 'UTC-3 (São Paulo)';
-          mainItems.push({ label: '. Timezone: ', val: ` ${tzVal}` });
+          const tzVal = (cfg.customTimezone as string);
+          if (tzVal) mainItems.push({ label: '. Timezone: ', val: ` ${tzVal}` });
         }
         if (showAchievements) {
-          const achVal = (cfg.customAchievements as string) || 'Arctic Vault, PR Shark, Pro';
-          mainItems.push({ label: '. Achievements: ', val: ` ${achVal}` });
+          const achVal = (cfg.customAchievements as string);
+          if (achVal) mainItems.push({ label: '. Achievements: ', val: ` ${achVal}` });
         }
         if (showHighlights) {
-          const hlVal = (cfg.customHighlights as string) || 'GitHub Star, Developer';
-          mainItems.push({ label: '. Highlights: ', val: ` ${hlVal}` });
+          const hlVal = (cfg.customHighlights as string);
+          if (hlVal) mainItems.push({ label: '. Highlights: ', val: ` ${hlVal}` });
         }
 
         for (const item of mainItems) {
@@ -641,24 +641,24 @@ export function renderWidgetSvg(
         const contactItems: Array<{ label: string; val: string }> = [];
 
         if (showWebsite) {
-          const webVal = (cfg.customWebsite as string) || data.user.blog || `https://${data.user.login.toLowerCase()}.vercel.app/`;
-          contactItems.push({ label: '. Website: ', val: ` ${webVal}` });
+          const webVal = (cfg.customWebsite as string) || data.user.blog;
+          if (webVal) contactItems.push({ label: '. Website: ', val: ` ${webVal}` });
         }
         if (showGithub) {
           const ghVal = (cfg.customGithub as string) || `github.com/${data.user.login}`;
-          contactItems.push({ label: '. GitHub: ', val: ` ${ghVal}` });
+          if (ghVal) contactItems.push({ label: '. GitHub: ', val: ` ${ghVal}` });
         }
         if (showTwitter) {
-          const twVal = (cfg.customTwitter as string) || (data.user.twitter_username ? `@${data.user.twitter_username}` : '@user');
-          contactItems.push({ label: '. Twitter: ', val: ` ${twVal}` });
+          const twVal = (cfg.customTwitter as string) || (data.user.twitter_username ? `@${data.user.twitter_username}` : '');
+          if (twVal) contactItems.push({ label: '. Twitter: ', val: ` ${twVal}` });
         }
         if (showEmail) {
-          const emVal = (cfg.customEmail as string) || 'user@example.com';
-          contactItems.push({ label: '. Email: ', val: ` ${emVal}` });
+          const emVal = (cfg.customEmail as string) || data.user.email;
+          if (emVal) contactItems.push({ label: '. Email: ', val: ` ${emVal}` });
         }
         if (showOrgs) {
-          const orgsVal = (cfg.customOrgs as string) || '@github, @vercel';
-          contactItems.push({ label: '. Orgs: ', val: ` ${orgsVal}` });
+          const orgsVal = (cfg.customOrgs as string);
+          if (orgsVal) contactItems.push({ label: '. Orgs: ', val: ` ${orgsVal}` });
         }
 
         for (const item of contactItems) {
@@ -694,19 +694,19 @@ export function renderWidgetSvg(
           statFields.push({ label: '. Stars: ', val: ` ${data.totalStars}` });
         }
         if (showCommits) {
-          const commitCount = (cfg.customCommits as string) || (data.contributions ? data.contributions.totalContributions.toLocaleString() : '1,280');
-          statFields.push({ label: '. Commits: ', val: ` ${commitCount}` });
+          const commitCount = (cfg.customCommits as string) || (data.contributions ? data.contributions.totalContributions.toLocaleString() : '');
+          if (commitCount) statFields.push({ label: '. Commits: ', val: ` ${commitCount}` });
         }
         if (showFollowers) {
           statFields.push({ label: '. Followers: ', val: ` ${data.user.followers}` });
         }
         if (showFollowing) {
-          const followingCount = (cfg.customFollowing as string) || (data.user.following !== undefined ? data.user.following.toLocaleString() : '42');
-          statFields.push({ label: '. Following: ', val: ` ${followingCount}` });
+          const followingCount = (cfg.customFollowing as string) || (data.user.following !== undefined ? data.user.following.toLocaleString() : '');
+          if (followingCount) statFields.push({ label: '. Following: ', val: ` ${followingCount}` });
         }
         if (showGists) {
-          const gistsCount = (cfg.customGists as string) || (data.user.public_gists !== undefined ? data.user.public_gists.toLocaleString() : '12');
-          statFields.push({ label: '. Gists: ', val: ` ${gistsCount}` });
+          const gistsCount = (cfg.customGists as string) || (data.user.public_gists !== undefined ? data.user.public_gists.toLocaleString() : '');
+          if (gistsCount) statFields.push({ label: '. Gists: ', val: ` ${gistsCount}` });
         }
 
         for (let i = 0; i < statFields.length; i += 2) {
