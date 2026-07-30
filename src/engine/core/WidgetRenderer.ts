@@ -763,8 +763,8 @@ export function renderWidgetSvg(
         customTitle,
         showTitle,
         globalStyles,
-        null,
-        'gitfest'
+        globalStyles.accentColor || '',
+        'contain'
       );
       break;
     }
