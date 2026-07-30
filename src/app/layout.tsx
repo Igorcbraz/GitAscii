@@ -65,6 +65,7 @@ export const metadata: Metadata = {
 };
 
 import { I18nProvider } from "@/i18n";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export default function RootLayout({
   children,
@@ -80,6 +81,7 @@ export default function RootLayout({
         <I18nProvider>
           {children}
         </I18nProvider>
+        <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
       </body>
     </html>
   );
