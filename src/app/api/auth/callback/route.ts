@@ -32,6 +32,7 @@ export async function GET(request: Request) {
         client_secret: clientSecret,
         code,
       }),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!tokenResponse.ok) {
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
         Authorization: `Bearer ${accessToken}`,
         'User-Agent': 'GitAscii-App',
       },
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!userResponse.ok) {
@@ -68,6 +70,7 @@ export async function GET(request: Request) {
     await setSession({
       username: userData.login,
       githubId: userData.id,
+      accessToken: accessToken,
     });
 
     const origin = new URL(request.url).origin;

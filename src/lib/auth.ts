@@ -7,6 +7,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'gitascii-fallback-session-
 export interface UserSession {
   username: string;
   githubId: number;
+  accessToken?: string;
 }
 
 function encrypt(text: string): string {

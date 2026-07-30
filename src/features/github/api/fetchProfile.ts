@@ -1,5 +1,6 @@
 import type { GitHubUser, GitHubRepo, NormalizedGitHubData } from '../types/github';
 import { APP_URL } from '../../../constants';
+import { getSession } from '../../../lib/auth';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 
@@ -19,18 +20,22 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
   }
 
   try {
+    const session = await getSession().catch(() => null);
+    const token = session?.accessToken || process.env.GITHUB_TOKEN;
+
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'GitAscii-App',
     };
 
-    if (process.env.GITHUB_TOKEN) {
-      headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
+    if (token) {
+      headers.Authorization = `token ${token}`;
     }
 
     const userRes = await fetch(`${GITHUB_API_BASE}/users/${username}`, {
       headers,
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!userRes.ok) {
@@ -44,7 +49,11 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
     const reposRes = await fetch(
       `${GITHUB_API_BASE}/users/${username}/repos?sort=updated&per_page=30`,
-      { headers, next: { revalidate: 3600 } }
+      { 
+        headers, 
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(8000),
+      }
     );
 
     const repos: GitHubRepo[] = reposRes.ok ? await reposRes.json() : [];
