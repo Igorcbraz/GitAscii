@@ -156,6 +156,28 @@ async function fetchAndProcessExternalImage(
   height: string,
   preserve: string
 ): Promise<string> {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      throw new Error('Invalid protocol');
+    }
+    const hostname = parsedUrl.hostname;
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '169.254.169.254' ||
+      hostname.endsWith('.local') ||
+      hostname === '0.0.0.0' ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('192.168.')
+    ) {
+      throw new Error('Forbidden hostname');
+    }
+  } catch (e) {
+    throw new Error('Invalid URL');
+  }
+
   const response = await fetch(url, { headers: { accept: 'image/svg+xml, */*' } });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -232,6 +254,24 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     const selfClosing = m[4];
 
     try {
+      const parsedUrl = new URL(url);
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        throw new Error('Invalid protocol');
+      }
+      const hostname = parsedUrl.hostname;
+      if (
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '::1' ||
+        hostname === '169.254.169.254' ||
+        hostname.endsWith('.local') ||
+        hostname === '0.0.0.0' ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.')
+      ) {
+        throw new Error('Forbidden hostname');
+      }
+
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 

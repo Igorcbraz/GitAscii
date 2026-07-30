@@ -38,6 +38,7 @@ import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer';
 import { WidgetPreviewTooltip, type WidgetCatalogItem, type WidgetBadgeType } from './WidgetPreviewTooltip';
 import { useI18n } from '@/i18n';
 import { useToast } from '@/components/ui/toast';
+import { Sparkles } from 'lucide-react';
 
 const WIDGET_CATALOG: WidgetCatalogItem[] = [
   {
@@ -198,6 +199,15 @@ const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Badge de destaque para perfis incríveis',
     isExternal: true,
     category: 'external',
+  },
+  {
+    id: 'gitfest-lineup',
+    name: 'GitFest',
+    icon: Sparkles,
+    desc: 'Festival lineup of your repos',
+    isExternal: true,
+    category: 'external',
+    badge: { text: 'New', type: 'highlight' },
   },
 
   {
@@ -390,6 +400,79 @@ export function WidgetLibrary() {
   };
 
   const renderWidgetCard = (item: WidgetCatalogItem) => {
+    if (item.id === 'gitfest-lineup') {
+      return (
+        <div
+          key={item.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => addWidget(item.id)}
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setHoveredWidget({ item, rect });
+          }}
+          onMouseLeave={() => setHoveredWidget(null)}
+          className="group relative w-full px-3 py-2 rounded-xl font-bold text-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden cursor-pointer my-2 transform hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
+          style={{
+            background: 'linear-gradient(145deg, #3d2b5e 0%, #2d1b4e 50%, #3d2b5e 100%)',
+            border: '2px solid rgba(139, 92, 246, 0.4)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)'
+          }}
+        >
+          {/* Hover Glow Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#c084fc]/20 via-[#a855f7]/20 to-[#e9d5ff]/20 transition-opacity duration-700 opacity-0 group-hover:opacity-80" style={{ filter: 'blur(15px)' }}></div>
+          
+          {/* Animated Border Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#c084fc] via-[#a855f7] to-[#e9d5ff] rounded-2xl transition-all duration-500 opacity-0 group-hover:opacity-40 animate-pulse" style={{ filter: 'blur(10px)', zIndex: -1 }}></div>
+          
+          <div className='absolute inset-0 rounded-2xl bg-gradient-to-b from-transparent via-transparent to-black/50'></div>
+
+          <div className='relative z-20 flex items-center justify-between gap-2'>
+            <div className="flex items-center gap-2">
+              <div className="relative w-10 h-10 flex-shrink-0 transition-transform duration-500 group-hover:scale-110">
+                {/* Icon Glow */}
+                <div className="absolute -inset-2 bg-gradient-to-br from-[#c084fc]/60 via-[#a855f7]/60 to-[#e9d5ff]/60 transition-all duration-500 blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg"></div>
+
+                <div className='relative w-full h-full flex items-center justify-center'>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6] to-[#C084FC] rounded-lg transition-transform duration-500 group-hover:rotate-12" style={{
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.4)'
+                  }}></div>
+
+                  <svg
+                    className="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:scale-110"
+                    viewBox='0 0 24 24'
+                    fill='white'
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6))',
+                      opacity: 0.95
+                    }}
+                  >
+                    <path fillRule='evenodd' d='M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z' clipRule='evenodd' />
+                  </svg>
+                </div>
+              </div>
+
+              <div className='flex items-center justify-center pl-2'>
+                <img
+                  src={'/gitfest.png'}
+                  alt='GitFest'
+                  className="h-9 w-auto object-contain transition-all duration-300 drop-shadow-[0_2px_6px_rgba(139,92,246,0.5)] group-hover:drop-shadow-[0_4px_16px_rgba(168,85,247,0.9)] group-hover:brightness-125"
+                />
+              </div>
+            </div>
+            
+            <div className="text-white/60 group-hover:text-white transition-colors duration-300 p-1 shrink-0 self-center">
+              <Plus size={15} />
+            </div>
+          </div>
+
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+            <div className='absolute inset-0 bg-gradient-to-r from-transparent via-[#d8b4fe]/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out'></div>
+          </div>
+        </div>
+      );
+    }
+
     const Icon = item.icon;
 
     return (
@@ -401,15 +484,15 @@ export function WidgetLibrary() {
           setHoveredWidget({ item, rect });
         }}
         onMouseLeave={() => setHoveredWidget(null)}
-        className="group relative p-3 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all rounded-xs cursor-pointer flex items-center justify-between shadow-xs"
+        className="group relative p-3 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(197,255,74,0.1)]"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors shrink-0">
+          <div className="p-2 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
             <Icon size={16} />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-signal-lime transition-colors">
+              <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-signal-lime transition-colors duration-300">
                 {item.name}
               </h4>
               {renderWidgetBadge(item.badge)}
@@ -419,7 +502,7 @@ export function WidgetLibrary() {
             </p>
           </div>
         </div>
-        <button className="text-ash group-hover:text-signal-lime transition-colors p-1 shrink-0 self-center">
+        <button className="text-ash group-hover:text-signal-lime transition-colors duration-300 p-1 shrink-0 self-center">
           <Plus size={15} />
         </button>
       </div>
@@ -530,7 +613,7 @@ export function WidgetLibrary() {
                   href="https://github.com/Igorcbraz/GitAscii/fork"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all rounded-xs cursor-pointer flex items-center gap-2.5 hover:shadow-[0_0_20px_rgba(197,255,74,0.15)]"
+                  className="group relative p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:shadow-[0_0_20px_rgba(197,255,74,0.15)] hover:-translate-y-0.5"
                 >
                   <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
                     <GitFork size={14} />
@@ -562,14 +645,14 @@ export function WidgetLibrary() {
             <div className="space-y-2 mb-4">
               <div
                 onClick={handleImportClick}
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all rounded-xs cursor-pointer flex items-center justify-between shadow-xs"
+                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
                     <Upload size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
                       {t('editor.sidebar.import_layout', 'Import Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -581,14 +664,14 @@ export function WidgetLibrary() {
 
               <div
                 onClick={handleExport}
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all rounded-xs cursor-pointer flex items-center justify-between shadow-xs"
+                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
                     <Download size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
                       {t('editor.sidebar.export_layout', 'Export Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -607,7 +690,7 @@ export function WidgetLibrary() {
               <div
                 key={tmpl.id}
                 onClick={() => applyTemplate(tmpl.id)}
-                className={`p-4 border rounded-none cursor-pointer transition-all ${config.templateId === tmpl.id
+                className={`p-4 border rounded-none cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 ${config.templateId === tmpl.id
                   ? 'border-signal-lime bg-iron shadow-sm'
                   : 'border-graphite bg-graphite hover:border-slate'
                   }`}
@@ -637,7 +720,7 @@ export function WidgetLibrary() {
               href="https://github.com/Igorcbraz/GitAscii/fork"
               target="_blank"
               rel="noopener noreferrer"
-              className="group block p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all rounded-none cursor-pointer hover:shadow-[0_0_20px_rgba(197,255,74,0.15)]"
+              className="group block p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer hover:shadow-[0_0_20px_rgba(197,255,74,0.15)] hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-2.5">
                 <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">

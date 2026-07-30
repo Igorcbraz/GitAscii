@@ -741,6 +741,34 @@ export function renderWidgetSvg(
       break;
     }
 
+    case 'gitfest-lineup': {
+      const username = (cfg.username as string) || data.user.login;
+      const theme = (cfg.theme as string) || 'dark';
+      const sort = (cfg.sort as string) || 'stars';
+      const order = (cfg.order as string) || 'asc';
+      const type = (cfg.type as string) || 'owner';
+      const invertColors = Boolean(cfg.invertColors);
+      const hideRepos = (cfg.hideRepos as string) || '';
+
+      const showTitle = cfg.showTitle !== false;
+      const customTitle = (cfg.customTitle as string) || '[ GITFEST LINEUP ]';
+
+      const baseUrl = process.env.NEXT_PUBLIC_GITFEST_URL || 'http://localhost:3000';
+      const statsUrl = `${baseUrl}/api/lineup?username=${encodeURIComponent(username)}&theme=${theme}&sort=${sort}&order=${order}&type=${type}${invertColors ? '&invertColors=true' : ''}${hideRepos ? `&hideRepos=${encodeURIComponent(hideRepos)}` : ''}`;
+
+      contentSvg = renderExternalWidgetSvg(
+        statsUrl,
+        width,
+        height,
+        customTitle,
+        showTitle,
+        globalStyles,
+        null,
+        'gitfest'
+      );
+      break;
+    }
+
     case 'github-readme-stats': {
       const username = (cfg.username as string) || data.user.login;
       const statType = (cfg.statType as string) || 'stats';

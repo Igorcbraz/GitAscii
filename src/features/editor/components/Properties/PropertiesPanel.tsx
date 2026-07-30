@@ -244,6 +244,7 @@ export function PropertiesPanel() {
         )}
 
         {[
+          'gitfest-lineup',
           'github-readme-stats',
           'streak-stats',
           'profile-trophy',

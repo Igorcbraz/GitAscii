@@ -14,8 +14,8 @@ const PROFILES_DIR = path.join(process.cwd(), 'src', 'data', 'profiles');
 
 export class LocalProfileRepository implements ProfileRepository {
   async get(username: string, slug: string): Promise<SavedConfiguration | null> {
-    const usernameLower = username.toLowerCase();
-    const slugLower = slug.toLowerCase();
+    const usernameLower = username.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const slugLower = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '');
     const filePath = path.join(PROFILES_DIR, `${usernameLower}_${slugLower}.json`);
     try {
       if (fs.existsSync(filePath)) {
@@ -29,8 +29,8 @@ export class LocalProfileRepository implements ProfileRepository {
   }
 
   async save(config: SavedConfiguration): Promise<void> {
-    const username = config.username.toLowerCase();
-    const slug = (config.profileSlug || 'default').toLowerCase();
+    const username = config.username.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const slug = (config.profileSlug || 'default').toLowerCase().replace(/[^a-z0-9_-]/g, '');
     try {
       if (!fs.existsSync(PROFILES_DIR)) {
         fs.mkdirSync(PROFILES_DIR, { recursive: true });
@@ -44,8 +44,8 @@ export class LocalProfileRepository implements ProfileRepository {
   }
 
   async delete(username: string, slug: string): Promise<void> {
-    const usernameLower = username.toLowerCase();
-    const slugLower = slug.toLowerCase();
+    const usernameLower = username.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    const slugLower = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '');
     const filePath = path.join(PROFILES_DIR, `${usernameLower}_${slugLower}.json`);
     try {
       if (fs.existsSync(filePath)) {

@@ -259,6 +259,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         stats: { width: 800, height: 120 },
         languages: { width: 800, height: 140 },
         repositories: { width: 800, height: 180 },
+        'gitfest-lineup': { width: 500, height: 650 },
         'github-readme-stats': { width: 500, height: 210 },
         'streak-stats': { width: 500, height: 210 },
         'profile-trophy': { width: 800, height: 160 },

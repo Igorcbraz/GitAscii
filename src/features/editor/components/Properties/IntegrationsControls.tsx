@@ -6,6 +6,48 @@ import { useEditorStore } from '../../store/editorStore';
 import type { WidgetConfig } from '@/engine/types';
 import { useI18n } from '@/i18n';
 
+function DebouncedInput({
+  value,
+  onChange,
+  placeholder,
+  className
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
+  const [localVal, setLocalVal] = React.useState(value);
+
+  React.useEffect(() => {
+    setLocalVal(value);
+  }, [value]);
+
+  const onChangeRef = React.useRef(onChange);
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localVal !== value) {
+        onChangeRef.current(localVal);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [localVal, value]);
+
+  return (
+    <input
+      type="text"
+      value={localVal}
+      onChange={(e) => setLocalVal(e.target.value)}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
+}
+
 interface IntegrationsControlsProps {
   instanceId: string;
   widgetId: string;
@@ -81,6 +123,88 @@ export function IntegrationsControls({
             placeholder={defaultUsername || 'username'}
             className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
           />
+        </div>
+      )}
+
+      {widgetId === 'gitfest-lineup' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Theme</label>
+            <select
+              value={(config.theme as string) || 'dark'}
+              onChange={(e) => handleUpdate({ theme: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="dark">Dark</option>
+              <option value="gitfest-rio">GitFest Rio</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Sort By</label>
+            <select
+              value={(config.sort as string) || 'stars'}
+              onChange={(e) => handleUpdate({ sort: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="stars">Stars</option>
+              <option value="created">Created</option>
+              <option value="updated">Updated</option>
+              <option value="full_name">Name</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Order</label>
+            <select
+              value={(config.order as string) || 'asc'}
+              onChange={(e) => handleUpdate({ order: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Type</label>
+            <select
+              value={(config.type as string) || 'owner'}
+              onChange={(e) => handleUpdate({ type: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="owner">Owner</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Ocultar Repositórios (Separados por vírgula)</label>
+            <DebouncedInput
+              value={(config.hideRepos as string) || ''}
+              onChange={(val) => handleUpdate({ hideRepos: val })}
+              placeholder="Ex: repo1, repo2"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 pt-1">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <div className="relative flex items-center">
+                <input
+                  type="checkbox"
+                  checked={Boolean(config.invertColors)}
+                  onChange={(e) => handleUpdate({ invertColors: e.target.checked })}
+                  className="peer sr-only"
+                />
+                <div className="w-8 h-4 bg-void-black border border-graphite rounded-full peer-checked:bg-signal-lime/20 peer-checked:border-signal-lime transition-colors"></div>
+                <div className="absolute left-1 top-1 w-2 h-2 bg-ash rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-signal-lime"></div>
+              </div>
+              <span className="text-note text-ash group-hover:text-chalk transition-colors font-inter-tight">
+                Invert Colors
+              </span>
+            </label>
+          </div>
         </div>
       )}
 
