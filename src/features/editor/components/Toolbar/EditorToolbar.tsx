@@ -12,9 +12,13 @@ import {
   Save,
   Loader2,
   Download,
-  Upload
+  Upload,
+  LogOut,
+  User,
+  LogIn
 } from 'lucide-react';
 import { CopyGuideModal } from './CopyGuideModal';
+import { ExportGuideModal } from './ExportGuideModal';
 import { useEditorStore } from '../../store/editorStore';
 import { APP_URL } from '../../../../constants';
 import { useI18n } from '@/i18n';
@@ -40,6 +44,7 @@ export function EditorToolbar() {
     saveToServer,
     isSaving,
     importLayout,
+    session,
   } = useEditorStore();
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -47,7 +52,20 @@ export function EditorToolbar() {
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL);
   const [copied, setCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showExportGuide, setShowExportGuide] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -85,6 +103,11 @@ export function EditorToolbar() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      
+      const skipGuide = typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_export_guide') === 'true';
+      if (!skipGuide) {
+        setShowExportGuide(true);
+      }
     } catch (err) {
       console.error('Failed to export layout:', err);
     }
@@ -223,10 +246,19 @@ export function EditorToolbar() {
     config,
   ]);
 
+  React.useEffect(() => {
+    const handleOpenExportGuide = () => {
+      setShowExportGuide(true);
+    };
+    window.addEventListener('openExportGuide', handleOpenExportGuide);
+    return () => window.removeEventListener('openExportGuide', handleOpenExportGuide);
+  }, []);
+
   if (!config || !githubData) return null;
 
   const username = config.username;
   const profileSlug = config.profileSlug;
+  const isOwner = !!(session && session.username.toLowerCase() === username.toLowerCase());
 
   const embedUrl =
     profileSlug === 'default'
@@ -259,12 +291,38 @@ export function EditorToolbar() {
 
         <div className="h-4 w-px bg-graphite" />
 
-        <div className="flex items-center gap-2 text-ash text-label font-inter-tight">
-          <span className="text-chalk font-medium">@{username}</span>
-          <span>/</span>
-          <span className="text-signal-lime uppercase tracking-wider font-medium text-eyebrow px-2 py-0.5 border border-graphite rounded-xs bg-onyx">
-            {config.profileName || 'Default'}
-          </span>
+        <div className="flex items-center gap-3 z-10">
+          {session ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${session.username}`}
+                className="inline-flex items-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-3.5 py-2 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 hover:border-signal-lime hover:shadow-[0_0_8px_rgba(197,255,74,0.2)] hover:bg-onyx/80"
+              >
+                <User className="size-3.5" />
+                <span>@{session.username}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
+                title="Sair"
+              >
+                <LogOut className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <a
+              href={`/api/auth/login?redirect_to=/${username}`}
+              onClick={() => setIsLoginLoading(true)}
+              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer"
+            >
+              {isLoginLoading ? (
+                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LogIn className="size-4" />
+              )}
+              <span>LOGIN</span>
+            </a>
+          )}
         </div>
       </div>
 
@@ -311,48 +369,69 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          onClick={handleSave}
-          disabled={saveStatus === 'saving'}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
-            saveStatus === 'saved'
-              ? 'bg-signal-lime text-black glow-lime'
-              : saveStatus === 'error'
-              ? 'bg-red-500 text-white'
-              : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
-          }`}
-        >
-          {saveStatus === 'saving' ? (
-            <Loader2 size={14} className="animate-spin" />
-          ) : saveStatus === 'saved' ? (
-            <Check size={14} />
-          ) : (
-            <Save size={14} />
-          )}
-          <span>
-            {saveStatus === 'saving'
-              ? t('common.saving', 'Saving...')
-              : saveStatus === 'saved'
-              ? t('common.saved', 'Saved!')
-              : saveStatus === 'error'
-              ? t('common.error', 'Error!')
-              : t('common.save_profile', 'Save Profile')}
-          </span>
-        </button>
 
-        <button
-          onClick={handleCopyCode}
-          className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-        >
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          <span>{copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}</span>
-        </button>
+        {isOwner && (
+          <button
+            onClick={handleSave}
+            disabled={saveStatus === 'saving'}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
+              saveStatus === 'saved'
+                ? 'bg-signal-lime text-black glow-lime'
+                : saveStatus === 'error'
+                ? 'bg-red-500 text-white'
+                : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
+            }`}
+          >
+            {saveStatus === 'saving' ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : saveStatus === 'saved' ? (
+              <Check size={14} />
+            ) : (
+              <Save size={14} />
+            )}
+            <span>
+              {saveStatus === 'saving'
+                ? t('common.saving', 'Saving...')
+                : saveStatus === 'saved'
+                ? t('common.saved', 'Saved!')
+                : saveStatus === 'error'
+                ? t('common.error', 'Error!')
+                : t('common.save_profile', 'Save Profile')}
+            </span>
+          </button>
+        )}
+
+        {isOwner ? (
+          <button
+            onClick={handleCopyCode}
+            className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            <span>{copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}</span>
+          </button>
+        ) : (
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
+          >
+            <Download size={14} />
+            <span>{t('common.export_layout', 'Export Layout')}</span>
+          </button>
+        )}
       </div>
 
       <CopyGuideModal
         isOpen={showGuide}
         onClose={() => setShowGuide(false)}
         username={username}
+        embedCode={embedCode}
+      />
+      
+      <ExportGuideModal
+        isOpen={showExportGuide}
+        onClose={() => setShowExportGuide(false)}
+        username={username}
+        onDownload={handleExport}
         embedCode={embedCode}
       />
     </header>

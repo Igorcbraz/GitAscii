@@ -6,9 +6,10 @@ import { useI18n, type Language } from '@/i18n';
 
 interface LanguageSelectorProps {
   align?: 'left' | 'right';
+  className?: string;
 }
 
-export default function LanguageSelector({ align = 'right' }: LanguageSelectorProps) {
+export default function LanguageSelector({ align = 'right', className = '' }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,14 +33,14 @@ export default function LanguageSelector({ align = 'right' }: LanguageSelectorPr
   const currentLang = languagesList.find((l) => l.code === language) || languagesList[0];
 
   return (
-    <div ref={containerRef} className="relative inline-block text-left z-50">
+    <div ref={containerRef} className={`relative inline-block text-left z-50 ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 rounded-sm border border-graphite bg-onyx px-3 py-2 font-inter-tight text-[13px] font-medium text-white transition-all duration-300 ease-in-out hover:border-signal-lime hover:bg-onyx/80 active:scale-[0.98] cursor-pointer group"
+        className="inline-flex items-center gap-1.5 rounded-sm border border-graphite bg-onyx px-2 py-1 font-inter-tight text-[11px] font-medium text-white transition-all duration-300 ease-in-out hover:border-signal-lime hover:bg-onyx/80 active:scale-[0.98] cursor-pointer group"
       >
-        <Globe className="size-4 text-ash group-hover:text-signal-lime transition-colors duration-300" />
+        <Globe className="size-3 text-ash group-hover:text-signal-lime transition-colors duration-300" />
         <span className="uppercase tracking-wider">{language}</span>
-        <ChevronDown className={`size-3.5 text-ash transition-transform duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : ''}`} />
+        <ChevronDown className={`size-3 text-ash transition-transform duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : ''}`} />
       </button>
 
       {isOpen && (

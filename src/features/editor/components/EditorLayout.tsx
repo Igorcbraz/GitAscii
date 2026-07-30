@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { AlertCircle, LogIn, ExternalLink } from 'lucide-react';
 import { useEditorStore } from '../store/editorStore';
 import { EditorToolbar } from './Toolbar/EditorToolbar';
 import { WidgetLibrary } from './Sidebar/WidgetLibrary';
@@ -18,7 +19,7 @@ interface EditorLayoutProps {
 }
 
 export function EditorLayout({ username, profileSlug = 'default', autoGenerate = false }: EditorLayoutProps) {
-  const { initEditor, config } = useEditorStore();
+  const { initEditor, config, setSession, session } = useEditorStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +29,19 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
     async function loadData() {
       try {
         setLoading(true);
+
+        try {
+          const sessionRes = await fetch('/api/auth/session');
+          if (sessionRes.ok) {
+            const sessionData = await sessionRes.json();
+            if (isMounted) {
+              setSession(sessionData.session || null);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to fetch session', e);
+        }
+
         const res = await fetch(`/api/github/${username}`);
         if (!res.ok) {
           let errMsg = 'Failed to fetch GitHub profile';
@@ -83,7 +97,7 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
     return () => {
       isMounted = false;
     };
-  }, [username, profileSlug, autoGenerate, initEditor]);
+  }, [username, profileSlug, autoGenerate, initEditor, setSession]);
 
   const { t } = useI18n();
 
@@ -109,9 +123,37 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
     );
   }
 
+  const isOwner = session && session.username.toLowerCase() === username.toLowerCase();
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-carbon">
       <EditorToolbar />
+      {!isOwner && (
+        <div className="bg-onyx border-b border-graphite px-4 py-2 flex items-center justify-between text-note text-ash font-inter-tight select-none">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={14} className="text-signal-lime shrink-0" />
+            <span className="text-eyebrow leading-none">
+              {session ? (
+                <>
+                  Você está logado como <strong className="text-white">@{session.username}</strong>, mas editando o perfil de <strong className="text-white">@{username}</strong>. Suas alterações não serão salvas no servidor.
+                </>
+              ) : (
+                <>
+                  Você está no <strong className="text-signal-lime font-medium">Modo Lite (Self-Hosted)</strong>. Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o seu repositório GitHub.
+                </>
+              )}
+            </span>
+          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('openExportGuide'))}
+              className="flex items-center gap-1 text-caption text-ash hover:text-white transition-colors cursor-pointer"
+            >
+              Ver Tutorial
+            </button>
+          </div>
+        </div>
+      )}
       <div className="flex-1 flex overflow-hidden relative">
         <WidgetLibrary />
         <SVGCanvas />

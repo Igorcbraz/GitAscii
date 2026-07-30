@@ -26,6 +26,8 @@ export interface EditorStore {
   zoom: number;
   isSaving: boolean;
   activeTab: 'widgets' | 'layers' | 'templates';
+  session: { username: string; githubId: number } | null;
+  setSession: (session: { username: string; githubId: number } | null) => void;
 
   initEditor: (config: SavedConfiguration, data: NormalizedGitHubData) => void;
   selectWidget: (instanceId: string | null) => void;
@@ -90,6 +92,9 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     zoom: 1,
     isSaving: false,
     activeTab: 'widgets',
+    session: null,
+
+    setSession: (session) => set({ session }),
 
     canUndo: false,
     canRedo: false,

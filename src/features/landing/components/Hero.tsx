@@ -1,23 +1,40 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Github } from 'lucide-react';
+import { ArrowRight, Github, User } from 'lucide-react';
 import { useI18n } from '@/i18n';
 
 import AsciiHands from '@/components/ui/ascii-hands';
 import { useToast } from '@/components/ui/toast';
 
+export interface UserSession {
+  username: string;
+  githubId: number;
+}
+
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [session, setSession] = useState<UserSession | null>(null);
   const router = useRouter();
   const { t } = useI18n();
   const { error } = useToast();
 
   useEffect(() => {
     setMounted(true);
+
+    fetch('/api/auth/session')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.session) {
+          setSession(data.session);
+        }
+      })
+      .catch(() => { });
   }, []);
 
   const validateUsername = (val: string) => {
@@ -40,16 +57,6 @@ export default function Hero() {
     router.push(`/${handle}`);
   };
 
-  const handleGenerateBest = () => {
-    const handle = username.trim() || 'Igorcbraz';
-    if (username.trim() && !validateUsername(handle)) {
-      error('Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).');
-      return;
-    }
-    setIsLoading(true);
-    router.push(`/${handle}?generate=true`);
-  };
-
   return (
     <section className="relative min-h-screen">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -59,7 +66,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pb-24 md:pb-32 pt-16">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
             <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
@@ -77,7 +84,36 @@ export default function Hero() {
             {t('landing.hero.subtitle', 'Premium SVGs. ASCII art. Visual editor. One platform for developers who care about their profile.')}
           </p>
 
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
+            {session ? (
+              <Link
+                href={`/${session.username}`}
+                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <User size={18} />
+                <span>{t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})</span>
+              </Link>
+            ) : (
+              <a
+                href="/api/auth/login"
+                onClick={() => setIsGithubLoading(true)}
+                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                {isGithubLoading ? (
+                  <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Github size={18} />
+                )}
+                <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
+              </a>
+            )}
+
+            <div className="flex items-center gap-3 w-full">
+              <span className="flex-1 h-px bg-graphite/60" />
+              <span className="uppercase text-caption tracking-widest text-ash/50 font-inter-tight">{t('common.or', 'or')}</span>
+              <span className="flex-1 h-px bg-graphite/60" />
+            </div>
+
             <form onSubmit={handleOpenEditor} className="flex w-full group">
               <div className="relative grow flex items-center">
                 <Github className="absolute left-4 w-5 h-5 text-ash z-10" />
@@ -88,17 +124,17 @@ export default function Hero() {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
                   placeholder={t('landing.hero.placeholder', 'Enter your GitHub username')}
-                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime focus:ring-1 focus:ring-signal-lime transition-all disabled:opacity-50 [&:-webkit-autofill]:[WebkitTextFillColor:#ffffff] [&:-webkit-autofill]:[WebkitBoxShadow:0_0_0_1000px_#060606_inset] [&:-webkit-autofill]:[transition:background-color_5000s_ease-in-out_0s]"
+                  className="w-full bg-onyx/80 backdrop-blur-sm border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime/60 focus:ring-1 focus:ring-signal-lime/60 transition-all disabled:opacity-50 [&:-webkit-autofill]:[WebkitTextFillColor:#ffffff] [&:-webkit-autofill]:[WebkitBoxShadow:0_0_0_1000px_#060606_inset] [&:-webkit-autofill]:[transition:background-color_5000s_ease-in-out_0s]"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="shrink-0 bg-signal-lime text-black font-inter-tight font-medium text-body py-3.5 px-6 rounded-r-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_12px_rgba(197,255,74,0.65)] hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                className="shrink-0 bg-onyx border border-graphite border-l-0 text-white font-inter-tight font-medium text-body py-3.5 px-5 rounded-r-sm transition-all duration-300 hover:border-signal-lime/50 hover:text-signal-lime flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span>{t('landing.hero.loading', 'Loading...')}</span>
                   </>
                 ) : (
@@ -108,25 +144,6 @@ export default function Hero() {
                 )}
               </button>
             </form>
-
-            <button
-              type="button"
-              onClick={handleGenerateBest}
-              disabled={isLoading}
-              className="font-inter-tight font-medium text-label text-signal-lime flex items-center gap-1 group/btn relative cursor-pointer hover:text-signal-lime bg-transparent border-none disabled:opacity-75 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-signal-lime border-t-transparent rounded-full animate-spin mr-1"></span>
-                  <span>{t('landing.hero.generating', 'Generating...')}</span>
-                </>
-              ) : (
-                <>
-                  {t('landing.hero.generate_best', 'Generate Best Profile')}
-                  <span className="absolute bottom-0 left-0 w-full h-px bg-signal-lime transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300"></span>
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>
