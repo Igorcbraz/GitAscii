@@ -69,11 +69,11 @@ export class BlobProfileRepository implements ProfileRepository {
     try {
       const { blobs } = await list({ prefix: `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json` });
 
-      let blob = blobs.find((b) => b.pathname === pathName);
+      let blob = blobs.find((b) => b.pathname === pathName || b.pathname.startsWith(pathName));
       let isCompressed = true;
 
       if (!blob) {
-        blob = blobs.find((b) => b.pathname === legacyPathName);
+        blob = blobs.find((b) => b.pathname === legacyPathName || b.pathname.startsWith(legacyPathName));
         isCompressed = false;
       }
 
@@ -116,7 +116,7 @@ export class BlobProfileRepository implements ProfileRepository {
       try {
         const legacyPathName = `profiles/${username}_${slug}.json`;
         const { blobs } = await list({ prefix: legacyPathName });
-        const legacyBlob = blobs.find((b) => b.pathname === legacyPathName);
+        const legacyBlob = blobs.find((b) => b.pathname === legacyPathName || b.pathname.startsWith(legacyPathName));
         if (legacyBlob) {
           await del(legacyBlob.url);
         }
@@ -135,12 +135,12 @@ export class BlobProfileRepository implements ProfileRepository {
     try {
       const { blobs } = await list({ prefix: `profiles/${username.toLowerCase()}_${slug.toLowerCase()}.json` });
 
-      const compressedBlob = blobs.find((b) => b.pathname === pathName);
+      const compressedBlob = blobs.find((b) => b.pathname === pathName || b.pathname.startsWith(pathName));
       if (compressedBlob) {
         await del(compressedBlob.url);
       }
 
-      const legacyBlob = blobs.find((b) => b.pathname === legacyPathName);
+      const legacyBlob = blobs.find((b) => b.pathname === legacyPathName || b.pathname.startsWith(legacyPathName));
       if (legacyBlob) {
         await del(legacyBlob.url);
       }
