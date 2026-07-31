@@ -5,9 +5,9 @@ import { FeaturesGrid } from '@/features/landing/components/FeaturesGrid'
 import { Footer } from '@/features/landing/components/Footer'
 import Hero from '@/features/landing/components/Hero'
 import { HowItWorks } from '@/features/landing/components/HowItWorks'
+import InteractiveShowcase from '@/features/landing/components/InteractiveShowcase'
 import Navbar from '@/features/landing/components/Navbar'
 import { SummarySection } from '@/features/landing/components/SummarySection'
-import TemplatesShowcase from '@/features/landing/components/TemplatesShowcase'
 
 export default function LandingPage() {
   return (
@@ -17,7 +17,7 @@ export default function LandingPage() {
         <Hero />
         <SummarySection />
         <DemoSection />
-        <TemplatesShowcase />
+        <InteractiveShowcase />
         <FeaturesGrid />
         <HowItWorks />
         <FAQ />

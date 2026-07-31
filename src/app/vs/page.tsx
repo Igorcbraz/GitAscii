@@ -139,17 +139,7 @@ export default function ComparisonHubPage() {
             <tbody className="divide-y divide-graphite text-bone">
               <tr>
                 <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_live_svg', 'Live SVG Stats Rendering')}
-                </td>
-                <td className="p-4 text-signal-lime font-bold">
-                  {t('vs.td_included', '✓ Included')}
-                </td>
-                <td className="p-4 text-ash">{t('vs.td_no', '✕ No')}</td>
-                <td className="p-4 text-ash">{t('vs.td_partial', 'Partial')}</td>
-              </tr>
-              <tr>
-                <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_ascii', 'Image-to-ASCII Converter')}
+                  {t('vs.concept_edge_rendering', 'Dynamic SVG Edge Rendering')}
                 </td>
                 <td className="p-4 text-signal-lime font-bold">
                   {t('vs.td_included', '✓ Included')}
@@ -159,7 +149,27 @@ export default function ComparisonHubPage() {
               </tr>
               <tr>
                 <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_visual_editor', 'Drag-and-Drop Visual Editor')}
+                  {t('vs.concept_theme_toggle', 'Native Light/Dark Auto-Toggle')}
+                </td>
+                <td className="p-4 text-signal-lime font-bold">
+                  {t('vs.td_included', '✓ Included')}
+                </td>
+                <td className="p-4 text-ash">{t('vs.td_manual', '✕ Manual')}</td>
+                <td className="p-4 text-ash">{t('vs.td_manual', '✕ Manual')}</td>
+              </tr>
+              <tr>
+                <td className="p-4 font-medium text-chalk">
+                  {t('vs.concept_ascii_engine', 'Luminance-Based ASCII Engine')}
+                </td>
+                <td className="p-4 text-signal-lime font-bold">
+                  {t('vs.td_included', '✓ Included')}
+                </td>
+                <td className="p-4 text-ash">{t('vs.td_no', '✕ No')}</td>
+                <td className="p-4 text-ash">{t('vs.td_no', '✕ No')}</td>
+              </tr>
+              <tr>
+                <td className="p-4 font-medium text-chalk">
+                  {t('vs.concept_visual_builder', 'Visual Layout Canvas Builder')}
                 </td>
                 <td className="p-4 text-signal-lime font-bold">
                   {t('vs.td_included', '✓ Included')}
@@ -169,27 +179,19 @@ export default function ComparisonHubPage() {
               </tr>
               <tr>
                 <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_dark_mode', 'Dark / Light Mode <picture>')}
+                  {t('vs.concept_zero_db', 'Zero Database Dependency')}
                 </td>
                 <td className="p-4 text-signal-lime font-bold">
                   {t('vs.td_included', '✓ Included')}
                 </td>
-                <td className="p-4 text-ash">{t('vs.td_manual', '✕ Manual')}</td>
-                <td className="p-4 text-ash">{t('vs.td_manual', '✕ Manual')}</td>
-              </tr>
-              <tr>
-                <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_multiple_profiles', 'Multiple Profile Layouts')}
-                </td>
+                <td className="p-4 text-ash">{t('vs.td_requires_db', '✕ Requires DB')}</td>
                 <td className="p-4 text-signal-lime font-bold">
                   {t('vs.td_included', '✓ Included')}
                 </td>
-                <td className="p-4 text-ash">{t('vs.td_single', '✕ Single')}</td>
-                <td className="p-4 text-ash">{t('vs.td_single', '✕ Single')}</td>
               </tr>
               <tr>
                 <td className="p-4 font-medium text-chalk">
-                  {t('vs.td_open_source', '100% Free & Open Source')}
+                  {t('vs.concept_self_host', 'MIT Open Source & Self-Hostable')}
                 </td>
                 <td className="p-4 text-signal-lime font-bold">
                   {t('vs.td_mit', '✓ MIT License')}
