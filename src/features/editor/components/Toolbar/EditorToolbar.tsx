@@ -146,65 +146,107 @@ export function EditorToolbar() {
         return
       }
 
+      if (cmdOrCtrl && e.key.toLowerCase() === 'c') {
+        e.preventDefault()
+        useEditorStore.getState().copyWidgets()
+        return
+      }
+
+      if (cmdOrCtrl && e.key.toLowerCase() === 'v') {
+        e.preventDefault()
+        useEditorStore.getState().pasteWidgets()
+        return
+      }
+
+      if (cmdOrCtrl && e.key.toLowerCase() === 'x') {
+        e.preventDefault()
+        useEditorStore.getState().cutWidgets()
+        return
+      }
+
+      if (cmdOrCtrl && e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        if (config) {
+          useEditorStore.getState().setSelection(config.widgets.map((w) => w.instanceId))
+        }
+        return
+      }
+
       if (cmdOrCtrl && e.key.toLowerCase() === 'd') {
-        if (selectedInstanceId) {
-          e.preventDefault()
-          duplicateWidget(selectedInstanceId)
+        e.preventDefault()
+        useEditorStore.getState().copyWidgets()
+        useEditorStore.getState().pasteWidgets()
+        return
+      }
+
+      if (cmdOrCtrl && e.key === '[') {
+        e.preventDefault()
+        const ids = useEditorStore.getState().selectedInstanceIds
+        if (ids && ids.length > 0) {
+          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'down'))
         }
         return
       }
 
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedInstanceId) {
-        const widget = config?.widgets.find((w) => w.instanceId === selectedInstanceId)
-        if (widget && !widget.locked) {
-          e.preventDefault()
-          removeWidget(selectedInstanceId)
+      if (cmdOrCtrl && e.key === ']') {
+        e.preventDefault()
+        const ids = useEditorStore.getState().selectedInstanceIds
+        if (ids && ids.length > 0) {
+          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'up'))
         }
         return
       }
 
-      if (e.key === 'Escape' && selectedInstanceId) {
+      if (cmdOrCtrl && e.key.toLowerCase() === 'l') {
+        e.preventDefault()
+        const ids = useEditorStore.getState().selectedInstanceIds
+        if (ids && ids.length > 0) {
+          ids.forEach((id) => useEditorStore.getState().toggleWidgetLock(id))
+        }
+        return
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const ids = useEditorStore.getState().selectedInstanceIds
+        if (ids && ids.length > 0) {
+          e.preventDefault()
+          useEditorStore.getState().removeWidgets(ids)
+        }
+        return
+      }
+
+      if (e.key === 'Escape') {
         e.preventDefault()
         selectWidget(null)
         return
       }
 
-      if (selectedInstanceId && config) {
-        const widget = config.widgets.find((w) => w.instanceId === selectedInstanceId)
-        if (widget && !widget.locked) {
-          const step = e.shiftKey ? 10 : 2
+      const selectedIds = useEditorStore.getState().selectedInstanceIds
+      if (selectedIds && selectedIds.length > 0 && config) {
+        const step = e.shiftKey ? 10 : 2
 
-          if (e.key === 'ArrowUp') {
-            e.preventDefault()
-            updateWidgetPosition(
-              widget.instanceId,
-              { x: widget.position.x, y: Math.max(0, widget.position.y - step) },
-              true
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault()
+          const deltas = selectedIds
+            .map((id) => {
+              const widget = config.widgets.find((w) => w.instanceId === id)
+              if (!widget || widget.locked) return null
+
+              let nx = widget.position.x
+              let ny = widget.position.y
+              if (e.key === 'ArrowUp') ny = Math.max(0, ny - step)
+              else if (e.key === 'ArrowDown') ny += step
+              else if (e.key === 'ArrowLeft') nx = Math.max(0, nx - step)
+              else if (e.key === 'ArrowRight') nx = Math.min(800 - widget.size.width, nx + step)
+
+              return { instanceId: id, position: { x: nx, y: ny } }
+            })
+            .filter((d): d is { instanceId: string; position: { x: number; y: number } } =>
+              Boolean(d)
             )
-          } else if (e.key === 'ArrowDown') {
-            e.preventDefault()
-            updateWidgetPosition(
-              widget.instanceId,
-              { x: widget.position.x, y: widget.position.y + step },
-              true
-            )
-          } else if (e.key === 'ArrowLeft') {
-            e.preventDefault()
-            updateWidgetPosition(
-              widget.instanceId,
-              { x: Math.max(0, widget.position.x - step), y: widget.position.y },
-              true
-            )
-          } else if (e.key === 'ArrowRight') {
-            e.preventDefault()
-            updateWidgetPosition(
-              widget.instanceId,
-              {
-                x: Math.min(800 - widget.size.width, widget.position.x + step),
-                y: widget.position.y,
-              },
-              true
-            )
+
+          if (deltas.length > 0) {
+            useEditorStore.getState().updateWidgetPositions(deltas, true)
           }
         }
       }

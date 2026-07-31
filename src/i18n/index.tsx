@@ -75,12 +75,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'landing.features.live_rendering.title': 'Live Rendering',
     'landing.features.live_rendering.desc':
       'Your SVG is served via URL — always up to date. No manual uploads, no stale data.',
-    'landing.features.multiple_profiles.title': 'Multiple Profiles',
-    'landing.features.multiple_profiles.desc':
-      'Create different profiles for different purposes. Portfolio, Resume, Open Source — all from one account.',
-    'landing.features.smart_gen.title': 'Smart Generation',
-    'landing.features.smart_gen.desc':
-      'Let GitAscii analyze your GitHub and generate the perfect profile automatically.',
+    'landing.features.adaptive_themes.title': 'Adaptive Themes',
+    'landing.features.adaptive_themes.desc':
+      'Automatically switch between dark and light themes using embedded SVG media queries and prefers-color-scheme.',
+    'landing.features.edge_native.title': 'Edge Native Caching',
+    'landing.features.edge_native.desc':
+      'Served from global Serverless Edge functions with 4-hour caching to ensure fast loading on GitHub Camo.',
 
     'landing.how_it_works.eyebrow': '[ THREE STEPS ]',
     'landing.how_it_works.title_normal': 'Simple. ',
@@ -323,12 +323,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'landing.features.live_rendering.title': 'Renderização ao Vivo',
     'landing.features.live_rendering.desc':
       'Seu SVG é servido via URL — sempre atualizado. Sem uploads manuais, sem dados desatualizados.',
-    'landing.features.multiple_profiles.title': 'Múltiplos Perfis',
-    'landing.features.multiple_profiles.desc':
-      'Crie perfis diferentes para finalidades distintas. Portfólio, Currículo, Open Source — tudo a partir de uma conta.',
-    'landing.features.smart_gen.title': 'Geração Inteligente',
-    'landing.features.smart_gen.desc':
-      'Deixe o GitAscii analisar seu GitHub e gerar o perfil perfeito de forma automática.',
+    'landing.features.adaptive_themes.title': 'Temas Adaptativos',
+    'landing.features.adaptive_themes.desc':
+      'Alterne automaticamente entre temas claro e escuro usando media queries SVG nativas e prefers-color-scheme.',
+    'landing.features.edge_native.title': 'Edge Native Caching',
+    'landing.features.edge_native.desc':
+      'Servido via funções Serverless Edge com cache de 4 horas para garantir carregamento ultra-rápido no proxy do GitHub.',
 
     'landing.how_it_works.eyebrow': '[ TRÊS PASSOS ]',
     'landing.how_it_works.title_normal': 'Simples. ',
@@ -572,12 +572,12 @@ export const translations: Record<Language, Record<string, string>> = {
     'landing.features.live_rendering.title': 'Renderizado en Vivo',
     'landing.features.live_rendering.desc':
       'Tu SVG se sirve a través de una URL, siempre actualizado. Sin subidas manuales, sin datos obsoletos.',
-    'landing.features.multiple_profiles.title': 'Múltiples Perfiles',
-    'landing.features.multiple_profiles.desc':
-      'Crea diferentes perfiles para diferentes propósitos. Portafolio, Currículum, Open Source — todo desde una cuenta.',
-    'landing.features.smart_gen.title': 'Generación Inteligente',
-    'landing.features.smart_gen.desc':
-      'Deja que GitAscii analice tu GitHub y genere el perfil perfecto automáticamente.',
+    'landing.features.adaptive_themes.title': 'Temas Adaptativos',
+    'landing.features.adaptive_themes.desc':
+      'Cambie automáticamente entre temas claros y oscuros usando consultas de medios SVG integradas y prefers-color-scheme.',
+    'landing.features.edge_native.title': 'Caché Edge Nativo',
+    'landing.features.edge_native.desc':
+      'Servido desde funciones Edge sin servidor con caché de 4 horas para garantizar una carga rápida en el proxy de GitHub Camo.',
 
     'landing.how_it_works.eyebrow': '[ TRES PASOS ]',
     'landing.how_it_works.title_normal': 'Simple. ',

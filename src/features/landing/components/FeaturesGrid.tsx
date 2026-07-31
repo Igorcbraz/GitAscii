@@ -1,6 +1,6 @@
 'use client'
 
-import { Layout, Paintbrush, Sparkles, Terminal, Users, Zap } from 'lucide-react'
+import { Cpu, Layout, Paintbrush, Sparkles, Terminal, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 
@@ -44,19 +44,19 @@ export function FeaturesGrid() {
       ),
     },
     {
-      title: t('landing.features.multiple_profiles.title', 'Multiple Profiles'),
-      icon: Users,
+      title: t('landing.features.adaptive_themes.title', 'Adaptive Themes'),
+      icon: Sparkles,
       description: t(
-        'landing.features.multiple_profiles.desc',
-        'Create different profiles for different purposes. Portfolio, Resume, Open Source — all from one account.'
+        'landing.features.adaptive_themes.desc',
+        'Automatically switch between dark and light themes using embedded SVG media queries and prefers-color-scheme.'
       ),
     },
     {
-      title: t('landing.features.smart_gen.title', 'Smart Generation'),
-      icon: Sparkles,
+      title: t('landing.features.edge_native.title', 'Edge Native Caching'),
+      icon: Cpu,
       description: t(
-        'landing.features.smart_gen.desc',
-        'Let GitAscii analyze your GitHub and generate the perfect profile automatically.'
+        'landing.features.edge_native.desc',
+        'Served from global Serverless Edge functions with 4-hour caching to ensure fast loading on GitHub Camo.'
       ),
     },
   ]

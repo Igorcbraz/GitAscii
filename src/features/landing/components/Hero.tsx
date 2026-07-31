@@ -135,6 +135,7 @@ export default function Hero() {
                 <input
                   id="hero-username-input"
                   type="text"
+                  aria-label={t('landing.hero.placeholder', 'Enter your GitHub username')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
@@ -145,6 +146,7 @@ export default function Hero() {
               <button
                 type="submit"
                 disabled={isLoading}
+                aria-label={t('landing.hero.open_editor', 'Open Editor')}
                 className="shrink-0 bg-onyx border border-graphite border-l-0 text-white font-inter-tight font-medium text-body py-3.5 px-5 rounded-r-sm transition-all duration-300 hover:border-signal-lime/50 hover:text-signal-lime flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
                 {isLoading ? (

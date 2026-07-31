@@ -5,8 +5,9 @@ import { FeaturesGrid } from '@/features/landing/components/FeaturesGrid'
 import { Footer } from '@/features/landing/components/Footer'
 import Hero from '@/features/landing/components/Hero'
 import { HowItWorks } from '@/features/landing/components/HowItWorks'
+import InteractiveShowcase from '@/features/landing/components/InteractiveShowcase'
 import Navbar from '@/features/landing/components/Navbar'
-import TemplatesShowcase from '@/features/landing/components/TemplatesShowcase'
+import { SummarySection } from '@/features/landing/components/SummarySection'
 
 export default function LandingPage() {
   return (
@@ -14,8 +15,9 @@ export default function LandingPage() {
       <KineticGrid className="min-h-screen!">
         <Navbar />
         <Hero />
+        <SummarySection />
         <DemoSection />
-        <TemplatesShowcase />
+        <InteractiveShowcase />
         <FeaturesGrid />
         <HowItWorks />
         <FAQ />

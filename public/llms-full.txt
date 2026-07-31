@@ -1,0 +1,69 @@
+# GitAscii — Complete Technical Documentation & AI Specification
+
+> Full specification of GitAscii architecture, SVG rendering engine, ASCII converter, theme templates, API parameters, and integration guides for AI models and search engines.
+
+## 1. System Architecture
+
+GitAscii is built on Next.js App Router, React 19, TypeScript, and Tailwind CSS. It serves two primary functions:
+1. **Interactive Visual Web Application**: A web editor available at `https://git-ascii.vercel.app/[username]` for creating custom GitHub profile layouts.
+2. **Serverless Dynamic SVG Engine**: Edge API routes that compute and render clean SVG markups on-the-fly containing real-time GitHub statistics, ASCII art, streak badges, tech stack pills, and customizable widgets.
+
+## 2. API Reference
+
+### 2.1 Standard Profile SVG Route
+- **URL**: `GET /api/:username`
+- **Description**: Renders default profile SVG for the given GitHub username.
+- **Query Parameters**:
+  - `theme`: Preset theme name (`terminal`, `minimal`, `github-dark`, `dracula`, `nord`, `tokyo-night`, `gruvbox`, `cyberpunk`, `matrix`, `japanese`, `bento`, `portfolio`, `open-source`). Default: `terminal`.
+  - `profileSlug`: Specific profile name if user has saved multiple layouts. Default: `default`.
+
+### 2.2 Named Profile SVG Route
+- **URL**: `GET /api/:username/:profileSlug`
+- **Description**: Renders specific named profile SVG (e.g. `/api/octocat/resume`).
+
+### 2.3 Direct SVG File Route
+- **URL**: `GET /:username/card.svg` or `GET /:username/:profileSlug/card.svg`
+- **Description**: File extension compatible route for tools or renderers requiring explicit `.svg` extensions.
+
+## 3. Themes & Customization Specs
+
+| Theme Name | Background | Accent Color | Vibe |
+| ---------- | ---------- | ------------ | ---- |
+| Terminal | `#000000` | `#c5ff4a` | Classic CLI terminal |
+| Minimal | `#ffffff` | `#000000` | Clean light mode |
+| GitHub Dark | `#0d1117` | `#58a6ff` | Native GitHub interface |
+| Dracula | `#282a36` | `#bd93f9` | Vibrant purple theme |
+| Nord | `#2e3440` | `#88c0d0` | Cold arctic palette |
+| Tokyo Night | `#1a1b26` | `#7aa2f7` | Modern neon blue |
+| Gruvbox | `#282828` | `#fabd2f` | Warm retro tones |
+| Cyberpunk | `#0a0a0f` | `#ff00ff` | Sci-fi neon glow |
+| Matrix | `#000000` | `#00ff00` | Digital green rain |
+| Japanese | `#1a1a1a` | `#e74c3c` | Zen aesthetic minimal |
+| Bento | `#0f0f0f` | `#ffffff` | Modern grid layout |
+| Portfolio | `#0a0a0a` | `#c5ff4a` | Professional lime accent |
+| Open Source | `#0d1117` | `#3fb950` | Community green |
+
+## 4. Markdown & HTML Integration Snippets
+
+### Standard Markdown Embed
+```markdown
+![GitAscii Profile](https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME)
+```
+
+### Advanced HTML Picture Tag (Dark / Light Theme Adaptation)
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=github-dark">
+  <source media="(prefers-color-scheme: light)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=minimal">
+  <img alt="GitAscii Profile Widget" src="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME">
+</picture>
+```
+
+## 5. Schema & Structured Data
+
+GitAscii uses schema.org standards:
+- `@type`: `SoftwareApplication` / `WebApplication`
+- `applicationCategory`: `DeveloperApplication`
+- `operatingSystem`: `Any`
+- `offers`: `0 USD` (Free & Open Source)
+- `author`: `GitAscii Team`
