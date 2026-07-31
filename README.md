@@ -170,7 +170,7 @@ Check out our [CHANGELOG.md](CHANGELOG.md) to see what's new.
 
 ## 🤝 Contributing
 
-Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything about how to contribute. Any contributions you make are **greatly appreciated**.
+Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything about how to contribute, and please review our [Code of Conduct](CODE_OF_CONDUCT.md). Any contributions you make are **greatly appreciated**.
 
 ---
 
