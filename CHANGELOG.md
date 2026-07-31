@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/Igorcbraz/GitAscii/compare/v1.0.0...v1.0.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* **security:** resolve all CodeQL alerts ([77767bf](https://github.com/Igorcbraz/GitAscii/commit/77767bf637c21f07dc35ef4f8f6fec925ec530d0))
+
 ## 1.0.0 (2026-07-31)
 
 
