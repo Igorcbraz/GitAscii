@@ -10,6 +10,7 @@ Modern React/TypeScript development patterns for high-performance applications.
 ## 🎯 Overview
 
 This skill provides comprehensive guidelines for building production-grade React applications with:
+
 - **Suspense-first architecture** - No loading spinners, no early returns
 - **Type-safe patterns** - Strict TypeScript, no `any` types
 - **Performance by default** - Lazy loading, memoization, cache strategies
@@ -49,12 +50,12 @@ This skill provides comprehensive guidelines for building production-grade React
 
 ## 🧩 Import Aliases
 
-| Alias | Resolves To | Example |
-|-------|-------------|---------|
-| `@/` | `src/` | `import { apiClient } from '@/lib/apiClient'` |
-| `~types` | `src/types` | `import type { User } from '~types/user'` |
+| Alias         | Resolves To      | Example                                                       |
+| ------------- | ---------------- | ------------------------------------------------------------- |
+| `@/`          | `src/`           | `import { apiClient } from '@/lib/apiClient'`                 |
+| `~types`      | `src/types`      | `import type { User } from '~types/user'`                     |
 | `~components` | `src/components` | `import { SuspenseLoader } from '~components/SuspenseLoader'` |
-| `~features` | `src/features` | `import { authApi } from '~features/auth'` |
+| `~features`   | `src/features`   | `import { authApi } from '~features/auth'`                    |
 
 ---
 
@@ -84,8 +85,8 @@ if (isLoading) {
 ### API Route Format
 
 ```typescript
-'/form/route'      // ✅ Correct
-'/api/form/route'  // ❌ Wrong
+'/form/route' // ✅ Correct
+'/api/form/route' // ❌ Wrong
 ```
 
 ---
@@ -93,56 +94,66 @@ if (isLoading) {
 ## 📂 Topic Guides
 
 ### Component Patterns
+
 - `React.FC<Props>` for type safety
 - `React.lazy()` for code splitting
 - Named const + default export pattern
 - **[📖 Full Guide: references/component-patterns.md](references/component-patterns.md)**
 
 ### Data Fetching
+
 - `useSuspenseQuery` as primary pattern
 - Cache-first strategy
 - API service layer in `features/{feature}/api/`
 - **[📖 Full Guide: references/data-fetching.md](references/data-fetching.md)**
 
 ### File Organization
+
 - `features/`: Domain-specific code
 - `components/`: Truly reusable
 - **[📖 Full Guide: references/file-organization.md](references/file-organization.md)**
 
 ### Styling with MUI v7
+
 - `sx` prop with `SxProps<Theme>`
 - Inline if <100 lines, separate if >100 lines
 - **[📖 Full Guide: references/styling-guide.md](references/styling-guide.md)**
 
 ### TanStack Router
+
 - Folder-based routing
 - `createFileRoute` with lazy loading
 - **[📖 Full Guide: references/routing-guide.md](references/routing-guide.md)**
 
 ### Loading & Error States
+
 - SuspenseLoader for all loading states
 - `useMuiSnackbar` for notifications
 - **[📖 Full Guide: references/loading-and-error-states.md](references/loading-and-error-states.md)**
 
 ### Performance
+
 - `useMemo` for expensive computations
 - `useCallback` for handlers passed to children
 - `React.memo` for expensive components
 - **[📖 Full Guide: references/performance.md](references/performance.md)**
 
 ### TypeScript Standards
+
 - Strict mode, no `any`
 - Explicit return types
 - Type imports with `import type`
 - **[📖 Full Guide: references/typescript-standards.md](references/typescript-standards.md)**
 
 ### Common Patterns
+
 - React Hook Form + Zod
 - DataGrid wrappers
 - Dialog standards
 - **[📖 Full Guide: references/common-patterns.md](references/common-patterns.md)**
 
 ### Complete Examples
+
 - Full component examples
 - Feature structure template
 - **[📖 Full Guide: references/complete-examples.md](references/complete-examples.md)**

@@ -5,6 +5,7 @@
 ## 🚀 Quick Start
 
 1. **Add to your project:**
+
    ```bash
    # Copy to project skills directory
    cp -r frontend-expert .agent/skills/
@@ -19,14 +20,14 @@
 
 Frontend Expert provides battle-tested patterns for:
 
-| Category | Patterns |
-|----------|----------|
-| **Components** | `React.FC<Props>`, lazy loading, Suspense boundaries |
-| **Data Fetching** | `useSuspenseQuery`, cache-first, API service layer |
-| **Styling** | MUI v7 `sx` prop, inline vs separate rules |
-| **Routing** | TanStack Router, folder-based, lazy routes |
-| **Performance** | `useMemo`, `useCallback`, `React.memo` |
-| **TypeScript** | Strict mode, no `any`, explicit types |
+| Category          | Patterns                                             |
+| ----------------- | ---------------------------------------------------- |
+| **Components**    | `React.FC<Props>`, lazy loading, Suspense boundaries |
+| **Data Fetching** | `useSuspenseQuery`, cache-first, API service layer   |
+| **Styling**       | MUI v7 `sx` prop, inline vs separate rules           |
+| **Routing**       | TanStack Router, folder-based, lazy routes           |
+| **Performance**   | `useMemo`, `useCallback`, `React.memo`               |
+| **TypeScript**    | Strict mode, no `any`, explicit types                |
 
 ## 🔧 How It Works
 
@@ -39,18 +40,18 @@ The skill activates when you work on frontend code and provides:
 
 ### Reference Documents
 
-| Topic | File |
-|-------|------|
-| Component Patterns | `references/component-patterns.md` |
-| Data Fetching | `references/data-fetching.md` |
-| File Organization | `references/file-organization.md` |
-| Styling Guide | `references/styling-guide.md` |
-| Routing Guide | `references/routing-guide.md` |
-| Loading & Errors | `references/loading-and-error-states.md` |
-| Performance | `references/performance.md` |
-| TypeScript | `references/typescript-standards.md` |
-| Common Patterns | `references/common-patterns.md` |
-| Complete Examples | `references/complete-examples.md` |
+| Topic              | File                                     |
+| ------------------ | ---------------------------------------- |
+| Component Patterns | `references/component-patterns.md`       |
+| Data Fetching      | `references/data-fetching.md`            |
+| File Organization  | `references/file-organization.md`        |
+| Styling Guide      | `references/styling-guide.md`            |
+| Routing Guide      | `references/routing-guide.md`            |
+| Loading & Errors   | `references/loading-and-error-states.md` |
+| Performance        | `references/performance.md`              |
+| TypeScript         | `references/typescript-standards.md`     |
+| Common Patterns    | `references/common-patterns.md`          |
+| Complete Examples  | `references/complete-examples.md`        |
 
 ## 🔔 When to Use
 
@@ -69,6 +70,7 @@ The skill activates when you work on frontend code and provides:
 **Request:** "Create a user profile component"
 
 **Skill Response:**
+
 ```typescript
 import React from 'react';
 import { Box, Paper, Avatar, Typography } from '@mui/material';
@@ -103,6 +105,7 @@ export default UserProfile;
 **Request:** "Create an orders feature"
 
 **Skill Response:**
+
 ```
 features/
   orders/

@@ -1,29 +1,31 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import { useI18n } from '@/i18n';
 import {
+  BarChart3,
+  Check,
+  Code2,
+  Edit2,
   Eye,
   EyeOff,
-  Lock,
-  Unlock,
-  Trash2,
-  GripVertical,
-  Edit2,
-  Check,
-  Heading,
-  User,
-  Terminal,
   FileText,
-  BarChart3,
-  Code2,
   FolderGit2,
-  Minus,
-  LayoutTemplate,
+  GripVertical,
+  Heading,
   Layers as LayersIcon,
-} from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import type { WidgetInstance } from '@/engine/types';
+  LayoutTemplate,
+  Lock,
+  Minus,
+  Terminal,
+  Trash2,
+  Unlock,
+  User,
+} from 'lucide-react'
+import React, { useState } from 'react'
+
+import type { WidgetInstance } from '@/engine/types'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
 
 const ICON_MAP: Record<string, React.ElementType> = {
   header: Heading,
@@ -37,10 +39,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
   repositories: FolderGit2,
   divider: Minus,
   footer: LayoutTemplate,
-};
+}
 
 export function LayersPanel() {
-  const { t } = useI18n();
+  const { t } = useI18n()
   const {
     config,
     selectedInstanceId,
@@ -49,63 +51,69 @@ export function LayersPanel() {
     toggleWidgetLock,
     removeWidget,
     renameWidget,
-    moveWidgetLayer,
     reorderWidgets,
-  } = useEditorStore();
+  } = useEditorStore()
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
 
-  if (!config) return null;
+  if (!config) return null
 
-  const widgetsDisplayOrder = [...config.widgets].reverse();
+  const widgetsDisplayOrder = [...config.widgets].reverse()
 
   const handleStartRename = (widget: WidgetInstance) => {
-    setEditingId(widget.instanceId);
-    setEditingName(widget.name || `${widget.widgetId.toUpperCase()} Layer`);
-  };
+    setEditingId(widget.instanceId)
+    setEditingName(widget.name || `${widget.widgetId.toUpperCase()} Layer`)
+  }
 
   const handleSaveRename = (instanceId: string) => {
     if (editingName.trim()) {
-      renameWidget(instanceId, editingName.trim());
+      renameWidget(instanceId, editingName.trim())
     }
-    setEditingId(null);
-  };
+    setEditingId(null)
+  }
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === targetIndex) return;
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === targetIndex) return
 
-    const total = config.widgets.length;
-    const actualFrom = total - 1 - draggedIndex;
-    const actualTo = total - 1 - targetIndex;
+    const total = config.widgets.length
+    const actualFrom = total - 1 - draggedIndex
+    const actualTo = total - 1 - targetIndex
 
-    reorderWidgets(actualFrom, actualTo);
-    setDraggedIndex(null);
-  };
+    reorderWidgets(actualFrom, actualTo)
+    setDraggedIndex(null)
+  }
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
-        <div className="label-stamp">{t('editor.canvas.layers_panel_title', '[ CAMADAS / LAYERS ]')}</div>
+        <div className="label-stamp">
+          {t('editor.canvas.layers_panel_title', '[ CAMADAS / LAYERS ]')}
+        </div>
         <span className="text-eyebrow font-jetbrains-mono text-ash">
-          {t('editor.canvas.layers_count', '{count} items', { count: String(config.widgets.length) })}
+          {t('editor.canvas.layers_count', '{count} items', {
+            count: String(config.widgets.length),
+          })}
         </span>
       </div>
 
       <p className="text-note text-ash font-inter-tight mb-3">
-        {t('editor.canvas.layers_reorder_desc', 'Arraste para reordenar a sobreposição das camadas igual no Photoshop.')}
+        {t(
+          'editor.canvas.layers_reorder_desc',
+          'Arraste para reordenar a sobreposição das camadas igual no Photoshop.'
+        )}
       </p>
 
       {config.widgets.length === 0 ? (
@@ -115,13 +123,11 @@ export function LayersPanel() {
       ) : (
         <div className="space-y-1.5">
           {widgetsDisplayOrder.map((widget, displayIndex) => {
-            const isSelected = widget.instanceId === selectedInstanceId;
-            const Icon = ICON_MAP[widget.widgetId] || LayersIcon;
-            const isEditing = editingId === widget.instanceId;
+            const isSelected = widget.instanceId === selectedInstanceId
+            const Icon = ICON_MAP[widget.widgetId] || LayersIcon
+            const isEditing = editingId === widget.instanceId
             const displayName =
-              widget.name || `${widget.widgetId.charAt(0).toUpperCase() + widget.widgetId.slice(1)}`;
-
-            const actualIndex = config.widgets.length - 1 - displayIndex;
+              widget.name || `${widget.widgetId.charAt(0).toUpperCase() + widget.widgetId.slice(1)}`
 
             return (
               <div
@@ -131,10 +137,11 @@ export function LayersPanel() {
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, displayIndex)}
                 onClick={() => selectWidget(widget.instanceId)}
-                className={`group flex items-center justify-between p-2.5 rounded-xs border transition-all cursor-pointer ${isSelected
-                  ? 'bg-iron border-signal-lime text-chalk shadow-sm'
-                  : 'bg-graphite border-graphite text-ash hover:border-slate hover:text-chalk'
-                  } ${!widget.visible ? 'opacity-50' : ''}`}
+                className={`group flex items-center justify-between p-2.5 rounded-xs border transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-iron border-signal-lime text-chalk shadow-sm'
+                    : 'bg-graphite border-graphite text-ash hover:border-slate hover:text-chalk'
+                } ${!widget.visible ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className="cursor-grab text-ash/40 group-hover:text-ash">
@@ -142,8 +149,9 @@ export function LayersPanel() {
                   </div>
 
                   <div
-                    className={`p-1.5 rounded-xs ${isSelected ? 'bg-signal-lime text-black' : 'bg-void-black text-signal-lime'
-                      }`}
+                    className={`p-1.5 rounded-xs ${
+                      isSelected ? 'bg-signal-lime text-black' : 'bg-void-black text-signal-lime'
+                    }`}
                   >
                     <Icon size={14} />
                   </div>
@@ -156,16 +164,16 @@ export function LayersPanel() {
                           value={editingName}
                           onChange={(e) => setEditingName(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleSaveRename(widget.instanceId);
-                            if (e.key === 'Escape') setEditingId(null);
+                            if (e.key === 'Enter') handleSaveRename(widget.instanceId)
+                            if (e.key === 'Escape') setEditingId(null)
                           }}
                           autoFocus
                           className="w-full bg-void-black text-chalk border border-signal-lime px-1.5 py-0.5 text-note font-inter-tight rounded-xs focus:outline-none"
                         />
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            handleSaveRename(widget.instanceId);
+                            e.stopPropagation()
+                            handleSaveRename(widget.instanceId)
                           }}
                           className="text-signal-lime p-1 hover:bg-graphite rounded"
                         >
@@ -179,8 +187,8 @@ export function LayersPanel() {
                         </span>
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartRename(widget);
+                            e.stopPropagation()
+                            handleStartRename(widget)
                           }}
                           className="opacity-0 group-hover:opacity-100 text-ash hover:text-chalk transition-opacity p-0.5"
                           title={t('editor.canvas.rename_layer', 'Renomear camada')}
@@ -192,21 +200,34 @@ export function LayersPanel() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="flex items-center gap-1 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => toggleWidgetVisibility(widget.instanceId)}
-                    title={widget.visible ? t('editor.canvas.hide_layer', 'Ocultar camada') : t('editor.canvas.show_layer', 'Exibir camada')}
-                    className={`p-1 rounded hover:bg-void-black transition-colors ${widget.visible ? 'text-ash hover:text-chalk' : 'text-amber-400'
-                      }`}
+                    title={
+                      widget.visible
+                        ? t('editor.canvas.hide_layer', 'Ocultar camada')
+                        : t('editor.canvas.show_layer', 'Exibir camada')
+                    }
+                    className={`p-1 rounded hover:bg-void-black transition-colors ${
+                      widget.visible ? 'text-ash hover:text-chalk' : 'text-amber-400'
+                    }`}
                   >
                     {widget.visible ? <Eye size={13} /> : <EyeOff size={13} />}
                   </button>
 
                   <button
                     onClick={() => toggleWidgetLock(widget.instanceId)}
-                    title={widget.locked ? t('editor.canvas.unlock_layer', 'Desbloquear camada') : t('editor.canvas.lock_layer', 'Bloquear camada')}
-                    className={`p-1 rounded hover:bg-void-black transition-colors ${widget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
-                      }`}
+                    title={
+                      widget.locked
+                        ? t('editor.canvas.unlock_layer', 'Desbloquear camada')
+                        : t('editor.canvas.lock_layer', 'Bloquear camada')
+                    }
+                    className={`p-1 rounded hover:bg-void-black transition-colors ${
+                      widget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
+                    }`}
                   >
                     {widget.locked ? <Lock size={13} /> : <Unlock size={13} />}
                   </button>
@@ -220,10 +241,10 @@ export function LayersPanel() {
                   </button>
                 </div>
               </div>
-            );
+            )
           })}
         </div>
       )}
     </div>
-  );
+  )
 }

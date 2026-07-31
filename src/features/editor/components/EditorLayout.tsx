@@ -1,75 +1,82 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { AlertCircle, LogIn, ExternalLink } from 'lucide-react';
-import { useEditorStore } from '../store/editorStore';
-import { EditorToolbar } from './Toolbar/EditorToolbar';
-import { WidgetLibrary } from './Sidebar/WidgetLibrary';
-import { SVGCanvas } from './Canvas/SVGCanvas';
-import { PropertiesPanel } from './Properties/PropertiesPanel';
-import { createConfiguration } from '@/engine/core/TemplateRenderer';
-import { generateBestProfile } from '@/engine/generate/profileAnalyzer';
-import type { SavedConfiguration, NormalizedGitHubData } from '@/engine/types';
-import { useI18n } from '@/i18n';
+import { AlertCircle } from 'lucide-react'
+import Link from 'next/link'
+import React, { useEffect, useState } from 'react'
+
+import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
+import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../store/editorStore'
+import { SVGCanvas } from './Canvas/SVGCanvas'
+import { PropertiesPanel } from './Properties/PropertiesPanel'
+import { WidgetLibrary } from './Sidebar/WidgetLibrary'
+import { EditorToolbar } from './Toolbar/EditorToolbar'
 
 interface EditorLayoutProps {
-  username: string;
-  profileSlug?: string;
-  autoGenerate?: boolean;
+  username: string
+  profileSlug?: string
+  autoGenerate?: boolean
 }
 
-export function EditorLayout({ username, profileSlug = 'default', autoGenerate = false }: EditorLayoutProps) {
-  const { initEditor, config, setSession, session } = useEditorStore();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function EditorLayout({
+  username,
+  profileSlug = 'default',
+  autoGenerate = false,
+}: EditorLayoutProps) {
+  const { initEditor, config, setSession, session } = useEditorStore()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true
 
     async function loadData() {
       try {
-        setLoading(true);
+        setLoading(true)
 
         try {
-          const sessionRes = await fetch('/api/auth/session');
+          const sessionRes = await fetch('/api/auth/session')
           if (sessionRes.ok) {
-            const sessionData = await sessionRes.json();
+            const sessionData = await sessionRes.json()
             if (isMounted) {
-              setSession(sessionData.session || null);
+              setSession(sessionData.session || null)
             }
           }
         } catch (e) {
-          console.warn('Failed to fetch session', e);
+          console.warn('Failed to fetch session', e)
         }
 
-        const res = await fetch(`/api/github/${username}`);
+        const res = await fetch(`/api/github/${username}`)
         if (!res.ok) {
-          let errMsg = 'Failed to fetch GitHub profile';
+          let errMsg = 'Failed to fetch GitHub profile'
           try {
-            const errJson = await res.json();
-            errMsg = errJson.error || errMsg;
+            const errJson = await res.json()
+            errMsg = errJson.error || errMsg
           } catch {
-            errMsg = await res.text() || errMsg;
+            errMsg = (await res.text()) || errMsg
           }
-          throw new Error(errMsg);
+          throw new Error(errMsg)
         }
-        const data: NormalizedGitHubData = await res.json();
+        const data: NormalizedGitHubData = await res.json()
 
-        let initialConfig: SavedConfiguration;
+        let initialConfig: SavedConfiguration
 
-        const storageKey = `gitascii_${data.user.id}_${profileSlug}`;
-        const savedDraft = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+        const storageKey = `gitascii_${data.user.id}_${profileSlug}`
+        const savedDraft = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
 
         if (savedDraft) {
           try {
-            initialConfig = JSON.parse(savedDraft);
+            initialConfig = JSON.parse(savedDraft)
           } catch {
             initialConfig = autoGenerate
               ? generateBestProfile(data)
-              : createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug);
+              : createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
           }
         } else if (autoGenerate) {
-          initialConfig = generateBestProfile(data);
+          initialConfig = generateBestProfile(data)
         } else {
           initialConfig = createConfiguration(
             data.user.id,
@@ -77,53 +84,60 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
             'terminal',
             profileSlug,
             profileSlug === 'default' ? 'Default' : profileSlug.toUpperCase()
-          );
+          )
         }
 
         if (isMounted) {
-          initEditor(initialConfig, data);
-          setLoading(false);
+          initEditor(initialConfig, data)
+          setLoading(false)
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load profile');
-          setLoading(false);
+          setError(err instanceof Error ? err.message : 'Failed to load profile')
+          setLoading(false)
         }
       }
     }
 
-    loadData();
+    loadData()
 
     return () => {
-      isMounted = false;
-    };
-  }, [username, profileSlug, autoGenerate, initEditor, setSession]);
+      isMounted = false
+    }
+  }, [username, profileSlug, autoGenerate, initEditor, setSession])
 
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   if (loading) {
     return (
       <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
         <div className="w-8 h-8 border-2 border-signal-lime border-t-transparent rounded-full animate-spin mb-4" />
-        <span className="text-label uppercase tracking-[0.2em] text-ash">{t('editor.fetching_data', '[ FETCHING GITHUB DATA ]')}</span>
+        <span className="text-label uppercase tracking-[0.2em] text-ash">
+          {t('editor.fetching_data', '[ FETCHING GITHUB DATA ]')}
+        </span>
         <span className="text-body text-chalk font-medium mt-1">@{username}</span>
       </div>
-    );
+    )
   }
 
   if (error || !config) {
     return (
       <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
-        <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">{t('editor.error_fetching', '[ ERROR ]')}</span>
+        <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">
+          {t('editor.error_fetching', '[ ERROR ]')}
+        </span>
         <h2 className="text-subheading font-pt-serif font-light text-chalk mb-4">{error}</h2>
-        <a href="/" className="px-4 py-2 bg-signal-lime text-black font-medium text-label rounded-sm glow-lime">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-signal-lime text-black font-medium text-label rounded-sm glow-lime"
+        >
           {t('editor.return_home', 'Return to Home')}
-        </a>
+        </Link>
       </div>
-    );
+    )
   }
 
-  const isOwner = session && session.username.toLowerCase() === username.toLowerCase();
+  const isOwner = session && session.username.toLowerCase() === username.toLowerCase()
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-carbon">
@@ -135,11 +149,16 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
             <span className="text-eyebrow leading-none">
               {session ? (
                 <>
-                  Você está logado como <strong className="text-white">@{session.username}</strong>, mas editando o perfil de <strong className="text-white">@{username}</strong>. Suas alterações não serão salvas no servidor.
+                  Você está logado como <strong className="text-white">@{session.username}</strong>,
+                  mas editando o perfil de <strong className="text-white">@{username}</strong>. Suas
+                  alterações não serão salvas no servidor.
                 </>
               ) : (
                 <>
-                  Você está no <strong className="text-signal-lime font-medium">Modo Lite (Self-Hosted)</strong>. Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o seu repositório GitHub.
+                  Você está no{' '}
+                  <strong className="text-signal-lime font-medium">Modo Lite (Self-Hosted)</strong>.
+                  Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o
+                  seu repositório GitHub.
                 </>
               )}
             </span>
@@ -160,5 +179,5 @@ export function EditorLayout({ username, profileSlug = 'default', autoGenerate =
         <PropertiesPanel />
       </div>
     </div>
-  );
+  )
 }

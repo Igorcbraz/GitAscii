@@ -1,39 +1,28 @@
-'use client';
+'use client'
 
-import React from 'react';
-import {
-  Trash2,
-  Eye,
-  EyeOff,
-  Palette,
-  Sliders,
-  Terminal,
-  Type,
-  Maximize2,
-  Lock,
-  Unlock,
-  Layers,
-} from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import { CHARSETS } from '@/engine/ascii/converter';
-import { ColorPicker } from './ColorPicker';
-import { useI18n } from '@/i18n';
-import { AsciiArtControls } from './AsciiArtControls';
-import { AsciiTextControls } from './AsciiTextControls';
-import { TerminalInfoControls } from './TerminalInfoControls';
-import { TechStackControls } from './TechStackControls';
-import { SocialMediaControls } from './SocialMediaControls';
-import { IntegrationsControls } from './IntegrationsControls';
+import { Eye, EyeOff, Lock, Maximize2, Palette, Sliders, Trash2, Type, Unlock } from 'lucide-react'
+import React from 'react'
+
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
+import { AsciiArtControls } from './AsciiArtControls'
+import { AsciiTextControls } from './AsciiTextControls'
+import { ColorPicker } from './ColorPicker'
+import { IntegrationsControls } from './IntegrationsControls'
+import { SocialMediaControls } from './SocialMediaControls'
+import { TechStackControls } from './TechStackControls'
+import { TerminalInfoControls } from './TerminalInfoControls'
 
 const WIDTH_PRESETS = [
   { label: '100%', val: 800 },
   { label: '75%', val: 600 },
   { label: '50%', val: 392 },
   { label: '33%', val: 256 },
-];
+]
 
 export function PropertiesPanel() {
-  const { t } = useI18n();
+  const { t } = useI18n()
   const {
     config,
     selectedInstanceId,
@@ -43,7 +32,7 @@ export function PropertiesPanel() {
     toggleWidgetVisibility,
     toggleWidgetLock,
     removeWidget,
-  } = useEditorStore();
+  } = useEditorStore()
 
   if (!config || !selectedInstanceId) {
     return (
@@ -53,18 +42,21 @@ export function PropertiesPanel() {
           {t('editor.properties.none_selected_title', 'Nenhum Widget Selecionado')}
         </h4>
         <p className="font-inter-tight text-note text-ash max-w-50">
-          {t('editor.properties.none_selected_desc', 'Clique em qualquer widget no canvas para inspecionar e editar suas propriedades.')}
+          {t(
+            'editor.properties.none_selected_desc',
+            'Clique em qualquer widget no canvas para inspecionar e editar suas propriedades.'
+          )}
         </p>
       </aside>
-    );
+    )
   }
 
-  const selectedWidget = config.widgets.find((w) => w.instanceId === selectedInstanceId);
+  const selectedWidget = config.widgets.find((w) => w.instanceId === selectedInstanceId)
 
-  if (!selectedWidget) return null;
+  if (!selectedWidget) return null
 
-  const cfg = selectedWidget.config;
-  const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`;
+  const cfg = selectedWidget.config
+  const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
 
   return (
     <aside className="w-[320px] h-full bg-onyx border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
@@ -79,16 +71,25 @@ export function PropertiesPanel() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => toggleWidgetLock(selectedWidget.instanceId)}
-            title={selectedWidget.locked ? t('editor.properties.unlock', 'Desbloquear Widget') : t('editor.properties.lock', 'Bloquear Widget')}
-            className={`p-1.5 rounded-xs hover:bg-graphite transition-colors cursor-pointer ${selectedWidget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
-              }`}
+            title={
+              selectedWidget.locked
+                ? t('editor.properties.unlock', 'Desbloquear Widget')
+                : t('editor.properties.lock', 'Bloquear Widget')
+            }
+            className={`p-1.5 rounded-xs hover:bg-graphite transition-colors cursor-pointer ${
+              selectedWidget.locked ? 'text-signal-lime' : 'text-ash hover:text-chalk'
+            }`}
           >
             {selectedWidget.locked ? <Lock size={16} /> : <Unlock size={16} />}
           </button>
 
           <button
             onClick={() => toggleWidgetVisibility(selectedWidget.instanceId)}
-            title={selectedWidget.visible ? t('editor.properties.hide', 'Ocultar Widget') : t('editor.properties.show', 'Exibir Widget')}
+            title={
+              selectedWidget.visible
+                ? t('editor.properties.hide', 'Ocultar Widget')
+                : t('editor.properties.show', 'Exibir Widget')
+            }
             className="p-1.5 rounded-xs hover:bg-graphite text-ash hover:text-chalk transition-colors cursor-pointer"
           >
             {selectedWidget.visible ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -115,29 +116,39 @@ export function PropertiesPanel() {
             <ColorPicker
               label="Background"
               align="left"
-              value={(cfg.backgroundColor as string) || config.globalStyles.backgroundColor || '#1f1f1f'}
-              onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { backgroundColor: color })}
+              value={
+                (cfg.backgroundColor as string) || config.globalStyles.backgroundColor || '#1f1f1f'
+              }
+              onChange={(color) =>
+                updateWidgetConfig(selectedWidget.instanceId, { backgroundColor: color })
+              }
             />
 
             <ColorPicker
               label={t('editor.properties.color_destaque', 'Cor de Destaque')}
               align="right"
               value={(cfg.accentColor as string) || config.globalStyles.accentColor || '#c5ff4a'}
-              onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { accentColor: color })}
+              onChange={(color) =>
+                updateWidgetConfig(selectedWidget.instanceId, { accentColor: color })
+              }
             />
 
             <ColorPicker
               label={t('editor.properties.color_texto', 'Cor do Texto')}
               align="left"
               value={(cfg.textColor as string) || config.globalStyles.textColor || '#ffffff'}
-              onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { textColor: color })}
+              onChange={(color) =>
+                updateWidgetConfig(selectedWidget.instanceId, { textColor: color })
+              }
             />
 
             <ColorPicker
               label={t('editor.properties.color_borda', 'Cor da Borda')}
               align="right"
               value={(cfg.borderColor as string) || config.globalStyles.borderColor || '#252525'}
-              onChange={(color) => updateWidgetConfig(selectedWidget.instanceId, { borderColor: color })}
+              onChange={(color) =>
+                updateWidgetConfig(selectedWidget.instanceId, { borderColor: color })
+              }
             />
           </div>
         </div>
@@ -151,8 +162,12 @@ export function PropertiesPanel() {
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-eyebrow text-ash font-inter-tight">{t('editor.properties.bio_label', 'Biography Text')}</label>
-                <span className="text-caption text-ash font-jetbrains-mono">{t('editor.properties.bio_suggestion', '(Profile suggestion)')}</span>
+                <label className="text-eyebrow text-ash font-inter-tight">
+                  {t('editor.properties.bio_label', 'Biography Text')}
+                </label>
+                <span className="text-caption text-ash font-jetbrains-mono">
+                  {t('editor.properties.bio_suggestion', '(Profile suggestion)')}
+                </span>
               </div>
               <textarea
                 rows={3}
@@ -161,14 +176,21 @@ export function PropertiesPanel() {
                     ? (cfg.customBio as string)
                     : useEditorStore.getState().githubData?.user.bio || ''
                 }
-                onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customBio: e.target.value })}
-                placeholder={t('editor.properties.bio_placeholder', 'Digite qualquer biografia livremente...')}
+                onChange={(e) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { customBio: e.target.value })
+                }
+                placeholder={t(
+                  'editor.properties.bio_placeholder',
+                  'Digite qualquer biografia livremente...'
+                )}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-2 rounded-xs focus:border-signal-lime focus:outline-none resize-none"
               />
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.location', 'Localização')}</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.location', 'Localização')}
+              </label>
               <input
                 type="text"
                 value={
@@ -176,14 +198,18 @@ export function PropertiesPanel() {
                     ? (cfg.customLocation as string)
                     : useEditorStore.getState().githubData?.user.location || ''
                 }
-                onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customLocation: e.target.value })}
+                onChange={(e) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { customLocation: e.target.value })
+                }
                 placeholder={t('editor.properties.location_placeholder', 'Ex: São Paulo, Brasil')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.website', 'Website / Blog (Link Clicável)')}</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.website', 'Website / Blog (Link Clicável)')}
+              </label>
               <input
                 type="text"
                 value={
@@ -191,7 +217,9 @@ export function PropertiesPanel() {
                     ? (cfg.customBlog as string)
                     : useEditorStore.getState().githubData?.user.blog || ''
                 }
-                onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { customBlog: e.target.value })}
+                onChange={(e) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { customBlog: e.target.value })
+                }
                 placeholder={t('editor.properties.website_placeholder', 'Ex: https://meusite.com')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
@@ -207,7 +235,9 @@ export function PropertiesPanel() {
             </div>
 
             <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">{t('editor.properties.avatar_label', 'URL da Imagem')}</label>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.avatar_label', 'URL da Imagem')}
+              </label>
               <input
                 type="text"
                 value={
@@ -215,7 +245,9 @@ export function PropertiesPanel() {
                     ? (cfg.avatarUrl as string)
                     : useEditorStore.getState().githubData?.user.avatar_url || ''
                 }
-                onChange={(e) => updateWidgetConfig(selectedWidget.instanceId, { avatarUrl: e.target.value })}
+                onChange={(e) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { avatarUrl: e.target.value })
+                }
                 placeholder="https://..."
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
@@ -231,7 +263,8 @@ export function PropertiesPanel() {
           <AsciiTextControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {(selectedWidget.widgetId === 'terminal-info' || selectedWidget.widgetId === 'terminal-card') && (
+        {(selectedWidget.widgetId === 'terminal-info' ||
+          selectedWidget.widgetId === 'terminal-card') && (
           <TerminalInfoControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
@@ -255,12 +288,12 @@ export function PropertiesPanel() {
           'readme-quotes',
           'awesome-badge',
         ].includes(selectedWidget.widgetId) && (
-            <IntegrationsControls
-              instanceId={selectedWidget.instanceId}
-              widgetId={selectedWidget.widgetId}
-              config={cfg}
-            />
-          )}
+          <IntegrationsControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">
@@ -290,13 +323,15 @@ export function PropertiesPanel() {
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">{t('editor.properties.size_shortcuts', 'Atalhos de Largura (Width)')}</label>
+            <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">
+              {t('editor.properties.size_shortcuts', 'Atalhos de Largura (Width)')}
+            </label>
             <div className="grid grid-cols-4 gap-1.5">
               {WIDTH_PRESETS.map((preset) => {
                 const isAspectLocked =
                   cfg.lockAspectRatio !== undefined
                     ? Boolean(cfg.lockAspectRatio)
-                    : selectedWidget.widgetId === 'avatar';
+                    : selectedWidget.widgetId === 'avatar'
 
                 return (
                   <button
@@ -308,14 +343,15 @@ export function PropertiesPanel() {
                         height: isAspectLocked ? preset.val : selectedWidget.size.height,
                       })
                     }
-                    className={`py-1 rounded-xs text-eyebrow font-jetbrains-mono transition-all cursor-pointer border ${selectedWidget.size.width === preset.val
-                      ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                      : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
-                      }`}
+                    className={`py-1 rounded-xs text-eyebrow font-jetbrains-mono transition-all cursor-pointer border ${
+                      selectedWidget.size.width === preset.val
+                        ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                        : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+                    }`}
                   >
                     {preset.label}
                   </button>
-                );
+                )
               })}
             </div>
           </div>
@@ -333,16 +369,16 @@ export function PropertiesPanel() {
                 step="4"
                 value={selectedWidget.size.width}
                 onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
+                  const val = parseInt(e.target.value, 10)
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
-                      : selectedWidget.widgetId === 'avatar';
+                      : selectedWidget.widgetId === 'avatar'
                   updateWidgetSize(
                     selectedWidget.instanceId,
                     { width: val, height: isAspectLocked ? val : selectedWidget.size.height },
                     false
-                  );
+                  )
                 }}
                 onMouseUp={() => useEditorStore.getState().recordHistorySnapshot()}
                 onTouchEnd={() => useEditorStore.getState().recordHistorySnapshot()}
@@ -354,15 +390,15 @@ export function PropertiesPanel() {
                 max="800"
                 value={selectedWidget.size.width}
                 onChange={(e) => {
-                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40));
+                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40))
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
-                      : selectedWidget.widgetId === 'avatar';
+                      : selectedWidget.widgetId === 'avatar'
                   updateWidgetSize(selectedWidget.instanceId, {
                     width: val,
                     height: isAspectLocked ? val : selectedWidget.size.height,
-                  });
+                  })
                 }}
                 className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
               />
@@ -382,16 +418,16 @@ export function PropertiesPanel() {
                 step="4"
                 value={selectedWidget.size.height}
                 onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
+                  const val = parseInt(e.target.value, 10)
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
-                      : selectedWidget.widgetId === 'avatar';
+                      : selectedWidget.widgetId === 'avatar'
                   updateWidgetSize(
                     selectedWidget.instanceId,
                     { width: isAspectLocked ? val : selectedWidget.size.width, height: val },
                     false
-                  );
+                  )
                 }}
                 onMouseUp={() => useEditorStore.getState().recordHistorySnapshot()}
                 onTouchEnd={() => useEditorStore.getState().recordHistorySnapshot()}
@@ -403,15 +439,15 @@ export function PropertiesPanel() {
                 max="800"
                 value={selectedWidget.size.height}
                 onChange={(e) => {
-                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40));
+                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40))
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
-                      : selectedWidget.widgetId === 'avatar';
+                      : selectedWidget.widgetId === 'avatar'
                   updateWidgetSize(selectedWidget.instanceId, {
                     width: isAspectLocked ? val : selectedWidget.size.width,
                     height: val,
-                  });
+                  })
                 }}
                 className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
               />
@@ -420,7 +456,9 @@ export function PropertiesPanel() {
 
           <div className="grid grid-cols-2 gap-2 pt-2 text-eyebrow">
             <div>
-              <label className="text-ash block mb-1 font-inter-tight">{t('editor.properties.pos_x', 'Posição X')}</label>
+              <label className="text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.pos_x', 'Posição X')}
+              </label>
               <input
                 type="number"
                 value={selectedWidget.position.x}
@@ -435,7 +473,9 @@ export function PropertiesPanel() {
             </div>
 
             <div>
-              <label className="text-ash block mb-1 font-inter-tight">{t('editor.properties.pos_y', 'Posição Y')}</label>
+              <label className="text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.pos_y', 'Posição Y')}
+              </label>
               <input
                 type="number"
                 value={selectedWidget.position.y}
@@ -452,6 +492,5 @@ export function PropertiesPanel() {
         </div>
       </div>
     </aside>
-  );
+  )
 }
-

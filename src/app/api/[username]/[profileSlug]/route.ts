@@ -1,40 +1,41 @@
-import { NextResponse } from 'next/server';
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
-import { createConfiguration } from '@/engine/core/TemplateRenderer';
-import { renderSvg, embedExternalImages } from '@/engine/core/SVGEngine';
-import { loadProfileConfig } from '@/lib/profileStorage';
+import { NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic';
+import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
+import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { loadProfileConfig } from '@/lib/profileStorage'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ username: string; profileSlug: string }> }
 ) {
   try {
-    const { username, profileSlug } = await params;
+    const { username, profileSlug } = await params
     if (!username || !profileSlug) {
-      return new NextResponse('Username and Profile Slug are required', { status: 400 });
+      return new NextResponse('Username and Profile Slug are required', { status: 400 })
     }
 
-    const { searchParams } = new URL(request.url);
-    let theme: 'dark' | 'light' = 'dark';
-    const queryTheme = searchParams.get('theme');
+    const { searchParams } = new URL(request.url)
+    let theme: 'dark' | 'light' = 'dark'
+    const queryTheme = searchParams.get('theme')
     if (queryTheme === 'light' || queryTheme === 'dark') {
-      theme = queryTheme;
+      theme = queryTheme
     }
 
-    const widgetsParam = searchParams.get('widgets');
-    const widgets = widgetsParam ? widgetsParam.split(',') : undefined;
+    const widgetsParam = searchParams.get('widgets')
+    const widgets = widgetsParam ? widgetsParam.split(',') : undefined
 
-    const data = await fetchGitHubProfile(username);
-    
-    let config = await loadProfileConfig(username, profileSlug);
+    const data = await fetchGitHubProfile(username)
+
+    let config = await loadProfileConfig(username, profileSlug)
     if (!config) {
-      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug);
+      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
     }
 
-    const rawSvgContent = renderSvg(config, data, { theme, widgets });
-    const svgContent = await embedExternalImages(rawSvgContent);
+    const rawSvgContent = renderSvg(config, data, { theme, widgets })
+    const svgContent = await embedExternalImages(rawSvgContent)
 
     return new NextResponse(svgContent, {
       status: 200,
@@ -43,15 +44,15 @@ export async function GET(
         'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400',
         'X-Content-Type-Options': 'nosniff',
       },
-    });
+    })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error rendering SVG';
+    const message = error instanceof Error ? error.message : 'Error rendering SVG'
     return new NextResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${message}</text></svg>`,
       {
         status: 500,
         headers: { 'Content-Type': 'image/svg+xml' },
       }
-    );
+    )
   }
 }

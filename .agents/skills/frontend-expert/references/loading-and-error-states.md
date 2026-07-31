@@ -23,6 +23,7 @@ const Component = () => {
 ```
 
 **Why this is bad:**
+
 1. **Layout Shift**: Content position jumps when loading completes
 2. **CLS (Cumulative Layout Shift)**: Poor Core Web Vital score
 3. **Jarring UX**: Page structure changes suddenly
@@ -76,9 +77,9 @@ export const MyComponent: React.FC = () => {
 ### Import
 
 ```typescript
-import { SuspenseLoader } from '~components/SuspenseLoader';
+import { SuspenseLoader } from '~components/SuspenseLoader'
 // Or
-import { SuspenseLoader } from '@/components/SuspenseLoader';
+import { SuspenseLoader } from '@/components/SuspenseLoader'
 ```
 
 ### Basic Usage
@@ -140,6 +141,7 @@ export const Dashboard: React.FC = () => {
 ```
 
 **Benefits:**
+
 - Each section loads independently
 - User sees partial content sooner
 - Better perceived performance
@@ -194,6 +196,7 @@ export const MyComponent: React.FC = () => {
 ```
 
 **What it does:**
+
 - Shows semi-transparent overlay with spinner
 - Content area reserved (no layout shift)
 - Prevents interaction while loading
@@ -226,6 +229,7 @@ export const MyComponent: React.FC = () => {
 ```
 
 **Available Methods:**
+
 - `showSuccess(message)` - Green success message
 - `showError(message)` - Red error message
 - `showWarning(message)` - Orange warning message
@@ -485,17 +489,20 @@ export const MyComponent: React.FC = () => {
 ## Summary
 
 **Loading States:**
+
 - ✅ **PREFERRED**: SuspenseLoader + useSuspenseQuery (modern pattern)
 - ✅ **ACCEPTABLE**: LoadingOverlay (legacy pattern)
 - ✅ **OK**: Skeleton with same layout
 - ❌ **NEVER**: Early returns or conditional layout
 
 **Error Handling:**
+
 - ✅ **ALWAYS**: useMuiSnackbar for user feedback
 - ❌ **NEVER**: react-toastify
 - ✅ Use onError callbacks in queries/mutations
 - ✅ Error boundaries for component-level errors
 
 **See Also:**
+
 - [component-patterns.md](component-patterns.md) - Suspense integration
 - [data-fetching.md](data-fetching.md) - useSuspenseQuery details

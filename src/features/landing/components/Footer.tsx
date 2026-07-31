@@ -1,13 +1,12 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useI18n } from '@/i18n';
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+
+import { useI18n } from '@/i18n'
 
 export function Footer() {
-  const router = useRouter();
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   return (
     <footer className="relative w-full bg-void-black border-t border-graphite">
@@ -30,17 +29,23 @@ export function Footer() {
             {t('landing.footer.eyebrow', '[ GET STARTED TODAY ]')}
           </span>
           <h2 className="font-pt-serif font-light text-4xl sm:text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
-            {t('landing.footer.title_normal', 'Ready to Transform Your ')}<span className="italic text-signal-lime">{t('landing.footer.title_italic', 'Profile?')}</span>
+            {t('landing.footer.title_normal', 'Ready to Transform Your ')}
+            <span className="italic text-signal-lime">
+              {t('landing.footer.title_italic', 'Profile?')}
+            </span>
           </h2>
           <p className="font-inter-tight text-body text-bone leading-body max-w-md">
-            {t('landing.footer.subtitle', 'Join developers who already elevated their GitHub presence with stunning ASCII art and premium SVGs.')}
+            {t(
+              'landing.footer.subtitle',
+              'Join developers who already elevated their GitHub presence with stunning ASCII art and premium SVGs.'
+            )}
           </p>
           <button
             onClick={() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.scrollTo({ top: 0, behavior: 'smooth' })
               setTimeout(() => {
-                document.getElementById('hero-username-input')?.focus();
-              }, 600);
+                document.getElementById('hero-username-input')?.focus()
+              }, 600)
             }}
             className="bg-signal-lime text-black font-inter-tight font-medium text-body py-4 px-8 rounded-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 flex items-center gap-2 cursor-pointer uppercase tracking-wide"
           >
@@ -62,7 +67,10 @@ export function Footer() {
                 <span className="font-pt-serif font-light italic text-signal-lime">Ascii</span>
               </div>
               <p className="font-inter-tight text-note text-ash mb-5 max-w-xs leading-relaxed">
-                {t('landing.footer.description', 'Transform your GitHub contributions into stunning ASCII art. Premium SVGs and a visual editor for developers.')}
+                {t(
+                  'landing.footer.description',
+                  'Transform your GitHub contributions into stunning ASCII art. Premium SVGs and a visual editor for developers.'
+                )}
               </p>
               <div className="inline-flex items-center justify-center px-3 py-1 rounded-full border border-signal-lime bg-transparent">
                 <span className="font-inter-tight text-signal-lime text-eyebrow uppercase tracking-[0.22em]">
@@ -78,7 +86,10 @@ export function Footer() {
               <ul className="flex flex-col gap-4">
                 {['Features', 'Templates', 'Editor', 'Generate'].map((item) => (
                   <li key={item}>
-                    <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
+                    <Link
+                      href={`#${item.toLowerCase()}`}
+                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
+                    >
                       {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
@@ -93,7 +104,10 @@ export function Footer() {
               <ul className="flex flex-col gap-4">
                 {['Documentation', 'API', 'Changelog', 'Status'].map((item) => (
                   <li key={item}>
-                    <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
+                    <Link
+                      href={`#${item.toLowerCase()}`}
+                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
+                    >
                       {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
@@ -108,7 +122,10 @@ export function Footer() {
               <ul className="flex flex-col gap-4">
                 {['GitHub', 'Documentation', 'Contributing', 'Discussions'].map((item) => (
                   <li key={item}>
-                    <Link href={`#${item.toLowerCase()}`} className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime">
+                    <Link
+                      href={`#${item.toLowerCase()}`}
+                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
+                    >
                       {t(`landing.footer.item.${item.toLowerCase()}`, item)}
                     </Link>
                   </li>
@@ -119,8 +136,8 @@ export function Footer() {
 
           <div className="mt-12 pt-8 border-t border-graphite flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="font-inter-tight text-note text-ash flex items-center gap-2">
-              <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>
-              © {new Date().getFullYear()} GitAscii. MIT License.
+              <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>©{' '}
+              {new Date().getFullYear()} GitAscii. MIT License.
             </p>
             <p className="font-jetbrains-mono text-caption text-ash/50 uppercase tracking-[0.18em]">
               v1.0.0 · BUILD 2026.07
@@ -129,5 +146,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

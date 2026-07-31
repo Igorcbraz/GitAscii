@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-void-black: #000000;
@@ -17,10 +17,14 @@
   --color-olive-depth: #597321;
   --color-moss-shadow: #314013;
 
-  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-inter-tight: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-ui-monospace: 'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-inter-tight:
+    'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-jetbrains-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui-monospace:
+    'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --text-caption: 10px;
   --leading-caption: 1.2;
@@ -47,7 +51,7 @@
   --tracking-display: -3.1px;
 
   --shadow-sm: rgba(197, 255, 74, 0.45) 0px 0px 8px 0px;
-  --shadow-glow-lg: rgba(197, 255, 74, 0.30) 0px 0px 24px 0px;
+  --shadow-glow-lg: rgba(197, 255, 74, 0.3) 0px 0px 24px 0px;
 }
 
 @layer base {
@@ -73,16 +77,18 @@
   input,
   select,
   textarea,
-  [role="button"],
+  [role='button'],
   .cursor-pointer {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke, opacity,
+      box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
   }
 
   input:-webkit-autofill,
-  input:-webkit-autofill:hover, 
-  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
@@ -135,7 +141,9 @@
   line-height: 0.94;
   letter-spacing: -3.1px;
   color: var(--color-chalk);
-  font-feature-settings: "liga" on, "dlig" on;
+  font-feature-settings:
+    'liga' on,
+    'dlig' on;
 }
 
 .accent-word {
@@ -148,13 +156,21 @@
 }
 
 .glow-lime-lg {
-  box-shadow: 0 0 24px 0 rgba(197, 255, 74, 0.30);
+  box-shadow: 0 0 24px 0 rgba(197, 255, 74, 0.3);
 }
 
-.surface-canvas { background-color: var(--color-carbon); }
-.surface-card { background-color: var(--color-onyx); }
-.surface-raised { background-color: var(--color-graphite); }
-.surface-hover { background-color: var(--color-iron); }
+.surface-canvas {
+  background-color: var(--color-carbon);
+}
+.surface-card {
+  background-color: var(--color-onyx);
+}
+.surface-raised {
+  background-color: var(--color-graphite);
+}
+.surface-hover {
+  background-color: var(--color-iron);
+}
 
 .border-hairline {
   border: 1px solid var(--color-graphite);
@@ -172,12 +188,17 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 8px 0 rgba(197, 255, 74, 0.45);
   }
   50% {
@@ -186,8 +207,13 @@
 }
 
 @keyframes typing-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .animate-fade-in-up {
@@ -218,8 +244,13 @@
 }
 
 @keyframes pulseGlowBar {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .animate-guide-fade-in {
@@ -229,4 +260,3 @@
 .animate-pulse-glow-bar {
   animation: pulseGlowBar 1.5s ease-in-out infinite;
 }
-

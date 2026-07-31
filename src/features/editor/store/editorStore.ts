@@ -1,77 +1,93 @@
-import { create } from 'zustand';
-import type { SavedConfiguration, WidgetInstance, NormalizedGitHubData } from '@/engine/types';
-import { createConfiguration } from '@/engine/core/TemplateRenderer';
-import { convertTextToAscii } from '@/engine/ascii/textConverter';
+import { create } from 'zustand'
+
+import { convertTextToAscii } from '@/engine/ascii/textConverter'
+import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
 
 interface HistoryState {
-  past: SavedConfiguration[];
-  future: SavedConfiguration[];
+  past: SavedConfiguration[]
+  future: SavedConfiguration[]
 }
 
-const MAX_HISTORY_STEPS = 50;
+const MAX_HISTORY_STEPS = 50
 
 function saveToLocalStorage(config: SavedConfiguration) {
   try {
-    localStorage.setItem(`gitascii_${config.githubId}_${config.profileSlug}`, JSON.stringify(config));
+    localStorage.setItem(
+      `gitascii_${config.githubId}_${config.profileSlug}`,
+      JSON.stringify(config)
+    )
   } catch (e) {
-    console.warn('Auto-save failed:', e);
+    console.warn('Auto-save failed:', e)
   }
 }
 
 export interface EditorStore {
-  config: SavedConfiguration | null;
-  githubData: NormalizedGitHubData | null;
-  selectedInstanceId: string | null;
-  history: HistoryState;
-  zoom: number;
-  isSaving: boolean;
-  activeTab: 'widgets' | 'layers' | 'templates';
-  session: { username: string; githubId: number } | null;
-  setSession: (session: { username: string; githubId: number } | null) => void;
+  config: SavedConfiguration | null
+  githubData: NormalizedGitHubData | null
+  selectedInstanceId: string | null
+  history: HistoryState
+  zoom: number
+  isSaving: boolean
+  activeTab: 'widgets' | 'layers' | 'templates'
+  session: { username: string; githubId: number } | null
+  setSession: (session: { username: string; githubId: number } | null) => void
 
-  initEditor: (config: SavedConfiguration, data: NormalizedGitHubData) => void;
-  selectWidget: (instanceId: string | null) => void;
-  updateWidgetConfig: (instanceId: string, patch: Record<string, unknown>) => void;
-  updateWidgetPosition: (instanceId: string, position: { x: number; y: number }, recordHistory?: boolean) => void;
-  updateWidgetSize: (instanceId: string, size: { width: number; height: number }, recordHistory?: boolean) => void;
-  toggleWidgetVisibility: (instanceId: string) => void;
-  toggleWidgetLock: (instanceId: string) => void;
-  renameWidget: (instanceId: string, name: string) => void;
-  removeWidget: (instanceId: string) => void;
-  addWidget: (widgetId: string) => void;
-  duplicateWidget: (instanceId: string) => void;
-  reorderWidgets: (fromIndex: number, toIndex: number) => void;
-  moveWidgetLayer: (instanceId: string, direction: 'up' | 'down' | 'top' | 'bottom') => void;
-  applyTemplate: (templateId: string) => void;
-  setZoom: (zoom: number) => void;
-  setActiveTab: (tab: 'widgets' | 'layers' | 'templates') => void;
-  recordHistorySnapshot: () => void;
-  saveToServer: () => Promise<void>;
+  initEditor: (config: SavedConfiguration, data: NormalizedGitHubData) => void
+  selectWidget: (instanceId: string | null) => void
+  updateWidgetConfig: (instanceId: string, patch: Record<string, unknown>) => void
+  updateWidgetPosition: (
+    instanceId: string,
+    position: { x: number; y: number },
+    recordHistory?: boolean
+  ) => void
+  updateWidgetSize: (
+    instanceId: string,
+    size: { width: number; height: number },
+    recordHistory?: boolean
+  ) => void
+  toggleWidgetVisibility: (instanceId: string) => void
+  toggleWidgetLock: (instanceId: string) => void
+  renameWidget: (instanceId: string, name: string) => void
+  removeWidget: (instanceId: string) => void
+  addWidget: (widgetId: string) => void
+  duplicateWidget: (instanceId: string) => void
+  reorderWidgets: (fromIndex: number, toIndex: number) => void
+  moveWidgetLayer: (instanceId: string, direction: 'up' | 'down' | 'top' | 'bottom') => void
+  applyTemplate: (templateId: string) => void
+  setZoom: (zoom: number) => void
+  setActiveTab: (tab: 'widgets' | 'layers' | 'templates') => void
+  recordHistorySnapshot: () => void
+  saveToServer: () => Promise<void>
 
-  undo: () => void;
-  redo: () => void;
-  canUndo: boolean;
-  canRedo: boolean;
-  importLayout: (widgets: WidgetInstance[], globalStyles?: SavedConfiguration['globalStyles'], templateId?: string) => void;
+  undo: () => void
+  redo: () => void
+  canUndo: boolean
+  canRedo: boolean
+  importLayout: (
+    widgets: WidgetInstance[],
+    globalStyles?: SavedConfiguration['globalStyles'],
+    templateId?: string
+  ) => void
 }
 
 export const useEditorStore = create<EditorStore>((set, get) => {
-  const pushStateToHistory = (newConfig: SavedConfiguration) => {
-    const { config, history } = get();
-    if (!config) return { newPast: history.past };
+  const pushStateToHistory = () => {
+    const { config, history } = get()
+    if (!config) return { newPast: history.past }
 
-    const snapshot = JSON.parse(JSON.stringify(config));
-    const newPast = [...history.past, snapshot].slice(-MAX_HISTORY_STEPS);
-    return { newPast };
-  };
+    const snapshot = JSON.parse(JSON.stringify(config))
+    const newPast = [...history.past, snapshot].slice(-MAX_HISTORY_STEPS)
+    return { newPast }
+  }
 
   const applyConfigChange = (newConfig: SavedConfiguration, saveSnapshot = true) => {
-    const { history } = get();
-    let newPast = history.past;
+    const { history } = get()
+    let newPast = history.past
 
     if (saveSnapshot) {
-      const res = pushStateToHistory(newConfig);
-      newPast = res.newPast;
+      const res = pushStateToHistory()
+      newPast = res.newPast
     }
 
     set({
@@ -79,10 +95,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       history: { past: newPast, future: saveSnapshot ? [] : history.future },
       canUndo: newPast.length > 0,
       canRedo: saveSnapshot ? false : get().canRedo,
-    });
+    })
 
-    saveToLocalStorage(newConfig);
-  };
+    saveToLocalStorage(newConfig)
+  }
 
   return {
     config: null,
@@ -107,145 +123,145 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         history: { past: [], future: [] },
         canUndo: false,
         canRedo: false,
-      });
+      })
     },
 
     recordHistorySnapshot: () => {
-      const { config, history } = get();
-      if (!config) return;
-      const snapshot = JSON.parse(JSON.stringify(config));
-      const newPast = [...history.past, snapshot].slice(-MAX_HISTORY_STEPS);
+      const { config, history } = get()
+      if (!config) return
+      const snapshot = JSON.parse(JSON.stringify(config))
+      const newPast = [...history.past, snapshot].slice(-MAX_HISTORY_STEPS)
       set({
         history: { past: newPast, future: [] },
         canUndo: true,
         canRedo: false,
-      });
+      })
     },
 
     selectWidget: (instanceId) => {
-      set({ selectedInstanceId: instanceId });
+      set({ selectedInstanceId: instanceId })
     },
 
     updateWidgetConfig: (instanceId, patch) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, config: { ...w.config, ...patch } } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
+      applyConfigChange(newConfig, true)
     },
 
     updateWidgetPosition: (instanceId, position, recordHistory = true) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, position } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, recordHistory);
+      applyConfigChange(newConfig, recordHistory)
     },
 
     updateWidgetSize: (instanceId, size, recordHistory = true) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, size } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, recordHistory);
+      applyConfigChange(newConfig, recordHistory)
     },
 
     toggleWidgetVisibility: (instanceId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, visible: !w.visible } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
+      applyConfigChange(newConfig, true)
     },
 
     toggleWidgetLock: (instanceId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, locked: !w.locked } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
+      applyConfigChange(newConfig, true)
     },
 
     renameWidget: (instanceId, name) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, name } : w
-      );
+      )
 
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
+      applyConfigChange(newConfig, true)
     },
 
     removeWidget: (instanceId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
-      const newWidgets = config.widgets.filter((w) => w.instanceId !== instanceId);
+      const newWidgets = config.widgets.filter((w) => w.instanceId !== instanceId)
       const newConfig = {
         ...config,
         widgets: newWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
-      set({ selectedInstanceId: null });
+      applyConfigChange(newConfig, true)
+      set({ selectedInstanceId: null })
     },
 
     addWidget: (widgetId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const defaultSizeMap: Record<string, { width: number; height: number }> = {
         header: { width: 800, height: 90 },
@@ -271,10 +287,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         'awesome-badge': { width: 360, height: 80 },
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
-      };
+      }
 
-      const widgetSize = defaultSizeMap[widgetId] || { width: 800, height: 120 };
-      const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0);
+      const widgetSize = defaultSizeMap[widgetId] || { width: 800, height: 120 }
+      const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0)
 
       const newInstance: WidgetInstance = {
         instanceId: `widget_${Date.now()}`,
@@ -299,24 +315,24 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         locked: false,
         visible: true,
         zIndex: config.widgets.length + 1,
-      };
+      }
 
       const newConfig = {
         ...config,
         widgets: [...config.widgets, newInstance],
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
-      set({ selectedInstanceId: newInstance.instanceId });
+      applyConfigChange(newConfig, true)
+      set({ selectedInstanceId: newInstance.instanceId })
     },
 
     duplicateWidget: (instanceId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
-      const target = config.widgets.find((w) => w.instanceId === instanceId);
-      if (!target) return;
+      const target = config.widgets.find((w) => w.instanceId === instanceId)
+      if (!target) return
 
       const newInstance: WidgetInstance = {
         ...JSON.parse(JSON.stringify(target)),
@@ -327,66 +343,66 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           y: target.position.y + target.size.height + 16,
         },
         zIndex: config.widgets.length + 1,
-      };
+      }
 
       const newConfig = {
         ...config,
         widgets: [...config.widgets, newInstance],
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
-      set({ selectedInstanceId: newInstance.instanceId });
+      applyConfigChange(newConfig, true)
+      set({ selectedInstanceId: newInstance.instanceId })
     },
 
     reorderWidgets: (fromIndex, toIndex) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
-      const newWidgets = [...config.widgets];
-      const [movedItem] = newWidgets.splice(fromIndex, 1);
-      newWidgets.splice(toIndex, 0, movedItem);
+      const newWidgets = [...config.widgets]
+      const [movedItem] = newWidgets.splice(fromIndex, 1)
+      newWidgets.splice(toIndex, 0, movedItem)
 
       const updatedWidgets = newWidgets.map((w, idx) => ({
         ...w,
         zIndex: idx + 1,
-      }));
+      }))
 
       const newConfig = {
         ...config,
         widgets: updatedWidgets,
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
+      applyConfigChange(newConfig, true)
     },
 
     moveWidgetLayer: (instanceId, direction) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
-      const index = config.widgets.findIndex((w) => w.instanceId === instanceId);
-      if (index === -1) return;
+      const index = config.widgets.findIndex((w) => w.instanceId === instanceId)
+      if (index === -1) return
 
-      let targetIndex = index;
+      let targetIndex = index
       if (direction === 'up' && index < config.widgets.length - 1) {
-        targetIndex = index + 1;
+        targetIndex = index + 1
       } else if (direction === 'down' && index > 0) {
-        targetIndex = index - 1;
+        targetIndex = index - 1
       } else if (direction === 'top') {
-        targetIndex = config.widgets.length - 1;
+        targetIndex = config.widgets.length - 1
       } else if (direction === 'bottom') {
-        targetIndex = 0;
+        targetIndex = 0
       }
 
       if (targetIndex !== index) {
-        get().reorderWidgets(index, targetIndex);
+        get().reorderWidgets(index, targetIndex)
       }
     },
 
     applyTemplate: (templateId) => {
-      const { config, githubData } = get();
-      if (!config || !githubData) return;
+      const { config, githubData } = get()
+      if (!config || !githubData) return
 
       const newConfig = createConfiguration(
         config.githubId,
@@ -394,19 +410,19 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         templateId,
         config.profileSlug,
         config.profileName
-      );
+      )
 
-      applyConfigChange(newConfig, true);
-      set({ selectedInstanceId: newConfig.widgets[0]?.instanceId || null });
+      applyConfigChange(newConfig, true)
+      set({ selectedInstanceId: newConfig.widgets[0]?.instanceId || null })
     },
 
     setZoom: (zoom) => set({ zoom }),
     setActiveTab: (tab) => set({ activeTab: tab }),
 
     saveToServer: async () => {
-      const { config } = get();
-      if (!config) return;
-      set({ isSaving: true });
+      const { config } = get()
+      if (!config) return
+      set({ isSaving: true })
       try {
         const response = await fetch('/api/save', {
           method: 'POST',
@@ -414,39 +430,39 @@ export const useEditorStore = create<EditorStore>((set, get) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(config),
-        });
+        })
         if (!response.ok) {
-          let errorMessage = `Failed to save configuration to server (Status: ${response.status})`;
+          let errorMessage = `Failed to save configuration to server (Status: ${response.status})`
           try {
-            const data = await response.json();
+            const data = await response.json()
             if (data && data.error) {
-              errorMessage = data.error;
+              errorMessage = data.error
             }
           } catch {
             try {
-              const text = await response.text();
+              const text = await response.text()
               if (text) {
-                errorMessage = text.slice(0, 150);
+                errorMessage = text.slice(0, 150)
               }
             } catch {}
           }
-          throw new Error(errorMessage);
+          throw new Error(errorMessage)
         }
       } catch (err) {
-        console.error('Save to server failed:', err);
-        throw err;
+        console.error('Save to server failed:', err)
+        throw err
       } finally {
-        set({ isSaving: false });
+        set({ isSaving: false })
       }
     },
 
     undo: () => {
-      const { config, history } = get();
-      if (history.past.length === 0 || !config) return;
+      const { config, history } = get()
+      if (history.past.length === 0 || !config) return
 
-      const previous = history.past[history.past.length - 1];
-      const newPast = history.past.slice(0, history.past.length - 1);
-      const newFuture = [config, ...history.future];
+      const previous = history.past[history.past.length - 1]
+      const newPast = history.past.slice(0, history.past.length - 1)
+      const newFuture = [config, ...history.future]
 
       set({
         config: previous,
@@ -456,18 +472,18 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         selectedInstanceId: previous.widgets.some((w) => w.instanceId === get().selectedInstanceId)
           ? get().selectedInstanceId
           : previous.widgets[0]?.instanceId || null,
-      });
+      })
 
-      saveToLocalStorage(previous);
+      saveToLocalStorage(previous)
     },
 
     redo: () => {
-      const { config, history } = get();
-      if (history.future.length === 0 || !config) return;
+      const { config, history } = get()
+      if (history.future.length === 0 || !config) return
 
-      const next = history.future[0];
-      const newFuture = history.future.slice(1);
-      const newPast = [...history.past, config];
+      const next = history.future[0]
+      const newFuture = history.future.slice(1)
+      const newPast = [...history.past, config]
 
       set({
         config: next,
@@ -477,14 +493,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         selectedInstanceId: next.widgets.some((w) => w.instanceId === get().selectedInstanceId)
           ? get().selectedInstanceId
           : next.widgets[0]?.instanceId || null,
-      });
+      })
 
-      saveToLocalStorage(next);
+      saveToLocalStorage(next)
     },
 
     importLayout: (widgets, globalStyles, templateId) => {
-      const { config } = get();
-      if (!config) return;
+      const { config } = get()
+      if (!config) return
 
       const newConfig = {
         ...config,
@@ -495,10 +511,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           ...config.metadata,
           updatedAt: new Date().toISOString(),
         },
-      };
+      }
 
-      applyConfigChange(newConfig, true);
-      set({ selectedInstanceId: newConfig.widgets[0]?.instanceId || null });
+      applyConfigChange(newConfig, true)
+      set({ selectedInstanceId: newConfig.widgets[0]?.instanceId || null })
     },
-  };
-});
+  }
+})

@@ -1,4 +1,5 @@
 # zkPass — Style Reference
+
 > Encrypted terminal meets classified broadsheet — a single lime-green signal cutting through near-black typography that mixes a whisper-weight serif with terminal-grade sans.
 
 **Theme:** dark
@@ -7,27 +8,28 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 
 ## Tokens — Colors
 
-| Name | Value | Token | Role |
-|------|-------|-------|------|
-| Void Black | `#000000` | `--color-void-black` | Page canvas, deep background layer — the absolute floor of the surface stack |
-| Carbon | `#060606` | `--color-carbon` | Primary page background where pure black would be too harsh — the actual canvas color in the dominant layout |
-| Graphite | `#252525` | `--color-graphite` | Card surfaces, nav bar, raised panels — the dominant mid-neutral |
-| Onyx | `#1f1f1f` | `--color-onyx` | Subtle elevation layer between canvas and card |
-| Iron | `#313131` | `--color-iron` | Box-shadow depth, elevated surface tint — provides warmth on hover and focus |
-| Slate | `#3d3d3d` | `--color-slate` | Hairline borders on dense tables, row dividers |
-| Fog | `#525252` | `--color-fog` | Low-emphasis borders, disabled control outlines |
-| Ash | `#7a7a7a` | `--color-ash` | Muted body text, helper copy, link underlines — the workhorse mid-gray |
-| Smoke | `#8a8a8a` | `--color-smoke` | Secondary captions, metadata text |
-| Pearl | `#c5c5c5` | `--color-pearl` | Tertiary text, subtle heading tints |
-| Bone | `#e5e5e5` | `--color-bone` | High-emphasis body text where pure white would vibrate against black |
-| Chalk | `#ffffff` | `--color-chalk` | Display text, primary headings, icon strokes — the only text color permitted above #e5e5e5 |
+| Name        | Value     | Token                 | Role                                                                                                                                                                                                      |
+| ----------- | --------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Void Black  | `#000000` | `--color-void-black`  | Page canvas, deep background layer — the absolute floor of the surface stack                                                                                                                              |
+| Carbon      | `#060606` | `--color-carbon`      | Primary page background where pure black would be too harsh — the actual canvas color in the dominant layout                                                                                              |
+| Graphite    | `#252525` | `--color-graphite`    | Card surfaces, nav bar, raised panels — the dominant mid-neutral                                                                                                                                          |
+| Onyx        | `#1f1f1f` | `--color-onyx`        | Subtle elevation layer between canvas and card                                                                                                                                                            |
+| Iron        | `#313131` | `--color-iron`        | Box-shadow depth, elevated surface tint — provides warmth on hover and focus                                                                                                                              |
+| Slate       | `#3d3d3d` | `--color-slate`       | Hairline borders on dense tables, row dividers                                                                                                                                                            |
+| Fog         | `#525252` | `--color-fog`         | Low-emphasis borders, disabled control outlines                                                                                                                                                           |
+| Ash         | `#7a7a7a` | `--color-ash`         | Muted body text, helper copy, link underlines — the workhorse mid-gray                                                                                                                                    |
+| Smoke       | `#8a8a8a` | `--color-smoke`       | Secondary captions, metadata text                                                                                                                                                                         |
+| Pearl       | `#c5c5c5` | `--color-pearl`       | Tertiary text, subtle heading tints                                                                                                                                                                       |
+| Bone        | `#e5e5e5` | `--color-bone`        | High-emphasis body text where pure white would vibrate against black                                                                                                                                      |
+| Chalk       | `#ffffff` | `--color-chalk`       | Display text, primary headings, icon strokes — the only text color permitted above #e5e5e5                                                                                                                |
 | Signal Lime | `#c5ff4a` | `--color-signal-lime` | Primary CTA fill, glowing borders, italic accent words in headlines — the single chromatic punctuation in an otherwise monochrome system; at 17.8:1 contrast against black it reads as emergency lighting |
-| Olive Depth | `#597321` | `--color-olive-depth` | Dark green stroke for SVG world-map art and shadow glows under signal-lime elements |
-| Moss Shadow | `#314013` | `--color-moss-shadow` | Deepest green used only as decorative stroke in dotted-globe illustrations |
+| Olive Depth | `#597321` | `--color-olive-depth` | Dark green stroke for SVG world-map art and shadow glows under signal-lime elements                                                                                                                       |
+| Moss Shadow | `#314013` | `--color-moss-shadow` | Deepest green used only as decorative stroke in dotted-globe illustrations                                                                                                                                |
 
 ## Tokens — Typography
 
 ### PT Serif — All display headlines, hero copy, section titles, and the italic accent words — the editorial voice. Weight 300 is anti-convention for a crypto site; most use 600-700, this whisper-weight signals authority through restraint, not volume. · `--font-pt-serif`
+
 - **Substitute:** Source Serif 4 (Google), Cormorant Garamond Light
 - **Weights:** 300
 - **Sizes:** 20, 22, 24, 26, 32, 40, 49, 56, 60, 72, 75, 78, 86, 89, 130
@@ -37,6 +39,7 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 - **Role:** All display headlines, hero copy, section titles, and the italic accent words — the editorial voice. Weight 300 is anti-convention for a crypto site; most use 600-700, this whisper-weight signals authority through restraint, not volume.
 
 ### Inter Tight — All UI chrome, body paragraphs, buttons, nav, tags, labels, links. Carries 500 for nav emphasis, 600 for button text. The uppercase tracked-out labels (0.18–0.26em) read as classified-document metadata stamps. · `--font-inter-tight`
+
 - **Substitute:** Inter (Google)
 - **Weights:** 400, 500, 600
 - **Sizes:** 9, 10, 11, 12, 13, 14, 16, 20, 28
@@ -45,6 +48,7 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 - **Role:** All UI chrome, body paragraphs, buttons, nav, tags, labels, links. Carries 500 for nav emphasis, 600 for button text. The uppercase tracked-out labels (0.18–0.26em) read as classified-document metadata stamps.
 
 ### JetBrains Mono — Code snippets, protocol names, terminal output, hex strings — the proof-of-cryptography evidence layer · `--font-jetbrains-mono`
+
 - **Substitute:** Fira Code (Google)
 - **Weights:** 400, 500, 600
 - **Sizes:** 10, 11, 13
@@ -53,6 +57,7 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 - **Role:** Code snippets, protocol names, terminal output, hex strings — the proof-of-cryptography evidence layer
 
 ### ui-monospace — Inline monospace fallback, tiny hash strings, timestamps · `--font-ui-monospace`
+
 - **Weights:** 400
 - **Sizes:** 9, 11, 12
 - **Line height:** 1.20, 1.55
@@ -61,15 +66,15 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 
 ### Type Scale
 
-| Role | Size | Line Height | Letter Spacing | Token |
-|------|------|-------------|----------------|-------|
-| caption | 10px | 1.2 | 0.24px | `--text-caption` |
-| body | 14px | 1.55 | — | `--text-body` |
-| subheading | 20px | 1.3 | -0.2px | `--text-subheading` |
-| heading-sm | 32px | 1.15 | -0.4px | `--text-heading-sm` |
-| heading | 49px | 1.05 | -1px | `--text-heading` |
-| heading-lg | 72px | 0.98 | -1.8px | `--text-heading-lg` |
-| display | 89px | 0.94 | -3.1px | `--text-display` |
+| Role       | Size | Line Height | Letter Spacing | Token               |
+| ---------- | ---- | ----------- | -------------- | ------------------- |
+| caption    | 10px | 1.2         | 0.24px         | `--text-caption`    |
+| body       | 14px | 1.55        | —              | `--text-body`       |
+| subheading | 20px | 1.3         | -0.2px         | `--text-subheading` |
+| heading-sm | 32px | 1.15        | -0.4px         | `--text-heading-sm` |
+| heading    | 49px | 1.05        | -1px           | `--text-heading`    |
+| heading-lg | 72px | 0.98        | -1.8px         | `--text-heading-lg` |
+| display    | 89px | 0.94        | -3.1px         | `--text-display`    |
 
 ## Tokens — Spacing & Shapes
 
@@ -77,39 +82,39 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 
 ### Spacing Scale
 
-| Name | Value | Token |
-|------|-------|-------|
-| 4 | 4px | `--spacing-4` |
-| 6 | 6px | `--spacing-6` |
-| 7 | 7px | `--spacing-7` |
-| 8 | 8px | `--spacing-8` |
-| 10 | 10px | `--spacing-10` |
-| 12 | 12px | `--spacing-12` |
-| 14 | 14px | `--spacing-14` |
-| 16 | 16px | `--spacing-16` |
-| 18 | 18px | `--spacing-18` |
-| 20 | 20px | `--spacing-20` |
-| 22 | 22px | `--spacing-22` |
-| 24 | 24px | `--spacing-24` |
-| 28 | 28px | `--spacing-28` |
-| 30 | 30px | `--spacing-30` |
-| 32 | 32px | `--spacing-32` |
-| 44 | 44px | `--spacing-44` |
+| Name | Value | Token          |
+| ---- | ----- | -------------- |
+| 4    | 4px   | `--spacing-4`  |
+| 6    | 6px   | `--spacing-6`  |
+| 7    | 7px   | `--spacing-7`  |
+| 8    | 8px   | `--spacing-8`  |
+| 10   | 10px  | `--spacing-10` |
+| 12   | 12px  | `--spacing-12` |
+| 14   | 14px  | `--spacing-14` |
+| 16   | 16px  | `--spacing-16` |
+| 18   | 18px  | `--spacing-18` |
+| 20   | 20px  | `--spacing-20` |
+| 22   | 22px  | `--spacing-22` |
+| 24   | 24px  | `--spacing-24` |
+| 28   | 28px  | `--spacing-28` |
+| 30   | 30px  | `--spacing-30` |
+| 32   | 32px  | `--spacing-32` |
+| 44   | 44px  | `--spacing-44` |
 
 ### Border Radius
 
-| Element | Value |
-|---------|-------|
-| tags | 2px |
-| cards | 0px |
-| buttons | 4px |
-| logoTiles | 4px |
+| Element   | Value |
+| --------- | ----- |
+| tags      | 2px   |
+| cards     | 0px   |
+| buttons   | 4px   |
+| logoTiles | 4px   |
 
 ### Shadows
 
-| Name | Value | Token |
-|------|-------|-------|
-| sm | `rgba(197, 255, 74, 0.45) 0px 0px 8px 0px` | `--shadow-sm` |
+| Name | Value                                      | Token         |
+| ---- | ------------------------------------------ | ------------- |
+| sm   | `rgba(197, 255, 74, 0.45) 0px 0px 8px 0px` | `--shadow-sm` |
 
 ### Layout
 
@@ -121,66 +126,79 @@ zkPass is an encrypted-terminal meets editorial-broadsheet: a near-black canvas 
 ## Components
 
 ### Signal Lime CTA Button
+
 **Role:** Primary action trigger — the only filled chromatic button in the system
 
 Background #c5ff4a, text #000000, padding 14px 24px, radius 4px. Inter Tight weight 500 at 14px with 0.04em tracking. Carries a chromatic glow shadow 0 0 8px 0 rgba(197, 255, 74, 0.45) — this glow is the button's only elevation, signaling 'this is the thing that does something'.
 
 ### Ghost Nav Button
+
 **Role:** Top-bar navigation items (PRODUCTS, TECHNOLOGY, ECOSYSTEM, $ZKP, RESOURCES)
 
 Transparent background, text #ffffff, Inter Tight weight 500 at 13px, 0.18em uppercase tracking. No border, no background. Active state: text shifts to #c5ff4a.
 
 ### Outlined Green Button (Launch CTA)
+
 **Role:** Secondary action with chromatic border
 
 Transparent background, 1px border #c5ff4a, text #c5ff4a, padding 14px 24px, radius 4px. Inter Tight weight 500 at 14px uppercase with 0.08em tracking. Carries the same lime glow as the filled CTA.
 
 ### Sharp Content Card
+
 **Role:** Feature panels for TransGate / TransGate SDK sections
 
 Background #1f1f1f, 1px border #252525, padding 40px, radius 0px. No drop shadow — depth comes from the border-color step against the canvas. Contains a tracked-out label (#7a7a8a, 0.18em) at the top, a PT Serif weight 300 headline (32–40px), and a body paragraph in Inter Tight 14px.
 
 ### Code Block Panel
+
 **Role:** Inline proof / SDK code display
 
 Background #252525, padding 24px, radius 4px, 1px border #313131. JetBrains Mono 13px, line-height 1.55. Lime-green syntax highlighting tokens (#c5ff4a) on #000000 inline code spans. Tag pills (e.g. 'SCHEMA', 'BUNDLE', 'INTENT') sit right-aligned in lime.
 
 ### Metadata Label Stamp
+
 **Role:** [ BUILT FOR HUMANS & AGENTS ] style section labels
 
 Inter Tight 11px weight 500, uppercase, 0.22em tracking, color #7a7a8a, bracketed in literal square brackets. The bracket punctuation is part of the identity — never strip the brackets.
 
 ### Accent Word
+
 **Role:** Single italic PT Serif word in lime green inside an otherwise white headline
 
 PT Serif weight 300 italic, color #c5ff4a, sized to match the parent headline (e.g. 'Verifiable Internet.' inside a 89px display). This is the only place italic PT Serif appears and the only place lime hits a headline — use sparingly, one per headline maximum.
 
 ### Logo Tile
+
 **Role:** Brand mark in lime green square
 
 60×60 to 80×80px square, background #c5ff4a, radius 4px, contains a black 'P' mark centered. The glow shadow 0 0 8px rgba(197, 255, 74, 0.45) is applied to the tile, not the inner mark.
 
 ### Dotted Globe Visual
+
 **Role:** Hero section world-map illustration
 
 Pure SVG composed of 1.5px #ffffff dots on the #060606 canvas forming a world-map silhouette. The dots use opacity 0.4–0.7 to create continent density. No gradient fills, no fills at all — this is pointillism typography, not vector art.
 
 ### Neon Section Divider
+
 **Role:** Horizontal lime strip separating major page sections
 
 Full-width 6–8px bar, solid #c5ff4a, used once between hero and content. Functions as a 'classified document' red-bar moment. Do not repeat within a page; one per scroll is the rule.
 
 ### Status Tag Pill
+
 **Role:** Signed/Verified status indicators (e.g. '✓ SIGNED', '● 3 MODES')
 
 Background transparent, 1px border #c5ff4a, text #c5ff4a, padding 4px 10px, radius 9999px, Inter Tight 11px weight 500 uppercase 0.06em. Check mark or dot prefix in same lime.
 
 ### Top Navigation Bar
+
 **Role:** Persistent page chrome
 
 Background #000000, 1px bottom border #252525, height 64px, max-width 1280px centered. Left: wordmark. Center: 5 nav items in ghost button style. Right: lime CTA. Sticky on scroll.
 
 ### Section Eyebrow Bracket
+
 **Role:** Above-title metadata tag for new content sections
 
 Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter Tight 11px weight 500, 0.22em tracking, color #7a7a8a. Period-separator between phrases. Right-aligned: 'B 01' / 'B 02' style section index in same treatment.
@@ -188,6 +206,7 @@ Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter
 ## Do's and Don'ts
 
 ### Do
+
 - Prefer canonical Tailwind utilities whenever a class can be expressed through a theme token or existing scale; if `suggestCanonicalClasses` proposes a replacement, use it instead of an arbitrary value.
 - Use icons for UI affordances, labels, and status cues; do not use emojis in source or interface copy.
 - Use #c5ff4a for filled CTA buttons, glowing borders, status pills, and exactly one italic accent word per headline — never for body text, never for icons at full size
@@ -199,6 +218,7 @@ Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter
 - Scale the neon section divider (full-width 6–8px #c5ff4a bar) to exactly one per page between major page regions
 
 ### Don't
+
 - Do not introduce any chromatic color beyond #c5ff4a, #597321, and #314013 — the entire chromatic palette is three greens against ten grays
 - Do not apply drop-shadows to cards, panels, or modals; elevation is communicated through surface-tone layering only
 - Do not use PT Serif at weight 400 or heavier for display; weight 300 is the signature and heavier weights break the whisper-authority effect
@@ -211,12 +231,12 @@ Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter
 
 ## Surfaces
 
-| Level | Name | Value | Purpose |
-|-------|------|-------|---------|
-| 0 | Canvas | `#060606` | Page background — the void |
-| 1 | Card | `#1f1f1f` | Content blocks, feature panels |
-| 2 | Raised | `#252525` | Nav bar, active panels, code blocks |
-| 3 | Hover | `#313131` | Interactive hover state, elevated popovers |
+| Level | Name   | Value     | Purpose                                    |
+| ----- | ------ | --------- | ------------------------------------------ |
+| 0     | Canvas | `#060606` | Page background — the void                 |
+| 1     | Card   | `#1f1f1f` | Content blocks, feature panels             |
+| 2     | Raised | `#252525` | Nav bar, active panels, code blocks        |
+| 3     | Hover  | `#313131` | Interactive hover state, elevated popovers |
 
 ## Elevation
 
@@ -233,6 +253,7 @@ Layout is max-width 1280px centered with generous outer gutters. The hero is a f
 ## Agent Prompt Guide
 
 Quick Color Reference:
+
 - text (primary): #ffffff
 - text (body): #e5e5e5
 - text (muted/helper): #7a7a8a
@@ -285,10 +306,14 @@ Example Component Prompts:
   --color-moss-shadow: #314013;
 
   /* Typography — Font Families */
-  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-inter-tight: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-ui-monospace: 'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-inter-tight:
+    'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-jetbrains-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui-monospace:
+    'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Typography — Scale */
   --text-caption: 10px;
@@ -381,10 +406,14 @@ Example Component Prompts:
   --color-moss-shadow: #314013;
 
   /* Typography */
-  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-inter-tight: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-ui-monospace: 'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-pt-serif: 'PT Serif', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-inter-tight:
+    'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-jetbrains-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui-monospace:
+    'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Typography — Scale */
   --text-caption: 10px;

@@ -1,14 +1,16 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { Type, ChevronDown } from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import { useI18n } from '@/i18n';
-import { convertTextToAscii, type AsciiFontName } from '@/engine/ascii/textConverter';
+import { ChevronDown, Type } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+
+import { type AsciiFontName, convertTextToAscii } from '@/engine/ascii/textConverter'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
 
 interface AsciiTextControlsProps {
-  instanceId: string;
-  config: Record<string, unknown>;
+  instanceId: string
+  config: Record<string, unknown>
 }
 
 const CHARSET_OPTIONS = [
@@ -24,43 +26,52 @@ const CHARSET_OPTIONS = [
   { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
   { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
   { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
-];
+]
 
 export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps) {
-  const { t } = useI18n();
-  const { updateWidgetConfig } = useEditorStore();
+  const { t } = useI18n()
+  const { updateWidgetConfig } = useEditorStore()
 
-  const [isCharsetMenuOpen, setIsCharsetMenuOpen] = useState(false);
+  const [isCharsetMenuOpen, setIsCharsetMenuOpen] = useState(false)
 
-  const customText = (config.customText as string) || 'GITAscii';
-  const asciiFont = (config.asciiFont as AsciiFontName) || 'block';
-  const charSpacing = config.charSpacing !== undefined ? Number(config.charSpacing) : 1;
-  const fontSize = Number(config.fontSize) || 12;
-  const charset = (config.charset as string) || 'default';
-  const customCharset = (config.customCharset as string) || '';
+  const customText = (config.customText as string) || 'GITAscii'
+  const asciiFont = (config.asciiFont as AsciiFontName) || 'block'
+  const charSpacing = config.charSpacing !== undefined ? Number(config.charSpacing) : 1
+  const fontSize = Number(config.fontSize) || 12
+  const charset = (config.charset as string) || 'default'
+  const customCharset = (config.customCharset as string) || ''
 
   useEffect(() => {
-    const lines = convertTextToAscii(customText, asciiFont, charSpacing, charset, customCharset);
-    const storedLines = config.asciiLines as string[];
+    const lines = convertTextToAscii(customText, asciiFont, charSpacing, charset, customCharset)
+    const storedLines = config.asciiLines as string[]
     const isSame =
       storedLines &&
       storedLines.length === lines.length &&
-      storedLines.every((val, idx) => val === lines[idx]);
+      storedLines.every((val, idx) => val === lines[idx])
 
     if (!isSame) {
       updateWidgetConfig(instanceId, {
         asciiLines: lines,
-      });
+      })
     }
-  }, [customText, asciiFont, charSpacing, charset, customCharset, instanceId, config.asciiLines, updateWidgetConfig]);
+  }, [
+    customText,
+    asciiFont,
+    charSpacing,
+    charset,
+    customCharset,
+    instanceId,
+    config.asciiLines,
+    updateWidgetConfig,
+  ])
 
   const FONT_OPTIONS: Array<{ id: AsciiFontName; name: string; info: string }> = [
     { id: 'block', name: t('editor.ascii.font.block', 'Block Solid'), info: '5 lines high' },
     { id: 'slant', name: t('editor.ascii.font.slant', 'Slant Banner'), info: '5 lines high' },
     { id: 'thin', name: t('editor.ascii.font.thin', 'Thin Outline'), info: '3 lines high' },
-  ];
+  ]
 
-  const selectedCharsetObj = CHARSET_OPTIONS.find((c) => c.id === charset) || CHARSET_OPTIONS[0];
+  const selectedCharsetObj = CHARSET_OPTIONS.find((c) => c.id === charset) || CHARSET_OPTIONS[0]
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
@@ -90,21 +101,22 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
         </label>
         <div className="grid grid-cols-3 gap-1 bg-carbon p-1 rounded border border-graphite">
           {FONT_OPTIONS.map((opt) => {
-            const isSelected = asciiFont === opt.id;
+            const isSelected = asciiFont === opt.id
             return (
               <button
                 key={opt.id}
                 type="button"
                 onClick={() => updateWidgetConfig(instanceId, { asciiFont: opt.id })}
-                className={`py-1.5 px-2 rounded text-caption font-medium transition-all text-center truncate ${isSelected
+                className={`py-1.5 px-2 rounded text-caption font-medium transition-all text-center truncate ${
+                  isSelected
                     ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                     : 'text-ash hover:text-chalk'
-                  }`}
+                }`}
                 title={opt.info}
               >
                 {opt.name}
               </button>
-            );
+            )
           })}
         </div>
       </div>
@@ -124,29 +136,35 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
               {selectedCharsetObj.preview}
             </span>
             <div className="truncate">
-              <div className="text-eyebrow text-chalk font-semibold leading-tight">{selectedCharsetObj.name}</div>
+              <div className="text-eyebrow text-chalk font-semibold leading-tight">
+                {selectedCharsetObj.name}
+              </div>
               <div className="text-[9px] text-ash">{selectedCharsetObj.info}</div>
             </div>
           </div>
-          <ChevronDown size={14} className={`text-ash transition-transform shrink-0 ${isCharsetMenuOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={14}
+            className={`text-ash transition-transform shrink-0 ${isCharsetMenuOpen ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {isCharsetMenuOpen && (
           <div className="absolute z-50 left-0 right-0 top-15 bg-carbon border border-graphite rounded shadow-xl max-h-60 overflow-y-auto p-1 space-y-1">
             {CHARSET_OPTIONS.map((item) => {
-              const isSelected = item.id === charset;
+              const isSelected = item.id === charset
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => {
-                    updateWidgetConfig(instanceId, { charset: item.id });
-                    setIsCharsetMenuOpen(false);
+                    updateWidgetConfig(instanceId, { charset: item.id })
+                    setIsCharsetMenuOpen(false)
                   }}
-                  className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${isSelected
-                    ? 'bg-graphite text-signal-lime border border-signal-lime/40'
-                    : 'hover:bg-graphite/60 text-chalk'
-                    }`}
+                  className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${
+                    isSelected
+                      ? 'bg-graphite text-signal-lime border border-signal-lime/40'
+                      : 'hover:bg-graphite/60 text-chalk'
+                  }`}
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
                     <span className="font-jetbrains-mono bg-void-black text-signal-lime text-eyebrow px-2 py-0.5 rounded border border-graphite font-semibold shrink-0">
@@ -156,7 +174,7 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
                   </div>
                   <span className="text-[9px] text-ash shrink-0">{item.info}</span>
                 </button>
-              );
+              )
             })}
           </div>
         )}
@@ -174,7 +192,9 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
 
       <div className="space-y-1.5 pt-2 border-t border-graphite/50">
         <div className="flex justify-between text-eyebrow">
-          <span className="text-ash font-medium">{t('editor.ascii.spacing_label', 'Espaçamento de Letras')}</span>
+          <span className="text-ash font-medium">
+            {t('editor.ascii.spacing_label', 'Espaçamento de Letras')}
+          </span>
           <span className="text-signal-lime font-mono font-semibold">{charSpacing} px</span>
         </div>
         <div className="flex items-center gap-2">
@@ -184,7 +204,9 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
             max="4"
             step="1"
             value={charSpacing}
-            onChange={(e) => updateWidgetConfig(instanceId, { charSpacing: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              updateWidgetConfig(instanceId, { charSpacing: parseInt(e.target.value, 10) })
+            }
             className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
           />
         </div>
@@ -192,7 +214,9 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
 
       <div className="space-y-1.5 pt-2 border-t border-graphite/50">
         <div className="flex justify-between text-eyebrow">
-          <span className="text-ash font-medium">{t('editor.ascii.fontsize_label', 'Tamanho do Caractere')}</span>
+          <span className="text-ash font-medium">
+            {t('editor.ascii.fontsize_label', 'Tamanho do Caractere')}
+          </span>
           <span className="text-signal-lime font-mono font-semibold">{fontSize} px</span>
         </div>
         <div className="flex items-center gap-2">
@@ -202,11 +226,13 @@ export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps
             max="24"
             step="1"
             value={fontSize}
-            onChange={(e) => updateWidgetConfig(instanceId, { fontSize: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              updateWidgetConfig(instanceId, { fontSize: parseInt(e.target.value, 10) })
+            }
             className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
           />
         </div>
       </div>
     </div>
-  );
+  )
 }

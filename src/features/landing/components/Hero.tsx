@@ -1,68 +1,73 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowRight, Github, User } from 'lucide-react';
-import { useI18n } from '@/i18n';
+import { ArrowRight, Github, User } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
-import AsciiHands from '@/components/ui/ascii-hands';
-import { useToast } from '@/components/ui/toast';
+import AsciiHands from '@/components/ui/ascii-hands'
+import { useToast } from '@/components/ui/toast'
+import { useI18n } from '@/i18n'
 
 export interface UserSession {
-  username: string;
-  githubId: number;
+  username: string
+  githubId: number
 }
 
 export default function Hero() {
-  const [mounted, setMounted] = useState(false);
-  const [username, setUsername] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGithubLoading, setIsGithubLoading] = useState(false);
-  const [session, setSession] = useState<UserSession | null>(null);
-  const router = useRouter();
-  const { t } = useI18n();
-  const { error } = useToast();
+  const [mounted, setMounted] = useState(false)
+  const [username, setUsername] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isGithubLoading, setIsGithubLoading] = useState(false)
+  const [session, setSession] = useState<UserSession | null>(null)
+  const router = useRouter()
+  const { t } = useI18n()
+  const { error } = useToast()
 
   useEffect(() => {
-    setMounted(true);
+    setMounted(true)
 
     fetch('/api/auth/session')
       .then((res) => res.json())
       .then((data) => {
         if (data && data.session) {
-          setSession(data.session);
+          setSession(data.session)
         }
       })
-      .catch(() => { });
-  }, []);
+      .catch(() => {})
+  }, [])
 
   const validateUsername = (val: string) => {
-    const clean = val.trim();
-    if (clean.includes('/') || clean.includes('.') || clean.includes('http') || clean.includes('www')) {
-      return false;
+    const clean = val.trim()
+    if (
+      clean.includes('/') ||
+      clean.includes('.') ||
+      clean.includes('http') ||
+      clean.includes('www')
+    ) {
+      return false
     }
-    const githubUsernameRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
-    return githubUsernameRegex.test(clean);
-  };
+    const githubUsernameRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i
+    return githubUsernameRegex.test(clean)
+  }
 
   const handleOpenEditor = (e: React.FormEvent) => {
-    e.preventDefault();
-    const handle = username.trim() || 'Igorcbraz';
+    e.preventDefault()
+    const handle = username.trim() || 'Igorcbraz'
     if (username.trim() && !validateUsername(handle)) {
-      error('Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).');
-      return;
+      error(
+        'Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).'
+      )
+      return
     }
-    setIsLoading(true);
-    router.push(`/${handle}`);
-  };
+    setIsLoading(true)
+    router.push(`/${handle}`)
+  }
 
   return (
     <section className="relative min-h-screen">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {mounted && (
-          <AsciiHands className="absolute inset-0 opacity-60" />
-        )}
+        {mounted && <AsciiHands className="absolute inset-0 opacity-60" />}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
       </div>
 
@@ -76,12 +81,17 @@ export default function Hero() {
 
           <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-300 font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
             {t('landing.hero.title_normal', 'Create ')}
-            <span className="italic text-signal-lime">{t('landing.hero.title_italic', 'Stunning')}</span>
+            <span className="italic text-signal-lime">
+              {t('landing.hero.title_italic', 'Stunning')}
+            </span>
             {t('landing.hero.title_end', ' GitHub Profile READMEs.')}
           </h1>
 
           <p className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-500 font-inter-tight font-normal text-bone text-body leading-body max-w-130 mb-12">
-            {t('landing.hero.subtitle', 'Premium SVGs. ASCII art. Visual editor. One platform for developers who care about their profile.')}
+            {t(
+              'landing.hero.subtitle',
+              'Premium SVGs. ASCII art. Visual editor. One platform for developers who care about their profile.'
+            )}
           </p>
 
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
@@ -91,11 +101,14 @@ export default function Hero() {
                 className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 <User size={18} />
-                <span>{t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})</span>
+                <span>
+                  {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
+                </span>
               </Link>
             ) : (
-              <a
+              <Link
                 href="/api/auth/login"
+                prefetch={false}
                 onClick={() => setIsGithubLoading(true)}
                 className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
@@ -105,12 +118,14 @@ export default function Hero() {
                   <Github size={18} />
                 )}
                 <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
-              </a>
+              </Link>
             )}
 
             <div className="flex items-center gap-3 w-full">
               <span className="flex-1 h-px bg-graphite/60" />
-              <span className="uppercase text-caption tracking-widest text-ash/50 font-inter-tight">{t('common.or', 'or')}</span>
+              <span className="uppercase text-caption tracking-widest text-ash/50 font-inter-tight">
+                {t('common.or', 'or')}
+              </span>
               <span className="flex-1 h-px bg-graphite/60" />
             </div>
 
@@ -150,5 +165,5 @@ export default function Hero() {
 
       <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)] z-20"></div>
     </section>
-  );
+  )
 }

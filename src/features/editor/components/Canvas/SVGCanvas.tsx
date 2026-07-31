@@ -1,15 +1,17 @@
-'use client';
+'use client'
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Lock, Move, Layers, X } from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import { renderSvg } from '@/engine/core/SVGEngine';
-import { LayersPanel } from '../Sidebar/LayersPanel';
-import { convertImageToAsciiCanvas } from '@/engine/ascii/converter';
-import { useI18n } from '@/i18n';
+import { Layers, Lock, Move, X } from 'lucide-react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+
+import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
+import { renderSvg } from '@/engine/core/SVGEngine'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
+import { LayersPanel } from '../Sidebar/LayersPanel'
 
 export function SVGCanvas() {
-  const { t } = useI18n();
+  const { t } = useI18n()
   const {
     config,
     githubData,
@@ -20,62 +22,64 @@ export function SVGCanvas() {
     updateWidgetConfig,
     recordHistorySnapshot,
     zoom,
-  } = useEditorStore();
+  } = useEditorStore()
 
-  const [isLayersOpen, setIsLayersOpen] = useState(false);
+  const [isLayersOpen, setIsLayersOpen] = useState(false)
 
   const [activeDrag, setActiveDrag] = useState<{
-    instanceId: string;
-    type: 'move' | 'resize-r' | 'resize-b' | 'resize-br';
-    startX: number;
-    startY: number;
-    initialPos: { x: number; y: number };
-    initialSize: { width: number; height: number };
-  } | null>(null);
+    instanceId: string
+    type: 'move' | 'resize-r' | 'resize-b' | 'resize-br'
+    startX: number
+    startY: number
+    initialPos: { x: number; y: number }
+    initialSize: { width: number; height: number }
+  } | null>(null)
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const renderedSvgString = useMemo(() => {
-    if (!config || !githubData) return '';
-    return renderSvg(config, githubData, { theme: 'dark' });
-  }, [config, githubData]);
+    if (!config || !githubData) return ''
+    return renderSvg(config, githubData, { theme: 'dark' })
+  }, [config, githubData])
 
-  const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([]);
+  const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([])
 
   useEffect(() => {
-    if (!config || !githubData) return;
+    if (!config || !githubData) return
 
     const asciiWidgets = config.widgets.filter(
       (w) => w.widgetId === 'ascii-art' && !w.config.asciiText
-    );
+    )
 
-    if (asciiWidgets.length === 0) return;
+    if (asciiWidgets.length === 0) return
 
     asciiWidgets.forEach(async (widget) => {
-      const cfg = widget.config;
-      const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar';
-      const customImageUrl = (cfg.imageUrl as string) || '';
-      const uploadedImageData = (cfg.uploadedImageData as string) || '';
+      const cfg = widget.config
+      const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
+      const customImageUrl = (cfg.imageUrl as string) || ''
+      const uploadedImageData = (cfg.uploadedImageData as string) || ''
 
-      let imgSrc = githubData.user.avatar_url || 'https://github.com/github.png';
+      let imgSrc = githubData.user.avatar_url || 'https://github.com/github.png'
       if (sourceType === 'upload' && uploadedImageData) {
-        imgSrc = uploadedImageData;
+        imgSrc = uploadedImageData
       } else if (sourceType === 'url' && customImageUrl) {
-        imgSrc = customImageUrl;
+        imgSrc = customImageUrl
       }
 
-      const charset = (cfg.charset as string) || 'dense';
-      const customCharset = (cfg.customCharset as string) || '';
-      const invert = Boolean(cfg.invert);
-      const detail = (cfg.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium';
-      const cols = Number(cfg.cols) || (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150);
+      const charset = (cfg.charset as string) || 'dense'
+      const customCharset = (cfg.customCharset as string) || ''
+      const invert = Boolean(cfg.invert)
+      const detail = (cfg.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
+      const cols =
+        Number(cfg.cols) ||
+        (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150)
 
-      const contrast = Number(cfg.contrast !== undefined ? cfg.contrast : 10);
-      const brightness = Number(cfg.brightness !== undefined ? cfg.brightness : 0);
-      const edgeEnhance = Boolean(cfg.edgeEnhance !== undefined ? cfg.edgeEnhance : true);
-      const autoContrast = Boolean(cfg.autoContrast !== false);
-      const dithering = Boolean(cfg.dithering !== false);
-      const colorMode = (cfg.colorMode as 'monochrome' | 'color') || 'monochrome';
+      const contrast = Number(cfg.contrast !== undefined ? cfg.contrast : 10)
+      const brightness = Number(cfg.brightness !== undefined ? cfg.brightness : 0)
+      const edgeEnhance = Boolean(cfg.edgeEnhance !== undefined ? cfg.edgeEnhance : true)
+      const autoContrast = Boolean(cfg.autoContrast !== false)
+      const dithering = Boolean(cfg.dithering !== false)
+      const colorMode = (cfg.colorMode as 'monochrome' | 'color') || 'monochrome'
 
       try {
         const options = {
@@ -89,168 +93,200 @@ export function SVGCanvas() {
           autoContrast,
           dithering,
           colorMode,
-        };
+        }
 
-        const result = await convertImageToAsciiCanvas(imgSrc, options);
+        const result = await convertImageToAsciiCanvas(imgSrc, options)
 
         updateWidgetConfig(widget.instanceId, {
           asciiText: result.lines,
           asciiColors: result.colorMatrix,
           cols: result.cols,
           rows: result.rows,
-        });
+        })
       } catch (err) {
-        console.warn('Background ASCII Conversion Warning:', err);
+        console.warn('Background ASCII Conversion Warning:', err)
       }
-    });
-  }, [config, githubData, updateWidgetConfig]);
+    })
+  }, [config, githubData, updateWidgetConfig])
 
   useEffect(() => {
-    if (!isLayersOpen) return;
+    if (!isLayersOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsLayersOpen(false);
+        setIsLayersOpen(false)
       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLayersOpen]);
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isLayersOpen])
 
   useEffect(() => {
-    if (!activeDrag) return;
+    if (!activeDrag) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = Math.round((e.clientX - activeDrag.startX) / zoom);
-      const deltaY = Math.round((e.clientY - activeDrag.startY) / zoom);
+      const deltaX = Math.round((e.clientX - activeDrag.startX) / zoom)
+      const deltaY = Math.round((e.clientY - activeDrag.startY) / zoom)
 
-      const targetWidget = config?.widgets.find((w) => w.instanceId === activeDrag.instanceId);
+      const targetWidget = config?.widgets.find((w) => w.instanceId === activeDrag.instanceId)
       const isAspectLocked = targetWidget
-        ? targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art' || Boolean(targetWidget.config.lockAspectRatio !== false && (targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art')) || Boolean(targetWidget.config.lockAspectRatio)
-        : false;
+        ? targetWidget.widgetId === 'avatar' ||
+          targetWidget.widgetId === 'ascii-art' ||
+          Boolean(
+            targetWidget.config.lockAspectRatio !== false &&
+            (targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art')
+          ) ||
+          Boolean(targetWidget.config.lockAspectRatio)
+        : false
 
       if (activeDrag.type === 'move') {
-        let rawX = activeDrag.initialPos.x + deltaX;
-        let rawY = activeDrag.initialPos.y + deltaY;
+        const rawX = activeDrag.initialPos.x + deltaX
+        const rawY = activeDrag.initialPos.y + deltaY
 
-        const SNAP_THRESHOLD = 8;
-        const width = activeDrag.initialSize.width;
-        const height = activeDrag.initialSize.height;
+        const SNAP_THRESHOLD = 8
+        const width = activeDrag.initialSize.width
+        const height = activeDrag.initialSize.height
 
-        let snapX: number | undefined;
-        let snapY: number | undefined;
-        const newGuides: { x?: number; y?: number }[] = [];
+        let snapX: number | undefined
+        let snapY: number | undefined
+        const newGuides: { x?: number; y?: number }[] = []
 
         if (config?.widgets) {
           for (const other of config.widgets) {
-            if (other.instanceId === activeDrag.instanceId || !other.visible) continue;
+            if (other.instanceId === activeDrag.instanceId || !other.visible) continue
 
-            const otherLeft = other.position.x;
-            const otherRight = other.position.x + other.size.width;
-            const otherCenterX = other.position.x + other.size.width / 2;
-            const otherTop = other.position.y;
-            const otherBottom = other.position.y + other.size.height;
-            const otherCenterY = other.position.y + other.size.height / 2;
+            const otherLeft = other.position.x
+            const otherRight = other.position.x + other.size.width
+            const otherCenterX = other.position.x + other.size.width / 2
+            const otherTop = other.position.y
+            const otherBottom = other.position.y + other.size.height
+            const otherCenterY = other.position.y + other.size.height / 2
 
-            const left = rawX;
-            const right = rawX + width;
-            const centerX = rawX + width / 2;
-            const top = rawY;
-            const bottom = rawY + height;
-            const centerY = rawY + height / 2;
+            const left = rawX
+            const right = rawX + width
+            const centerX = rawX + width / 2
+            const top = rawY
+            const bottom = rawY + height
+            const centerY = rawY + height / 2
 
             if (Math.abs(left - otherLeft) < SNAP_THRESHOLD) {
-              snapX = otherLeft;
-              newGuides.push({ x: otherLeft });
+              snapX = otherLeft
+              newGuides.push({ x: otherLeft })
             } else if (Math.abs(left - otherRight) < SNAP_THRESHOLD) {
-              snapX = otherRight;
-              newGuides.push({ x: otherRight });
+              snapX = otherRight
+              newGuides.push({ x: otherRight })
             } else if (Math.abs(right - otherLeft) < SNAP_THRESHOLD) {
-              snapX = otherLeft - width;
-              newGuides.push({ x: otherLeft });
+              snapX = otherLeft - width
+              newGuides.push({ x: otherLeft })
             } else if (Math.abs(right - otherRight) < SNAP_THRESHOLD) {
-              snapX = otherRight - width;
-              newGuides.push({ x: otherRight });
+              snapX = otherRight - width
+              newGuides.push({ x: otherRight })
             } else if (Math.abs(centerX - otherCenterX) < SNAP_THRESHOLD) {
-              snapX = otherCenterX - width / 2;
-              newGuides.push({ x: otherCenterX });
+              snapX = otherCenterX - width / 2
+              newGuides.push({ x: otherCenterX })
             }
 
             if (Math.abs(top - otherTop) < SNAP_THRESHOLD) {
-              snapY = otherTop;
-              newGuides.push({ y: otherTop });
+              snapY = otherTop
+              newGuides.push({ y: otherTop })
             } else if (Math.abs(top - otherBottom) < SNAP_THRESHOLD) {
-              snapY = otherBottom;
-              newGuides.push({ y: otherBottom });
+              snapY = otherBottom
+              newGuides.push({ y: otherBottom })
             } else if (Math.abs(bottom - otherTop) < SNAP_THRESHOLD) {
-              snapY = otherTop - height;
-              newGuides.push({ y: otherTop });
+              snapY = otherTop - height
+              newGuides.push({ y: otherTop })
             } else if (Math.abs(bottom - otherBottom) < SNAP_THRESHOLD) {
-              snapY = otherBottom - height;
-              newGuides.push({ y: otherBottom });
+              snapY = otherBottom - height
+              newGuides.push({ y: otherBottom })
             } else if (Math.abs(centerY - otherCenterY) < SNAP_THRESHOLD) {
-              snapY = otherCenterY - height / 2;
-              newGuides.push({ y: otherCenterY });
+              snapY = otherCenterY - height / 2
+              newGuides.push({ y: otherCenterY })
             }
           }
         }
 
-        const snappedX = snapX !== undefined ? snapX : Math.max(0, Math.min(800 - width, Math.round(rawX / 4) * 4));
-        const snappedY = snapY !== undefined ? snapY : Math.max(0, Math.round(rawY / 4) * 4);
+        const snappedX =
+          snapX !== undefined ? snapX : Math.max(0, Math.min(800 - width, Math.round(rawX / 4) * 4))
+        const snappedY = snapY !== undefined ? snapY : Math.max(0, Math.round(rawY / 4) * 4)
 
-        setAlignmentGuides(newGuides);
-        updateWidgetPosition(activeDrag.instanceId, { x: snappedX, y: snappedY }, false);
+        setAlignmentGuides(newGuides)
+        updateWidgetPosition(activeDrag.instanceId, { x: snappedX, y: snappedY }, false)
       } else if (activeDrag.type === 'resize-r') {
-        const newWidth = Math.max(40, Math.min(800 - activeDrag.initialPos.x, Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4));
-        const newHeight = isAspectLocked ? newWidth : activeDrag.initialSize.height;
-        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false);
+        const newWidth = Math.max(
+          40,
+          Math.min(
+            800 - activeDrag.initialPos.x,
+            Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4
+          )
+        )
+        const newHeight = isAspectLocked ? newWidth : activeDrag.initialSize.height
+        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false)
       } else if (activeDrag.type === 'resize-b') {
-        const newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4);
-        const newWidth = isAspectLocked ? Math.min(800 - activeDrag.initialPos.x, newHeight) : activeDrag.initialSize.width;
-        updateWidgetSize(activeDrag.instanceId, { width: isAspectLocked ? newHeight : newWidth, height: newHeight }, false);
+        const newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4)
+        const newWidth = isAspectLocked
+          ? Math.min(800 - activeDrag.initialPos.x, newHeight)
+          : activeDrag.initialSize.width
+        updateWidgetSize(
+          activeDrag.instanceId,
+          { width: isAspectLocked ? newHeight : newWidth, height: newHeight },
+          false
+        )
       } else if (activeDrag.type === 'resize-br') {
-        let newWidth = Math.max(40, Math.min(800 - activeDrag.initialPos.x, Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4));
-        let newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4);
+        let newWidth = Math.max(
+          40,
+          Math.min(
+            800 - activeDrag.initialPos.x,
+            Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4
+          )
+        )
+        let newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4)
 
         if (isAspectLocked) {
-          const side = Math.min(newWidth, Math.min(800 - activeDrag.initialPos.x, newHeight));
-          newWidth = side;
-          newHeight = side;
+          const side = Math.min(newWidth, Math.min(800 - activeDrag.initialPos.x, newHeight))
+          newWidth = side
+          newHeight = side
         }
 
-        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false);
+        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false)
       }
-    };
+    }
 
     const handleMouseUp = () => {
-      setActiveDrag(null);
-      setAlignmentGuides([]);
-      recordHistorySnapshot();
-    };
+      setActiveDrag(null)
+      setAlignmentGuides([])
+      recordHistorySnapshot()
+    }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [activeDrag, zoom, updateWidgetPosition, updateWidgetSize, recordHistorySnapshot, config?.widgets]);
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [
+    activeDrag,
+    zoom,
+    updateWidgetPosition,
+    updateWidgetSize,
+    recordHistorySnapshot,
+    config?.widgets,
+  ])
 
   if (!config || !githubData) {
     return (
       <div className="flex-1 h-full bg-carbon flex items-center justify-center text-ash">
         Carregando canvas...
       </div>
-    );
+    )
   }
 
-  let canvasHeight = 400;
+  let canvasHeight = 400
   config.widgets.forEach((w) => {
     if (w.visible) {
-      const bottom = w.position.y + w.size.height + 40;
-      if (bottom > canvasHeight) canvasHeight = bottom;
+      const bottom = w.position.y + w.size.height + 40
+      if (bottom > canvasHeight) canvasHeight = bottom
     }
-  });
+  })
 
   return (
     <main
@@ -279,7 +315,7 @@ export function SVGCanvas() {
                 className="absolute top-0 bottom-0 w-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
                 style={{ left: guide.x }}
               />
-            );
+            )
           }
           if (guide.y !== undefined) {
             return (
@@ -288,29 +324,29 @@ export function SVGCanvas() {
                 className="absolute left-0 right-0 h-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
                 style={{ top: guide.y }}
               />
-            );
+            )
           }
-          return null;
+          return null
         })}
 
         <div className="absolute inset-0 pointer-events-auto">
           {config.widgets.map((widget) => {
-            if (!widget.visible) return null;
+            if (!widget.visible) return null
 
-            const isSelected = widget.instanceId === selectedInstanceId;
+            const isSelected = widget.instanceId === selectedInstanceId
             const displayName =
-              widget.name || `${widget.widgetId.charAt(0).toUpperCase() + widget.widgetId.slice(1)}`;
+              widget.name || `${widget.widgetId.charAt(0).toUpperCase() + widget.widgetId.slice(1)}`
 
             return (
               <div
                 key={widget.instanceId}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  selectWidget(widget.instanceId);
+                  e.stopPropagation()
+                  selectWidget(widget.instanceId)
                 }}
                 onMouseDown={(e) => {
-                  e.stopPropagation();
-                  selectWidget(widget.instanceId);
+                  e.stopPropagation()
+                  selectWidget(widget.instanceId)
                   if (!widget.locked) {
                     setActiveDrag({
                       instanceId: widget.instanceId,
@@ -319,7 +355,7 @@ export function SVGCanvas() {
                       startY: e.clientY,
                       initialPos: { ...widget.position },
                       initialSize: { ...widget.size },
-                    });
+                    })
                   }
                 }}
                 style={{
@@ -330,12 +366,13 @@ export function SVGCanvas() {
                   height: widget.size.height,
                   zIndex: widget.zIndex,
                 }}
-                className={`group transition-all ${widget.locked
-                  ? 'cursor-not-allowed'
-                  : isSelected
-                    ? 'cursor-grab active:cursor-grabbing ring-2 ring-signal-lime ring-offset-2 ring-offset-carbon'
-                    : 'cursor-grab hover:ring-1 hover:ring-ash/50'
-                  }`}
+                className={`group transition-all ${
+                  widget.locked
+                    ? 'cursor-not-allowed'
+                    : isSelected
+                      ? 'cursor-grab active:cursor-grabbing ring-2 ring-signal-lime ring-offset-2 ring-offset-carbon'
+                      : 'cursor-grab hover:ring-1 hover:ring-ash/50'
+                }`}
               >
                 {isSelected && (
                   <div className="absolute -top-7 left-0 flex items-center gap-1.5 bg-signal-lime text-black font-inter-tight text-caption uppercase tracking-wider font-semibold px-2 py-0.5 rounded-xs shadow-md z-30">
@@ -351,7 +388,7 @@ export function SVGCanvas() {
                   <>
                     <div
                       onMouseDown={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
                         setActiveDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-r',
@@ -359,7 +396,7 @@ export function SVGCanvas() {
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
-                        });
+                        })
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
                       title="Arraste para ajustar largura (Width)"
@@ -369,7 +406,7 @@ export function SVGCanvas() {
 
                     <div
                       onMouseDown={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
                         setActiveDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-b',
@@ -377,7 +414,7 @@ export function SVGCanvas() {
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
-                        });
+                        })
                       }}
                       className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
                       title="Arraste para ajustar altura (Height)"
@@ -387,7 +424,7 @@ export function SVGCanvas() {
 
                     <div
                       onMouseDown={(e) => {
-                        e.stopPropagation();
+                        e.stopPropagation()
                         setActiveDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-br',
@@ -395,7 +432,7 @@ export function SVGCanvas() {
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
-                        });
+                        })
                       }}
                       className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
                       title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
@@ -403,7 +440,7 @@ export function SVGCanvas() {
                   </>
                 )}
               </div>
-            );
+            )
           })}
         </div>
       </div>
@@ -442,14 +479,19 @@ export function SVGCanvas() {
         <button
           type="button"
           onClick={(e) => {
-            e.stopPropagation();
-            setIsLayersOpen((prev) => !prev);
+            e.stopPropagation()
+            setIsLayersOpen((prev) => !prev)
           }}
-          className={`group relative flex items-center justify-center w-12 h-12 rounded-full border shadow-2xl transition-all cursor-pointer ${isLayersOpen
-            ? 'bg-signal-lime text-black border-signal-lime shadow-[0_0_20px_rgba(204,255,0,0.4)] scale-105'
-            : 'bg-onyx/90 text-ash border-graphite hover:border-signal-lime hover:text-signal-lime hover:scale-105 backdrop-blur-md'
-            }`}
-          title={isLayersOpen ? t('editor.canvas.close_layers', 'Fechar camadas') : t('editor.canvas.view_reorder_layers', 'Camadas (Ver e reordenar)')}
+          className={`group relative flex items-center justify-center w-12 h-12 rounded-full border shadow-2xl transition-all cursor-pointer ${
+            isLayersOpen
+              ? 'bg-signal-lime text-black border-signal-lime shadow-[0_0_20px_rgba(204,255,0,0.4)] scale-105'
+              : 'bg-onyx/90 text-ash border-graphite hover:border-signal-lime hover:text-signal-lime hover:scale-105 backdrop-blur-md'
+          }`}
+          title={
+            isLayersOpen
+              ? t('editor.canvas.close_layers', 'Fechar camadas')
+              : t('editor.canvas.view_reorder_layers', 'Camadas (Ver e reordenar)')
+          }
         >
           <Layers size={20} className="transition-transform group-hover:scale-110" />
 
@@ -461,5 +503,5 @@ export function SVGCanvas() {
         </button>
       </div>
     </main>
-  );
+  )
 }

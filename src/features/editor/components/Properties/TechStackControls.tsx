@@ -1,14 +1,17 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import { Search, X, Check, Sparkles, Layers, Globe, Server, Cloud, Moon, Sun } from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import { useI18n } from '@/i18n';
+import { Check, Cloud, Globe, Layers, Moon, Search, Server, Sparkles, Sun, X } from 'lucide-react'
+import Image from 'next/image'
+import React, { useState } from 'react'
+
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
 
 export interface TechItem {
-  id: string;
-  name: string;
-  category: 'languages' | 'frontend' | 'backend' | 'devops';
+  id: string
+  name: string
+  category: 'languages' | 'frontend' | 'backend' | 'devops'
 }
 
 export const TECH_CATALOG: TechItem[] = [
@@ -92,58 +95,78 @@ export const TECH_CATALOG: TechItem[] = [
   { id: 'githubactions', name: 'GitHub Actions', category: 'devops' },
   { id: 'jest', name: 'Jest', category: 'devops' },
   { id: 'vitest', name: 'Vitest', category: 'devops' },
-];
+]
 
 const PRESETS = [
-  { label: 'Frontend', icon: Globe, items: ['html', 'css', 'js', 'ts', 'react', 'nextjs', 'tailwind', 'vite'] },
-  { label: 'Backend', icon: Server, items: ['nodejs', 'ts', 'express', 'postgres', 'mongodb', 'docker', 'redis'] },
-  { label: 'Full Stack', icon: Layers, items: ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'postgres', 'docker', 'git'] },
-  { label: 'DevOps & Cloud', icon: Cloud, items: ['linux', 'docker', 'kubernetes', 'aws', 'git', 'github', 'bash', 'python'] },
-];
+  {
+    label: 'Frontend',
+    icon: Globe,
+    items: ['html', 'css', 'js', 'ts', 'react', 'nextjs', 'tailwind', 'vite'],
+  },
+  {
+    label: 'Backend',
+    icon: Server,
+    items: ['nodejs', 'ts', 'express', 'postgres', 'mongodb', 'docker', 'redis'],
+  },
+  {
+    label: 'Full Stack',
+    icon: Layers,
+    items: ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'postgres', 'docker', 'git'],
+  },
+  {
+    label: 'DevOps & Cloud',
+    icon: Cloud,
+    items: ['linux', 'docker', 'kubernetes', 'aws', 'git', 'github', 'bash', 'python'],
+  },
+]
 
 interface TechStackControlsProps {
-  instanceId: string;
-  config: Record<string, unknown>;
+  instanceId: string
+  config: Record<string, unknown>
 }
 
 export function TechStackControls({ instanceId, config }: TechStackControlsProps) {
-  const { t } = useI18n();
-  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'languages' | 'frontend' | 'backend' | 'devops'>('all');
+  const { t } = useI18n()
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeCategory, setActiveCategory] = useState<
+    'all' | 'languages' | 'frontend' | 'backend' | 'devops'
+  >('all')
 
   const selectedTechs = Array.isArray(config.selectedTechs)
     ? (config.selectedTechs as string[])
-    : ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'python', 'docker', 'git', 'postgres'];
+    : ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'python', 'docker', 'git', 'postgres']
 
-  const theme = (config.theme as string) || 'dark';
-  const perLine = Number(config.perLine) || 12;
-  const showTitle = config.showTitle !== false;
-  const customTitle = (config.customTitle as string) || '[ TECHNOLOGIES & SKILLS ]';
+  const theme = (config.theme as string) || 'dark'
+  const perLine = Number(config.perLine) || 12
+  const showTitle = config.showTitle !== false
+  const customTitle = (config.customTitle as string) || '[ TECHNOLOGIES & SKILLS ]'
 
   const toggleTech = (id: string) => {
-    let updated: string[];
+    let updated: string[]
     if (selectedTechs.includes(id)) {
-      updated = selectedTechs.filter((t) => t !== id);
+      updated = selectedTechs.filter((t) => t !== id)
     } else {
-      updated = [...selectedTechs, id];
+      updated = [...selectedTechs, id]
     }
-    updateWidgetConfig(instanceId, { selectedTechs: updated });
-  };
+    updateWidgetConfig(instanceId, { selectedTechs: updated })
+  }
 
   const applyPreset = (presetItems: string[]) => {
-    updateWidgetConfig(instanceId, { selectedTechs: presetItems });
-  };
+    updateWidgetConfig(instanceId, { selectedTechs: presetItems })
+  }
 
   const clearAll = () => {
-    updateWidgetConfig(instanceId, { selectedTechs: [] });
-  };
+    updateWidgetConfig(instanceId, { selectedTechs: [] })
+  }
 
   const filteredCatalog = TECH_CATALOG.filter((tech) => {
-    const matchesCategory = activeCategory === 'all' || tech.category === activeCategory;
-    const matchesSearch = tech.name.toLowerCase().includes(searchTerm.toLowerCase()) || tech.id.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+    const matchesCategory = activeCategory === 'all' || tech.category === activeCategory
+    const matchesSearch =
+      tech.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tech.id.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
@@ -153,13 +176,17 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
           <span>{t('editor.tech.title', 'Tecnologias & Skills')}</span>
         </div>
         <span className="text-caption font-jetbrains-mono text-ash bg-carbon px-1.5 py-0.5 rounded border border-graphite">
-          {t('editor.tech.selected_count', '{count} selecionadas', { count: String(selectedTechs.length) })}
+          {t('editor.tech.selected_count', '{count} selecionadas', {
+            count: String(selectedTechs.length),
+          })}
         </span>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-eyebrow text-ash font-medium">{t('editor.properties.show_title_label', 'Exibir Título')}</label>
+          <label className="text-eyebrow text-ash font-medium">
+            {t('editor.properties.show_title_label', 'Exibir Título')}
+          </label>
           <input
             type="checkbox"
             checked={showTitle}
@@ -181,7 +208,9 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
       <div>
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-eyebrow text-ash font-medium">{t('editor.tech.active_techs', 'Tecnologias Ativas')}</span>
+          <span className="text-eyebrow text-ash font-medium">
+            {t('editor.tech.active_techs', 'Tecnologias Ativas')}
+          </span>
           {selectedTechs.length > 0 && (
             <button
               onClick={clearAll}
@@ -194,37 +223,45 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
         {selectedTechs.length === 0 ? (
           <div className="p-3 text-center border border-dashed border-graphite rounded-xs text-eyebrow text-ash">
-            {t('editor.tech.none_selected', 'Nenhuma tecnologia selecionada. Clique no catálogo abaixo para adicionar.')}
+            {t(
+              'editor.tech.none_selected',
+              'Nenhuma tecnologia selecionada. Clique no catálogo abaixo para adicionar.'
+            )}
           </div>
         ) : (
           <div className="flex flex-wrap gap-1 max-h-27.5 overflow-y-auto p-1.5 bg-void-black border border-graphite rounded-xs">
             {selectedTechs.map((techId) => {
-              const info = TECH_CATALOG.find((t) => t.id === techId);
+              const info = TECH_CATALOG.find((t) => t.id === techId)
               return (
                 <div
                   key={techId}
                   onClick={() => toggleTech(techId)}
                   className="group flex items-center gap-1 bg-graphite border border-signal-lime/40 text-signal-lime px-2 py-0.5 rounded-xs text-eyebrow font-jetbrains-mono cursor-pointer hover:bg-red-500/20 hover:border-red-500 hover:text-red-400 transition-colors"
                 >
-                  <img
+                  <Image
                     src={`https://skillicons.dev/icons?i=${techId === 'reactnative' ? 'react' : techId}&theme=${theme}`}
                     alt={techId}
+                    width={14}
+                    height={14}
                     className="w-3.5 h-3.5 object-contain"
+                    unoptimized
                   />
                   <span>{info ? info.name : techId}</span>
                   <X size={10} className="opacity-60 group-hover:opacity-100" />
                 </div>
-              );
+              )
             })}
           </div>
         )}
       </div>
 
       <div>
-        <label className="text-eyebrow text-ash block mb-1.5 font-medium">{t('editor.tech.presets', 'Atalhos de Stacks Populares')}</label>
+        <label className="text-eyebrow text-ash block mb-1.5 font-medium">
+          {t('editor.tech.presets', 'Atalhos de Stacks Populares')}
+        </label>
         <div className="grid grid-cols-2 gap-1.5">
           {PRESETS.map((preset) => {
-            const Icon = preset.icon;
+            const Icon = preset.icon
             return (
               <button
                 key={preset.label}
@@ -235,22 +272,25 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
                 <Icon size={13} className="text-signal-lime shrink-0" />
                 <span className="truncate">{preset.label}</span>
               </button>
-            );
+            )
           })}
         </div>
       </div>
 
       <div className="space-y-3 pt-2 border-t border-graphite/50">
         <div>
-          <label className="text-eyebrow text-ash block mb-1.5 font-medium">{t('editor.tech.icon_theme', 'Tema dos Ícones')}</label>
+          <label className="text-eyebrow text-ash block mb-1.5 font-medium">
+            {t('editor.tech.icon_theme', 'Tema dos Ícones')}
+          </label>
           <div className="grid grid-cols-2 gap-1 bg-carbon p-1 rounded-xs border border-graphite">
             <button
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { theme: 'dark' })}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xs text-eyebrow font-medium transition-all cursor-pointer ${theme === 'dark'
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xs text-eyebrow font-medium transition-all cursor-pointer ${
+                theme === 'dark'
                   ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold shadow-sm'
                   : 'text-ash hover:text-chalk'
-                }`}
+              }`}
             >
               <Moon size={13} />
               <span>{t('editor.tech.theme_dark', 'Escuro (Dark)')}</span>
@@ -258,10 +298,11 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
             <button
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { theme: 'light' })}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xs text-eyebrow font-medium transition-all cursor-pointer ${theme === 'light'
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xs text-eyebrow font-medium transition-all cursor-pointer ${
+                theme === 'light'
                   ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold shadow-sm'
                   : 'text-ash hover:text-chalk'
-                }`}
+              }`}
             >
               <Sun size={13} />
               <span>{t('editor.tech.theme_light', 'Claro (Light)')}</span>
@@ -271,7 +312,9 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-eyebrow">
-            <span className="text-ash font-medium">{t('editor.tech.icons_per_line', 'Ícones por Linha')}</span>
+            <span className="text-ash font-medium">
+              {t('editor.tech.icons_per_line', 'Ícones por Linha')}
+            </span>
             <span className="text-signal-lime font-jetbrains-mono font-bold bg-carbon px-2 py-0.5 rounded border border-graphite">
               {t('editor.tech.per_line_count', '{count} / linha', { count: String(perLine) })}
             </span>
@@ -301,7 +344,10 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t('editor.tech.search_placeholder', 'Buscar tecnologia (ex: React, Docker, Python)...')}
+            placeholder={t(
+              'editor.tech.search_placeholder',
+              'Buscar tecnologia (ex: React, Docker, Python)...'
+            )}
             className="w-full bg-graphite border border-graphite text-chalk text-eyebrow pl-8 pr-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
           />
         </div>
@@ -311,10 +357,11 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-2 py-0.5 rounded-xs capitalize shrink-0 transition-colors cursor-pointer border ${activeCategory === cat
+              className={`px-2 py-0.5 rounded-xs capitalize shrink-0 transition-colors cursor-pointer border ${
+                activeCategory === cat
                   ? 'border-signal-lime bg-signal-lime/10 text-signal-lime font-medium'
                   : 'border-transparent text-ash hover:text-chalk'
-                }`}
+              }`}
             >
               {cat === 'all' ? t('editor.tech.cat_all', 'Todas') : cat}
             </button>
@@ -323,35 +370,38 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
         <div className="grid grid-cols-3 gap-1.5 max-h-55 overflow-y-auto p-1 bg-void-black border border-graphite rounded-xs">
           {filteredCatalog.map((tech) => {
-            const isSelected = selectedTechs.includes(tech.id);
+            const isSelected = selectedTechs.includes(tech.id)
             return (
               <div
                 key={tech.id}
                 onClick={() => toggleTech(tech.id)}
-                className={`p-2 rounded-xs border flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-150 relative ${isSelected
+                className={`p-2 rounded-xs border flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-150 relative ${
+                  isSelected
                     ? 'border-signal-lime bg-signal-lime/10 text-signal-lime shadow-sm'
                     : 'border-graphite bg-onyx text-ash hover:border-slate hover:text-chalk'
-                  }`}
+                }`}
               >
                 {isSelected && (
                   <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-signal-lime text-black flex items-center justify-center">
                     <Check size={9} strokeWidth={3} />
                   </div>
                 )}
-                <img
+                <Image
                   src={`https://skillicons.dev/icons?i=${tech.id === 'reactnative' ? 'react' : tech.id}&theme=${theme}`}
                   alt={tech.name}
+                  width={24}
+                  height={24}
                   className="w-6 h-6 object-contain"
-                  loading="lazy"
+                  unoptimized
                 />
                 <span className="text-caption font-medium line-clamp-1 text-center">
                   {tech.name}
                 </span>
               </div>
-            );
+            )
           })}
         </div>
       </div>
     </div>
-  );
+  )
 }

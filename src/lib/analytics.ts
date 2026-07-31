@@ -1,3 +1,3 @@
-export * from "./analytics/index";
-export * from "./analytics/types";
-export * from "./analytics/interface";
+export * from './analytics/index'
+export * from './analytics/interface'
+export * from './analytics/types'

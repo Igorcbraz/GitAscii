@@ -1,14 +1,15 @@
-'use client';
+'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Check, Copy, ChevronDown, Pipette } from 'lucide-react';
-import { useI18n } from '@/i18n';
+import { Check, ChevronDown, Copy, Pipette } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+
+import { useI18n } from '@/i18n'
 
 interface ColorPickerProps {
-  label?: string;
-  value: string;
-  onChange: (color: string) => void;
-  align?: 'left' | 'right';
+  label?: string
+  value: string
+  onChange: (color: string) => void
+  align?: 'left' | 'right'
 }
 
 const PRESET_SWATCHES = [
@@ -24,51 +25,60 @@ const PRESET_SWATCHES = [
   '#2d3748', // Slate Dark
   '#718096', // Cool Ash
   '#ffffff', // Pure White
-];
+]
 
-export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right' }: ColorPickerProps) {
-  const { t } = useI18n();
-  const [isOpen, setIsOpen] = useState(false);
-  const [hexInput, setHexInput] = useState(value);
-  const [copied, setCopied] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
+export function ColorPicker({
+  label,
+  value = '#1f1f1f',
+  onChange,
+  align = 'right',
+}: ColorPickerProps) {
+  const { t } = useI18n()
+  const [isOpen, setIsOpen] = useState(false)
+  const [hexInput, setHexInput] = useState(value)
+  const [copied, setCopied] = useState(false)
+  const popoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setHexInput(value);
-  }, [value]);
+    setHexInput(value)
+  }, [value])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside)
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setHexInput(val);
+    const val = e.target.value
+    setHexInput(val)
     if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
-      onChange(val);
+      onChange(val)
     }
-  };
+  }
 
   const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+    e.stopPropagation()
+    navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <div className="relative" ref={popoverRef}>
-      {label && <label className="text-eyebrow text-ash block mb-1 font-inter-tight font-medium">{label}</label>}
+      {label && (
+        <label className="text-eyebrow text-ash block mb-1 font-inter-tight font-medium">
+          {label}
+        </label>
+      )}
 
       <button
         type="button"
@@ -84,13 +94,17 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
             {value}
           </span>
         </div>
-        <ChevronDown size={14} className={`text-ash transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          size={14}
+          className={`text-ash transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
         <div
-          className={`absolute ${align === 'left' ? 'left-0' : 'right-0'
-            } top-full mt-1 w-55 bg-onyx border border-slate p-3 rounded-md shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100`}
+          className={`absolute ${
+            align === 'left' ? 'left-0' : 'right-0'
+          } top-full mt-1 w-55 bg-onyx border border-slate p-3 rounded-md shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100`}
         >
           <div className="text-caption uppercase font-inter-tight font-semibold tracking-wider text-ash mb-2 flex items-center justify-between">
             <span>{t('editor.properties.color_picker.swatches', 'Color Swatches')}</span>
@@ -100,7 +114,11 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
               title={t('editor.properties.color_picker.copy_hex', 'Copy Hex')}
             >
               {copied ? <Check size={12} className="text-signal-lime" /> : <Copy size={12} />}
-              <span className="text-caption">{copied ? t('common.copied', 'Copied') : t('editor.properties.color_picker.copy', 'Copy')}</span>
+              <span className="text-caption">
+                {copied
+                  ? t('common.copied', 'Copied')
+                  : t('editor.properties.color_picker.copy', 'Copy')}
+              </span>
             </button>
           </div>
 
@@ -110,13 +128,14 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
                 key={color}
                 type="button"
                 onClick={() => {
-                  onChange(color);
-                  setHexInput(color);
+                  onChange(color)
+                  setHexInput(color)
                 }}
-                className={`w-6 h-6 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer ${value.toLowerCase() === color.toLowerCase()
-                  ? 'border-signal-lime ring-2 ring-signal-lime/40 scale-105'
-                  : 'border-white/10 hover:border-white/40'
-                  }`}
+                className={`w-6 h-6 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer ${
+                  value.toLowerCase() === color.toLowerCase()
+                    ? 'border-signal-lime ring-2 ring-signal-lime/40 scale-105'
+                    : 'border-white/10 hover:border-white/40'
+                }`}
                 style={{ backgroundColor: color }}
                 title={color}
               />
@@ -129,8 +148,8 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
                 type="color"
                 value={value.startsWith('#') && value.length === 7 ? value : '#1f1f1f'}
                 onChange={(e) => {
-                  onChange(e.target.value);
-                  setHexInput(e.target.value);
+                  onChange(e.target.value)
+                  setHexInput(e.target.value)
                 }}
                 className="absolute -inset-2.5 w-[200%] h-[200%] cursor-pointer opacity-0"
               />
@@ -138,7 +157,10 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
                 className="w-full h-full flex items-center justify-center"
                 style={{ backgroundColor: value }}
               >
-                <Pipette size={12} className="text-white drop-shadow opacity-75 group-hover:opacity-100" />
+                <Pipette
+                  size={12}
+                  className="text-white drop-shadow opacity-75 group-hover:opacity-100"
+                />
               </div>
             </div>
 
@@ -155,5 +177,5 @@ export function ColorPicker({ label, value = '#1f1f1f', onChange, align = 'right
         </div>
       )}
     </div>
-  );
+  )
 }

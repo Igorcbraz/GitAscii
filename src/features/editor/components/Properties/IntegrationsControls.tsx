@@ -1,41 +1,43 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { Sliders, User, Palette, Layout, Shield, Type, Layers, Globe, Code } from 'lucide-react';
-import { useEditorStore } from '../../store/editorStore';
-import type { WidgetConfig } from '@/engine/types';
-import { useI18n } from '@/i18n';
+import { Sliders, User } from 'lucide-react'
+import React from 'react'
+
+import type { WidgetConfig } from '@/engine/types'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
 
 function DebouncedInput({
   value,
   onChange,
   placeholder,
-  className
+  className,
 }: {
-  value: string;
-  onChange: (val: string) => void;
-  placeholder?: string;
-  className?: string;
+  value: string
+  onChange: (val: string) => void
+  placeholder?: string
+  className?: string
 }) {
-  const [localVal, setLocalVal] = React.useState(value);
+  const [localVal, setLocalVal] = React.useState(value)
 
   React.useEffect(() => {
-    setLocalVal(value);
-  }, [value]);
+    setLocalVal(value)
+  }, [value])
 
-  const onChangeRef = React.useRef(onChange);
+  const onChangeRef = React.useRef(onChange)
   React.useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
+    onChangeRef.current = onChange
+  }, [onChange])
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
       if (localVal !== value) {
-        onChangeRef.current(localVal);
+        onChangeRef.current(localVal)
       }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [localVal, value]);
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [localVal, value])
 
   return (
     <input
@@ -45,41 +47,35 @@ function DebouncedInput({
       placeholder={placeholder}
       className={className}
     />
-  );
+  )
 }
 
 interface IntegrationsControlsProps {
-  instanceId: string;
-  widgetId: string;
-  config: WidgetConfig;
+  instanceId: string
+  widgetId: string
+  config: WidgetConfig
 }
 
-export function IntegrationsControls({
-  instanceId,
-  widgetId,
-  config,
-}: IntegrationsControlsProps) {
-  const { t } = useI18n();
-  const { updateWidgetConfig, githubData } = useEditorStore();
-  const defaultUsername = githubData?.user.login || '';
+export function IntegrationsControls({ instanceId, widgetId, config }: IntegrationsControlsProps) {
+  const { t } = useI18n()
+  const { updateWidgetConfig, githubData } = useEditorStore()
+  const defaultUsername = githubData?.user.login || ''
 
   const handleUpdate = (patch: Record<string, unknown>) => {
-    updateWidgetConfig(instanceId, patch);
-  };
+    updateWidgetConfig(instanceId, patch)
+  }
 
-  const showTitle = config.showTitle !== false;
-  const customTitle = (config.customTitle as string) || '';
-  const username = (config.username as string) ?? defaultUsername;
+  const showTitle = config.showTitle !== false
+  const customTitle = (config.customTitle as string) || ''
+  const username = (config.username as string) ?? defaultUsername
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite">
-      {/* Section Header */}
       <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
         <Sliders size={14} />
         <span>{t('editor.integrations.title', 'Configurações da Integração')}</span>
       </div>
 
-      {/* Title Toggle & Custom Title Input */}
       <div className="space-y-2">
         <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
           <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
@@ -109,7 +105,6 @@ export function IntegrationsControls({
         )}
       </div>
 
-      {/* GitHub Username Override (for user-based widgets) */}
       {widgetId !== 'readme-quotes' && widgetId !== 'awesome-badge' && (
         <div>
           <label className="text-eyebrow text-ash mb-1 font-inter-tight flex items-center gap-1">
@@ -139,7 +134,7 @@ export function IntegrationsControls({
               <option value="gitfest-rio">GitFest Rio</option>
             </select>
           </div>
-          
+
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Sort By</label>
             <select
@@ -179,7 +174,9 @@ export function IntegrationsControls({
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Ocultar Repositórios (Separados por vírgula)</label>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              Ocultar Repositórios (Separados por vírgula)
+            </label>
             <DebouncedInput
               value={(config.hideRepos as string) || ''}
               onChange={(val) => handleUpdate({ hideRepos: val })}
@@ -208,7 +205,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 1. GitHub Readme Stats */}
       {widgetId === 'github-readme-stats' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -220,9 +216,15 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ statType: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="stats">{t('editor.integrations.stats_card', 'Estatísticas Gerais (Stats Card)')}</option>
-              <option value="top-langs">{t('editor.integrations.top_languages', 'Top Linguagens (Top Languages)')}</option>
-              <option value="pin">{t('editor.integrations.pinned_repo', 'Repositório Fixado (Pinned Repo)')}</option>
+              <option value="stats">
+                {t('editor.integrations.stats_card', 'Estatísticas Gerais (Stats Card)')}
+              </option>
+              <option value="top-langs">
+                {t('editor.integrations.top_languages', 'Top Linguagens (Top Languages)')}
+              </option>
+              <option value="pin">
+                {t('editor.integrations.pinned_repo', 'Repositório Fixado (Pinned Repo)')}
+              </option>
             </select>
           </div>
 
@@ -276,17 +278,29 @@ export function IntegrationsControls({
                   onChange={(e) => handleUpdate({ layout: e.target.value })}
                   className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
                 >
-                  <option value="compact">{t('editor.integrations.layout_compact', 'Compacto (Lista)')}</option>
-                  <option value="normal">{t('editor.integrations.layout_normal', 'Normal (Barras)')}</option>
-                  <option value="donut">{t('editor.integrations.layout_donut', 'Donut (Gráfico Rosca)')}</option>
-                  <option value="pie">{t('editor.integrations.layout_pie', 'Pie (Gráfico Pizza)')}</option>
+                  <option value="compact">
+                    {t('editor.integrations.layout_compact', 'Compacto (Lista)')}
+                  </option>
+                  <option value="normal">
+                    {t('editor.integrations.layout_normal', 'Normal (Barras)')}
+                  </option>
+                  <option value="donut">
+                    {t('editor.integrations.layout_donut', 'Donut (Gráfico Rosca)')}
+                  </option>
+                  <option value="pie">
+                    {t('editor.integrations.layout_pie', 'Pie (Gráfico Pizza)')}
+                  </option>
                 </select>
               </div>
 
               <div>
                 <div className="flex justify-between text-eyebrow mb-1">
-                  <span className="text-ash font-inter-tight">{t('editor.integrations.max_languages', 'Qtd. Máxima de Linguagens')}</span>
-                  <span className="text-chalk font-jetbrains-mono">{Number(config.langsCount) || 5}</span>
+                  <span className="text-ash font-inter-tight">
+                    {t('editor.integrations.max_languages', 'Qtd. Máxima de Linguagens')}
+                  </span>
+                  <span className="text-chalk font-jetbrains-mono">
+                    {Number(config.langsCount) || 5}
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -300,7 +314,10 @@ export function IntegrationsControls({
 
               <div>
                 <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-                  {t('editor.integrations.hide_languages', 'Ocultar Linguagens (Separadas por vírgula)')}
+                  {t(
+                    'editor.integrations.hide_languages',
+                    'Ocultar Linguagens (Separadas por vírgula)'
+                  )}
                 </label>
                 <input
                   type="text"
@@ -341,7 +358,10 @@ export function IntegrationsControls({
 
               <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-                  {t('editor.integrations.include_all_commits', 'Incluir Todos os Commits (Ano Todo)')}
+                  {t(
+                    'editor.integrations.include_all_commits',
+                    'Incluir Todos os Commits (Ano Todo)'
+                  )}
                 </label>
                 <input
                   type="checkbox"
@@ -379,7 +399,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 2. GitHub Streak Stats */}
       {widgetId === 'streak-stats' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -415,8 +434,12 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ mode: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="daily">{t('editor.integrations.streak_daily', 'Diário (Daily Streaks)')}</option>
-              <option value="weekly">{t('editor.integrations.streak_weekly', 'Semanal (Weekly Streaks)')}</option>
+              <option value="daily">
+                {t('editor.integrations.streak_daily', 'Diário (Daily Streaks)')}
+              </option>
+              <option value="weekly">
+                {t('editor.integrations.streak_weekly', 'Semanal (Weekly Streaks)')}
+              </option>
             </select>
           </div>
 
@@ -438,8 +461,12 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">{t('editor.integrations.border_radius', 'Raio do Canto (Border Radius)')}</span>
-              <span className="text-chalk font-jetbrains-mono">{Number(config.streakBorderRadius) || 4}px</span>
+              <span className="text-ash font-inter-tight">
+                {t('editor.integrations.border_radius', 'Raio do Canto (Border Radius)')}
+              </span>
+              <span className="text-chalk font-jetbrains-mono">
+                {Number(config.streakBorderRadius) || 4}px
+              </span>
             </div>
             <input
               type="range"
@@ -465,7 +492,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 3. GitHub Profile Trophy */}
       {widgetId === 'profile-trophy' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -496,7 +522,9 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">{t('editor.integrations.num_columns', 'Número de Colunas')}</span>
+              <span className="text-ash font-inter-tight">
+                {t('editor.integrations.num_columns', 'Número de Colunas')}
+              </span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.column) || 6}</span>
             </div>
             <input
@@ -511,7 +539,9 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">{t('editor.integrations.num_rows', 'Número de Linhas')}</span>
+              <span className="text-ash font-inter-tight">
+                {t('editor.integrations.num_rows', 'Número de Linhas')}
+              </span>
               <span className="text-chalk font-jetbrains-mono">{Number(config.row) || 1}</span>
             </div>
             <input
@@ -550,7 +580,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 4. GitHub Readme Activity Graph */}
       {widgetId === 'activity-graph' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -578,8 +607,12 @@ export function IntegrationsControls({
 
           <div>
             <div className="flex justify-between text-eyebrow mb-1">
-              <span className="text-ash font-inter-tight">{t('editor.integrations.activity_period', 'Período de Atividade (Dias)')}</span>
-              <span className="text-chalk font-jetbrains-mono">{Number(config.days) || 31} dias</span>
+              <span className="text-ash font-inter-tight">
+                {t('editor.integrations.activity_period', 'Período de Atividade (Dias)')}
+              </span>
+              <span className="text-chalk font-jetbrains-mono">
+                {Number(config.days) || 31} dias
+              </span>
             </div>
             <input
               type="range"
@@ -617,7 +650,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 5. Snake (GitHub Contribution Snake) */}
       {widgetId === 'contribution-snake' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -629,7 +661,9 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ theme: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="dark">{t('editor.integrations.snake_dark', 'Dark Theme (Padrão)')}</option>
+              <option value="dark">
+                {t('editor.integrations.snake_dark', 'Dark Theme (Padrão)')}
+              </option>
               <option value="light">Light Theme</option>
               <option value="ocean">Ocean Blue</option>
             </select>
@@ -644,7 +678,9 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ branch: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="output">{t('editor.integrations.branch_output', 'Branch `output` (Recomendado)')}</option>
+              <option value="output">
+                {t('editor.integrations.branch_output', 'Branch `output` (Recomendado)')}
+              </option>
               <option value="main">Branch `main`</option>
               <option value="master">Branch `master`</option>
             </select>
@@ -652,7 +688,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 6. Metrics (lowlighter/metrics) */}
       {widgetId === 'metrics-card' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -680,16 +715,26 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ baseSections: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="header,activity,community,repositories">{t('editor.integrations.metrics_full', 'Completo (Header, Activity, Community, Repos)')}</option>
-              <option value="header,activity">{t('editor.integrations.metrics_summary', 'Resumido (Header & Activity)')}</option>
-              <option value="header,repositories">{t('editor.integrations.metrics_repos', 'Apenas Repositórios')}</option>
-              <option value="header">{t('editor.integrations.metrics_header', 'Apenas Cabeçalho')}</option>
+              <option value="header,activity,community,repositories">
+                {t(
+                  'editor.integrations.metrics_full',
+                  'Completo (Header, Activity, Community, Repos)'
+                )}
+              </option>
+              <option value="header,activity">
+                {t('editor.integrations.metrics_summary', 'Resumido (Header & Activity)')}
+              </option>
+              <option value="header,repositories">
+                {t('editor.integrations.metrics_repos', 'Apenas Repositórios')}
+              </option>
+              <option value="header">
+                {t('editor.integrations.metrics_header', 'Apenas Cabeçalho')}
+              </option>
             </select>
           </div>
         </div>
       )}
 
-      {/* 7. GitHub Profile Views Counter */}
       {widgetId === 'views-counter' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -757,7 +802,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 8. GitHub Readme Quotes */}
       {widgetId === 'readme-quotes' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -769,8 +813,12 @@ export function IntegrationsControls({
               onChange={(e) => handleUpdate({ quoteType: e.target.value })}
               className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
             >
-              <option value="random">{t('editor.integrations.quote_random', 'Citação Aleatória (Random Quote)')}</option>
-              <option value="quote-day">{t('editor.integrations.quote_day', 'Citação do Dia (Quote of the Day)')}</option>
+              <option value="random">
+                {t('editor.integrations.quote_random', 'Citação Aleatória (Random Quote)')}
+              </option>
+              <option value="quote-day">
+                {t('editor.integrations.quote_day', 'Citação do Dia (Quote of the Day)')}
+              </option>
             </select>
           </div>
 
@@ -810,7 +858,6 @@ export function IntegrationsControls({
         </div>
       )}
 
-      {/* 9. Awesome GitHub Profile README */}
       {widgetId === 'awesome-badge' && (
         <div className="space-y-3 pt-2">
           <div>
@@ -877,5 +924,5 @@ export function IntegrationsControls({
         </div>
       )}
     </div>
-  );
+  )
 }

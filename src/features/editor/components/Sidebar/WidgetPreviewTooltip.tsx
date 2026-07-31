@@ -1,35 +1,36 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import { useI18n } from '@/i18n';
-import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types';
-import { renderWidgetSvg } from '@/engine/core/WidgetRenderer';
-import { getMockGitHubData } from '@/features/github/api/fetchProfile';
-import { convertImageToAsciiCanvas } from '@/engine/ascii/converter';
+import { Plus } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
-export type WidgetBadgeType = 'popular' | 'essential' | 'highlight' | 'interactive' | 'trending';
+import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
+import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
+import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { getMockGitHubData } from '@/features/github/api/mockProfile'
+import { useI18n } from '@/i18n'
+
+export type WidgetBadgeType = 'popular' | 'essential' | 'highlight' | 'interactive' | 'trending'
 
 export interface WidgetBadge {
-  text: string;
-  type: WidgetBadgeType;
+  text: string
+  type: WidgetBadgeType
 }
 
 export interface WidgetCatalogItem {
-  id: string;
-  name: string;
-  desc: string;
-  icon: React.ElementType;
-  isExternal?: boolean;
-  badge?: WidgetBadge;
-  category?: 'essential' | 'interactive' | 'stats' | 'external' | 'misc';
+  id: string
+  name: string
+  desc: string
+  icon: React.ElementType
+  isExternal?: boolean
+  badge?: WidgetBadge
+  category?: 'essential' | 'interactive' | 'stats' | 'external' | 'misc'
 }
 
 interface WidgetPreviewTooltipProps {
-  widgetItem: WidgetCatalogItem | null;
-  targetRect: DOMRect | null;
-  globalStyles: GlobalStyles;
-  githubData: NormalizedGitHubData | null;
+  widgetItem: WidgetCatalogItem | null
+  targetRect: DOMRect | null
+  globalStyles: GlobalStyles
+  githubData: NormalizedGitHubData | null
 }
 
 const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
@@ -56,7 +57,7 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   'awesome-badge': { width: 360, height: 80 },
   divider: { width: 800, height: 30 },
   footer: { width: 800, height: 50 },
-};
+}
 
 export function WidgetPreviewTooltip({
   widgetItem,
@@ -64,48 +65,56 @@ export function WidgetPreviewTooltip({
   globalStyles,
   githubData,
 }: WidgetPreviewTooltipProps) {
-  const { t } = useI18n();
-  const [asciiArtCache, setAsciiArtCache] = useState<{ lines: string[]; colors?: string[][] } | null>(null);
+  const { t } = useI18n()
+  const [asciiArtCache, setAsciiArtCache] = useState<{
+    lines: string[]
+    colors?: string[][]
+  } | null>(null)
 
-  const size = widgetItem ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 } : { width: 800, height: 120 };
-  const data = githubData || getMockGitHubData('Igorcbraz');
+  const size = widgetItem
+    ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 }
+    : { width: 800, height: 120 }
+  const data = githubData || getMockGitHubData('Igorcbraz')
 
   useEffect(() => {
-    if (widgetItem?.id !== 'ascii-art' || asciiArtCache) return;
+    if (widgetItem?.id !== 'ascii-art' || asciiArtCache) return
 
-    let isCurrent = true;
+    let isCurrent = true
     async function loadPreviewAscii() {
-      const avatarUrl = data.user.avatar_url || 'https://github.com/github.png';
+      const avatarUrl = data.user.avatar_url || 'https://github.com/github.png'
       try {
         const result = await convertImageToAsciiCanvas(avatarUrl, {
           charset: 'dense',
           cols: 45,
           colorMode: 'monochrome',
-        });
+        })
         if (isCurrent) {
           setAsciiArtCache({
             lines: result.lines,
             colors: result.colorMatrix,
-          });
+          })
         }
       } catch (err) {
-        console.warn('Preview ASCII art generation failed:', err);
+        console.warn('Preview ASCII art generation failed:', err)
       }
     }
 
-    loadPreviewAscii();
+    loadPreviewAscii()
     return () => {
-      isCurrent = false;
-    };
-  }, [widgetItem?.id, data.user.avatar_url, asciiArtCache]);
+      isCurrent = false
+    }
+  }, [widgetItem?.id, data.user.avatar_url, asciiArtCache])
 
-  if (!widgetItem || !targetRect) return null;
+  if (!widgetItem || !targetRect) return null
 
-  const translatedName = t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name);
-  const translatedDesc = t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc);
+  const translatedName = t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name)
+  const translatedDesc = t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc)
   const translatedBadgeText = widgetItem.badge
-    ? t(`widget.badge.${widgetItem.badge.text.toLowerCase().replace(/\s+/g, '_')}`, widgetItem.badge.text)
-    : '';
+    ? t(
+        `widget.badge.${widgetItem.badge.text.toLowerCase().replace(/\s+/g, '_')}`,
+        widgetItem.badge.text
+      )
+    : ''
 
   const previewWidget: WidgetInstance = {
     instanceId: `preview_${widgetItem.id}`,
@@ -114,27 +123,32 @@ export function WidgetPreviewTooltip({
     position: { x: 0, y: 0 },
     size,
     config: {
-      ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art' ? { lockAspectRatio: true } : {}),
-      ...(widgetItem.id === 'ascii-art' && asciiArtCache ? {
-        asciiText: asciiArtCache.lines,
-        asciiColors: asciiArtCache.colors,
-      } : {}),
+      ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art'
+        ? { lockAspectRatio: true }
+        : {}),
+      ...(widgetItem.id === 'ascii-art' && asciiArtCache
+        ? {
+            asciiText: asciiArtCache.lines,
+            asciiColors: asciiArtCache.colors,
+          }
+        : {}),
     },
     locked: false,
     visible: true,
     zIndex: 1,
-  };
+  }
 
-  const svgContent = renderWidgetSvg(previewWidget, data, globalStyles);
+  const svgContent = renderWidgetSvg(previewWidget, data, globalStyles)
 
-  const leftPosition = targetRect.right + 12;
-  const rawTop = targetRect.top - 20;
-  const topPosition = typeof window !== 'undefined'
-    ? Math.max(16, Math.min(window.innerHeight - 300, rawTop))
-    : rawTop;
+  const leftPosition = targetRect.right + 12
+  const rawTop = targetRect.top - 20
+  const topPosition =
+    typeof window !== 'undefined'
+      ? Math.max(16, Math.min(window.innerHeight - 300, rawTop))
+      : rawTop
 
-  const arrowTop = targetRect.top - topPosition + targetRect.height / 2 - 6;
-  const clampedArrowTop = Math.max(12, Math.min(arrowTop, 270));
+  const arrowTop = targetRect.top - topPosition + targetRect.height / 2 - 6
+  const clampedArrowTop = Math.max(12, Math.min(arrowTop, 270))
 
   return (
     <div
@@ -177,14 +191,12 @@ export function WidgetPreviewTooltip({
       </div>
 
       <div className="mt-2.5 flex items-center justify-between text-eyebrow">
-        <p className="text-ash font-inter-tight line-clamp-1 flex-1 mr-2">
-          {translatedDesc}
-        </p>
+        <p className="text-ash font-inter-tight line-clamp-1 flex-1 mr-2">{translatedDesc}</p>
         <div className="text-signal-lime font-inter-tight font-medium flex items-center gap-1 shrink-0 bg-signal-lime/10 px-2 py-0.5 rounded-xs border border-signal-lime/20">
           <Plus size={12} />
           <span>{t('editor.sidebar.insert', 'Inserir')}</span>
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,31 +1,38 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Terminal,
-  Upload,
-  Link as LinkIcon,
-  User,
-  Sparkles,
-  RefreshCw,
-  Sun,
-  Contrast,
-  Sliders,
-  Palette,
   AlertCircle,
   ChevronDown,
-} from 'lucide-react';
-import { CHARSETS, convertImageToAsciiCanvas, type AsciiConvertOptions } from '@/engine/ascii/converter';
-import { useEditorStore } from '../../store/editorStore';
-import { useI18n } from '@/i18n';
+  Contrast,
+  Link as LinkIcon,
+  Palette,
+  RefreshCw,
+  Sliders,
+  Sparkles,
+  Sun,
+  Terminal,
+  Upload,
+  User,
+} from 'lucide-react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+
+import { type AsciiConvertOptions, convertImageToAsciiCanvas } from '@/engine/ascii/converter'
+import { useI18n } from '@/i18n'
+
+import { useEditorStore } from '../../store/editorStore'
 
 interface AsciiArtControlsProps {
-  instanceId: string;
-  config: Record<string, unknown>;
+  instanceId: string
+  config: Record<string, unknown>
 }
 
 const CHARSET_OPTIONS = [
-  { id: 'dense', name: 'DENSE GRADIENT', preview: '"$@B%8&WM#*oahk', info: '67 chars - Máxima Precisão' },
+  {
+    id: 'dense',
+    name: 'DENSE GRADIENT',
+    preview: '"$@B%8&WM#*oahk',
+    info: '67 chars - Máxima Precisão',
+  },
   { id: 'standard', name: 'STANDARD', preview: ' .:-=+*#%@', info: '10 chars' },
   { id: 'blocks', name: 'BLOCKS / SHADING', preview: ' ░▒▓█', info: '5 chars' },
   { id: 'dots', name: 'BRAILLE / DOTS', preview: ' ⠁⠃⠇⡇⣇⣿', info: '7 chars' },
@@ -36,50 +43,52 @@ const CHARSET_OPTIONS = [
   { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
   { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
   { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
-];
+]
 
 export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) {
-  const { t } = useI18n();
-  const { githubData, updateWidgetConfig } = useEditorStore();
+  const { t } = useI18n()
+  const { githubData, updateWidgetConfig } = useEditorStore()
 
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isCharsetMenuOpen, setIsCharsetMenuOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [isCharsetMenuOpen, setIsCharsetMenuOpen] = useState(false)
 
-  const sourceType = (config.sourceType as 'avatar' | 'url' | 'upload') || 'avatar';
-  const customImageUrl = (config.imageUrl as string) || '';
-  const uploadedImageData = (config.uploadedImageData as string) || '';
+  const sourceType = (config.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
+  const customImageUrl = (config.imageUrl as string) || ''
+  const uploadedImageData = (config.uploadedImageData as string) || ''
 
-  const charset = (config.charset as string) || 'dense';
-  const customCharset = (config.customCharset as string) || '';
-  const invert = Boolean(config.invert);
+  const charset = (config.charset as string) || 'dense'
+  const customCharset = (config.customCharset as string) || ''
+  const invert = Boolean(config.invert)
 
-  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium';
-  const cols = Number(config.cols) || (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150);
+  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
+  const cols =
+    Number(config.cols) ||
+    (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150)
 
-  const contrast = Number(config.contrast !== undefined ? config.contrast : 10);
-  const brightness = Number(config.brightness !== undefined ? config.brightness : 0);
-  const edgeEnhance = Boolean(config.edgeEnhance !== undefined ? config.edgeEnhance : true);
-  const autoContrast = Boolean(config.autoContrast !== false);
-  const dithering = Boolean(config.dithering !== false);
-  const colorMode = (config.colorMode as 'monochrome' | 'color') || 'monochrome';
+  const contrast = Number(config.contrast !== undefined ? config.contrast : 10)
+  const brightness = Number(config.brightness !== undefined ? config.brightness : 0)
+  const edgeEnhance = Boolean(config.edgeEnhance !== undefined ? config.edgeEnhance : true)
+  const autoContrast = Boolean(config.autoContrast !== false)
+  const dithering = Boolean(config.dithering !== false)
+  const colorMode = (config.colorMode as 'monochrome' | 'color') || 'monochrome'
 
   const getActiveImageSource = useCallback(() => {
     if (sourceType === 'upload' && uploadedImageData) {
-      return uploadedImageData;
+      return uploadedImageData
     }
     if (sourceType === 'url' && customImageUrl) {
-      return customImageUrl;
+      return customImageUrl
     }
-    return githubData?.user.avatar_url || 'https://github.com/github.png';
-  }, [sourceType, uploadedImageData, customImageUrl, githubData]);
+    return githubData?.user.avatar_url || 'https://github.com/github.png'
+  }, [sourceType, uploadedImageData, customImageUrl, githubData])
 
   const processImageToAscii = useCallback(async () => {
-    const imgSrc = getActiveImageSource();
-    if (!imgSrc) return;
+    const imgSrc = getActiveImageSource()
+    if (!imgSrc) return
 
-    setIsProcessing(true);
-    setErrorMsg(null);
+    setIsProcessing(true)
+    setErrorMsg(null)
 
     try {
       const options: AsciiConvertOptions = {
@@ -93,65 +102,104 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         autoContrast,
         dithering,
         colorMode,
-      };
+      }
 
-      const result = await convertImageToAsciiCanvas(imgSrc, options);
+      const result = await convertImageToAsciiCanvas(imgSrc, options)
 
       updateWidgetConfig(instanceId, {
         asciiText: result.lines,
         asciiColors: result.colorMatrix,
         cols: result.cols,
         rows: result.rows,
-      });
+      })
     } catch (err: unknown) {
-      console.warn('ASCII Conversion Warning:', err);
-      setErrorMsg(t('editor.ascii.error_cors', 'Não foi possível converter a imagem (CORS/URL restrita). Faça o upload do arquivo para melhores resultados.'));
+      console.warn('ASCII Conversion Warning:', err)
+      setErrorMsg(
+        t(
+          'editor.ascii.error_cors',
+          'Não foi possível converter a imagem (CORS/URL restrita). Faça o upload do arquivo para melhores resultados.'
+        )
+      )
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  }, [getActiveImageSource, charset, customCharset, invert, cols, contrast, brightness, edgeEnhance, autoContrast, dithering, colorMode, updateWidgetConfig, instanceId]);
+  }, [
+    getActiveImageSource,
+    charset,
+    customCharset,
+    invert,
+    cols,
+    contrast,
+    brightness,
+    edgeEnhance,
+    autoContrast,
+    dithering,
+    colorMode,
+    updateWidgetConfig,
+    instanceId,
+    t,
+  ])
 
-  const isInitialMount = useRef(true);
+  const isInitialMount = useRef(true)
   useEffect(() => {
     if (isInitialMount.current) {
-      isInitialMount.current = false;
+      isInitialMount.current = false
       if (!config.asciiText) {
-        processImageToAscii();
+        processImageToAscii()
       }
-      return;
+      return
     }
 
     const timer = setTimeout(() => {
-      processImageToAscii();
-    }, 150);
+      processImageToAscii()
+    }, 150)
 
-    return () => clearTimeout(timer);
-  }, [sourceType, customImageUrl, uploadedImageData, charset, customCharset, invert, detail, cols, contrast, brightness, edgeEnhance, autoContrast, dithering, colorMode, processImageToAscii]);
+    return () => clearTimeout(timer)
+  }, [
+    sourceType,
+    customImageUrl,
+    uploadedImageData,
+    charset,
+    customCharset,
+    invert,
+    detail,
+    cols,
+    contrast,
+    brightness,
+    edgeEnhance,
+    autoContrast,
+    dithering,
+    colorMode,
+    processImageToAscii,
+    config.asciiText,
+  ])
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setErrorMsg(t('editor.ascii.error_invalid_image', 'Por favor selecione um arquivo de imagem válido.'));
-      return;
+      setErrorMsg(
+        t('editor.ascii.error_invalid_image', 'Por favor selecione um arquivo de imagem válido.')
+      )
+      return
     }
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string;
+      const base64Data = event.target?.result as string
       if (base64Data) {
         updateWidgetConfig(instanceId, {
           sourceType: 'upload',
           uploadedImageData: base64Data,
-        });
+        })
       }
-    };
-    reader.readAsDataURL(file);
-  };
+    }
+    reader.readAsDataURL(file)
+  }
 
-  const selectedCharsetObj = CHARSET_OPTIONS.find((c) => c.id === charset) || CHARSET_OPTIONS[0];
+  const selectedCharsetObj = CHARSET_OPTIONS.find((c) => c.id === charset) || CHARSET_OPTIONS[0]
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
@@ -167,20 +215,27 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           title={t('editor.ascii.regenerate', 'Regerar Arte ASCII')}
         >
           <RefreshCw size={12} className={isProcessing ? 'animate-spin text-signal-lime' : ''} />
-          <span>{isProcessing ? t('editor.ascii.converting', 'Convertendo...') : t('editor.ascii.update', 'Atualizar')}</span>
+          <span>
+            {isProcessing
+              ? t('editor.ascii.converting', 'Convertendo...')
+              : t('editor.ascii.update', 'Atualizar')}
+          </span>
         </button>
       </div>
 
       <div className="space-y-2">
-        <label className="text-eyebrow text-ash font-medium block">{t('editor.ascii.source', 'Origem da Foto')}</label>
+        <label className="text-eyebrow text-ash font-medium block">
+          {t('editor.ascii.source', 'Origem da Foto')}
+        </label>
         <div className="grid grid-cols-3 gap-1 bg-carbon p-1 rounded border border-graphite">
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'avatar' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${sourceType === 'avatar'
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+              sourceType === 'avatar'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
-              }`}
+            }`}
           >
             <User size={12} />
             <span>GitHub</span>
@@ -188,10 +243,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'url' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${sourceType === 'url'
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+              sourceType === 'url'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
-              }`}
+            }`}
           >
             <LinkIcon size={12} />
             <span>URL</span>
@@ -199,15 +255,16 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <button
             type="button"
             onClick={() => {
-              updateWidgetConfig(instanceId, { sourceType: 'upload' });
+              updateWidgetConfig(instanceId, { sourceType: 'upload' })
               if (!uploadedImageData) {
-                fileInputRef.current?.click();
+                fileInputRef.current?.click()
               }
             }}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${sourceType === 'upload'
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+              sourceType === 'upload'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
-              }`}
+            }`}
           >
             <Upload size={12} />
             <span>Upload</span>
@@ -239,7 +296,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
               className="w-full border border-dashed border-graphite hover:border-signal-lime/60 bg-carbon hover:bg-graphite/40 text-chalk text-eyebrow py-2 px-3 rounded flex items-center justify-center gap-2 transition-all"
             >
               <Upload size={13} className="text-signal-lime" />
-              <span>{uploadedImageData ? t('editor.ascii.change_photo', 'Trocar Foto Uploaded') : t('editor.ascii.select_photo', 'Selecionar Foto Local')}</span>
+              <span>
+                {uploadedImageData
+                  ? t('editor.ascii.change_photo', 'Trocar Foto Uploaded')
+                  : t('editor.ascii.select_photo', 'Selecionar Foto Local')}
+              </span>
             </button>
           </div>
         )}
@@ -253,7 +314,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
       </div>
 
       <div className="space-y-2 pt-2 border-t border-graphite/50 relative">
-        <label className="text-eyebrow text-ash font-medium block">Conjunto de Caracteres (Base)</label>
+        <label className="text-eyebrow text-ash font-medium block">
+          Conjunto de Caracteres (Base)
+        </label>
 
         <button
           type="button"
@@ -265,29 +328,35 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
               {selectedCharsetObj.preview}
             </span>
             <div className="truncate">
-              <div className="text-eyebrow text-chalk font-semibold leading-tight">{selectedCharsetObj.name}</div>
+              <div className="text-eyebrow text-chalk font-semibold leading-tight">
+                {selectedCharsetObj.name}
+              </div>
               <div className="text-[9px] text-ash">{selectedCharsetObj.info}</div>
             </div>
           </div>
-          <ChevronDown size={14} className={`text-ash transition-transform shrink-0 ${isCharsetMenuOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            size={14}
+            className={`text-ash transition-transform shrink-0 ${isCharsetMenuOpen ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {isCharsetMenuOpen && (
           <div className="absolute z-50 left-0 right-0 top-15 bg-carbon border border-graphite rounded shadow-xl max-h-60 overflow-y-auto p-1 space-y-1">
             {CHARSET_OPTIONS.map((item) => {
-              const isSelected = item.id === charset;
+              const isSelected = item.id === charset
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => {
-                    updateWidgetConfig(instanceId, { charset: item.id });
-                    setIsCharsetMenuOpen(false);
+                    updateWidgetConfig(instanceId, { charset: item.id })
+                    setIsCharsetMenuOpen(false)
                   }}
-                  className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${isSelected
+                  className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${
+                    isSelected
                       ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                       : 'hover:bg-graphite/60 text-chalk'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
                     <span className="font-jetbrains-mono bg-void-black text-signal-lime text-eyebrow px-2 py-0.5 rounded border border-graphite font-semibold shrink-0">
@@ -297,7 +366,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
                   </div>
                   <span className="text-[9px] text-ash shrink-0">{item.info}</span>
                 </button>
-              );
+              )
             })}
           </div>
         )}
@@ -313,7 +382,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         )}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.invert_chars', 'Inverter Caracteres (Invert)')}</span>
+          <span className="text-eyebrow text-chalk font-medium">
+            {t('editor.ascii.invert_chars', 'Inverter Caracteres (Invert)')}
+          </span>
           <input
             type="checkbox"
             checked={invert}
@@ -325,7 +396,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
       <div className="space-y-3 pt-2 border-t border-graphite/50">
         <div className="flex items-center justify-between">
-          <label className="text-eyebrow text-ash font-medium">{t('editor.ascii.detail_level', 'Nível de Detalhe (Colunas)')}</label>
+          <label className="text-eyebrow text-ash font-medium">
+            {t('editor.ascii.detail_level', 'Nível de Detalhe (Colunas)')}
+          </label>
           <span className="text-eyebrow text-signal-lime font-mono font-semibold">{cols} cols</span>
         </div>
 
@@ -340,10 +413,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
               key={item.id}
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { detail: item.id, cols: item.c })}
-              className={`py-1 text-caption font-medium rounded border transition-all ${cols === item.c || detail === item.id
+              className={`py-1 text-caption font-medium rounded border transition-all ${
+                cols === item.c || detail === item.id
                   ? 'bg-signal-lime text-black border-signal-lime font-semibold'
                   : 'bg-graphite text-ash border-graphite hover:text-chalk'
-                }`}
+              }`}
             >
               {item.label}
             </button>
@@ -356,7 +430,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           max={150}
           step={2}
           value={cols}
-          onChange={(e) => updateWidgetConfig(instanceId, { cols: Number(e.target.value), detail: 'custom' })}
+          onChange={(e) =>
+            updateWidgetConfig(instanceId, { cols: Number(e.target.value), detail: 'custom' })
+          }
           className="w-full accent-signal-lime bg-graphite h-1.5 rounded cursor-pointer"
         />
       </div>
@@ -390,7 +466,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
             <span className="text-ash flex items-center gap-1">
               <Sun size={12} /> {t('editor.ascii.brightness', 'Brilho')}
             </span>
-            <span className="text-chalk font-mono">{brightness > 0 ? `+${brightness}` : brightness}</span>
+            <span className="text-chalk font-mono">
+              {brightness > 0 ? `+${brightness}` : brightness}
+            </span>
           </div>
           <input
             type="range"
@@ -405,7 +483,8 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-eyebrow text-chalk font-medium flex items-center gap-1.5">
-            <Sparkles size={13} className="text-signal-lime" /> {t('editor.ascii.edge_enhance', 'Realçar Contornos (Rosto)')}
+            <Sparkles size={13} className="text-signal-lime" />{' '}
+            {t('editor.ascii.edge_enhance', 'Realçar Contornos (Rosto)')}
           </span>
           <input
             type="checkbox"
@@ -416,7 +495,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.auto_contrast', 'Auto-Contraste (Gama Dinâmica)')}</span>
+          <span className="text-eyebrow text-chalk font-medium">
+            {t('editor.ascii.auto_contrast', 'Auto-Contraste (Gama Dinâmica)')}
+          </span>
           <input
             type="checkbox"
             checked={autoContrast}
@@ -426,7 +507,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-eyebrow text-chalk font-medium">{t('editor.ascii.dithering', 'Pontilhado Fotográfico (Dithering)')}</span>
+          <span className="text-eyebrow text-chalk font-medium">
+            {t('editor.ascii.dithering', 'Pontilhado Fotográfico (Dithering)')}
+          </span>
           <input
             type="checkbox"
             checked={dithering}
@@ -437,26 +520,29 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-eyebrow text-chalk font-medium flex items-center gap-1.5">
-            <Palette size={13} className="text-signal-lime" /> {t('editor.ascii.color_mode', 'Modo de Cores')}
+            <Palette size={13} className="text-signal-lime" />{' '}
+            {t('editor.ascii.color_mode', 'Modo de Cores')}
           </span>
           <div className="flex items-center gap-1 bg-carbon p-0.5 rounded border border-graphite">
             <button
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { colorMode: 'monochrome' })}
-              className={`px-2 py-0.5 rounded text-caption font-medium transition-all ${colorMode === 'monochrome'
+              className={`px-2 py-0.5 rounded text-caption font-medium transition-all ${
+                colorMode === 'monochrome'
                   ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                   : 'text-ash hover:text-chalk'
-                }`}
+              }`}
             >
               Mono
             </button>
             <button
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { colorMode: 'color' })}
-              className={`px-2 py-0.5 rounded text-caption font-medium transition-all ${colorMode === 'color'
+              className={`px-2 py-0.5 rounded text-caption font-medium transition-all ${
+                colorMode === 'color'
                   ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                   : 'text-ash hover:text-chalk'
-                }`}
+              }`}
             >
               Colorido
             </button>
@@ -464,5 +550,5 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         </div>
       </div>
     </div>
-  );
+  )
 }

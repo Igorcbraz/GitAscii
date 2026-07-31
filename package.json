@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.12",
@@ -21,6 +27,8 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
     "@eslint/eslintrc": "^3.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
@@ -28,7 +36,13 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.0",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0"
   }

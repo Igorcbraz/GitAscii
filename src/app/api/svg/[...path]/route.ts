@@ -1,66 +1,64 @@
-import { NextResponse } from 'next/server';
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile';
-import { createConfiguration } from '@/engine/core/TemplateRenderer';
-import { renderSvg, embedExternalImages } from '@/engine/core/SVGEngine';
-import { loadProfileConfig } from '@/lib/profileStorage';
+import { NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic';
+import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
+import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { loadProfileConfig } from '@/lib/profileStorage'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ path: string[] }> }
-) {
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const { path } = await params;
+    const { path } = await params
 
     if (!path || path.length === 0) {
-      return new NextResponse('Invalid SVG route', { status: 400 });
+      return new NextResponse('Invalid SVG route', { status: 400 })
     }
 
-    let username = '';
-    let profileSlug = 'default';
-    let theme: 'dark' | 'light' = 'dark';
+    let username = ''
+    let profileSlug = 'default'
+    let theme: 'dark' | 'light' = 'dark'
 
-    const { searchParams } = new URL(request.url);
-    const queryTheme = searchParams.get('theme');
+    const { searchParams } = new URL(request.url)
+    const queryTheme = searchParams.get('theme')
     if (queryTheme === 'light' || queryTheme === 'dark') {
-      theme = queryTheme;
+      theme = queryTheme
     }
 
     if (path.length === 1) {
-      const file = path[0];
-      username = file.replace('.svg', '');
+      const file = path[0]
+      username = file.replace('.svg', '')
     } else if (path.length === 2) {
-      username = path[0];
-      const file = path[1];
+      username = path[0]
+      const file = path[1]
       if (file.endsWith('.svg')) {
-        const variant = file.replace('.svg', '');
-        if (variant === 'light') theme = 'light';
-        else if (variant === 'dark') theme = 'dark';
-        else profileSlug = variant;
+        const variant = file.replace('.svg', '')
+        if (variant === 'light') theme = 'light'
+        else if (variant === 'dark') theme = 'dark'
+        else profileSlug = variant
       }
     } else if (path.length >= 3) {
-      username = path[0];
-      profileSlug = path[1];
-      const file = path[2];
+      username = path[0]
+      profileSlug = path[1]
+      const file = path[2]
       if (file.endsWith('.svg')) {
-        const variant = file.replace('.svg', '');
-        theme = variant === 'light' ? 'light' : 'dark';
+        const variant = file.replace('.svg', '')
+        theme = variant === 'light' ? 'light' : 'dark'
       }
     }
 
-    const widgetsParam = searchParams.get('widgets');
-    const widgets = widgetsParam ? widgetsParam.split(',') : undefined;
+    const widgetsParam = searchParams.get('widgets')
+    const widgets = widgetsParam ? widgetsParam.split(',') : undefined
 
-    const data = await fetchGitHubProfile(username);
+    const data = await fetchGitHubProfile(username)
 
-    let config = await loadProfileConfig(username, profileSlug);
+    let config = await loadProfileConfig(username, profileSlug)
     if (!config) {
-      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug);
+      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
     }
 
-    const rawSvgContent = renderSvg(config, data, { theme, widgets });
-    const svgContent = await embedExternalImages(rawSvgContent);
+    const rawSvgContent = renderSvg(config, data, { theme, widgets })
+    const svgContent = await embedExternalImages(rawSvgContent)
 
     return new NextResponse(svgContent, {
       status: 200,
@@ -69,16 +67,21 @@ export async function GET(
         'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400',
         'X-Content-Type-Options': 'nosniff',
       },
-    });
+    })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error rendering SVG';
-    const escapedMessage = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const message = error instanceof Error ? error.message : 'Error rendering SVG'
+    const escapedMessage = message
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;')
     return new NextResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${escapedMessage}</text></svg>`,
       {
         status: 500,
         headers: { 'Content-Type': 'image/svg+xml' },
       }
-    );
+    )
   }
 }

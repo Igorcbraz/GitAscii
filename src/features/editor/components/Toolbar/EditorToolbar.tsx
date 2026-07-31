@@ -1,32 +1,31 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import Link from 'next/link';
 import {
-  Undo2,
+  Check,
+  Copy,
+  Download,
+  Loader2,
+  LogIn,
+  LogOut,
   Redo2,
+  Save,
+  Undo2,
+  User,
   ZoomIn,
   ZoomOut,
-  Copy,
-  Check,
-  Save,
-  Loader2,
-  Download,
-  Upload,
-  LogOut,
-  User,
-  LogIn
-} from 'lucide-react';
-import { CopyGuideModal } from './CopyGuideModal';
-import { ExportGuideModal } from './ExportGuideModal';
-import { useEditorStore } from '../../store/editorStore';
-import { APP_URL } from '../../../../constants';
-import { useI18n } from '@/i18n';
-import { useToast } from '@/components/ui/toast';
+} from 'lucide-react'
+import Link from 'next/link'
+import React, { useState } from 'react'
+
+import { useI18n } from '@/i18n'
+
+import { APP_URL } from '../../../../constants'
+import { useEditorStore } from '../../store/editorStore'
+import { CopyGuideModal } from './CopyGuideModal'
+import { ExportGuideModal } from './ExportGuideModal'
 
 export function EditorToolbar() {
-  const { t } = useI18n();
-  const { error, success } = useToast();
+  const { t } = useI18n()
   const {
     config,
     githubData,
@@ -42,197 +41,177 @@ export function EditorToolbar() {
     updateWidgetPosition,
     duplicateWidget,
     saveToServer,
-    isSaving,
-    importLayout,
     session,
-  } = useEditorStore();
+  } = useEditorStore()
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const [currentOrigin, setCurrentOrigin] = useState(APP_URL);
-  const [copied, setCopied] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
-  const [showExportGuide, setShowExportGuide] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
+  const [copied, setCopied] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
+  const [showExportGuide, setShowExportGuide] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [isLoginLoading, setIsLoginLoading] = useState(false)
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      const res = await fetch('/api/auth/logout', { method: 'POST' })
       if (res.ok) {
-        window.location.reload();
+        window.location.reload()
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      setCurrentOrigin(window.location.origin);
+      setCurrentOrigin(window.location.origin)
     }
-  }, []);
+  }, [])
 
   const handleSave = async () => {
-    setSaveStatus('saving');
+    setSaveStatus('saving')
     try {
-      await saveToServer();
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (err) {
-      setSaveStatus('error');
-      setTimeout(() => setSaveStatus((prev) => prev === 'error' ? 'idle' : prev), 3000);
+      await saveToServer()
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    } catch {
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus((prev) => (prev === 'error' ? 'idle' : prev)), 3000)
     }
-  };
+  }
 
   const handleExport = () => {
-    if (!config) return;
+    if (!config) return
     try {
       const exportData = {
         widgets: config.widgets,
         globalStyles: config.globalStyles,
         templateId: config.templateId,
-      };
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `gitascii_layout_${config.username}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      const skipGuide = typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_export_guide') === 'true';
+      }
+      const jsonString = JSON.stringify(exportData, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `gitascii_layout_${config.username}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      const skipGuide =
+        typeof window !== 'undefined' &&
+        localStorage.getItem('gitascii_skip_export_guide') === 'true'
       if (!skipGuide) {
-        setShowExportGuide(true);
+        setShowExportGuide(true)
       }
     } catch (err) {
-      console.error('Failed to export layout:', err);
+      console.error('Failed to export layout:', err)
     }
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const result = event.target?.result;
-        if (typeof result !== 'string') return;
-
-        const data = JSON.parse(result);
-        if (!data || !Array.isArray(data.widgets)) {
-          error(t('editor.sidebar.import.invalid_format', 'Formato de arquivo inválido: lista de widgets não encontrada.'));
-          return;
-        }
-
-        // Import widgets and optionally global styles & templateId
-        importLayout(data.widgets, data.globalStyles, data.templateId);
-        success('Layout importado com sucesso!');
-        
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } catch (err) {
-        console.error('Failed to parse import file:', err);
-        error(t('editor.sidebar.import.invalid_json', 'Falha ao processar arquivo JSON. Verifique se é um arquivo JSON válido.'));
-      }
-    };
-    reader.readAsText(file);
-  };
+  }
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
+      const target = e.target as HTMLElement
       if (
         target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable)
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
       ) {
-        return;
+        return
       }
 
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'z') {
         if (e.shiftKey) {
           if (canRedo) {
-            e.preventDefault();
-            redo();
+            e.preventDefault()
+            redo()
           }
         } else {
           if (canUndo) {
-            e.preventDefault();
-            undo();
+            e.preventDefault()
+            undo()
           }
         }
-        return;
+        return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'y') {
         if (canRedo) {
-          e.preventDefault();
-          redo();
+          e.preventDefault()
+          redo()
         }
-        return;
+        return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'd') {
         if (selectedInstanceId) {
-          e.preventDefault();
-          duplicateWidget(selectedInstanceId);
+          e.preventDefault()
+          duplicateWidget(selectedInstanceId)
         }
-        return;
+        return
       }
 
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedInstanceId) {
-        const widget = config?.widgets.find((w) => w.instanceId === selectedInstanceId);
+        const widget = config?.widgets.find((w) => w.instanceId === selectedInstanceId)
         if (widget && !widget.locked) {
-          e.preventDefault();
-          removeWidget(selectedInstanceId);
+          e.preventDefault()
+          removeWidget(selectedInstanceId)
         }
-        return;
+        return
       }
 
       if (e.key === 'Escape' && selectedInstanceId) {
-        e.preventDefault();
-        selectWidget(null);
-        return;
+        e.preventDefault()
+        selectWidget(null)
+        return
       }
 
       if (selectedInstanceId && config) {
-        const widget = config.widgets.find((w) => w.instanceId === selectedInstanceId);
+        const widget = config.widgets.find((w) => w.instanceId === selectedInstanceId)
         if (widget && !widget.locked) {
-          const step = e.shiftKey ? 10 : 2;
+          const step = e.shiftKey ? 10 : 2
 
           if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            updateWidgetPosition(widget.instanceId, { x: widget.position.x, y: Math.max(0, widget.position.y - step) }, true);
+            e.preventDefault()
+            updateWidgetPosition(
+              widget.instanceId,
+              { x: widget.position.x, y: Math.max(0, widget.position.y - step) },
+              true
+            )
           } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            updateWidgetPosition(widget.instanceId, { x: widget.position.x, y: widget.position.y + step }, true);
+            e.preventDefault()
+            updateWidgetPosition(
+              widget.instanceId,
+              { x: widget.position.x, y: widget.position.y + step },
+              true
+            )
           } else if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            updateWidgetPosition(widget.instanceId, { x: Math.max(0, widget.position.x - step), y: widget.position.y }, true);
+            e.preventDefault()
+            updateWidgetPosition(
+              widget.instanceId,
+              { x: Math.max(0, widget.position.x - step), y: widget.position.y },
+              true
+            )
           } else if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            updateWidgetPosition(widget.instanceId, { x: Math.min(800 - widget.size.width, widget.position.x + step), y: widget.position.y }, true);
+            e.preventDefault()
+            updateWidgetPosition(
+              widget.instanceId,
+              {
+                x: Math.min(800 - widget.size.width, widget.position.x + step),
+                y: widget.position.y,
+              },
+              true
+            )
           }
         }
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [
     undo,
     redo,
@@ -244,49 +223,50 @@ export function EditorToolbar() {
     updateWidgetPosition,
     duplicateWidget,
     config,
-  ]);
+  ])
 
   React.useEffect(() => {
     const handleOpenExportGuide = () => {
-      setShowExportGuide(true);
-    };
-    window.addEventListener('openExportGuide', handleOpenExportGuide);
-    return () => window.removeEventListener('openExportGuide', handleOpenExportGuide);
-  }, []);
+      setShowExportGuide(true)
+    }
+    window.addEventListener('openExportGuide', handleOpenExportGuide)
+    return () => window.removeEventListener('openExportGuide', handleOpenExportGuide)
+  }, [])
 
-  if (!config || !githubData) return null;
+  if (!config || !githubData) return null
 
-  const username = config.username;
-  const profileSlug = config.profileSlug;
-  const isOwner = !!(session && session.username.toLowerCase() === username.toLowerCase());
+  const username = config.username
+  const profileSlug = config.profileSlug
+  const isOwner = !!(session && session.username.toLowerCase() === username.toLowerCase())
 
   const embedUrl =
     profileSlug === 'default'
       ? `${currentOrigin}/api/${username}`
-      : `${currentOrigin}/api/${username}/${profileSlug}`;
+      : `${currentOrigin}/api/${username}/${profileSlug}`
 
-
-
-  const embedCode = `![Widget](${embedUrl})`;
+  const embedCode = `![Widget](${embedUrl})`
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(embedCode);
-    setCopied(true);
-    
-    const skipGuide = typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_copy_guide') === 'true';
+    navigator.clipboard.writeText(embedCode)
+    setCopied(true)
+
+    const skipGuide =
+      typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_copy_guide') === 'true'
     if (!skipGuide) {
-      setShowGuide(true);
+      setShowGuide(true)
     }
-    
-    setTimeout(() => setCopied(false), 2000);
-  };
+
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-30">
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center gap-1">
           <span className="font-inter-tight text-[16px] font-medium text-chalk">Git</span>
-          <span className="font-pt-serif text-[16px] font-light italic text-signal-lime">Ascii</span>
+          <span className="font-pt-serif text-[16px] font-light italic text-signal-lime">
+            Ascii
+          </span>
         </Link>
 
         <div className="h-4 w-px bg-graphite" />
@@ -369,7 +349,6 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-
         {isOwner && (
           <button
             onClick={handleSave}
@@ -378,8 +357,8 @@ export function EditorToolbar() {
               saveStatus === 'saved'
                 ? 'bg-signal-lime text-black glow-lime'
                 : saveStatus === 'error'
-                ? 'bg-red-500 text-white'
-                : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
+                  ? 'bg-red-500 text-white'
+                  : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
             }`}
           >
             {saveStatus === 'saving' ? (
@@ -393,10 +372,10 @@ export function EditorToolbar() {
               {saveStatus === 'saving'
                 ? t('common.saving', 'Saving...')
                 : saveStatus === 'saved'
-                ? t('common.saved', 'Saved!')
-                : saveStatus === 'error'
-                ? t('common.error', 'Error!')
-                : t('common.save_profile', 'Save Profile')}
+                  ? t('common.saved', 'Saved!')
+                  : saveStatus === 'error'
+                    ? t('common.error', 'Error!')
+                    : t('common.save_profile', 'Save Profile')}
             </span>
           </button>
         )}
@@ -407,7 +386,9 @@ export function EditorToolbar() {
             className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            <span>{copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}</span>
+            <span>
+              {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
+            </span>
           </button>
         ) : (
           <button
@@ -426,7 +407,7 @@ export function EditorToolbar() {
         username={username}
         embedCode={embedCode}
       />
-      
+
       <ExportGuideModal
         isOpen={showExportGuide}
         onClose={() => setShowExportGuide(false)}
@@ -435,5 +416,5 @@ export function EditorToolbar() {
         embedCode={embedCode}
       />
     </header>
-  );
+  )
 }

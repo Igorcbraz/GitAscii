@@ -1,34 +1,36 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { useI18n } from '@/i18n';
 import {
-  X,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardPaste,
   Copy,
   ExternalLink,
-  ChevronRight,
-  ChevronLeft,
+  Eye,
   FileEdit,
   Pencil,
-  ClipboardPaste,
-  Eye,
   Sparkles,
-} from 'lucide-react';
+  X,
+} from 'lucide-react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+
+import { useI18n } from '@/i18n'
 
 interface CopyGuideModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  username: string;
-  embedCode: string;
+  isOpen: boolean
+  onClose: () => void
+  username: string
+  embedCode: string
 }
 
 const STEPS = [
   {
     icon: FileEdit,
     title: 'Edite o README.md',
-    description: 'Abra o seu repositório especial (username/username) no GitHub, clique no arquivo README.md e depois no ícone de editar para modificá-lo.',
+    description:
+      'Abra o seu repositório especial (username/username) no GitHub, clique no arquivo README.md e depois no ícone de editar para modificá-lo.',
     descriptionIcon: Pencil,
     linkLabel: 'Editar README',
     getLinkUrl: (username: string) =>
@@ -37,8 +39,7 @@ const STEPS = [
   {
     icon: ClipboardPaste,
     title: 'Cole o código',
-    description:
-      'Cole o código copiado (Ctrl+V / ⌘+V) no local desejado do seu README.',
+    description: 'Cole o código copiado (Ctrl+V / ⌘+V) no local desejado do seu README.',
     descriptionIcon: null,
     linkLabel: null,
     getLinkUrl: () => '',
@@ -52,100 +53,104 @@ const STEPS = [
     linkLabel: 'Ver meu perfil',
     getLinkUrl: (username: string) => `https://github.com/${username}`,
   },
-];
+]
 
-export function CopyGuideModal({
-  isOpen,
-  onClose,
-  username,
-  embedCode,
-}: CopyGuideModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [reCopied, setReCopied] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { t } = useI18n();
+export function CopyGuideModal({ isOpen, onClose, username, embedCode }: CopyGuideModalProps) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [reCopied, setReCopied] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const { t } = useI18n()
 
   const steps = [
     {
       ...STEPS[0],
       title: t('editor.guide.step1_title', 'Edite o README.md'),
-      description: t('editor.guide.step1_desc', 'Abra o seu repositório especial (username/username) no GitHub, clique no arquivo README.md e depois no ícone de editar [icon] para modificá-lo.'),
+      description: t(
+        'editor.guide.step1_desc',
+        'Abra o seu repositório especial (username/username) no GitHub, clique no arquivo README.md e depois no ícone de editar [icon] para modificá-lo.'
+      ),
       linkLabel: t('editor.guide.step1_link', 'Editar README'),
     },
     {
       ...STEPS[1],
       title: t('editor.guide.step2_title', 'Cole o código'),
-      description: t('editor.guide.step2_desc', 'Cole o código copiado (Ctrl+V / ⌘+V) no local desejado do seu README.'),
+      description: t(
+        'editor.guide.step2_desc',
+        'Cole o código copiado (Ctrl+V / ⌘+V) no local desejado do seu README.'
+      ),
       linkLabel: null,
     },
     {
       ...STEPS[2],
       title: t('editor.guide.step3_title', 'Salve e confira'),
-      description: t('editor.guide.step3_desc', 'Clique em "Commit changes" para salvar. Depois, acesse seu perfil para ver o resultado!'),
+      description: t(
+        'editor.guide.step3_desc',
+        'Clique em "Commit changes" para salvar. Depois, acesse seu perfil para ver o resultado!'
+      ),
       linkLabel: t('editor.guide.step3_link', 'Ver meu perfil'),
     },
-  ];
+  ]
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
-      setCurrentStep(0);
-      setIsClosing(false);
+      setCurrentStep(0)
+      setIsClosing(false)
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        handleClose();
+        handleClose()
       }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleClose = useCallback(() => {
-    setIsClosing(true);
+    setIsClosing(true)
     setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-    }, 200);
-  }, [onClose]);
+      onClose()
+      setIsClosing(false)
+    }, 200)
+  }, [onClose])
 
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
   useEffect(() => {
     if (isOpen && typeof window !== 'undefined') {
-      setDontShowAgain(localStorage.getItem('gitascii_skip_copy_guide') === 'true');
+      setDontShowAgain(localStorage.getItem('gitascii_skip_copy_guide') === 'true')
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleReCopy = () => {
-    navigator.clipboard.writeText(embedCode);
-    setReCopied(true);
-    setTimeout(() => setReCopied(false), 2000);
-  };
+    navigator.clipboard.writeText(embedCode)
+    setReCopied(true)
+    setTimeout(() => setReCopied(false), 2000)
+  }
 
   const nextStep = () => {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-  };
+    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1)
+  }
 
   const prevStep = () => {
-    if (currentStep > 0) setCurrentStep((s) => s - 1);
-  };
+    if (currentStep > 0) setCurrentStep((s) => s - 1)
+  }
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted) return null
 
-  const step = steps[currentStep];
-  const StepIcon = step.icon;
-  const linkUrl = step.getLinkUrl(username);
-  const isLastStep = currentStep === steps.length - 1;
-  const isFirstStep = currentStep === 0;
+  const step = steps[currentStep]
+  const StepIcon = step.icon
+  const linkUrl = step.getLinkUrl(username)
+  const isLastStep = currentStep === steps.length - 1
+  const isFirstStep = currentStep === 0
 
   return createPortal(
     <>
@@ -168,7 +173,10 @@ export function CopyGuideModal({
                     {t('editor.guide.copied_title', 'Código copiado!')}
                   </h2>
                   <p className="text-caption text-ash mt-0.5">
-                    {t('editor.guide.copied_subtitle', 'Siga os passos para adicionar ao seu perfil')}
+                    {t(
+                      'editor.guide.copied_subtitle',
+                      'Siga os passos para adicionar ao seu perfil'
+                    )}
                   </p>
                 </div>
               </div>
@@ -189,12 +197,13 @@ export function CopyGuideModal({
                   onClick={() => setCurrentStep(idx)}
                 >
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ease-out ${idx < currentStep
-                      ? 'bg-signal-lime w-full'
-                      : idx === currentStep
-                        ? 'bg-signal-lime w-full animate-pulse-glow-bar'
-                        : 'w-0'
-                      }`}
+                    className={`h-full rounded-full transition-all duration-500 ease-out ${
+                      idx < currentStep
+                        ? 'bg-signal-lime w-full'
+                        : idx === currentStep
+                          ? 'bg-signal-lime w-full animate-pulse-glow-bar'
+                          : 'w-0'
+                    }`}
                   />
                 </div>
               ))}
@@ -222,7 +231,10 @@ export function CopyGuideModal({
                           <React.Fragment key={i}>
                             {part}
                             <span className="inline-flex items-center gap-0.5">
-                              <step.descriptionIcon size={14} className="text-signal-lime inline align-middle" />
+                              <step.descriptionIcon
+                                size={14}
+                                className="text-signal-lime inline align-middle"
+                              />
                             </span>
                           </React.Fragment>
                         ) : (
@@ -256,7 +268,11 @@ export function CopyGuideModal({
                       ) : (
                         <Copy size={12} />
                       )}
-                      <span>{reCopied ? t('common.copied', 'Copiado!') : t('editor.guide.step2_recopy', 'Copiar novamente')}</span>
+                      <span>
+                        {reCopied
+                          ? t('common.copied', 'Copiado!')
+                          : t('editor.guide.step2_recopy', 'Copiar novamente')}
+                      </span>
                     </button>
                   )}
                 </div>
@@ -266,23 +282,28 @@ export function CopyGuideModal({
           <div className="px-6 pb-5">
             <button
               onClick={() => {
-                const newValue = !dontShowAgain;
-                setDontShowAgain(newValue);
+                const newValue = !dontShowAgain
+                setDontShowAgain(newValue)
                 if (newValue) {
-                  localStorage.setItem('gitascii_skip_copy_guide', 'true');
+                  localStorage.setItem('gitascii_skip_copy_guide', 'true')
                 } else {
-                  localStorage.removeItem('gitascii_skip_copy_guide');
+                  localStorage.removeItem('gitascii_skip_copy_guide')
                 }
               }}
               className="inline-flex items-center gap-2.5 text-ash hover:text-chalk transition-colors cursor-pointer select-none group"
             >
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${dontShowAgain
-                  ? 'bg-signal-lime border-signal-lime text-black'
-                  : 'bg-void-black border-graphite group-hover:border-ash'
-                }`}>
+              <div
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                  dontShowAgain
+                    ? 'bg-signal-lime border-signal-lime text-black'
+                    : 'bg-void-black border-graphite group-hover:border-ash'
+                }`}
+              >
                 {dontShowAgain && <Check size={10} strokeWidth={3.5} />}
               </div>
-              <span className="font-inter-tight font-medium text-label">{t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}</span>
+              <span className="font-inter-tight font-medium text-label">
+                {t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}
+              </span>
             </button>
           </div>
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between">
@@ -324,5 +345,5 @@ export function CopyGuideModal({
       </div>
     </>,
     document.body
-  );
+  )
 }

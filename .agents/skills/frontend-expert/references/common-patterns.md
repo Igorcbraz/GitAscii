@@ -115,6 +115,7 @@ export const MyForm: React.FC = () => {
 ### Standard Dialog Structure
 
 From BEST_PRACTICES.md - All dialogs should have:
+
 - Icon in title
 - Close button (X)
 - Action buttons at bottom
@@ -168,11 +169,13 @@ export const MyDialog: React.FC<MyDialogProps> = ({ open, onClose, onConfirm }) 
 From BEST_PRACTICES.md - DataGrid wrappers should accept:
 
 **Required Props:**
+
 - `rows`: Data array
 - `columns`: Column definitions
 - Loading/error states
 
 **Optional Props:**
+
 - Toolbar components
 - Custom actions
 - Initial state
@@ -221,37 +224,36 @@ export const DataGridWrapper: React.FC<DataGridWrapperProps> = ({
 ### Update with Cache Invalidation
 
 ```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMuiSnackbar } from '@/hooks/useMuiSnackbar'
 
 export const useUpdateEntity = () => {
-    const queryClient = useQueryClient();
-    const { showSuccess, showError } = useMuiSnackbar();
+  const queryClient = useQueryClient()
+  const { showSuccess, showError } = useMuiSnackbar()
 
-    return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: any }) =>
-            api.updateEntity(id, data),
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => api.updateEntity(id, data),
 
-        onSuccess: (result, variables) => {
-            // Invalidate affected queries
-            queryClient.invalidateQueries({ queryKey: ['entity', variables.id] });
-            queryClient.invalidateQueries({ queryKey: ['entities'] });
+    onSuccess: (result, variables) => {
+      // Invalidate affected queries
+      queryClient.invalidateQueries({ queryKey: ['entity', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['entities'] })
 
-            showSuccess('Entity updated');
-        },
+      showSuccess('Entity updated')
+    },
 
-        onError: () => {
-            showError('Failed to update entity');
-        },
-    });
-};
+    onError: () => {
+      showError('Failed to update entity')
+    },
+  })
+}
 
 // Usage
-const updateEntity = useUpdateEntity();
+const updateEntity = useUpdateEntity()
 
 const handleSave = () => {
-    updateEntity.mutate({ id: 123, data: { name: 'New Name' } });
-};
+  updateEntity.mutate({ id: 123, data: { name: 'New Name' } })
+}
 ```
 
 ---
@@ -261,6 +263,7 @@ const handleSave = () => {
 ### TanStack Query for Server State (PRIMARY)
 
 Use TanStack Query for **all server data**:
+
 - Fetching: useSuspenseQuery
 - Mutations: useMutation
 - Caching: Automatic
@@ -269,14 +272,15 @@ Use TanStack Query for **all server data**:
 ```typescript
 // ✅ CORRECT - TanStack Query for server data
 const { data: users } = useSuspenseQuery({
-    queryKey: ['users'],
-    queryFn: () => userApi.getUsers(),
-});
+  queryKey: ['users'],
+  queryFn: () => userApi.getUsers(),
+})
 ```
 
 ### useState for UI State
 
 Use `useState` for **local UI state only**:
+
 - Form inputs (uncontrolled)
 - Modal open/closed
 - Selected tab
@@ -284,29 +288,30 @@ Use `useState` for **local UI state only**:
 
 ```typescript
 // ✅ CORRECT - useState for UI state
-const [modalOpen, setModalOpen] = useState(false);
-const [selectedTab, setSelectedTab] = useState(0);
+const [modalOpen, setModalOpen] = useState(false)
+const [selectedTab, setSelectedTab] = useState(0)
 ```
 
 ### Zustand for Global Client State (Minimal)
 
 Use Zustand only for **global client state**:
+
 - Theme preference
 - Sidebar collapsed state
 - User preferences (not from server)
 
 ```typescript
-import { create } from 'zustand';
+import { create } from 'zustand'
 
 interface AppState {
-    sidebarOpen: boolean;
-    toggleSidebar: () => void;
+  sidebarOpen: boolean
+  toggleSidebar: () => void
 }
 
 export const useAppState = create<AppState>((set) => ({
-    sidebarOpen: true,
-    toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-}));
+  sidebarOpen: true,
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+}))
 ```
 
 **Avoid prop drilling** - use context or Zustand instead.
@@ -316,6 +321,7 @@ export const useAppState = create<AppState>((set) => ({
 ## Summary
 
 **Common Patterns:**
+
 - ✅ useAuth hook for current user (id, email, roles, username)
 - ✅ React Hook Form + Zod for forms
 - ✅ Dialog with icon + close button
@@ -326,6 +332,7 @@ export const useAppState = create<AppState>((set) => ({
 - ✅ Zustand for global client state (minimal)
 
 **See Also:**
+
 - [data-fetching.md](data-fetching.md) - TanStack Query patterns
 - [component-patterns.md](component-patterns.md) - Component structure
 - [loading-and-error-states.md](loading-and-error-states.md) - Error handling

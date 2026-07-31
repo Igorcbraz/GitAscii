@@ -9,6 +9,7 @@ Este projeto utiliza uma arquitetura de monitoramento desacoplada, tipada e prof
 O sistema de analytics foi estruturado sob o princípio da **Inversão de Dependências (SOLID)**, garantindo que os componentes da aplicação não conheçam o fornecedor final de analytics (ex: Google Analytics 4, PostHog, Mixpanel).
 
 ### Arquivos (`src/lib/analytics/`)
+
 - [types.ts](file:///C:/Repos/GitAscii/src/lib/analytics/types.ts): Contém as definições de tipos para eventos, propriedades e estado de consentimento.
 - [interface.ts](file:///C:/Repos/GitAscii/src/lib/analytics/interface.ts): Interface genérica que qualquer provedor (GA4, PostHog, Amplitude, etc.) deve implementar.
 - [google-analytics.ts](file:///C:/Repos/GitAscii/src/lib/analytics/google-analytics.ts): Implementação da interface voltada para o Google Analytics 4.
@@ -21,34 +22,36 @@ O sistema de analytics foi estruturado sob o princípio da **Inversão de Depend
 
 A tabela abaixo descreve todos os eventos catalogados e os respectivos parâmetros esperados pelo TypeScript:
 
-| Evento | Parâmetros Esperados | Descrição |
-| :--- | :--- | :--- |
-| `generate_readme` | `template`, `theme`, `widgets_count`, `generation_time_ms?` | README final gerado e renderizado com sucesso. |
-| `preview_template` | `template`, `category?` | Usuário abriu o preview de um template. |
-| `template_selected` | `template`, `category?` | Usuário selecionou um template no editor. |
-| `widget_added` | `widget_id`, `category?`, `total_widgets_used?` | Adição de widget ao editor. |
-| `widget_removed` | `widget_id`, `category?`, `total_widgets_used?` | Remoção de widget do editor. |
-| `copy_markdown` | `format: "markdown" \| "svg"`, `template`, `widgets_count?` | Ação de copiar markdown para a área de transferência. |
-| `copy_svg` | `format: "markdown" \| "svg"`, `template`, `widgets_count?` | Ação de copiar SVG. |
-| `download_svg` | `format: "svg" \| "png"`, `template`, `theme?` | Download de SVG renderizado. |
-| `download_png` | `format: "svg" \| "png"`, `template`, `theme?` | Download de imagem PNG. |
-| `publish_profile` | `username`, `theme`, `widgetsCount` | Publicação de profile GitAscii na web. |
-| `share_profile` | `platform: "twitter" \| "linkedin" \| "whatsapp" \| "copy_link"`, `username` | Ação de compartilhar profile gerado nas redes. |
-| `open_editor` | `entryPoint: "hero" \| "header" \| "templates_gallery" \| "direct"` | Entrada do usuário no editor. |
-| `username_checked` | `username`, `exists`, `responseTimeMs` | Verificação de existência do usuário no GitHub. |
-| `api_request` | `endpoint`, `method` | Chamada HTTP iniciada para nossa API. |
-| `api_success` | `endpoint`, `method`, `responseTimeMs` | Sucesso no retorno de uma chamada de API. |
-| `api_error` | `endpoint`, `method`, `statusCode`, `errorMessage` | Erro mapeado no retorno da API. |
-| `login` | `method: "github" \| "google" \| "email"`, `userId?` | Identificação/Autenticação do usuário. |
-| `signup` | `method: "github" \| "google" \| "email"`, `userId?` | Registro de nova conta. |
+| Evento              | Parâmetros Esperados                                                         | Descrição                                             |
+| :------------------ | :--------------------------------------------------------------------------- | :---------------------------------------------------- |
+| `generate_readme`   | `template`, `theme`, `widgets_count`, `generation_time_ms?`                  | README final gerado e renderizado com sucesso.        |
+| `preview_template`  | `template`, `category?`                                                      | Usuário abriu o preview de um template.               |
+| `template_selected` | `template`, `category?`                                                      | Usuário selecionou um template no editor.             |
+| `widget_added`      | `widget_id`, `category?`, `total_widgets_used?`                              | Adição de widget ao editor.                           |
+| `widget_removed`    | `widget_id`, `category?`, `total_widgets_used?`                              | Remoção de widget do editor.                          |
+| `copy_markdown`     | `format: "markdown" \| "svg"`, `template`, `widgets_count?`                  | Ação de copiar markdown para a área de transferência. |
+| `copy_svg`          | `format: "markdown" \| "svg"`, `template`, `widgets_count?`                  | Ação de copiar SVG.                                   |
+| `download_svg`      | `format: "svg" \| "png"`, `template`, `theme?`                               | Download de SVG renderizado.                          |
+| `download_png`      | `format: "svg" \| "png"`, `template`, `theme?`                               | Download de imagem PNG.                               |
+| `publish_profile`   | `username`, `theme`, `widgetsCount`                                          | Publicação de profile GitAscii na web.                |
+| `share_profile`     | `platform: "twitter" \| "linkedin" \| "whatsapp" \| "copy_link"`, `username` | Ação de compartilhar profile gerado nas redes.        |
+| `open_editor`       | `entryPoint: "hero" \| "header" \| "templates_gallery" \| "direct"`          | Entrada do usuário no editor.                         |
+| `username_checked`  | `username`, `exists`, `responseTimeMs`                                       | Verificação de existência do usuário no GitHub.       |
+| `api_request`       | `endpoint`, `method`                                                         | Chamada HTTP iniciada para nossa API.                 |
+| `api_success`       | `endpoint`, `method`, `responseTimeMs`                                       | Sucesso no retorno de uma chamada de API.             |
+| `api_error`         | `endpoint`, `method`, `statusCode`, `errorMessage`                           | Erro mapeado no retorno da API.                       |
+| `login`             | `method: "github" \| "google" \| "email"`, `userId?`                         | Identificação/Autenticação do usuário.                |
+| `signup`            | `method: "github" \| "google" \| "email"`, `userId?`                         | Registro de nova conta.                               |
 
 ### 🛠️ Eventos de Erro (Automáticos e Manuais)
+
 - `generate_failed`: `{ message, stack?, endpoint?, statusCode?, widget?, template?, context? }`
 - `widget_error`: `{ message, stack?, endpoint?, statusCode?, widget?, template?, context? }`
 - `markdown_error`: `{ message, stack?, endpoint?, statusCode?, widget?, template?, context? }`
 - `render_error`: `{ message, stack?, endpoint?, statusCode?, widget?, template?, context? }`
 
 ### 🤖 Eventos Automáticos & Funil
+
 - `first_visit`: Disparado na primeira visita do usuário ao site.
 - `first_interaction`: Disparado no primeiro clique/tecla pressionada pelo usuário (`{ action }`).
 - `session_start`: Disparado ao iniciar uma nova sessão.
@@ -72,21 +75,21 @@ Para adicionar um novo evento de forma profissional e segura ao longo da aplica�
 
 ## 🔒 Consent Mode v2 (LGPD / GDPR)
 
-A arquitetura já suporta o **Consent Mode v2**. Por padrão, os rastreamentos e cookies são definidos como `denied`. 
+A arquitetura já suporta o **Consent Mode v2**. Por padrão, os rastreamentos e cookies são definidos como `denied`.
 Para atualizar os estados de consentimento a partir de um Banner de Cookies futuro, utilize a função `updateConsent`:
 
 ```typescript
-import { useAnalytics } from "@/lib/analytics";
+import { useAnalytics } from '@/lib/analytics'
 
-const { updateConsent } = useAnalytics();
+const { updateConsent } = useAnalytics()
 
 // Quando o usuário aceitar os cookies
 updateConsent({
-  analytics_storage: "granted",
-  ad_storage: "granted",
-  ad_user_data: "granted",
-  ad_personalization: "granted",
-});
+  analytics_storage: 'granted',
+  ad_storage: 'granted',
+  ad_user_data: 'granted',
+  ad_personalization: 'granted',
+})
 ```
 
 ---
@@ -96,24 +99,20 @@ updateConsent({
 ### 1. Utilizando o Hook `useAnalytics()` (Client Components)
 
 ```tsx
-"use client";
+'use client'
 
-import { useAnalytics } from "@/lib/analytics";
+import { useAnalytics } from '@/lib/analytics'
 
 export function TemplateCard({ template, category }) {
-  const { templateSelected, previewTemplate } = useAnalytics();
+  const { templateSelected, previewTemplate } = useAnalytics()
 
   return (
     <div>
-      <button onClick={() => previewTemplate({ template, category })}>
-        Visualizar
-      </button>
-      
-      <button onClick={() => templateSelected({ template, category })}>
-        Selecionar
-      </button>
+      <button onClick={() => previewTemplate({ template, category })}>Visualizar</button>
+
+      <button onClick={() => templateSelected({ template, category })}>Selecionar</button>
     </div>
-  );
+  )
 }
 ```
 
@@ -122,24 +121,24 @@ export function TemplateCard({ template, category }) {
 O sistema automaticamente **remove campos nulos, undefined ou strings vazias** antes do envio das métricas, evitando poluição no banco do Google Analytics.
 
 ```tsx
-import { useAnalytics } from "@/lib/analytics";
+import { useAnalytics } from '@/lib/analytics'
 
 export function EditorActions() {
-  const { copyMarkdown, trackError } = useAnalytics();
+  const { copyMarkdown, trackError } = useAnalytics()
 
   const handleCopy = () => {
     try {
       copyMarkdown({
-        format: "markdown",
-        template: "neon-layout",
-        widgets_count: 4
-      });
+        format: 'markdown',
+        template: 'neon-layout',
+        widgets_count: 4,
+      })
     } catch (error) {
-      trackError("markdown_error", error, { context: "copy_button" });
+      trackError('markdown_error', error, { context: 'copy_button' })
     }
-  };
+  }
 
-  return <button onClick={handleCopy}>Copiar Markdown</button>;
+  return <button onClick={handleCopy}>Copiar Markdown</button>
 }
 ```
 

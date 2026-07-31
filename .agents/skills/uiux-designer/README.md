@@ -27,19 +27,20 @@ python3 .agent/skills/uiux-designer/scripts/search.py "performance" --stack reac
 ## 🔧 How It Works
 
 ### 1. BM25 Search Engine
+
 The skill uses a custom BM25 implementation to search through CSV knowledge bases, ranking results by relevance.
 
 ### 2. Knowledge Domains
 
-| Domain | Content |
-|--------|---------|
-| `style` | 50+ UI styles (Glassmorphism, Neumorphism, Brutalism, etc.) |
-| `color` | 97 color palettes organized by product type |
-| `typography` | 57 font pairings with Google Fonts integration |
-| `product` | Industry-specific design recommendations |
-| `landing` | Landing page patterns and CTA strategies |
-| `chart` | Data visualization best practices |
-| `ux` | 99 UX guidelines with Do/Don't examples |
+| Domain       | Content                                                     |
+| ------------ | ----------------------------------------------------------- |
+| `style`      | 50+ UI styles (Glassmorphism, Neumorphism, Brutalism, etc.) |
+| `color`      | 97 color palettes organized by product type                 |
+| `typography` | 57 font pairings with Google Fonts integration              |
+| `product`    | Industry-specific design recommendations                    |
+| `landing`    | Landing page patterns and CTA strategies                    |
+| `chart`      | Data visualization best practices                           |
+| `ux`         | 99 UX guidelines with Do/Don't examples                     |
 
 ### 3. Tech Stack Support
 
@@ -50,6 +51,7 @@ The skill uses a custom BM25 implementation to search through CSV knowledge base
 ## 🔔 When to Use
 
 Use this skill when:
+
 - Starting a new UI/UX project and need design direction
 - Choosing color palettes, fonts, or visual style
 - Reviewing code for accessibility and UX issues

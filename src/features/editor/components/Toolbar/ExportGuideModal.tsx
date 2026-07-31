@@ -1,35 +1,36 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { useI18n } from '@/i18n';
 import {
-  X,
   Check,
-  Download,
-  Github,
-  UserPlus,
-  ChevronRight,
   ChevronLeft,
-  Sparkles,
-  FileJson,
-  ExternalLink,
+  ChevronRight,
   Copy,
-} from 'lucide-react';
+  Download,
+  ExternalLink,
+  FileJson,
+  Github,
+  Sparkles,
+  X,
+} from 'lucide-react'
+import React, { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+
+import { useI18n } from '@/i18n'
 
 interface ExportGuideModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  username: string;
-  onDownload: () => void;
-  embedCode: string;
+  isOpen: boolean
+  onClose: () => void
+  username: string
+  onDownload: () => void
+  embedCode: string
 }
 
 const STEPS = [
   {
     icon: Download,
     title: 'Arquivo Baixado',
-    description: 'O arquivo do seu layout foi baixado para o seu computador. Ele contém toda a configuração do seu perfil.',
+    description:
+      'O arquivo do seu layout foi baixado para o seu computador. Ele contém toda a configuração do seu perfil.',
     descriptionIcon: FileJson,
     linkLabel: null,
     getLinkUrl: () => '',
@@ -37,7 +38,8 @@ const STEPS = [
   {
     icon: Github,
     title: 'Adicione ao GitHub',
-    description: 'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.',
+    description:
+      'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.',
     descriptionIcon: null,
     linkLabel: 'Adicionar arquivo',
     getLinkUrl: (username: string) => `https://github.com/${username}/${username}/upload/main`,
@@ -45,12 +47,14 @@ const STEPS = [
   {
     icon: Sparkles,
     title: 'Tudo Pronto!',
-    description: 'Nosso site renderiza automaticamente o JSON do seu repositório. Basta copiar a URL da imagem gerada e colar no seu README.',
+    description:
+      'Nosso site renderiza automaticamente o JSON do seu repositório. Basta copiar a URL da imagem gerada e colar no seu README.',
     descriptionIcon: null,
     linkLabel: 'Editar README',
-    getLinkUrl: (username: string) => `https://github.com/${username}/${username}/edit/main/README.md`,
+    getLinkUrl: (username: string) =>
+      `https://github.com/${username}/${username}/edit/main/README.md`,
   },
-];
+]
 
 export function ExportGuideModal({
   isOpen,
@@ -59,91 +63,100 @@ export function ExportGuideModal({
   onDownload,
   embedCode,
 }: ExportGuideModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isClosing, setIsClosing] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [reCopied, setReCopied] = useState(false);
-  const { t } = useI18n();
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isClosing, setIsClosing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [reCopied, setReCopied] = useState(false)
+  const { t } = useI18n()
 
   const steps = [
     {
       ...STEPS[0],
       title: t('editor.guide.export.step1_title', 'Arquivo Baixado'),
-      description: t('editor.guide.export.step1_desc', 'O arquivo JSON do seu layout foi baixado para o seu computador.'),
+      description: t(
+        'editor.guide.export.step1_desc',
+        'O arquivo JSON do seu layout foi baixado para o seu computador.'
+      ),
     },
     {
       ...STEPS[1],
       title: t('editor.guide.export.step2_title', 'Adicione ao GitHub'),
-      description: t('editor.guide.export.step2_desc', 'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.'),
+      description: t(
+        'editor.guide.export.step2_desc',
+        'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.'
+      ),
       linkLabel: t('editor.guide.export.step2_link', 'Adicionar arquivo'),
     },
     {
       ...STEPS[2],
       title: t('editor.guide.export.step3_title', 'Tudo Pronto!'),
-      description: t('editor.guide.export.step3_desc', 'Nosso site renderiza automaticamente o JSON do seu repositório. Basta colar a URL da imagem no seu README.'),
+      description: t(
+        'editor.guide.export.step3_desc',
+        'Nosso site renderiza automaticamente o JSON do seu repositório. Basta colar a URL da imagem no seu README.'
+      ),
       linkLabel: t('editor.guide.export.step3_link', 'Editar README'),
     },
-  ];
+  ]
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
-      setCurrentStep(0);
-      setIsClosing(false);
+      setCurrentStep(0)
+      setIsClosing(false)
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        handleClose();
+        handleClose()
       }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleClose = useCallback(() => {
-    setIsClosing(true);
+    setIsClosing(true)
     setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-    }, 200);
-  }, [onClose]);
+      onClose()
+      setIsClosing(false)
+    }, 200)
+  }, [onClose])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(embedCode);
-    setReCopied(true);
-    setTimeout(() => setReCopied(false), 2000);
-  };
+    navigator.clipboard.writeText(embedCode)
+    setReCopied(true)
+    setTimeout(() => setReCopied(false), 2000)
+  }
 
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
   useEffect(() => {
     if (isOpen && typeof window !== 'undefined') {
-      setDontShowAgain(localStorage.getItem('gitascii_skip_export_guide') === 'true');
+      setDontShowAgain(localStorage.getItem('gitascii_skip_export_guide') === 'true')
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const nextStep = () => {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1);
-  };
+    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1)
+  }
 
   const prevStep = () => {
-    if (currentStep > 0) setCurrentStep((s) => s - 1);
-  };
+    if (currentStep > 0) setCurrentStep((s) => s - 1)
+  }
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !mounted) return null
 
-  const step = steps[currentStep];
-  const StepIcon = step.icon;
-  const linkUrl = step.getLinkUrl ? step.getLinkUrl(username) : '';
-  const isLastStep = currentStep === steps.length - 1;
-  const isFirstStep = currentStep === 0;
+  const step = steps[currentStep]
+  const StepIcon = step.icon
+  const linkUrl = step.getLinkUrl ? step.getLinkUrl(username) : ''
+  const isLastStep = currentStep === steps.length - 1
+  const isFirstStep = currentStep === 0
 
   return createPortal(
     <>
@@ -187,12 +200,13 @@ export function ExportGuideModal({
                   onClick={() => setCurrentStep(idx)}
                 >
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ease-out ${idx < currentStep
-                      ? 'bg-signal-lime w-full'
-                      : idx === currentStep
-                        ? 'bg-signal-lime w-full animate-pulse-glow-bar'
-                        : 'w-0'
-                      }`}
+                    className={`h-full rounded-full transition-all duration-500 ease-out ${
+                      idx < currentStep
+                        ? 'bg-signal-lime w-full'
+                        : idx === currentStep
+                          ? 'bg-signal-lime w-full animate-pulse-glow-bar'
+                          : 'w-0'
+                    }`}
                   />
                 </div>
               ))}
@@ -259,23 +273,28 @@ export function ExportGuideModal({
           <div className="px-6 pb-5">
             <button
               onClick={() => {
-                const newValue = !dontShowAgain;
-                setDontShowAgain(newValue);
+                const newValue = !dontShowAgain
+                setDontShowAgain(newValue)
                 if (newValue) {
-                  localStorage.setItem('gitascii_skip_export_guide', 'true');
+                  localStorage.setItem('gitascii_skip_export_guide', 'true')
                 } else {
-                  localStorage.removeItem('gitascii_skip_export_guide');
+                  localStorage.removeItem('gitascii_skip_export_guide')
                 }
               }}
               className="inline-flex items-center gap-2.5 text-ash hover:text-chalk transition-colors cursor-pointer select-none group"
             >
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${dontShowAgain
-                  ? 'bg-signal-lime border-signal-lime text-black'
-                  : 'bg-void-black border-graphite group-hover:border-ash'
-                }`}>
+              <div
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                  dontShowAgain
+                    ? 'bg-signal-lime border-signal-lime text-black'
+                    : 'bg-void-black border-graphite group-hover:border-ash'
+                }`}
+              >
                 {dontShowAgain && <Check size={10} strokeWidth={3.5} />}
               </div>
-              <span className="font-inter-tight font-medium text-label">{t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}</span>
+              <span className="font-inter-tight font-medium text-label">
+                {t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}
+              </span>
             </button>
           </div>
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between">
@@ -317,5 +336,5 @@ export function ExportGuideModal({
       </div>
     </>,
     document.body
-  );
+  )
 }
