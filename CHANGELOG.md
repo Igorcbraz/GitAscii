@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/Igorcbraz/GitAscii/compare/v1.0.1...v1.0.2) (2026-07-31)
+
+
+### Bug Fixes
+
+* show correct favicon ([d56017d](https://github.com/Igorcbraz/GitAscii/commit/d56017d4ec46e1da5c27325967e59fc254e89faf))
+
 ## [1.0.1](https://github.com/Igorcbraz/GitAscii/compare/v1.0.0...v1.0.1) (2026-07-31)
 
 
