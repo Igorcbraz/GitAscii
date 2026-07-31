@@ -29,9 +29,46 @@ export async function GET(
 
     const data = await fetchGitHubProfile(username)
 
-    let config = await loadProfileConfig(username, profileSlug)
-    if (!config) {
-      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
+    const templateParam = searchParams.get('template')
+    let config
+    if (templateParam) {
+      config = createConfiguration(data.user.id, data.user.login, templateParam, profileSlug)
+    } else {
+      config = await loadProfileConfig(username, profileSlug)
+      if (!config) {
+        config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
+      }
+    }
+
+    if (widgets) {
+      for (const w of widgets) {
+        if (!config.widgets.some((cw: any) => cw.widgetId === w || cw.instanceId === w)) {
+          let wWidth = 800
+          let wHeight = 210
+
+          if (['github-readme-stats', 'streak-stats', 'metrics-card'].includes(w)) {
+            wWidth = 390
+            wHeight = 210
+          } else if (['activity-graph', 'contribution-snake', 'readme-quotes'].includes(w)) {
+            wWidth = 800
+            wHeight = 210
+          } else if (w === 'stats' || w === 'streak') {
+            wWidth = 390
+            wHeight = 210
+          }
+
+          config.widgets.push({
+            instanceId: `temp-${w}`,
+            widgetId: w,
+            position: { x: 0, y: 0 },
+            size: { width: wWidth, height: wHeight },
+            config: {},
+            locked: false,
+            visible: true,
+            zIndex: 99,
+          })
+        }
+      }
     }
 
     const rawSvgContent = renderSvg(config, data, { theme, widgets })

@@ -83,17 +83,30 @@ export function Footer() {
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
                 {t('landing.footer.product', '[ PRODUCT ]')}
               </span>
-              <ul className="flex flex-col gap-4">
-                {['Features', 'Templates', 'Editor', 'Generate'].map((item) => (
-                  <li key={item}>
-                    <Link
-                      href={`#${item.toLowerCase()}`}
-                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
-                    >
-                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
-                    </Link>
-                  </li>
-                ))}
+              <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
+                <li>
+                  <Link href="/templates" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.templates_catalog', 'Templates Catalog')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/widgets" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.dynamic_widgets', 'Dynamic Widgets')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/explore" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.explore_profiles', 'Explore Profiles')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#hero-username-input"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.visual_editor', 'Visual Editor')}
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -101,17 +114,30 @@ export function Footer() {
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
                 {t('landing.footer.resources', '[ RESOURCES ]')}
               </span>
-              <ul className="flex flex-col gap-4">
-                {['Documentation', 'API', 'Changelog', 'Status'].map((item) => (
-                  <li key={item}>
-                    <Link
-                      href={`#${item.toLowerCase()}`}
-                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
-                    >
-                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
-                    </Link>
-                  </li>
-                ))}
+              <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
+                <li>
+                  <Link href="/guides" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.guides', 'Guides & Tutorials')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/llms.txt" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.ai_docs', 'llms.txt (AI Docs)')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/sitemap.xml" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.sitemap', 'Sitemap XML')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/manifest.webmanifest"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.app_manifest', 'App Manifest')}
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -119,17 +145,37 @@ export function Footer() {
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
                 {t('landing.footer.community', '[ COMMUNITY ]')}
               </span>
-              <ul className="flex flex-col gap-4">
-                {['GitHub', 'Documentation', 'Contributing', 'Discussions'].map((item) => (
-                  <li key={item}>
-                    <Link
-                      href={`#${item.toLowerCase()}`}
-                      className="font-inter-tight font-normal text-body text-pearl transition-colors duration-200 hover:text-signal-lime"
-                    >
-                      {t(`landing.footer.item.${item.toLowerCase()}`, item)}
-                    </Link>
-                  </li>
-                ))}
+              <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
+                <li>
+                  <a
+                    href="https://github.com/Igorcbraz/GitAscii"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.github_repo', 'GitHub Repository')}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/Igorcbraz/GitAscii/fork"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.fork_contribute', 'Fork & Contribute')}
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/Igorcbraz/GitAscii/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.issues_requests', 'Issues & Feature Requests')}
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -137,10 +183,10 @@ export function Footer() {
           <div className="mt-12 pt-8 border-t border-graphite flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="font-inter-tight text-note text-ash flex items-center gap-2">
               <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>©{' '}
-              {new Date().getFullYear()} GitAscii. MIT License.
+              {new Date().getFullYear()} {t('landing.footer.copyright', 'GitAscii. MIT License.')}
             </p>
             <p className="font-jetbrains-mono text-caption text-ash/50 uppercase tracking-[0.18em]">
-              v1.0.0 · BUILD 2026.07
+              {t('landing.footer.version', 'v1.0.0 · BUILD 2026.07')}
             </p>
           </div>
         </div>

@@ -7,11 +7,42 @@ import { useI18n } from '@/i18n'
 export function HowItWorks() {
   const { t } = useI18n()
 
+  const howToLd = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Create a GitHub Profile README with GitAscii',
+    description: 'Create a custom GitHub Profile README in three simple steps using GitAscii.',
+    step: [
+      {
+        '@type': 'HowToStep',
+        position: 1,
+        name: 'Enter Your Username',
+        text: 'Type your GitHub username on GitAscii to fetch public user profile data automatically.',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 2,
+        name: 'Customize Everything',
+        text: 'Use the visual editor to drag widgets, select theme templates, and customize colors and fonts.',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 3,
+        name: 'Copy & Paste',
+        text: 'Copy the generated markdown or HTML picture snippet directly into your GitHub README.md file.',
+      },
+    ],
+  }
+
   return (
     <section
       id="how-it-works"
       className="bg-carbon py-32 px-6 md:px-12 w-full relative overflow-hidden"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
+      />
       <div className="max-w-7xl mx-auto flex flex-col">
         <div className="mb-24 flex flex-col items-center text-center">
           <span className="font-sans font-medium text-eyebrow uppercase tracking-[0.22em] text-ash mb-4">

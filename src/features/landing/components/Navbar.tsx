@@ -2,6 +2,7 @@
 
 import { Github, LogIn, LogOut, Menu, Star, User, X } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import LanguageSelector from '@/components/ui/LanguageSelector'
@@ -18,12 +19,13 @@ export default function Navbar() {
   const [session, setSession] = useState<UserSession | null>(null)
   const [isLoginLoading, setIsLoginLoading] = useState(false)
   const { t } = useI18n()
+  const pathname = usePathname()
 
   const menuItems = [
-    { label: t('landing.navbar.features', 'FEATURES'), id: 'features' },
-    { label: t('landing.navbar.templates', 'TEMPLATES'), id: 'templates' },
-    { label: t('landing.navbar.how_it_works', 'HOW IT WORKS'), id: 'how-it-works' },
-    { label: t('landing.navbar.faq', 'FAQ'), id: 'faq' },
+    { label: t('landing.navbar.templates', 'TEMPLATES'), href: '/templates' },
+    { label: t('landing.navbar.widgets', 'WIDGETS'), href: '/widgets' },
+    { label: t('landing.navbar.explore', 'EXPLORE'), href: '/explore' },
+    { label: t('landing.navbar.guides', 'GUIDES'), href: '/guides' },
   ]
 
   useEffect(() => {
@@ -73,15 +75,20 @@ export default function Navbar() {
           <LanguageSelector align="left" className="ml-2" />
         </div>
         <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2 h-full">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={`#${item.id}`}
-              className="font-inter-tight text-label font-medium uppercase tracking-[0.18em] text-white transition-colors duration-300 ease-in-out hover:text-signal-lime"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-colors duration-300 ease-in-out hover:text-signal-lime ${
+                  isActive ? 'text-signal-lime' : 'text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </div>
         <div className="hidden md:flex items-center gap-3 z-10">
           {session ? (
@@ -143,16 +150,21 @@ export default function Navbar() {
       </div>
       {isMobileMenuOpen && (
         <div className="absolute left-0 top-16 w-full bg-void-black border-b border-graphite px-6 py-4 md:hidden flex flex-col gap-4 animate-in slide-in-from-top-2 duration-300 ease-in-out shadow-xl z-40">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={`#${item.id}`}
-              className="font-inter-tight text-label font-medium uppercase tracking-[0.18em] text-white transition-colors duration-300 ease-in-out hover:text-signal-lime block py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-colors duration-300 ease-in-out hover:text-signal-lime block py-2 ${
+                  isActive ? 'text-signal-lime' : 'text-white'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
           <div className="flex flex-col gap-3 mt-2 border-t border-graphite/40 pt-4">
             {session ? (
               <div className="flex flex-col gap-2">

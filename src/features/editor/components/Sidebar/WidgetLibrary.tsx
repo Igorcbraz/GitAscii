@@ -47,7 +47,7 @@ import {
   WidgetPreviewTooltip,
 } from './WidgetPreviewTooltip'
 
-const WIDGET_CATALOG: WidgetCatalogItem[] = [
+export const WIDGET_CATALOG: WidgetCatalogItem[] = [
   {
     id: 'header',
     name: 'Header',

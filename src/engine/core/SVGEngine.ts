@@ -12,7 +12,11 @@ export function renderSvg(
 
   const targetWidgetIds = options.widgets
   let visibleWidgets = config.widgets.filter(
-    (w) => w.visible && (!targetWidgetIds || targetWidgetIds.includes(w.instanceId))
+    (w) =>
+      w.visible &&
+      (!targetWidgetIds ||
+        targetWidgetIds.includes(w.instanceId) ||
+        targetWidgetIds.includes(w.widgetId))
   )
 
   if (targetWidgetIds && visibleWidgets.length === 0) {
@@ -238,7 +242,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
 
     try {
       const replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
-      finalSvg = finalSvg.replace(fullMatch, replacement)
+      finalSvg = finalSvg.replace(fullMatch, () => replacement)
     } catch (err) {
       console.error('Failed to fetch external widget:', url, err)
 
@@ -294,18 +298,15 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
         throw new Error('Forbidden hostname')
       }
 
-      const response = await fetch(url)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-
+      const response = await fetch(url, { headers: { accept: 'image/*, */*' } })
+      if (!response.ok) continue
       const buffer = await response.arrayBuffer()
+      const contentType = response.headers.get('content-type') || 'image/png'
       const base64 = Buffer.from(buffer).toString('base64')
-
-      let contentType = response.headers.get('content-type') || 'image/svg+xml'
-      contentType = contentType.split(';')[0].trim()
-
       const dataUri = `data:${contentType};base64,${base64}`
+
       const replacement = fullMatch.replace(hrefMatch[0], `href="${dataUri}"`)
-      finalSvg = finalSvg.replace(fullMatch, replacement)
+      finalSvg = finalSvg.replace(fullMatch, () => replacement)
     } catch (err) {
       console.error('Failed to embed inline image:', url, err)
     }
