@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/icon-512.png" width="120" height="120" alt="GitAscii Logo" />
+  <img src="src/app/icon-512.png" width="120" height="120" alt="GitAscii Logo" />
 
   <h1>GitAscii</h1>
 
