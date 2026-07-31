@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/Igorcbraz/GitAscii/compare/v1.0.1...v1.1.0) (2026-07-31)
+
+
+### Features
+
+* **editor:** add marquee selection and shortcuts ([45eee18](https://github.com/Igorcbraz/GitAscii/commit/45eee186c2df250c917ae1c0237045a5e966ceea))
+* enhance SEO and add new community/template sections ([4da4a60](https://github.com/Igorcbraz/GitAscii/commit/4da4a60225b2288107a1e7635633ae4dc9ef07b8))
+* **landing:** replace templates showcase with interactive showcase and update copy ([ec9b73f](https://github.com/Igorcbraz/GitAscii/commit/ec9b73f7baba0e37548c7ca31bb9443369e9e12c))
+
+
+### Bug Fixes
+
+* show correct favicon ([d56017d](https://github.com/Igorcbraz/GitAscii/commit/d56017d4ec46e1da5c27325967e59fc254e89faf))
+
 ## [1.0.1](https://github.com/Igorcbraz/GitAscii/compare/v1.0.0...v1.0.1) (2026-07-31)
 
 
