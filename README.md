@@ -27,13 +27,7 @@
 
 ---
 
-<div align="center">
-  <video src="public/presentation.mp4" width="100%" autoplay loop muted controls></video>
-  <br/>
-  <sup><i>GitAscii Product Showcase</i></sup>
-</div>
-
----
+https://github.com/user-attachments/assets/1e262f59-e63b-438c-bc6e-9776dc796d8f
 
 ## 🔗 Demo
 
@@ -177,20 +171,6 @@ Check out our [CHANGELOG.md](CHANGELOG.md) to see what's new.
 ## 🤝 Contributing
 
 Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything about how to contribute. Any contributions you make are **greatly appreciated**.
-
----
-
-## 🌟 Star History
-
-<div align="center">
-  <a href="https://www.star-history.com/?repos=Igorcbraz%2FGitAscii&type=timeline&logscale=&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&theme=dark&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
-    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
-  </picture>
-  </a>
-</div>
 
 ---
 
