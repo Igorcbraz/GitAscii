@@ -1,171 +1,202 @@
 <div align="center">
   <img src="public/icon-512.png" width="120" height="120" alt="GitAscii Logo" />
 
-# ── GitAscii ──
+  <h1>GitAscii</h1>
 
-> **Where cryptic terminals meet editorial newspaper design** — elevate your GitHub presence to a premium design level dynamically and automatically.
+  <p>
+    <b>Where cryptic terminals meet editorial newspaper design.</b><br />
+    Elevate your GitHub presence to a premium design level dynamically and automatically.
+  </p>
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.3-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0-20232a?style=flat-square&logo=react&logoColor=61dafb)](https://react.dev/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind-4.0-06b6d4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  <p>
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15.3-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" /></a>
+    <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19.0-20232a?style=for-the-badge&logo=react&logoColor=61dafb" alt="React" /></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind-4.0-06b6d4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  </p>
 
+  <p>
+    <a href="#-demo">Demo</a> •
+    <a href="#-why-gitascii">Why GitAscii?</a> •
+    <a href="#-features">Features</a> •
+    <a href="#-how-it-works">How It Works</a> •
+    <a href="#-architecture">Architecture</a> •
+    <a href="#-project-structure">Project Structure</a>
+  </p>
 </div>
 
 ---
-
-## ⚡ What is GitAscii?
-
-**GitAscii** is a complete platform designed to transform standard GitHub profiles into high-impact, self-updating visual experiences.
-
-Instead of dealing with static markdown tables or generic badges, GitAscii provides developers with a **visual drag-and-drop editor** backed by a powerful **ASCII and SVG rendering engine**. It combines the raw, technical aesthetics of a command-line interface with the elegance of a classic newspaper layout, resulting in a premium "classified document" look.
-
-Once your profile is designed, GitAscii serves it via a dynamic URL, meaning your GitHub README stays updated automatically without any manual commits on your part.
 
 <div align="center">
-  <img src="public/example.svg" width="800" alt="GitAscii Example Profile Preview" />
+  <video src="public/presentation.mp4" width="100%" autoplay loop muted controls></video>
+  <br/>
+  <sup><i>GitAscii Product Showcase</i></sup>
 </div>
 
 ---
 
-## 🚀 Product Features & Widget Library
+## 🔗 Demo
 
-GitAscii comes packed with a rich library of internal widgets and seamless integrations with the most popular GitHub stats services, giving you ultimate control over your profile's aesthetic.
+Experience the platform live. No installation required.
 
-### 🎨 Visual Drag-and-Drop Editor
-
-A robust, browser-based editor inspired by tools like Figma and Canva. It features real-time SVG rendering, allowing you to drag widgets, adjust layouts, and preview your final README instantly.
-
-### 🔓 Frictionless Access (Two Ways to Play)
-
-We respect your privacy and workflow. You don't necessarily need to authenticate via OAuth to use GitAscii. There are two ways to interact with the product:
-
-1. **Public Sandbox (No Login)**: Just type any GitHub username and instantly start designing based on public data. Perfect for quick edits or trying out templates.
-2. **Authenticated Mode**: Log in via GitHub OAuth to unlock private repositories data, save your layouts directly to your account, and manage your dynamic rendering links with ease.
-
-### 📦 Portability (Import/Export Layouts)
-
-You can seamlessly export your custom-crafted profile layout as a JSON file and import it anytime, or share it with other users in the community.
-
-### 📟 Core & ASCII Widgets
-
-- **ASCII Art Engine**: Convert photos, logos, or raw images into highly detailed character art directly in the browser (with 6+ character sets and contrast controls).
-- **ASCII Text**: Render custom texts using true ASCII art fonts.
-- **Terminal Info**: A Neofetch-style terminal info card summarizing your profile.
-- **Tech Stack Gallery**: An interactive gallery of skill icons (React, Node, etc.).
-- **Top Languages & GitHub Stats**: Clean, built-in metrics blocks for languages, repos, stars, and followers.
-- **Featured Repos**: Highlight your best work in stylized repository cards.
-- **Headers, Avatars, Bio & Footers**: Essential structural widgets that maintain the editorial newspaper look.
-
-### 🌐 External Integrations
-
-GitAscii embraces the open-source ecosystem. We natively support wrapping popular community tools into our design system:
-
-- **GitFest**: Generate a festival lineup style poster of your top repos!
-- **Contribution Snake**: The famous animated snake eating your commit graph.
-- **GitHub Readme Stats & Streak Stats**: Fully integrated blocks tracking your commits and current streaks.
-- **Profile Trophy**: Display achievements and trophies based on your GitHub activity.
-- **Activity Graph**: A line chart mapping your last 31 days of commits.
-- **Metrics Card & Views Counter**: Advanced infographics and real-time visitor counters.
-- **Readme Quotes**: Daily motivational quotes for developers.
-
-### 🔗 Dynamic Direct Rendering
-
-Say goodbye to manual repository updates. GitAscii generates your layout as an SVG served via our dynamic URL system. Just paste one link into your GitHub README, and your stats, ASCII art, and badges will update automatically.
-
-### 📐 Premium Templates & Smart Generation
-
-Not a designer? No problem. GitAscii includes over 13 ready-to-use, premium layouts (such as "Minimalist Terminal" or "Industrial Cyberpunk"). Additionally, the Smart Generation feature can analyze your GitHub profile and instantly assemble the perfect layout tailored to your activity.
-
-### 📊 Comprehensive Dashboard & Analytics
-
-GitAscii tracks usage gracefully using a decoupled SaaS-level analytics architecture (supporting GA4, PostHog, etc.), complete with Consent Mode v2 and Web Vitals monitoring, ensuring optimal performance and user experience.
-
-### 🌗 Adaptive Theme Rendering (Dark & Light)
-
-GitAscii generates separate SVGs for both dark and light themes. By leveraging the HTML `<picture>` element in your GitHub README, your profile will automatically adapt to match the viewer's current GitHub theme preference.
-
-### 📂 Multiple Profiles
-
-Create different profiles for different purposes. Maintain separate configurations for a "Portfolio", a "Resume", or an "Open Source Contributor" look — all saved within a single account.
-
-### 🌍 Full Internationalization (i18n)
-
-The platform is fully localized in **English**, **Portuguese**, and **Spanish**, automatically detecting and adapting to the developer's native language.
+> **[🚀 Launch GitAscii in your Browser](https://git-ascii.vercel.app/)**
 
 ---
 
-## 🏗️ Technical Architecture
+## 💡 Why GitAscii?
 
-GitAscii is built to scale, using a modern stack and a modular architecture:
+Standard GitHub profiles are limited by standard Markdown. Maintaining an attractive, up-to-date README is tedious and requires constant manual updates.
 
-- **Frontend Ecosystem:** Built on [Next.js 15.3](https://nextjs.org/) (App Router) and [React 19](https://react.dev/), leveraging [Tailwind CSS 4.0](https://tailwindcss.com/) for styling and [Framer Motion 12](https://motion.dev/) for fluid micro-animations. State is managed elegantly via [Zustand](https://github.com/pmndrs/zustand).
-- **Rendering Engine (`src/engine/`):** The core logic handling the complex conversion of images to ASCII matrices and assembling dynamic SVGs on the fly.
-- **Modular Features (`src/features/`):** The visual editor, templates gallery, and GitHub API integrations are decoupled into modular feature folders for maintainability.
-- **Analytics Subsystem (`src/lib/analytics/`):** A strictly typed, IoC (Inversion of Control) based tracking system that abstracts away the provider, allowing seamless event logging (e.g., `generate_readme`, `copy_svg`) without polluting business logic.
+**GitAscii** solves this by providing a complete visual platform where you can design your GitHub README using drag-and-drop widgets, ASCII art, and real-time statistics. Once designed, the engine generates a single, dynamic URL that you embed in your README. It auto-updates forever.
 
 ---
 
-## 🎨 Design Philosophy
+## ✨ Features
 
-Our visual identity follows strict rules documented in our [Design Guide](design.md). The concept is **"Encrypted terminal meets classified broadsheet"**.
+<div align="center">
 
-- **The Void:** We use `Void Black` (`#000000`) and `Carbon` (`#060606`) as our absolute backgrounds to eliminate visual fatigue.
-- **The Signal:** `Signal Lime` (`#c5ff4a`) acts as an emergency light in a dark room. It is the _only_ chromatic color used, strictly reserved for CTAs, glowing borders, and crucial keywords.
-- **Typography:**
-  - **PT Serif (Weight 300)** brings an unexpected, whisper-weight editorial authority to display headlines.
-  - **Inter Tight** handles all UI chrome and tracked-out, uppercase metadata labels (like `[ BUILT FOR AGENTS ]`).
-  - **JetBrains Mono** is used exclusively for code snippets, providing a technical "proof" layer.
+| 🎨 **Visual Drag-and-Drop Editor**                                                                       | 🌗 **Adaptive Theme Rendering**                                                                  |
+| :------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| Build layouts intuitively without writing Markdown or code. Our editor feels like Figma for your README. | Automatically serves different SVGs matching the viewer's GitHub dark or light theme preference. |
+| 📊 **Real-time GitHub Statistics**                                                                       | 🖼️ **ASCII Image Conversion Engine**                                                             |
+| Seamlessly track commits, stars, top languages, and streaks without external manual setup.               | Turn any uploaded avatar or image into detailed ASCII character art in the browser.              |
+| ⚡ **Dynamic Profile URLs**                                                                              | 🔄 **Zero-maintenance Updates**                                                                  |
+| Embed a single static URL. Our engine generates the SVG on the fly every time it's requested.            | Say goodbye to manual cron jobs or GitHub Actions. Your layout stays fresh automatically.        |
+
+</div>
+
+## 🖼️ Preview
+
+### Platform
+
+<div align="center">
+  <img src="public/hero.png" alt="GitAscii Platform UI" width="100%" />
+  <br/>
+  <sup><i>GitAscii Landing Page and Dashboard</i></sup>
+</div>
+
+### Live Editor
+
+<div align="center">
+  <img src="public/editor.png" alt="GitAscii Visual Editor" width="100%" />
+  <br/>
+  <sup><i>The intuitive Drag-and-Drop Builder Interface</i></sup>
+</div>
+
+### Generated Output Example
+
+This is what your GitHub profile could look like. Just drop the generated link in your README.
+
+<div align="center">
+  <img src="public/example.svg" alt="Generated GitAscii Profile SVG" width="100%" />
+  <br/>
+  <sup><i>Dynamic SVG result rendered directly by GitHub</i></sup>
+</div>
 
 ---
 
-## 💻 How to Run Locally
+## ⚙️ How It Works
 
-Get the platform running on your machine in seconds:
+<details>
+<summary><b>1. Create Your Layout</b></summary>
+Use the drag-and-drop builder to compose your profile. Add terminal widgets, GitHub stats, ASCII art, and arrange them on the grid.
+</details>
 
-### 1. Clone the repository
+<details>
+<summary><b>2. The Engine Processes Widgets</b></summary>
+The client compiles your widget configuration into a state payload, gathering necessary metadata to render your components.
+</details>
 
-```bash
-git clone https://github.com/Igorcbraz/GitAscii.git
-cd GitAscii
-```
+<details>
+<summary><b>3. Dynamic SVG Generation</b></summary>
+The Next.js backend aggregates component templates, fetches live GitHub API statistics, and constructs a highly optimized, raw SVG markup on the fly.
+</details>
 
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Start the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to start building.
+<details>
+<summary><b>4. GitHub Renders the Result</b></summary>
+You place the provided generated URL into your <code>README.md</code>. GitHub requests this dynamic image, displaying your fully updated layout on every page load.
+</details>
 
 ---
 
-## 📂 Directory Structure
+## 🏗️ Architecture
+
+GitAscii is highly modularized, separating client UI logic from server-side rendering:
+
+| Layer                | Responsibility                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Editor Layer**     | The React/Zustand client-side visual interface where users interact, drag, drop, and configure widgets natively in the browser. |
+| **Rendering Engine** | The core Next.js logic responsible for compiling widget layouts, applying styles, and assembling the final raw SVG output.      |
+| **Data Layer**       | Connects to external services (GitHub API, WakaTime, etc.) to fetch and normalize user statistics securely on the backend.      |
+| **Delivery Layer**   | Next.js Edge APIs serving the dynamic files, configured with proper caching headers optimized for GitHub's image proxy (camo).  |
+
+---
+
+## 🧠 Rendering Pipeline
+
+GitAscii uses several interesting techniques to power the visual experience:
+
+> **Adaptive Theme Rendering**  
+> We leverage the HTML `<picture>` element and CSS media queries (`prefers-color-scheme`) to serve distinct SVGs depending on whether the user views GitHub in dark or light mode.
+
+> **Image Processing Pipeline**  
+> The ASCII image conversion relies on the HTML5 `Canvas API`. The engine draws images to a hidden canvas, uses `getImageData` to extract raw pixel arrays, and maps pixel luminance to custom character matrices.
+
+> **Dynamic SVG Generation**  
+> Instead of storing static files, our endpoint constructs structured SVG markup dynamically per request, injecting data and caching the result directly on Vercel Edge nodes.
+
+---
+
+## 📂 Project Structure
 
 ```text
 GitAscii/
 ├── public/                 # Static assets, logos, and preview images
 ├── src/
-│   ├── app/                # Next.js App Router (Pages & Layouts)
-│   ├── components/         # Shared UI components (Buttons, Cards, Modals)
+│   ├── app/                # Next.js App Router (Pages, Layouts, API Routes)
+│   ├── components/         # Shared UI components for the editor
 │   ├── constants/          # Static data and configuration
-│   ├── engine/             # Core logic for ASCII generation & SVG rendering
-│   ├── features/           # Domains (Visual Editor, Smart Generator, Landing)
-│   ├── lib/                # Utilities, Hooks, and the Analytics subsystem
-│   └── middleware.ts       # Route protection and security
+│   ├── engine/             # Core logic for ASCII generation & dynamic SVG rendering
+│   ├── features/           # Independent feature modules separated by domain
+│   ├── lib/                # Shared utilities, hooks, and analytics helpers
+│   └── middleware.ts       # Route protection and request middleware
 ├── design.md               # Detailed Design System specifications
-├── analytics.md            # SaaS analytics & event tracking documentation
-├── theme.css               # Global CSS variables (Colors & Tokens)
-└── package.json            # Dependencies and scripts
+├── analytics.md            # Event tracking documentation
+├── theme.css               # Global CSS variables and design tokens
+└── package.json            # Dependencies and build scripts
 ```
 
 ---
+
+## 📝 Changelog
+
+Check out our [CHANGELOG.md](CHANGELOG.md) to see what's new.
+
+---
+
+## 🤝 Contributing
+
+Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything about how to contribute. Any contributions you make are **greatly appreciated**.
+
+---
+
+## 🌟 Star History
+
+<div align="center">
+  <a href="https://www.star-history.com/?repos=Igorcbraz%2FGitAscii&type=timeline&logscale=&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&theme=dark&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&logscale&legend=top-left&sealed_token=HokzMx2nTNzWEG2hM-S3cVSTZj0ZZXsNHH_e-EY12V9hI62bmEjXLAbOX3ppMnd17OT6NJGwlNAsGeQb09XY8XnozbyUZGA8jRKr9XhntJaeyAw503Uc6nxBxaK07mc6AFY5e0LIa0JP3_I2eIjK94o6be6hiKh9JvxmIuj7iYx4LevMbGGtx0hu5mbw" />
+  </picture>
+  </a>
+</div>
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
   <sub>Built with design obsession by <a href="https://github.com/Igorcbraz">Igorcbraz</a>.</sub>
