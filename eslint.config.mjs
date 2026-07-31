@@ -8,14 +8,18 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+import { fixupConfigRules } from '@eslint/compat'
+
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 })
 
 export default [
-  ...compat.config({
-    extends: ['next/core-web-vitals'],
-  }),
+  ...fixupConfigRules(
+    compat.config({
+      extends: ['next/core-web-vitals'],
+    })
+  ),
   prettierConfig,
   {
     plugins: {

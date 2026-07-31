@@ -32,7 +32,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       headers.Authorization = `token ${token}`
     }
 
-    const userRes = await fetch(`${GITHUB_API_BASE}/users/${username}`, {
+    const userRes = await fetch(`${GITHUB_API_BASE}/users/${encodeURIComponent(username)}`, {
       headers,
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(8000),
@@ -48,7 +48,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     const user: GitHubUser = await userRes.json()
 
     const reposRes = await fetch(
-      `${GITHUB_API_BASE}/users/${username}/repos?sort=updated&per_page=30`,
+      `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=30`,
       {
         headers,
         next: { revalidate: 3600 },
@@ -87,7 +87,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
     return result
   } catch (error) {
-    console.warn(`Falling back to mock data for user '${username}':`, error)
+    console.warn("Falling back to mock data for user '%s':", username, error)
     return getMockGitHubData(username)
   }
 }

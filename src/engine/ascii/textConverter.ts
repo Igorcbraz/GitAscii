@@ -16,6 +16,7 @@ export function convertTextToAscii(
   charsetKey = 'default',
   customCharset = ''
 ): string[] {
+  charSpacing = Math.max(0, Math.min(10, Number(charSpacing) || 0))
   const font = FONTS[fontName] || BLOCK_FONT
   const fontKeys = Object.keys(font)
   const sampleChar = fontKeys[0] || 'A'

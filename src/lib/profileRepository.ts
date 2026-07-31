@@ -17,7 +17,8 @@ export class LocalProfileRepository implements ProfileRepository {
   async get(username: string, slug: string): Promise<SavedConfiguration | null> {
     const usernameLower = username.toLowerCase().replace(/[^a-z0-9_-]/g, '')
     const slugLower = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '')
-    const filePath = path.join(PROFILES_DIR, `${usernameLower}_${slugLower}.json`)
+    const safeFilename = path.basename(`${usernameLower}_${slugLower}.json`)
+    const filePath = path.join(PROFILES_DIR, safeFilename)
     try {
       if (fs.existsSync(filePath)) {
         const content = await fs.promises.readFile(filePath, 'utf-8')
@@ -25,7 +26,9 @@ export class LocalProfileRepository implements ProfileRepository {
       }
     } catch (error) {
       console.warn(
-        `LocalProfileRepository: Failed to load profile config for ${username}_${slug}:`,
+        'LocalProfileRepository: Failed to load profile config for %s_%s:',
+        username,
+        slug,
         error
       )
     }
@@ -39,11 +42,14 @@ export class LocalProfileRepository implements ProfileRepository {
       if (!fs.existsSync(PROFILES_DIR)) {
         fs.mkdirSync(PROFILES_DIR, { recursive: true })
       }
-      const filePath = path.join(PROFILES_DIR, `${username}_${slug}.json`)
+      const safeFilename = path.basename(`${username}_${slug}.json`)
+      const filePath = path.join(PROFILES_DIR, safeFilename)
       await fs.promises.writeFile(filePath, JSON.stringify(config, null, 2), 'utf-8')
     } catch (error) {
       console.error(
-        `LocalProfileRepository: Failed to save profile config for ${username}_${slug}:`,
+        'LocalProfileRepository: Failed to save profile config for %s_%s:',
+        username,
+        slug,
         error
       )
       throw error
@@ -53,14 +59,17 @@ export class LocalProfileRepository implements ProfileRepository {
   async delete(username: string, slug: string): Promise<void> {
     const usernameLower = username.toLowerCase().replace(/[^a-z0-9_-]/g, '')
     const slugLower = slug.toLowerCase().replace(/[^a-z0-9_-]/g, '')
-    const filePath = path.join(PROFILES_DIR, `${usernameLower}_${slugLower}.json`)
+    const safeFilename = path.basename(`${usernameLower}_${slugLower}.json`)
+    const filePath = path.join(PROFILES_DIR, safeFilename)
     try {
       if (fs.existsSync(filePath)) {
         await fs.promises.unlink(filePath)
       }
     } catch (error) {
       console.error(
-        `LocalProfileRepository: Failed to delete profile config for ${username}_${slug}:`,
+        'LocalProfileRepository: Failed to delete profile config for %s_%s:',
+        username,
+        slug,
         error
       )
       throw error
@@ -108,7 +117,9 @@ export class BlobProfileRepository implements ProfileRepository {
       }
     } catch (error) {
       console.warn(
-        `BlobProfileRepository: Failed to load profile config for ${username}_${slug}:`,
+        'BlobProfileRepository: Failed to load profile config for %s_%s:',
+        username,
+        slug,
         error
       )
     }
@@ -141,13 +152,17 @@ export class BlobProfileRepository implements ProfileRepository {
         }
       } catch (cleanupError) {
         console.warn(
-          `BlobProfileRepository: Failed to cleanup legacy uncompressed file for ${username}_${slug}:`,
+          'BlobProfileRepository: Failed to cleanup legacy uncompressed file for %s_%s:',
+          username,
+          slug,
           cleanupError
         )
       }
     } catch (error) {
       console.error(
-        `BlobProfileRepository: Failed to save profile config for ${username}_${slug}:`,
+        'BlobProfileRepository: Failed to save profile config for %s_%s:',
+        username,
+        slug,
         error
       )
       throw error
@@ -177,7 +192,9 @@ export class BlobProfileRepository implements ProfileRepository {
       }
     } catch (error) {
       console.error(
-        `BlobProfileRepository: Failed to delete profile config for ${username}_${slug}:`,
+        'BlobProfileRepository: Failed to delete profile config for %s_%s:',
+        username,
+        slug,
         error
       )
       throw error

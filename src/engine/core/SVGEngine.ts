@@ -106,7 +106,9 @@ function inlineSvg(
     extractedStyles += match[1] + '\n'
   }
 
-  svg = svg.replace(styleRegex, '')
+  while (svg.match(styleRegex)) {
+    svg = svg.replace(styleRegex, '')
+  }
 
   const svgTagRegex = /<svg([^>]*)>/i
   const match = svg.match(svgTagRegex)
@@ -213,21 +215,24 @@ async function fetchAndProcessExternalImage(
 }
 
 export async function embedExternalImages(svgContent: string): Promise<string> {
-  const regex =
-    /<!-- EXTERNAL_WIDGET_START:\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([\s\S]*?)\s*-->([\s\S]*?)<!-- EXTERNAL_WIDGET_END -->/g
+  const regex = /<!-- EXTERNAL_WIDGET_START:([\s\S]*?)-->([\s\S]*?)<!-- EXTERNAL_WIDGET_END -->/g
 
   let finalSvg = svgContent
   const matches = [...svgContent.matchAll(regex)]
 
   for (const m of matches) {
     const fullMatch = m[0]
-    const url = m[1].trim().replace(/&amp;/g, '&')
-    const x = m[2].trim()
-    const y = m[3].trim()
-    const width = m[4].trim()
-    const height = m[5].trim()
-    const mode = m[6].trim()
-    const fallbackUrl = m[7].trim().replace(/&amp;/g, '&')
+    const startData = m[1].trim()
+    const parts = startData.split('|').map((s) => s.trim())
+    if (parts.length !== 7) continue
+    const [urlPart, xPart, yPart, widthPart, heightPart, modePart, fallbackUrlPart] = parts
+    const url = urlPart.replace(/&amp;/g, '&')
+    const x = xPart
+    const y = yPart
+    const width = widthPart
+    const height = heightPart
+    const mode = modePart
+    const fallbackUrl = fallbackUrlPart.replace(/&amp;/g, '&')
 
     const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
 
@@ -261,15 +266,14 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     }
   }
 
-  const imageRegex = /<image\s+([^>]*?)href="((?:https?:\/\/|www\.)[^"]+?)"([^>]*?)(\/?)>/g
+  const imageRegex = /<image\s+[^>]*>/gi
   const imageMatches = [...finalSvg.matchAll(imageRegex)]
 
   for (const m of imageMatches) {
     const fullMatch = m[0]
-    const beforeAttr = m[1]
-    const url = m[2].replace(/&amp;/g, '&')
-    const afterAttr = m[3]
-    const selfClosing = m[4]
+    const hrefMatch = fullMatch.match(/href="((?:https?:\/\/|www\.)[^"]+?)"/)
+    if (!hrefMatch) continue
+    const url = hrefMatch[1].replace(/&amp;/g, '&')
 
     try {
       const parsedUrl = new URL(url)
@@ -300,7 +304,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
       contentType = contentType.split(';')[0].trim()
 
       const dataUri = `data:${contentType};base64,${base64}`
-      const replacement = `<image ${beforeAttr}href="${dataUri}"${afterAttr}${selfClosing}>`
+      const replacement = fullMatch.replace(hrefMatch[0], `href="${dataUri}"`)
       finalSvg = finalSvg.replace(fullMatch, replacement)
     } catch (err) {
       console.error('Failed to embed inline image:', url, err)
