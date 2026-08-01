@@ -1,7 +1,18 @@
-name: Publish Article
+name: Publish Blog Articles
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'blog/**/*.md'
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devpublisher-${{ github.repository }}
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -11,10 +22,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Publish README via DevPublisher
+      - name: Restore DevPublisher state
+        uses: actions/cache/restore@v4
+        with:
+          path: .devpublisher
+          key: devpublisher-${{ github.repository }}-${{ github.workflow }}-${{ github.run_id }}
+          restore-keys: |
+            devpublisher-${{ github.repository }}-${{ github.workflow }}-
+
+      - name: Publish blog articles
         uses: Igorcbraz/DevPublisher@main
         with:
-          file: 'README.md'
-          platforms: 'devto'
+          folder: blog
+          platforms: devto
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_TOKEN }}
+
+      - name: Save DevPublisher state
+        if: ${{ always() && hashFiles('.devpublisher/state.json') != '' }}
+        uses: actions/cache/save@v4
+        with:
+          path: .devpublisher
+          key: devpublisher-${{ github.repository }}-${{ github.workflow }}-${{ github.run_id }}
