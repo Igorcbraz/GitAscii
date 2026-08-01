@@ -1,0 +1,20 @@
+name: Publish Article
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Publish README via DevPublisher
+        uses: Igorcbraz/DevPublisher@main
+        with:
+          file: 'README.md'
+          platforms: 'devto'
+        env:
+          DEVTO_API_KEY: ${{ secrets.DEVTO_TOKEN }}
