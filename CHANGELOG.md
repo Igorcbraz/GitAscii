@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Igorcbraz/GitAscii/compare/v1.1.0...v1.2.0) (2026-08-01)
+
+
+### Features
+
+* add DevPublisher GitHub Actions workflow ([f6df35d](https://github.com/Igorcbraz/GitAscii/commit/f6df35dd8684b0529b3126c073b62542aebdea09))
+
 ## [1.1.0](https://github.com/Igorcbraz/GitAscii/compare/v1.0.1...v1.1.0) (2026-07-31)
 
 
