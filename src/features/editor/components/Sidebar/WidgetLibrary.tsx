@@ -554,7 +554,7 @@ export function WidgetLibrary() {
   ]
 
   return (
-    <aside className="w-75 h-full bg-onyx border-r border-graphite flex flex-col shrink-0">
+    <aside className="w-full lg:w-75 h-full bg-onyx border-r-0 lg:border-r border-graphite flex flex-col shrink-0">
       <div className="flex border-b border-graphite bg-void-black">
         <button
           onClick={() => setSidebarTab('widgets')}

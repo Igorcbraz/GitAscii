@@ -321,7 +321,7 @@ export function EditorToolbar() {
                 className="inline-flex items-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-3.5 py-2 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 hover:border-signal-lime hover:shadow-[0_0_8px_rgba(197,255,74,0.2)] hover:bg-onyx/80"
               >
                 <User className="size-3.5" />
-                <span>@{session.username}</span>
+                <span className="hidden sm:inline">@{session.username}</span>
               </Link>
               <button
                 onClick={handleLogout}
@@ -348,7 +348,7 @@ export function EditorToolbar() {
         </div>
       </div>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-onyx border border-graphite rounded-sm p-1">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 bg-onyx border border-graphite rounded-sm p-1">
         <button
           onClick={undo}
           data-testid="undo-btn"
@@ -415,7 +415,7 @@ export function EditorToolbar() {
             ) : (
               <Save size={14} />
             )}
-            <span>
+            <span className="hidden sm:inline">
               {saveStatus === 'saving'
                 ? t('common.saving', 'Saving...')
                 : saveStatus === 'saved'
@@ -434,7 +434,7 @@ export function EditorToolbar() {
             className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
-            <span>
+            <span className="hidden sm:inline">
               {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
             </span>
           </button>
@@ -445,7 +445,7 @@ export function EditorToolbar() {
             className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
           >
             <Download size={14} />
-            <span>{t('common.export_layout', 'Export Layout')}</span>
+            <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
           </button>
         )}
       </div>

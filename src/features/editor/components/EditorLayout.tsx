@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Grid, Monitor, Sliders } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 
@@ -26,7 +26,8 @@ export function EditorLayout({
   profileSlug = 'default',
   autoGenerate = false,
 }: EditorLayoutProps) {
-  const { initEditor, config, setSession, session } = useEditorStore()
+  const { initEditor, config, setSession, session, activeMobilePanel, setActiveMobilePanel } =
+    useEditorStore()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -90,6 +91,9 @@ export function EditorLayout({
         if (isMounted) {
           initEditor(initialConfig, data)
           setLoading(false)
+          if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            useEditorStore.getState().setZoom(0.4)
+          }
         }
       } catch (err: unknown) {
         if (isMounted) {
@@ -173,10 +177,53 @@ export function EditorLayout({
           </div>
         </div>
       )}
-      <div className="flex-1 flex overflow-hidden relative">
-        <WidgetLibrary />
-        <SVGCanvas />
-        <PropertiesPanel />
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+          <div
+            className={`${activeMobilePanel === 'widgets' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
+          >
+            <WidgetLibrary />
+          </div>
+          <div
+            className={`${activeMobilePanel === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-1 h-full relative overflow-hidden`}
+          >
+            <SVGCanvas />
+          </div>
+          <div
+            className={`${activeMobilePanel === 'properties' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
+          >
+            <PropertiesPanel />
+          </div>
+        </div>
+        <div className="lg:hidden flex border-t border-graphite bg-void-black shrink-0 pb-safe z-50">
+          <button
+            onClick={() => setActiveMobilePanel('widgets')}
+            className={`flex-1 flex flex-col items-center justify-center py-2 text-[10px] font-medium uppercase tracking-wider transition-colors ${
+              activeMobilePanel === 'widgets' ? 'text-signal-lime' : 'text-ash'
+            }`}
+          >
+            <Grid size={20} className="mb-1" />
+            {t('editor.mobile.widgets', 'Widgets')}
+          </button>
+          <button
+            onClick={() => setActiveMobilePanel('canvas')}
+            className={`flex-1 flex flex-col items-center justify-center py-2 text-[10px] font-medium uppercase tracking-wider transition-colors ${
+              activeMobilePanel === 'canvas' ? 'text-signal-lime' : 'text-ash'
+            }`}
+          >
+            <Monitor size={20} className="mb-1" />
+            {t('editor.mobile.canvas', 'Canvas')}
+          </button>
+          <button
+            onClick={() => setActiveMobilePanel('properties')}
+            className={`flex-1 flex flex-col items-center justify-center py-2 text-[10px] font-medium uppercase tracking-wider transition-colors ${
+              activeMobilePanel === 'properties' ? 'text-signal-lime' : 'text-ash'
+            }`}
+          >
+            <Sliders size={20} className="mb-1" />
+            {t('editor.mobile.props', 'Props')}
+          </button>
+        </div>
       </div>
     </div>
   )

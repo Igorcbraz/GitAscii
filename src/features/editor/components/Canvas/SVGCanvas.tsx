@@ -39,6 +39,7 @@ export function SVGCanvas() {
   } | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const lastTapRef = useRef<{ id: string; time: number }>({ id: '', time: 0 })
 
   const [marquee, setMarquee] = useState<{
     startX: number
@@ -134,10 +135,14 @@ export function SVGCanvas() {
   }, [isLayersOpen])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
       if (!activeDrag) return
-      const deltaX = Math.round((e.clientX - activeDrag.startX) / zoom)
-      const deltaY = Math.round((e.clientY - activeDrag.startY) / zoom)
+
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
+
+      const deltaX = Math.round((clientX - activeDrag.startX) / zoom)
+      const deltaY = Math.round((clientY - activeDrag.startY) / zoom)
 
       const targetWidget = config?.widgets.find((w) => w.instanceId === activeDrag.instanceId)
       const isAspectLocked = targetWidget
@@ -335,17 +340,20 @@ export function SVGCanvas() {
       }
     }
 
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      dragPosRef.current = { x: e.clientX, y: e.clientY }
+    const handleGlobalMouseMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
+
+      dragPosRef.current = { x: clientX, y: clientY }
       if (activeDrag || marquee) startAutoScroll()
 
       if (marquee) {
-        setMarquee((prev) => (prev ? { ...prev, currentX: e.clientX, currentY: e.clientY } : null))
+        setMarquee((prev) => (prev ? { ...prev, currentX: clientX, currentY: clientY } : null))
       }
       if (activeDrag) handleMouseMove(e)
     }
 
-    const handleGlobalMouseUp = (e: MouseEvent) => {
+    const handleGlobalMouseUp = (e: MouseEvent | TouchEvent) => {
       stopAutoScroll()
 
       if (marquee && containerRef.current && config) {
@@ -393,10 +401,14 @@ export function SVGCanvas() {
 
     window.addEventListener('mousemove', handleGlobalMouseMove)
     window.addEventListener('mouseup', handleGlobalMouseUp)
+    window.addEventListener('touchmove', handleGlobalMouseMove, { passive: false })
+    window.addEventListener('touchend', handleGlobalMouseUp)
 
     return () => {
       window.removeEventListener('mousemove', handleGlobalMouseMove)
       window.removeEventListener('mouseup', handleGlobalMouseUp)
+      window.removeEventListener('touchmove', handleGlobalMouseMove)
+      window.removeEventListener('touchend', handleGlobalMouseUp)
       stopAutoScroll()
     }
   }, [
@@ -431,7 +443,7 @@ export function SVGCanvas() {
 
   return (
     <main
-      className="flex-1 h-full bg-carbon overflow-auto p-8 flex flex-col items-center justify-start relative select-none"
+      className="flex-1 h-full bg-carbon overflow-auto p-8 flex flex-col items-center justify-start relative select-none touch-none"
       onMouseDown={(e) => {
         const target = e.target as HTMLElement
         if (
@@ -449,6 +461,24 @@ export function SVGCanvas() {
           if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
             selectWidget(null)
           }
+        }
+      }}
+      onTouchStart={(e) => {
+        const target = e.target as HTMLElement
+        if (
+          target === e.currentTarget ||
+          target === containerRef.current ||
+          target.classList.contains('pointer-events-none') ||
+          target.classList.contains('pointer-events-auto')
+        ) {
+          const touch = e.touches[0]
+          setMarquee({
+            startX: touch.clientX,
+            startY: touch.clientY,
+            currentX: touch.clientX,
+            currentY: touch.clientY,
+          })
+          selectWidget(null)
         }
       }}
     >
@@ -532,6 +562,10 @@ export function SVGCanvas() {
                   e.stopPropagation()
                   selectWidget(widget.instanceId, e.ctrlKey || e.metaKey, e.shiftKey)
                 }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation()
+                  useEditorStore.getState().setActiveMobilePanel('properties')
+                }}
                 onMouseDown={(e) => {
                   e.stopPropagation()
                   if (!selectedInstanceIds.includes(widget.instanceId)) {
@@ -546,6 +580,33 @@ export function SVGCanvas() {
                       initialPos: { ...widget.position },
                       initialSize: { ...widget.size },
                     })
+                  }
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation()
+                  if (!selectedInstanceIds.includes(widget.instanceId)) {
+                    selectWidget(widget.instanceId, false, false)
+                  }
+                  if (!widget.locked) {
+                    const touch = e.touches[0]
+                    setActiveDrag({
+                      instanceId: widget.instanceId,
+                      type: 'move',
+                      startX: touch.clientX,
+                      startY: touch.clientY,
+                      initialPos: { ...widget.position },
+                      initialSize: { ...widget.size },
+                    })
+                  }
+                }}
+                onTouchEnd={(e) => {
+                  const now = Date.now()
+                  const lastTap = lastTapRef.current
+                  if (lastTap.id === widget.instanceId && now - lastTap.time < 300) {
+                    useEditorStore.getState().setActiveMobilePanel('properties')
+                    lastTapRef.current = { id: '', time: 0 }
+                  } else {
+                    lastTapRef.current = { id: widget.instanceId, time: now }
                   }
                 }}
                 style={{
@@ -588,6 +649,18 @@ export function SVGCanvas() {
                           initialSize: { ...widget.size },
                         })
                       }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation()
+                        const touch = e.touches[0]
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-r',
+                          startX: touch.clientX,
+                          startY: touch.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        })
+                      }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
                       title="Arraste para ajustar largura (Width)"
                     >
@@ -602,6 +675,18 @@ export function SVGCanvas() {
                           type: 'resize-b',
                           startX: e.clientX,
                           startY: e.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        })
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation()
+                        const touch = e.touches[0]
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-b',
+                          startX: touch.clientX,
+                          startY: touch.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
                         })
@@ -624,6 +709,18 @@ export function SVGCanvas() {
                           initialSize: { ...widget.size },
                         })
                       }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation()
+                        const touch = e.touches[0]
+                        setActiveDrag({
+                          instanceId: widget.instanceId,
+                          type: 'resize-br',
+                          startX: touch.clientX,
+                          startY: touch.clientY,
+                          initialPos: { ...widget.position },
+                          initialSize: { ...widget.size },
+                        })
+                      }}
                       className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
                       title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
                     />
@@ -636,7 +733,7 @@ export function SVGCanvas() {
       </div>
 
       <div
-        className="fixed bottom-6 left-81 z-40 flex flex-col items-start select-none"
+        className="fixed bottom-20 right-4 lg:bottom-6 lg:left-81 lg:right-auto z-40 flex flex-col items-end lg:items-start select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {isLayersOpen && (

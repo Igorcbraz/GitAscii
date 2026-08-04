@@ -36,7 +36,7 @@ export function PropertiesPanel() {
 
   if (!config || !selectedInstanceId) {
     return (
-      <aside className="w-[320px] h-full bg-onyx border-l border-graphite p-6 flex flex-col items-center justify-center text-center shrink-0">
+      <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite p-6 flex flex-col items-center justify-center text-center shrink-0">
         <Sliders className="w-8 h-8 text-ash mb-3 stroke-[1.5px]" />
         <h4 className="font-inter-tight font-medium text-base text-chalk mb-1">
           {t('editor.properties.none_selected_title', 'Nenhum Widget Selecionado')}
@@ -59,7 +59,7 @@ export function PropertiesPanel() {
   const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
 
   return (
-    <aside className="w-[320px] h-full bg-onyx border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
+    <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
       <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
         <div>
           <span className="label-stamp">{t('editor.properties.title', '[ PROPRIEDADES ]')}</span>

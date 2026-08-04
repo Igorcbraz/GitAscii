@@ -33,7 +33,9 @@ export interface EditorStore {
   activeTab: 'widgets' | 'layers' | 'templates'
   session: { username: string; githubId: number } | null
   clipboard: WidgetInstance[]
+  activeMobilePanel: 'widgets' | 'canvas' | 'properties'
   setSession: (session: { username: string; githubId: number } | null) => void
+  setActiveMobilePanel: (panel: 'widgets' | 'canvas' | 'properties') => void
 
   initEditor: (config: SavedConfiguration, data: NormalizedGitHubData) => void
   selectWidget: (instanceId: string | null, multi?: boolean, isShift?: boolean) => void
@@ -122,8 +124,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     activeTab: 'widgets',
     session: null,
     clipboard: [],
+    activeMobilePanel: 'canvas',
 
     setSession: (session) => set({ session }),
+    setActiveMobilePanel: (panel) => set({ activeMobilePanel: panel }),
 
     canUndo: false,
     canRedo: false,
