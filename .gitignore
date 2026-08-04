@@ -8,9 +8,6 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
 # next.js
 /.next/
 /out/
@@ -21,12 +18,6 @@
 # misc
 .DS_Store
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 
 # env files
 .env*.local
@@ -42,3 +33,24 @@ next-env.d.ts
 
 # agy
 .agents/skills
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+/playwright/.local-browsers
+
+# Storybook
+storybook-static/
+
+# Coverage
+coverage/
+
+# Debug / Reports
+*.log
+*.zip
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
