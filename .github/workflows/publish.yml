@@ -34,9 +34,19 @@ jobs:
         uses: Igorcbraz/DevPublisher@main
         with:
           folder: blog
-          platforms: devto
+          platforms: devto,hashnode,medium,tabnews
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_TOKEN }}
+          HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
+          HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
+          TABNEWS_SESSION_ID: ${{ secrets.TABNEWS_SESSION_ID }}
+
+      - name: Upload Medium exports
+        uses: actions/upload-artifact@v4
+        with:
+          name: medium-export
+          path: .devpublisher/medium-export/
+          if-no-files-found: ignore
 
       - name: Save DevPublisher state
         if: ${{ always() && hashFiles('.devpublisher/state.json') != '' }}
