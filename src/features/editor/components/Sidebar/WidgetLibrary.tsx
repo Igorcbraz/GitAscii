@@ -427,6 +427,7 @@ export function WidgetLibrary() {
           role="button"
           tabIndex={0}
           onClick={() => addWidget(item.id)}
+          data-testid="add-widget-gitfest-lineup"
           onMouseEnter={(e) => {
             const rect = e.currentTarget.getBoundingClientRect()
             setHoveredWidget({ item, rect })
@@ -512,6 +513,7 @@ export function WidgetLibrary() {
       <div
         key={item.id}
         onClick={() => addWidget(item.id)}
+        data-testid={`add-widget-${item.id}`}
         onMouseEnter={(e) => {
           const rect = e.currentTarget.getBoundingClientRect()
           setHoveredWidget({ item, rect })
@@ -556,6 +558,7 @@ export function WidgetLibrary() {
       <div className="flex border-b border-graphite bg-void-black">
         <button
           onClick={() => setSidebarTab('widgets')}
+          data-testid="widgets-tab-btn"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'widgets'
               ? 'border-signal-lime text-signal-lime bg-onyx'
@@ -566,6 +569,7 @@ export function WidgetLibrary() {
         </button>
         <button
           onClick={() => setSidebarTab('templates')}
+          data-testid="templates-tab-btn"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'templates'
               ? 'border-signal-lime text-signal-lime bg-onyx'
@@ -656,7 +660,7 @@ export function WidgetLibrary() {
                           {t('editor.sidebar.announce', 'Anuncie Aqui')}
                         </span>
                       </div>
-                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
                         {t(
                           'editor.sidebar.featured_slot_desc',
                           'Destaque seu widget para a comunidade'
@@ -680,7 +684,7 @@ export function WidgetLibrary() {
                           {t('editor.sidebar.announce', 'Anuncie Aqui')}
                         </span>
                       </div>
-                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
                         {t(
                           'editor.sidebar.featured_slot_desc',
                           'Destaque seu widget para a comunidade'
@@ -754,6 +758,7 @@ export function WidgetLibrary() {
             <div className="space-y-2 mb-4">
               <div
                 onClick={handleImportClick}
+                data-testid="import-layout-btn"
                 className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
@@ -773,6 +778,7 @@ export function WidgetLibrary() {
 
               <div
                 onClick={handleExport}
+                data-testid="export-layout-btn"
                 className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
@@ -807,6 +813,7 @@ export function WidgetLibrary() {
               <div
                 key={tmpl.id}
                 onClick={() => applyTemplate(tmpl.id)}
+                data-testid={`template-${tmpl.id}`}
                 className={`p-4 border rounded-none cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 ${
                   config.templateId === tmpl.id
                     ? 'border-signal-lime bg-iron shadow-sm'

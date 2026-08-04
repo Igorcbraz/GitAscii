@@ -71,6 +71,7 @@ export function PropertiesPanel() {
         <div className="flex items-center gap-1">
           <button
             onClick={() => toggleWidgetLock(selectedWidget.instanceId)}
+            data-testid="widget-lock-btn"
             title={
               selectedWidget.locked
                 ? t('editor.properties.unlock', 'Desbloquear Widget')
@@ -85,6 +86,7 @@ export function PropertiesPanel() {
 
           <button
             onClick={() => toggleWidgetVisibility(selectedWidget.instanceId)}
+            data-testid="widget-visible-btn"
             title={
               selectedWidget.visible
                 ? t('editor.properties.hide', 'Ocultar Widget')
@@ -97,6 +99,7 @@ export function PropertiesPanel() {
 
           <button
             onClick={() => removeWidget(selectedWidget.instanceId)}
+            data-testid="widget-delete-btn"
             title={t('editor.properties.delete', 'Excluir Widget')}
             className="p-1.5 rounded-xs hover:bg-red-500/20 text-ash hover:text-red-400 transition-colors cursor-pointer"
           >
@@ -179,6 +182,7 @@ export function PropertiesPanel() {
                 onChange={(e) =>
                   updateWidgetConfig(selectedWidget.instanceId, { customBio: e.target.value })
                 }
+                data-testid="widget-bio-input"
                 placeholder={t(
                   'editor.properties.bio_placeholder',
                   'Digite qualquer biografia livremente...'
@@ -201,6 +205,7 @@ export function PropertiesPanel() {
                 onChange={(e) =>
                   updateWidgetConfig(selectedWidget.instanceId, { customLocation: e.target.value })
                 }
+                data-testid="widget-location-input"
                 placeholder={t('editor.properties.location_placeholder', 'Ex: São Paulo, Brasil')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
@@ -220,6 +225,7 @@ export function PropertiesPanel() {
                 onChange={(e) =>
                   updateWidgetConfig(selectedWidget.instanceId, { customBlog: e.target.value })
                 }
+                data-testid="widget-website-input"
                 placeholder={t('editor.properties.website_placeholder', 'Ex: https://meusite.com')}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
               />
@@ -400,6 +406,7 @@ export function PropertiesPanel() {
                     height: isAspectLocked ? val : selectedWidget.size.height,
                   })
                 }}
+                data-testid="widget-width-input"
                 className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
               />
             </div>
@@ -449,6 +456,7 @@ export function PropertiesPanel() {
                     height: val,
                   })
                 }}
+                data-testid="widget-height-input"
                 className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
               />
             </div>
@@ -468,6 +476,7 @@ export function PropertiesPanel() {
                     y: selectedWidget.position.y,
                   })
                 }
+                data-testid="widget-x-input"
                 className="w-full bg-graphite border border-graphite focus:border-signal-lime px-2 py-1 font-jetbrains-mono text-chalk rounded-xs focus:outline-none"
               />
             </div>
@@ -485,6 +494,7 @@ export function PropertiesPanel() {
                     y: parseInt(e.target.value, 10) || 0,
                   })
                 }
+                data-testid="widget-y-input"
                 className="w-full bg-graphite border border-graphite focus:border-signal-lime px-2 py-1 font-jetbrains-mono text-chalk rounded-xs focus:outline-none"
               />
             </div>

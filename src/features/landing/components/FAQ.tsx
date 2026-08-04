@@ -95,7 +95,7 @@ export function FAQ() {
                   className="w-full py-6 px-6 flex items-center justify-between text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-6">
-                    <span className="font-jetbrains-mono text-label text-ash/70 group-hover:text-ash transition-colors">
+                    <span className="font-jetbrains-mono text-label text-ash group-hover:text-chalk transition-colors">
                       {qNumber}
                     </span>
                     <span

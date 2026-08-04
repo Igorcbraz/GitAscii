@@ -454,6 +454,9 @@ export function SVGCanvas() {
     >
       <div
         ref={containerRef}
+        data-zoom={zoom}
+        data-canvas-width={800}
+        data-canvas-height={canvasHeight}
         className="relative transition-transform origin-top duration-150 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-graphite rounded-none bg-void-black overflow-hidden shrink-0 mb-16"
         style={{
           transform: `scale(${zoom})`,
@@ -463,6 +466,7 @@ export function SVGCanvas() {
       >
         <div
           dangerouslySetInnerHTML={{ __html: renderedSvgString }}
+          data-testid="canvas-svg-container"
           className="w-full h-full pointer-events-none"
         />
 
@@ -518,6 +522,12 @@ export function SVGCanvas() {
             return (
               <div
                 key={widget.instanceId}
+                data-testid={`canvas-widget-${widget.widgetId}`}
+                data-selected={isSelected}
+                data-x={widget.position.x}
+                data-y={widget.position.y}
+                data-width={widget.size.width}
+                data-height={widget.size.height}
                 onClick={(e) => {
                   e.stopPropagation()
                   selectWidget(widget.instanceId, e.ctrlKey || e.metaKey, e.shiftKey)

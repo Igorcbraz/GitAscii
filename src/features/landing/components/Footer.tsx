@@ -185,7 +185,7 @@ export function Footer() {
               <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>©{' '}
               {new Date().getFullYear()} {t('landing.footer.copyright', 'GitAscii. MIT License.')}
             </p>
-            <p className="font-jetbrains-mono text-caption text-ash/50 uppercase tracking-[0.18em]">
+            <p className="font-jetbrains-mono text-caption text-fog uppercase tracking-[0.18em]">
               {t('landing.footer.version', 'v1.0.0 · BUILD 2026.07')}
             </p>
           </div>

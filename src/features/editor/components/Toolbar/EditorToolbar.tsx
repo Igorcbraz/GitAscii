@@ -351,6 +351,7 @@ export function EditorToolbar() {
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-onyx border border-graphite rounded-sm p-1">
         <button
           onClick={undo}
+          data-testid="undo-btn"
           disabled={!canUndo}
           title={t('editor.toolbar.undo', 'Undo')}
           className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
@@ -360,6 +361,7 @@ export function EditorToolbar() {
 
         <button
           onClick={redo}
+          data-testid="redo-btn"
           disabled={!canRedo}
           title={t('editor.toolbar.redo', 'Redo')}
           className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
@@ -371,6 +373,7 @@ export function EditorToolbar() {
 
         <button
           onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+          data-testid="zoom-out-btn"
           title={t('editor.toolbar.zoom_out', 'Zoom Out')}
           className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
         >
@@ -383,6 +386,7 @@ export function EditorToolbar() {
 
         <button
           onClick={() => setZoom(Math.min(1.5, zoom + 0.1))}
+          data-testid="zoom-in-btn"
           title={t('editor.toolbar.zoom_in', 'Zoom In')}
           className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
         >
@@ -394,6 +398,7 @@ export function EditorToolbar() {
         {isOwner && (
           <button
             onClick={handleSave}
+            data-testid="save-profile-btn"
             disabled={saveStatus === 'saving'}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
               saveStatus === 'saved'
@@ -425,6 +430,7 @@ export function EditorToolbar() {
         {isOwner ? (
           <button
             onClick={handleCopyCode}
+            data-testid="copy-code-btn"
             className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -435,6 +441,7 @@ export function EditorToolbar() {
         ) : (
           <button
             onClick={handleExport}
+            data-testid="export-layout-btn"
             className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
           >
             <Download size={14} />
