@@ -1,6 +1,6 @@
 'use client'
 
-import { Eye, EyeOff, Lock, Maximize2, Palette, Sliders, Trash2, Type, Unlock } from 'lucide-react'
+import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
@@ -36,18 +36,176 @@ export function PropertiesPanel() {
   } = useEditorStore()
 
   if (!config || !selectedInstanceId) {
+    if (!config) return null
     return (
-      <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite p-6 flex flex-col items-center justify-center text-center shrink-0">
-        <Sliders className="w-8 h-8 text-ash mb-3 stroke-[1.5px]" />
-        <h4 className="font-inter-tight font-medium text-base text-chalk mb-1">
-          {t('editor.properties.none_selected_title', 'Nenhum Widget Selecionado')}
-        </h4>
-        <p className="font-inter-tight text-note text-ash max-w-50">
-          {t(
-            'editor.properties.none_selected_desc',
-            'Clique em qualquer widget no canvas para inspecionar e editar suas propriedades.'
-          )}
-        </p>
+      <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
+        <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
+          <div>
+            <span className="label-stamp">{t('editor.properties.title', '[ PROPRIEDADES ]')}</span>
+            <h3 className="font-inter-tight font-medium text-base text-chalk capitalize mt-0.5">
+              {t('editor.properties.global_settings', 'Configurações Globais')}
+            </h3>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-6 flex-1">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
+              <Palette size={14} />
+              <span>{t('editor.properties.canvas_style', 'Estilo do Canvas')}</span>
+            </div>
+
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                {t('editor.properties.transparent_bg', 'Fundo Transparente')}
+              </label>
+              <input
+                type="checkbox"
+                checked={Boolean(config.globalStyles.transparentBackground)}
+                onChange={(e) =>
+                  useEditorStore.getState().updateGlobalStyles({
+                    transparentBackground: e.target.checked,
+                  })
+                }
+                className="w-4 h-4 accent-signal-lime cursor-pointer"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {!config.globalStyles.transparentBackground && (
+                <ColorPicker
+                  label="Background"
+                  align="left"
+                  value={config.globalStyles.backgroundColor || '#060606'}
+                  onChange={(color) =>
+                    useEditorStore.getState().updateGlobalStyles({ backgroundColor: color })
+                  }
+                />
+              )}
+              <ColorPicker
+                label={t('editor.properties.color_destaque', 'Cor de Destaque')}
+                align={config.globalStyles.transparentBackground ? 'left' : 'right'}
+                value={config.globalStyles.accentColor || '#c5ff4a'}
+                onChange={(color) =>
+                  useEditorStore.getState().updateGlobalStyles({ accentColor: color })
+                }
+              />
+              <ColorPicker
+                label={t('editor.properties.color_texto', 'Cor do Texto')}
+                align="left"
+                value={config.globalStyles.textColor || '#ffffff'}
+                onChange={(color) =>
+                  useEditorStore.getState().updateGlobalStyles({ textColor: color })
+                }
+              />
+              <ColorPicker
+                label={t('editor.properties.color_borda', 'Cor da Borda')}
+                align="right"
+                value={config.globalStyles.borderColor || '#252525'}
+                onChange={(color) =>
+                  useEditorStore.getState().updateGlobalStyles({ borderColor: color })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-3 border-t border-graphite">
+            <div className="flex items-center gap-2 text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
+              <Type size={14} />
+              <span>{t('editor.properties.design_system', 'Design System (Global)')}</span>
+            </div>
+
+            <div>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.global_font', 'Fonte Global')}
+              </label>
+              <select
+                value={config.globalStyles.fontFamily || 'Inter Tight'}
+                onChange={(e) =>
+                  useEditorStore.getState().updateGlobalStyles({ fontFamily: e.target.value })
+                }
+                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+              >
+                <option value="Inter Tight">Inter Tight</option>
+                <option value="JetBrains Mono">JetBrains Mono</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Fira Code">Fira Code</option>
+                <option value="PT Serif">PT Serif</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-eyebrow">
+                <span className="text-ash font-inter-tight">
+                  {t('editor.properties.border_radius', 'Arredondamento das Bordas')}
+                </span>
+                <span className="text-chalk font-jetbrains-mono">
+                  {config.globalStyles.borderRadius || 0}px
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="32"
+                  step="1"
+                  value={config.globalStyles.borderRadius || 0}
+                  onChange={(e) =>
+                    useEditorStore
+                      .getState()
+                      .updateGlobalStyles({ borderRadius: parseInt(e.target.value, 10) })
+                  }
+                  className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-eyebrow">
+                <span className="text-ash font-inter-tight">
+                  {t('editor.properties.padding', 'Espaçamento Interno (Padding)')}
+                </span>
+                <span className="text-chalk font-jetbrains-mono">
+                  {config.globalStyles.padding || 0}px
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="64"
+                  step="4"
+                  value={config.globalStyles.padding || 0}
+                  onChange={(e) =>
+                    useEditorStore
+                      .getState()
+                      .updateGlobalStyles({ padding: parseInt(e.target.value, 10) })
+                  }
+                  className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.theme_mode', 'Forçar Tema Escuro/Claro')}
+              </label>
+              <select
+                value={config.globalStyles.themeMode || 'dark'}
+                onChange={(e) =>
+                  useEditorStore
+                    .getState()
+                    .updateGlobalStyles({ themeMode: e.target.value as 'dark' | 'light' | 'auto' })
+                }
+                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+              >
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+                <option value="auto">Automático (Pelo perfil do usuário)</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </aside>
     )
   }

@@ -560,11 +560,21 @@ export function SVGCanvas() {
         data-zoom={zoom}
         data-canvas-width={800}
         data-canvas-height={canvasHeight}
-        className="relative transition-transform origin-top duration-150 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-graphite rounded-none bg-void-black overflow-hidden shrink-0 mb-16"
+        className={`relative transition-transform origin-top duration-150 shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-graphite rounded-none overflow-hidden shrink-0 mb-16 ${
+          config.globalStyles.transparentBackground ? '' : 'bg-void-black'
+        }`}
         style={{
           transform: `scale(${zoom})`,
           width: 800,
           height: canvasHeight,
+          ...(config.globalStyles.transparentBackground
+            ? {
+                backgroundImage:
+                  'repeating-linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a), repeating-linear-gradient(45deg, #1a1a1a 25%, #0f0f0f 25%, #0f0f0f 75%, #1a1a1a 75%, #1a1a1a)',
+                backgroundPosition: '0 0, 10px 10px',
+                backgroundSize: '20px 20px',
+              }
+            : {}),
         }}
       >
         <style dangerouslySetInnerHTML={{ __html: editorAnimOverrideStyle }} />

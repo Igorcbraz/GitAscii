@@ -44,6 +44,7 @@ export interface EditorStore {
   pasteWidgets: () => void
   cutWidgets: () => void
   updateWidgetConfig: (instanceId: string, patch: Record<string, unknown>) => void
+  updateGlobalStyles: (patch: Partial<SavedConfiguration['globalStyles']>) => void
   updateWidgetPositions: (
     deltas: { instanceId: string; position: { x: number; y: number } }[],
     recordHistory?: boolean
@@ -266,6 +267,19 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const newConfig = {
         ...config,
         widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
+    updateGlobalStyles: (patch) => {
+      const { config } = get()
+      if (!config) return
+
+      const newConfig = {
+        ...config,
+        globalStyles: { ...config.globalStyles, ...patch },
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
       }
 
