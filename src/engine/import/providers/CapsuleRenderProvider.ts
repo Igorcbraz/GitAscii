@@ -6,7 +6,7 @@ export class CapsuleRenderProvider extends BaseProvider {
   id = 'capsule-render-provider'
   name = 'Capsule Render Header/Footer Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

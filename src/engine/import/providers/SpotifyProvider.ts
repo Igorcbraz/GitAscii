@@ -5,7 +5,7 @@ export class SpotifyProvider extends BaseProvider {
   id = 'spotify-provider'
   name = 'Spotify Now Playing Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

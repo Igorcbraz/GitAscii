@@ -6,7 +6,7 @@ export class SkillIconsProvider extends BaseProvider {
   id = 'skill-icons-provider'
   name = 'Skill Icons Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

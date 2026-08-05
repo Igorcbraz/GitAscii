@@ -19,7 +19,7 @@ test.describe('GitAscii Landing Page E2E Tests', () => {
   }) => {
     // Wait for hydration so onSubmit is registered
     await page.waitForTimeout(1000)
-    
+
     const usernameInput = page.locator('#hero-username-input')
     await expect(usernameInput).toBeVisible()
 

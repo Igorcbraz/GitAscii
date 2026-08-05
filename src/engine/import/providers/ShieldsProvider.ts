@@ -5,12 +5,12 @@ export class ShieldsProvider extends BaseProvider {
   id = 'shields-provider'
   name = 'Shields.io Badges Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
     if (src.includes('img.shields.io') || src.includes('shields.io')) {
-      const linkUrl = this.extractLinkHref(node, contextFrame)
+      const linkUrl = this.extractLinkHref(node, _contextFrame)
       const labelMatch = src.match(/badge\/(?:-|%2D)?([^-]+)-/i)
       const label = labelMatch ? labelMatch[1].toLowerCase().replace(/%20/g, ' ') : ''
 
@@ -116,7 +116,7 @@ export class ShieldsProvider extends BaseProvider {
         widgetId: 'awesome-badge',
         width: 140,
         height: 35,
-        extractedCategory: contextFrame.sectionCategory,
+        extractedCategory: _contextFrame.sectionCategory,
         config: {
           badgeUrl: src,
           targetUrl: linkUrl || undefined,

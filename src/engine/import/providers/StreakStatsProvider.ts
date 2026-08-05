@@ -5,7 +5,7 @@ export class StreakStatsProvider extends BaseProvider {
   id = 'streak-stats-provider'
   name = 'GitHub Streak Stats Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

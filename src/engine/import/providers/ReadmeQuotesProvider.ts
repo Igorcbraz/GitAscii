@@ -5,7 +5,7 @@ export class ReadmeQuotesProvider extends BaseProvider {
   id = 'readme-quotes-provider'
   name = 'Readme Quotes Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

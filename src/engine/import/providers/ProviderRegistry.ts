@@ -27,11 +27,11 @@ export class ProviderRegistry {
     return [...this.providers]
   }
 
-  public matchNode(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  public matchNode(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     let bestResult: ProviderMatchResult | null = null
 
     for (const provider of this.providers) {
-      const result = provider.match(node, contextFrame)
+      const result = provider.match(node, _contextFrame)
       if (result) {
         if (!bestResult || result.confidence > bestResult.confidence) {
           bestResult = result

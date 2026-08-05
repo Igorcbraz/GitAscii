@@ -159,7 +159,7 @@ Engenheiro de Software focado em TypeScript e React.
     assert.equal(matchStats?.widgetId, 'github-readme-stats')
     assert.ok((matchStats?.confidence ?? 0) >= 0.9)
 
-    const imgCustomNode = {
+    const _imgCustomNode = {
       id: 'node_custom',
       type: 'image' as const,
       attributes: { src: 'https://example.com/banner.png' },

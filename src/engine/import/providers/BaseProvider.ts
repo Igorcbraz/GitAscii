@@ -5,7 +5,7 @@ export abstract class BaseProvider implements Provider {
   abstract name: string
   description?: string
 
-  abstract match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null
+  abstract match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null
 
   protected extractImageSrc(node: ASTNode): string | null {
     if (node.type === 'image' && node.attributes.src) {
@@ -20,10 +20,10 @@ export abstract class BaseProvider implements Provider {
     return null
   }
 
-  protected extractLinkHref(node: ASTNode, contextFrame: ContextFrame): string | null {
+  protected extractLinkHref(node: ASTNode, _contextFrame: ContextFrame): string | null {
     if (node.type === 'link' && node.attributes.href) {
       return node.attributes.href as string
     }
-    return contextFrame.linkHref || null
+    return _contextFrame.linkHref || null
   }
 }

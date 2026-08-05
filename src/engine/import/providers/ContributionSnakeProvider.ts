@@ -5,7 +5,7 @@ export class ContributionSnakeProvider extends BaseProvider {
   id = 'contribution-snake-provider'
   name = 'Contribution Snake Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

@@ -5,7 +5,7 @@ export class ActivityGraphProvider extends BaseProvider {
   id = 'activity-graph-provider'
   name = 'Activity Graph Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

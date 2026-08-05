@@ -5,7 +5,7 @@ export class ViewsCounterProvider extends BaseProvider {
   id = 'views-counter-provider'
   name = 'Profile Views Counter Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

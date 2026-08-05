@@ -5,7 +5,7 @@ export class GithubStatsProvider extends BaseProvider {
   id = 'github-readme-stats-provider'
   name = 'GitHub Readme Stats Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

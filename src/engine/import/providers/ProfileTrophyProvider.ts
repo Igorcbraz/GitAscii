@@ -5,7 +5,7 @@ export class ProfileTrophyProvider extends BaseProvider {
   id = 'profile-trophy-provider'
   name = 'GitHub Profile Trophy Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

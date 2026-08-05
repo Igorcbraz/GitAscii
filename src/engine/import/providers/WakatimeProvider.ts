@@ -5,7 +5,7 @@ export class WakatimeProvider extends BaseProvider {
   id = 'wakatime-provider'
   name = 'Wakatime Coding Stats Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

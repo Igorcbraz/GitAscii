@@ -5,7 +5,7 @@ export class DeviconsProvider extends BaseProvider {
   id = 'devicons-provider'
   name = 'Devicons & VectorLogo Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

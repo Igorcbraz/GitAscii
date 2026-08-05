@@ -48,7 +48,7 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     await expect(yInput).toBeVisible()
 
     // Change position using input fields
-    const initialXAttr = await headerOnCanvas.getAttribute('data-x')
+    const _initialXAttr = await headerOnCanvas.getAttribute('data-x')
 
     await xInput.fill('20')
     await xInput.press('Enter')
@@ -89,7 +89,7 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     // Verify values remain populated
     await expect(bioInput).toHaveValue('Senior DevOps & Rust Builder')
     await expect(locationInput).toHaveValue('Tokyo, Japan')
-    
+
     // Verify actual canvas rendering
     await expect(bioOnCanvas).toContainText('Senior DevOps & Rust Builder')
   })
@@ -122,7 +122,7 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
 
     // Verify width modified
     await expect(widthInput).toHaveValue('600')
-    
+
     // Verify actual canvas state changed using DOM attribute
     await expect(headerOnCanvas).toHaveAttribute('data-width', '600')
   })

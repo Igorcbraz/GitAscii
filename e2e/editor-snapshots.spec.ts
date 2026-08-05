@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures/customFixture'
+import { expect, test } from './fixtures/customFixture'
 
 test.describe('GitAscii Visual Regression Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe('GitAscii Visual Regression Tests', () => {
     // Open layers panel
     await page.locator('[data-testid="layers-tab-btn"]').click({ force: true })
     await page.waitForTimeout(500)
-    
+
     await expect(page).toHaveScreenshot('layers-panel.png', {
       maxDiffPixelRatio: 0.1,
     })
@@ -23,11 +23,14 @@ test.describe('GitAscii Visual Regression Tests', () => {
     const firstWidget = page.locator('[data-testid="canvas-widget-header"]')
     await firstWidget.click({ force: true })
     await page.waitForTimeout(500)
-    
+
     // Snapshot only the canvas area
-    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot('canvas-single-selection.png', {
-      maxDiffPixelRatio: 0.1,
-    })
+    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot(
+      'canvas-single-selection.png',
+      {
+        maxDiffPixelRatio: 0.1,
+      }
+    )
   })
 
   test('Canvas States - Empty Canvas', async ({ page }) => {
@@ -35,7 +38,7 @@ test.describe('GitAscii Visual Regression Tests', () => {
     // Click header and delete
     await page.locator('[data-testid="canvas-widget-header"]').click({ force: true })
     await page.keyboard.press('Delete')
-    
+
     // Find all other widgets and delete them if there are any default ones
     const widgets = page.locator('g[data-widget-id]')
     const count = await widgets.count()
@@ -43,18 +46,21 @@ test.describe('GitAscii Visual Regression Tests', () => {
       await widgets.first().click({ force: true })
       await page.keyboard.press('Delete')
     }
-    
+
     await page.waitForTimeout(500)
-    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot('canvas-empty.png', {
-      maxDiffPixelRatio: 0.1,
-    })
+    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot(
+      'canvas-empty.png',
+      {
+        maxDiffPixelRatio: 0.1,
+      }
+    )
   })
 
   test('Dark Theme Snapshot', async ({ page }) => {
     // Toggle dark theme if there is a button, or force class on html/body
     await page.evaluate(() => document.documentElement.classList.add('dark'))
     await page.waitForTimeout(500)
-    
+
     await expect(page).toHaveScreenshot('dark-theme.png', {
       maxDiffPixelRatio: 0.1,
     })
@@ -62,19 +68,22 @@ test.describe('GitAscii Visual Regression Tests', () => {
 
   test('Drag and Resize Scenarios', async ({ page }) => {
     const widget = page.locator('[data-testid="canvas-widget-header"]')
-    
+
     // Simulate drag via evaluate to store since userEvent mouse moves are flaky in E2E sometimes
     // But we'll try native first
     await widget.hover({ force: true })
     await page.mouse.down()
     await page.mouse.move(500, 500)
     await page.mouse.up()
-    
+
     await page.waitForTimeout(500)
-    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot('canvas-drag-moved.png', {
-      maxDiffPixelRatio: 0.1,
-    })
-    
+    await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot(
+      'canvas-drag-moved.png',
+      {
+        maxDiffPixelRatio: 0.1,
+      }
+    )
+
     // Simulate resize
     await widget.click({ force: true })
     const resizeHandle = page.locator('.react-resizable-handle').first()
@@ -83,11 +92,14 @@ test.describe('GitAscii Visual Regression Tests', () => {
       await page.mouse.down()
       await page.mouse.move(800, 800)
       await page.mouse.up()
-      
+
       await page.waitForTimeout(500)
-      await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot('canvas-drag-resized.png', {
-        maxDiffPixelRatio: 0.1,
-      })
+      await expect(page.locator('[data-testid="canvas-svg-container"]')).toHaveScreenshot(
+        'canvas-drag-resized.png',
+        {
+          maxDiffPixelRatio: 0.1,
+        }
+      )
     }
   })
 })

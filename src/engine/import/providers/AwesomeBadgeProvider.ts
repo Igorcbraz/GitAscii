@@ -5,18 +5,18 @@ export class AwesomeBadgeProvider extends BaseProvider {
   id = 'awesome-badge-provider'
   name = 'Awesome Badge Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
     if (src.includes('awesome') || src.includes('badge.svg')) {
-      const linkUrl = this.extractLinkHref(node, contextFrame)
+      const linkUrl = this.extractLinkHref(node, _contextFrame)
       return {
         confidence: 0.9,
         widgetId: 'awesome-badge',
         width: 160,
         height: 40,
-        extractedCategory: contextFrame.sectionCategory,
+        extractedCategory: _contextFrame.sectionCategory,
         config: {
           badgeUrl: src,
           targetUrl: linkUrl || undefined,

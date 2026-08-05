@@ -5,7 +5,7 @@ export class MetricsCardProvider extends BaseProvider {
   id = 'metrics-card-provider'
   name = 'Metrics Card Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

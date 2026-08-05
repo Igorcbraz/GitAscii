@@ -6,7 +6,7 @@ export class TypingSvgProvider extends BaseProvider {
   id = 'typing-svg-provider'
   name = 'Readme Typing SVG Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 

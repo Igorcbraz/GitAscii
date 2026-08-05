@@ -5,7 +5,7 @@ export class HolopinProvider extends BaseProvider {
   id = 'holopin-provider'
   name = 'Holopin Badges Provider'
 
-  match(node: ASTNode, contextFrame: ContextFrame): ProviderMatchResult | null {
+  match(node: ASTNode, _contextFrame: ContextFrame): ProviderMatchResult | null {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
