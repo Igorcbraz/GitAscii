@@ -1058,7 +1058,7 @@ export function renderWidgetSvg(
         'contain'
       )
 
-      contentSvg = contentSvg.replace(/<image [^>]*?onerror="this\.style\.display='none';" \/>/, '')
+      contentSvg = contentSvg.replace(/<image [^>]*onerror="this\.style\.display='none';" \/>/, '')
 
       break
     }
