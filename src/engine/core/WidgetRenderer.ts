@@ -53,6 +53,14 @@ function renderExternalWidgetSvg(
   targetUrl?: string,
   fallbackUrl?: string
 ): string {
+  let processedUrl = url
+  if (processedUrl && processedUrl.includes('github.com/') && processedUrl.includes('/blob/')) {
+    processedUrl = processedUrl.replace(
+      /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
+      'https://raw.githubusercontent.com/$1/$2/$3'
+    )
+  }
+
   const imgY = showTitle ? 44 : 16
   const paddingX = 16
   const imgW = width - paddingX * 2
@@ -64,21 +72,23 @@ function renderExternalWidgetSvg(
       : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:left top;'
 
   const imgHtml = fallbackUrl
-    ? `<img src="${escapeXml(url)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(fallbackUrl)}';" />`
-    : `<img src="${escapeXml(url)}" alt="${escapeXml(title)}" style="${imgStyle}" />`
+    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(fallbackUrl)}';" />`
+    : `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" />`
   const innerContentHtml = targetUrl
     ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;max-width:100%;max-height:100%;">${imgHtml}</a>`
     : imgHtml
 
   return `
     ${showTitle ? `<text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">${escapeXml(title)}</text>` : ''}
-    <!-- EXTERNAL_WIDGET_START: ${escapeXml(url)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
+    <!-- EXTERNAL_WIDGET_START: ${escapeXml(processedUrl)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
     <foreignObject x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}">
       <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;">
         ${innerContentHtml}
       </div>
     </foreignObject>
-    <image href="${escapeXml(url)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" opacity="0" />
+    ${targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : ''}
+    <image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" />
+    ${targetUrl ? `</a>` : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
 }
@@ -1181,6 +1191,35 @@ export function renderWidgetSvg(
         'badge',
         targetUrl
       )
+      break
+    }
+
+    case 'custom-image': {
+      const imageUrl = (cfg.imageUrl as string) || (cfg.src as string) || (cfg.url as string) || ''
+      const targetUrl = (cfg.targetUrl as string) || (cfg.href as string) || undefined
+      const showTitle = cfg.showTitle === true
+      const customTitle = (cfg.customTitle as string) || '[ IMAGE ]'
+      const mode = (cfg.mode as 'contain' | 'badge') || 'contain'
+
+      if (!imageUrl) {
+        contentSvg = `
+          <rect width="${width}" height="${height}" fill="#18181b" rx="4" opacity="0.6" stroke="${border}" stroke-width="1" />
+          <text x="${width / 2}" y="${height / 2 - 6}" text-anchor="middle" font-family="${globalStyles.fontFamily}" font-size="12" fill="${accent}">📷 [ IMAGEM CUSTOMIZADA ]</text>
+          <text x="${width / 2}" y="${height / 2 + 14}" text-anchor="middle" font-family="${globalStyles.fontFamily}" font-size="10" fill="#71717a">Cole a URL ou faça upload no painel de propriedades</text>
+        `
+      } else {
+        contentSvg = renderExternalWidgetSvg(
+          imageUrl,
+          width,
+          height,
+          customTitle,
+          showTitle,
+          globalStyles,
+          accent,
+          mode,
+          targetUrl
+        )
+      }
       break
     }
 

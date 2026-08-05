@@ -10,6 +10,7 @@ import { AnimationControls } from './AnimationControls'
 import { AsciiArtControls } from './AsciiArtControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { ColorPicker } from './ColorPicker'
+import { CustomImageControls } from './CustomImageControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
@@ -439,6 +440,10 @@ export function PropertiesPanel() {
 
         {selectedWidget.widgetId === 'social-media' && (
           <SocialMediaControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === 'custom-image' && (
+          <CustomImageControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {[
