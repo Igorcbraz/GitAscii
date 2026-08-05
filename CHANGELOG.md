@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.2.0](https://github.com/Igorcbraz/GitAscii/compare/v1.1.0...v1.2.0) (2026-08-05)
+
+
+### Features
+
+* add DevPublisher GitHub Actions workflow ([f6df35d](https://github.com/Igorcbraz/GitAscii/commit/f6df35dd8684b0529b3126c073b62542aebdea09))
+* **editor:** add all GIF suggestions to CustomImageControls from TheDudeThatCode repo ([09508d7](https://github.com/Igorcbraz/GitAscii/commit/09508d72d3506029f25864142db36419daa252b6))
+* **editor:** add global styles controls to properties panel ([b9025ac](https://github.com/Igorcbraz/GitAscii/commit/b9025acc8c39d2eb1a45fb43f9e7d31290deccb2))
+* **editor:** implement animations, update properties panel and fix stories ([295a502](https://github.com/Igorcbraz/GitAscii/commit/295a5021846dd1dc2a362a4d001533d8a7176e79))
+* **editor:** improve ghstats integrations controls and support all embed types ([1f17a19](https://github.com/Igorcbraz/GitAscii/commit/1f17a196839cd0f0afe797a3b78a79b069d1656a))
+* **editor:** optimize responsive layout for mobile screens ([c5ec825](https://github.com/Igorcbraz/GitAscii/commit/c5ec825ae7d5cd4fba24c23087d08e72296e761d))
+* **engine:** add import engine for markdown to widget conversion ([aef722b](https://github.com/Igorcbraz/GitAscii/commit/aef722b2dc0e042137c25d47d36eab746a915473))
+* **github:** fetch profile README content ([9a573a3](https://github.com/Igorcbraz/GitAscii/commit/9a573a39b3fed783ddb70783c8d954ab139ddb5a))
+* **import:** refactor readme importer and add custom image properties ([c741d53](https://github.com/Igorcbraz/GitAscii/commit/c741d5361894c1270a61d99fd43560c0a9049f5e))
+* integrate GitHub App for committing README and layouts ([6e7e791](https://github.com/Igorcbraz/GitAscii/commit/6e7e7914b1991b2d6b737ff1f5a858d84e5bc38f))
+
+
+### Bug Fixes
+
+* **canvas:** prevent full SVG re-render and animation resets on widget drag ([6f63d0a](https://github.com/Igorcbraz/GitAscii/commit/6f63d0add9a33b37e4c8090fc8cd80808f676c8d))
+* **explore:** load community profiles from cloud storage in production ([2844a0b](https://github.com/Igorcbraz/GitAscii/commit/2844a0ba4e190a0162c704ea3ec40ac9e663b7ab))
+* remove CodeQL vulnerable regex entirely using skipImage param ([8a13342](https://github.com/Igorcbraz/GitAscii/commit/8a133424531c35e29644ad4891529103f6fabab3))
+* resolve CodeQL regex ReDoS and Vercel build conflicts ([db9f187](https://github.com/Igorcbraz/GitAscii/commit/db9f187d9f4f6103ddaa7e15c3b46ad79695f51b))
+* resolve remaining github-advanced-security vulnerabilities ([77d6381](https://github.com/Igorcbraz/GitAscii/commit/77d63818aff42710cc494184d83f1a43389c66f4))
+* resolve SSRF vulnerabilities in githubApp.ts ([a7f1add](https://github.com/Igorcbraz/GitAscii/commit/a7f1add0d53a60a807e65516e426b87a1b035aa0))
+* smooth editor dragging and snapping ([bb818b4](https://github.com/Igorcbraz/GitAscii/commit/bb818b4942db5bcf25e03c5f7bcfe00a1d283339))
+
 ## [1.1.0](https://github.com/Igorcbraz/GitAscii/compare/v1.0.1...v1.1.0) (2026-07-31)
 
 ### Features
