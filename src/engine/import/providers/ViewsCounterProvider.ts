@@ -9,11 +9,23 @@ export class ViewsCounterProvider extends BaseProvider {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
+    let hostname = ''
+    let pathname = ''
+    try {
+      const parsed = new URL(src)
+      hostname = parsed.hostname.toLowerCase()
+      pathname = parsed.pathname.toLowerCase()
+    } catch {
+      return null
+    }
+
     if (
-      src.includes('komarev.com/ghpvc') ||
-      src.includes('hits.seeyoufarm.org') ||
-      src.includes('visitors.now.sh') ||
-      src.includes('profile-counter')
+      (hostname === 'komarev.com' && pathname.includes('/ghpvc')) ||
+      hostname === 'hits.seeyoufarm.org' ||
+      hostname.endsWith('.seeyoufarm.org') ||
+      hostname === 'visitors.now.sh' ||
+      hostname.endsWith('.now.sh') ||
+      hostname.includes('profile-counter')
     ) {
       return {
         confidence: 0.95,

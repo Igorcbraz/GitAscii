@@ -9,11 +9,16 @@ export function normalizeUrl(rawUrl: string): string {
 
   // Convert GitHub blob web view URLs to raw user content URLs
   // e.g. https://github.com/user/repo/blob/branch/path/file.gif -> https://raw.githubusercontent.com/user/repo/branch/path/file.gif
-  if (trimmed.includes('github.com/') && trimmed.includes('/blob/')) {
-    trimmed = trimmed.replace(
-      /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
-      'https://raw.githubusercontent.com/$1/$2/$3'
-    )
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
+      trimmed = trimmed.replace(
+        /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
+        'https://raw.githubusercontent.com/$1/$2/$3'
+      )
+    }
+  } catch {
+    // Not a valid URL yet, skip
   }
 
   // Handle relative URLs or non-HTTP protocols gracefully

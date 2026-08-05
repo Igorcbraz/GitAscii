@@ -54,11 +54,16 @@ function renderExternalWidgetSvg(
   fallbackUrl?: string
 ): string {
   let processedUrl = url
-  if (processedUrl && processedUrl.includes('github.com/') && processedUrl.includes('/blob/')) {
-    processedUrl = processedUrl.replace(
-      /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
-      'https://raw.githubusercontent.com/$1/$2/$3'
-    )
+  try {
+    const parsed = new URL(processedUrl)
+    if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
+      processedUrl = processedUrl.replace(
+        /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
+        'https://raw.githubusercontent.com/$1/$2/$3'
+      )
+    }
+  } catch {
+    // Ignore invalid URL
   }
 
   const imgY = showTitle ? 44 : 16
@@ -1053,7 +1058,7 @@ export function renderWidgetSvg(
         'contain'
       )
 
-      contentSvg = contentSvg.replace(/<image [^>]+onerror="this\.style\.display='none';" \/>/, '')
+      contentSvg = contentSvg.replace(/<image [^>]*?onerror="this\.style\.display='none';" \/>/, '')
 
       break
     }

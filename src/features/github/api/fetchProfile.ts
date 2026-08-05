@@ -82,15 +82,16 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     }
 
     try {
+      const encodedUser = encodeURIComponent(username)
       const readmeRes = await fetch(
-        `https://raw.githubusercontent.com/${username}/${username}/main/README.md`,
+        `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/main/README.md`,
         { signal: AbortSignal.timeout(4000) }
       )
       if (readmeRes.ok) {
         result.readmeContent = await readmeRes.text()
       } else {
         const readmeResMaster = await fetch(
-          `https://raw.githubusercontent.com/${username}/${username}/master/README.md`,
+          `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/master/README.md`,
           { signal: AbortSignal.timeout(4000) }
         )
         if (readmeResMaster.ok) {

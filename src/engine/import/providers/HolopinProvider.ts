@@ -9,7 +9,19 @@ export class HolopinProvider extends BaseProvider {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
-    if (src.includes('holopin.io') || src.includes('holopin.me')) {
+    let hostname: string
+    try {
+      hostname = new URL(src).hostname.toLowerCase()
+    } catch {
+      return null
+    }
+
+    if (
+      hostname === 'holopin.io' ||
+      hostname.endsWith('.holopin.io') ||
+      hostname === 'holopin.me' ||
+      hostname.endsWith('.holopin.me')
+    ) {
       return {
         confidence: 0.95,
         widgetId: 'awesome-badge',

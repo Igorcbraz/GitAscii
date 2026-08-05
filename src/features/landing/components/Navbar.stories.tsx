@@ -34,7 +34,7 @@ export const Anonymous: Story = {
           if (url.includes('/api/auth/session')) {
             return new Response(JSON.stringify({ session: null }), { status: 200 })
           }
-          if (url.includes('api.github.com')) {
+          if (/^https?:\/\/api\.github\.com(?:\/|$)/.test(url)) {
             return new Response(JSON.stringify({ stargazers_count: 563 }), { status: 200 })
           }
           return originalFetch(input)
@@ -61,7 +61,7 @@ export const LoggedIn: Story = {
               { status: 200 }
             )
           }
-          if (url.includes('api.github.com')) {
+          if (/^https?:\/\/api\.github\.com(?:\/|$)/.test(url)) {
             return new Response(JSON.stringify({ stargazers_count: 1042 }), { status: 200 })
           }
           return originalFetch(input)
@@ -90,7 +90,7 @@ export const Mobile: Story = {
           if (url.includes('/api/auth/session')) {
             return new Response(JSON.stringify({ session: null }), { status: 200 })
           }
-          if (url.includes('api.github.com')) {
+          if (/^https?:\/\/api\.github\.com(?:\/|$)/.test(url)) {
             return new Response(JSON.stringify({ stargazers_count: 563 }), { status: 200 })
           }
           return originalFetch(input)

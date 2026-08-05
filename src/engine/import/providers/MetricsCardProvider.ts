@@ -9,7 +9,18 @@ export class MetricsCardProvider extends BaseProvider {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
-    if (src.includes('metrics.lecoq.io') || src.includes('github-metrics')) {
+    let hostname: string
+    try {
+      hostname = new URL(src).hostname.toLowerCase()
+    } catch {
+      return null
+    }
+
+    const isMetricsHost = hostname === 'metrics.lecoq.io'
+    const isGithubMetricsHost =
+      hostname === 'github-metrics' || hostname.endsWith('.github-metrics')
+
+    if (isMetricsHost || isGithubMetricsHost) {
       return {
         confidence: 0.95,
         widgetId: 'metrics-card',

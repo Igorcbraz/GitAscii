@@ -9,7 +9,18 @@ export class ShieldsProvider extends BaseProvider {
     const src = this.extractImageSrc(node)
     if (!src) return null
 
-    if (src.includes('img.shields.io') || src.includes('shields.io')) {
+    let isShieldsHost = false
+    try {
+      const hostname = new URL(src).hostname.toLowerCase()
+      isShieldsHost =
+        hostname === 'shields.io' ||
+        hostname.endsWith('.shields.io') ||
+        hostname === 'img.shields.io'
+    } catch {
+      isShieldsHost = false
+    }
+
+    if (isShieldsHost) {
       const linkUrl = this.extractLinkHref(node, _contextFrame)
       const labelMatch = src.match(/badge\/(?:-|%2D)?([^-]+)-/i)
       const label = labelMatch ? labelMatch[1].toLowerCase().replace(/%20/g, ' ') : ''

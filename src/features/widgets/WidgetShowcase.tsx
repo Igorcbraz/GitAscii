@@ -226,7 +226,10 @@ export function WidgetShowcase() {
                     </Link>
 
                     <Link
-                      href={`/?username=${activeUsername}&widget=${widget.id}`}
+                      href={{
+                        pathname: '/',
+                        query: { username: activeUsername, widget: widget.id },
+                      }}
                       className="w-full inline-flex items-center justify-center gap-2 bg-carbon border border-graphite hover:border-signal-lime text-ash hover:text-white font-medium text-caption py-1.5 uppercase tracking-wider transition-all"
                     >
                       <span>{t('widget_showcase.edit_builder', 'Edit in Visual Builder')}</span>
@@ -355,7 +358,10 @@ export function WidgetShowcase() {
                     </Link>
 
                     <Link
-                      href={`/?username=${activeUsername}&widget=${widget.id}`}
+                      href={{
+                        pathname: '/',
+                        query: { username: activeUsername, widget: widget.id },
+                      }}
                       className="w-full inline-flex items-center justify-center gap-2 bg-void-black border border-graphite hover:border-signal-lime text-ash hover:text-white font-medium text-caption py-1.5 uppercase tracking-wider transition-all"
                     >
                       <span>{t('widget_showcase.edit_builder', 'Edit in Visual Builder')}</span>

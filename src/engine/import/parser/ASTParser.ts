@@ -2,8 +2,12 @@ import type { Alignment, ASTAttributes, ASTNode, ASTNodeType } from '../types'
 import { normalizeUrl } from '../url/UrlNormalizer'
 
 export function parseReadmeToAST(rawMarkdown: string): ASTNode {
-  // 1. Strip HTML comments completely
-  const sanitized = rawMarkdown.replace(/<!--[\s\S]*?-->/g, '')
+  let sanitized = rawMarkdown
+  let previous: string
+  do {
+    previous = sanitized
+    sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '')
+  } while (sanitized !== previous)
 
   let nextId = 1
   const generateId = () => `node_${nextId++}`
@@ -362,7 +366,7 @@ export function parseReadmeToAST(rawMarkdown: string): ASTNode {
           tagName: 'a',
           attributes: { href, ...parseAttributes(rawMatch) },
           children: [],
-          textContent: rawMatch.replace(/<[^>]+>/g, '').trim(),
+          textContent: rawMatch.replace(/[<>]/g, '').trim(),
           rawHtml: rawMatch,
           indexInParent: parentNode.children.length,
           parentId: parentNode.id,

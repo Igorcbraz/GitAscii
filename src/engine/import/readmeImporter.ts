@@ -44,7 +44,7 @@ export function importReadme(
   const flushTextBuffer = () => {
     const text = currentTextBuffer.join('\n').trim()
     if (text) {
-      const cleanText = text.replace(/<[^>]+>/g, '').trim()
+      const cleanText = text.replace(/[<>]/g, '').trim()
 
       if (cleanText) {
         const frame = contextStack.current()
