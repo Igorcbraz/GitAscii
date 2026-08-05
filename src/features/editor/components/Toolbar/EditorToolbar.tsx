@@ -4,6 +4,7 @@ import {
   Check,
   Copy,
   Download,
+  Github,
   Loader2,
   LogIn,
   LogOut,
@@ -49,6 +50,9 @@ export function EditorToolbar() {
   const [showGuide, setShowGuide] = useState(false)
   const [showExportGuide, setShowExportGuide] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [commitStatus, setCommitStatus] = useState<'idle' | 'committing' | 'success' | 'error'>(
+    'idle'
+  )
   const [isLoginLoading, setIsLoginLoading] = useState(false)
 
   const handleLogout = async () => {
@@ -280,11 +284,12 @@ export function EditorToolbar() {
   const username = config.username
   const profileSlug = config.profileSlug
   const isOwner = !!(session && session.username.toLowerCase() === username.toLowerCase())
+  const viewerUsername = session?.username || username
 
   const embedUrl =
     profileSlug === 'default'
-      ? `${currentOrigin}/api/${username}`
-      : `${currentOrigin}/api/${username}/${profileSlug}`
+      ? `${currentOrigin}/api/${viewerUsername}`
+      : `${currentOrigin}/api/${viewerUsername}/${profileSlug}`
 
   const embedCode = `![Widget](${embedUrl})`
 
@@ -300,6 +305,90 @@ export function EditorToolbar() {
 
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const handleCommitToGithub = async () => {
+    if (!session) {
+      return
+    }
+
+    setCommitStatus('committing')
+    const currentViewerEmbedUrl =
+      profileSlug === 'default'
+        ? `${currentOrigin}/api/${session.username}`
+        : `${currentOrigin}/api/${session.username}/${profileSlug}`
+
+    const v = Date.now()
+    const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
+      ? `${currentViewerEmbedUrl}&v=${v}`
+      : `${currentViewerEmbedUrl}?v=${v}`
+    const finalEmbedCode = `![Widget](${urlWithCacheBust})`
+
+    const exportData = {
+      username: session.username,
+      widgets: config.widgets,
+      globalStyles: config.globalStyles,
+      templateId: config.templateId,
+    }
+
+    try {
+      const res = await fetch('/api/github/commit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embedCode: finalEmbedCode, exportData }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        if (data.error === 'not_installed' && data.installUrl) {
+          const urlObj = new URL(data.installUrl)
+          urlObj.searchParams.set('state', username)
+          window.location.href = urlObj.toString()
+          return
+        }
+        throw new Error(data.error || 'Failed to commit')
+      }
+
+      setCommitStatus('success')
+      setTimeout(() => setCommitStatus('idle'), 2000)
+    } catch (e) {
+      console.error(e)
+      setCommitStatus('error')
+      setTimeout(() => setCommitStatus('idle'), 3000)
+    }
+  }
+
+  const renderUpdateReadmeButton = () => (
+    <button
+      onClick={handleCommitToGithub}
+      data-testid="commit-github-btn"
+      disabled={commitStatus === 'committing'}
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
+        commitStatus === 'success'
+          ? 'bg-signal-lime text-black glow-lime'
+          : commitStatus === 'error'
+            ? 'bg-red-500 text-white'
+            : 'bg-transparent border border-signal-lime text-signal-lime hover:bg-signal-lime hover:text-black hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110'
+      }`}
+    >
+      {commitStatus === 'committing' ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : commitStatus === 'success' ? (
+        <Check size={14} />
+      ) : (
+        <Github size={14} />
+      )}
+      <span className="hidden sm:inline">
+        {commitStatus === 'committing'
+          ? t('common.committing', 'Committing...')
+          : commitStatus === 'success'
+            ? t('common.committed', 'Committed!')
+            : commitStatus === 'error'
+              ? t('common.error', 'Error!')
+              : t('common.update_readme', 'Update README')}
+      </span>
+    </button>
+  )
 
   return (
     <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-30">
@@ -427,26 +516,31 @@ export function EditorToolbar() {
           </button>
         )}
 
-        {isOwner ? (
-          <button
-            onClick={handleCopyCode}
-            data-testid="copy-code-btn"
-            className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-          >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            <span className="hidden sm:inline">
-              {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
-            </span>
-          </button>
+        {session ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleCopyCode}
+              data-testid="copy-code-btn"
+              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
+            >
+              {copied ? <Check size={14} /> : <Copy size={14} />}
+              <span className="hidden sm:inline">
+                {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
+              </span>
+            </button>
+            {renderUpdateReadmeButton()}
+          </div>
         ) : (
-          <button
-            onClick={handleExport}
-            data-testid="export-layout-btn"
-            className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExport}
+              data-testid="export-layout-btn"
+              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
+            </button>
+          </div>
         )}
       </div>
 
