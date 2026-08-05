@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
 import { attributions, WidgetItem, widgetsList } from '@/data/widgetsData'
-import { WIDGET_CATALOG } from '@/features/editor/components/Sidebar/WidgetLibrary'
+import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { useI18n } from '@/i18n'
 
 export function WidgetShowcase() {

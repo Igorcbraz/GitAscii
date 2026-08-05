@@ -1,40 +1,6 @@
 'use client'
 
-import {
-  Activity,
-  Award,
-  BarChart3,
-  Code2,
-  Cpu,
-  Download,
-  ExternalLink,
-  Eye,
-  FileText,
-  Flame,
-  FolderGit2,
-  GitFork,
-  Globe,
-  Grid,
-  Heading,
-  LayoutTemplate,
-  Minus,
-  PieChart,
-  Plus,
-  Quote,
-  Search,
-  Share2,
-  ShieldCheck,
-  Terminal,
-  TerminalSquare,
-  TrendingUp,
-  Trophy,
-  Type,
-  Upload,
-  User,
-  X,
-  Zap,
-} from 'lucide-react'
-import { Sparkles } from 'lucide-react'
+import { Download, ExternalLink, GitFork, Plus, Search, Upload, X, Zap } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -42,214 +8,14 @@ import { useToast } from '@/components/ui/toast'
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
 import { useI18n } from '@/i18n'
 
-import { useEditorStore } from '../../store/editorStore'
 import {
-  type WidgetBadgeType,
+  WIDGET_CATALOG,
+  WIDGET_FILTERS,
+  WidgetBadgeType,
   type WidgetCatalogItem,
-  WidgetPreviewTooltip,
-} from './WidgetPreviewTooltip'
-
-export const WIDGET_CATALOG: WidgetCatalogItem[] = [
-  {
-    id: 'header',
-    name: 'Header',
-    icon: Heading,
-    desc: 'Name, handle & company badge',
-    category: 'essential',
-    badge: { text: 'Mais Usado', type: 'popular' },
-  },
-  {
-    id: 'ascii-text',
-    name: 'ASCII Text',
-    icon: Type,
-    desc: 'Custom text rendered in ASCII art font',
-    category: 'interactive',
-    badge: { text: 'Novo', type: 'highlight' },
-  },
-  {
-    id: 'ascii-art',
-    name: 'ASCII Art',
-    icon: Terminal,
-    desc: 'Image converted to character art',
-    category: 'interactive',
-    badge: { text: 'Destaque', type: 'highlight' },
-  },
-  {
-    id: 'terminal-info',
-    name: 'Terminal Info',
-    icon: TerminalSquare,
-    desc: 'Neofetch-style terminal info card',
-    category: 'essential',
-    badge: { text: 'Mais Usado', type: 'popular' },
-  },
-  {
-    id: 'avatar',
-    name: 'Avatar',
-    icon: User,
-    desc: 'Profile picture frame',
-    category: 'essential',
-    badge: { text: 'Essencial', type: 'essential' },
-  },
-  {
-    id: 'tech-stack',
-    name: 'Tech Stack',
-    icon: Cpu,
-    desc: 'Interactive skill icons gallery',
-    category: 'interactive',
-    badge: { text: 'Interativo', type: 'interactive' },
-  },
-  {
-    id: 'bio',
-    name: 'Bio & Links',
-    icon: FileText,
-    desc: 'Biography, location & blog link',
-    category: 'essential',
-  },
-  {
-    id: 'custom-image',
-    name: 'Image',
-    icon: FileText,
-    desc: 'Custom image or banner',
-    category: 'misc',
-  },
-  {
-    id: 'stats',
-    name: 'GitHub Stats',
-    icon: BarChart3,
-    desc: 'Stars, repos, followers metrics',
-    category: 'stats',
-    badge: { text: 'Popular', type: 'popular' },
-  },
-  {
-    id: 'languages',
-    name: 'Top Languages',
-    icon: Code2,
-    desc: 'Language breakdown bar',
-    category: 'stats',
-  },
-  {
-    id: 'repositories',
-    name: 'Featured Repos',
-    icon: FolderGit2,
-    desc: 'Highlighted repository cards',
-    category: 'stats',
-  },
-  {
-    id: 'social-media',
-    name: 'Social Media',
-    icon: Share2,
-    desc: 'Shields & social media badges',
-    category: 'misc',
-  },
-
-  {
-    id: 'github-readme-stats',
-    name: 'GitHub Readme Stats',
-    icon: BarChart3,
-    desc: 'Estatísticas, top linguagens & repos fixados',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'Popular', type: 'popular' },
-  },
-  {
-    id: 'streak-stats',
-    name: 'GitHub Streak Stats',
-    icon: Flame,
-    desc: 'Sequência e recorde de contribuições',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'profile-trophy',
-    name: 'GitHub Profile Trophy',
-    icon: Trophy,
-    desc: 'Troféus e conquistas do perfil',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'activity-graph',
-    name: 'Activity Graph',
-    icon: Activity,
-    desc: 'Gráfico de linhas de atividade em 31 dias',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'contribution-snake',
-    name: 'Contribution Snake',
-    icon: TrendingUp,
-    desc: 'Cobra animada comendo os blocos de commit',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'Trending', type: 'trending' },
-  },
-  {
-    id: 'metrics-card',
-    name: 'Metrics Card',
-    icon: PieChart,
-    desc: 'Infográfico avançado de métricas e hábitos',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'views-counter',
-    name: 'Profile Views Counter',
-    icon: Eye,
-    desc: 'Contador de visitas ao perfil GitHub',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'readme-quotes',
-    name: 'GitHub Readme Quotes',
-    icon: Quote,
-    desc: 'Citação diária para desenvolvedores',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'awesome-badge',
-    name: 'Awesome Profile Badge',
-    icon: Award,
-    desc: 'Badge de destaque para perfis incríveis',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'gitfest-lineup',
-    name: 'GitFest',
-    icon: Sparkles,
-    desc: 'Festival lineup of your repos',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'New', type: 'highlight' },
-  },
-
-  {
-    id: 'ghstats',
-    name: 'GHStats.dev',
-    icon: BarChart3,
-    desc: 'GitHub Stats Cards from ghstats.dev',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'New', type: 'highlight' },
-  },
-  {
-    id: 'divider',
-    name: 'Neon Divider',
-    icon: Minus,
-    desc: 'Section separator line',
-    category: 'misc',
-  },
-  {
-    id: 'footer',
-    name: 'Footer Stamp',
-    icon: LayoutTemplate,
-    desc: 'Signature metadata footer',
-    category: 'misc',
-  },
-]
+} from '../../config/widgets'
+import { useEditorStore } from '../../store/editorStore'
+import { WidgetPreviewTooltip } from './WidgetPreviewTooltip'
 
 function renderWidgetBadge(badge?: { text: string; type: WidgetBadgeType }) {
   if (!badge) return null
@@ -407,21 +173,9 @@ export function WidgetLibrary() {
 
   const filteredWidgets = useMemo(() => {
     return translatedCatalog.filter((item) => {
-      if (categoryFilter === 'popular') {
-        if (
-          !item.badge ||
-          (item.badge.type !== 'popular' &&
-            item.badge.type !== 'highlight' &&
-            item.badge.type !== 'trending')
-        ) {
-          return false
-        }
-      } else if (categoryFilter === 'essential') {
-        if (item.category !== 'essential' && item.badge?.type !== 'essential') {
-          return false
-        }
-      } else if (categoryFilter === 'external') {
-        if (!item.isExternal) return false
+      const filter = WIDGET_FILTERS.find((f) => f.id === categoryFilter)
+      if (filter && !filter.match(item)) {
+        return false
       }
 
       if (!searchQuery.trim()) return true
@@ -592,17 +346,6 @@ export function WidgetLibrary() {
     )
   }
 
-  const FILTER_ITEMS = [
-    { id: 'all', label: t('editor.sidebar.filter.all', 'Todos'), icon: Grid },
-    { id: 'popular', label: t('editor.sidebar.filter.popular', 'Destaques'), icon: Flame },
-    {
-      id: 'essential',
-      label: t('editor.sidebar.filter.essential', 'Essenciais'),
-      icon: ShieldCheck,
-    },
-    { id: 'external', label: t('editor.sidebar.filter.external', 'Externos'), icon: Globe },
-  ]
-
   return (
     <aside className="w-full lg:w-75 h-full bg-onyx border-r-0 lg:border-r border-graphite flex flex-col shrink-0">
       <div className="flex border-b border-graphite bg-void-black">
@@ -661,7 +404,7 @@ export function WidgetLibrary() {
                 onMouseLeave={handleMouseUpOrLeave}
                 className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none select-none cursor-grab active:cursor-grabbing"
               >
-                {FILTER_ITEMS.map((filter) => {
+                {WIDGET_FILTERS.map((filter) => {
                   const FilterIcon = filter.icon
                   const isActive = categoryFilter === filter.id
                   return (
@@ -681,7 +424,7 @@ export function WidgetLibrary() {
                         size={12}
                         className={isActive ? 'text-signal-lime' : 'text-ash'}
                       />
-                      <span>{filter.label}</span>
+                      <span>{t(filter.labelKey as any, filter.defaultLabel)}</span>
                     </button>
                   )
                 })}
