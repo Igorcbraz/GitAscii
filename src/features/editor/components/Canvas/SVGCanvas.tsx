@@ -1,14 +1,43 @@
 'use client'
 
 import { Layers, Lock, Move, X } from 'lucide-react'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
-import { renderSvg } from '@/engine/core/SVGEngine'
+import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
+import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { LayersPanel } from '../Sidebar/LayersPanel'
+
+const WidgetNode = memo(
+  function WidgetNode({
+    widget,
+    githubData,
+    globalStyles,
+  }: {
+    widget: WidgetInstance
+    githubData: NormalizedGitHubData
+    globalStyles: GlobalStyles
+  }) {
+    const innerSvg = renderWidgetSvg(widget, githubData, globalStyles, false)
+    return (
+      <g
+        id={`widget-${widget.instanceId}`}
+        transform={`translate(${widget.position.x}, ${widget.position.y})`}
+        dangerouslySetInnerHTML={{ __html: innerSvg }}
+      />
+    )
+  },
+  (prev, next) => {
+    return (
+      prev.widget === next.widget &&
+      prev.githubData === next.githubData &&
+      prev.globalStyles === next.globalStyles
+    )
+  }
+)
 
 export function SVGCanvas() {
   const { t } = useI18n()
@@ -51,11 +80,6 @@ export function SVGCanvas() {
   const scrollRafRef = useRef<number | null>(null)
   const isDraggingRef = useRef(false)
   const dragPosRef = useRef({ x: 0, y: 0 })
-
-  const renderedSvgString = useMemo(() => {
-    if (!config || !githubData) return ''
-    return renderSvg(config, githubData, { theme: 'dark' })
-  }, [config, githubData])
 
   const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([])
 
@@ -580,7 +604,6 @@ export function SVGCanvas() {
         <style dangerouslySetInnerHTML={{ __html: editorAnimOverrideStyle }} />
         <div
           ref={svgContainerRef}
-          dangerouslySetInnerHTML={{ __html: renderedSvgString }}
           data-testid="canvas-svg-container"
           className={`w-full h-full pointer-events-none ${config.widgets
             .map((w) =>
@@ -589,7 +612,45 @@ export function SVGCanvas() {
                 : `static-anim-${w.instanceId}`
             )
             .join(' ')}`}
-        />
+        >
+          {config && githubData && (
+            <svg
+              width="800"
+              height={canvasHeight}
+              viewBox={`0 0 800 ${canvasHeight}`}
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <style>
+                {`
+                  @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=PT+Serif:ital,wght@0,300;1,300&display=swap');
+                  * { box-sizing: border-box; }
+                  text { user-select: none; }
+                `}
+              </style>
+              {!config.globalStyles.transparentBackground && (
+                <rect
+                  width="800"
+                  height={canvasHeight}
+                  fill={config.globalStyles.backgroundColor || '#060606'}
+                  rx={config.globalStyles.borderRadius || 0}
+                />
+              )}
+              {(() => {
+                const sortedWidgets = [...config.widgets].sort((a, b) => a.zIndex - b.zIndex)
+                return sortedWidgets.map((widget) => (
+                  <WidgetNode
+                    key={widget.instanceId}
+                    widget={widget}
+                    githubData={githubData}
+                    globalStyles={config.globalStyles}
+                  />
+                ))
+              })()}
+            </svg>
+          )}
+        </div>
 
         {alignmentGuides.map((guide, idx) => {
           if (guide.x !== undefined) {

@@ -87,7 +87,7 @@ function renderExternalWidgetSvg(
       </div>
     </foreignObject>
     ${targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : ''}
-    <image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" />
+    <image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />
     ${targetUrl ? `</a>` : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
@@ -96,7 +96,8 @@ function renderExternalWidgetSvg(
 export function renderWidgetSvg(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
-  globalStyles: GlobalStyles
+  globalStyles: GlobalStyles,
+  includeWrapper: boolean = true
 ): string {
   if (!widget.visible) return ''
 
@@ -1457,13 +1458,19 @@ export function renderWidgetSvg(
     }
   }
 
-  return `
-    <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
+  const innerHtml = `
       ${styleBlock}
       ${shadowRect}
       <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />
       ${templateDecorationSvg}
       ${contentSvg}
+  `
+
+  if (!includeWrapper) return innerHtml
+
+  return `
+    <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
+${innerHtml}
     </g>
   `
 }
