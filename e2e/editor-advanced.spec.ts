@@ -282,7 +282,7 @@ test.describe('GitAscii API Error and Invalid Cases', () => {
       })
   })
 
-  test('Invalid layouts', async ({ _page }) => {
+  test('Invalid layouts', async ({ page }) => {
     // If there's an import button, we would simulate uploading invalid JSON
     // We check that the app doesn't crash and maybe shows an error
   })

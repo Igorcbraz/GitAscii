@@ -1,7 +1,7 @@
 'use client'
 
 import { Layers, Lock, Move, X } from 'lucide-react'
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
@@ -39,6 +39,41 @@ const WidgetNode = memo(
   }
 )
 
+const CANVAS_WIDTH = 800
+const GRID_SIZE = 8
+const SNAP_THRESHOLD = 6
+
+type Position = { x: number; y: number }
+type Size = { width: number; height: number }
+type AlignmentGuide = { x?: number; y?: number }
+type DragType = 'move' | 'resize-r' | 'resize-b' | 'resize-br'
+
+type DragState = {
+  instanceId: string
+  type: DragType
+  startX: number
+  startY: number
+  initialPos: Position
+  initialSize: Size
+  initialPositions: Record<string, Position>
+  selectedInstanceIds: string[]
+}
+
+type DragPreview = {
+  positions: Record<string, Position>
+  sizes: Record<string, Size>
+  guides: AlignmentGuide[]
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function snapToGrid(value: number) {
+  const gridValue = Math.round(value / GRID_SIZE) * GRID_SIZE
+  return Math.abs(gridValue - value) <= SNAP_THRESHOLD ? gridValue : value
+}
+
 export function SVGCanvas() {
   const { t } = useI18n()
   const {
@@ -58,14 +93,10 @@ export function SVGCanvas() {
 
   const [isLayersOpen, setIsLayersOpen] = useState(false)
 
-  const [activeDrag, setActiveDrag] = useState<{
-    instanceId: string
-    type: 'move' | 'resize-r' | 'resize-b' | 'resize-br'
-    startX: number
-    startY: number
-    initialPos: { x: number; y: number }
-    initialSize: { width: number; height: number }
-  } | null>(null)
+  const activeDragRef = useRef<DragState | null>(null)
+  const dragPreviewRef = useRef<DragPreview | null>(null)
+  const dragRafRef = useRef<number | null>(null)
+  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const svgContainerRef = useRef<HTMLDivElement>(null)
@@ -78,10 +109,16 @@ export function SVGCanvas() {
     currentY: number
   } | null>(null)
   const scrollRafRef = useRef<number | null>(null)
+  const marqueeRafRef = useRef<number | null>(null)
   const isDraggingRef = useRef(false)
   const dragPosRef = useRef({ x: 0, y: 0 })
+  const suppressClickRef = useRef(false)
+  const marqueeRef = useRef<typeof marquee>(null)
+  const configRef = useRef(config)
+  const selectedInstanceIdsRef = useRef(selectedInstanceIds)
+  const zoomRef = useRef(zoom)
 
-  const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([])
+  const [alignmentGuides, setAlignmentGuides] = useState<AlignmentGuide[]>([])
 
   const [playingPreviews, setPlayingPreviews] = useState<Record<string, boolean>>({})
 
@@ -232,201 +269,203 @@ export function SVGCanvas() {
   }, [isLayersOpen])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent | TouchEvent) => {
-      if (!activeDrag) return
+    configRef.current = config
+  }, [config])
 
-      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
+  useEffect(() => {
+    selectedInstanceIdsRef.current = selectedInstanceIds
+  }, [selectedInstanceIds])
 
-      const deltaX = Math.round((clientX - activeDrag.startX) / zoom)
-      const deltaY = Math.round((clientY - activeDrag.startY) / zoom)
+  useEffect(() => {
+    zoomRef.current = zoom
+  }, [zoom])
 
-      const targetWidget = config?.widgets.find((w) => w.instanceId === activeDrag.instanceId)
-      const isAspectLocked = targetWidget
-        ? targetWidget.widgetId === 'avatar' ||
-          targetWidget.widgetId === 'ascii-art' ||
-          Boolean(
-            targetWidget.config.lockAspectRatio !== false &&
-            (targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art')
-          ) ||
-          Boolean(targetWidget.config.lockAspectRatio)
-        : false
+  const applyPreviewToCanvas = useCallback((preview: DragPreview) => {
+    const currentConfig = configRef.current
+    if (!currentConfig || !svgContainerRef.current) return
+
+    for (const [instanceId, position] of Object.entries(preview.positions)) {
+      const widget = currentConfig.widgets.find((item) => item.instanceId === instanceId)
+      if (!widget) continue
+
+      const widgetElementId = 'widget-' + instanceId
+      const widgetElement = Array.from(
+        svgContainerRef.current.querySelectorAll<SVGGElement>('g[id]')
+      ).find((element) => element.id === widgetElementId)
+      if (!widgetElement) continue
+
+      const size = preview.sizes[instanceId] || widget.size
+      const scaleX = size.width / widget.size.width
+      const scaleY = size.height / widget.size.height
+      widgetElement.setAttribute(
+        'transform',
+        'translate(' + position.x + ', ' + position.y + ') scale(' + scaleX + ' ' + scaleY + ')'
+      )
+    }
+  }, [])
+
+  const scheduleDragPreview = useCallback(
+    (preview: DragPreview) => {
+      dragPreviewRef.current = preview
+      if (dragRafRef.current !== null) return
+
+      dragRafRef.current = requestAnimationFrame(() => {
+        dragRafRef.current = null
+        const nextPreview = dragPreviewRef.current
+        if (!nextPreview) return
+        applyPreviewToCanvas(nextPreview)
+        setAlignmentGuides(nextPreview.guides)
+        setDragPreview(nextPreview)
+      })
+    },
+    [applyPreviewToCanvas]
+  )
+
+  const startDrag = (drag: DragState) => {
+    activeDragRef.current = drag
+    dragPreviewRef.current = null
+    setDragPreview({ positions: {}, sizes: {}, guides: [] })
+  }
+
+  useEffect(() => {
+    const buildDragPreview = (event: MouseEvent | TouchEvent) => {
+      const activeDrag = activeDragRef.current
+      const currentConfig = configRef.current
+      if (!activeDrag || !currentConfig) return
+
+      const clientX = 'touches' in event ? event.touches[0].clientX : (event as MouseEvent).clientX
+      const clientY = 'touches' in event ? event.touches[0].clientY : (event as MouseEvent).clientY
+
+      const deltaX = Math.round((clientX - activeDrag.startX) / zoomRef.current)
+      const deltaY = Math.round((clientY - activeDrag.startY) / zoomRef.current)
+      const targetWidget = currentConfig.widgets.find(
+        (widget) => widget.instanceId === activeDrag.instanceId
+      )
+      if (!targetWidget) return
+
+      const isAspectLocked =
+        targetWidget.widgetId === 'avatar' ||
+        targetWidget.widgetId === 'ascii-art' ||
+        Boolean(
+          targetWidget.config.lockAspectRatio !== false &&
+          (targetWidget.widgetId === 'avatar' || targetWidget.widgetId === 'ascii-art')
+        ) ||
+        Boolean(targetWidget.config.lockAspectRatio)
 
       if (activeDrag.type === 'move') {
-        const rawX = activeDrag.initialPos.x + deltaX
-        const rawY = activeDrag.initialPos.y + deltaY
-
-        const SNAP_THRESHOLD = 8
+        const movingWidgets = activeDrag.selectedInstanceIds
+          .map((instanceId) =>
+            currentConfig.widgets.find((widget) => widget.instanceId === instanceId)
+          )
+          .filter((widget): widget is NonNullable<typeof widget> => Boolean(widget))
+        const minGroupX = Math.min(...movingWidgets.map((widget) => widget.position.x))
+        const maxGroupRight = Math.max(
+          ...movingWidgets.map((widget) => widget.position.x + widget.size.width)
+        )
+        const minGroupY = Math.min(...movingWidgets.map((widget) => widget.position.y))
+        const minX = activeDrag.initialPos.x - minGroupX
+        const maxX = activeDrag.initialPos.x + CANVAS_WIDTH - maxGroupRight
+        const minY = activeDrag.initialPos.y - minGroupY
         const width = activeDrag.initialSize.width
         const height = activeDrag.initialSize.height
+        const rawX = clamp(activeDrag.initialPos.x + deltaX, minX, maxX)
+        const rawY = Math.max(minY, activeDrag.initialPos.y + deltaY)
 
-        let snapX: number | undefined
-        let snapY: number | undefined
-        const newGuides: { x?: number; y?: number }[] = []
-
-        if (config?.widgets) {
-          for (const other of config.widgets) {
-            if (other.instanceId === activeDrag.instanceId || !other.visible) continue
-
-            const otherLeft = other.position.x
-            const otherRight = other.position.x + other.size.width
-            const otherCenterX = other.position.x + other.size.width / 2
-            const otherTop = other.position.y
-            const otherBottom = other.position.y + other.size.height
-            const otherCenterY = other.position.y + other.size.height / 2
-
-            const left = rawX
-            const right = rawX + width
-            const centerX = rawX + width / 2
-            const top = rawY
-            const bottom = rawY + height
-            const centerY = rawY + height / 2
-
-            if (Math.abs(left - otherLeft) < SNAP_THRESHOLD) {
-              snapX = otherLeft
-              newGuides.push({ x: otherLeft })
-            } else if (Math.abs(left - otherRight) < SNAP_THRESHOLD) {
-              snapX = otherRight
-              newGuides.push({ x: otherRight })
-            } else if (Math.abs(right - otherLeft) < SNAP_THRESHOLD) {
-              snapX = otherLeft - width
-              newGuides.push({ x: otherLeft })
-            } else if (Math.abs(right - otherRight) < SNAP_THRESHOLD) {
-              snapX = otherRight - width
-              newGuides.push({ x: otherRight })
-            } else if (Math.abs(centerX - otherCenterX) < SNAP_THRESHOLD) {
-              snapX = otherCenterX - width / 2
-              newGuides.push({ x: otherCenterX })
-            }
-
-            if (Math.abs(top - otherTop) < SNAP_THRESHOLD) {
-              snapY = otherTop
-              newGuides.push({ y: otherTop })
-            } else if (Math.abs(top - otherBottom) < SNAP_THRESHOLD) {
-              snapY = otherBottom
-              newGuides.push({ y: otherBottom })
-            } else if (Math.abs(bottom - otherTop) < SNAP_THRESHOLD) {
-              snapY = otherTop - height
-              newGuides.push({ y: otherTop })
-            } else if (Math.abs(bottom - otherBottom) < SNAP_THRESHOLD) {
-              snapY = otherBottom - height
-              newGuides.push({ y: otherBottom })
-            } else if (Math.abs(centerY - otherCenterY) < SNAP_THRESHOLD) {
-              snapY = otherCenterY - height / 2
-              newGuides.push({ y: otherCenterY })
-            }
-          }
+        const xSnapCandidates: { value: number; guide: number; distance: number }[] = []
+        const ySnapCandidates: { value: number; guide: number; distance: number }[] = []
+        const considerX = (value: number, guide: number) => {
+          if (value < minX || value > maxX) return
+          const distance = Math.abs(value - rawX)
+          if (distance <= SNAP_THRESHOLD) xSnapCandidates.push({ value, guide, distance })
+        }
+        const considerY = (value: number, guide: number) => {
+          if (value < minY) return
+          const distance = Math.abs(value - rawY)
+          if (distance <= SNAP_THRESHOLD) ySnapCandidates.push({ value, guide, distance })
         }
 
-        const snappedX =
-          snapX !== undefined ? snapX : Math.max(0, Math.min(800 - width, Math.round(rawX / 4) * 4))
-        const snappedY = snapY !== undefined ? snapY : Math.max(0, Math.round(rawY / 4) * 4)
+        considerX(0, 0)
+        considerX(CANVAS_WIDTH - width, CANVAS_WIDTH)
+        considerX(CANVAS_WIDTH / 2 - width / 2, CANVAS_WIDTH / 2)
+        considerY(0, 0)
 
-        setAlignmentGuides(newGuides)
-        if (
-          selectedInstanceIds &&
-          selectedInstanceIds.length > 1 &&
-          selectedInstanceIds.includes(activeDrag.instanceId)
-        ) {
-          const dx = snappedX - activeDrag.initialPos.x
-          const dy = snappedY - activeDrag.initialPos.y
-          const deltas = selectedInstanceIds
-            .map((id) => {
-              if (id === activeDrag.instanceId)
-                return { instanceId: id, position: { x: snappedX, y: snappedY } }
-              const w = config?.widgets.find((w) => w.instanceId === id)
-              if (!w) return null
-              return { instanceId: id, position: { x: w.position.x + dx, y: w.position.y + dy } }
-            })
-            .filter((d): d is { instanceId: string; position: { x: number; y: number } } =>
-              Boolean(d)
-            )
-          if (updateWidgetPositions) updateWidgetPositions(deltas, false)
-        } else {
-          updateWidgetPosition(activeDrag.instanceId, { x: snappedX, y: snappedY }, false)
+        const movingIds = new Set(activeDrag.selectedInstanceIds)
+        for (const other of currentConfig.widgets) {
+          if (!other.visible || movingIds.has(other.instanceId)) continue
+
+          const otherLeft = other.position.x
+          const otherRight = other.position.x + other.size.width
+          const otherCenterX = otherLeft + other.size.width / 2
+          const otherTop = other.position.y
+          const otherBottom = other.position.y + other.size.height
+          const otherCenterY = otherTop + other.size.height / 2
+
+          considerX(otherLeft, otherLeft)
+          considerX(otherRight, otherRight)
+          considerX(otherLeft - width, otherLeft)
+          considerX(otherRight - width, otherRight)
+          considerX(otherCenterX - width / 2, otherCenterX)
+
+          considerY(otherTop, otherTop)
+          considerY(otherBottom, otherBottom)
+          considerY(otherTop - height, otherTop)
+          considerY(otherBottom - height, otherBottom)
+          considerY(otherCenterY - height / 2, otherCenterY)
         }
-      } else if (activeDrag.type === 'resize-r') {
-        const newWidth = Math.max(
+
+        const xSnap = xSnapCandidates.sort((a, b) => a.distance - b.distance)[0]
+        const ySnap = ySnapCandidates.sort((a, b) => a.distance - b.distance)[0]
+        const x = xSnap ? xSnap.value : clamp(snapToGrid(rawX), minX, maxX)
+        const y = ySnap ? ySnap.value : Math.max(minY, snapToGrid(rawY))
+        const offsetX = x - activeDrag.initialPos.x
+        const offsetY = y - activeDrag.initialPos.y
+        const positions = Object.fromEntries(
+          Object.entries(activeDrag.initialPositions).map(([instanceId, position]) => [
+            instanceId,
+            { x: position.x + offsetX, y: position.y + offsetY },
+          ])
+        )
+        const guides: AlignmentGuide[] = [
+          ...(xSnap ? [{ x: xSnap.guide }] : []),
+          ...(ySnap ? [{ y: ySnap.guide }] : []),
+        ]
+
+        scheduleDragPreview({ positions, sizes: {}, guides })
+        return
+      }
+
+      const maxWidth = CANVAS_WIDTH - activeDrag.initialPos.x
+      const roundedWidth = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
+      const roundedHeight = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
+      let width = activeDrag.initialSize.width
+      let height = activeDrag.initialSize.height
+
+      if (activeDrag.type === 'resize-r' || activeDrag.type === 'resize-br') {
+        width = Math.max(
           40,
-          Math.min(
-            800 - activeDrag.initialPos.x,
-            Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4
-          )
+          Math.min(maxWidth, roundedWidth(activeDrag.initialSize.width + deltaX))
         )
-        const newHeight = isAspectLocked ? newWidth : activeDrag.initialSize.height
-        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false)
-      } else if (activeDrag.type === 'resize-b') {
-        const newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4)
-        const newWidth = isAspectLocked
-          ? Math.min(800 - activeDrag.initialPos.x, newHeight)
-          : activeDrag.initialSize.width
-        updateWidgetSize(
-          activeDrag.instanceId,
-          { width: isAspectLocked ? newHeight : newWidth, height: newHeight },
-          false
-        )
-      } else if (activeDrag.type === 'resize-br') {
-        let newWidth = Math.max(
-          40,
-          Math.min(
-            800 - activeDrag.initialPos.x,
-            Math.round((activeDrag.initialSize.width + deltaX) / 4) * 4
-          )
-        )
-        let newHeight = Math.max(40, Math.round((activeDrag.initialSize.height + deltaY) / 4) * 4)
-
-        if (isAspectLocked) {
-          const side = Math.min(newWidth, Math.min(800 - activeDrag.initialPos.x, newHeight))
-          newWidth = side
-          newHeight = side
-        }
-
-        updateWidgetSize(activeDrag.instanceId, { width: newWidth, height: newHeight }, false)
       }
-    }
-
-    const handleMouseUp = () => {
-      setActiveDrag(null)
-      setAlignmentGuides([])
-      recordHistorySnapshot()
-    }
-
-    const doAutoScroll = () => {
-      if (!isDraggingRef.current || !containerRef.current?.parentElement) return
-
-      const parent = containerRef.current.parentElement
-      const rect = parent.getBoundingClientRect()
-      const mouse = dragPosRef.current
-
-      let scrollX = 0
-      let scrollY = 0
-      const threshold = 50
-      const maxSpeed = 15
-
-      if (mouse.x < rect.left + threshold) {
-        scrollX = -((rect.left + threshold - mouse.x) / threshold) * maxSpeed
-      } else if (mouse.x > rect.right - threshold) {
-        scrollX = ((mouse.x - (rect.right - threshold)) / threshold) * maxSpeed
+      if (activeDrag.type === 'resize-b' || activeDrag.type === 'resize-br') {
+        height = Math.max(40, roundedHeight(activeDrag.initialSize.height + deltaY))
       }
 
-      if (mouse.y < rect.top + threshold) {
-        scrollY = -((rect.top + threshold - mouse.y) / threshold) * maxSpeed
-      } else if (mouse.y > rect.bottom - threshold) {
-        scrollY = ((mouse.y - (rect.bottom - threshold)) / threshold) * maxSpeed
+      if (isAspectLocked) {
+        const side =
+          activeDrag.type === 'resize-b'
+            ? Math.min(maxWidth, height)
+            : activeDrag.type === 'resize-r'
+              ? width
+              : Math.min(maxWidth, width, height)
+        width = side
+        height = side
       }
 
-      if (scrollX !== 0 || scrollY !== 0) {
-        parent.scrollBy(scrollX, scrollY)
-      }
-
-      scrollRafRef.current = requestAnimationFrame(doAutoScroll)
-    }
-
-    const startAutoScroll = () => {
-      isDraggingRef.current = true
-      if (scrollRafRef.current === null) {
-        scrollRafRef.current = requestAnimationFrame(doAutoScroll)
-      }
+      scheduleDragPreview({
+        positions: { [activeDrag.instanceId]: activeDrag.initialPos },
+        sizes: { [activeDrag.instanceId]: { width, height } },
+        guides: [],
+      })
     }
 
     const stopAutoScroll = () => {
@@ -437,63 +476,145 @@ export function SVGCanvas() {
       }
     }
 
-    const handleGlobalMouseMove = (e: MouseEvent | TouchEvent) => {
-      const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY
+    const doAutoScroll = () => {
+      if (!isDraggingRef.current || !containerRef.current?.parentElement) return
 
-      dragPosRef.current = { x: clientX, y: clientY }
-      if (activeDrag || marquee) startAutoScroll()
+      const parent = containerRef.current.parentElement
+      const rect = parent.getBoundingClientRect()
+      const mouse = dragPosRef.current
+      const threshold = 50
+      const maxSpeed = 15
+      const scrollX =
+        mouse.x < rect.left + threshold
+          ? -((rect.left + threshold - mouse.x) / threshold) * maxSpeed
+          : mouse.x > rect.right - threshold
+            ? ((mouse.x - (rect.right - threshold)) / threshold) * maxSpeed
+            : 0
+      const scrollY =
+        mouse.y < rect.top + threshold
+          ? -((rect.top + threshold - mouse.y) / threshold) * maxSpeed
+          : mouse.y > rect.bottom - threshold
+            ? ((mouse.y - (rect.bottom - threshold)) / threshold) * maxSpeed
+            : 0
 
-      if (marquee) {
-        setMarquee((prev) => (prev ? { ...prev, currentX: clientX, currentY: clientY } : null))
-      }
-      if (activeDrag) handleMouseMove(e)
+      if (scrollX !== 0 || scrollY !== 0) parent.scrollBy(scrollX, scrollY)
+      scrollRafRef.current = requestAnimationFrame(doAutoScroll)
     }
 
-    const handleGlobalMouseUp = (e: MouseEvent | TouchEvent) => {
+    const startAutoScroll = () => {
+      isDraggingRef.current = true
+      if (scrollRafRef.current === null) {
+        scrollRafRef.current = requestAnimationFrame(doAutoScroll)
+      }
+    }
+
+    const finishDrag = () => {
+      const activeDrag = activeDragRef.current
+      const preview = dragPreviewRef.current
+      if (dragRafRef.current !== null) {
+        cancelAnimationFrame(dragRafRef.current)
+        dragRafRef.current = null
+      }
+
+      if (activeDrag && preview) {
+        const store = useEditorStore.getState()
+        if (activeDrag.type === 'move') {
+          const positions = Object.entries(preview.positions)
+            .filter(([instanceId, position]) => {
+              const initialPosition = activeDrag.initialPositions[instanceId]
+              return (
+                initialPosition &&
+                (initialPosition.x !== position.x || initialPosition.y !== position.y)
+              )
+            })
+            .map(([instanceId, position]) => ({ instanceId, position }))
+          if (positions.length > 0) store.updateWidgetPositions(positions, false)
+        } else {
+          const size = preview.sizes[activeDrag.instanceId]
+          if (
+            size &&
+            (size.width !== activeDrag.initialSize.width ||
+              size.height !== activeDrag.initialSize.height)
+          ) {
+            store.updateWidgetSize(activeDrag.instanceId, size, false)
+          }
+        }
+        store.recordHistorySnapshot()
+      }
+
+      activeDragRef.current = null
+      dragPreviewRef.current = null
+      setDragPreview(null)
+      setAlignmentGuides([])
+    }
+
+    const handleGlobalMouseMove = (event: MouseEvent | TouchEvent) => {
+      const clientX = 'touches' in event ? event.touches[0].clientX : (event as MouseEvent).clientX
+      const clientY = 'touches' in event ? event.touches[0].clientY : (event as MouseEvent).clientY
+
+      dragPosRef.current = { x: clientX, y: clientY }
+      if (activeDragRef.current || marqueeRef.current) startAutoScroll()
+
+      if (marqueeRef.current) {
+        marqueeRef.current = {
+          ...marqueeRef.current,
+          currentX: clientX,
+          currentY: clientY,
+        }
+        if (marqueeRafRef.current === null) {
+          marqueeRafRef.current = requestAnimationFrame(() => {
+            marqueeRafRef.current = null
+            setMarquee(marqueeRef.current)
+          })
+        }
+      }
+      if (activeDragRef.current) buildDragPreview(event)
+    }
+
+    const handleGlobalMouseUp = (event: MouseEvent | TouchEvent) => {
       stopAutoScroll()
 
-      if (marquee && containerRef.current && config) {
+      const currentMarquee = marqueeRef.current
+      const currentConfig = configRef.current
+      if (currentMarquee && containerRef.current && currentConfig) {
         const rect = containerRef.current.getBoundingClientRect()
-        const startX = (marquee.startX - rect.left) / zoom
-        const startY = (marquee.startY - rect.top) / zoom
-        const endX = (marquee.currentX - rect.left) / zoom
-        const endY = (marquee.currentY - rect.top) / zoom
-
+        const startX = (currentMarquee.startX - rect.left) / zoomRef.current
+        const startY = (currentMarquee.startY - rect.top) / zoomRef.current
+        const endX = (currentMarquee.currentX - rect.left) / zoomRef.current
+        const endY = (currentMarquee.currentY - rect.top) / zoomRef.current
         const minX = Math.min(startX, endX)
         const maxX = Math.max(startX, endX)
         const minY = Math.min(startY, endY)
         const maxY = Math.max(startY, endY)
-
-        const selectedIds: string[] = []
-        config.widgets.forEach((w) => {
-          if (!w.visible) return
-          const wLeft = w.position.x
-          const wRight = w.position.x + w.size.width
-          const wTop = w.position.y
-          const wBottom = w.position.y + w.size.height
-
-          if (wRight >= minX && wLeft <= maxX && wBottom >= minY && wTop <= maxY) {
-            selectedIds.push(w.instanceId)
-          }
-        })
+        const selectedIds = currentConfig.widgets
+          .filter(
+            (widget) =>
+              widget.visible &&
+              widget.position.x + widget.size.width >= minX &&
+              widget.position.x <= maxX &&
+              widget.position.y + widget.size.height >= minY &&
+              widget.position.y <= maxY
+          )
+          .map((widget) => widget.instanceId)
 
         if (selectedIds.length > 0) {
-          if (e.ctrlKey || e.metaKey || e.shiftKey) {
-            const newSet = new Set(selectedInstanceIds)
-            selectedIds.forEach((id) => {
-              if (newSet.has(id)) newSet.delete(id)
-              else newSet.add(id)
+          const store = useEditorStore.getState()
+          if (event.ctrlKey || event.metaKey || event.shiftKey) {
+            const nextSelection = new Set(store.selectedInstanceIds)
+            selectedIds.forEach((instanceId) => {
+              if (nextSelection.has(instanceId)) nextSelection.delete(instanceId)
+              else nextSelection.add(instanceId)
             })
-            if (setSelection) setSelection(Array.from(newSet))
+            store.setSelection(Array.from(nextSelection))
           } else {
-            if (setSelection) setSelection(selectedIds)
+            store.setSelection(selectedIds)
           }
         }
-        setMarquee(null)
       }
 
-      if (activeDrag) handleMouseUp()
+      marqueeRef.current = null
+      setMarquee(null)
+      finishDrag()
     }
 
     window.addEventListener('mousemove', handleGlobalMouseMove)
@@ -507,20 +628,10 @@ export function SVGCanvas() {
       window.removeEventListener('touchmove', handleGlobalMouseMove)
       window.removeEventListener('touchend', handleGlobalMouseUp)
       stopAutoScroll()
+      if (dragRafRef.current !== null) cancelAnimationFrame(dragRafRef.current)
+      if (marqueeRafRef.current !== null) cancelAnimationFrame(marqueeRafRef.current)
     }
-  }, [
-    activeDrag,
-    zoom,
-    updateWidgetPosition,
-    updateWidgetSize,
-    recordHistorySnapshot,
-    config,
-    config?.widgets,
-    marquee,
-    selectedInstanceIds,
-    setSelection,
-    updateWidgetPositions,
-  ])
+  }, [scheduleDragPreview])
 
   if (!config || !githubData) {
     return (
@@ -533,7 +644,9 @@ export function SVGCanvas() {
   let canvasHeight = 400
   config.widgets.forEach((w) => {
     if (w.visible) {
-      const bottom = w.position.y + w.size.height + 40
+      const previewPosition = dragPreview?.positions[w.instanceId]
+      const previewSize = dragPreview?.sizes[w.instanceId]
+      const bottom = (previewPosition || w.position).y + (previewSize || w.size).height + 40
       if (bottom > canvasHeight) canvasHeight = bottom
     }
   })
@@ -549,12 +662,14 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-none') ||
           target.classList.contains('pointer-events-auto')
         ) {
-          setMarquee({
+          const nextMarquee = {
             startX: e.clientX,
             startY: e.clientY,
             currentX: e.clientX,
             currentY: e.clientY,
-          })
+          }
+          marqueeRef.current = nextMarquee
+          setMarquee(nextMarquee)
           if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
             selectWidget(null)
           }
@@ -569,12 +684,14 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-auto')
         ) {
           const touch = e.touches[0]
-          setMarquee({
+          const nextMarquee = {
             startX: touch.clientX,
             startY: touch.clientY,
             currentX: touch.clientX,
             currentY: touch.clientY,
-          })
+          }
+          marqueeRef.current = nextMarquee
+          setMarquee(nextMarquee)
           selectWidget(null)
         }
       }}
@@ -695,6 +812,13 @@ export function SVGCanvas() {
           {config.widgets.map((widget) => {
             if (!widget.visible) return null
 
+            const previewPosition = dragPreview?.positions[widget.instanceId]
+            const previewSize = dragPreview?.sizes[widget.instanceId]
+            const widgetPosition = previewPosition || widget.position
+            const widgetSize = previewSize || widget.size
+            const isDraggingWidget =
+              dragPreview !== null &&
+              Boolean(activeDragRef.current?.selectedInstanceIds.includes(widget.instanceId))
             const isSelected =
               (selectedInstanceIds && selectedInstanceIds.includes(widget.instanceId)) ||
               widget.instanceId === selectedInstanceId
@@ -712,6 +836,10 @@ export function SVGCanvas() {
                 data-height={widget.size.height}
                 onClick={(e) => {
                   e.stopPropagation()
+                  if (suppressClickRef.current) {
+                    suppressClickRef.current = false
+                    return
+                  }
                   selectWidget(widget.instanceId, e.ctrlKey || e.metaKey, e.shiftKey)
                 }}
                 onDoubleClick={(e) => {
@@ -720,34 +848,72 @@ export function SVGCanvas() {
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation()
-                  if (!selectedInstanceIds.includes(widget.instanceId)) {
+                  if (!selectedInstanceIdsRef.current.includes(widget.instanceId)) {
                     selectWidget(widget.instanceId, e.ctrlKey || e.metaKey, e.shiftKey)
                   }
                   if (!widget.locked) {
-                    setActiveDrag({
+                    const currentSelection = useEditorStore.getState().selectedInstanceIds
+                    const draggableIds = currentSelection.includes(widget.instanceId)
+                      ? currentSelection
+                      : [widget.instanceId]
+                    const initialPositions = Object.fromEntries(
+                      draggableIds
+                        .map((instanceId) => {
+                          const selectedWidget = config.widgets.find(
+                            (item) => item.instanceId === instanceId
+                          )
+                          return selectedWidget
+                            ? [instanceId, { ...selectedWidget.position }]
+                            : null
+                        })
+                        .filter((entry): entry is [string, Position] => Boolean(entry))
+                    )
+                    suppressClickRef.current = true
+                    startDrag({
                       instanceId: widget.instanceId,
                       type: 'move',
                       startX: e.clientX,
                       startY: e.clientY,
                       initialPos: { ...widget.position },
                       initialSize: { ...widget.size },
+                      initialPositions,
+                      selectedInstanceIds: Object.keys(initialPositions),
                     })
                   }
                 }}
                 onTouchStart={(e) => {
                   e.stopPropagation()
-                  if (!selectedInstanceIds.includes(widget.instanceId)) {
+                  if (!selectedInstanceIdsRef.current.includes(widget.instanceId)) {
                     selectWidget(widget.instanceId, false, false)
                   }
                   if (!widget.locked) {
                     const touch = e.touches[0]
-                    setActiveDrag({
+                    const currentSelection = useEditorStore.getState().selectedInstanceIds
+                    const draggableIds = currentSelection.includes(widget.instanceId)
+                      ? currentSelection
+                      : [widget.instanceId]
+                    const initialPositions = Object.fromEntries(
+                      draggableIds
+                        .map((instanceId) => {
+                          const selectedWidget = config.widgets.find(
+                            (item) => item.instanceId === instanceId
+                          )
+                          return selectedWidget
+                            ? [instanceId, { ...selectedWidget.position }]
+                            : null
+                        })
+                        .filter((entry): entry is [string, Position] => Boolean(entry))
+                    )
+                    suppressClickRef.current = true
+                    startDrag({
                       instanceId: widget.instanceId,
                       type: 'move',
                       startX: touch.clientX,
                       startY: touch.clientY,
                       initialPos: { ...widget.position },
                       initialSize: { ...widget.size },
+                      initialPositions,
+                      selectedInstanceIds: Object.keys(initialPositions),
                     })
                   }
                 }}
@@ -763,13 +929,13 @@ export function SVGCanvas() {
                 }}
                 style={{
                   position: 'absolute',
-                  left: widget.position.x,
-                  top: widget.position.y,
-                  width: widget.size.width,
-                  height: widget.size.height,
+                  left: widgetPosition.x,
+                  top: widgetPosition.y,
+                  width: widgetSize.width,
+                  height: widgetSize.height,
                   zIndex: widget.zIndex,
                 }}
-                className={`group transition-all ${
+                className={`group ${isDraggingWidget ? 'transition-none' : 'transition-all'} ${
                   widget.locked
                     ? 'cursor-not-allowed'
                     : isSelected
@@ -782,7 +948,7 @@ export function SVGCanvas() {
                     {widget.locked ? <Lock size={10} className="text-black" /> : <Move size={10} />}
                     <span>{displayName}</span>
                     <span className="font-jetbrains-mono opacity-60">
-                      ({widget.size.width}x{widget.size.height})
+                      ({widgetSize.width}x{widgetSize.height})
                     </span>
                   </div>
                 )}
@@ -792,25 +958,31 @@ export function SVGCanvas() {
                     <div
                       onMouseDown={(e) => {
                         e.stopPropagation()
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-r',
                           startX: e.clientX,
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       onTouchStart={(e) => {
                         e.stopPropagation()
                         const touch = e.touches[0]
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-r',
                           startX: touch.clientX,
                           startY: touch.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
@@ -822,25 +994,31 @@ export function SVGCanvas() {
                     <div
                       onMouseDown={(e) => {
                         e.stopPropagation()
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-b',
                           startX: e.clientX,
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       onTouchStart={(e) => {
                         e.stopPropagation()
                         const touch = e.touches[0]
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-b',
                           startX: touch.clientX,
                           startY: touch.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
@@ -852,25 +1030,31 @@ export function SVGCanvas() {
                     <div
                       onMouseDown={(e) => {
                         e.stopPropagation()
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-br',
                           startX: e.clientX,
                           startY: e.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       onTouchStart={(e) => {
                         e.stopPropagation()
                         const touch = e.touches[0]
-                        setActiveDrag({
+                        suppressClickRef.current = true
+                        startDrag({
                           instanceId: widget.instanceId,
                           type: 'resize-br',
                           startX: touch.clientX,
                           startY: touch.clientY,
                           initialPos: { ...widget.position },
                           initialSize: { ...widget.size },
+                          initialPositions: { [widget.instanceId]: { ...widget.position } },
+                          selectedInstanceIds: [widget.instanceId],
                         })
                       }}
                       className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
