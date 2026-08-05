@@ -51,7 +51,8 @@ function renderExternalWidgetSvg(
   accent: string,
   mode: 'contain' | 'badge' = 'contain',
   targetUrl?: string,
-  fallbackUrl?: string
+  fallbackUrl?: string,
+  skipImage: boolean = false
 ): string {
   let processedUrl = url
   try {
@@ -91,9 +92,9 @@ function renderExternalWidgetSvg(
         ${innerContentHtml}
       </div>
     </foreignObject>
-    ${targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : ''}
-    <image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />
-    ${targetUrl ? `</a>` : ''}
+    ${!skipImage ? (targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : '') : ''}
+    ${!skipImage ? `<image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />` : ''}
+    ${!skipImage ? (targetUrl ? `</a>` : '') : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
 }
@@ -1055,10 +1056,11 @@ export function renderWidgetSvg(
         !hideTitle && embedType !== 'card',
         globalStyles,
         accent,
-        'contain'
+        'contain',
+        undefined,
+        undefined,
+        true
       )
-
-      contentSvg = contentSvg.replace(/<image [^>]*onerror="this\.style\.display='none';" \/>/, '')
 
       break
     }
