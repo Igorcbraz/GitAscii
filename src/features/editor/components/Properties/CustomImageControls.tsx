@@ -60,6 +60,89 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
     reader.readAsDataURL(file)
   }
 
+  const SUGGESTED_GIFS = [
+    {
+      name: 'Designer',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Designer.gif',
+    },
+    {
+      name: 'Developer',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Developer.gif',
+    },
+    {
+      name: 'Earth',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Earth.gif',
+    },
+    {
+      name: 'Handshake',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Handshake.gif',
+    },
+    {
+      name: 'Hi',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Hi.gif',
+    },
+    {
+      name: 'Mario Gameplay',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Mario_Gameplay.gif',
+    },
+    {
+      name: 'Mario Hello',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Mario_Hello_Big.gif',
+    },
+    {
+      name: 'Medal',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Medal.gif',
+    },
+    {
+      name: 'PC',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/PC.gif',
+    },
+    {
+      name: 'Point Down',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Point_Down.gif',
+    },
+    {
+      name: 'Rocket',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Rocket.gif',
+    },
+    {
+      name: 'Super Mario',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Super_Mario.gif',
+    },
+    {
+      name: 'Coin',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/coin.gif',
+    },
+    {
+      name: 'Dino',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/dino.gif',
+    },
+    {
+      name: 'Gandalf',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/gandalf_parrot.gif',
+    },
+    {
+      name: 'Happy',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/happy.gif',
+    },
+    {
+      name: 'Headbang',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/headbang.gif',
+    },
+    {
+      name: 'Hmm',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/hmm.gif',
+    },
+    {
+      name: 'Powerup',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/powerup.gif',
+    },
+    {
+      name: 'Wave',
+      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/wave.gif',
+    },
+  ]
+
   return (
     <div className="space-y-4 pt-3 border-t border-graphite">
       <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
@@ -88,6 +171,27 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           placeholder="https://exemplo.com/imagem.png ou upload abaixo"
           className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2.5 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
         />
+
+        {/* Suggested GIFs */}
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {SUGGESTED_GIFS.map((gif) => (
+            <button
+              key={gif.name}
+              type="button"
+              onClick={() => {
+                setErrorMsg(null)
+                updateWidgetConfig(instanceId, {
+                  imageUrl: gif.url,
+                  src: gif.url,
+                  url: gif.url,
+                })
+              }}
+              className="px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded bg-carbon hover:bg-graphite/40 border border-graphite hover:border-signal-lime/60 text-ash hover:text-signal-lime transition-colors"
+            >
+              {gif.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* File Upload Button */}
