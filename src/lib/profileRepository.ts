@@ -9,6 +9,7 @@ export interface ProfileRepository {
   get(username: string, slug: string): Promise<SavedConfiguration | null>
   save(config: SavedConfiguration): Promise<void>
   delete(username: string, slug: string): Promise<void>
+  listAll(): Promise<SavedConfiguration[]>
 }
 
 const PROFILES_DIR = path.join(process.cwd(), 'src', 'data', 'profiles')
@@ -74,6 +75,32 @@ export class LocalProfileRepository implements ProfileRepository {
       )
       throw error
     }
+  }
+
+  async listAll(): Promise<SavedConfiguration[]> {
+    const configs: SavedConfiguration[] = []
+    try {
+      if (fs.existsSync(PROFILES_DIR)) {
+        const files = await fs.promises.readdir(PROFILES_DIR)
+        for (const file of files) {
+          if (file.endsWith('.json')) {
+            try {
+              const filePath = path.join(PROFILES_DIR, file)
+              const content = await fs.promises.readFile(filePath, 'utf-8')
+              const config = JSON.parse(content) as SavedConfiguration
+              if (config && config.username) {
+                configs.push(config)
+              }
+            } catch (e) {
+              console.error(`Error reading profile file ${file}:`, e)
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to list stored profiles:', error)
+    }
+    return configs
   }
 }
 
@@ -199,6 +226,41 @@ export class BlobProfileRepository implements ProfileRepository {
       )
       throw error
     }
+  }
+
+  async listAll(): Promise<SavedConfiguration[]> {
+    const configs: SavedConfiguration[] = []
+    try {
+      const { blobs } = await list({ prefix: 'profiles/' })
+      for (const blob of blobs) {
+        try {
+          const isCompressed = blob.pathname.endsWith('.json.gz')
+          const isLegacy = blob.pathname.endsWith('.json')
+
+          if (!isCompressed && !isLegacy) continue
+
+          const response = await fetch(blob.url)
+          if (!response.ok) {
+            console.warn(`Failed to fetch blob ${blob.pathname}: ${response.statusText}`)
+            continue
+          }
+
+          if (isCompressed) {
+            const arrayBuffer = await response.arrayBuffer()
+            const buffer = Buffer.from(arrayBuffer)
+            const decompressed = zlib.gunzipSync(buffer).toString('utf-8')
+            configs.push(JSON.parse(decompressed) as SavedConfiguration)
+          } else {
+            configs.push((await response.json()) as SavedConfiguration)
+          }
+        } catch (e) {
+          console.error(`Error reading blob ${blob.pathname}:`, e)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to list stored profiles from blob:', error)
+    }
+    return configs
   }
 }
 

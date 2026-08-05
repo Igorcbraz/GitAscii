@@ -36,6 +36,7 @@ export interface NormalizedGitHubData {
   languages: Record<string, number>
   totalStars: number
   totalForks: number
+  readmeContent?: string | null
   contributions?: {
     totalContributions: number
     weeks: Array<{

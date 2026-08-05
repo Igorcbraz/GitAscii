@@ -9,22 +9,7 @@ import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engin
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
 
-export type WidgetBadgeType = 'popular' | 'essential' | 'highlight' | 'interactive' | 'trending'
-
-export interface WidgetBadge {
-  text: string
-  type: WidgetBadgeType
-}
-
-export interface WidgetCatalogItem {
-  id: string
-  name: string
-  desc: string
-  icon: React.ElementType
-  isExternal?: boolean
-  badge?: WidgetBadge
-  category?: 'essential' | 'interactive' | 'stats' | 'external' | 'misc'
-}
+import { type WidgetCatalogItem } from '../../config/widgets'
 
 interface WidgetPreviewTooltipProps {
   widgetItem: WidgetCatalogItem | null

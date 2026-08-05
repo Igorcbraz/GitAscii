@@ -1,6 +1,7 @@
 import { FlatCompat } from '@eslint/eslintrc'
 import prettierConfig from 'eslint-config-prettier'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
+import storybook from 'eslint-plugin-storybook'
 import unusedImports from 'eslint-plugin-unused-imports'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -14,8 +15,17 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 })
 
-export default [
-  { ignores: ['.next/**', 'node_modules/**'] },
+const eslintConfig = [
+  {
+    ignores: [
+      '.next/**',
+      'node_modules/**',
+      'storybook-static/**',
+      'playwright-report/**',
+      'test-results/**',
+      '.agents/**',
+    ],
+  },
   ...fixupConfigRules(
     compat.config({
       extends: ['next/core-web-vitals'],
@@ -46,4 +56,7 @@ export default [
       ],
     },
   },
+  ...storybook.configs['flat/recommended'],
 ]
+
+export default eslintConfig

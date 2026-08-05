@@ -1,38 +1,6 @@
 'use client'
 
-import {
-  Activity,
-  Award,
-  BarChart3,
-  Code2,
-  Cpu,
-  Download,
-  Eye,
-  FileText,
-  Flame,
-  FolderGit2,
-  GitFork,
-  Globe,
-  Grid,
-  Heading,
-  LayoutTemplate,
-  Minus,
-  PieChart,
-  Plus,
-  Quote,
-  Search,
-  Share2,
-  ShieldCheck,
-  Terminal,
-  TerminalSquare,
-  TrendingUp,
-  Trophy,
-  Type,
-  Upload,
-  User,
-  X,
-} from 'lucide-react'
-import { Sparkles } from 'lucide-react'
+import { Download, ExternalLink, GitFork, Plus, Search, Upload, X, Zap } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -40,198 +8,14 @@ import { useToast } from '@/components/ui/toast'
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
 import { useI18n } from '@/i18n'
 
-import { useEditorStore } from '../../store/editorStore'
 import {
-  type WidgetBadgeType,
+  WIDGET_CATALOG,
+  WIDGET_FILTERS,
+  WidgetBadgeType,
   type WidgetCatalogItem,
-  WidgetPreviewTooltip,
-} from './WidgetPreviewTooltip'
-
-export const WIDGET_CATALOG: WidgetCatalogItem[] = [
-  {
-    id: 'header',
-    name: 'Header',
-    icon: Heading,
-    desc: 'Name, handle & company badge',
-    category: 'essential',
-    badge: { text: 'Mais Usado', type: 'popular' },
-  },
-  {
-    id: 'ascii-text',
-    name: 'ASCII Text',
-    icon: Type,
-    desc: 'Custom text rendered in ASCII art font',
-    category: 'interactive',
-    badge: { text: 'Novo', type: 'highlight' },
-  },
-  {
-    id: 'ascii-art',
-    name: 'ASCII Art',
-    icon: Terminal,
-    desc: 'Image converted to character art',
-    category: 'interactive',
-    badge: { text: 'Destaque', type: 'highlight' },
-  },
-  {
-    id: 'terminal-info',
-    name: 'Terminal Info',
-    icon: TerminalSquare,
-    desc: 'Neofetch-style terminal info card',
-    category: 'essential',
-    badge: { text: 'Mais Usado', type: 'popular' },
-  },
-  {
-    id: 'avatar',
-    name: 'Avatar',
-    icon: User,
-    desc: 'Profile picture frame',
-    category: 'essential',
-    badge: { text: 'Essencial', type: 'essential' },
-  },
-  {
-    id: 'tech-stack',
-    name: 'Tech Stack',
-    icon: Cpu,
-    desc: 'Interactive skill icons gallery',
-    category: 'interactive',
-    badge: { text: 'Interativo', type: 'interactive' },
-  },
-  {
-    id: 'bio',
-    name: 'Bio & Links',
-    icon: FileText,
-    desc: 'Biography, location & blog link',
-    category: 'essential',
-  },
-  {
-    id: 'stats',
-    name: 'GitHub Stats',
-    icon: BarChart3,
-    desc: 'Stars, repos, followers metrics',
-    category: 'stats',
-    badge: { text: 'Popular', type: 'popular' },
-  },
-  {
-    id: 'languages',
-    name: 'Top Languages',
-    icon: Code2,
-    desc: 'Language breakdown bar',
-    category: 'stats',
-  },
-  {
-    id: 'repositories',
-    name: 'Featured Repos',
-    icon: FolderGit2,
-    desc: 'Highlighted repository cards',
-    category: 'stats',
-  },
-  {
-    id: 'social-media',
-    name: 'Social Media',
-    icon: Share2,
-    desc: 'Shields & social media badges',
-    category: 'misc',
-  },
-
-  {
-    id: 'github-readme-stats',
-    name: 'GitHub Readme Stats',
-    icon: BarChart3,
-    desc: 'Estatísticas, top linguagens & repos fixados',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'Popular', type: 'popular' },
-  },
-  {
-    id: 'streak-stats',
-    name: 'GitHub Streak Stats',
-    icon: Flame,
-    desc: 'Sequência e recorde de contribuições',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'profile-trophy',
-    name: 'GitHub Profile Trophy',
-    icon: Trophy,
-    desc: 'Troféus e conquistas do perfil',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'activity-graph',
-    name: 'Activity Graph',
-    icon: Activity,
-    desc: 'Gráfico de linhas de atividade em 31 dias',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'contribution-snake',
-    name: 'Contribution Snake',
-    icon: TrendingUp,
-    desc: 'Cobra animada comendo os blocos de commit',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'Trending', type: 'trending' },
-  },
-  {
-    id: 'metrics-card',
-    name: 'Metrics Card',
-    icon: PieChart,
-    desc: 'Infográfico avançado de métricas e hábitos',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'views-counter',
-    name: 'Profile Views Counter',
-    icon: Eye,
-    desc: 'Contador de visitas ao perfil GitHub',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'readme-quotes',
-    name: 'GitHub Readme Quotes',
-    icon: Quote,
-    desc: 'Citação diária para desenvolvedores',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'awesome-badge',
-    name: 'Awesome Profile Badge',
-    icon: Award,
-    desc: 'Badge de destaque para perfis incríveis',
-    isExternal: true,
-    category: 'external',
-  },
-  {
-    id: 'gitfest-lineup',
-    name: 'GitFest',
-    icon: Sparkles,
-    desc: 'Festival lineup of your repos',
-    isExternal: true,
-    category: 'external',
-    badge: { text: 'New', type: 'highlight' },
-  },
-
-  {
-    id: 'divider',
-    name: 'Neon Divider',
-    icon: Minus,
-    desc: 'Section separator line',
-    category: 'misc',
-  },
-  {
-    id: 'footer',
-    name: 'Footer Stamp',
-    icon: LayoutTemplate,
-    desc: 'Signature metadata footer',
-    category: 'misc',
-  },
-]
+} from '../../config/widgets'
+import { useEditorStore } from '../../store/editorStore'
+import { WidgetPreviewTooltip } from './WidgetPreviewTooltip'
 
 function renderWidgetBadge(badge?: { text: string; type: WidgetBadgeType }) {
   if (!badge) return null
@@ -389,21 +173,9 @@ export function WidgetLibrary() {
 
   const filteredWidgets = useMemo(() => {
     return translatedCatalog.filter((item) => {
-      if (categoryFilter === 'popular') {
-        if (
-          !item.badge ||
-          (item.badge.type !== 'popular' &&
-            item.badge.type !== 'highlight' &&
-            item.badge.type !== 'trending')
-        ) {
-          return false
-        }
-      } else if (categoryFilter === 'essential') {
-        if (item.category !== 'essential' && item.badge?.type !== 'essential') {
-          return false
-        }
-      } else if (categoryFilter === 'external') {
-        if (!item.isExternal) return false
+      const filter = WIDGET_FILTERS.find((f) => f.id === categoryFilter)
+      if (filter && !filter.match(item)) {
+        return false
       }
 
       if (!searchQuery.trim()) return true
@@ -427,6 +199,7 @@ export function WidgetLibrary() {
           role="button"
           tabIndex={0}
           onClick={() => addWidget(item.id)}
+          data-testid="add-widget-gitfest-lineup"
           onMouseEnter={(e) => {
             const rect = e.currentTarget.getBoundingClientRect()
             setHoveredWidget({ item, rect })
@@ -512,20 +285,39 @@ export function WidgetLibrary() {
       <div
         key={item.id}
         onClick={() => addWidget(item.id)}
+        data-testid={`add-widget-${item.id}`}
         onMouseEnter={(e) => {
           const rect = e.currentTarget.getBoundingClientRect()
           setHoveredWidget({ item, rect })
         }}
         onMouseLeave={() => setHoveredWidget(null)}
-        className="group relative p-3 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(197,255,74,0.1)]"
+        className={`group relative p-3 border transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
+          item.isExternal
+            ? 'border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]'
+            : 'border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx hover:shadow-[0_4px_12px_rgba(197,255,74,0.15)]'
+        }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+        {item.isExternal && (
+          <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+        )}
+
+        <div className="flex items-center gap-3 relative z-10">
+          <div
+            className={`p-2 rounded-xs transition-colors duration-300 shrink-0 ${
+              item.isExternal
+                ? 'bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white'
+                : 'bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black'
+            }`}
+          >
             <Icon size={16} />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-signal-lime transition-colors duration-300">
+              <h4
+                className={`font-inter-tight font-medium text-label text-chalk transition-colors duration-300 ${
+                  item.isExternal ? 'group-hover:text-violet-400' : 'group-hover:text-signal-lime'
+                }`}
+              >
                 {item.name}
               </h4>
               {renderWidgetBadge(item.badge)}
@@ -533,29 +325,33 @@ export function WidgetLibrary() {
             <p className="font-inter-tight text-eyebrow text-ash line-clamp-1">{item.desc}</p>
           </div>
         </div>
-        <button className="text-ash group-hover:text-signal-lime transition-colors duration-300 p-1 shrink-0 self-center">
-          <Plus size={15} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0 relative z-10">
+          {item.isExternal && (
+            <ExternalLink
+              size={11}
+              className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
+            />
+          )}
+          <button
+            className={`transition-colors duration-300 p-1 ${
+              item.isExternal
+                ? 'text-ash group-hover:text-violet-400'
+                : 'text-ash group-hover:text-signal-lime'
+            }`}
+          >
+            <Plus size={15} />
+          </button>
+        </div>
       </div>
     )
   }
 
-  const FILTER_ITEMS = [
-    { id: 'all', label: t('editor.sidebar.filter.all', 'Todos'), icon: Grid },
-    { id: 'popular', label: t('editor.sidebar.filter.popular', 'Destaques'), icon: Flame },
-    {
-      id: 'essential',
-      label: t('editor.sidebar.filter.essential', 'Essenciais'),
-      icon: ShieldCheck,
-    },
-    { id: 'external', label: t('editor.sidebar.filter.external', 'Externos'), icon: Globe },
-  ]
-
   return (
-    <aside className="w-75 h-full bg-onyx border-r border-graphite flex flex-col shrink-0">
+    <aside className="w-full lg:w-75 h-full bg-onyx border-r-0 lg:border-r border-graphite flex flex-col shrink-0">
       <div className="flex border-b border-graphite bg-void-black">
         <button
           onClick={() => setSidebarTab('widgets')}
+          data-testid="widgets-tab-btn"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'widgets'
               ? 'border-signal-lime text-signal-lime bg-onyx'
@@ -566,6 +362,7 @@ export function WidgetLibrary() {
         </button>
         <button
           onClick={() => setSidebarTab('templates')}
+          data-testid="templates-tab-btn"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'templates'
               ? 'border-signal-lime text-signal-lime bg-onyx'
@@ -607,7 +404,7 @@ export function WidgetLibrary() {
                 onMouseLeave={handleMouseUpOrLeave}
                 className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none select-none cursor-grab active:cursor-grabbing"
               >
-                {FILTER_ITEMS.map((filter) => {
+                {WIDGET_FILTERS.map((filter) => {
                   const FilterIcon = filter.icon
                   const isActive = categoryFilter === filter.id
                   return (
@@ -627,7 +424,7 @@ export function WidgetLibrary() {
                         size={12}
                         className={isActive ? 'text-signal-lime' : 'text-ash'}
                       />
-                      <span>{filter.label}</span>
+                      <span>{t(filter.labelKey as any, filter.defaultLabel)}</span>
                     </button>
                   )
                 })}
@@ -656,7 +453,7 @@ export function WidgetLibrary() {
                           {t('editor.sidebar.announce', 'Anuncie Aqui')}
                         </span>
                       </div>
-                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
                         {t(
                           'editor.sidebar.featured_slot_desc',
                           'Destaque seu widget para a comunidade'
@@ -680,7 +477,7 @@ export function WidgetLibrary() {
                           {t('editor.sidebar.announce', 'Anuncie Aqui')}
                         </span>
                       </div>
-                      <p className="font-inter-tight text-eyebrow text-ash/70 group-hover:text-ash transition-colors line-clamp-1">
+                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
                         {t(
                           'editor.sidebar.featured_slot_desc',
                           'Destaque seu widget para a comunidade'
@@ -692,38 +489,140 @@ export function WidgetLibrary() {
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-2">
-              <div className="label-stamp">
-                {categoryFilter === 'all' && !searchQuery
-                  ? '[ WIDGET CATALOG ]'
-                  : `[ RESULTS: ${filteredWidgets.length} ]`}
-              </div>
-            </div>
-
             {filteredWidgets.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-graphite rounded-xs text-ash text-note font-inter-tight">
                 {t('editor.sidebar.no_widgets', 'Nenhum widget encontrado para "{query}"', {
                   query: searchQuery,
                 })}
               </div>
-            ) : (
-              <div className="space-y-2">
-                {(categoryFilter === 'all' && !searchQuery
-                  ? filteredWidgets.filter((w) => w.id !== 'gitfest-lineup')
-                  : filteredWidgets
-                ).map(renderWidgetCard)}
+            ) : categoryFilter === 'all' && !searchQuery ? (
+              <div className="space-y-5">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <Zap size={10} className="text-signal-lime shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-signal-lime uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.native_category', 'GitAscii Native')}
+                    </span>
+                    <span className="ml-auto font-inter-tight text-caption text-ash/50">
+                      {
+                        filteredWidgets.filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
+                          .length
+                      }
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {filteredWidgets
+                      .filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
+                      .map(renderWidgetCard)}
+                  </div>
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <ExternalLink size={10} className="text-violet-400/80 shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.external_category', 'Integrações Externas')}
+                    </span>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {filteredWidgets.filter((w) => w.isExternal).length}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {filteredWidgets
+                      .filter((w) => w.isExternal)
+                      .map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => addWidget(item.id)}
+                            data-testid={`add-widget-${item.id}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setHoveredWidget({ item, rect })
+                            }}
+                            onMouseLeave={() => setHoveredWidget(null)}
+                            className="group relative p-3 border border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]"
+                          >
+                            <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <div className="p-2 rounded-xs bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white transition-colors duration-300 shrink-0">
+                                <Icon size={16} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-violet-400 transition-colors duration-300">
+                                    {item.name}
+                                  </h4>
+                                  {item.badge && (
+                                    <span className="text-[9px] font-inter-tight font-medium text-bone bg-graphite border border-slate px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
+                                      {item.badge.text}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="font-inter-tight text-eyebrow text-ash group-hover:text-bone transition-colors line-clamp-1">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 relative z-10">
+                              <ExternalLink
+                                size={11}
+                                className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
+                              />
+                              <button className="text-ash group-hover:text-violet-400 transition-colors duration-300 p-1">
+                                <Plus size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
 
                 <a
                   href="https://github.com/Igorcbraz/GitAscii/fork"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:shadow-[0_0_20px_rgba(197,255,74,0.15)] hover:-translate-y-0.5"
+                  className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
                 >
-                  <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <GitFork size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-inter-tight font-medium text-note text-signal-lime leading-tight">
+                    <h4 className="font-inter-tight font-medium text-note text-pearl group-hover:text-chalk transition-colors duration-300 leading-tight">
+                      {t('editor.sidebar.contribute_widget', 'Adicione seu próprio Widget!')}
+                    </h4>
+                    <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
+                      {t(
+                        'editor.sidebar.contribute_widget_desc',
+                        'Faça um fork e contribua com a comunidade'
+                      )}
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="label-stamp">{`[ RESULTS: ${filteredWidgets.length} ]`}</div>
+                </div>
+                {filteredWidgets.map(renderWidgetCard)}
+
+                <a
+                  href="https://github.com/Igorcbraz/GitAscii/fork"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
+                >
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
+                    <GitFork size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-inter-tight font-medium text-note text-pearl group-hover:text-chalk transition-colors duration-300 leading-tight">
                       {t('editor.sidebar.contribute_widget', 'Adicione seu próprio Widget!')}
                     </h4>
                     <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
@@ -754,14 +653,15 @@ export function WidgetLibrary() {
             <div className="space-y-2 mb-4">
               <div
                 onClick={handleImportClick}
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
+                data-testid="import-layout-btn"
+                className="group relative p-2.5 border border-graphite hover:border-pearl bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <Upload size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-white transition-colors duration-300">
                       {t('editor.sidebar.import_layout', 'Import Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -773,14 +673,15 @@ export function WidgetLibrary() {
 
               <div
                 onClick={handleExport}
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
+                data-testid="export-layout-btn"
+                className="group relative p-2.5 border border-graphite hover:border-pearl bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <Download size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-white transition-colors duration-300">
                       {t('editor.sidebar.export_layout', 'Export Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -807,6 +708,7 @@ export function WidgetLibrary() {
               <div
                 key={tmpl.id}
                 onClick={() => applyTemplate(tmpl.id)}
+                data-testid={`template-${tmpl.id}`}
                 className={`p-4 border rounded-none cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 ${
                   config.templateId === tmpl.id
                     ? 'border-signal-lime bg-iron shadow-sm'

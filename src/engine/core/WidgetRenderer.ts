@@ -51,8 +51,22 @@ function renderExternalWidgetSvg(
   accent: string,
   mode: 'contain' | 'badge' = 'contain',
   targetUrl?: string,
-  fallbackUrl?: string
+  fallbackUrl?: string,
+  skipImage: boolean = false
 ): string {
+  let processedUrl = url
+  try {
+    const parsed = new URL(processedUrl)
+    if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
+      processedUrl = processedUrl.replace(
+        /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
+        'https://raw.githubusercontent.com/$1/$2/$3'
+      )
+    }
+  } catch {
+    // Ignore invalid URL
+  }
+
   const imgY = showTitle ? 44 : 16
   const paddingX = 16
   const imgW = width - paddingX * 2
@@ -63,23 +77,24 @@ function renderExternalWidgetSvg(
       ? 'height:32px; width:auto; max-width:100%; object-fit:contain; object-position:left center;'
       : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:left top;'
 
-  const onerrorAttr = fallbackUrl
-    ? ` onerror="this.onerror=null;this.src='${escapeXml(fallbackUrl)}';"`
-    : ''
-  const imgHtml = `<img src="${escapeXml(url)}"${onerrorAttr} alt="${escapeXml(title)}" style="${imgStyle}" />`
+  const imgHtml = fallbackUrl
+    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(fallbackUrl)}';" />`
+    : `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" />`
   const innerContentHtml = targetUrl
     ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;max-width:100%;max-height:100%;">${imgHtml}</a>`
     : imgHtml
 
   return `
     ${showTitle ? `<text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">${escapeXml(title)}</text>` : ''}
-    <!-- EXTERNAL_WIDGET_START: ${escapeXml(url)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
+    <!-- EXTERNAL_WIDGET_START: ${escapeXml(processedUrl)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
     <foreignObject x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}">
       <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;">
         ${innerContentHtml}
       </div>
     </foreignObject>
-    <image href="${escapeXml(url)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" opacity="0" />
+    ${!skipImage ? (targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : '') : ''}
+    ${!skipImage ? `<image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />` : ''}
+    ${!skipImage ? (targetUrl ? `</a>` : '') : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
 }
@@ -87,7 +102,8 @@ function renderExternalWidgetSvg(
 export function renderWidgetSvg(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
-  globalStyles: GlobalStyles
+  globalStyles: GlobalStyles,
+  includeWrapper: boolean = true
 ): string {
   if (!widget.visible) return ''
 
@@ -160,25 +176,21 @@ export function renderWidgetSvg(
           .map((line, rowIndex) => {
             const rowColors = asciiColors[rowIndex] || []
             let rowSvg = ''
-            let currentSpanText = ''
-            let currentColor = ''
 
-            for (let charIndex = 0; charIndex < line.length; charIndex++) {
-              const char = line[charIndex]
+            for (let charIndex = 0; charIndex < line.length;) {
+              let chunk = line[charIndex]
               const charColor = rowColors[charIndex] || accent
-
-              if (charColor === currentColor) {
-                currentSpanText += char
-              } else {
-                if (currentSpanText) {
-                  rowSvg += `<tspan fill="${currentColor}">${escapeXml(currentSpanText)}</tspan>`
-                }
-                currentColor = charColor
-                currentSpanText = char
+              let nextIndex = charIndex + 1
+              while (
+                nextIndex < line.length &&
+                (rowColors[nextIndex] || accent) === charColor &&
+                nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
+              ) {
+                chunk += line[nextIndex]
+                nextIndex++
               }
-            }
-            if (currentSpanText) {
-              rowSvg += `<tspan fill="${currentColor}">${escapeXml(currentSpanText)}</tspan>`
+              rowSvg += `<tspan fill="${charColor}">${escapeXml(chunk)}</tspan>`
+              charIndex = nextIndex
             }
 
             const yPos = (rowIndex + 0.85) * lineHeight
@@ -187,9 +199,23 @@ export function renderWidgetSvg(
           .join('\n')
       } else {
         const linesContent = asciiLines
-          .map(
-            (line, i) => `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`
-          )
+          .map((line, i) => {
+            let rowSvg = ''
+            for (let charIndex = 0; charIndex < line.length;) {
+              let chunk = line[charIndex]
+              let nextIndex = charIndex + 1
+              while (
+                nextIndex < line.length &&
+                nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
+              ) {
+                chunk += line[nextIndex]
+                nextIndex++
+              }
+              rowSvg += `<tspan>${escapeXml(chunk)}</tspan>`
+              charIndex = nextIndex
+            }
+            return `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${rowSvg}</tspan>`
+          })
           .join('')
 
         innerContent = `
@@ -226,9 +252,23 @@ export function renderWidgetSvg(
       const viewH = asciiLines.length * lineHeight
 
       const linesContent = asciiLines
-        .map(
-          (line, i) => `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`
-        )
+        .map((line, i) => {
+          let rowSvg = ''
+          for (let charIndex = 0; charIndex < line.length;) {
+            let chunk = line[charIndex]
+            let nextIndex = charIndex + 1
+            while (
+              nextIndex < line.length &&
+              nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
+            ) {
+              chunk += line[nextIndex]
+              nextIndex++
+            }
+            rowSvg += `<tspan>${escapeXml(chunk)}</tspan>`
+            charIndex = nextIndex
+          }
+          return `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${rowSvg}</tspan>`
+        })
         .join('')
 
       contentSvg = `
@@ -957,6 +997,74 @@ export function renderWidgetSvg(
       break
     }
 
+    case 'ghstats': {
+      const username = data.user.login
+      const embedType = (cfg.embedType as string) || 'card'
+
+      const theme = (cfg.theme as string) || 'default'
+      const showIcons = cfg.showIcons !== false
+      const showRing = cfg.showRing !== false
+      const hideBorder = Boolean(cfg.hideBorder)
+      const hideTitle = Boolean(cfg.hideTitle)
+      const size = (cfg.size as string) || 'default'
+      const compactCount = (cfg.compactCount as string) || '4'
+      const hideStats = (cfg.hideStats as string) || ''
+
+      const customTitle = (cfg.customTitle as string) || ''
+      const layout = (cfg.layout as string) || 'bar'
+      const maxLangs = Number(cfg.maxLangs) || 8
+      const badgeStyle = (cfg.badgeStyle as string) || 'flat'
+
+      let statsUrl = `https://ghstats.dev/api/${embedType}?username=${encodeURIComponent(username)}&theme=${theme}`
+
+      const bgColor = cfg.backgroundColor as string
+      if (bgColor) statsUrl += `&bg=${bgColor.replace('#', '')}`
+
+      const textColor = cfg.textColor as string
+      if (textColor) statsUrl += `&text=${textColor.replace('#', '')}`
+
+      const accentColor = cfg.accentColor as string
+      if (accentColor) {
+        statsUrl += `&icon_color=${accentColor.replace('#', '')}`
+        statsUrl += `&title_color=${accentColor.replace('#', '')}`
+      }
+
+      const borderColor = cfg.borderColor as string
+      if (borderColor) statsUrl += `&border_color=${borderColor.replace('#', '')}`
+
+      if (embedType === 'card') {
+        if (!showIcons) statsUrl += `&show_icons=false`
+        if (!showRing) statsUrl += `&show_ring=false`
+        if (hideBorder) statsUrl += `&hide_border=true`
+        if (hideTitle) statsUrl += `&hide_title=true`
+        if (size === 'compact') statsUrl += `&size=compact&compact_count=${compactCount}`
+        if (customTitle) statsUrl += `&custom_title=${encodeURIComponent(customTitle)}`
+        if (hideStats) statsUrl += `&hide=${encodeURIComponent(hideStats)}`
+      } else if (embedType === 'langs') {
+        if (layout !== 'bar') statsUrl += `&layout=${layout}`
+        if (maxLangs !== 8) statsUrl += `&max_langs=${maxLangs}`
+        if (hideBorder) statsUrl += `&hide_border=true`
+      } else if (embedType === 'mini' || embedType === 'badge') {
+        if (badgeStyle !== 'flat') statsUrl += `&style=${badgeStyle}`
+      }
+
+      contentSvg = renderExternalWidgetSvg(
+        statsUrl,
+        width,
+        height,
+        customTitle || '[ GHSTATS.DEV ]',
+        !hideTitle && embedType !== 'card',
+        globalStyles,
+        accent,
+        'contain',
+        undefined,
+        undefined,
+        true
+      )
+
+      break
+    }
+
     case 'streak-stats': {
       const username = (cfg.username as string) || data.user.login
       const theme = (cfg.theme as string) || 'dark'
@@ -1046,8 +1154,8 @@ export function renderWidgetSvg(
         theme === 'light'
           ? 'github-contribution-grid-snake.svg'
           : 'github-contribution-grid-snake-dark.svg'
-      const snakeUrl = `https://raw.githubusercontent.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/${encodeURIComponent(branch)}/${snakeFileName}`
-      const fallbackSnakeUrl = `https://raw.githubusercontent.com/platane/platane/output/${snakeFileName}`
+      const snakeUrl = `https://cdn.jsdelivr.net/gh/${encodeURIComponent(username)}/${encodeURIComponent(username)}@${encodeURIComponent(branch)}/${snakeFileName}`
+      const fallbackSnakeUrl = `https://cdn.jsdelivr.net/gh/platane/platane@output/${snakeFileName}`
 
       contentSvg = renderExternalWidgetSvg(
         snakeUrl,
@@ -1161,6 +1269,35 @@ export function renderWidgetSvg(
       break
     }
 
+    case 'custom-image': {
+      const imageUrl = (cfg.imageUrl as string) || (cfg.src as string) || (cfg.url as string) || ''
+      const targetUrl = (cfg.targetUrl as string) || (cfg.href as string) || undefined
+      const showTitle = cfg.showTitle === true
+      const customTitle = (cfg.customTitle as string) || '[ IMAGE ]'
+      const mode = (cfg.mode as 'contain' | 'badge') || 'contain'
+
+      if (!imageUrl) {
+        contentSvg = `
+          <rect width="${width}" height="${height}" fill="#18181b" rx="4" opacity="0.6" stroke="${border}" stroke-width="1" />
+          <text x="${width / 2}" y="${height / 2 - 6}" text-anchor="middle" font-family="${globalStyles.fontFamily}" font-size="12" fill="${accent}">📷 [ IMAGEM CUSTOMIZADA ]</text>
+          <text x="${width / 2}" y="${height / 2 + 14}" text-anchor="middle" font-family="${globalStyles.fontFamily}" font-size="10" fill="#71717a">Cole a URL ou faça upload no painel de propriedades</text>
+        `
+      } else {
+        contentSvg = renderExternalWidgetSvg(
+          imageUrl,
+          width,
+          height,
+          customTitle,
+          showTitle,
+          globalStyles,
+          accent,
+          mode,
+          targetUrl
+        )
+      }
+      break
+    }
+
     default: {
       contentSvg = `
         <text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(widget.widgetId.toUpperCase())}</text>
@@ -1224,12 +1361,190 @@ export function renderWidgetSvg(
     shadowRect = `<rect x="6" y="6" width="${width}" height="${height}" fill="#000000" rx="${rx}" />`
   }
 
-  return `
-    <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
+  let styleBlock = ''
+  const animType = (cfg.animationType as string) || 'none'
+  const animDuration = (cfg.animationDuration as number) || 600
+  const animDelay = (cfg.animationDelay as number) || 0
+  const animEasing = (cfg.animationEasing as string) || 'ease-out'
+  const previewKey = (cfg.animationPreviewKey as number) || 0
+
+  if (animType !== 'none') {
+    const easing = animEasing === 'spring' ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : animEasing
+
+    if (animType === 'typewriter') {
+      if (widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text') {
+        const fontSize = Number(cfg.fontSize) || (widget.widgetId === 'ascii-text' ? 12 : 9)
+        const lineHeight =
+          widget.widgetId === 'ascii-text'
+            ? fontSize * 1.2
+            : Math.max(7, Math.round(fontSize * 1.12))
+
+        let linesCount = 1
+        if (widget.widgetId === 'ascii-art') {
+          linesCount = Array.isArray(cfg.asciiText)
+            ? cfg.asciiText.length
+            : Math.floor(height / lineHeight)
+        } else {
+          linesCount = Array.isArray(cfg.asciiLines)
+            ? cfg.asciiLines.length
+            : Math.floor(height / lineHeight)
+        }
+
+        let rectsHtml = ''
+        let rectAnimations = ''
+        const lineTime = animDuration / Math.max(1, linesCount)
+
+        for (let i = 0; i < linesCount; i++) {
+          rectsHtml += `<rect class="typewriter-line-${widget.instanceId}-${previewKey}-${i}" x="0" y="${i * lineHeight}" width="0" height="${lineHeight + 2}" />\n          `
+          rectAnimations += `
+            #widget-${widget.instanceId} .typewriter-line-${widget.instanceId}-${previewKey}-${i} {
+              animation: typewriter-clip-${widget.instanceId}-${previewKey} ${lineTime}ms linear ${animDelay + i * lineTime}ms both;
+            }`
+        }
+
+        styleBlock = `
+          <style>
+            @keyframes typewriter-clip-${widget.instanceId}-${previewKey} {
+              from { width: 0; }
+              to { width: ${width}px; }
+            }
+            ${rectAnimations}
+          </style>
+        `
+
+        contentSvg = `
+          <clipPath id="typewriter-clip-${widget.instanceId}-${previewKey}">
+            ${rectsHtml}
+          </clipPath>
+          <g clip-path="url(#typewriter-clip-${widget.instanceId}-${previewKey})">
+            ${contentSvg}
+          </g>
+        `
+      } else {
+        styleBlock = `
+          <style>
+            @keyframes typewriter-clip-${widget.instanceId}-${previewKey} {
+              from { width: 0; }
+              to { width: ${width}px; }
+            }
+            #widget-${widget.instanceId} .typewriter-target {
+              animation: typewriter-clip-${widget.instanceId}-${previewKey} ${animDuration}ms linear ${animDelay}ms both;
+            }
+          </style>
+        `
+
+        contentSvg = `
+          <clipPath id="typewriter-clip-${widget.instanceId}-${previewKey}">
+            <rect class="typewriter-target" x="0" y="0" width="0" height="${height}" />
+          </clipPath>
+          <g clip-path="url(#typewriter-clip-${widget.instanceId}-${previewKey})">
+            ${contentSvg}
+          </g>
+        `
+      }
+    } else {
+      styleBlock = `
+        <style>
+          @keyframes svg-fade-in-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes svg-slide-up-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes svg-slide-down-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes svg-slide-left-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes svg-slide-right-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes svg-zoom-in-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          @keyframes svg-zoom-out-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: scale(1.1); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          @keyframes svg-flip-x-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: perspective(400px) rotateX(90deg); }
+            to { opacity: 1; transform: perspective(400px) rotateX(0deg); }
+          }
+          @keyframes svg-flip-y-${widget.instanceId}-${previewKey} {
+            from { opacity: 0; transform: perspective(400px) rotateY(90deg); }
+            to { opacity: 1; transform: perspective(400px) rotateY(0deg); }
+          }
+          @keyframes svg-glitch-${widget.instanceId}-${previewKey} {
+            0% { opacity: 0; transform: skewX(10deg); }
+            20% { opacity: 0.8; transform: skewX(-10deg); }
+            40% { opacity: 0.5; transform: skewX(5deg); }
+            60% { opacity: 0.9; transform: skewX(0deg); }
+            100% { opacity: 1; }
+          }
+          @keyframes svg-scan-lines-${widget.instanceId}-${previewKey} {
+            0% { opacity: 0; clip-path: inset(100% 0 0 0); }
+            100% { opacity: 1; clip-path: inset(0 0 0 0); }
+          }
+
+          #widget-${widget.instanceId} .anim-target {
+            animation-name: svg-${animType}-${widget.instanceId}-${previewKey};
+            animation-duration: ${animDuration}ms;
+            animation-timing-function: ${easing};
+            animation-fill-mode: both;
+          }
+        </style>
+      `
+
+      let animIndex = 0
+      const isAscii = widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text'
+      const totalStaggerBudget = Math.min(animDuration * 0.6, isAscii ? 1200 : 600)
+
+      const tagsToMatch = 'text|tspan|rect|path|image'
+      const matchRegex = new RegExp(`<(${tagsToMatch})\\b`, 'gi')
+      const replaceRegex = new RegExp(`<(${tagsToMatch})\\b([^>]*)`, 'gi')
+
+      const elementCount = (contentSvg.match(matchRegex) || []).length
+      const staggerDelay = elementCount > 1 ? totalStaggerBudget / elementCount : 0
+
+      contentSvg = contentSvg.replace(replaceRegex, (match, tag, attrs) => {
+        if (attrs.includes('id=') && (attrs.includes('clip') || attrs.includes('grad')))
+          return match
+        if (attrs.includes('class="no-anim"') || attrs.includes('fill="none"')) return match
+
+        const delay = animDelay + animIndex++ * staggerDelay
+
+        let newAttrs = attrs
+        if (attrs.includes('class=')) {
+          newAttrs = attrs.replace(/class="([^"]*)"/i, 'class="$1 anim-target"')
+        } else {
+          newAttrs = ` class="anim-target"${attrs}`
+        }
+
+        return `<${tag}${newAttrs} style="animation-delay: ${Math.round(delay)}ms; transform-origin: center;"`
+      })
+    }
+  }
+
+  const innerHtml = `
+      ${styleBlock}
       ${shadowRect}
       <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />
       ${templateDecorationSvg}
       ${contentSvg}
+  `
+
+  if (!includeWrapper) return innerHtml
+
+  return `
+    <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
+${innerHtml}
     </g>
   `
 }

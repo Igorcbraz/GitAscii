@@ -1,7 +1,4 @@
-import fs from 'fs'
-import path from 'path'
-
-import type { SavedConfiguration } from '@/engine/types'
+import { profileRepository } from '@/lib/profileRepository'
 
 export interface CommunityProfileItem {
   username: string
@@ -13,47 +10,34 @@ export interface CommunityProfileItem {
   isStored: boolean
 }
 
-const PROFILES_DIR = path.join(process.cwd(), 'src', 'data', 'profiles')
-
-export function getStoredProfiles(): CommunityProfileItem[] {
+export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
   const profiles: CommunityProfileItem[] = []
 
   try {
-    if (fs.existsSync(PROFILES_DIR)) {
-      const files = fs.readdirSync(PROFILES_DIR)
-      for (const file of files) {
-        if (file.endsWith('.json')) {
-          try {
-            const filePath = path.join(PROFILES_DIR, file)
-            const content = fs.readFileSync(filePath, 'utf-8')
-            const config = JSON.parse(content) as SavedConfiguration
+    const configs = await profileRepository.listAll()
 
-            if (config && config.username) {
-              const asciiWidget = config.widgets?.find(
-                (w) =>
-                  w.widgetId === 'ascii-art' &&
-                  Array.isArray((w.config as Record<string, unknown>)?.asciiText) &&
-                  ((w.config as Record<string, unknown>).asciiText as unknown[]).length > 0
-              )
+    for (const config of configs) {
+      if (config && config.username) {
+        const asciiWidget = config.widgets?.find(
+          (w) =>
+            w.widgetId === 'ascii-art' &&
+            Array.isArray((w.config as Record<string, unknown>)?.asciiText) &&
+            ((w.config as Record<string, unknown>).asciiText as unknown[]).length > 0
+        )
 
-              profiles.push({
-                username: config.username,
-                profileSlug: config.profileSlug || 'default',
-                templateId: config.templateId || 'terminal',
-                widgetsCount: config.widgets?.length || 0,
-                hasAsciiArt: Boolean(asciiWidget),
-                tags: [
-                  config.templateId || 'terminal',
-                  asciiWidget ? 'ASCII Art' : 'SVG Widgets',
-                  'Verified Data',
-                ],
-                isStored: true,
-              })
-            }
-          } catch (e) {
-            console.error(`Error reading profile file ${file}:`, e)
-          }
-        }
+        profiles.push({
+          username: config.username,
+          profileSlug: config.profileSlug || 'default',
+          templateId: config.templateId || 'terminal',
+          widgetsCount: config.widgets?.length || 0,
+          hasAsciiArt: Boolean(asciiWidget),
+          tags: [
+            config.templateId || 'terminal',
+            asciiWidget ? 'ASCII Art' : 'SVG Widgets',
+            'Verified Data',
+          ],
+          isStored: true,
+        })
       }
     }
   } catch (error) {

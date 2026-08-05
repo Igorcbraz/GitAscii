@@ -33,7 +33,9 @@ export interface EditorStore {
   activeTab: 'widgets' | 'layers' | 'templates'
   session: { username: string; githubId: number } | null
   clipboard: WidgetInstance[]
+  activeMobilePanel: 'widgets' | 'canvas' | 'properties'
   setSession: (session: { username: string; githubId: number } | null) => void
+  setActiveMobilePanel: (panel: 'widgets' | 'canvas' | 'properties') => void
 
   initEditor: (config: SavedConfiguration, data: NormalizedGitHubData) => void
   selectWidget: (instanceId: string | null, multi?: boolean, isShift?: boolean) => void
@@ -42,6 +44,7 @@ export interface EditorStore {
   pasteWidgets: () => void
   cutWidgets: () => void
   updateWidgetConfig: (instanceId: string, patch: Record<string, unknown>) => void
+  updateGlobalStyles: (patch: Partial<SavedConfiguration['globalStyles']>) => void
   updateWidgetPositions: (
     deltas: { instanceId: string; position: { x: number; y: number } }[],
     recordHistory?: boolean
@@ -122,8 +125,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     activeTab: 'widgets',
     session: null,
     clipboard: [],
+    activeMobilePanel: 'canvas',
 
     setSession: (session) => set({ session }),
+    setActiveMobilePanel: (panel) => set({ activeMobilePanel: panel }),
 
     canUndo: false,
     canRedo: false,
@@ -262,6 +267,19 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const newConfig = {
         ...config,
         widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
+    updateGlobalStyles: (patch) => {
+      const { config } = get()
+      if (!config) return
+
+      const newConfig = {
+        ...config,
+        globalStyles: { ...config.globalStyles, ...patch },
         metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
       }
 

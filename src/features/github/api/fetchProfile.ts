@@ -78,6 +78,28 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       languages,
       totalStars,
       totalForks,
+      readmeContent: null,
+    }
+
+    try {
+      const encodedUser = encodeURIComponent(username)
+      const readmeRes = await fetch(
+        `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/main/README.md`,
+        { signal: AbortSignal.timeout(4000) }
+      )
+      if (readmeRes.ok) {
+        result.readmeContent = await readmeRes.text()
+      } else {
+        const readmeResMaster = await fetch(
+          `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/master/README.md`,
+          { signal: AbortSignal.timeout(4000) }
+        )
+        if (readmeResMaster.ok) {
+          result.readmeContent = await readmeResMaster.text()
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch README for', username, e)
     }
 
     profileCache.set(cacheKey, {

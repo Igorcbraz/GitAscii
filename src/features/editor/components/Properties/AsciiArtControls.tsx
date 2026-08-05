@@ -155,6 +155,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     }, 150)
 
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     sourceType,
     customImageUrl,
@@ -171,7 +172,6 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     dithering,
     colorMode,
     processImageToAscii,
-    config.asciiText,
   ])
 
   const fileInputRef = useRef<HTMLInputElement>(null)

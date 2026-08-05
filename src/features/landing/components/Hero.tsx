@@ -123,7 +123,7 @@ export default function Hero() {
 
             <div className="flex items-center gap-3 w-full">
               <span className="flex-1 h-px bg-graphite/60" />
-              <span className="uppercase text-caption tracking-widest text-ash/50 font-inter-tight">
+              <span className="uppercase text-caption tracking-widest text-fog font-inter-tight">
                 {t('common.or', 'or')}
               </span>
               <span className="flex-1 h-px bg-graphite/60" />

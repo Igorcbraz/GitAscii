@@ -59,6 +59,7 @@ export interface WidgetInstance {
 
 export interface GlobalStyles {
   backgroundColor: string
+  transparentBackground?: boolean
   textColor: string
   accentColor: string
   borderColor: string
