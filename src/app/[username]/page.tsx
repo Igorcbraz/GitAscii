@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
 
@@ -108,7 +107,7 @@ export default async function DefaultEditorPage({
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-carbon">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
@@ -117,33 +116,7 @@ export default async function DefaultEditorPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }}
       />
-      <div className="flex-1">
-        <EditorLayout username={username} profileSlug="default" autoGenerate={autoGenerate} />
-      </div>
-      <footer className="border-t border-graphite bg-void-black py-4 px-6 text-center font-inter-tight text-note text-ash flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span>
-            GitAscii &copy; {new Date().getFullYear()} — Free GitHub Profile README Generator
-          </span>
-        </div>
-        <nav className="flex items-center gap-6">
-          <Link href="/" className="hover:text-signal-lime">
-            Home
-          </Link>
-          <Link href="/templates" className="hover:text-signal-lime">
-            Templates
-          </Link>
-          <Link href="/widgets" className="hover:text-signal-lime">
-            Widgets
-          </Link>
-          <Link href="/explore" className="hover:text-signal-lime">
-            Explore
-          </Link>
-          <Link href="/guides" className="hover:text-signal-lime">
-            Guides
-          </Link>
-        </nav>
-      </footer>
-    </div>
+      <EditorLayout username={username} profileSlug="default" autoGenerate={autoGenerate} />
+    </>
   )
 }

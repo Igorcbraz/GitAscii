@@ -6,6 +6,7 @@ import React from 'react'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import { AnimationControls } from './AnimationControls'
 import { AsciiArtControls } from './AsciiArtControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { ColorPicker } from './ColorPicker'
@@ -300,6 +301,12 @@ export function PropertiesPanel() {
             config={cfg}
           />
         )}
+
+        <AnimationControls
+          instanceId={selectedWidget.instanceId}
+          widgetId={selectedWidget.widgetId}
+          config={cfg}
+        />
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">

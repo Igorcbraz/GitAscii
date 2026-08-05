@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, userEvent, within } from '@storybook/test'
+import { expect, userEvent } from '@storybook/test'
 import React from 'react'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -156,8 +156,6 @@ export const InteractiveSelection: Story = {
     },
   ],
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    // Find the SVG group for the header widget (instanceId usually contains 'header')
     // Get all groups with data-widget-id
     const widgets = canvasElement.querySelectorAll('g[data-widget-id]')
     if (widgets.length > 0) {

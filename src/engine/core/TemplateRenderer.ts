@@ -17,6 +17,21 @@ export interface TemplatePreset {
 }
 
 export const TEMPLATE_PRESETS: Record<string, TemplatePreset> = {
+  blank: {
+    id: 'blank',
+    name: 'Blank Canvas',
+    description: 'Empty canvas for complete creative freedom.',
+    colors: {
+      background: '#060606',
+      cardBackground: '#121212',
+      text: '#e5e5e5',
+      accent: '#c5ff4a',
+      border: '#252525',
+    },
+    fontFamily: "'Inter Tight', sans-serif",
+    borderRadius: 0,
+    layout: [],
+  },
   terminal: {
     id: 'terminal',
     name: 'Terminal',

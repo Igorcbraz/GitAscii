@@ -104,6 +104,13 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: 'essential',
   },
   {
+    id: 'custom-image',
+    name: 'Image',
+    icon: FileText,
+    desc: 'Custom image or banner',
+    category: 'misc',
+  },
+  {
     id: 'stats',
     name: 'GitHub Stats',
     icon: BarChart3,

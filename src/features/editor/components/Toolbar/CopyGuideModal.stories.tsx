@@ -31,33 +31,16 @@ type Story = StoryObj<typeof CopyGuideModal>
 export const Default: Story = {
   args: {
     isOpen: true,
-  },
-}
-
-export const Loading: Story = {
-  args: {
-    isOpen: true,
-    isLoading: true,
-  },
-}
-
-export const Empty: Story = {
-  args: {
-    isOpen: true,
-    isEmpty: true,
-  },
-}
-
-export const ErrorState: Story = {
-  args: {
-    isOpen: true,
-    error: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
 }
 
 export const Dark: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -67,6 +50,8 @@ export const Dark: Story = {
 export const Light: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     backgrounds: { default: 'light' },
@@ -76,6 +61,8 @@ export const Light: Story = {
 export const Responsive: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     viewport: { defaultViewport: 'mobile1' },

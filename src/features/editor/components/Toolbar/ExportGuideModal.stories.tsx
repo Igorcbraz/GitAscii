@@ -32,6 +32,8 @@ type Story = StoryObj<typeof ExportGuideModal>
 export const Default: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   play: async () => {
     const canvas = within(document.body) // modals usually render in portals
@@ -48,30 +50,11 @@ export const Default: Story = {
   },
 }
 
-export const Loading: Story = {
-  args: {
-    isOpen: true,
-    isLoading: true,
-  },
-}
-
-export const Empty: Story = {
-  args: {
-    isOpen: true,
-    isEmpty: true,
-  },
-}
-
-export const ErrorState: Story = {
-  args: {
-    isOpen: true,
-    error: true,
-  },
-}
-
 export const Dark: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     backgrounds: { default: 'dark' },
@@ -81,6 +64,8 @@ export const Dark: Story = {
 export const Light: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     backgrounds: { default: 'light' },
@@ -90,6 +75,8 @@ export const Light: Story = {
 export const Responsive: Story = {
   args: {
     isOpen: true,
+    username: 'octocat',
+    embedCode: '<!-- HTML snippet goes here -->',
   },
   parameters: {
     viewport: { defaultViewport: 'mobile1' },

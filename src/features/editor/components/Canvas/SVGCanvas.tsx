@@ -39,6 +39,7 @@ export function SVGCanvas() {
   } | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const svgContainerRef = useRef<HTMLDivElement>(null)
   const lastTapRef = useRef<{ id: string; time: number }>({ id: '', time: 0 })
 
   const [marquee, setMarquee] = useState<{
@@ -57,6 +58,77 @@ export function SVGCanvas() {
   }, [config, githubData])
 
   const [alignmentGuides, setAlignmentGuides] = useState<{ x?: number; y?: number }[]>([])
+
+  const [playingPreviews, setPlayingPreviews] = useState<Record<string, boolean>>({})
+
+  // Watch for changes in animationPreviewKey of widgets to trigger temporary play mode
+  const widgetPreviewKeys = useMemo(() => {
+    if (!config) return ''
+    return config.widgets
+      .map((w) => `${w.instanceId}:${w.config.animationPreviewKey || 0}`)
+      .join(',')
+  }, [config])
+
+  const prevKeysRef = useRef<string>('')
+
+  useEffect(() => {
+    if (!config) return
+    if (!prevKeysRef.current) {
+      prevKeysRef.current = widgetPreviewKeys
+      return
+    }
+
+    const oldParts = prevKeysRef.current.split(',')
+    const newParts = widgetPreviewKeys.split(',')
+
+    newParts.forEach((part, idx) => {
+      if (part !== oldParts[idx]) {
+        const [instanceId] = part.split(':')
+        // Enable live preview play for 2.5 seconds
+        setPlayingPreviews((prev) => ({ ...prev, [instanceId]: true }))
+        setTimeout(() => {
+          setPlayingPreviews((prev) => ({ ...prev, [instanceId]: false }))
+        }, 2500)
+      }
+    })
+
+    prevKeysRef.current = widgetPreviewKeys
+  }, [widgetPreviewKeys, config])
+
+  // Style block to inject into the canvas editor that forces static state (opacity 1, no anim) for any widget not actively previewing
+  const editorAnimOverrideStyle = useMemo(() => {
+    if (!config) return ''
+    return config.widgets
+      .map((w) => {
+        const isPlaying = playingPreviews[w.instanceId]
+        if (!isPlaying) {
+          return `
+            .static-anim-${w.instanceId} #widget-${w.instanceId} .anim-target,
+            .static-anim-${w.instanceId} #widget-${w.instanceId} .typewriter-target {
+              animation: none !important;
+              opacity: 1 !important;
+              clip-path: none !important;
+            }
+          `
+        }
+        return ''
+      })
+      .join('\n')
+  }, [config, playingPreviews])
+
+  const asciiParamsStr = useMemo(() => {
+    if (!config) return ''
+    return config.widgets
+      .filter((w) => w.widgetId === 'ascii-art')
+      .map((w) => {
+        const cfg = w.config
+        const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
+        const customImageUrl = (cfg.imageUrl as string) || ''
+        const uploadedImageData = (cfg.uploadedImageData as string) || ''
+        return `${w.instanceId}:${sourceType}:${customImageUrl}:${uploadedImageData}:${cfg.charset || 'dense'}:${cfg.customCharset || ''}:${cfg.invert || false}:${cfg.detail || 'medium'}:${cfg.cols || 0}:${cfg.contrast || 10}:${cfg.brightness || 0}:${cfg.edgeEnhance !== false}:${cfg.autoContrast !== false}:${cfg.dithering !== false}:${cfg.colorMode || 'monochrome'}:${cfg.asciiText ? 'hasText' : 'noText'}`
+      })
+      .join('|')
+  }, [config])
 
   useEffect(() => {
     if (!config || !githubData) return
@@ -121,7 +193,8 @@ export function SVGCanvas() {
         console.warn('Background ASCII Conversion Warning:', err)
       }
     })
-  }, [config, githubData, updateWidgetConfig])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [asciiParamsStr, githubData, updateWidgetConfig])
 
   useEffect(() => {
     if (!isLayersOpen) return
@@ -494,10 +567,18 @@ export function SVGCanvas() {
           height: canvasHeight,
         }}
       >
+        <style dangerouslySetInnerHTML={{ __html: editorAnimOverrideStyle }} />
         <div
+          ref={svgContainerRef}
           dangerouslySetInnerHTML={{ __html: renderedSvgString }}
           data-testid="canvas-svg-container"
-          className="w-full h-full pointer-events-none"
+          className={`w-full h-full pointer-events-none ${config.widgets
+            .map((w) =>
+              playingPreviews[w.instanceId]
+                ? `play-anim-${w.instanceId}`
+                : `static-anim-${w.instanceId}`
+            )
+            .join(' ')}`}
         />
 
         {alignmentGuides.map((guide, idx) => {
@@ -599,7 +680,7 @@ export function SVGCanvas() {
                     })
                   }
                 }}
-                onTouchEnd={(e) => {
+                onTouchEnd={() => {
                   const now = Date.now()
                   const lastTap = lastTapRef.current
                   if (lastTap.id === widget.instanceId && now - lastTap.time < 300) {

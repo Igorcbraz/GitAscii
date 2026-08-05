@@ -20,68 +20,49 @@ const meta: Meta<typeof WidgetPreviewTooltip> = {
     },
   ],
   argTypes: {
-    instanceId: { control: 'text' },
-    config: { control: 'object' },
+    widgetItem: { control: 'object' },
+    targetRect: { control: 'object' },
+    globalStyles: { control: 'object' },
+    githubData: { control: 'object' },
   },
 }
 
 export default meta
 type Story = StoryObj<typeof WidgetPreviewTooltip>
 
+const mockRect: DOMRect = {
+  bottom: 100,
+  height: 50,
+  left: 200,
+  right: 250,
+  top: 50,
+  width: 50,
+  x: 200,
+  y: 50,
+  toJSON: () => ({}),
+}
+
+const mockWidgetItem = {
+  id: 'header',
+  name: 'Header Widget',
+  desc: 'Preview of header widget',
+  icon: () => null,
+}
+
 export const Default: Story = {
   args: {
-    instanceId: 'test-instance',
-    config: {},
-  },
-}
-
-export const Loading: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: { isLoading: true },
-  },
-}
-
-export const Empty: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: { isEmpty: true },
-  },
-}
-
-export const ErrorState: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: { hasError: true },
-  },
-}
-
-export const Dark: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: { theme: 'dark' },
-  },
-  parameters: {
-    backgrounds: { default: 'dark' },
-  },
-}
-
-export const Light: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: { theme: 'light' },
-  },
-  parameters: {
-    backgrounds: { default: 'light' },
-  },
-}
-
-export const Responsive: Story = {
-  args: {
-    instanceId: 'test-instance',
-    config: {},
-  },
-  parameters: {
-    viewport: { defaultViewport: 'mobile1' },
+    widgetItem: mockWidgetItem,
+    targetRect: mockRect,
+    globalStyles: {
+      fontFamily: 'Inter',
+      borderRadius: 8,
+      textColor: '#ffffff',
+      accentColor: '#00ff00',
+      backgroundColor: '#000000',
+      borderColor: '#333333',
+      padding: 16,
+      themeMode: 'dark',
+    },
+    githubData: mockGithubData,
   },
 }
