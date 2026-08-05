@@ -68,7 +68,8 @@ export async function getInstallationTokenForUser(
       ? `${htmlUrl}/installations/new`
       : `https://github.com/apps/gitascii-dev/installations/new`
 
-    const instRes = await fetch(`https://api.github.com/users/${username}/installation`, {
+    const encodedUsername = encodeURIComponent(username)
+    const instRes = await fetch(`https://api.github.com/users/${encodedUsername}/installation`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
         Accept: 'application/vnd.github.v3+json',
@@ -87,8 +88,9 @@ export async function getInstallationTokenForUser(
     const instData = await instRes.json()
     const installationId = instData.id
 
+    const encodedInstallationId = encodeURIComponent(installationId.toString())
     const tokenRes = await fetch(
-      `https://api.github.com/app/installations/${installationId}/access_tokens`,
+      `https://api.github.com/app/installations/${encodedInstallationId}/access_tokens`,
       {
         method: 'POST',
         headers: {
@@ -117,13 +119,17 @@ export async function getInstallationTokenById(
   try {
     const jwt = generateGitHubAppJWT()
 
-    const instRes = await fetch(`https://api.github.com/app/installations/${installationId}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'GitAscii-App',
-      },
-    })
+    const encodedInstallationId = encodeURIComponent(installationId.toString())
+    const instRes = await fetch(
+      `https://api.github.com/app/installations/${encodedInstallationId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'GitAscii-App',
+        },
+      }
+    )
 
     if (!instRes.ok) {
       console.error('Failed to fetch installation details', await instRes.text())
@@ -134,7 +140,7 @@ export async function getInstallationTokenById(
     const username = instData.account.login
 
     const tokenRes = await fetch(
-      `https://api.github.com/app/installations/${installationId}/access_tokens`,
+      `https://api.github.com/app/installations/${encodedInstallationId}/access_tokens`,
       {
         method: 'POST',
         headers: {
