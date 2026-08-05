@@ -7,6 +7,7 @@ import {
   Code2,
   Cpu,
   Download,
+  ExternalLink,
   Eye,
   FileText,
   Flame,
@@ -31,6 +32,7 @@ import {
   Upload,
   User,
   X,
+  Zap,
 } from 'lucide-react'
 import { Sparkles } from 'lucide-react'
 import Image from 'next/image'
@@ -526,15 +528,33 @@ export function WidgetLibrary() {
           setHoveredWidget({ item, rect })
         }}
         onMouseLeave={() => setHoveredWidget(null)}
-        className="group relative p-3 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(197,255,74,0.1)]"
+        className={`group relative p-3 border transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
+          item.isExternal
+            ? 'border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]'
+            : 'border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx hover:shadow-[0_4px_12px_rgba(197,255,74,0.15)]'
+        }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+        {item.isExternal && (
+          <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+        )}
+
+        <div className="flex items-center gap-3 relative z-10">
+          <div
+            className={`p-2 rounded-xs transition-colors duration-300 shrink-0 ${
+              item.isExternal
+                ? 'bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white'
+                : 'bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black'
+            }`}
+          >
             <Icon size={16} />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-signal-lime transition-colors duration-300">
+              <h4
+                className={`font-inter-tight font-medium text-label text-chalk transition-colors duration-300 ${
+                  item.isExternal ? 'group-hover:text-violet-400' : 'group-hover:text-signal-lime'
+                }`}
+              >
                 {item.name}
               </h4>
               {renderWidgetBadge(item.badge)}
@@ -542,9 +562,23 @@ export function WidgetLibrary() {
             <p className="font-inter-tight text-eyebrow text-ash line-clamp-1">{item.desc}</p>
           </div>
         </div>
-        <button className="text-ash group-hover:text-signal-lime transition-colors duration-300 p-1 shrink-0 self-center">
-          <Plus size={15} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0 relative z-10">
+          {item.isExternal && (
+            <ExternalLink
+              size={11}
+              className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
+            />
+          )}
+          <button
+            className={`transition-colors duration-300 p-1 ${
+              item.isExternal
+                ? 'text-ash group-hover:text-violet-400'
+                : 'text-ash group-hover:text-signal-lime'
+            }`}
+          >
+            <Plus size={15} />
+          </button>
+        </div>
       </div>
     )
   }
@@ -703,38 +737,140 @@ export function WidgetLibrary() {
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-2">
-              <div className="label-stamp">
-                {categoryFilter === 'all' && !searchQuery
-                  ? '[ WIDGET CATALOG ]'
-                  : `[ RESULTS: ${filteredWidgets.length} ]`}
-              </div>
-            </div>
-
             {filteredWidgets.length === 0 ? (
               <div className="py-8 text-center border border-dashed border-graphite rounded-xs text-ash text-note font-inter-tight">
                 {t('editor.sidebar.no_widgets', 'Nenhum widget encontrado para "{query}"', {
                   query: searchQuery,
                 })}
               </div>
-            ) : (
-              <div className="space-y-2">
-                {(categoryFilter === 'all' && !searchQuery
-                  ? filteredWidgets.filter((w) => w.id !== 'gitfest-lineup')
-                  : filteredWidgets
-                ).map(renderWidgetCard)}
+            ) : categoryFilter === 'all' && !searchQuery ? (
+              <div className="space-y-5">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <Zap size={10} className="text-signal-lime shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-signal-lime uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.native_category', 'GitAscii Native')}
+                    </span>
+                    <span className="ml-auto font-inter-tight text-caption text-ash/50">
+                      {
+                        filteredWidgets.filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
+                          .length
+                      }
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {filteredWidgets
+                      .filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
+                      .map(renderWidgetCard)}
+                  </div>
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <ExternalLink size={10} className="text-violet-400/80 shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.external_category', 'Integrações Externas')}
+                    </span>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {filteredWidgets.filter((w) => w.isExternal).length}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {filteredWidgets
+                      .filter((w) => w.isExternal)
+                      .map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => addWidget(item.id)}
+                            data-testid={`add-widget-${item.id}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setHoveredWidget({ item, rect })
+                            }}
+                            onMouseLeave={() => setHoveredWidget(null)}
+                            className="group relative p-3 border border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]"
+                          >
+                            <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <div className="p-2 rounded-xs bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white transition-colors duration-300 shrink-0">
+                                <Icon size={16} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-violet-400 transition-colors duration-300">
+                                    {item.name}
+                                  </h4>
+                                  {item.badge && (
+                                    <span className="text-[9px] font-inter-tight font-medium text-bone bg-graphite border border-slate px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
+                                      {item.badge.text}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="font-inter-tight text-eyebrow text-ash group-hover:text-bone transition-colors line-clamp-1">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 relative z-10">
+                              <ExternalLink
+                                size={11}
+                                className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
+                              />
+                              <button className="text-ash group-hover:text-violet-400 transition-colors duration-300 p-1">
+                                <Plus size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
 
                 <a
                   href="https://github.com/Igorcbraz/GitAscii/fork"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:shadow-[0_0_20px_rgba(197,255,74,0.15)] hover:-translate-y-0.5"
+                  className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
                 >
-                  <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <GitFork size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-inter-tight font-medium text-note text-signal-lime leading-tight">
+                    <h4 className="font-inter-tight font-medium text-note text-pearl group-hover:text-chalk transition-colors duration-300 leading-tight">
+                      {t('editor.sidebar.contribute_widget', 'Adicione seu próprio Widget!')}
+                    </h4>
+                    <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
+                      {t(
+                        'editor.sidebar.contribute_widget_desc',
+                        'Faça um fork e contribua com a comunidade'
+                      )}
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="label-stamp">{`[ RESULTS: ${filteredWidgets.length} ]`}</div>
+                </div>
+                {filteredWidgets.map(renderWidgetCard)}
+
+                <a
+                  href="https://github.com/Igorcbraz/GitAscii/fork"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
+                >
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
+                    <GitFork size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-inter-tight font-medium text-note text-pearl group-hover:text-chalk transition-colors duration-300 leading-tight">
                       {t('editor.sidebar.contribute_widget', 'Adicione seu próprio Widget!')}
                     </h4>
                     <p className="font-inter-tight text-caption text-chalk/50 leading-tight">
@@ -766,14 +902,14 @@ export function WidgetLibrary() {
               <div
                 onClick={handleImportClick}
                 data-testid="import-layout-btn"
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
+                className="group relative p-2.5 border border-graphite hover:border-pearl bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <Upload size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-white transition-colors duration-300">
                       {t('editor.sidebar.import_layout', 'Import Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -786,14 +922,14 @@ export function WidgetLibrary() {
               <div
                 onClick={handleExport}
                 data-testid="export-layout-btn"
-                className="group relative p-2.5 border border-graphite hover:border-signal-lime bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
+                className="group relative p-2.5 border border-graphite hover:border-pearl bg-void-black/60 hover:bg-onyx transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-signal-lime text-signal-lime group-hover:text-black transition-colors duration-300 shrink-0">
+                  <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <Download size={14} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-signal-lime transition-colors duration-300">
+                    <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-white transition-colors duration-300">
                       {t('editor.sidebar.export_layout', 'Export Layout')}
                     </h4>
                     <p className="font-inter-tight text-caption text-ash line-clamp-1">
