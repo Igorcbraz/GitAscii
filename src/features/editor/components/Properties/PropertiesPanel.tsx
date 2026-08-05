@@ -449,6 +449,7 @@ export function PropertiesPanel() {
         {[
           'gitfest-lineup',
           'github-readme-stats',
+          'ghstats',
           'streak-stats',
           'profile-trophy',
           'activity-graph',

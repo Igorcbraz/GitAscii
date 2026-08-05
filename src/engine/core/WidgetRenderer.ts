@@ -991,6 +991,73 @@ export function renderWidgetSvg(
       break
     }
 
+    case 'ghstats': {
+      const username = data.user.login
+      const embedType = (cfg.embedType as string) || 'card'
+
+      const theme = (cfg.theme as string) || 'default'
+      const showIcons = cfg.showIcons !== false
+      const showRing = cfg.showRing !== false
+      const hideBorder = Boolean(cfg.hideBorder)
+      const hideTitle = Boolean(cfg.hideTitle)
+      const size = (cfg.size as string) || 'default'
+      const compactCount = (cfg.compactCount as string) || '4'
+      const hideStats = (cfg.hideStats as string) || ''
+
+      const customTitle = (cfg.customTitle as string) || ''
+      const layout = (cfg.layout as string) || 'bar'
+      const maxLangs = Number(cfg.maxLangs) || 8
+      const badgeStyle = (cfg.badgeStyle as string) || 'flat'
+
+      let statsUrl = `https://ghstats.dev/api/${embedType}?username=${encodeURIComponent(username)}&theme=${theme}`
+
+      const bgColor = cfg.backgroundColor as string
+      if (bgColor) statsUrl += `&bg=${bgColor.replace('#', '')}`
+
+      const textColor = cfg.textColor as string
+      if (textColor) statsUrl += `&text=${textColor.replace('#', '')}`
+
+      const accentColor = cfg.accentColor as string
+      if (accentColor) {
+        statsUrl += `&icon_color=${accentColor.replace('#', '')}`
+        statsUrl += `&title_color=${accentColor.replace('#', '')}`
+      }
+
+      const borderColor = cfg.borderColor as string
+      if (borderColor) statsUrl += `&border_color=${borderColor.replace('#', '')}`
+
+      if (embedType === 'card') {
+        if (!showIcons) statsUrl += `&show_icons=false`
+        if (!showRing) statsUrl += `&show_ring=false`
+        if (hideBorder) statsUrl += `&hide_border=true`
+        if (hideTitle) statsUrl += `&hide_title=true`
+        if (size === 'compact') statsUrl += `&size=compact&compact_count=${compactCount}`
+        if (customTitle) statsUrl += `&custom_title=${encodeURIComponent(customTitle)}`
+        if (hideStats) statsUrl += `&hide=${encodeURIComponent(hideStats)}`
+      } else if (embedType === 'langs') {
+        if (layout !== 'bar') statsUrl += `&layout=${layout}`
+        if (maxLangs !== 8) statsUrl += `&max_langs=${maxLangs}`
+        if (hideBorder) statsUrl += `&hide_border=true`
+      } else if (embedType === 'mini' || embedType === 'badge') {
+        if (badgeStyle !== 'flat') statsUrl += `&style=${badgeStyle}`
+      }
+
+      contentSvg = renderExternalWidgetSvg(
+        statsUrl,
+        width,
+        height,
+        customTitle || '[ GHSTATS.DEV ]',
+        !hideTitle && embedType !== 'card',
+        globalStyles,
+        accent,
+        'contain'
+      )
+
+      contentSvg = contentSvg.replace(/<image [^>]+onerror="this\.style\.display='none';" \/>/, '')
+
+      break
+    }
+
     case 'streak-stats': {
       const username = (cfg.username as string) || data.user.login
       const theme = (cfg.theme as string) || 'dark'

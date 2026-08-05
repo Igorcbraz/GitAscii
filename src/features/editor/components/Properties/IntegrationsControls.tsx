@@ -1,6 +1,6 @@
 'use client'
 
-import { Sliders, User } from 'lucide-react'
+import { Sliders } from 'lucide-react'
 import React from 'react'
 
 import type { WidgetConfig } from '@/engine/types'
@@ -58,8 +58,7 @@ interface IntegrationsControlsProps {
 
 export function IntegrationsControls({ instanceId, widgetId, config }: IntegrationsControlsProps) {
   const { t } = useI18n()
-  const { updateWidgetConfig, githubData } = useEditorStore()
-  const defaultUsername = githubData?.user.login || ''
+  const { updateWidgetConfig } = useEditorStore()
 
   const handleUpdate = (patch: Record<string, unknown>) => {
     updateWidgetConfig(instanceId, patch)
@@ -67,7 +66,6 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
 
   const showTitle = config.showTitle !== false
   const customTitle = (config.customTitle as string) || ''
-  const username = (config.username as string) ?? defaultUsername
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite">
@@ -105,21 +103,7 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
         )}
       </div>
 
-      {widgetId !== 'readme-quotes' && widgetId !== 'awesome-badge' && (
-        <div>
-          <label className="text-eyebrow text-ash mb-1 font-inter-tight flex items-center gap-1">
-            <User size={12} />
-            <span>{t('editor.integrations.github_user', 'Usuário do GitHub')}</span>
-          </label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => handleUpdate({ username: e.target.value })}
-            placeholder={defaultUsername || 'username'}
-            className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
-          />
-        </div>
-      )}
+      {/* Campo de username removido conforme solicitado para usar sempre o logado */}
 
       {widgetId === 'gitfest-lineup' && (
         <div className="space-y-3 pt-2">
@@ -388,6 +372,220 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.hide_border', 'Ocultar Borda Padrão')}
+            </label>
+            <input
+              type="checkbox"
+              checked={Boolean(config.hideBorder)}
+              onChange={(e) => handleUpdate({ hideBorder: e.target.checked })}
+              className="w-4 h-4 accent-signal-lime cursor-pointer"
+            />
+          </div>
+        </div>
+      )}
+
+      {widgetId === 'ghstats' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Embed Type</label>
+            <select
+              value={(config.embedType as string) || 'card'}
+              onChange={(e) => handleUpdate({ embedType: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="card">Standard Card</option>
+              <option value="langs">Top Languages</option>
+              <option value="mini">Mini Badge</option>
+              <option value="badge">Standard Badge</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.visual_theme', 'Tema Visual')}
+            </label>
+            <select
+              value={(config.theme as string) || 'default'}
+              onChange={(e) => handleUpdate({ theme: e.target.value })}
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            >
+              <option value="default">Default</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="tokyonight">Tokyo Night</option>
+              <option value="dracula">Dracula</option>
+              <option value="radical">Radical</option>
+              <option value="merko">Merko</option>
+              <option value="gruvbox">Gruvbox</option>
+              <option value="onedark">One Dark</option>
+              <option value="synthwave">Synthwave</option>
+              <option value="cyberpunk">Cyberpunk</option>
+              <option value="nord">Nord</option>
+              <option value="catppuccin">Catppuccin</option>
+              <option value="vue">Vue</option>
+              <option value="github_dark">GitHub Dark</option>
+            </select>
+          </div>
+
+          {((config.embedType as string) || 'card') === 'card' && (
+            <>
+              <div>
+                <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                  Custom Title
+                </label>
+                <input
+                  type="text"
+                  value={(config.customTitle as string) || ''}
+                  onChange={(e) => handleUpdate({ customTitle: e.target.value })}
+                  placeholder="Override card title"
+                  className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                  Hide Stats (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={(config.hideStats as string) || ''}
+                  onChange={(e) => handleUpdate({ hideStats: e.target.value })}
+                  placeholder="e.g. stars,issues"
+                  className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                    Tamanho/Layout
+                  </label>
+                  <select
+                    value={(config.size as string) || 'default'}
+                    onChange={(e) => handleUpdate({ size: e.target.value })}
+                    className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                  >
+                    <option value="default">Padrão</option>
+                    <option value="compact">Compacto</option>
+                  </select>
+                </div>
+
+                {config.size === 'compact' && (
+                  <div>
+                    <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                      Qtd de Itens
+                    </label>
+                    <select
+                      value={(config.compactCount as string) || '4'}
+                      onChange={(e) => handleUpdate({ compactCount: e.target.value })}
+                      className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                    >
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="6">6</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+                  <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                    Show Icons
+                  </label>
+                  <input
+                    type="checkbox"
+                    checked={config.showIcons !== false}
+                    onChange={(e) => handleUpdate({ showIcons: e.target.checked })}
+                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+                  <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                    Show Ring
+                  </label>
+                  <input
+                    type="checkbox"
+                    checked={config.showRing !== false}
+                    onChange={(e) => handleUpdate({ showRing: e.target.checked })}
+                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+                  <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                    Hide Title
+                  </label>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(config.hideTitle)}
+                    onChange={(e) => handleUpdate({ hideTitle: e.target.checked })}
+                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {((config.embedType as string) || 'card') === 'langs' && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Layout</label>
+                <select
+                  value={(config.layout as string) || 'bar'}
+                  onChange={(e) => handleUpdate({ layout: e.target.value })}
+                  className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                >
+                  <option value="bar">Bar</option>
+                  <option value="stacked">Stacked</option>
+                  <option value="horizontal_list">Horizontal List</option>
+                  <option value="vertical_list">Vertical List</option>
+                  <option value="grid">Grid</option>
+                  <option value="donut">Donut</option>
+                  <option value="donut_vertical">Donut Vertical</option>
+                  <option value="compact">Compact</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                  Max Langs
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={Number(config.maxLangs) || 8}
+                  onChange={(e) => handleUpdate({ maxLangs: e.target.value })}
+                  className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {(((config.embedType as string) || 'card') === 'mini' ||
+            ((config.embedType as string) || 'card') === 'badge') && (
+            <div>
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                Badge Style
+              </label>
+              <select
+                value={(config.badgeStyle as string) || 'flat'}
+                onChange={(e) => handleUpdate({ badgeStyle: e.target.value })}
+                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+              >
+                <option value="flat">Flat</option>
+                <option value="flat-square">Flat Square</option>
+                <option value="for-the-badge">For The Badge</option>
+                <option value="plastic">Plastic</option>
+                <option value="minimal">Minimal</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+            <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
+              Hide Border
             </label>
             <input
               type="checkbox"

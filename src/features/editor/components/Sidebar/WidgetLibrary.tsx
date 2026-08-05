@@ -227,6 +227,15 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
   },
 
   {
+    id: 'ghstats',
+    name: 'GHStats.dev',
+    icon: BarChart3,
+    desc: 'GitHub Stats Cards from ghstats.dev',
+    isExternal: true,
+    category: 'external',
+    badge: { text: 'New', type: 'highlight' },
+  },
+  {
     id: 'divider',
     name: 'Neon Divider',
     icon: Minus,
