@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Igorcbraz/GitAscii/compare/v1.2.0...v1.3.0) (2026-08-06)
+
+
+### Features
+
+* export widget embed code using 100% width HTML tags ([e1e52d7](https://github.com/Igorcbraz/GitAscii/commit/e1e52d7d4405d64ce1fd6a932c3b871aec1a4ae8))
+
 ## [1.2.0](https://github.com/Igorcbraz/GitAscii/compare/v1.1.0...v1.2.0) (2026-08-05)
 
 
