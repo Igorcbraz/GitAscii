@@ -2,7 +2,7 @@
 title: 'GitAscii vs github-readme-stats: Moving from Query Strings to Edge Rendering 🚀'
 published: false
 description: 'Why relying on traditional query-string-configured GitHub stats cards limits performance, design flexibility, and scalability—and how modern edge architecture decouples style from content.'
-tags: 'github, opensource, webdev, architecture'
+tags: ['github', 'opensource', 'webdev', 'architecture']
 cover_image: 'assets/gitascii-vs-stats.jpg'
 ---
 

@@ -3,7 +3,7 @@ title: 'Como resolver temas Dark/Light em SVGs no GitHub sem acesso ao DOM (bypa
 slug: 'como-resolver-temas-dark-light-svgs-github-sem-dom'
 published: false
 description: 'O proxy Camo do GitHub remove tags de script e isola imagens. Descubra como criar SVGs responsivos aos temas escuro/claro usando CSS media queries embutidas executadas diretamente no navegador do leitor.'
-tags: 'css, svg, github, frontend'
+tags: ['css', 'svg', 'github', 'frontend']
 cover_image: 'assets/dynamic-svg-themes.jpg'
 ---
 

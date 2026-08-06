@@ -3,7 +3,7 @@ title: 'GitAscii vs readme-typing-svg: Analisando latência e overhead no proxy 
 slug: 'gitascii-vs-readme-typing-svg-performance'
 published: false
 description: 'Geração de SVGs dinâmicos tradicionais executa processamento síncrono pesado em cada requisição. Saiba como o deslocamento de carga para o client-side e o Vercel Edge Runtime evitam timeouts no proxy Camo do GitHub.'
-tags: 'performance, nextjs, edge-computing, svg'
+tags: ['performance', 'nextjs', 'edge-computing', 'svg']
 cover_image: 'assets/latency-comparison.jpg'
 ---
 

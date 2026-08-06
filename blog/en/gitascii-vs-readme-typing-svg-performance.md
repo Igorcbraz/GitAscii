@@ -3,7 +3,7 @@ title: 'GitAscii vs readme-typing-svg: Analyzing Latency and Overhead in the Git
 slug: 'gitascii-vs-readme-typing-svg-performance'
 published: false
 description: 'Traditional dynamic SVGs perform synchronous image generation on every request. Learn how offloading heavy canvas processing to the client and deploying to Vercel Edge Runtime prevents GitHub Camo proxy timeouts.'
-tags: 'performance, nextjs, edge-computing, svg'
+tags: ['performance', 'nextjs', 'edge-computing', 'svg']
 cover_image: 'assets/latency-comparison.jpg'
 ---
 

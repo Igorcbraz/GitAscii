@@ -3,7 +3,7 @@ title: 'Solving Dark/Light Themes in SVGs on GitHub Without DOM Access (Bypassin
 slug: 'svg-temas-dinamicos-github-camo'
 published: false
 description: 'GitHub Camo strips script tags and isolates image assets. Discover how to build dynamic, responsive dark/light mode SVGs using embedded CSS media queries executed entirely in the reader browser.'
-tags: 'css, svg, github, frontend'
+tags: ['css', 'svg', 'github', 'frontend']
 cover_image: 'assets/dynamic-svg-themes.jpg'
 ---
 
