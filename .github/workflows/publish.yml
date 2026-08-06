@@ -34,22 +34,18 @@ jobs:
         uses: Igorcbraz/DevPublisher@main
         with:
           folder: blog/en
-          platforms: devto,hashnode,medium,tabnews
+          platforms: devto,medium,tabnews
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_TOKEN }}
-          HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
-          HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
           TABNEWS_SESSION_ID: ${{ secrets.TABNEWS_SESSION_ID }}
 
       - name: Publish blog articles (PT)
         uses: Igorcbraz/DevPublisher@main
         with:
           folder: blog/pt
-          platforms: devto,hashnode,medium,tabnews
+          platforms: devto,medium,tabnews
         env:
           DEVTO_API_KEY: ${{ secrets.DEVTO_TOKEN }}
-          HASHNODE_TOKEN: ${{ secrets.HASHNODE_TOKEN }}
-          HASHNODE_PUBLICATION_ID: ${{ secrets.HASHNODE_PUBLICATION_ID }}
           TABNEWS_SESSION_ID: ${{ secrets.TABNEWS_SESSION_ID }}
 
       - name: Upload Medium exports
