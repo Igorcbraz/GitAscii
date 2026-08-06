@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: devpublisher-${{ github.repository }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   publish:
