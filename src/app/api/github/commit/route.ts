@@ -27,7 +27,13 @@ export async function POST(request: Request) {
       const v = Date.now()
       const profileSlug = exportData?.templateId || 'default'
       const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
-      finalEmbedCode = `![Widget](${protocol}://${host}/api/${username}${slugPath}?v=${v})`
+      finalEmbedCode = `<a href="${protocol}://${host}">
+  <img
+    src="${protocol}://${host}/api/${username}${slugPath}?v=${v}"
+    alt="GitAscii Widget"
+    width="100%"
+  />
+</a>`
 
       if (exportData) {
         exportData.username = username
@@ -104,7 +110,8 @@ export async function POST(request: Request) {
       currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
     }
 
-    const widgetRegex = /!\[Widget\]\([^)]+\)/g
+    const widgetRegex =
+      /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
     let newContent = currentContent
     if (widgetRegex.test(currentContent)) {
       newContent = currentContent.replace(widgetRegex, finalEmbedCode)

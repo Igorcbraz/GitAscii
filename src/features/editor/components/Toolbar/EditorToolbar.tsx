@@ -291,7 +291,13 @@ export function EditorToolbar() {
       ? `${currentOrigin}/api/${viewerUsername}`
       : `${currentOrigin}/api/${viewerUsername}/${profileSlug}`
 
-  const embedCode = `![Widget](${embedUrl})`
+  const embedCode = `<a href="${currentOrigin}">
+  <img
+    src="${embedUrl}"
+    alt="GitAscii Widget"
+    width="100%"
+  />
+</a>`
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(embedCode)
@@ -321,7 +327,13 @@ export function EditorToolbar() {
     const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
       ? `${currentViewerEmbedUrl}&v=${v}`
       : `${currentViewerEmbedUrl}?v=${v}`
-    const finalEmbedCode = `![Widget](${urlWithCacheBust})`
+    const finalEmbedCode = `<a href="${currentOrigin}">
+  <img
+    src="${urlWithCacheBust}"
+    alt="GitAscii Widget"
+    width="100%"
+  />
+</a>`
 
     const exportData = {
       username: session.username,

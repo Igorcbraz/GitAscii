@@ -11,7 +11,13 @@ export default function DemoSection() {
   const [copied, setCopied] = useState(false)
   const { t } = useI18n()
 
-  const embedCode = `![Widget](${APP_URL}/api/Igorcbraz)`
+  const embedCode = `<a href="${APP_URL}">
+  <img
+    src="${APP_URL}/api/Igorcbraz"
+    alt="GitAscii Widget"
+    width="100%"
+  />
+</a>`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode)
@@ -111,7 +117,9 @@ export default function DemoSection() {
 
               <pre className="m-0 overflow-x-auto whitespace-pre-wrap break-all pr-8">
                 <code className="text-bone leading-relaxed">
-                  ![Widget](<span className="text-signal-lime">{`${APP_URL}/api/Igorcbraz`}</span>)
+                  {`<a href="${APP_URL}">\n  <img\n    src="`}
+                  <span className="text-signal-lime">{`${APP_URL}/api/Igorcbraz`}</span>
+                  {`"\n    alt="GitAscii Widget"\n    width="100%"\n  />\n</a>`}
                 </code>
               </pre>
             </div>
