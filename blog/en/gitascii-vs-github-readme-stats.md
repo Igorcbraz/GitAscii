@@ -4,7 +4,6 @@ published: false
 description: 'Why relying on traditional query-string-configured GitHub stats cards limits performance, design flexibility, and scalability—and how modern edge architecture decouples style from content.'
 tags: 'github, opensource, webdev, architecture'
 cover_image: 'assets/gitascii-vs-stats.jpg'
-canonical_url: ''
 ---
 
 The classic `github-readme-stats` has been the undisputed king of profile customization for years. We have all seen the familiar stats cards pinned to thousands of developer portfolios. But relying on query parameters appended directly to an image tag introduces structural bottlenecks when you want true creative freedom and optimal load performance.

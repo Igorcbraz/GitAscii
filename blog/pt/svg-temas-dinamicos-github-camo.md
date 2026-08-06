@@ -5,7 +5,6 @@ published: false
 description: 'O proxy Camo do GitHub remove tags de script e isola imagens. Descubra como criar SVGs responsivos aos temas escuro/claro usando CSS media queries embutidas executadas diretamente no navegador do leitor.'
 tags: 'css, svg, github, frontend'
 cover_image: 'assets/dynamic-svg-themes.jpg'
-canonical_url: ''
 ---
 
 A limitação mais frustrante do proxy Camo do GitHub não é o seu cache estrito de imagens, mas a esterilização absoluta de qualquer script executado no lado do cliente. Isso cria um clássico desafio de frontend: como entregar um banner ou layout personalizado no `README.md` que responda automaticamente ao tema claro ou escuro do sistema operacional do leitor, se você não tem acesso ao DOM para detectar o estado atual da interface ou injetar classes CSS com JavaScript?

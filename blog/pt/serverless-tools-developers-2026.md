@@ -4,7 +4,6 @@ description: 'Uma análise arquitetural profunda das ferramentas de edge serverl
 tags: ['serverless', 'edge-computing', 'architecture', 'web-development']
 main_image: 'assets/serverless-tools.jpg'
 cover_image: 'assets/serverless-tools.jpg'
-canonical: ''
 published: false
 ---
 

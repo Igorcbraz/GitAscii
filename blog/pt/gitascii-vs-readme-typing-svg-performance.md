@@ -5,7 +5,6 @@ published: false
 description: 'Geração de SVGs dinâmicos tradicionais executa processamento síncrono pesado em cada requisição. Saiba como o deslocamento de carga para o client-side e o Vercel Edge Runtime evitam timeouts no proxy Camo do GitHub.'
 tags: 'performance, nextjs, edge-computing, svg'
 cover_image: 'assets/latency-comparison.jpg'
-canonical_url: ''
 ---
 
 Ferramentas clássicas de customização de perfis, como o `readme-typing-svg`, popularizaram a injeção de animações e interatividade em repositórios, servindo SVGs remotos gerados de forma dinâmica. Porém, o custo oculto dessa abordagem síncrona clássica é a degradação da percepção de performance. _Cold starts_ ocasionais, picos de latência e timeouts no proxy GitHub Camo frequentemente deixam os perfis com imagens quebradas.

@@ -5,7 +5,6 @@ published: false
 description: 'Traditional dynamic SVGs perform synchronous image generation on every request. Learn how offloading heavy canvas processing to the client and deploying to Vercel Edge Runtime prevents GitHub Camo proxy timeouts.'
 tags: 'performance, nextjs, edge-computing, svg'
 cover_image: 'assets/latency-comparison.jpg'
-canonical_url: ''
 ---
 
 Classic profile customization badges, such as `readme-typing-svg`, popularized dynamic widgets in repository READMEs by serving remote, dynamically generated SVGs. However, the hidden cost of this synchronous generation pattern is degraded performance. Occasional server cold starts, latency spikes, and strict timeouts inside the GitHub Camo proxy often leave profiles with broken image placeholders.

@@ -4,7 +4,6 @@ description: 'An architectural deep dive into the serverless edge tools dominati
 tags: ['serverless', 'edge-computing', 'architecture', 'web-development']
 main_image: 'assets/serverless-tools.jpg'
 cover_image: 'assets/serverless-tools.jpg'
-canonical: ''
 published: false
 ---
 

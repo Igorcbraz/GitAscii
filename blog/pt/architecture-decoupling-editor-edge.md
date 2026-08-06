@@ -5,7 +5,6 @@ tags:
   ['software-architecture', 'react', 'nextjs', 'edge-computing', 'serverless', 'web-development']
 main_image: 'assets/decoupling-canvas.jpg'
 cover_image: 'assets/decoupling-canvas.jpg'
-canonical: ''
 published: false
 ---
 

@@ -4,7 +4,6 @@ published: false
 description: 'Por que depender de cartões de estatísticas do GitHub configurados via query string limita a performance, flexibilidade e escalabilidade—e como a arquitetura moderna no edge separa estilo de conteúdo.'
 tags: 'github, opensource, webdev, architecture'
 cover_image: 'assets/gitascii-vs-stats.jpg'
-canonical_url: ''
 ---
 
 O clássico `github-readme-stats` é o rei indiscutível da personalização de perfis há anos. Todos nós já vimos os familiares cartões de estatísticas fixados em milhares de portfólios de desenvolvedores. No entanto, depender de parâmetros de query string anexados diretamente a uma tag de imagem introduz gargalos estruturais quando você busca verdadeira liberdade criativa e tempos de carregamento otimizados.

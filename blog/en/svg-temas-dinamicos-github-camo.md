@@ -5,7 +5,6 @@ published: false
 description: 'GitHub Camo strips script tags and isolates image assets. Discover how to build dynamic, responsive dark/light mode SVGs using embedded CSS media queries executed entirely in the reader browser.'
 tags: 'css, svg, github, frontend'
 cover_image: 'assets/dynamic-svg-themes.jpg'
-canonical_url: ''
 ---
 
 The most frustrating aspect of GitHub's image proxy, Camo, is not its caching behavior, but the absolute sandboxing of client-side scripts. This constraint creates a classic frontend challenge: how do you deliver a dynamic banner or layout inside a `README.md` that automatically adjusts to the reader's dark or light theme when you have zero access to the DOM or JavaScript?
