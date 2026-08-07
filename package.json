@@ -20,7 +20,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@next/third-parties": "^16.2.12",
+    "@next/third-parties": "^16.3.0",
     "@vercel/blob": "^2.6.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
