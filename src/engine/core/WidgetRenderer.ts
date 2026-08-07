@@ -99,6 +99,42 @@ function renderExternalWidgetSvg(
   `
 }
 
+export function getWidgetMinSize(
+  widget: WidgetInstance,
+  data: NormalizedGitHubData
+): { width: number; height: number } | null {
+  if (widget.widgetId === 'bio') {
+    const width = widget.size.width
+    const cfg = widget.config
+    const customBio =
+      cfg.customBio !== undefined ? (cfg.customBio as string) : data.user.bio || 'No bio provided.'
+    const maxCharsPerLine = Math.max(20, Math.floor((width - 72) / 8.5))
+    const wrappedLines: string[] = []
+    for (const p of customBio.split('\n')) {
+      if (p.length <= maxCharsPerLine) {
+        wrappedLines.push(p)
+        continue
+      }
+      let remaining = p
+      while (remaining.length > 0) {
+        if (remaining.length <= maxCharsPerLine) {
+          wrappedLines.push(remaining)
+          break
+        }
+        let breakPoint = remaining.lastIndexOf(' ', maxCharsPerLine)
+        if (breakPoint === -1) {
+          breakPoint = maxCharsPerLine
+        }
+        wrappedLines.push(remaining.substring(0, breakPoint))
+        remaining = remaining.substring(breakPoint + 1).trimStart()
+      }
+    }
+    const requiredHeight = 60 + (Math.max(1, wrappedLines.length) - 1) * 20 + 48
+    return { width, height: requiredHeight }
+  }
+  return null
+}
+
 export function renderWidgetSvg(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
@@ -291,10 +327,35 @@ export function renderWidgetSvg(
       const customBlog =
         cfg.customBlog !== undefined ? (cfg.customBlog as string) : data.user.blog || ''
 
-      const bioLines = customBio.split('\n')
-      const bioSvg = bioLines
+      const maxCharsPerLine = Math.max(20, Math.floor((width - 72) / 8.5))
+      const wrappedLines: string[] = []
+
+      for (const p of customBio.split('\n')) {
+        if (p.length <= maxCharsPerLine) {
+          wrappedLines.push(p)
+          continue
+        }
+        let remaining = p
+        while (remaining.length > 0) {
+          if (remaining.length <= maxCharsPerLine) {
+            wrappedLines.push(remaining)
+            break
+          }
+          let breakPoint = remaining.lastIndexOf(' ', maxCharsPerLine)
+          if (breakPoint === -1) {
+            breakPoint = maxCharsPerLine
+          }
+          wrappedLines.push(remaining.substring(0, breakPoint))
+          remaining = remaining.substring(breakPoint + 1).trimStart()
+        }
+      }
+
+      const bioSvg = wrappedLines
         .map((line, i) => `<tspan x="24" dy="${i === 0 ? 0 : 20}">${escapeXml(line)}</tspan>`)
         .join('')
+
+      const requiredHeight = 60 + (Math.max(1, wrappedLines.length) - 1) * 20 + 48
+      const finalHeight = Math.max(height, requiredHeight)
 
       let blogHref = customBlog
       if (blogHref && !blogHref.startsWith('http://') && !blogHref.startsWith('https://')) {
@@ -316,7 +377,7 @@ export function renderWidgetSvg(
         <text x="24" y="60" font-family="${globalStyles.fontFamily}" font-size="14" fill="${textClr}">
           ${bioSvg}
         </text>
-        <g transform="translate(24, ${height - 24})">
+        <g transform="translate(24, ${finalHeight - 24})">
           ${locationSvg}
           ${blogSvg}
         </g>

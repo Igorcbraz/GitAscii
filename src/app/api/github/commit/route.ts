@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           name: repoName,
           description: 'My GitHub Profile Readme generated with GitAscii',
+          auto_init: true,
         }),
       })
 

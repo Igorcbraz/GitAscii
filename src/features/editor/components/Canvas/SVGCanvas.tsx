@@ -4,7 +4,7 @@ import { Layers, Lock, Move, X } from 'lucide-react'
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
-import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
+import { getWidgetMinSize, renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
@@ -461,6 +461,15 @@ export function SVGCanvas() {
         height = side
       }
 
+      const activeWidget = currentConfig.widgets.find((w) => w.instanceId === activeDrag.instanceId)
+      if (activeWidget && githubData) {
+        const tempWidget = { ...activeWidget, size: { width, height } }
+        const minSize = getWidgetMinSize(tempWidget, githubData)
+        if (minSize && height < minSize.height) {
+          height = minSize.height
+        }
+      }
+
       scheduleDragPreview({
         positions: { [activeDrag.instanceId]: activeDrag.initialPos },
         sizes: { [activeDrag.instanceId]: { width, height } },
@@ -540,6 +549,17 @@ export function SVGCanvas() {
           }
         }
         store.recordHistorySnapshot()
+      }
+
+      if (svgContainerRef.current && configRef.current) {
+        for (const widget of configRef.current.widgets) {
+          const el = svgContainerRef.current.querySelector<SVGGElement>(
+            `g#widget-${widget.instanceId}`
+          )
+          if (el) {
+            el.setAttribute('transform', `translate(${widget.position.x}, ${widget.position.y})`)
+          }
+        }
       }
 
       activeDragRef.current = null
