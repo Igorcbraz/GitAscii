@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/Igorcbraz/GitAscii/compare/v1.2.0...v1.3.0) (2026-08-07)
+
+
+### Features
+
+* export widget embed code using 100% width HTML tags ([e1e52d7](https://github.com/Igorcbraz/GitAscii/commit/e1e52d7d4405d64ce1fd6a932c3b871aec1a4ae8))
+
+
+### Bug Fixes
+
+* convert string tags to array in blog frontmatter ([3dec848](https://github.com/Igorcbraz/GitAscii/commit/3dec848c26203ff48c3ce89e7b7805a6f4dd01ba))
+* resolve github repository creation and bio widget text wrapping ([39662b5](https://github.com/Igorcbraz/GitAscii/commit/39662b5b3096ee8749af1907fa40435f9a576e13)), closes [#37](https://github.com/Igorcbraz/GitAscii/issues/37) [#30](https://github.com/Igorcbraz/GitAscii/issues/30)
+
 ## [1.2.0](https://github.com/Igorcbraz/GitAscii/compare/v1.1.0...v1.2.0) (2026-08-05)
 
 
