@@ -2,14 +2,12 @@
 
 import {
   Check,
-  Copy,
   Download,
   Github,
   Loader2,
   LogIn,
   LogOut,
   Redo2,
-  Save,
   Undo2,
   User,
   ZoomIn,
@@ -22,7 +20,6 @@ import { useI18n } from '@/i18n'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
-import { CopyGuideModal } from './CopyGuideModal'
 import { ExportGuideModal } from './ExportGuideModal'
 
 export function EditorToolbar() {
@@ -41,15 +38,11 @@ export function EditorToolbar() {
     selectWidget,
     updateWidgetPosition,
     duplicateWidget,
-    saveToServer,
     session,
   } = useEditorStore()
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
-  const [copied, setCopied] = useState(false)
-  const [showGuide, setShowGuide] = useState(false)
   const [showExportGuide, setShowExportGuide] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [commitStatus, setCommitStatus] = useState<'idle' | 'committing' | 'success' | 'error'>(
     'idle'
   )
@@ -71,18 +64,6 @@ export function EditorToolbar() {
       setCurrentOrigin(window.location.origin)
     }
   }, [])
-
-  const handleSave = async () => {
-    setSaveStatus('saving')
-    try {
-      await saveToServer()
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } catch {
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus((prev) => (prev === 'error' ? 'idle' : prev)), 3000)
-    }
-  }
 
   const handleExport = () => {
     if (!config) return
@@ -299,21 +280,10 @@ export function EditorToolbar() {
   />
 </a>`
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(embedCode)
-    setCopied(true)
-
-    const skipGuide =
-      typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_copy_guide') === 'true'
-    if (!skipGuide) {
-      setShowGuide(true)
-    }
-
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   const handleCommitToGithub = async () => {
     if (!session) {
+      setCommitStatus('committing')
+      window.location.href = `/api/auth/login?redirect_to=/${username}`
       return
     }
 
@@ -380,7 +350,7 @@ export function EditorToolbar() {
           ? 'bg-signal-lime text-black glow-lime'
           : commitStatus === 'error'
             ? 'bg-red-500 text-white'
-            : 'bg-transparent border border-signal-lime text-signal-lime hover:bg-signal-lime hover:text-black hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110'
+            : 'bg-signal-lime text-black glow-lime hover:brightness-110'
       }`}
     >
       {commitStatus === 'committing' ? (
@@ -496,72 +466,16 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        {isOwner && (
-          <button
-            onClick={handleSave}
-            data-testid="save-profile-btn"
-            disabled={saveStatus === 'saving'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
-              saveStatus === 'saved'
-                ? 'bg-signal-lime text-black glow-lime'
-                : saveStatus === 'error'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
-            }`}
-          >
-            {saveStatus === 'saving' ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : saveStatus === 'saved' ? (
-              <Check size={14} />
-            ) : (
-              <Save size={14} />
-            )}
-            <span className="hidden sm:inline">
-              {saveStatus === 'saving'
-                ? t('common.saving', 'Saving...')
-                : saveStatus === 'saved'
-                  ? t('common.saved', 'Saved!')
-                  : saveStatus === 'error'
-                    ? t('common.error', 'Error!')
-                    : t('common.save_profile', 'Save Profile')}
-            </span>
-          </button>
-        )}
-
-        {session ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCopyCode}
-              data-testid="copy-code-btn"
-              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span className="hidden sm:inline">
-                {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
-              </span>
-            </button>
-            {renderUpdateReadmeButton()}
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleExport}
-              data-testid="export-layout-btn"
-              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-            >
-              <Download size={14} />
-              <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
-            </button>
-          </div>
-        )}
+        <button
+          onClick={handleExport}
+          data-testid="export-layout-btn"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
+        >
+          <Download size={14} />
+          <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
+        </button>
+        {renderUpdateReadmeButton()}
       </div>
-
-      <CopyGuideModal
-        isOpen={showGuide}
-        onClose={() => setShowGuide(false)}
-        username={username}
-        embedCode={embedCode}
-      />
 
       <ExportGuideModal
         isOpen={showExportGuide}

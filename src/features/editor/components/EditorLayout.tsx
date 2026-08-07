@@ -115,18 +115,35 @@ export function EditorLayout({
         const storageKey = `gitascii_${data.user.id}_${profileSlug}`
         const savedDraft = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
 
+        let serverConfig: SavedConfiguration | null = null
+        try {
+          const configRes = await fetch(`/api/config/${username}/${profileSlug}`)
+          if (configRes.ok) {
+            serverConfig = await configRes.json()
+          }
+        } catch (e) {
+          console.warn('Failed to fetch server config', e)
+        }
+
         if (savedDraft) {
           try {
             initialConfig = JSON.parse(savedDraft)
             setStep('profile', 'done', 'Rascunho salvo encontrado')
           } catch {
-            initialConfig = autoGenerate ? generateBestProfile(data) : null
+            initialConfig = serverConfig || (autoGenerate ? generateBestProfile(data) : null)
             setStep(
               'profile',
               'done',
-              autoGenerate ? 'Gerado automaticamente' : 'Sem configuração prévia'
+              serverConfig
+                ? 'Configuração carregada'
+                : autoGenerate
+                  ? 'Gerado automaticamente'
+                  : 'Sem configuração prévia'
             )
           }
+        } else if (serverConfig) {
+          initialConfig = serverConfig
+          setStep('profile', 'done', 'Perfil carregado do repositório')
         } else if (autoGenerate) {
           initialConfig = generateBestProfile(data)
           setStep('profile', 'done', 'Perfil gerado automaticamente')
