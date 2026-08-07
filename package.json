@@ -23,7 +23,7 @@
     "@next/third-parties": "^16.2.12",
     "@vercel/blob": "^2.6.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.475.0",
+    "lucide-react": "^1.28.0",
     "motion": "^12.43.0",
     "next": "^15.3.0",
     "react": "^19.0.0",
