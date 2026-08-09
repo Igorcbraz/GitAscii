@@ -100,6 +100,15 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
+    // Intercept config route to prevent backend hanging on github fetches
+    await page.route('**/api/config/**', async (route) => {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Config not found' }),
+      })
+    })
+
     // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(page)
   },
