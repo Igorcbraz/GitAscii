@@ -153,3 +153,29 @@ export function EditorActions() {
    - Abra a aba de console do navegador para ver os logs locais.
    - Acesse o painel do Google Analytics 4 associado à tag `G-GDBZXFCBLQ`.
    - Vá em **Administrador → DebugView** (sob a coluna de exibição de dados). Os seus eventos em localhost aparecerão em tempo real no fluxo de depuração.
+
+---
+
+## 📹 Microsoft Clarity (Heatmaps & Session Recording)
+
+Além do Google Analytics 4, utilizamos o **Microsoft Clarity** para entender visualmente o comportamento dos usuários através de heatmaps (mapas de calor) e gravações de sessão anonimizadas.
+
+A integração do Clarity segue a mesma filosofia de arquitetura:
+
+1. **Performance**: O script do Clarity só é injetado via `next/script` em produção, utilizando a estratégia `afterInteractive` para não prejudicar o Core Web Vitals.
+2. **Abstração**: O módulo localizado em `src/lib/analytics/clarity.ts` isola as chamadas diretas ao objeto `window.clarity`.
+3. **Privacidade e PII**: Implementamos verificações para barrar envio de dados sensíveis (PII - _Personally Identifiable Information_). Quaisquer tags cujos nomes contenham `email`, `name`, `password`, `token`, `cpf` ou `phone` serão silenciadas.
+
+### Como Usar
+
+O script inicial já está incluído e ativado globalmente via `layout.tsx`. Para enviar eventos customizados ou adicionar filtros à sessão:
+
+```typescript
+import { trackClarityEvent, setClarityTag } from '@/lib/analytics/clarity'
+
+// Enviar evento customizado ao Clarity
+trackClarityEvent('download_svg_premium')
+
+// Marcar a sessão atual com um atributo para filtrar heatmaps depois
+setClarityTag('theme', 'dracula')
+```

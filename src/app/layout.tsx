@@ -7,6 +7,7 @@ import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
 import { ToastProvider } from '@/components/ui/toast'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
+import { MicrosoftClarity } from '@/lib/analytics/clarity'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
 
 const ptSerif = PT_Serif({
@@ -269,6 +270,7 @@ export default function RootLayout({
           </ToastProvider>
         </I18nProvider>
         <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
+        <MicrosoftClarity />
         {/* impeccable-live-start */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="http://localhost:8400/live.js?token=58a45599-d30d-4e10-8d20-a21967b6483b"></script>
