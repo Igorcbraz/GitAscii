@@ -3,7 +3,6 @@ import { expect, test } from './fixtures/customFixture'
 test.describe('GitAscii Visual Regression Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/Igorcbraz')
-    await page.waitForLoadState('networkidle')
     // Hide standard elements that could cause flakiness (videos/iframes)
     await page.addStyleTag({ content: 'iframe, video { visibility: hidden !important; }' })
   })
@@ -20,7 +19,7 @@ test.describe('GitAscii Visual Regression Tests', () => {
 
   test('Canvas States - Single Selection', async ({ page }) => {
     // Select the first widget
-    const firstWidget = page.locator('[data-testid="canvas-widget-header"]')
+    const firstWidget = page.locator('[data-testid="canvas-widget-header"]').first()
     await firstWidget.click({ force: true })
     await page.waitForTimeout(500)
 
@@ -36,7 +35,7 @@ test.describe('GitAscii Visual Regression Tests', () => {
   test('Canvas States - Empty Canvas', async ({ page }) => {
     // We can clear the canvas by deleting all widgets
     // Click header and delete
-    await page.locator('[data-testid="canvas-widget-header"]').click({ force: true })
+    await page.locator('[data-testid="canvas-widget-header"]').first().click({ force: true })
     await page.keyboard.press('Delete')
 
     // Find all other widgets and delete them if there are any default ones
@@ -67,7 +66,7 @@ test.describe('GitAscii Visual Regression Tests', () => {
   })
 
   test('Drag and Resize Scenarios', async ({ page }) => {
-    const widget = page.locator('[data-testid="canvas-widget-header"]')
+    const widget = page.locator('[data-testid="canvas-widget-header"]').first()
 
     // Simulate drag via evaluate to store since userEvent mouse moves are flaky in E2E sometimes
     // But we'll try native first
