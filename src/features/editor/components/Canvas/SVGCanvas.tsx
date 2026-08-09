@@ -16,15 +16,23 @@ const WidgetNode = memo(
     widget,
     githubData,
     globalStyles,
+    isSelected,
   }: {
     widget: WidgetInstance
     githubData: NormalizedGitHubData
     globalStyles: GlobalStyles
+    isSelected?: boolean
   }) {
     const innerSvg = renderWidgetSvg(widget, githubData, globalStyles, false)
     return (
       <g
         id={`widget-${widget.instanceId}`}
+        data-testid={`canvas-widget-${widget.widgetId}`}
+        data-selected={isSelected ? 'true' : undefined}
+        data-x={widget.position.x}
+        data-y={widget.position.y}
+        data-width={widget.size.width}
+        data-height={widget.size.height}
         transform={`translate(${widget.position.x}, ${widget.position.y})`}
         dangerouslySetInnerHTML={{ __html: innerSvg }}
       />
@@ -34,7 +42,8 @@ const WidgetNode = memo(
     return (
       prev.widget === next.widget &&
       prev.githubData === next.githubData &&
-      prev.globalStyles === next.globalStyles
+      prev.globalStyles === next.globalStyles &&
+      prev.isSelected === next.isSelected
     )
   }
 )
@@ -742,6 +751,7 @@ export function SVGCanvas() {
         <div
           ref={svgContainerRef}
           data-testid="canvas-svg-container"
+          tabIndex={-1}
           className={`w-full h-full pointer-events-none ${config.widgets
             .map((w) =>
               playingPreviews[w.instanceId]
@@ -782,6 +792,7 @@ export function SVGCanvas() {
                     widget={widget}
                     githubData={githubData}
                     globalStyles={config.globalStyles}
+                    isSelected={selectedInstanceIds.includes(widget.instanceId)}
                   />
                 ))
               })()}
@@ -1089,7 +1100,7 @@ export function SVGCanvas() {
       </div>
 
       <div
-        className="fixed bottom-20 right-4 lg:bottom-6 lg:left-81 lg:right-auto z-40 flex flex-col items-end lg:items-start select-none"
+        className="fixed bottom-20 right-4 lg:bottom-14 lg:left-81 lg:right-auto z-40 flex flex-col items-end lg:items-start select-none"
         onClick={(e) => e.stopPropagation()}
       >
         {isLayersOpen && (

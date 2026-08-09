@@ -21,6 +21,7 @@ import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../store/editorStore'
+import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
 import { SVGCanvas } from './Canvas/SVGCanvas'
 import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
 import { PropertiesPanel } from './Properties/PropertiesPanel'
@@ -375,9 +376,10 @@ export function EditorLayout({
             <WidgetLibrary />
           </div>
           <div
-            className={`${activeMobilePanel === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-1 h-full relative overflow-hidden`}
+            className={`${activeMobilePanel === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-col flex-1 h-full relative overflow-hidden`}
           >
             <SVGCanvas />
+            <CanvasStatusBar />
           </div>
           <div
             className={`${activeMobilePanel === 'properties' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
