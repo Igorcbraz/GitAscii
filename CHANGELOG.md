@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.0](https://github.com/Igorcbraz/GitAscii/compare/v1.3.0...v1.4.0) (2026-08-10)
+
+
+### Features
+
+* **analytics:** add microsoft clarity integration ([73fe748](https://github.com/Igorcbraz/GitAscii/commit/73fe74867d13cd69f45de79c35a2850ad8890d8d))
+* **editor:** add Command Palette and extract CanvasStatusBar ([b4e8f7e](https://github.com/Igorcbraz/GitAscii/commit/b4e8f7e5ee93190409d8e7eb4daa534807f8ddb1))
+* google analytics integration with consent management ([ac0ce98](https://github.com/Igorcbraz/GitAscii/commit/ac0ce985ee96c61dd11200e4ac7c8cac3fa78035))
+* **seo:** add static OG image and align dynamic edge component with brand style ([13cc7a2](https://github.com/Igorcbraz/GitAscii/commit/13cc7a222d545869fa27a63d557aa3b2e404f984))
+
 ## [1.3.0](https://github.com/Igorcbraz/GitAscii/compare/v1.2.0...v1.3.0) (2026-08-07)
 
 
