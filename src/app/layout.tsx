@@ -75,10 +75,17 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://git-ascii.vercel.app/opengraph-image',
+        url: 'https://git-ascii.vercel.app/og-image.png',
         width: 1200,
         height: 630,
         alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
+        type: 'image/png',
+      },
+      {
+        url: 'https://git-ascii.vercel.app/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator (Dynamic)',
         type: 'image/png',
       },
     ],
@@ -88,7 +95,7 @@ export const metadata: Metadata = {
     title: 'GitAscii — Premium GitHub Profile README Generator',
     description:
       'Create stunning GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
-    images: ['https://git-ascii.vercel.app/opengraph-image'],
+    images: ['https://git-ascii.vercel.app/og-image.png'],
     creator: '@git_ascii',
   },
   robots: {
