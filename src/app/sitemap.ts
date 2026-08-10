@@ -4,7 +4,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://git-ascii.vercel.app'
   const currentDate = new Date()
 
-  const staticHubs = ['', '/templates', '/widgets', '/explore', '/guides', '/vs']
+  const staticHubs = [
+    '',
+    '/templates',
+    '/widgets',
+    '/explore',
+    '/guides',
+    '/vs',
+    '/privacy',
+    '/terms',
+  ]
 
   const stackTemplates = [
     '/templates/react',

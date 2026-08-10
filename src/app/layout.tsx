@@ -1,13 +1,12 @@
 import './globals.css'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata, Viewport } from 'next'
 import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
-import { MicrosoftClarity } from '@/lib/analytics/clarity'
+import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
 
 const ptSerif = PT_Serif({
@@ -238,6 +237,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
       <body>
@@ -269,8 +269,7 @@ export default function RootLayout({
             </AutoAnalyticsTracker>
           </ToastProvider>
         </I18nProvider>
-        <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
-        <MicrosoftClarity />
+        <ConsentControlledScripts />
         {/* impeccable-live-start */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="http://localhost:8400/live.js?token=58a45599-d30d-4e10-8d20-a21967b6483b"></script>

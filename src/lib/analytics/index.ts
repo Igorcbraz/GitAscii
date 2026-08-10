@@ -1,7 +1,10 @@
 'use client'
 
 import { usePathname, useSearchParams } from 'next/navigation'
-import React, { Suspense, useEffect, useRef } from 'react'
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+
+import { getConsentChoice } from '@/lib/consent'
+import { ConsentBanner } from '@/lib/consent/ConsentBanner'
 
 import { GoogleAnalyticsProvider } from './google-analytics'
 import { AnalyticsProvider } from './interface'
@@ -139,7 +142,51 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   const editorStartTime = useRef<number | null>(null)
   const previewStartTime = useRef<number | null>(null)
 
+  const [consentGranted, setConsentGranted] = useState<boolean>(false)
+
+  const applyGrantedConsent = useCallback(() => {
+    analytics.updateConsent({
+      analytics_storage: 'granted',
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+    })
+  }, [])
+
   useEffect(() => {
+    const stored = getConsentChoice()
+    if (stored === 'granted') {
+      applyGrantedConsent()
+      setConsentGranted(true)
+    }
+  }, [applyGrantedConsent])
+
+  const handleConsentDecision = useCallback(
+    (choice: 'granted' | 'denied') => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('analytics-consent-decision', { detail: { choice } }))
+      }
+
+      if (choice === 'granted') {
+        applyGrantedConsent()
+        setConsentGranted(true)
+        analytics.track('session_start')
+      } else {
+        analytics.updateConsent({
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+        })
+        setConsentGranted(false)
+      }
+    },
+    [applyGrantedConsent]
+  )
+
+  useEffect(() => {
+    if (!consentGranted) return
+
     const isFirstVisit = !localStorage.getItem('gitascii_visited')
     if (isFirstVisit) {
       analytics.track('first_visit')
@@ -224,12 +271,15 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
       window.removeEventListener('error', handleGlobalError)
       window.removeEventListener('unhandledrejection', handleUnhandledRejection)
     }
-  }, [])
+  }, [consentGranted])
 
   return React.createElement(
     React.Fragment,
     null,
     React.createElement(Suspense, { fallback: null }, React.createElement(RouteTrackListener)),
+    React.createElement(ConsentBanner, { onConsent: handleConsentDecision }),
     children
   )
 }
+
+export type { ConsentState }

@@ -60,9 +60,12 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     if (window.gtag) {
-      window.gtag('config', 'G-GDBZXFCBLQ', {
-        user_id: userId,
-      })
+      const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+      if (gaId) {
+        window.gtag('config', gaId, {
+          user_id: userId,
+        })
+      }
       if (cleanedProperties) {
         this.setUserProperties(cleanedProperties)
       }
@@ -95,10 +98,11 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      sendGAEvent({
-        event: event,
-        value: cleanedParams,
-      })
+      if (window.gtag) {
+        window.gtag('event', event, cleanedParams || {})
+      } else {
+        sendGAEvent('event', event, cleanedParams || {})
+      }
     } catch (err) {
       console.error('[GA Error Tracking Event]:', err)
     }

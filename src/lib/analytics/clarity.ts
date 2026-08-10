@@ -9,11 +9,15 @@ declare global {
   }
 }
 
-export function MicrosoftClarity() {
+interface MicrosoftClarityProps {
+  consentGranted: boolean
+}
+
+export function MicrosoftClarity({ consentGranted }: MicrosoftClarityProps) {
   const isProduction = process.env.NODE_ENV === 'production'
   const projectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID
 
-  if (!isProduction || !projectId) return null
+  if (!isProduction || !projectId || !consentGranted) return null
 
   return createElement(Script, {
     id: 'microsoft-clarity',

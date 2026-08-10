@@ -13,8 +13,15 @@ O sistema de analytics foi estruturado sob o princípio da **Inversão de Depend
 - [types.ts](file:///C:/Repos/GitAscii/src/lib/analytics/types.ts): Contém as definições de tipos para eventos, propriedades e estado de consentimento.
 - [interface.ts](file:///C:/Repos/GitAscii/src/lib/analytics/interface.ts): Interface genérica que qualquer provedor (GA4, PostHog, Amplitude, etc.) deve implementar.
 - [google-analytics.ts](file:///C:/Repos/GitAscii/src/lib/analytics/google-analytics.ts): Implementação da interface voltada para o Google Analytics 4.
-- [index.ts](file:///C:/Repos/GitAscii/src/lib/analytics/index.ts): Exporta o hook `useAnalytics()`, o singleton `analytics` e o componente de escuta automática `<AutoAnalyticsTracker />`.
+- [clarity.ts](file:///C:/Repos/GitAscii/src/lib/analytics/clarity.ts): Microsoft Clarity — requer `consentGranted: true` para carregar.
+- [ConsentControlledScripts.tsx](file:///C:/Repos/GitAscii/src/lib/analytics/ConsentControlledScripts.tsx): Client component que monta GA4 e Clarity condicionalmente com base no consentimento.
+- [index.ts](file:///C:/Repos/GitAscii/src/lib/analytics/index.ts): Exporta o hook `useAnalytics()`, o singleton `analytics` e o componente `<AutoAnalyticsTracker />`.
 - [web-vitals.tsx](file:///C:/Repos/GitAscii/src/lib/analytics/web-vitals.tsx): Rastreamento automático e envio de métricas de performance (LCP, FID, CLS, etc.).
+
+### Arquivos (`src/lib/consent/`)
+
+- [index.ts](file:///C:/Repos/GitAscii/src/lib/consent/index.ts): Helpers SSR-safe: `getConsentChoice`, `saveConsentChoice`, `clearConsentChoice`.
+- [ConsentBanner.tsx](file:///C:/Repos/GitAscii/src/lib/consent/ConsentBanner.tsx): Banner de consentimento acessível + `PrivacySettingsButton` para o footer.
 
 ---
 
@@ -73,24 +80,71 @@ Para adicionar um novo evento de forma profissional e segura ao longo da aplica�
 
 ---
 
-## 🔒 Consent Mode v2 (LGPD / GDPR)
+## 🔒 Sistema de Consentimento (LGPD / GDPR)
 
-A arquitetura já suporta o **Consent Mode v2**. Por padrão, os rastreamentos e cookies são definidos como `denied`.
-Para atualizar os estados de consentimento a partir de um Banner de Cookies futuro, utilize a função `updateConsent`:
+### Visão Geral
 
-```typescript
-import { useAnalytics } from '@/lib/analytics'
+O GitAscii implementa um sistema de consentimento explícito. Nenhum dado de analytics é coletado sem o aceite ativo do usuário.
 
-const { updateConsent } = useAnalytics()
+### Como funciona — fluxo de consentimento
 
-// Quando o usuário aceitar os cookies
-updateConsent({
-  analytics_storage: 'granted',
-  ad_storage: 'granted',
-  ad_user_data: 'granted',
-  ad_personalization: 'granted',
-})
 ```
+Primeiro acesso
+      │
+      ▼
+  analytics.init() chamado em analytics/index.ts
+      │  Cria gtag stub (dataLayer)
+      │  Consent Mode v2 → analytics_storage: 'denied' (padrão)
+      │
+      ▼
+  AutoAnalyticsTracker lê localStorage via getConsentChoice()
+      │
+      ├── 'granted' (visita anterior com aceite) ────────────────────────────┐
+      │       updateConsent({ analytics_storage: 'granted', ... })            │
+      │       setConsentGranted(true) → eventos de sessão disparados          │
+      │       ConsentControlledScripts → Clarity carregado                   │
+      │       Banner NÃO exibido                                              │
+      │                                                                       │
+      ├── 'denied' (visita anterior com recusa) ──────────────────────────────┤
+      │       Consent permanece 'denied'                                      │
+      │       Banner NÃO exibido                                              │
+      │       Clarity NÃO carregado                                           │
+      │                                                                       │
+      └── null (primeira visita) ─────────────────────────────────────────────┤
+              ConsentBanner exibido                                            │
+              │                                                                │
+              ├── [Aceita] → saveConsentChoice('granted')                     │
+              │              dispara 'analytics-consent-decision'              │
+              │              GA4 consent → 'granted'                          │
+              │              Clarity: carregado dinamicamente                 │
+              │                                                                │
+              └── [Recusa] → saveConsentChoice('denied') ───────────────────┘
+                             GA4 consent permanece 'denied'
+                             Clarity: script nunca carregado
+                             Sentry: continua funcionando normalmente
+```
+
+### GA4 vs. Clarity — tratamentos diferentes
+
+|                              | Google Analytics 4                          | Microsoft Clarity                                            |
+| ---------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
+| **Script carregado**         | Sempre (Consent Mode v2)                    | Somente após consent granted                                 |
+| **Dados enviados se negado** | Bloqueado por `analytics_storage: 'denied'` | Script não existe, nada é enviado                            |
+| **Por quê a diferença**      | GA4 tem suporte nativo a Consent Mode v2    | Clarity não tem equivalente; não carregar é a única garantia |
+
+### Sentry — separado do consentimento de analytics
+
+O Sentry é um sistema de **monitoramento técnico de erros**, não uma ferramenta de analytics:
+
+- Coleta apenas stack traces, URL da página e versão do browser.
+- Não escreve cookies de rastreamento ou dados de comportamento.
+- É carregado independentemente do consentimento de analytics porque detectar bugs afeta a qualidade do serviço para todos os usuários.
+
+### Como o usuário altera a escolha
+
+1. Footer → clicar em **Privacy Settings**
+2. Isso executa `clearConsentChoice()` e recarrega a página
+3. O banner reaparece para nova escolha
 
 ---
 
@@ -109,7 +163,6 @@ export function TemplateCard({ template, category }) {
   return (
     <div>
       <button onClick={() => previewTemplate({ template, category })}>Visualizar</button>
-
       <button onClick={() => templateSelected({ template, category })}>Selecionar</button>
     </div>
   )
@@ -153,12 +206,18 @@ export function EditorActions() {
    - Abra a aba de console do navegador para ver os logs locais.
    - Acesse o painel do Google Analytics 4 associado à tag `G-GDBZXFCBLQ`.
    - Vá em **Administrador → DebugView** (sob a coluna de exibição de dados). Os seus eventos em localhost aparecerão em tempo real no fluxo de depuração.
+3. **Testando o consentimento**:
+   - Limpe o `localStorage` da aplicação para simular o primeiro acesso.
+   - O banner deve aparecer; ao aceitar, verifique o DebugView para eventos de `session_start`.
+   - Ao recusar e recarregar, nenhum evento deve chegar ao GA4 e o script do Clarity não deve ser carregado (verificar Network tab).
 
 ---
 
 ## 📹 Microsoft Clarity (Heatmaps & Session Recording)
 
 Além do Google Analytics 4, utilizamos o **Microsoft Clarity** para entender visualmente o comportamento dos usuários através de heatmaps (mapas de calor) e gravações de sessão anonimizadas.
+
+> ⚠️ **Consent-gated**: O script do Clarity **não é carregado** caso o usuário recuse o consentimento de analytics. O Clarity não possui suporte a Consent Mode v2, portanto a única forma de garantir privacidade é não injetar o script.
 
 A integração do Clarity segue a mesma filosofia de arquitetura:
 
@@ -168,7 +227,7 @@ A integração do Clarity segue a mesma filosofia de arquitetura:
 
 ### Como Usar
 
-O script inicial já está incluído e ativado globalmente via `layout.tsx`. Para enviar eventos customizados ou adicionar filtros à sessão:
+Para enviar eventos customizados ou adicionar filtros à sessão (somente se consent foi granted):
 
 ```typescript
 import { trackClarityEvent, setClarityTag } from '@/lib/analytics/clarity'
@@ -179,3 +238,14 @@ trackClarityEvent('download_svg_premium')
 // Marcar a sessão atual com um atributo para filtrar heatmaps depois
 setClarityTag('theme', 'dracula')
 ```
+
+---
+
+## 📄 Páginas de Política
+
+| Página         | URL        | Descrição                                                                                            |
+| -------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| Privacy Policy | `/privacy` | Política de privacidade com detalhes de coleta, GA4, Clarity, Sentry, cookies e direitos do usuário  |
+| Terms of Use   | `/terms`   | Termos de uso cobrindo serviço, uso aceitável, conteúdo gerado, GitHub, disponibilidade e limitações |
+
+> **Atenção**: As páginas contêm placeholders marcados com `[PLACEHOLDER: ...]` para informações jurídicas que devem ser preenchidas pelo proprietário do projeto (nome legal, e-mail de contato, endereço físico).
