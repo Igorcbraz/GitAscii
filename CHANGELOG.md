@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/Igorcbraz/GitAscii/compare/v1.4.0...v1.4.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* **analytics:** explicit clarity consent signal ([db04be6](https://github.com/Igorcbraz/GitAscii/commit/db04be6daed18b2203f006873a2a2791503c26bb))
+
 ## [1.4.0](https://github.com/Igorcbraz/GitAscii/compare/v1.3.0...v1.4.0) (2026-08-10)
 
 
