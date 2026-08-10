@@ -2,18 +2,14 @@
 
 import {
   Check,
-  Copy,
+  Command,
   Download,
   Github,
   Loader2,
   LogIn,
   LogOut,
-  Redo2,
-  Save,
-  Undo2,
+  Search,
   User,
-  ZoomIn,
-  ZoomOut,
 } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -22,7 +18,7 @@ import { useI18n } from '@/i18n'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
-import { CopyGuideModal } from './CopyGuideModal'
+import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { ExportGuideModal } from './ExportGuideModal'
 
 export function EditorToolbar() {
@@ -30,26 +26,17 @@ export function EditorToolbar() {
   const {
     config,
     githubData,
-    zoom,
-    setZoom,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
     selectedInstanceId,
     removeWidget,
     selectWidget,
     updateWidgetPosition,
     duplicateWidget,
-    saveToServer,
     session,
   } = useEditorStore()
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
-  const [copied, setCopied] = useState(false)
-  const [showGuide, setShowGuide] = useState(false)
   const [showExportGuide, setShowExportGuide] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [commitStatus, setCommitStatus] = useState<'idle' | 'committing' | 'success' | 'error'>(
     'idle'
   )
@@ -71,18 +58,6 @@ export function EditorToolbar() {
       setCurrentOrigin(window.location.origin)
     }
   }, [])
-
-  const handleSave = async () => {
-    setSaveStatus('saving')
-    try {
-      await saveToServer()
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } catch {
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus((prev) => (prev === 'error' ? 'idle' : prev)), 3000)
-    }
-  }
 
   const handleExport = () => {
     if (!config) return
@@ -116,6 +91,15 @@ export function EditorToolbar() {
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey
+
+      if (cmdOrCtrl && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setCommandPaletteOpen((open) => !open)
+        return
+      }
+
       const target = e.target as HTMLElement
       if (
         target &&
@@ -124,28 +108,25 @@ export function EditorToolbar() {
         return
       }
 
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
-      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey
-
       if (cmdOrCtrl && e.key.toLowerCase() === 'z') {
         if (e.shiftKey) {
-          if (canRedo) {
+          if (useEditorStore.getState().canRedo) {
             e.preventDefault()
-            redo()
+            useEditorStore.getState().redo()
           }
         } else {
-          if (canUndo) {
+          if (useEditorStore.getState().canUndo) {
             e.preventDefault()
-            undo()
+            useEditorStore.getState().undo()
           }
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'y') {
-        if (canRedo) {
+        if (useEditorStore.getState().canRedo) {
           e.preventDefault()
-          redo()
+          useEditorStore.getState().redo()
         }
         return
       }
@@ -259,10 +240,6 @@ export function EditorToolbar() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [
-    undo,
-    redo,
-    canUndo,
-    canRedo,
     selectedInstanceId,
     removeWidget,
     selectWidget,
@@ -283,7 +260,6 @@ export function EditorToolbar() {
 
   const username = config.username
   const profileSlug = config.profileSlug
-  const isOwner = !!(session && session.username.toLowerCase() === username.toLowerCase())
   const viewerUsername = session?.username || username
 
   const embedUrl =
@@ -299,21 +275,10 @@ export function EditorToolbar() {
   />
 </a>`
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(embedCode)
-    setCopied(true)
-
-    const skipGuide =
-      typeof window !== 'undefined' && localStorage.getItem('gitascii_skip_copy_guide') === 'true'
-    if (!skipGuide) {
-      setShowGuide(true)
-    }
-
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   const handleCommitToGithub = async () => {
     if (!session) {
+      setCommitStatus('committing')
+      window.location.href = `/api/auth/login?redirect_to=/${username}`
       return
     }
 
@@ -380,7 +345,7 @@ export function EditorToolbar() {
           ? 'bg-signal-lime text-black glow-lime'
           : commitStatus === 'error'
             ? 'bg-red-500 text-white'
-            : 'bg-transparent border border-signal-lime text-signal-lime hover:bg-signal-lime hover:text-black hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110'
+            : 'bg-signal-lime text-black glow-lime hover:brightness-110'
       }`}
     >
       {commitStatus === 'committing' ? (
@@ -403,7 +368,7 @@ export function EditorToolbar() {
   )
 
   return (
-    <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-30">
+    <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center gap-1">
           <span className="font-inter-tight text-[16px] font-medium text-chalk">Git</span>
@@ -449,119 +414,34 @@ export function EditorToolbar() {
         </div>
       </div>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 bg-onyx border border-graphite rounded-sm p-1">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
         <button
-          onClick={undo}
-          data-testid="undo-btn"
-          disabled={!canUndo}
-          title={t('editor.toolbar.undo', 'Undo')}
-          className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
+          onClick={() => setCommandPaletteOpen(true)}
+          data-testid="command-palette-btn"
+          title="Busca Global (Ctrl+K)"
+          className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
         >
-          <Undo2 size={16} />
-        </button>
-
-        <button
-          onClick={redo}
-          data-testid="redo-btn"
-          disabled={!canRedo}
-          title={t('editor.toolbar.redo', 'Redo')}
-          className="p-1.5 rounded-xs hover:bg-graphite disabled:opacity-30 disabled:hover:bg-transparent text-chalk transition-colors cursor-pointer"
-        >
-          <Redo2 size={16} />
-        </button>
-
-        <div className="h-4 w-px bg-graphite mx-1" />
-
-        <button
-          onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-          data-testid="zoom-out-btn"
-          title={t('editor.toolbar.zoom_out', 'Zoom Out')}
-          className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
-        >
-          <ZoomOut size={16} />
-        </button>
-
-        <span className="font-jetbrains-mono text-eyebrow text-ash px-2">
-          {Math.round(zoom * 100)}%
-        </span>
-
-        <button
-          onClick={() => setZoom(Math.min(1.5, zoom + 0.1))}
-          data-testid="zoom-in-btn"
-          title={t('editor.toolbar.zoom_in', 'Zoom In')}
-          className="p-1.5 rounded-xs hover:bg-graphite text-chalk transition-colors cursor-pointer"
-        >
-          <ZoomIn size={16} />
+          <Search size={13} className="shrink-0 text-fog" />
+          <span className="font-inter-tight text-note text-fog flex-1 text-left">
+            Pesquisar widgets, templates...
+          </span>
+          <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
+            <Command size={9} />K
+          </kbd>
         </button>
       </div>
 
       <div className="flex items-center gap-3">
-        {isOwner && (
-          <button
-            onClick={handleSave}
-            data-testid="save-profile-btn"
-            disabled={saveStatus === 'saving'}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
-              saveStatus === 'saved'
-                ? 'bg-signal-lime text-black glow-lime'
-                : saveStatus === 'error'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white'
-            }`}
-          >
-            {saveStatus === 'saving' ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : saveStatus === 'saved' ? (
-              <Check size={14} />
-            ) : (
-              <Save size={14} />
-            )}
-            <span className="hidden sm:inline">
-              {saveStatus === 'saving'
-                ? t('common.saving', 'Saving...')
-                : saveStatus === 'saved'
-                  ? t('common.saved', 'Saved!')
-                  : saveStatus === 'error'
-                    ? t('common.error', 'Error!')
-                    : t('common.save_profile', 'Save Profile')}
-            </span>
-          </button>
-        )}
-
-        {session ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCopyCode}
-              data-testid="copy-code-btn"
-              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              <span className="hidden sm:inline">
-                {copied ? t('common.copied', 'Copied!') : t('common.copy_code', 'Copy Code')}
-              </span>
-            </button>
-            {renderUpdateReadmeButton()}
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleExport}
-              data-testid="export-layout-btn"
-              className="flex items-center gap-1.5 bg-signal-lime text-black px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider glow-lime hover:brightness-110 transition-all cursor-pointer"
-            >
-              <Download size={14} />
-              <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
-            </button>
-          </div>
-        )}
+        <button
+          onClick={handleExport}
+          data-testid="export-layout-btn"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
+        >
+          <Download size={14} />
+          <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
+        </button>
+        {renderUpdateReadmeButton()}
       </div>
-
-      <CopyGuideModal
-        isOpen={showGuide}
-        onClose={() => setShowGuide(false)}
-        username={username}
-        embedCode={embedCode}
-      />
 
       <ExportGuideModal
         isOpen={showExportGuide}
@@ -569,6 +449,14 @@ export function EditorToolbar() {
         username={username}
         onDownload={handleExport}
         embedCode={embedCode}
+      />
+
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onCommit={handleCommitToGithub}
+        onExport={handleExport}
+        commitStatus={commitStatus}
       />
     </header>
   )

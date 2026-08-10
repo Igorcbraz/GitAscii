@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 import { useI18n } from '@/i18n'
+import { PrivacySettingsButton } from '@/lib/consent/ConsentBanner'
 
 export function Footer() {
   const { t } = useI18n()
@@ -61,7 +62,7 @@ export function Footer() {
       <div className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
-            <div className="md:col-span-5 flex flex-col items-start">
+            <div className="md:col-span-4 flex flex-col items-start">
               <div className="text-subheading mb-3 flex items-center">
                 <span className="font-inter-tight font-medium text-chalk">Git</span>
                 <span className="font-pt-serif font-light italic text-signal-lime">Ascii</span>
@@ -141,7 +142,7 @@ export function Footer() {
               </ul>
             </div>
 
-            <div className="md:col-span-3 flex flex-col">
+            <div className="md:col-span-2 flex flex-col">
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
                 {t('landing.footer.community', '[ COMMUNITY ]')}
               </span>
@@ -175,6 +176,27 @@ export function Footer() {
                   >
                     {t('landing.footer.item.issues_requests', 'Issues & Feature Requests')}
                   </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="md:col-span-2 flex flex-col">
+              <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
+                [ LEGAL ]
+              </span>
+              <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
+                <li>
+                  <Link href="/privacy" className="transition-colors hover:text-signal-lime">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="transition-colors hover:text-signal-lime">
+                    Terms of Use
+                  </Link>
+                </li>
+                <li>
+                  <PrivacySettingsButton />
                 </li>
               </ul>
             </div>

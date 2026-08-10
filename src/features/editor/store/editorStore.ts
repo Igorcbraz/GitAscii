@@ -72,7 +72,6 @@ export interface EditorStore {
   setZoom: (zoom: number) => void
   setActiveTab: (tab: 'widgets' | 'layers' | 'templates') => void
   recordHistorySnapshot: () => void
-  saveToServer: () => Promise<void>
 
   undo: () => void
   redo: () => void
@@ -600,43 +599,6 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     setZoom: (zoom) => set({ zoom }),
     setActiveTab: (tab) => set({ activeTab: tab }),
 
-    saveToServer: async () => {
-      const { config } = get()
-      if (!config) return
-      set({ isSaving: true })
-      try {
-        const response = await fetch('/api/save', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(config),
-        })
-        if (!response.ok) {
-          let errorMessage = `Failed to save configuration to server (Status: ${response.status})`
-          try {
-            const data = await response.json()
-            if (data && data.error) {
-              errorMessage = data.error
-            }
-          } catch {
-            try {
-              const text = await response.text()
-              if (text) {
-                errorMessage = text.slice(0, 150)
-              }
-            } catch {}
-          }
-          throw new Error(errorMessage)
-        }
-      } catch (err) {
-        console.error('Save to server failed:', err)
-        throw err
-      } finally {
-        set({ isSaving: false })
-      }
-    },
-
     undo: () => {
       const { config, history } = get()
       if (history.past.length === 0 || !config) return
@@ -714,3 +676,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     },
   }
 })
+
+if (typeof window !== 'undefined') {
+  ;(window as any).__EDITOR_STORE__ = useEditorStore
+}

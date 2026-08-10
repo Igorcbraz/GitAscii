@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
-export const alt = 'GitAscii — Premium GitHub Profile README & ASCII Art Generator'
+export const alt = 'GitAscii — Turn your GitHub profile into ASCII art'
 export const size = {
   width: 1200,
   height: 630,
@@ -17,95 +17,272 @@ export default async function Image() {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor: '#060606',
-        backgroundImage: 'radial-gradient(ellipse at center, #1a2310 0%, #060606 70%)',
+        backgroundImage: 'radial-gradient(ellipse at 40% 50%, #0d1a07 0%, #060606 65%)',
         color: '#ffffff',
-        fontFamily: 'sans-serif',
         position: 'relative',
-        padding: '60px',
+        overflow: 'hidden',
       }}
     >
+      {/* Top-left wordmark */}
       <div
         style={{
           position: 'absolute',
-          top: 40,
-          left: 50,
+          top: 44,
+          left: 60,
           display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
+          alignItems: 'baseline',
+          gap: '0px',
         }}
       >
-        <span style={{ fontSize: 28, fontWeight: 700, color: '#ffffff' }}>Git</span>
-        <span style={{ fontSize: 28, fontWeight: 300, fontStyle: 'italic', color: '#c5ff4a' }}>
+        <span style={{ fontSize: 28, fontWeight: 400, color: '#ffffff', fontFamily: 'serif' }}>
+          Git
+        </span>
+        <span
+          style={{
+            fontSize: 28,
+            fontWeight: 300,
+            fontStyle: 'italic',
+            color: '#c5ff4a',
+            fontFamily: 'serif',
+          }}
+        >
           Ascii
         </span>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          maxWidth: '1000px',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 16,
-            letterSpacing: '0.25em',
-            textTransform: 'uppercase',
-            color: '#888888',
-            marginBottom: 20,
-          }}
-        >
-          [ THE FUTURE OF GITHUB PROFILES ]
-        </div>
-        <div
-          style={{
-            fontSize: 54,
-            fontWeight: 700,
-            color: '#ffffff',
-            lineHeight: 1.1,
-            marginBottom: 24,
-          }}
-        >
-          Create <span style={{ color: '#c5ff4a', fontStyle: 'italic' }}>Stunning</span> GitHub
-          Profile READMEs
-        </div>
-        <div
-          style={{
-            fontSize: 22,
-            color: '#cccccc',
-            maxWidth: '800px',
-            lineHeight: 1.4,
-          }}
-        >
-          Live SVG Stats Widgets · Custom ASCII Art Engine · Drag & Drop Visual Editor
-        </div>
-      </div>
-
+      {/* Main content area — left column */}
       <div
         style={{
           position: 'absolute',
-          bottom: 40,
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: '640px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingLeft: '60px',
+          paddingRight: '40px',
+        }}
+      >
+        {/* Eyebrow label */}
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 500,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: '#7a7a8a',
+            marginBottom: 24,
+            fontFamily: 'sans-serif',
+          }}
+        >
+          [ YOUR GITHUB PROFILE · TRANSFORMED ]
+        </div>
+
+        {/* Display headline */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginBottom: 28,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 62,
+              fontWeight: 300,
+              lineHeight: 0.94,
+              color: '#ffffff',
+              fontFamily: 'serif',
+              letterSpacing: '-1.5px',
+            }}
+          >
+            Turn your GitHub
+          </span>
+          <span
+            style={{
+              fontSize: 62,
+              fontWeight: 300,
+              lineHeight: 0.94,
+              color: '#ffffff',
+              fontFamily: 'serif',
+              letterSpacing: '-1.5px',
+              marginTop: 6,
+            }}
+          >
+            profile into{' '}
+            <span
+              style={{
+                color: '#c5ff4a',
+                fontStyle: 'italic',
+              }}
+            >
+              ASCII art.
+            </span>
+          </span>
+        </div>
+
+        {/* Body text */}
+        <div
+          style={{
+            fontSize: 16,
+            color: '#c5c5c5',
+            lineHeight: 1.55,
+            fontFamily: 'sans-serif',
+            letterSpacing: '0.02em',
+          }}
+        >
+          Live SVG Stats Widgets · Custom ASCII Art Engine · Drag &amp; Drop Editor
+        </div>
+      </div>
+
+      {/* Right side — ASCII terminal panel */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          right: 60,
+          transform: 'translateY(-50%)',
+          width: '420px',
+          height: '320px',
+          backgroundColor: '#1f1f1f',
+          border: '1px solid #252525',
+          borderRadius: '4px',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '20px',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Terminal header */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginBottom: 16,
+          }}
+        >
+          <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#3d3d3d' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#3d3d3d' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#3d3d3d' }} />
+          <span
+            style={{
+              marginLeft: 8,
+              fontSize: 11,
+              color: '#525252',
+              fontFamily: 'monospace',
+              letterSpacing: '0.06em',
+            }}
+          >
+            ascii-engine · output.txt
+          </span>
+        </div>
+        {/* ASCII art grid */}
+        <div
+          style={{
+            fontFamily: 'monospace',
+            fontSize: 10.5,
+            lineHeight: 1.18,
+            color: '#c5ff4a',
+            letterSpacing: '0.06em',
+            whiteSpace: 'pre',
+          }}
+        >
+          {`  ·  ░░▒▒████▒▒░░  ·
+  ░▒██████████████▒░
+  ▒████▓▓▓▓▓▓▓▓████▒
+  ████▓▓  ·  · ▓▓███
+  ████▓▓  ◉  ◉ ▓▓███
+  ████▓▓    ·   ▓████
+  ▒████▓▓▄▄▄▄▄▓████▒
+  ░▒████████████████░
+    ░░░▒▒████▒▒░░░
+  ░▒▒▒████████████▒░
+  ▒████▓▓▓▓▓▓▓█████▒
+  ████▓▓█▓▓▓▓▓▓████
+  ▒████▓▓▓▓▓▓▓████▒
+  ░░▒▒████████▒▒░░`}
+        </div>
+        {/* Terminal footer */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              color: '#c5ff4a',
+              border: '1px solid #c5ff4a',
+              padding: '3px 8px',
+              borderRadius: '9999px',
+              letterSpacing: '0.06em',
+              fontFamily: 'monospace',
+            }}
+          >
+            ✓ RENDERED
+          </span>
+        </div>
+      </div>
+
+      {/* Neon divider bar */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 80,
+          left: 0,
+          right: 0,
+          height: 6,
+          backgroundColor: '#c5ff4a',
+        }}
+      />
+
+      {/* Bottom badge */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          gap: '20px',
+          gap: '16px',
           backgroundColor: '#121212',
           border: '1px solid #272727',
-          padding: '12px 24px',
+          padding: '10px 24px',
           borderRadius: '4px',
         }}
       >
-        <span style={{ color: '#c5ff4a', fontSize: 16, fontWeight: 600 }}>
+        <span
+          style={{
+            color: '#c5ff4a',
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'sans-serif',
+            letterSpacing: '0.04em',
+          }}
+        >
           git-ascii.vercel.app
         </span>
-        <span style={{ color: '#555555' }}>|</span>
-        <span style={{ color: '#888888', fontSize: 16 }}>100% Free & Open Source</span>
+        <span style={{ color: '#3d3d3d', fontSize: 14 }}>|</span>
+        <span
+          style={{
+            color: '#7a7a8a',
+            fontSize: 14,
+            fontFamily: 'sans-serif',
+            letterSpacing: '0.02em',
+          }}
+        >
+          100% Free &amp; Open Source
+        </span>
       </div>
     </div>,
     {

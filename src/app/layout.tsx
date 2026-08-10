@@ -1,12 +1,12 @@
 import './globals.css'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
 import type { Metadata, Viewport } from 'next'
 import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
+import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
 
 const ptSerif = PT_Serif({
@@ -75,10 +75,17 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://git-ascii.vercel.app/opengraph-image',
+        url: 'https://git-ascii.vercel.app/og-image.png',
         width: 1200,
         height: 630,
         alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
+        type: 'image/png',
+      },
+      {
+        url: 'https://git-ascii.vercel.app/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator (Dynamic)',
         type: 'image/png',
       },
     ],
@@ -88,7 +95,7 @@ export const metadata: Metadata = {
     title: 'GitAscii — Premium GitHub Profile README Generator',
     description:
       'Create stunning GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
-    images: ['https://git-ascii.vercel.app/opengraph-image'],
+    images: ['https://git-ascii.vercel.app/og-image.png'],
     creator: '@git_ascii',
   },
   robots: {
@@ -237,6 +244,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
       <body>
@@ -268,7 +276,7 @@ export default function RootLayout({
             </AutoAnalyticsTracker>
           </ToastProvider>
         </I18nProvider>
-        <GoogleAnalytics gaId="G-GDBZXFCBLQ" />
+        <ConsentControlledScripts />
         {/* impeccable-live-start */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="http://localhost:8400/live.js?token=58a45599-d30d-4e10-8d20-a21967b6483b"></script>

@@ -191,31 +191,46 @@ async function fetchAndProcessExternalImage(
     throw new Error('Invalid URL')
   }
 
-  const response = await fetch(url, { headers: { accept: 'image/svg+xml, */*' } })
-  if (!response.ok) throw new Error(`HTTP ${response.status}`)
-
-  const contentType = response.headers.get('content-type') || ''
-  const buffer = await response.arrayBuffer()
-
-  const isSvg =
-    contentType.includes('image/svg+xml') ||
-    contentType.includes('xml') ||
-    url.toLowerCase().split('?')[0].endsWith('.svg')
-
-  if (isSvg) {
-    try {
-      const text = Buffer.from(buffer).toString('utf-8')
-      return inlineSvg(text, x, y, width, height, preserve)
-    } catch (inlineErr) {
-      console.error('Failed to inline SVG, falling back to base64 image tag:', inlineErr)
-      const base64 = Buffer.from(buffer).toString('base64')
-      return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
+  try {
+    const response = await fetch(url, { headers: { accept: 'image/svg+xml, */*' } })
+    if (!response.ok) {
+      console.warn(`Failed to fetch external SVG: ${url} (HTTP ${response.status})`)
+      // Return a basic error SVG for this widget rather than crashing the whole grid
+      return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
+        <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
+      </svg>`
     }
-  } else {
-    const base64 = Buffer.from(buffer).toString('base64')
-    let mimeType = contentType.split(';')[0].trim()
-    if (!mimeType) mimeType = 'image/png'
-    return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
+
+    const contentType = response.headers.get('content-type') || ''
+    const buffer = await response.arrayBuffer()
+
+    const isSvg =
+      contentType.includes('image/svg+xml') ||
+      contentType.includes('xml') ||
+      url.toLowerCase().split('?')[0].endsWith('.svg')
+
+    if (isSvg) {
+      try {
+        const text = Buffer.from(buffer).toString('utf-8')
+        return inlineSvg(text, x, y, width, height, preserve)
+      } catch (inlineErr) {
+        console.error('Failed to inline SVG, falling back to base64 image tag:', inlineErr)
+        const base64 = Buffer.from(buffer).toString('base64')
+        return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
+      }
+    } else {
+      const base64 = Buffer.from(buffer).toString('base64')
+      let mimeType = contentType.split(';')[0].trim()
+      if (!mimeType) mimeType = 'image/png'
+      return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
+    }
+  } catch (error: any) {
+    console.warn(`Failed to fetch external SVG: ${url} (${error.message})`)
+    return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
+      <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
+    </svg>`
   }
 }
 

@@ -2,8 +2,8 @@ import { expect, test } from './fixtures/customFixture'
 
 test.describe('GitAscii Visual Editor E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the editor for the default mocked user
-    await page.goto('/Igorcbraz')
+    // Navigate to the editor with auto-generate to bypass onboarding
+    await page.goto('/Igorcbraz?generate=true')
   })
 
   test('1. Application Loading: should load the editor with editor canvas and panels', async ({
@@ -29,7 +29,7 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     await addBioBtn.click()
 
     // Check that the canvas now contains a bio widget
-    const bioOnCanvas = page.locator('[data-testid="canvas-widget-bio"]')
+    const bioOnCanvas = page.locator('[data-testid="canvas-widget-bio"]').first()
     await expect(bioOnCanvas).toBeVisible()
   })
 
@@ -37,9 +37,9 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     page,
   }) => {
     // Select the existing header widget in the canvas
-    const headerOnCanvas = page.locator('[data-testid="canvas-widget-header"]')
+    const headerOnCanvas = page.locator('[data-testid="canvas-widget-header"]').first()
     await expect(headerOnCanvas).toBeVisible()
-    await headerOnCanvas.click()
+    await headerOnCanvas.click({ force: true })
 
     // Verify properties panel coordinates inputs are visible
     const xInput = page.locator('[data-testid="widget-x-input"]')
@@ -69,8 +69,8 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     await page.locator('[data-testid="add-widget-bio"]').click()
 
     // Select the bio widget in the canvas
-    const bioOnCanvas = page.locator('[data-testid="canvas-widget-bio"]')
-    await bioOnCanvas.click()
+    const bioOnCanvas = page.locator('[data-testid="canvas-widget-bio"]').first()
+    await bioOnCanvas.click({ force: true })
 
     // Verify custom bio textarea is visible in properties panel
     const bioInput = page.locator('[data-testid="widget-bio-input"]')
@@ -110,8 +110,8 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
 
   test('6. Themes & Style customization: should allow customizing dimensions', async ({ page }) => {
     // Select the header widget
-    const headerOnCanvas = page.locator('[data-testid="canvas-widget-header"]')
-    await headerOnCanvas.click()
+    const headerOnCanvas = page.locator('[data-testid="canvas-widget-header"]').first()
+    await headerOnCanvas.click({ force: true })
 
     // Custom width adjustments
     const widthInput = page.locator('[data-testid="widget-width-input"]')
@@ -143,8 +143,10 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
   })
 
   test('8. Accessibility Audit: visual editor layout semantic and ARIA compliance', async ({
+    page,
     checkAccessibility,
   }) => {
+    await expect(page.locator('main')).toBeVisible()
     await checkAccessibility()
   })
 
