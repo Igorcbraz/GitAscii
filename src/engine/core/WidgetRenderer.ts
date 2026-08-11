@@ -170,10 +170,20 @@ export function renderWidgetSvg(
     }
 
     case 'avatar': {
-      const avatarUrl = (cfg.avatarUrl as string) || data.user.avatar_url
+      const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
+      let avatarUrl = data.user.avatar_url
+
+      if (sourceType === 'upload' && cfg.uploadedImageData) {
+        avatarUrl = cfg.uploadedImageData as string
+      } else if (sourceType === 'url' && cfg.imageUrl) {
+        avatarUrl = cfg.imageUrl as string
+      } else if (cfg.avatarUrl && !cfg.sourceType) {
+        avatarUrl = cfg.avatarUrl as string
+      }
+
       contentSvg = `
         <clipPath id="avatar-clip-${widget.instanceId}">
-          <rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="${Math.max(4, rx)}" />
+          <rect class="no-anim" x="16" y="16" width="${width - 32}" height="${height - 32}" rx="${Math.max(4, rx)}" />
         </clipPath>
         <rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="${Math.max(4, rx)}" fill="#060606" stroke="${accent}" stroke-width="1.5" />
         <image href="${escapeXml(avatarUrl)}" x="16" y="16" width="${width - 32}" height="${height - 32}" preserveAspectRatio="xMidYMid meet" clip-path="url(#avatar-clip-${widget.instanceId})" />
@@ -1422,9 +1432,18 @@ export function renderWidgetSvg(
     shadowRect = `<rect x="6" y="6" width="${width}" height="${height}" fill="#000000" rx="${rx}" />`
   }
 
+  if (cfg.hideDecorations) {
+    templateDecorationSvg = ''
+    shadowRect = ''
+  }
+
+  if (cfg.hideBorder) {
+    strokeWidth = 0
+  }
+
   let styleBlock = ''
   const animType = (cfg.animationType as string) || 'none'
-  const animDuration = (cfg.animationDuration as number) || 600
+  const animDuration = (cfg.animationDuration as number) || 1500
   const animDelay = (cfg.animationDelay as number) || 0
   const animEasing = (cfg.animationEasing as string) || 'ease-out'
   const previewKey = (cfg.animationPreviewKey as number) || 0
@@ -1433,34 +1452,54 @@ export function renderWidgetSvg(
     const easing = animEasing === 'spring' ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : animEasing
 
     if (animType === 'typewriter') {
-      if (widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text') {
-        const fontSize = Number(cfg.fontSize) || (widget.widgetId === 'ascii-text' ? 12 : 9)
-        const lineHeight =
-          widget.widgetId === 'ascii-text'
-            ? fontSize * 1.2
-            : Math.max(7, Math.round(fontSize * 1.12))
-
-        let linesCount = 1
-        if (widget.widgetId === 'ascii-art') {
-          linesCount = Array.isArray(cfg.asciiText)
-            ? cfg.asciiText.length
-            : Math.floor(height / lineHeight)
-        } else {
-          linesCount = Array.isArray(cfg.asciiLines)
-            ? cfg.asciiLines.length
-            : Math.floor(height / lineHeight)
-        }
-
+      if (
+        widget.widgetId === 'ascii-art' ||
+        widget.widgetId === 'ascii-text' ||
+        widget.widgetId.startsWith('terminal-')
+      ) {
         let rectsHtml = ''
         let rectAnimations = ''
-        const lineTime = animDuration / Math.max(1, linesCount)
 
-        for (let i = 0; i < linesCount; i++) {
-          rectsHtml += `<rect class="typewriter-line-${widget.instanceId}-${previewKey}-${i}" x="0" y="${i * lineHeight}" width="0" height="${lineHeight + 2}" />\n          `
-          rectAnimations += `
+        if (widget.widgetId.startsWith('terminal-')) {
+          const yMatches = [...contentSvg.matchAll(/<text[^>]*y="([0-9.]+)"/g)]
+          const yValues = yMatches.map((m) => parseFloat(m[1]))
+          const linesCount = yValues.length
+          const lineTime = animDuration / Math.max(1, linesCount)
+
+          yValues.forEach((y, i) => {
+            rectsHtml += `<rect class="typewriter-line-${widget.instanceId}-${previewKey}-${i}" x="0" y="${y - 16}" width="0" height="22" />\n          `
+            rectAnimations += `
             #widget-${widget.instanceId} .typewriter-line-${widget.instanceId}-${previewKey}-${i} {
               animation: typewriter-clip-${widget.instanceId}-${previewKey} ${lineTime}ms linear ${animDelay + i * lineTime}ms both;
             }`
+          })
+        } else {
+          const fontSize = Number(cfg.fontSize) || (widget.widgetId === 'ascii-text' ? 12 : 9)
+          const lineHeight =
+            widget.widgetId === 'ascii-text'
+              ? fontSize * 1.2
+              : Math.max(7, Math.round(fontSize * 1.12))
+
+          let linesCount = 1
+          if (widget.widgetId === 'ascii-art') {
+            linesCount = Array.isArray(cfg.asciiText)
+              ? cfg.asciiText.length
+              : Math.floor(height / lineHeight)
+          } else {
+            linesCount = Array.isArray(cfg.asciiLines)
+              ? cfg.asciiLines.length
+              : Math.floor(height / lineHeight)
+          }
+
+          const lineTime = animDuration / Math.max(1, linesCount)
+
+          for (let i = 0; i < linesCount; i++) {
+            rectsHtml += `<rect class="typewriter-line-${widget.instanceId}-${previewKey}-${i}" x="0" y="${i * lineHeight}" width="0" height="${lineHeight + 2}" />\n          `
+            rectAnimations += `
+            #widget-${widget.instanceId} .typewriter-line-${widget.instanceId}-${previewKey}-${i} {
+              animation: typewriter-clip-${widget.instanceId}-${previewKey} ${lineTime}ms linear ${animDelay + i * lineTime}ms both;
+            }`
+          }
         }
 
         styleBlock = `
@@ -1567,7 +1606,7 @@ export function renderWidgetSvg(
       const isAscii = widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text'
       const totalStaggerBudget = Math.min(animDuration * 0.6, isAscii ? 1200 : 600)
 
-      const tagsToMatch = 'text|tspan|rect|path|image'
+      const tagsToMatch = 'text|tspan|rect|path|image|circle|line|polygon|polyline'
       const matchRegex = new RegExp(`<(${tagsToMatch})\\b`, 'gi')
       const replaceRegex = new RegExp(`<(${tagsToMatch})\\b([^>]*)`, 'gi')
 
@@ -1581,6 +1620,12 @@ export function renderWidgetSvg(
 
         const delay = animDelay + animIndex++ * staggerDelay
 
+        let isSelfClosing = false
+        if (attrs.trim().endsWith('/')) {
+          isSelfClosing = true
+          attrs = attrs.substring(0, attrs.lastIndexOf('/'))
+        }
+
         let newAttrs = attrs
         if (attrs.includes('class=')) {
           newAttrs = attrs.replace(/class="([^"]*)"/i, 'class="$1 anim-target"')
@@ -1588,7 +1633,7 @@ export function renderWidgetSvg(
           newAttrs = ` class="anim-target"${attrs}`
         }
 
-        return `<${tag}${newAttrs} style="animation-delay: ${Math.round(delay)}ms; transform-origin: center;"`
+        return `<${tag}${newAttrs} style="animation-delay: ${Math.round(delay)}ms; transform-origin: center;"${isSelfClosing ? ' /' : ''}`
       })
     }
   }

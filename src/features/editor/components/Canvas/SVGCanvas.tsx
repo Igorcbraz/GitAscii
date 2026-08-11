@@ -277,8 +277,38 @@ export function SVGCanvas() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isLayersOpen])
 
+  const previousWidgetsLength = useRef(config?.widgets.length || 0)
+
   useEffect(() => {
     configRef.current = config
+
+    if (config && config.widgets.length > previousWidgetsLength.current) {
+      const newWidget = config.widgets[config.widgets.length - 1]
+      if (containerRef.current?.parentElement && newWidget) {
+        const parent = containerRef.current.parentElement
+        const targetY = newWidget.position.y * zoomRef.current - 100
+
+        const startY = parent.scrollTop
+        const distance = targetY - startY
+        const duration = 400 // ms
+        let start: number | null = null
+
+        const step = (timestamp: number) => {
+          if (!start) start = timestamp
+          const progress = Math.min((timestamp - start) / duration, 1)
+          // easeOutCubic
+          const ease = 1 - Math.pow(1 - progress, 3)
+          parent.scrollTop = startY + distance * ease
+          if (progress < 1) {
+            requestAnimationFrame(step)
+          }
+        }
+        requestAnimationFrame(step)
+      }
+    }
+    if (config) {
+      previousWidgetsLength.current = config.widgets.length
+    }
   }, [config])
 
   useEffect(() => {
