@@ -396,44 +396,171 @@ export function renderWidgetSvg(
     }
 
     case 'stats': {
-      const stars = data.totalStars
-      const repos = data.user.public_repos
-      const followers = data.user.followers
-      const following = data.user.following
+      const hideMetrics: string[] = Array.isArray(cfg.hideMetrics)
+        ? (cfg.hideMetrics as string[])
+        : []
 
-      const statItems = [
-        { label: 'STARS', val: stars.toLocaleString() },
-        { label: 'REPOS', val: repos.toLocaleString() },
-        { label: 'FOLLOWERS', val: followers.toLocaleString() },
-        { label: 'FOLLOWING', val: following.toLocaleString() },
+      const allMetrics = [
+        { id: 'stars', label: 'STARS', val: data.totalStars.toLocaleString() },
+        { id: 'repos', label: 'REPOS', val: data.user.public_repos.toLocaleString() },
+        { id: 'followers', label: 'FOLLOWERS', val: data.user.followers.toLocaleString() },
+        { id: 'following', label: 'FOLLOWING', val: data.user.following.toLocaleString() },
+        { id: 'forks', label: 'FORKS', val: data.totalForks.toLocaleString() },
+        { id: 'gists', label: 'GISTS', val: data.user.public_gists.toLocaleString() },
       ]
 
-      const itemWidth = (width - 48) / statItems.length
+      const statItems = allMetrics.filter((m) => !hideMetrics.includes(m.id))
+      const statsLayout = (cfg.statsLayout as string) || 'horizontal'
+      const statsStyle = (cfg.statsStyle as string) || 'default'
+      const labelStyle = (cfg.labelStyle as string) || 'label'
+      const valueFontSize = Number(cfg.valueFontSize) || 28
+
+      const getLabel = (m: { label: string }) => (labelStyle === 'none' ? '' : m.label)
+
+      let statsSvg = ''
+
+      if (statsStyle === 'terminal') {
+        // Monospaced bracket style: [ 1.2k ]  STARS
+        const rowH = 28
+        const startY = 48
+        const monoFont = `'JetBrains Mono', monospace`
+        if (statsLayout === 'horizontal') {
+          const itemW = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(${24 + i * itemW}, ${startY})">
+              <text x="0" y="18" font-family="${monoFont}" font-size="13" fill="${accent}">[ ${m.val} ]</text>
+              ${labelStyle !== 'none' ? `<text x="0" y="32" font-family="${monoFont}" font-size="9" fill="#7a7a7a" letter-spacing="2">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        } else if (statsLayout === 'vertical') {
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(24, ${startY + i * 32})">
+              <text x="0" y="18" font-family="${monoFont}" font-size="13" fill="${accent}">[ ${m.val} ]</text>
+              ${labelStyle !== 'none' ? `<text x="${(m.val.length + 4) * 8 + 4}" y="18" font-family="${monoFont}" font-size="9" fill="#7a7a7a" letter-spacing="2">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        } else {
+          const colW = (width - 48) / 2
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(${24 + (i % 2) * colW}, ${startY + Math.floor(i / 2) * 40})">
+              <text x="0" y="18" font-family="${monoFont}" font-size="13" fill="${accent}">[ ${m.val} ]</text>
+              ${labelStyle !== 'none' ? `<text x="0" y="30" font-family="${monoFont}" font-size="9" fill="#7a7a7a" letter-spacing="2">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        }
+      } else if (statsStyle === 'minimal') {
+        // Pure values, no decoration
+        const fs = valueFontSize
+        if (statsLayout === 'horizontal') {
+          const itemW = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <text x="${24 + i * itemW}" y="${48 + fs}" font-family="${globalStyles.fontFamily}" font-size="${fs}" font-weight="200" fill="${textClr}">${m.val}</text>`
+            )
+            .join('')
+        } else if (statsLayout === 'vertical') {
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <text x="24" y="${48 + i * (fs + 12) + fs}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(fs, 22)}" font-weight="200" fill="${textClr}">${m.val}</text>`
+            )
+            .join('')
+        } else {
+          const colW = (width - 48) / 2
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <text x="${24 + (i % 2) * colW}" y="${48 + Math.floor(i / 2) * (Math.min(fs, 24) + 8) + Math.min(fs, 24)}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(fs, 24)}" font-weight="200" fill="${textClr}">${m.val}</text>`
+            )
+            .join('')
+        }
+      } else if (statsStyle === 'cards') {
+        // Each metric in a pill card
+        const cardH = 52
+        const gap = 8
+        const cols = statsLayout === 'vertical' ? 1 : 2
+        const cardW = cols === 1 ? width - 48 : Math.floor((width - 48 - gap) / 2)
+        statsSvg = statItems
+          .map((m, i) => {
+            const col = i % cols
+            const row = Math.floor(i / cols)
+            const cx = 24 + col * (cardW + gap)
+            const cy = 44 + row * (cardH + gap)
+            return `
+            <g transform="translate(${cx}, ${cy})">
+              <rect x="0" y="0" width="${cardW}" height="${cardH}" fill="#1e1e1e" rx="6" />
+              <rect x="0" y="0" width="3" height="${cardH}" fill="${accent}" rx="1" />
+              <text x="12" y="22" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 22)}" font-weight="300" fill="${accent}">${m.val}</text>
+              ${labelStyle !== 'none' ? `<text x="12" y="42" font-family="${globalStyles.fontFamily}" font-size="9" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+            </g>`
+          })
+          .join('')
+      } else {
+        // default: big numbers
+        if (statsLayout === 'horizontal') {
+          const itemWidth = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(${24 + i * itemWidth}, 48)">
+              <text x="0" y="${valueFontSize}" font-family="${globalStyles.fontFamily}" font-size="${valueFontSize}" font-weight="300" fill="${accent}">${m.val}</text>
+              ${labelStyle !== 'none' ? `<text x="0" y="${valueFontSize + 18}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        } else if (statsLayout === 'vertical') {
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(24, ${48 + i * 52})">
+              <text x="0" y="28" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 24)}" font-weight="300" fill="${accent}">${m.val}</text>
+              ${labelStyle !== 'none' ? `<text x="${Math.min(valueFontSize, 24) * (m.val.length * 0.6) + 8}" y="28" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        } else {
+          const colW = (width - 48) / 2
+          statsSvg = statItems
+            .map(
+              (m, i) => `
+            <g transform="translate(${24 + (i % 2) * colW}, ${48 + Math.floor(i / 2) * 60})">
+              <text x="0" y="${Math.min(valueFontSize, 26)}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 26)}" font-weight="300" fill="${accent}">${m.val}</text>
+              ${labelStyle !== 'none' ? `<text x="0" y="${Math.min(valueFontSize, 26) + 16}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+            </g>`
+            )
+            .join('')
+        }
+      }
 
       contentSvg = `
         <text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ GITHUB METRICS ]</text>
-        ${statItems
-          .map(
-            (item, i) => `
-          <g transform="translate(${24 + i * itemWidth}, 56)">
-            <text x="0" y="24" font-family="${globalStyles.fontFamily}" font-size="28" font-weight="300" fill="${accent}">${item.val}</text>
-            <text x="0" y="44" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${item.label}</text>
-          </g>
-        `
-          )
-          .join('')}
+        ${statsSvg}
       `
       break
     }
 
     case 'languages': {
-      const hideLangs =
+      const hideLangsArr: string[] = Array.isArray(cfg.hideLangsArr)
+        ? (cfg.hideLangsArr as string[])
+        : []
+      const hideLangsStr =
         typeof cfg.hideLangs === 'string'
-          ? cfg.hideLangs
+          ? (cfg.hideLangs as string)
               .split(',')
               .map((l) => l.trim().toLowerCase())
               .filter(Boolean)
           : []
+      const hideLangs = [...hideLangsArr.map((l) => l.toLowerCase()), ...hideLangsStr]
 
       let filteredLangs = Object.entries(data.languages)
       if (hideLangs.length > 0) {
@@ -443,64 +570,279 @@ export function renderWidgetSvg(
       const maxLangs = Number(cfg.langsCount) || 5
       const topLangs = filteredLangs.slice(0, maxLangs)
       const totalCount = topLangs.reduce((sum, [_, count]) => sum + count, 0) || 1
+      const showPercentage = cfg.showPercentage !== false
+      const langsLayout = (cfg.langsLayout as string) || 'bars'
 
-      const colors: Record<string, string> = {
+      const langColors: Record<string, string> = {
         TypeScript: '#3178c6',
         JavaScript: '#f1e05a',
         Rust: '#dea584',
         Python: '#3572A5',
         CSS: '#563d7c',
         HTML: '#e34c26',
+        Go: '#00ADD8',
+        Java: '#b07219',
+        Ruby: '#701516',
+        'C++': '#f34b7d',
+        'C#': '#239120',
+        PHP: '#4F5D95',
+        Swift: '#F05138',
+        Kotlin: '#A97BFF',
+        Dart: '#00B4AB',
+        Shell: '#89e051',
+        Vue: '#41b883',
+        Svelte: '#ff3e00',
       }
 
-      let currentX = 24
-      const barWidth = width - 48
-      const barSvg = topLangs
-        .map(([lang, count]) => {
-          const w = (count / totalCount) * barWidth
-          const rect = `<rect x="${currentX}" y="52" width="${w}" height="8" fill="${colors[lang] || accent}" rx="2" />`
-          currentX += w
-          return rect
-        })
-        .join('')
+      const getColor = (lang: string) => langColors[lang] || accent
 
-      const legendSvg = topLangs
-        .map(([lang, count], i) => {
-          const pct = Math.round((count / totalCount) * 100)
-          return `
+      let langsSvg = ''
+
+      if (langsLayout === 'bars' || langsLayout === undefined) {
+        let currentX = 24
+        const barWidth = width - 48
+        const barSvg = topLangs
+          .map(([lang, count]) => {
+            const w = (count / totalCount) * barWidth
+            const rect = `<rect x="${currentX}" y="52" width="${w}" height="8" fill="${getColor(lang)}" rx="2" />`
+            currentX += w
+            return rect
+          })
+          .join('')
+
+        const legendSvg = topLangs
+          .map(([lang, count], i) => {
+            const pct = Math.round((count / totalCount) * 100)
+            return `
           <g transform="translate(${24 + (i % 2) * (barWidth / 2)}, ${80 + Math.floor(i / 2) * 24})">
-            <circle cx="6" cy="-4" r="4" fill="${colors[lang] || accent}" />
-            <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="12" fill="${textClr}">${lang} <tspan fill="#7a7a7a">${pct}%</tspan></text>
+            <circle cx="6" cy="-4" r="4" fill="${getColor(lang)}" />
+            <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="12" fill="${textClr}">${lang} ${showPercentage ? `<tspan fill="#7a7a7a">${pct}%</tspan>` : ''}</text>
           </g>
         `
-        })
-        .join('')
+          })
+          .join('')
+
+        langsSvg = `${barSvg}${legendSvg}`
+      } else if (langsLayout === 'list') {
+        const barW = width - 48
+        langsSvg = topLangs
+          .map(([lang, count], i) => {
+            const pct = Math.round((count / totalCount) * 100)
+            const fillW = (count / totalCount) * (barW - 100)
+            return `
+          <g transform="translate(24, ${48 + i * 26})">
+            <circle cx="6" cy="8" r="4" fill="${getColor(lang)}" />
+            <text x="18" y="14" font-family="'Inter Tight', sans-serif" font-size="12" fill="${textClr}">${escapeXml(lang)}</text>
+            ${showPercentage ? `<text x="${barW - 36}" y="14" text-anchor="end" font-family="'Inter Tight', sans-serif" font-size="11" fill="#7a7a7a">${pct}%</text>` : ''}
+            <rect x="0" y="20" width="${barW - 36}" height="3" fill="#252525" rx="1" />
+            <rect x="0" y="20" width="${fillW}" height="3" fill="${getColor(lang)}" rx="1" />
+          </g>
+        `
+          })
+          .join('')
+      } else if (langsLayout === 'compact') {
+        const itemW = (width - 48) / Math.min(topLangs.length, 3)
+        langsSvg = topLangs
+          .map(([lang, count], i) => {
+            const pct = Math.round((count / totalCount) * 100)
+            return `
+          <g transform="translate(${24 + (i % 3) * itemW}, ${48 + Math.floor(i / 3) * 52})">
+            <circle cx="6" cy="8" r="5" fill="${getColor(lang)}" />
+            <text x="16" y="14" font-family="'Inter Tight', sans-serif" font-size="11" fill="${textClr}">${escapeXml(lang)}</text>
+            ${showPercentage ? `<text x="16" y="30" font-family="'Inter Tight', sans-serif" font-size="10" fill="#7a7a7a">${pct}%</text>` : ''}
+          </g>
+        `
+          })
+          .join('')
+      } else if (langsLayout === 'donut') {
+        const donutLegendPos = (cfg.donutLegendPos as string) || 'bottom'
+        const donutShowPct = cfg.donutShowPct !== false
+        const donutCenterLabel = Boolean(cfg.donutCenterLabel)
+
+        const donutR =
+          donutLegendPos === 'side' ? Math.min(width / 4, 60) : Math.min((width - 48) / 2, 60)
+        const donutRi = Math.round(donutR * 0.52)
+        const donutCx = donutLegendPos === 'side' ? 24 + donutR + 4 : width / 2
+        const donutCy = 44 + donutR
+
+        let startAngle = -Math.PI / 2
+        const arcsSvg = topLangs
+          .map(([lang, count]) => {
+            const fraction = count / totalCount
+            const angle = fraction * 2 * Math.PI
+            const endAngle = startAngle + angle
+            const x1 = donutCx + donutR * Math.cos(startAngle)
+            const y1 = donutCy + donutR * Math.sin(startAngle)
+            const x2 = donutCx + donutR * Math.cos(endAngle)
+            const y2 = donutCy + donutR * Math.sin(endAngle)
+            const xi1 = donutCx + donutRi * Math.cos(startAngle)
+            const yi1 = donutCy + donutRi * Math.sin(startAngle)
+            const xi2 = donutCx + donutRi * Math.cos(endAngle)
+            const yi2 = donutCy + donutRi * Math.sin(endAngle)
+            const large = angle > Math.PI ? 1 : 0
+            const path = `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${donutR} ${donutR} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} L ${xi2.toFixed(1)} ${yi2.toFixed(1)} A ${donutRi} ${donutRi} 0 ${large} 0 ${xi1.toFixed(1)} ${yi1.toFixed(1)} Z`
+            startAngle = endAngle
+            return `<path d="${path}" fill="${getColor(lang)}" />`
+          })
+          .join('')
+
+        // Center label — biggest language
+        const centerSvg =
+          donutCenterLabel && topLangs.length > 0
+            ? `<text x="${donutCx}" y="${donutCy + 4}" text-anchor="middle" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="600" fill="${textClr}">${escapeXml(topLangs[0][0])}</text>`
+            : ''
+
+        // Legend
+        let legendSvg = ''
+        if (donutLegendPos === 'bottom') {
+          const legendStartY = donutCy + donutR + 16
+          const lW = width - 48
+          legendSvg = topLangs
+            .map(([lang, count], i) => {
+              const pct = Math.round((count / totalCount) * 100)
+              return `
+              <g transform="translate(${24 + (i % 2) * (lW / 2)}, ${legendStartY + Math.floor(i / 2) * 22})">
+                <circle cx="6" cy="-4" r="4" fill="${getColor(lang)}" />
+                <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="11" fill="${textClr}">${escapeXml(lang)}${donutShowPct ? ` <tspan fill="#7a7a7a">${pct}%</tspan>` : ''}</text>
+              </g>`
+            })
+            .join('')
+        } else if (donutLegendPos === 'side') {
+          const legendX = donutCx + donutR + 16
+          legendSvg = topLangs
+            .slice(0, 6)
+            .map(([lang, count], i) => {
+              const pct = Math.round((count / totalCount) * 100)
+              return `
+              <g transform="translate(${legendX}, ${donutCy - donutR + i * 22})">
+                <circle cx="6" cy="-4" r="4" fill="${getColor(lang)}" />
+                <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="10" fill="${textClr}">${escapeXml(lang.length > 10 ? lang.slice(0, 9) + '…' : lang)}${donutShowPct ? ` <tspan fill="#7a7a7a">${pct}%</tspan>` : ''}</text>
+              </g>`
+            })
+            .join('')
+        }
+
+        langsSvg = `${arcsSvg}${centerSvg}${legendSvg}`
+      }
 
       contentSvg = `
         <text x="24" y="32" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ TOP LANGUAGES ]</text>
-        ${barSvg}
-        ${legendSvg}
+        ${langsSvg}
       `
       break
     }
 
     case 'repositories': {
-      const repos = data.repos.slice(0, 2)
-      contentSvg = `
-        <text x="24" y="32" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ FEATURED REPOSITORIES ]</text>
-        ${repos
-          .map(
-            (repo, i) => `
-          <g transform="translate(24, ${50 + i * 64})">
-            <rect x="0" y="0" width="${width - 48}" height="52" fill="#252525" border="1px solid #313131" rx="4" />
-            <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" fill="${accent}">${escapeXml(repo.name)}</text>
-            <text x="${width - 64}" y="24" font-family="'Inter Tight', sans-serif" font-size="12" fill="#7a7a7a" text-anchor="end">★ ${repo.stargazers_count}</text>
-            <text x="16" y="42" font-family="'Inter Tight', sans-serif" font-size="11" fill="#7a7a7a">${escapeXml(repo.description || 'No description.')}</text>
-          </g>
-        `
+      const selectedRepos: string[] = Array.isArray(cfg.selectedRepos)
+        ? (cfg.selectedRepos as string[])
+        : []
+      const maxRepos = Number(cfg.maxRepos) || 3
+      const repoViewMode = (cfg.repoViewMode as string) || 'list'
+      const repoSortBy = (cfg.repoSortBy as string) || 'stars'
+      const showRepoLanguage = cfg.showRepoLanguage !== false
+      const showRepoForks = Boolean(cfg.showRepoForks)
+
+      // Resolve repo list
+      let repoList = [...data.repos].filter((r) => !r.fork)
+
+      if (selectedRepos.length > 0) {
+        // Use user-specified order
+        const ordered = selectedRepos
+          .map((name) => repoList.find((r) => r.name === name))
+          .filter(Boolean) as typeof repoList
+        const rest = repoList.filter((r) => !selectedRepos.includes(r.name))
+        repoList = [...ordered, ...rest]
+      } else {
+        // Auto sort
+        if (repoSortBy === 'updated') {
+          repoList.sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
           )
-          .join('')}
-      `
+        } else if (repoSortBy === 'forks') {
+          repoList.sort((a, b) => b.forks_count - a.forks_count)
+        } else if (repoSortBy === 'name') {
+          repoList.sort((a, b) => a.name.localeCompare(b.name))
+        } else {
+          repoList.sort((a, b) => b.stargazers_count - a.stargazers_count)
+        }
+      }
+
+      const repos = repoList.slice(0, maxRepos)
+
+      if (repoViewMode === 'grid') {
+        const cols = 2
+        const cardW = Math.floor((width - 48 - 12) / cols)
+        const cardH = 80
+        const gapY = 12
+
+        contentSvg = `
+          <text x="24" y="32" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ FEATURED REPOSITORIES ]</text>
+          ${repos
+            .map(
+              (repo, i) => `
+            <g transform="translate(${24 + (i % cols) * (cardW + 12)}, ${50 + Math.floor(i / cols) * (cardH + gapY)})">
+              <rect x="0" y="0" width="${cardW}" height="${cardH}" fill="#1e1e1e" rx="4" />
+              <rect x="0" y="0" width="4" height="${cardH}" fill="${accent}" rx="2" />
+              <text x="12" y="20" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="500" fill="${accent}">${escapeXml(repo.name.length > 18 ? repo.name.slice(0, 16) + '…' : repo.name)}</text>
+              <text x="${cardW - 8}" y="20" text-anchor="end" font-family="'Inter Tight', sans-serif" font-size="11" fill="#7a7a7a">★ ${repo.stargazers_count}</text>
+              <text x="12" y="38" font-family="'Inter Tight', sans-serif" font-size="10" fill="#7a7a7a">${escapeXml((repo.description || 'No description.').slice(0, 40) + ((repo.description || '').length > 40 ? '…' : ''))}</text>
+              ${showRepoLanguage && repo.language ? `<text x="12" y="${cardH - 10}" font-family="'Inter Tight', sans-serif" font-size="10" fill="${accent}">${escapeXml(repo.language)}</text>` : ''}
+              ${showRepoForks ? `<text x="${cardW - 8}" y="${cardH - 10}" text-anchor="end" font-family="'Inter Tight', sans-serif" font-size="10" fill="#7a7a7a">⑂ ${repo.forks_count}</text>` : ''}
+            </g>
+          `
+            )
+            .join('')}
+        `
+      } else {
+        // list mode — adaptive card height based on enabled fields
+        const showRepoStars = cfg.showRepoStars !== false
+        const showRepoDesc = cfg.showRepoDesc !== false
+        const showRepoUpdated = Boolean(cfg.showRepoUpdated)
+
+        // Compute card height: name row always shown (20px top)
+        // desc line: +18, language/meta line: +14, updated: +14
+        const metaLineNeeded = showRepoLanguage || showRepoForks || showRepoStars || showRepoUpdated
+        const cardH = 24 + (showRepoDesc ? 18 : 0) + (metaLineNeeded ? 18 : 0) + 8
+        const rowSpacing = cardH + 8
+
+        contentSvg = `
+          <text x="24" y="32" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ FEATURED REPOSITORIES ]</text>
+          ${repos
+            .map((repo, i) => {
+              const gy = 50 + i * rowSpacing
+              const metaParts: string[] = []
+              if (showRepoLanguage && repo.language) metaParts.push(repo.language)
+              if (showRepoStars) metaParts.push(`\u2605 ${repo.stargazers_count}`)
+              if (showRepoForks) metaParts.push(`\u2442 ${repo.forks_count}`)
+              if (showRepoUpdated) {
+                const d = new Date(repo.updated_at)
+                metaParts.push(
+                  `Updated ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                )
+              }
+              const metaStr = escapeXml(metaParts.join('  '))
+
+              let yOff = 20
+              const nameRow = `<text x="12" y="${yOff}" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="500" fill="${accent}">${escapeXml(repo.name.length > 36 ? repo.name.slice(0, 34) + '\u2026' : repo.name)}</text>`
+              yOff += showRepoDesc ? 18 : 0
+              const descRow = showRepoDesc
+                ? `<text x="12" y="${yOff}" font-family="'Inter Tight', sans-serif" font-size="10" fill="#7a7a7a">${escapeXml((repo.description || 'No description.').slice(0, 68) + ((repo.description || '').length > 68 ? '\u2026' : ''))}</text>`
+                : ''
+              yOff += metaLineNeeded ? 18 : 0
+              const metaRow = metaLineNeeded
+                ? `<text x="12" y="${yOff}" font-family="'Inter Tight', sans-serif" font-size="10" fill="${accent}">${metaStr}</text>`
+                : ''
+
+              return `
+            <g transform="translate(24, ${gy})">
+              <rect x="0" y="0" width="${width - 48}" height="${cardH}" fill="#1e1e1e" rx="4" />
+              <rect x="0" y="0" width="3" height="${cardH}" fill="${accent}" rx="1" />
+              ${nameRow}${descRow}${metaRow}
+            </g>`
+            })
+            .join('')}
+        `
+      }
       break
     }
 

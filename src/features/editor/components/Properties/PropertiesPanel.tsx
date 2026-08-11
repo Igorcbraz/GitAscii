@@ -13,10 +13,13 @@ import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
 import { ColorPicker } from './ColorPicker'
 import { CustomImageControls } from './CustomImageControls'
+import { FeaturedReposControls } from './FeaturedReposControls'
+import { GithubStatsControls } from './GithubStatsControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
+import { TopLanguagesControls } from './TopLanguagesControls'
 
 function DimensionInput({
   value,
@@ -555,6 +558,18 @@ export function PropertiesPanel() {
 
         {selectedWidget.widgetId === 'custom-image' && (
           <CustomImageControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === 'stats' && (
+          <GithubStatsControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === 'languages' && (
+          <TopLanguagesControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === 'repositories' && (
+          <FeaturedReposControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {[
