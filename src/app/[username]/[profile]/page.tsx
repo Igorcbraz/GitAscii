@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +15,7 @@ export async function generateMetadata({
   const cleanProfile = profile.trim()
   const title = `@${cleanUsername} - ${cleanProfile} Profile Layout`
   const description = `Customize, preview, and generate the custom ${cleanProfile} GitHub Profile README SVG layout for @${cleanUsername} using GitAscii.`
-  const url = `https://git-ascii.vercel.app/${cleanUsername}/${cleanProfile}`
+  const url = `${APP_URL}/${cleanUsername}/${cleanProfile}`
 
   return {
     title,
@@ -36,7 +37,7 @@ export async function generateMetadata({
       type: 'profile',
       images: [
         {
-          url: `https://git-ascii.vercel.app/api/${cleanUsername}/${cleanProfile}`,
+          url: `${APP_URL}/api/${cleanUsername}/${cleanProfile}`,
           width: 1200,
           height: 630,
           alt: `@${cleanUsername}'s ${cleanProfile} GitAscii Profile Card`,
@@ -47,7 +48,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: `${title} | GitAscii`,
       description,
-      images: [`https://git-ascii.vercel.app/api/${cleanUsername}/${cleanProfile}`],
+      images: [`${APP_URL}/api/${cleanUsername}/${cleanProfile}`],
     },
     robots: {
       index: true,
@@ -71,19 +72,19 @@ export default async function NamedProfileEditorPage({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: `@${username}`,
-        item: `https://git-ascii.vercel.app/${username}`,
+        item: `${APP_URL}/${username}`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: profile,
-        item: `https://git-ascii.vercel.app/${username}/${profile}`,
+        item: `${APP_URL}/${username}/${profile}`,
       },
     ],
   }

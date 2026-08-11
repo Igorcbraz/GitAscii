@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://git-ascii.vercel.app'
+  const baseUrl = APP_URL
   const currentDate = new Date()
 
   const staticHubs = [

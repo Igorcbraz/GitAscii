@@ -3,6 +3,7 @@
 import { Zap } from 'lucide-react'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { widgetsList } from '@/data/widgetsData'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
@@ -18,7 +19,7 @@ export default function WidgetsPage() {
     name: 'Free GitHub Profile Widgets & Dynamic SVGs Showcase',
     description:
       'Live SVG stats, streak counters, language charts, and ASCII art widgets for GitHub READMEs.',
-    url: 'https://git-ascii.vercel.app/widgets',
+    url: `${APP_URL}/widgets`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: widgetsList.length,
@@ -39,13 +40,13 @@ export default function WidgetsPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Widgets',
-        item: 'https://git-ascii.vercel.app/widgets',
+        item: `${APP_URL}/widgets`,
       },
     ],
   }

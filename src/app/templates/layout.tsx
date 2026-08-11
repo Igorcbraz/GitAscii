@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export const metadata: Metadata = {
   title: '13+ Best GitHub Profile README Templates & Themes (2026)',
   description:
@@ -14,18 +16,18 @@ export const metadata: Metadata = {
     'Free GitHub profile maker',
   ],
   alternates: {
-    canonical: 'https://git-ascii.vercel.app/templates',
+    canonical: `${APP_URL}/templates`,
   },
   openGraph: {
     title: '13+ Best GitHub Profile README Templates | GitAscii Marketplace',
     description:
       'Handcrafted, responsive GitHub Profile README templates with live SVG stats, ASCII art, and custom themes.',
-    url: 'https://git-ascii.vercel.app/templates',
+    url: `${APP_URL}/templates`,
     siteName: 'GitAscii',
     type: 'website',
     images: [
       {
-        url: 'https://git-ascii.vercel.app/opengraph-image',
+        url: `${APP_URL}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: 'GitAscii GitHub Profile README Templates Marketplace',

@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og'
 
+import { APP_URL } from '@/constants'
+
 export const runtime = 'edge'
 
 export const alt = 'GitAscii — GitHub Profile README & ASCII Art Generator'
@@ -153,7 +155,9 @@ export default async function Image({ params }: { params: Promise<{ username: st
           color: '#777777',
         }}
       >
-        <span>https://git-ascii.vercel.app/{cleanUsername}</span>
+        <span>
+          {APP_URL}/{cleanUsername}
+        </span>
         <span>•</span>
         <span style={{ color: '#c5ff4a' }}>Free GitHub Profile Generator</span>
       </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export const metadata: Metadata = {
   title: 'Free GitHub Profile Widgets & Dynamic SVGs Showcase (2026)',
   description:
@@ -13,13 +15,13 @@ export const metadata: Metadata = {
     'Dynamic SVG badges README',
   ],
   alternates: {
-    canonical: 'https://git-ascii.vercel.app/widgets',
+    canonical: `${APP_URL}/widgets`,
   },
   openGraph: {
     title: 'Free GitHub Profile Widgets & Dynamic SVGs Showcase | GitAscii',
     description:
       'Live SVG stats, streak counters, language charts, and ASCII art widgets for GitHub READMEs. Open source & zero build step.',
-    url: 'https://git-ascii.vercel.app/widgets',
+    url: `${APP_URL}/widgets`,
     siteName: 'GitAscii',
     type: 'website',
   },

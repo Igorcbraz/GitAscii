@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og'
 
+import { APP_URL } from '@/constants'
+
 export const runtime = 'edge'
 
 export const alt = 'GitAscii — Named Profile Layout Card'
@@ -105,7 +107,7 @@ export default async function Image({
         }}
       >
         <span>
-          https://git-ascii.vercel.app/{cleanUsername}/{cleanProfile}
+          ${APP_URL}/{cleanUsername}/{cleanProfile}
         </span>
       </div>
     </div>,

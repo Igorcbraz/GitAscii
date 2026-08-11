@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og'
 
+import { APP_DOMAIN } from '@/constants'
+
 export const runtime = 'edge'
 
 export const alt = 'GitAscii — Turn your GitHub profile into ASCII art'
@@ -270,7 +272,7 @@ export default async function Image() {
             letterSpacing: '0.04em',
           }}
         >
-          git-ascii.vercel.app
+          ${APP_DOMAIN}
         </span>
         <span style={{ color: '#3d3d3d', fontSize: 14 }}>|</span>
         <span

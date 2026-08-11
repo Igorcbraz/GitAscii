@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
 
 import { ToastProvider } from '@/components/ui/toast'
+import { APP_URL } from '@/constants'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
@@ -38,7 +39,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://git-ascii.vercel.app'),
+  metadataBase: new URL(APP_URL),
   title: {
     default: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
     template: '%s | GitAscii',
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
     'Generative Engine Optimization',
     'Answer Engine Optimization',
   ],
-  authors: [{ name: 'GitAscii Team', url: 'https://git-ascii.vercel.app' }],
+  authors: [{ name: 'GitAscii Team', url: APP_URL }],
   creator: 'GitAscii',
   publisher: 'GitAscii',
   category: 'Developer Tools',
@@ -69,20 +70,20 @@ export const metadata: Metadata = {
     title: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
     description:
       'Build stunning GitHub Profile READMEs with live SVG stats, custom ASCII art engine, and a drag-and-drop visual editor. 100% Free & Open Source.',
-    url: 'https://git-ascii.vercel.app',
+    url: APP_URL,
     siteName: 'GitAscii',
     locale: 'en_US',
     type: 'website',
     images: [
       {
-        url: 'https://git-ascii.vercel.app/og-image.png',
+        url: `${APP_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
         type: 'image/png',
       },
       {
-        url: 'https://git-ascii.vercel.app/opengraph-image',
+        url: `${APP_URL}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator (Dynamic)',
@@ -95,7 +96,7 @@ export const metadata: Metadata = {
     title: 'GitAscii — Premium GitHub Profile README Generator',
     description:
       'Create stunning GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
-    images: ['https://git-ascii.vercel.app/og-image.png'],
+    images: [`${APP_URL}/og-image.png`],
     creator: '@git_ascii',
   },
   robots: {
@@ -110,12 +111,12 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://git-ascii.vercel.app',
+    canonical: APP_URL,
     languages: {
-      'en-US': 'https://git-ascii.vercel.app',
-      'pt-BR': 'https://git-ascii.vercel.app?lang=pt',
-      'es-ES': 'https://git-ascii.vercel.app?lang=es',
-      'x-default': 'https://git-ascii.vercel.app',
+      'en-US': APP_URL,
+      'pt-BR': `${APP_URL}?lang=pt`,
+      'es-ES': `${APP_URL}?lang=es`,
+      'x-default': APP_URL,
     },
   },
   icons: {
@@ -144,11 +145,11 @@ const softwareLd = {
   },
   description:
     'Create stunning GitHub Profile READMEs with premium SVGs, ASCII art, and a powerful visual editor.',
-  url: 'https://git-ascii.vercel.app',
+  url: APP_URL,
   author: {
     '@type': 'Organization',
     name: 'GitAscii',
-    url: 'https://git-ascii.vercel.app',
+    url: APP_URL,
   },
   featureList: [
     'Visual Drag-and-Drop Profile Editor',
@@ -164,12 +165,12 @@ const websiteLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'GitAscii',
-  url: 'https://git-ascii.vercel.app',
+  url: APP_URL,
   potentialAction: {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: 'https://git-ascii.vercel.app/{search_term_string}',
+      urlTemplate: `${APP_URL}/{search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },
@@ -179,8 +180,8 @@ const orgLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'GitAscii',
-  url: 'https://git-ascii.vercel.app',
-  logo: 'https://git-ascii.vercel.app/icon-512.png',
+  url: APP_URL,
+  logo: `${APP_URL}/icon-512.png`,
   sameAs: ['https://github.com/Igorcbraz/GitAscii'],
 }
 
@@ -231,7 +232,7 @@ const breadcrumbLd = {
       '@type': 'ListItem',
       position: 1,
       name: 'Home',
-      item: 'https://git-ascii.vercel.app',
+      item: APP_URL,
     },
   ],
 }

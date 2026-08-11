@@ -1,6 +1,6 @@
 # GitAscii — GitHub Profile README & ASCII Art Generator
 
-> GitAscii (https://git-ascii.vercel.app) is a free, open-source platform for creating, customizing, and serving dynamic SVG widgets and ASCII art for GitHub profile README.md files.
+> GitAscii (https://gitascii.com) is a free, open-source platform for creating, customizing, and serving dynamic SVG widgets and ASCII art for GitHub profile README.md files.
 
 ## Summary & Key Takeaways
 
@@ -8,36 +8,36 @@ GitAscii transforms standard GitHub profiles into visual developer portfolios. I
 
 ## Key Programmatic Hubs & Resources
 
-- **Templates Catalog**: `https://git-ascii.vercel.app/templates` (13+ theme templates including Terminal, Minimal, Cyberpunk, Dracula, Nord, Tokyo Night, Gruvbox, Matrix, Bento)
-- **Dynamic SVG Widgets**: `https://git-ascii.vercel.app/widgets` (Live stats cards, streak counters, language breakdowns, ASCII art banners, tech badges)
-- **Developer Directory**: `https://git-ascii.vercel.app/explore` (Public showcase of developer profile READMEs)
-- **Guides & Tutorials**: `https://git-ascii.vercel.app/guides` (Step-by-step markdown tutorials and GitHub profile tips)
-- **LLM Full Documentation**: `https://git-ascii.vercel.app/llms-full.txt`
-- **Sitemap XML**: `https://git-ascii.vercel.app/sitemap.xml`
+- **Templates Catalog**: `https://gitascii.com/templates` (13+ theme templates including Terminal, Minimal, Cyberpunk, Dracula, Nord, Tokyo Night, Gruvbox, Matrix, Bento)
+- **Dynamic SVG Widgets**: `https://gitascii.com/widgets` (Live stats cards, streak counters, language breakdowns, ASCII art banners, tech badges)
+- **Developer Directory**: `https://gitascii.com/explore` (Public showcase of developer profile READMEs)
+- **Guides & Tutorials**: `https://gitascii.com/guides` (Step-by-step markdown tutorials and GitHub profile tips)
+- **LLM Full Documentation**: `https://gitascii.com/llms-full.txt`
+- **Sitemap XML**: `https://gitascii.com/sitemap.xml`
 
 ## Dynamic API Endpoints
 
-- **Profile Editor Route**: `https://git-ascii.vercel.app/[username]`
-- **Named Profile Route**: `https://git-ascii.vercel.app/[username]/[profileSlug]`
-- **Live SVG Widget Endpoint**: `https://git-ascii.vercel.app/api/[username]`
-- **Named Profile SVG Endpoint**: `https://git-ascii.vercel.app/api/[username]/[profileSlug]`
-- **Dynamic OG Image Endpoint**: `https://git-ascii.vercel.app/[username]/opengraph-image`
+- **Profile Editor Route**: `https://gitascii.com/[username]`
+- **Named Profile Route**: `https://gitascii.com/[username]/[profileSlug]`
+- **Live SVG Widget Endpoint**: `https://gitascii.com/api/[username]`
+- **Named Profile SVG Endpoint**: `https://gitascii.com/api/[username]/[profileSlug]`
+- **Dynamic OG Image Endpoint**: `https://gitascii.com/[username]/opengraph-image`
 
 ## Usage Example (Markdown Embed)
 
 To add a dynamic GitAscii profile card to a GitHub README.md:
 
 ```markdown
-![GitAscii Profile](https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME)
+![GitAscii Profile](https://gitascii.com/api/YOUR_GITHUB_USERNAME)
 ```
 
 To support automatic dark/light mode switching on GitHub:
 
 ```html
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=github-dark">
-  <source media="(prefers-color-scheme: light)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=minimal">
-  <img alt="GitAscii Profile" src="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME">
+  <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/YOUR_GITHUB_USERNAME?theme=github-dark">
+  <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/YOUR_GITHUB_USERNAME?theme=minimal">
+  <img alt="GitAscii Profile" src="https://gitascii.com/api/YOUR_GITHUB_USERNAME">
 </picture>
 ```
 

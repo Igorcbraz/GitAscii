@@ -122,7 +122,7 @@ export default function InteractiveShowcase() {
     {
       id: 'stats',
       name: tc('widget.name.stats', 'Live Stats Card', 'Cartão de Estatísticas'),
-      snippet: '![Stats](https://git-ascii.vercel.app/api/YOUR_USERNAME)',
+      snippet: '![Stats](${APP_URL}/api/YOUR_USERNAME)',
       desc: tc(
         'widget.desc.stats',
         'Calculates total commits, stars, PRs, issues and repos dynamically.',
@@ -132,7 +132,7 @@ export default function InteractiveShowcase() {
     {
       id: 'streak',
       name: tc('widget.name.streak', 'Contribution Streak', 'Racha de Contribuições'),
-      snippet: '![Streak](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=streak)',
+      snippet: '![Streak](${APP_URL}/api/YOUR_USERNAME?widget=streak)',
       desc: tc(
         'widget.desc.streak',
         'Displays active daily contribution streak and longest record.',
@@ -142,7 +142,7 @@ export default function InteractiveShowcase() {
     {
       id: 'languages',
       name: tc('widget.name.languages', 'Top Languages', 'Principais Linguagens'),
-      snippet: '![Languages](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=languages)',
+      snippet: '![Languages](${APP_URL}/api/YOUR_USERNAME?widget=languages)',
       desc: tc(
         'widget.desc.languages',
         'Visual breakdown of programming languages used across public repositories.',
@@ -152,7 +152,7 @@ export default function InteractiveShowcase() {
     {
       id: 'stack',
       name: tc('widget.name.stack', 'Tech Stack Badges', 'Badges de Habilidades'),
-      snippet: '![Stack](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=stack)',
+      snippet: '![Stack](${APP_URL}/api/YOUR_USERNAME?widget=stack)',
       desc: tc(
         'widget.desc.stack',
         'Displays customized tech stack skill badges dynamically.',

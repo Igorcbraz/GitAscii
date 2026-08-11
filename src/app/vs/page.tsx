@@ -3,6 +3,7 @@
 import Link from 'next/link'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 import { useI18n } from '@/i18n'
@@ -42,7 +43,7 @@ export default function ComparisonHubPage() {
     '@type': 'CollectionPage',
     name: 'GitAscii vs Competitors & Alternatives',
     description: 'Detailed feature comparison between GitAscii and popular README generators.',
-    url: 'https://git-ascii.vercel.app/vs',
+    url: `${APP_URL}/vs`,
   }
 
   const breadcrumbLd = {
@@ -53,13 +54,13 @@ export default function ComparisonHubPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Resources & Comparisons',
-        item: 'https://git-ascii.vercel.app/vs',
+        item: `${APP_URL}/vs`,
       },
     ],
   }

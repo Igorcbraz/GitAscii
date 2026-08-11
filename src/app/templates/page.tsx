@@ -3,6 +3,7 @@
 import { Layout } from 'lucide-react'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { templateList } from '@/data/templatesData'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
@@ -18,7 +19,7 @@ export default function TemplatesPage() {
     name: '13+ Best GitHub Profile README Templates Marketplace',
     description:
       'Handcrafted, responsive GitHub Profile README templates with live SVG stats, ASCII art, and custom themes.',
-    url: 'https://git-ascii.vercel.app/templates',
+    url: `${APP_URL}/templates`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: templateList.length,
@@ -39,13 +40,13 @@ export default function TemplatesPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Templates',
-        item: 'https://git-ascii.vercel.app/templates',
+        item: `${APP_URL}/templates`,
       },
     ],
   }

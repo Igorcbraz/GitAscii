@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 
+import { APP_DOMAIN } from '@/constants'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}))
-    const host = 'git-ascii.vercel.app'
+    const host = APP_DOMAIN
     const key = process.env.INDEXNOW_KEY || 'gitascii2026indexnowkey'
 
     const urlList = body.urlList || [

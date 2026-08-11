@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -31,7 +32,7 @@ const widgetMap: Record<string, WidgetData> = {
       'Render dynamic SVG stats cards for your GitHub profile README. Automatically displays total commits, stars earned, pull requests merged, issues closed, and total contributions.',
     type: 'Dynamic SVG Card',
     codeSnippet: `<!-- GitHub Live Stats Card -->
-![GitHub Stats](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=terminal)`,
+![GitHub Stats](${APP_URL}/api/YOUR_USERNAME?theme=terminal)`,
     githubSourceUrl: 'https://github.com/Igorcbraz/GitAscii/blob/main/src/app/api/svg/route.ts',
     params: [
       {
@@ -73,7 +74,7 @@ const widgetMap: Record<string, WidgetData> = {
       'Display your active daily GitHub contribution streak, total contributions over the past year, and your all-time longest streak.',
     type: 'Streak Counter Widget',
     codeSnippet: `<!-- GitHub Streak Counter -->
-![GitHub Streak](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=streak)`,
+![GitHub Streak](${APP_URL}/api/YOUR_USERNAME?widget=streak)`,
     githubSourceUrl:
       'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/renderers/streakRenderer.ts',
     params: [
@@ -102,7 +103,7 @@ const widgetMap: Record<string, WidgetData> = {
       'Generate a visual breakdown of your most used programming languages across public repositories with precise percentage bars.',
     type: 'Language Graph Widget',
     codeSnippet: `<!-- Top Languages Graph -->
-![Top Languages](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=languages)`,
+![Top Languages](${APP_URL}/api/YOUR_USERNAME?widget=languages)`,
     githubSourceUrl:
       'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/renderers/languagesRenderer.ts',
     params: [
@@ -133,7 +134,7 @@ const widgetMap: Record<string, WidgetData> = {
       'Convert user avatars, logos, or custom artwork into character-based text art banners with configurable density and color accents.',
     type: 'ASCII Art Converter',
     codeSnippet: `<!-- ASCII Banner -->
-![ASCII Banner](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=ascii)`,
+![ASCII Banner](${APP_URL}/api/YOUR_USERNAME?widget=ascii)`,
     githubSourceUrl: 'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/asciiEngine.ts',
     params: [
       {
@@ -166,7 +167,7 @@ const widgetMap: Record<string, WidgetData> = {
       'Create tech stack badges with official brand logos, custom background fills, and clean SVG rendering.',
     type: 'Tech Badges Generator',
     codeSnippet: `<!-- Tech Stack Badges -->
-![Tech Badges](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=stack)`,
+![Tech Badges](${APP_URL}/api/YOUR_USERNAME?widget=stack)`,
     githubSourceUrl:
       'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/renderers/stackRenderer.ts',
     params: [
@@ -201,7 +202,7 @@ export async function generateMetadata({
   const data = widgetMap[widgetId]
   if (!data) return {}
 
-  const url = `https://git-ascii.vercel.app/widgets/${widgetId}`
+  const url = `${APP_URL}/widgets/${widgetId}`
 
   return {
     title: `${data.title} | GitAscii`,
@@ -249,7 +250,7 @@ export default async function WidgetDetailPage({
     applicationCategory: 'DeveloperApplication',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     description: data.description,
-    url: `https://git-ascii.vercel.app/widgets/${data.id}`,
+    url: `${APP_URL}/widgets/${data.id}`,
   }
 
   const breadcrumbLd = {
@@ -260,19 +261,19 @@ export default async function WidgetDetailPage({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Widgets',
-        item: 'https://git-ascii.vercel.app/widgets',
+        item: `${APP_URL}/widgets`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: data.name,
-        item: `https://git-ascii.vercel.app/widgets/${data.id}`,
+        item: `${APP_URL}/widgets/${data.id}`,
       },
     ],
   }

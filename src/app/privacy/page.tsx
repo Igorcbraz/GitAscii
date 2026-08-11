@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { APP_DOMAIN, APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   description:
     'Learn how GitAscii collects, uses, and protects information when you use our GitHub Profile README generator.',
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://git-ascii.vercel.app/privacy' },
+  alternates: { canonical: `${APP_URL}/privacy` },
 }
 
 const LAST_UPDATED = '2026-08-09'
@@ -48,11 +49,8 @@ export default function PrivacyPage() {
             <p>
               This Privacy Policy explains how GitAscii (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
               &ldquo;our&rdquo;) collects, uses, and shares information when you visit{' '}
-              <a
-                href="https://git-ascii.vercel.app"
-                className="text-signal-lime hover:brightness-110 transition-colors"
-              >
-                git-ascii.vercel.app
+              <a href={APP_URL} className="text-signal-lime hover:brightness-110 transition-colors">
+                {APP_DOMAIN}
               </a>{' '}
               (the &ldquo;Service&rdquo;). GitAscii is a free, open-source tool for creating GitHub
               Profile READMEs and is operated by{' '}
@@ -326,9 +324,7 @@ export default function PrivacyPage() {
               <li>Click &ldquo;Decline&rdquo; in the banner that appears.</li>
               <li>
                 Alternatively, clear your browser&rsquo;s cookies and local storage for{' '}
-                <code className="font-jetbrains-mono text-signal-lime text-note">
-                  git-ascii.vercel.app
-                </code>
+                <code className="font-jetbrains-mono text-signal-lime text-note">{APP_DOMAIN}</code>
                 .
               </li>
             </ol>

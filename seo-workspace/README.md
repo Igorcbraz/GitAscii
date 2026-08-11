@@ -4,7 +4,7 @@ Este é o diretório central para documentar, planejar e executar o trabalho de 
 
 ## 🎯 Escopo do Projeto
 
-- **Domínio Principal:** `git-ascii.vercel.app`
+- **Domínio Principal:** `gitascii.com`
 - **Repositório:** `Igorcbraz/GitAscii`
 - **ID do Projeto (OpenSEO):** `292f3d4c-a079-45a0-bbf7-731ca26a0115`
 - **Mercado Alvo:** `2076/pt` (Português)
@@ -19,6 +19,6 @@ Este é o diretório central para documentar, planejar e executar o trabalho de 
 
 ## 🚀 Próximas Ações
 
-1. Executar auditoria inicial de domínio e palavras-chave atuais do `git-ascii.vercel.app`.
+1. Executar auditoria inicial de domínio e palavras-chave atuais do `gitascii.com`.
 2. Identificar competidores diretos de busca orgânica.
 3. Rastrear posições e planejar melhorias nas páginas.

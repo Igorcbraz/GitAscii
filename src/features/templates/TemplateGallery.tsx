@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 
 import { TechIcon } from '@/components/ui/TechIcon'
 import { useToast } from '@/components/ui/toast'
+import { APP_URL } from '@/constants'
 import { languageStacks, templateList } from '@/data/templatesData'
 import { useI18n } from '@/i18n'
 
@@ -29,7 +30,7 @@ export function TemplateGallery() {
   const handleCopyMarkdown = (slug: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const markdown = `<!-- GitAscii ${slug} template -->\n![GitHub Profile Card](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=${slug})`
+    const markdown = `<!-- GitAscii ${slug} template -->\n![GitHub Profile Card](${APP_URL}/api/YOUR_USERNAME?theme=${slug})`
     navigator.clipboard.writeText(markdown)
     setCopiedSlug(slug)
     success(`Copied ${slug} template SVG snippet to clipboard.`)

@@ -4,6 +4,7 @@ import { BookOpen, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 import { useI18n } from '@/i18n'
@@ -88,7 +89,7 @@ export default function GuidesPage() {
     name: 'GitHub Profile README Guides & Resource Articles',
     description:
       'Curated collection of authoritative guides, Medium articles, official GitHub documentation, and tutorials.',
-    url: 'https://git-ascii.vercel.app/guides',
+    url: `${APP_URL}/guides`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: guidesList.length,
@@ -110,13 +111,13 @@ export default function GuidesPage() {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Guides & Resources',
-        item: 'https://git-ascii.vercel.app/guides',
+        item: `${APP_URL}/guides`,
       },
     ],
   }
