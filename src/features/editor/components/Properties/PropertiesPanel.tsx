@@ -3,18 +3,64 @@
 import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'lucide-react'
 import React from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { AnimationControls } from './AnimationControls'
 import { AsciiArtControls } from './AsciiArtControls'
 import { AsciiTextControls } from './AsciiTextControls'
+import { AvatarControls } from './AvatarControls'
 import { ColorPicker } from './ColorPicker'
 import { CustomImageControls } from './CustomImageControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
+
+function DimensionInput({
+  value,
+  onChange,
+  testId,
+  min,
+  max,
+}: {
+  value: number
+  onChange: (v: number) => void
+  testId: string
+  min: number
+  max: number
+}) {
+  const [local, setLocal] = React.useState<string>(value.toString())
+
+  React.useEffect(() => {
+    setLocal(value.toString())
+  }, [value])
+
+  return (
+    <input
+      type="number"
+      min={min}
+      max={max}
+      value={local}
+      onChange={(e) => setLocal(e.target.value)}
+      onBlur={(e) => {
+        let val = parseInt(e.target.value, 10)
+        if (isNaN(val)) val = min
+        val = Math.max(min, Math.min(max, val))
+        setLocal(val.toString())
+        onChange(val)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.currentTarget.blur()
+        }
+      }}
+      data-testid={testId}
+      className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
+    />
+  )
+}
 
 const WIDTH_PRESETS = [
   { label: '100%', val: 800 },
@@ -60,15 +106,13 @@ export function PropertiesPanel() {
               <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                 {t('editor.properties.transparent_bg', 'Fundo Transparente')}
               </label>
-              <input
-                type="checkbox"
+              <Switch
                 checked={Boolean(config.globalStyles.transparentBackground)}
-                onChange={(e) =>
+                onChange={(checkedValue) =>
                   useEditorStore.getState().updateGlobalStyles({
-                    transparentBackground: e.target.checked,
+                    transparentBackground: checkedValue,
                   })
                 }
-                className="w-4 h-4 accent-signal-lime cursor-pointer"
               />
             </div>
 
@@ -314,6 +358,97 @@ export function PropertiesPanel() {
               }
             />
           </div>
+
+          <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite mt-3">
+            <label
+              className="text-eyebrow text-chalk font-inter-tight cursor-pointer"
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, { hideBorder: !cfg.hideBorder })
+              }
+            >
+              {t('editor.properties.hide_border', 'Sem Borda')}
+            </label>
+            <button
+              type="button"
+              className={`w-9 h-5 rounded-full transition-colors relative flex items-center shrink-0 ${cfg.hideBorder ? 'bg-signal-lime' : 'bg-zinc-700'} focus:outline-none`}
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, { hideBorder: !cfg.hideBorder })
+              }
+            >
+              <span
+                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.hideBorder ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite mt-3">
+            <label
+              className="text-eyebrow text-chalk font-inter-tight cursor-pointer"
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, {
+                  hideDecorations: !cfg.hideDecorations,
+                })
+              }
+            >
+              {t('editor.properties.hide_decorations', 'Sem Detalhes (+)')}
+            </label>
+            <button
+              type="button"
+              className={`w-9 h-5 rounded-full transition-colors relative flex items-center shrink-0 ${cfg.hideDecorations ? 'bg-signal-lime' : 'bg-zinc-700'} focus:outline-none`}
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, {
+                  hideDecorations: !cfg.hideDecorations,
+                })
+              }
+            >
+              <span
+                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.hideDecorations ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite mt-3">
+            <label
+              className="text-eyebrow text-chalk font-inter-tight cursor-pointer"
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, {
+                  showTitle: cfg.showTitle === false,
+                })
+              }
+            >
+              {t('editor.properties.show_title', 'Exibir Título do Widget')}
+            </label>
+            <button
+              type="button"
+              className={`w-9 h-5 rounded-full transition-colors relative flex items-center shrink-0 ${cfg.showTitle !== false ? 'bg-signal-lime' : 'bg-zinc-700'} focus:outline-none`}
+              onClick={() =>
+                updateWidgetConfig(selectedWidget.instanceId, {
+                  showTitle: cfg.showTitle === false,
+                })
+              }
+            >
+              <span
+                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.showTitle !== false ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+              />
+            </button>
+          </div>
+
+          {cfg.showTitle !== false && (
+            <div className="mt-3">
+              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+                {t('editor.properties.widget_name', 'Nome do Widget (Título)')}
+              </label>
+              <input
+                type="text"
+                value={(cfg.customTitle as string) || ''}
+                onChange={(e) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { customTitle: e.target.value })
+                }
+                placeholder={t('editor.properties.widget_name_placeholder', 'Ex: Meu Widget')}
+                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+              />
+            </div>
+          )}
         </div>
 
         {selectedWidget.widgetId === 'bio' && (
@@ -394,31 +529,7 @@ export function PropertiesPanel() {
         )}
 
         {selectedWidget.widgetId === 'avatar' && (
-          <div className="space-y-3 pt-3 border-t border-graphite">
-            <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
-              <Type size={14} />
-              <span>{t('editor.properties.avatar_title', 'URL da Imagem do Avatar')}</span>
-            </div>
-
-            <div>
-              <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-                {t('editor.properties.avatar_label', 'URL da Imagem')}
-              </label>
-              <input
-                type="text"
-                value={
-                  cfg.avatarUrl !== undefined
-                    ? (cfg.avatarUrl as string)
-                    : useEditorStore.getState().githubData?.user.avatar_url || ''
-                }
-                onChange={(e) =>
-                  updateWidgetConfig(selectedWidget.instanceId, { avatarUrl: e.target.value })
-                }
-                placeholder="https://..."
-                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
-              />
-            </div>
-          </div>
+          <AvatarControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {selectedWidget.widgetId === 'ascii-art' && (
@@ -485,17 +596,15 @@ export function PropertiesPanel() {
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.properties.size_aspect', 'Manter proporção quadrada (1:1)')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={
                 cfg.lockAspectRatio !== undefined
                   ? Boolean(cfg.lockAspectRatio)
                   : selectedWidget.widgetId === 'avatar'
               }
-              onChange={(e) =>
-                updateWidgetConfig(selectedWidget.instanceId, { lockAspectRatio: e.target.checked })
+              onChange={(checkedValue) =>
+                updateWidgetConfig(selectedWidget.instanceId, { lockAspectRatio: checkedValue })
               }
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
             />
           </div>
 
@@ -561,13 +670,11 @@ export function PropertiesPanel() {
                 onTouchEnd={() => useEditorStore.getState().recordHistorySnapshot()}
                 className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
               />
-              <input
-                type="number"
-                min="40"
-                max="800"
+              <DimensionInput
+                min={40}
+                max={800}
                 value={selectedWidget.size.width}
-                onChange={(e) => {
-                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40))
+                onChange={(val) => {
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
@@ -577,8 +684,7 @@ export function PropertiesPanel() {
                     height: isAspectLocked ? val : selectedWidget.size.height,
                   })
                 }}
-                data-testid="widget-width-input"
-                className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
+                testId="widget-width-input"
               />
             </div>
           </div>
@@ -611,13 +717,11 @@ export function PropertiesPanel() {
                 onTouchEnd={() => useEditorStore.getState().recordHistorySnapshot()}
                 className="flex-1 accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
               />
-              <input
-                type="number"
-                min="40"
-                max="800"
+              <DimensionInput
+                min={40}
+                max={800}
                 value={selectedWidget.size.height}
-                onChange={(e) => {
-                  const val = Math.max(40, Math.min(800, parseInt(e.target.value, 10) || 40))
+                onChange={(val) => {
                   const isAspectLocked =
                     cfg.lockAspectRatio !== undefined
                       ? Boolean(cfg.lockAspectRatio)
@@ -627,8 +731,7 @@ export function PropertiesPanel() {
                     height: val,
                   })
                 }}
-                data-testid="widget-height-input"
-                className="w-16 bg-graphite border border-graphite focus:border-signal-lime px-2 py-0.5 text-eyebrow font-jetbrains-mono text-chalk rounded-xs text-right focus:outline-none"
+                testId="widget-height-input"
               />
             </div>
           </div>
