@@ -25,26 +25,26 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
   const resetZoom = () => setZoom(1)
 
   return (
-    <div className="hidden lg:flex h-8 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-fog shrink-0 select-none z-10">
+    <div className="flex h-9 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-ash select-none z-10">
       <div className="flex items-center gap-1">
         <button
           onClick={undo}
           disabled={!canUndo}
-          title={t('editor.statusbar.undo')}
+          title={`${t('editor.statusbar.undo')} (Ctrl+Z)`}
           data-testid="statusbar-undo"
-          className="p-1 rounded-xs hover:bg-graphite hover:text-chalk disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk disabled:text-fog disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          <Undo2 size={12} />
+          <Undo2 size={13} />
         </button>
 
         <button
           onClick={redo}
           disabled={!canRedo}
-          title={t('editor.statusbar.redo')}
+          title={`${t('editor.statusbar.redo')} (Ctrl+Y)`}
           data-testid="statusbar-redo"
-          className="p-1 rounded-xs hover:bg-graphite hover:text-chalk disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk disabled:text-fog disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          <Redo2 size={12} />
+          <Redo2 size={13} />
         </button>
 
         {showInfo && (
@@ -55,7 +55,7 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
               {widgetCount !== 1 ? t('editor.statusbar.widgets') : t('editor.statusbar.widget')}
             </span>
             {selCount > 0 && (
-              <span className="text-signal-lime ml-2">
+              <span className="text-signal-lime ml-2 font-medium">
                 · {selCount} {t('editor.statusbar.selected')}
               </span>
             )}
@@ -68,16 +68,16 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
           onClick={stepDown}
           title={t('editor.statusbar.zoom_out')}
           data-testid="statusbar-zoom-out"
-          className="p-1 rounded-xs hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
         >
-          <Minus size={12} />
+          <Minus size={13} />
         </button>
 
         <button
           onClick={resetZoom}
           title={t('editor.statusbar.zoom_reset')}
           data-testid="statusbar-zoom-reset"
-          className="min-w-11.5 text-center text-fog hover:text-chalk hover:bg-graphite rounded-xs px-1.5 py-0.5 transition-colors cursor-pointer font-jetbrains-mono"
+          className="min-w-11.5 text-center text-pearl hover:text-chalk hover:bg-graphite rounded-xs px-1.5 py-0.5 transition-colors cursor-pointer font-jetbrains-mono text-[11px] font-semibold"
         >
           {zoomPct}%
         </button>
@@ -86,9 +86,9 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
           onClick={stepUp}
           title={t('editor.statusbar.zoom_in')}
           data-testid="statusbar-zoom-in"
-          className="p-1 rounded-xs hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
         >
-          <Plus size={12} />
+          <Plus size={13} />
         </button>
 
         <div className="w-px h-3 bg-graphite mx-1" />
@@ -97,9 +97,9 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
           onClick={resetZoom}
           title={t('editor.statusbar.zoom_reset')}
           data-testid="statusbar-zoom-fit"
-          className="p-1 rounded-xs hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
         >
-          <RotateCcw size={11} />
+          <RotateCcw size={12} />
         </button>
       </div>
     </div>
