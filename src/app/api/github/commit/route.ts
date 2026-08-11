@@ -95,11 +95,32 @@ export async function POST(request: Request) {
       )
     }
 
+    let jsonSha = undefined
+    let hasJsonChanged = true
+    let incomingJsonStr = ''
+
+    if (exportData) {
+      const jsonRes = await fetch(
+        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+        { headers }
+      )
+      if (jsonRes.status === 200) {
+        const jsonData = await jsonRes.json()
+        jsonSha = jsonData.sha
+        const currentJsonStr = Buffer.from(jsonData.content, 'base64').toString('utf8')
+        incomingJsonStr = JSON.stringify(exportData, null, 2)
+
+        if (currentJsonStr === incomingJsonStr) {
+          hasJsonChanged = false
+        }
+      } else {
+        incomingJsonStr = JSON.stringify(exportData, null, 2)
+      }
+    }
+
     const readmeRes = await fetch(
       `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
-      {
-        headers,
-      }
+      { headers }
     )
 
     let sha = undefined
@@ -113,46 +134,38 @@ export async function POST(request: Request) {
 
     const widgetRegex =
       /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
-    let newContent = currentContent
-    if (widgetRegex.test(currentContent)) {
-      newContent = currentContent.replace(widgetRegex, finalEmbedCode)
-    } else {
-      newContent = currentContent ? `${currentContent}\n\n${finalEmbedCode}` : finalEmbedCode
-    }
+    const isWidgetMissing = !currentContent.match(widgetRegex)
 
-    const updateRes = await fetch(
-      `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
-      {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          message: 'Update profile README via GitAscii',
-          content: Buffer.from(newContent, 'utf8').toString('base64'),
-          sha,
-        }),
+    if (hasJsonChanged || isWidgetMissing) {
+      let newContent = currentContent
+      if (!isWidgetMissing) {
+        newContent = currentContent.replace(widgetRegex, finalEmbedCode)
+      } else {
+        newContent = currentContent ? `${currentContent}\n\n${finalEmbedCode}` : finalEmbedCode
       }
-    )
 
-    if (!updateRes.ok) {
-      return NextResponse.json(
-        { error: 'Failed to update README', details: await updateRes.text() },
-        { status: 500 }
-      )
-    }
-
-    if (exportData) {
-      const jsonRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+      const updateRes = await fetch(
+        `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
         {
+          method: 'PUT',
           headers,
+          body: JSON.stringify({
+            message: 'Update profile README via GitAscii',
+            content: Buffer.from(newContent, 'utf8').toString('base64'),
+            sha,
+          }),
         }
       )
-      let jsonSha = undefined
-      if (jsonRes.status === 200) {
-        const jsonData = await jsonRes.json()
-        jsonSha = jsonData.sha
-      }
 
+      if (!updateRes.ok) {
+        return NextResponse.json(
+          { error: 'Failed to update README', details: await updateRes.text() },
+          { status: 500 }
+        )
+      }
+    }
+
+    if (exportData && hasJsonChanged) {
       const updateJsonRes = await fetch(
         `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
         {
@@ -160,7 +173,7 @@ export async function POST(request: Request) {
           headers,
           body: JSON.stringify({
             message: 'Update GitAscii layout export',
-            content: Buffer.from(JSON.stringify(exportData, null, 2), 'utf8').toString('base64'),
+            content: Buffer.from(incomingJsonStr, 'utf8').toString('base64'),
             sha: jsonSha,
           }),
         }
@@ -168,6 +181,57 @@ export async function POST(request: Request) {
 
       if (!updateJsonRes.ok) {
         console.error('Failed to upload JSON:', await updateJsonRes.text())
+      }
+
+      // Verifica se o layout contém o widget da snake
+      const hasSnakeWidget = exportData?.widgets?.some((w: any) => w.id === 'contribution-snake')
+
+      if (hasSnakeWidget) {
+        try {
+          // Busca o workflow dinamicamente do repositório de exemplo do Platane
+          const yamlRes = await fetch(
+            'https://raw.githubusercontent.com/Platane/Platane/master/.github/workflows/main.yml'
+          )
+          if (yamlRes.ok) {
+            let snakeYaml = await yamlRes.text()
+
+            // Substitui o usuário fixo 'platane' pela variável dinâmica do GitHub, se houver,
+            // tomando cuidado para não alterar a action 'Platane/snk'
+            snakeYaml = snakeYaml.replace(
+              /github_user_name:\s*\w+/g,
+              'github_user_name: ${{ github.repository_owner }}'
+            )
+
+            const actionRes = await fetch(
+              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
+              { headers }
+            )
+            let actionSha = undefined
+            if (actionRes.status === 200) {
+              const actionData = await actionRes.json()
+              actionSha = actionData.sha
+            }
+
+            const updateActionRes = await fetch(
+              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
+              {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({
+                  message: 'Configura GitHub Action do Contribution Snake',
+                  content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
+                  sha: actionSha,
+                }),
+              }
+            )
+
+            if (!updateActionRes.ok) {
+              console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao configurar o workflow da snake:', err)
+        }
       }
     }
 
