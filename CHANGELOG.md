@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/Igorcbraz/GitAscii/compare/v1.4.1...v1.4.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* migrate old domain to gitascii.com and modularize APP_URL ([4e9d56f](https://github.com/Igorcbraz/GitAscii/commit/4e9d56f18f62ed9a369b91ca4a46f69018a5f6c9))
+
 ## [1.4.1](https://github.com/Igorcbraz/GitAscii/compare/v1.4.0...v1.4.1) (2026-08-10)
 
 
