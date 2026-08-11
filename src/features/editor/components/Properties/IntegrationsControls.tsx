@@ -1,8 +1,9 @@
 'use client'
 
-import { Sliders } from 'lucide-react'
+import { AlertCircle, Sliders } from 'lucide-react'
 import React from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
@@ -58,14 +59,13 @@ interface IntegrationsControlsProps {
 
 export function IntegrationsControls({ instanceId, widgetId, config }: IntegrationsControlsProps) {
   const { t } = useI18n()
+  const showTitle = config.showTitle !== false
+  const customTitle = (config.customTitle as string) || ''
   const { updateWidgetConfig } = useEditorStore()
 
   const handleUpdate = (patch: Record<string, unknown>) => {
     updateWidgetConfig(instanceId, patch)
   }
-
-  const showTitle = config.showTitle !== false
-  const customTitle = (config.customTitle as string) || ''
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite">
@@ -79,11 +79,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
           <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
             {t('editor.integrations.show_title', 'Exibir Título do Widget')}
           </label>
-          <input
-            type="checkbox"
+          <Switch
             checked={showTitle}
-            onChange={(e) => handleUpdate({ showTitle: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer"
+            onChange={(checkedValue) => handleUpdate({ showTitle: checkedValue })}
           />
         </div>
 
@@ -172,11 +170,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
           <div className="flex flex-col gap-2 pt-1">
             <label className="flex items-center gap-2 cursor-pointer group">
               <div className="relative flex items-center">
-                <input
-                  type="checkbox"
+                <Switch
                   checked={Boolean(config.invertColors)}
-                  onChange={(e) => handleUpdate({ invertColors: e.target.checked })}
-                  className="peer sr-only"
+                  onChange={(checkedValue) => handleUpdate({ invertColors: checkedValue })}
                 />
                 <div className="w-8 h-4 bg-void-black border border-graphite rounded-full peer-checked:bg-signal-lime/20 peer-checked:border-signal-lime transition-colors"></div>
                 <div className="absolute left-1 top-1 w-2 h-2 bg-ash rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-signal-lime"></div>
@@ -320,11 +316,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                   {t('editor.integrations.show_metric_icons', 'Exibir Ícones de Métricas')}
                 </label>
-                <input
-                  type="checkbox"
+                <Switch
                   checked={config.showIcons !== false}
-                  onChange={(e) => handleUpdate({ showIcons: e.target.checked })}
-                  className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  onChange={(checkedValue) => handleUpdate({ showIcons: checkedValue })}
                 />
               </div>
 
@@ -332,11 +326,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                   {t('editor.integrations.include_private_commits', 'Incluir Commits Privados')}
                 </label>
-                <input
-                  type="checkbox"
+                <Switch
                   checked={Boolean(config.countPrivate)}
-                  onChange={(e) => handleUpdate({ countPrivate: e.target.checked })}
-                  className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  onChange={(checkedValue) => handleUpdate({ countPrivate: checkedValue })}
                 />
               </div>
 
@@ -347,11 +339,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                     'Incluir Todos os Commits (Ano Todo)'
                   )}
                 </label>
-                <input
-                  type="checkbox"
+                <Switch
                   checked={Boolean(config.includeAllCommits)}
-                  onChange={(e) => handleUpdate({ includeAllCommits: e.target.checked })}
-                  className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  onChange={(checkedValue) => handleUpdate({ includeAllCommits: checkedValue })}
                 />
               </div>
 
@@ -359,11 +349,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                 <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                   {t('editor.integrations.hide_rank', 'Ocultar Ranking (Rank Badge)')}
                 </label>
-                <input
-                  type="checkbox"
+                <Switch
                   checked={Boolean(config.hideRank)}
-                  onChange={(e) => handleUpdate({ hideRank: e.target.checked })}
-                  className="w-4 h-4 accent-signal-lime cursor-pointer"
+                  onChange={(checkedValue) => handleUpdate({ hideRank: checkedValue })}
                 />
               </div>
             </div>
@@ -373,11 +361,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.hide_border', 'Ocultar Borda Padrão')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.hideBorder)}
-              onChange={(e) => handleUpdate({ hideBorder: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ hideBorder: checkedValue })}
             />
           </div>
         </div>
@@ -492,11 +478,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                   <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                     Show Icons
                   </label>
-                  <input
-                    type="checkbox"
+                  <Switch
                     checked={config.showIcons !== false}
-                    onChange={(e) => handleUpdate({ showIcons: e.target.checked })}
-                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                    onChange={(checkedValue) => handleUpdate({ showIcons: checkedValue })}
                   />
                 </div>
 
@@ -504,11 +488,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                   <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                     Show Ring
                   </label>
-                  <input
-                    type="checkbox"
+                  <Switch
                     checked={config.showRing !== false}
-                    onChange={(e) => handleUpdate({ showRing: e.target.checked })}
-                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                    onChange={(checkedValue) => handleUpdate({ showRing: checkedValue })}
                   />
                 </div>
 
@@ -516,11 +498,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
                   <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
                     Hide Title
                   </label>
-                  <input
-                    type="checkbox"
+                  <Switch
                     checked={Boolean(config.hideTitle)}
-                    onChange={(e) => handleUpdate({ hideTitle: e.target.checked })}
-                    className="w-4 h-4 accent-signal-lime cursor-pointer"
+                    onChange={(checkedValue) => handleUpdate({ hideTitle: checkedValue })}
                   />
                 </div>
               </div>
@@ -587,11 +567,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               Hide Border
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.hideBorder)}
-              onChange={(e) => handleUpdate({ hideBorder: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ hideBorder: checkedValue })}
             />
           </div>
         </div>
@@ -680,11 +658,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.hide_border', 'Ocultar Borda Padrão')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.hideBorder)}
-              onChange={(e) => handleUpdate({ hideBorder: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ hideBorder: checkedValue })}
             />
           </div>
         </div>
@@ -756,11 +732,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.remove_trophy_frame', 'Remover Moldura das Troféus')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.noFrame)}
-              onChange={(e) => handleUpdate({ noFrame: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ noFrame: checkedValue })}
             />
           </div>
 
@@ -768,11 +742,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.transparent_bg', 'Fundo Transparente')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.noBg)}
-              onChange={(e) => handleUpdate({ noBg: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ noBg: checkedValue })}
             />
           </div>
         </div>
@@ -826,11 +798,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.gradient_fill', 'Preenchimento de Gradiente Sob a Linha')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={config.showArea !== false}
-              onChange={(e) => handleUpdate({ showArea: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ showArea: checkedValue })}
             />
           </div>
 
@@ -838,11 +808,9 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
             <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
               {t('editor.integrations.hide_border_only', 'Ocultar Borda')}
             </label>
-            <input
-              type="checkbox"
+            <Switch
               checked={Boolean(config.hideBorder)}
-              onChange={(e) => handleUpdate({ hideBorder: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer"
+              onChange={(checkedValue) => handleUpdate({ hideBorder: checkedValue })}
             />
           </div>
         </div>
@@ -882,6 +850,15 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
               <option value="main">Branch `main`</option>
               <option value="master">Branch `master`</option>
             </select>
+          </div>
+
+          <div className="bg-[#1a1a1a] p-3 rounded-md border border-[#333] flex items-start gap-2 mt-4">
+            <AlertCircle size={16} className="text-signal-lime mt-0.5 shrink-0" />
+            <div className="text-[11px] text-ash font-inter-tight leading-relaxed">
+              Este widget exige que você configure o GitHub Action <strong>platane/snk</strong> no
+              seu repositório. O GitAscii irá buscar a imagem gerada na branch e caminho informados
+              acima.
+            </div>
           </div>
         </div>
       )}

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { type AsciiConvertOptions, convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { useI18n } from '@/i18n'
 
@@ -385,11 +386,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.invert_chars', 'Inverter Caracteres (Invert)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={invert}
-            onChange={(e) => updateWidgetConfig(instanceId, { invert: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { invert: checkedValue })}
           />
         </div>
       </div>
@@ -486,11 +485,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
             <Sparkles size={13} className="text-signal-lime" />{' '}
             {t('editor.ascii.edge_enhance', 'Realçar Contornos (Rosto)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={edgeEnhance}
-            onChange={(e) => updateWidgetConfig(instanceId, { edgeEnhance: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) =>
+              updateWidgetConfig(instanceId, { edgeEnhance: checkedValue })
+            }
           />
         </div>
 
@@ -498,11 +497,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.auto_contrast', 'Auto-Contraste (Gama Dinâmica)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={autoContrast}
-            onChange={(e) => updateWidgetConfig(instanceId, { autoContrast: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) =>
+              updateWidgetConfig(instanceId, { autoContrast: checkedValue })
+            }
           />
         </div>
 
@@ -510,11 +509,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.dithering', 'Pontilhado Fotográfico (Dithering)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={dithering}
-            onChange={(e) => updateWidgetConfig(instanceId, { dithering: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { dithering: checkedValue })}
           />
         </div>
 

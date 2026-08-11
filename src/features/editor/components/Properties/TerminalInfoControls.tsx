@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import React, { useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -60,7 +61,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
 
   const dotLeaders = config.dotLeaders !== false
 
-  const customTitle = (config.customTitle as string) || ''
   const customContactTitle = (config.customContactTitle as string) || ''
   const customStatsTitle = (config.customStatsTitle as string) || ''
 
@@ -315,21 +315,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
 
             {openAccordion === 'profile' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
-                <div>
-                  <label className="text-caption text-ash block mb-0.5">
-                    {t('editor.terminal.section_title', 'Título da Seção')}
-                  </label>
-                  <input
-                    type="text"
-                    value={customTitle}
-                    onChange={(e) =>
-                      updateWidgetConfig(instanceId, { customTitle: e.target.value })
-                    }
-                    placeholder={user ? `${user.login}@github` : 'username@github'}
-                    className={flatInputClass}
-                  />
-                </div>
-
                 <div>
                   <label className="text-caption text-ash block mb-0.5">Custom Uptime</label>
                   <input
@@ -616,11 +601,11 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 {t('editor.terminal.dot_leaders_desc', 'Ajusta pontilhado automático (...)')}
               </span>
             </div>
-            <input
-              type="checkbox"
+            <Switch
               checked={dotLeaders}
-              onChange={(e) => updateWidgetConfig(instanceId, { dotLeaders: e.target.checked })}
-              className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+              onChange={(checkedValue) =>
+                updateWidgetConfig(instanceId, { dotLeaders: checkedValue })
+              }
             />
           </div>
 

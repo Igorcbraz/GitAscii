@@ -4,6 +4,7 @@ import { Check, Cloud, Globe, Layers, Moon, Search, Server, Sparkles, Sun, X } f
 import Image from 'next/image'
 import React, { useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -127,6 +128,8 @@ interface TechStackControlsProps {
 
 export function TechStackControls({ instanceId, config }: TechStackControlsProps) {
   const { t } = useI18n()
+  const showTitle = config.showTitle !== false
+  const customTitle = (config.customTitle as string) || ''
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState<
@@ -139,8 +142,6 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
 
   const theme = (config.theme as string) || 'dark'
   const perLine = Number(config.perLine) || 12
-  const showTitle = config.showTitle !== false
-  const customTitle = (config.customTitle as string) || '[ TECHNOLOGIES & SKILLS ]'
 
   const toggleTech = (id: string) => {
     let updated: string[]
@@ -187,11 +188,9 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
           <label className="text-eyebrow text-ash font-medium">
             {t('editor.properties.show_title_label', 'Exibir Título')}
           </label>
-          <input
-            type="checkbox"
+          <Switch
             checked={showTitle}
-            onChange={(e) => updateWidgetConfig(instanceId, { showTitle: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { showTitle: checkedValue })}
           />
         </div>
 

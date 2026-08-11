@@ -143,11 +143,11 @@ const EASING_OPTIONS: { id: AnimationEasing; label: string }[] = [
 ]
 
 const DURATION_PRESETS = [
-  { label: '400ms', value: 400 },
-  { label: '800ms', value: 800 },
-  { label: '1.2s', value: 1200 },
-  { label: '1.6s', value: 1600 },
+  { label: '600ms', value: 600 },
+  { label: '1s', value: 1000 },
+  { label: '1.5s', value: 1500 },
   { label: '2s', value: 2000 },
+  { label: '3s', value: 3000 },
 ]
 
 export function AnimationControls({ instanceId, config, widgetId }: AnimationControlsProps) {
@@ -155,8 +155,8 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
   const { updateWidgetConfig } = useEditorStore()
 
   const animationType = (config.animationType as AnimationType) || 'none'
-  const animationDuration = (config.animationDuration as number) || 600
-  const animationDelay = (config.animationDelay as number) || 0
+  const animationDuration = config.animationDuration !== undefined ? config.animationDuration : 1500
+  const animationDelay = config.animationDelay !== undefined ? config.animationDelay : 0
   const animationEasing = (config.animationEasing as AnimationEasing) || 'ease-out'
   const previewKey = (config.animationPreviewKey as number) || 0
 
@@ -188,6 +188,9 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
           if (widgetId === 'ascii-art') {
             return preset.id === 'typewriter' || preset.id === 'none'
           }
+          if (widgetId === 'languages') {
+            return !['flip-y', 'typewriter', 'scan-lines'].includes(preset.id)
+          }
           return true
         }).map((preset) => {
           const Icon = preset.icon
@@ -196,7 +199,12 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
               key={preset.id}
               type="button"
               title={preset.description}
-              onClick={() => updateWidgetConfig(instanceId, { animationType: preset.id })}
+              onClick={() =>
+                updateWidgetConfig(instanceId, {
+                  animationType: preset.id,
+                  animationPreviewKey: previewKey + 1,
+                })
+              }
               className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xs text-center cursor-pointer transition-all border text-[10px] font-inter-tight leading-tight ${
                 animationType === preset.id
                   ? 'bg-signal-lime text-black border-signal-lime font-semibold'
@@ -223,12 +231,19 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
                   type="number"
                   min={100}
                   max={5000}
-                  value={animationDuration}
-                  onChange={(e) =>
+                  value={animationDuration === '' ? '' : (animationDuration as number)}
+                  onChange={(e) => {
+                    const val = e.target.value
                     updateWidgetConfig(instanceId, {
-                      animationDuration: Math.max(100, parseInt(e.target.value, 10) || 100),
+                      animationDuration: val === '' ? '' : parseInt(val, 10),
                     })
-                  }
+                  }}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value, 10)
+                    if (isNaN(val) || val < 100) {
+                      updateWidgetConfig(instanceId, { animationDuration: 1500 })
+                    }
+                  }}
                   className="w-14 bg-graphite border border-graphite focus:border-signal-lime px-1 py-0.5 text-right text-chalk font-jetbrains-mono rounded-xs focus:outline-none"
                 />
                 <span className="text-chalk font-jetbrains-mono">ms</span>
@@ -253,9 +268,9 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
             <input
               type="range"
               min={100}
-              max={2000}
+              max={3000}
               step={50}
-              value={animationDuration}
+              value={animationDuration === '' ? 600 : (animationDuration as number)}
               onChange={(e) =>
                 updateWidgetConfig(instanceId, {
                   animationDuration: parseInt(e.target.value, 10),
@@ -276,12 +291,19 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
                   type="number"
                   min={0}
                   max={5000}
-                  value={animationDelay}
-                  onChange={(e) =>
+                  value={animationDelay === '' ? '' : (animationDelay as number)}
+                  onChange={(e) => {
+                    const val = e.target.value
                     updateWidgetConfig(instanceId, {
-                      animationDelay: Math.max(0, parseInt(e.target.value, 10) || 0),
+                      animationDelay: val === '' ? '' : parseInt(val, 10),
                     })
-                  }
+                  }}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value, 10)
+                    if (isNaN(val) || val < 0) {
+                      updateWidgetConfig(instanceId, { animationDelay: 0 })
+                    }
+                  }}
                   className="w-14 bg-graphite border border-graphite focus:border-signal-lime px-1 py-0.5 text-right text-chalk font-jetbrains-mono rounded-xs focus:outline-none"
                 />
                 <span className="text-chalk font-jetbrains-mono">ms</span>
@@ -292,7 +314,7 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
               min={0}
               max={1500}
               step={50}
-              value={animationDelay}
+              value={animationDelay === '' ? 0 : (animationDelay as number)}
               onChange={(e) =>
                 updateWidgetConfig(instanceId, {
                   animationDelay: parseInt(e.target.value, 10),
