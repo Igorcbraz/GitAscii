@@ -90,13 +90,8 @@ export function SVGCanvas() {
     githubData,
     selectedInstanceId,
     selectedInstanceIds,
-    setSelection,
-    updateWidgetPositions,
     selectWidget,
-    updateWidgetPosition,
-    updateWidgetSize,
     updateWidgetConfig,
-    recordHistorySnapshot,
     zoom,
   } = useEditorStore()
 
@@ -131,7 +126,12 @@ export function SVGCanvas() {
 
   const [playingPreviews, setPlayingPreviews] = useState<Record<string, boolean>>({})
 
-  // Watch for changes in animationPreviewKey of widgets to trigger temporary play mode
+  const [editingText, setEditingText] = useState<{
+    instanceId: string
+    field: string
+    initialValue: string
+  } | null>(null)
+
   const widgetPreviewKeys = useMemo(() => {
     if (!config) return ''
     return config.widgets
@@ -154,7 +154,6 @@ export function SVGCanvas() {
     newParts.forEach((part, idx) => {
       if (part !== oldParts[idx]) {
         const [instanceId] = part.split(':')
-        // Enable live preview play for 2.5 seconds
         setPlayingPreviews((prev) => ({ ...prev, [instanceId]: true }))
         setTimeout(() => {
           setPlayingPreviews((prev) => ({ ...prev, [instanceId]: false }))
@@ -165,7 +164,6 @@ export function SVGCanvas() {
     prevKeysRef.current = widgetPreviewKeys
   }, [widgetPreviewKeys, config])
 
-  // Style block to inject into the canvas editor that forces static state (opacity 1, no anim) for any widget not actively previewing
   const editorAnimOverrideStyle = useMemo(() => {
     if (!config) return ''
     return config.widgets
@@ -296,7 +294,7 @@ export function SVGCanvas() {
         const step = (timestamp: number) => {
           if (!start) start = timestamp
           const progress = Math.min((timestamp - start) / duration, 1)
-          // easeOutCubic
+
           const ease = 1 - Math.pow(1 - progress, 3)
           parent.scrollTop = startY + distance * ease
           if (progress < 1) {
@@ -690,7 +688,7 @@ export function SVGCanvas() {
       if (dragRafRef.current !== null) cancelAnimationFrame(dragRafRef.current)
       if (marqueeRafRef.current !== null) cancelAnimationFrame(marqueeRafRef.current)
     }
-  }, [scheduleDragPreview])
+  }, [githubData, scheduleDragPreview])
 
   if (!config || !githubData) {
     return (
@@ -905,7 +903,25 @@ export function SVGCanvas() {
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation()
-                  useEditorStore.getState().setActiveMobilePanel('properties')
+
+                  if (widget.widgetId === 'ascii-text') {
+                    setEditingText({
+                      instanceId: widget.instanceId,
+                      field: 'customText',
+                      initialValue: (widget.config.customText as string) || 'GitAscii',
+                    })
+                  } else if (widget.widgetId === 'bio') {
+                    setEditingText({
+                      instanceId: widget.instanceId,
+                      field: 'customBio',
+                      initialValue:
+                        (widget.config.customBio as string) ||
+                        githubData.user.bio ||
+                        'No bio provided.',
+                    })
+                  } else {
+                    useEditorStore.getState().setActiveMobilePanel('properties')
+                  }
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation()
@@ -1122,6 +1138,45 @@ export function SVGCanvas() {
                       title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
                     />
                   </>
+                )}
+
+                {editingText?.instanceId === widget.instanceId && (
+                  <div
+                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-carbon/95 p-4 rounded-sm shadow-2xl"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                  >
+                    <textarea
+                      autoFocus
+                      defaultValue={editingText.initialValue}
+                      className="w-full h-full bg-transparent text-white font-jetbrains-mono outline-none resize-none p-2 border border-graphite rounded focus:border-signal-lime/50"
+                      style={{ fontSize: '14px' }}
+                      onBlur={(e) => {
+                        const val = e.target.value
+                        useEditorStore
+                          .getState()
+                          .updateWidgetConfig(widget.instanceId, { [editingText.field]: val })
+                        setEditingText(null)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          e.stopPropagation()
+                          setEditingText(null)
+                        } else if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          e.currentTarget.blur()
+                        }
+                      }}
+                    />
+                    <div className="text-center text-xs text-ash font-inter-tight mt-2">
+                      {t(
+                        'editor.canvas.edit_hint',
+                        'Enter para salvar, Shift+Enter para nova linha, Esc para cancelar'
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )
