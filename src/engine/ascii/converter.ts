@@ -1,6 +1,7 @@
 export const CHARSETS: Record<string, string> = {
-  dense: ' .\'`^\\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
-  standard: ' .:-=+*#%@',
+  dense:
+    " `.-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@",
+  standard: ' .,:;irsXA253hMHGS#9B&@',
   blocks: ' ░▒▓█',
   dots: ' ⠁⠃⠇⡇⣇⣿',
   braille: 'braille',
@@ -15,7 +16,7 @@ export const CHARSETS: Record<string, string> = {
 export interface AsciiConvertOptions {
   charset?: string
   customCharset?: string
-  detail?: 'low' | 'medium' | 'high' | 'ultra' | number
+  detail?: 'lowest' | 'low' | 'medium' | 'high' | 'ultra' | number
   cols?: number
   rows?: number
   density?: number
@@ -43,6 +44,11 @@ export interface AsciiConvertResult {
   rows: number
 }
 
+function sRGBtoLinear(c: number): number {
+  const norm = c / 255
+  return norm <= 0.04045 ? norm / 12.92 : Math.pow((norm + 0.055) / 1.055, 2.4)
+}
+
 export async function convertImageToAsciiCanvas(
   imageSrc: string,
   options: AsciiConvertOptions = {}
@@ -58,28 +64,68 @@ export async function convertImageToAsciiCanvas(
 
     img.onload = () => {
       try {
-        let cols = options.cols || 45
+        let cols = options.cols || 150
         if (typeof options.detail === 'number') {
           cols = options.detail
+        } else if (options.detail === 'lowest') {
+          cols = 50
         } else if (options.detail === 'low') {
-          cols = 28
+          cols = 100
         } else if (options.detail === 'medium') {
-          cols = 45
-        } else if (options.detail === 'high') {
-          cols = 85
-        } else if (options.detail === 'ultra') {
           cols = 150
+        } else if (options.detail === 'high') {
+          cols = 200
+        } else if (options.detail === 'ultra') {
+          cols = 250
         }
 
         const charAspectRatio = 0.5
         let rows = options.rows || Math.max(8, Math.round(cols * charAspectRatio))
 
-        cols = Math.max(12, Math.min(150, cols))
-        rows = Math.max(8, Math.min(120, rows))
+        cols = Math.max(12, Math.min(300, cols))
+        rows = Math.max(8, Math.min(300, rows))
 
         const isBraille = options.charset === 'braille'
         const cCols = isBraille ? cols * 2 : cols
         const cRows = isBraille ? rows * 4 : rows
+
+        const size = Math.min(img.width, img.height)
+        const startX = (img.width - size) / 2
+        const startY = (img.height - size) / 2
+
+        let curCanvas = document.createElement('canvas')
+        curCanvas.width = size
+        curCanvas.height = size
+        const curCtx = curCanvas.getContext('2d', { willReadFrequently: true })
+        if (!curCtx) {
+          reject(new Error('Canvas 2D context creation failed'))
+          return
+        }
+        curCtx.drawImage(img, startX, startY, size, size, 0, 0, size, size)
+
+        let curSize = size
+        while (curSize * 0.5 > Math.max(cCols, cRows)) {
+          curSize = Math.floor(curSize * 0.5)
+          const nextCanvas = document.createElement('canvas')
+          nextCanvas.width = curSize
+          nextCanvas.height = curSize
+          const nextCtx = nextCanvas.getContext('2d', { willReadFrequently: true })
+          if (!nextCtx) break
+          nextCtx.imageSmoothingEnabled = true
+          nextCtx.imageSmoothingQuality = 'high'
+          nextCtx.drawImage(
+            curCanvas,
+            0,
+            0,
+            curCanvas.width,
+            curCanvas.height,
+            0,
+            0,
+            curSize,
+            curSize
+          )
+          curCanvas = nextCanvas
+        }
 
         const canvas = document.createElement('canvas')
         canvas.width = cCols
@@ -92,11 +138,9 @@ export async function convertImageToAsciiCanvas(
 
         ctx.fillStyle = '#000000'
         ctx.fillRect(0, 0, cCols, cRows)
-
-        const size = Math.min(img.width, img.height)
-        const startX = (img.width - size) / 2
-        const startY = (img.height - size) / 2
-        ctx.drawImage(img, startX, startY, size, size, 0, 0, cCols, cRows)
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.drawImage(curCanvas, 0, 0, curCanvas.width, curCanvas.height, 0, 0, cCols, cRows)
 
         const imgData = ctx.getImageData(0, 0, cCols, cRows)
         const pixels = imgData.data
@@ -121,30 +165,31 @@ export async function convertImageToAsciiCanvas(
         const autoContrast = options.autoContrast !== false
         const dithering = options.dithering !== false
 
-        const lumMatrix: number[][] = Array.from({ length: cRows }, () => new Array(cCols).fill(0))
-        const pixelColorMatrix: string[][] = Array.from({ length: cRows }, () =>
-          new Array(cCols).fill('#ffffff')
-        )
-        const alphaMatrix: boolean[][] = Array.from({ length: cRows }, () =>
-          new Array(cCols).fill(true)
-        )
-
-        let minLum = 255
-        let maxLum = 0
+        const pixelCount = cCols * cRows
+        const lumMatrix = new Float32Array(pixelCount)
+        const alphaMatrix = new Uint8Array(pixelCount)
+        const hexColors = new Array<string>(pixelCount)
 
         for (let y = 0; y < cRows; y++) {
           for (let x = 0; x < cCols; x++) {
-            const idx = (y * cCols + x) * 4
+            const i = y * cCols + x
+            const idx = i * 4
             let r = pixels[idx]
             let g = pixels[idx + 1]
             let b = pixels[idx + 2]
             const a = pixels[idx + 3]
 
             if (a < 30) {
-              alphaMatrix[y][x] = false
-              pixelColorMatrix[y][x] = 'transparent'
+              alphaMatrix[i] = 0
+              hexColors[i] = 'transparent'
               continue
             }
+            alphaMatrix[i] = 1
+
+            const hexR = r.toString(16).padStart(2, '0')
+            const hexG = g.toString(16).padStart(2, '0')
+            const hexB = b.toString(16).padStart(2, '0')
+            hexColors[i] = `#${hexR}${hexG}${hexB}`
 
             r = Math.min(255, Math.max(0, r + brightness))
             g = Math.min(255, Math.max(0, g + brightness))
@@ -154,98 +199,100 @@ export async function convertImageToAsciiCanvas(
             g = Math.min(255, Math.max(0, factor * (g - 128) + 128))
             b = Math.min(255, Math.max(0, factor * (b - 128) + 128))
 
+            const linR = sRGBtoLinear(r)
+            const linG = sRGBtoLinear(g)
+            const linB = sRGBtoLinear(b)
+
+            let luminance = 0.2126 * linR + 0.7152 * linG + 0.0722 * linB
+
             if (gamma !== 1.0) {
-              r = Math.min(255, Math.max(0, Math.pow(r / 255, 1 / gamma) * 255))
-              g = Math.min(255, Math.max(0, Math.pow(g / 255, 1 / gamma) * 255))
-              b = Math.min(255, Math.max(0, Math.pow(b / 255, 1 / gamma) * 255))
+              luminance = Math.pow(luminance, 1 / gamma)
             }
 
-            let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+            lumMatrix[i] = luminance * 255
+          }
+        }
 
-            if (options.edgeEnhance && x > 0 && y > 0 && x < cCols - 1 && y < cRows - 1) {
-              const leftIdx = (y * cCols + (x - 1)) * 4
-              const rightIdx = (y * cCols + (x + 1)) * 4
-              const topIdx = ((y - 1) * cCols + x) * 4
-              const bottomIdx = ((y + 1) * cCols + x) * 4
+        if (options.edgeEnhance) {
+          const tempLum = new Float32Array(lumMatrix)
+          for (let y = 1; y < cRows - 1; y++) {
+            for (let x = 1; x < cCols - 1; x++) {
+              const i = y * cCols + x
+              if (!alphaMatrix[i]) continue
 
-              const lumLeft =
-                0.2126 * pixels[leftIdx] +
-                0.7152 * pixels[leftIdx + 1] +
-                0.0722 * pixels[leftIdx + 2]
-              const lumRight =
-                0.2126 * pixels[rightIdx] +
-                0.7152 * pixels[rightIdx + 1] +
-                0.0722 * pixels[rightIdx + 2]
-              const lumTop =
-                0.2126 * pixels[topIdx] + 0.7152 * pixels[topIdx + 1] + 0.0722 * pixels[topIdx + 2]
-              const lumBottom =
-                0.2126 * pixels[bottomIdx] +
-                0.7152 * pixels[bottomIdx + 1] +
-                0.0722 * pixels[bottomIdx + 2]
+              const lumLeft = tempLum[y * cCols + (x - 1)]
+              const lumRight = tempLum[y * cCols + (x + 1)]
+              const lumTop = tempLum[(y - 1) * cCols + x]
+              const lumBottom = tempLum[(y + 1) * cCols + x]
 
               const dx = lumRight - lumLeft
               const dy = lumBottom - lumTop
               const edgeVal = Math.sqrt(dx * dx + dy * dy)
 
-              luminance = Math.min(255, Math.max(0, luminance * 0.6 + edgeVal * 0.5))
+              lumMatrix[i] = Math.min(255, Math.max(0, tempLum[i] * 0.6 + edgeVal * 0.5))
             }
+          }
+        }
 
-            lumMatrix[y][x] = luminance
-            if (luminance < minLum) minLum = luminance
-            if (luminance > maxLum) maxLum = luminance
-
-            const hexR = Math.round(r).toString(16).padStart(2, '0')
-            const hexG = Math.round(g).toString(16).padStart(2, '0')
-            const hexB = Math.round(b).toString(16).padStart(2, '0')
-            pixelColorMatrix[y][x] = `#${hexR}${hexG}${hexB}`
+        let minLum = 255
+        let maxLum = 0
+        for (let i = 0; i < pixelCount; i++) {
+          if (alphaMatrix[i]) {
+            if (lumMatrix[i] < minLum) minLum = lumMatrix[i]
+            if (lumMatrix[i] > maxLum) maxLum = lumMatrix[i]
           }
         }
 
         if (autoContrast && maxLum > minLum) {
           const range = maxLum - minLum
-          for (let y = 0; y < cRows; y++) {
-            for (let x = 0; x < cCols; x++) {
-              if (!alphaMatrix[y][x]) continue
-              lumMatrix[y][x] = Math.min(
-                255,
-                Math.max(0, ((lumMatrix[y][x] - minLum) / range) * 255)
-              )
+          for (let i = 0; i < pixelCount; i++) {
+            if (alphaMatrix[i]) {
+              lumMatrix[i] = Math.min(255, Math.max(0, ((lumMatrix[i] - minLum) / range) * 255))
             }
           }
         }
 
-        if (dithering && !isBraille) {
+        if (dithering) {
           for (let y = 0; y < cRows; y++) {
             for (let x = 0; x < cCols; x++) {
-              if (!alphaMatrix[y][x]) continue
-              const oldLum = lumMatrix[y][x]
-              const charIdx = Math.min(len - 1, Math.max(0, Math.floor((oldLum / 256) * len)))
-              const newLum = (charIdx / len) * 255
+              const i = y * cCols + x
+              if (!alphaMatrix[i]) continue
+
+              const oldLum = lumMatrix[i]
+              let newLum = 0
+              if (isBraille) {
+                newLum = oldLum > 128 ? 255 : 0
+              } else {
+                const charIdx = Math.min(
+                  len - 1,
+                  Math.max(0, Math.round((oldLum / 255) * (len - 1)))
+                )
+                newLum = len > 1 ? (charIdx / (len - 1)) * 255 : 0
+              }
+              lumMatrix[i] = newLum
+
               const error = oldLum - newLum
 
-              if (x + 1 < cCols && alphaMatrix[y][x + 1]) {
-                lumMatrix[y][x + 1] = Math.min(
-                  255,
-                  Math.max(0, lumMatrix[y][x + 1] + error * (7 / 16))
-                )
+              if (x + 1 < cCols && alphaMatrix[i + 1]) {
+                lumMatrix[i + 1] = Math.min(255, Math.max(0, lumMatrix[i + 1] + error * (7 / 16)))
               }
               if (y + 1 < cRows) {
-                if (x > 0 && alphaMatrix[y + 1][x - 1]) {
-                  lumMatrix[y + 1][x - 1] = Math.min(
+                if (x > 0 && alphaMatrix[i + cCols - 1]) {
+                  lumMatrix[i + cCols - 1] = Math.min(
                     255,
-                    Math.max(0, lumMatrix[y + 1][x - 1] + error * (3 / 16))
+                    Math.max(0, lumMatrix[i + cCols - 1] + error * (3 / 16))
                   )
                 }
-                if (alphaMatrix[y + 1][x]) {
-                  lumMatrix[y + 1][x] = Math.min(
+                if (alphaMatrix[i + cCols]) {
+                  lumMatrix[i + cCols] = Math.min(
                     255,
-                    Math.max(0, lumMatrix[y + 1][x] + error * (5 / 16))
+                    Math.max(0, lumMatrix[i + cCols] + error * (5 / 16))
                   )
                 }
-                if (x + 1 < cCols && alphaMatrix[y + 1][x + 1]) {
-                  lumMatrix[y + 1][x + 1] = Math.min(
+                if (x + 1 < cCols && alphaMatrix[i + cCols + 1]) {
+                  lumMatrix[i + cCols + 1] = Math.min(
                     255,
-                    Math.max(0, lumMatrix[y + 1][x + 1] + error * (1 / 16))
+                    Math.max(0, lumMatrix[i + cCols + 1] + error * (1 / 16))
                   )
                 }
               }
@@ -259,29 +306,34 @@ export async function convertImageToAsciiCanvas(
         )
 
         if (isBraille) {
-          const threshold = minLum + (maxLum - minLum) * 0.4
+          const threshold = dithering ? 128 : minLum + (maxLum - minLum) * 0.4
+
           for (let y = 0; y < rows; y++) {
             let line = ''
             for (let x = 0; x < cols; x++) {
-              let b = 0
               const cx = x * 2
               const cy = y * 4
 
-              if (lumMatrix[cy][cx] > threshold) b |= 1
-              if (lumMatrix[cy + 1][cx] > threshold) b |= 2
-              if (lumMatrix[cy + 2][cx] > threshold) b |= 4
+              let b = 0
+              if (cy < cRows && cx < cCols && lumMatrix[cy * cCols + cx] > threshold) b |= 1
+              if (cy + 1 < cRows && cx < cCols && lumMatrix[(cy + 1) * cCols + cx] > threshold)
+                b |= 2
+              if (cy + 2 < cRows && cx < cCols && lumMatrix[(cy + 2) * cCols + cx] > threshold)
+                b |= 4
+
               if (cx + 1 < cCols) {
-                if (lumMatrix[cy][cx + 1] > threshold) b |= 8
-                if (lumMatrix[cy + 1][cx + 1] > threshold) b |= 16
-                if (lumMatrix[cy + 2][cx + 1] > threshold) b |= 32
+                if (cy < cRows && lumMatrix[cy * cCols + cx + 1] > threshold) b |= 8
+                if (cy + 1 < cRows && lumMatrix[(cy + 1) * cCols + cx + 1] > threshold) b |= 16
+                if (cy + 2 < cRows && lumMatrix[(cy + 2) * cCols + cx + 1] > threshold) b |= 32
               }
+
               if (cy + 3 < cRows) {
-                if (lumMatrix[cy + 3][cx] > threshold) b |= 64
-                if (cx + 1 < cCols && lumMatrix[cy + 3][cx + 1] > threshold) b |= 128
+                if (cx < cCols && lumMatrix[(cy + 3) * cCols + cx] > threshold) b |= 64
+                if (cx + 1 < cCols && lumMatrix[(cy + 3) * cCols + cx + 1] > threshold) b |= 128
               }
 
               line += String.fromCharCode(0x2800 + b)
-              colorMatrix[y][x] = pixelColorMatrix[cy][cx]
+              colorMatrix[y][x] = hexColors[cy * cCols + cx] || '#ffffff'
             }
             lines.push(line)
           }
@@ -289,15 +341,16 @@ export async function convertImageToAsciiCanvas(
           for (let y = 0; y < rows; y++) {
             let line = ''
             for (let x = 0; x < cols; x++) {
-              if (!alphaMatrix[y][x]) {
+              const i = y * cCols + x
+              if (!alphaMatrix[i]) {
                 line += ' '
                 colorMatrix[y][x] = 'transparent'
                 continue
               }
-              const lum = Math.min(255, Math.max(0, lumMatrix[y][x]))
-              const charIdx = Math.min(len - 1, Math.max(0, Math.floor((lum / 256) * len)))
+              const lum = Math.min(255, Math.max(0, lumMatrix[i]))
+              const charIdx = Math.min(len - 1, Math.max(0, Math.round((lum / 255) * (len - 1))))
               line += chars[charIdx]
-              colorMatrix[y][x] = pixelColorMatrix[y][x]
+              colorMatrix[y][x] = hexColors[i] || '#ffffff'
             }
             lines.push(line)
           }

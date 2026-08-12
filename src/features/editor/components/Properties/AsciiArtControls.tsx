@@ -68,10 +68,19 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
   const customCharset = (config.customCharset as string) || ''
   const invert = Boolean(config.invert)
 
-  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'ultra'
+  const detail =
+    (config.detail as 'lowest' | 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
   const cols =
     Number(config.cols) ||
-    (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150)
+    (detail === 'lowest'
+      ? 50
+      : detail === 'low'
+        ? 100
+        : detail === 'medium'
+          ? 150
+          : detail === 'high'
+            ? 200
+            : 250)
 
   const contrast = Number(config.contrast !== undefined ? config.contrast : 10)
   const brightness = Number(config.brightness !== undefined ? config.brightness : 0)
@@ -412,19 +421,20 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-signal-lime font-mono font-semibold">{cols} cols</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           {[
-            { id: 'low', label: t('editor.ascii.low', 'Baixo'), c: 28 },
-            { id: 'medium', label: t('editor.ascii.medium', 'Médio'), c: 45 },
-            { id: 'high', label: t('editor.ascii.high', 'Alto'), c: 85 },
-            { id: 'ultra', label: t('editor.ascii.ultra', 'Ultra'), c: 150 },
+            { id: 'lowest', label: t('editor.ascii.lowest', 'Min'), c: 50 },
+            { id: 'low', label: t('editor.ascii.low', 'Baixo'), c: 100 },
+            { id: 'medium', label: t('editor.ascii.medium', 'Médio'), c: 150 },
+            { id: 'high', label: t('editor.ascii.high', 'Alto'), c: 200 },
+            { id: 'ultra', label: t('editor.ascii.ultra', 'Max'), c: 250 },
           ].map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { detail: item.id, cols: item.c })}
               className={`py-1 text-caption font-medium rounded border transition-all ${
-                cols === item.c || detail === item.id
+                cols === item.c
                   ? 'bg-signal-lime text-black border-signal-lime font-semibold'
                   : 'bg-graphite text-ash border-graphite hover:text-chalk'
               }`}
@@ -437,7 +447,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         <input
           type="range"
           min={16}
-          max={150}
+          max={300}
           step={2}
           value={cols}
           onChange={(e) =>
