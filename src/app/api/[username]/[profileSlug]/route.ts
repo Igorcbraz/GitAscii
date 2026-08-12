@@ -55,6 +55,26 @@ export async function GET(
           } else if (w === 'stats' || w === 'streak') {
             wWidth = 390
             wHeight = 210
+          } else if (
+            [
+              'godprofile-terminal',
+              'godprofile-marquee',
+              'godprofile-neural',
+              'godprofile-trophies',
+              'godprofile-wakatime',
+              'godprofile-globe',
+            ].includes(w)
+          ) {
+            const defaultSizeMap: Record<string, { width: number; height: number }> = {
+              'godprofile-terminal': { width: 450, height: 300 },
+              'godprofile-marquee': { width: 800, height: 120 },
+              'godprofile-neural': { width: 800, height: 320 },
+              'godprofile-trophies': { width: 800, height: 280 },
+              'godprofile-wakatime': { width: 420, height: 260 },
+              'godprofile-globe': { width: 320, height: 350 },
+            }
+            wWidth = defaultSizeMap[w].width
+            wHeight = defaultSizeMap[w].height
           }
 
           config.widgets.push({

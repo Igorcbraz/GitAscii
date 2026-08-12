@@ -35,7 +35,8 @@ export interface WidgetBadge {
   type: WidgetBadgeType
 }
 
-export type WidgetCategory = 'essential' | 'interactive' | 'stats' | 'external' | 'misc'
+export type WidgetCategory =
+  'essential' | 'interactive' | 'stats' | 'external' | 'misc' | 'godprofile'
 
 export interface WidgetCatalogItem {
   id: string
@@ -255,6 +256,55 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Signature metadata footer',
     category: 'misc',
   },
+  {
+    id: 'godprofile-terminal',
+    name: 'Terminal Emulator',
+    icon: TerminalSquare,
+    desc: 'Animated typewriter terminal SVG',
+    category: 'godprofile',
+    isExternal: true,
+  },
+  {
+    id: 'godprofile-marquee',
+    name: 'Icon Marquee',
+    icon: Sparkles,
+    desc: 'Infinite CSS-scrolling tech badges',
+    category: 'godprofile',
+    isExternal: true,
+  },
+  {
+    id: 'godprofile-neural',
+    name: 'Neural Network Map',
+    icon: Activity,
+    desc: 'Animated tech stack visualization',
+    category: 'godprofile',
+    isExternal: true,
+  },
+  {
+    id: 'godprofile-trophies',
+    name: 'GitHub Trophies',
+    icon: Trophy,
+    desc: 'Trophy case with S/A/B/C tiers',
+    category: 'godprofile',
+    isExternal: true,
+  },
+  {
+    id: 'godprofile-wakatime',
+    name: 'WakaTime Activity',
+    icon: BarChart3,
+    desc: 'Coding stats horizontal bar chart',
+    category: 'godprofile',
+    isExternal: true,
+  },
+
+  {
+    id: 'godprofile-globe',
+    name: '3D Contribution Globe',
+    icon: Globe,
+    desc: 'Isometric 3D globe SVG',
+    category: 'godprofile',
+    isExternal: true,
+  },
 ]
 
 export const WIDGET_FILTERS: WidgetFilterItem[] = [
@@ -287,6 +337,13 @@ export const WIDGET_FILTERS: WidgetFilterItem[] = [
     labelKey: 'editor.sidebar.filter.external',
     defaultLabel: 'Externos',
     icon: Globe,
-    match: (item) => !!item.isExternal,
+    match: (item) => !!item.isExternal && item.category !== 'godprofile',
+  },
+  {
+    id: 'godprofile',
+    labelKey: 'editor.sidebar.filter.godprofile',
+    defaultLabel: 'GodProfile',
+    icon: Sparkles,
+    match: (item) => item.category === 'godprofile',
   },
 ]

@@ -457,6 +457,13 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         ghstats: { width: 390, height: 350 },
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
+        'godprofile-terminal': { width: 450, height: 300 },
+        'godprofile-marquee': { width: 800, height: 120 },
+        'godprofile-neural': { width: 800, height: 320 },
+        'godprofile-trophies': { width: 800, height: 280 },
+        'godprofile-wakatime': { width: 420, height: 260 },
+
+        'godprofile-globe': { width: 320, height: 350 },
       }
 
       const widgetSize = defaultSizeMap[widgetId] || { width: 800, height: 120 }

@@ -15,6 +15,7 @@ import { ColorPicker } from './ColorPicker'
 import { CustomImageControls } from './CustomImageControls'
 import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
+import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
@@ -586,6 +587,22 @@ export function PropertiesPanel() {
           'awesome-badge',
         ].includes(selectedWidget.widgetId) && (
           <IntegrationsControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          'godprofile-terminal',
+          'godprofile-marquee',
+          'godprofile-neural',
+          'godprofile-trophies',
+          'godprofile-wakatime',
+
+          'godprofile-globe',
+        ].includes(selectedWidget.widgetId) && (
+          <GodProfileControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

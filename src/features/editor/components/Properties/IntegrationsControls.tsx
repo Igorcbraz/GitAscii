@@ -1098,6 +1098,89 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
           </div>
         </div>
       )}
+
+      {widgetId === 'godprofile-terminal' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.terminal_text', 'Linhas do Terminal')}
+            </label>
+            <textarea
+              value={(config.terminalCommands as string) || ''}
+              onChange={(e) => handleUpdate({ terminalCommands: e.target.value })}
+              placeholder="Ex: npm run dev\nStarting server..."
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-[80px]"
+            />
+          </div>
+        </div>
+      )}
+
+      {widgetId === 'godprofile-marquee' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.marquee_langs', 'Linguagens / Ícones')}
+            </label>
+            <input
+              type="text"
+              value={(config.marqueeLangs as string) || ''}
+              onChange={(e) => handleUpdate({ marqueeLangs: e.target.value })}
+              placeholder="Ex: react, typescript (vazio = todas)"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {widgetId === 'godprofile-neural' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.neural_techs', 'Tecnologias e Categorias')}
+            </label>
+            <textarea
+              value={(config.neuralTechs as string) || ''}
+              onChange={(e) => handleUpdate({ neuralTechs: e.target.value })}
+              placeholder="Ex: react:frontend, node:backend"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-[80px]"
+            />
+          </div>
+        </div>
+      )}
+
+      {widgetId === 'godprofile-trophies' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.trophies_list', 'Troféus para Exibir')}
+            </label>
+            <input
+              type="text"
+              value={(config.trophiesList as string) || ''}
+              onChange={(e) => handleUpdate({ trophiesList: e.target.value })}
+              placeholder="Ex: commits, stars, followers"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
+
+      {widgetId === 'godprofile-wakatime' && (
+        <div className="space-y-3 pt-2">
+          <div>
+            <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+              {t('editor.integrations.wakatime_hide', 'Ocultar Linguagens')}
+            </label>
+            <input
+              type="text"
+              value={(config.wakatimeHide as string) || ''}
+              onChange={(e) => handleUpdate({ wakatimeHide: e.target.value })}
+              placeholder="Ex: other, markdown"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

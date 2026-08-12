@@ -1380,6 +1380,713 @@ export function renderWidgetSvg(
       break
     }
 
+    case 'godprofile-terminal': {
+      const commands = Array.isArray(cfg.terminalCommands)
+        ? (cfg.terminalCommands as string[])
+        : ['$ whoami', 'user', '$ uname -a', 'Linux GitAscii']
+
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const accent = '#b6a891'
+      const text_color = '#eceff4'
+      const font = 'Consolas, monospace'
+
+      const line_height = 22
+      const font_size = 14
+      const pad_x = 20
+      const pad_y = 60
+
+      const delay_per_line = 0.8
+      const css_rules: string[] = []
+      for (let i = 0; i < commands.length; i++) {
+        const delay = i * delay_per_line
+        css_rules.push(
+          `.line${i} { opacity: 0; animation: reveal 0.1s ${delay.toFixed(2)}s forwards; }`
+        )
+      }
+
+      const css_keyframes = '@keyframes reveal { from { opacity: 0; } to { opacity: 1; } }'
+      const cursor_delay = commands.length * delay_per_line
+      const css_cursor = `.cursor { opacity: 0; animation: reveal 0.1s ${cursor_delay.toFixed(2)}s forwards, blink 1s ${cursor_delay.toFixed(2)}s step-end infinite; }`
+      const css_blink = '@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }'
+
+      const full_css = `
+        ${css_keyframes}
+        ${css_blink}
+        ${css_rules.join('\n    ')}
+        ${css_cursor}
+        .terminal-bg { font-family: ${font}, 'Courier New', monospace; font-size: ${font_size}px; }
+      `
+
+      const text_elements: string[] = []
+      for (let i = 0; i < commands.length; i++) {
+        const line = commands[i]
+        const y = pad_y + i * line_height
+        const is_command =
+          line.trim().startsWith('$') || line.trim().startsWith('#') || line.trim().startsWith('>')
+        const color = is_command ? accent : text_color
+        const safe_line = escapeXml(line)
+        text_elements.push(
+          `  <text x="${pad_x}" y="${y}" fill="${color}" class="line${i}">${safe_line}</text>`
+        )
+      }
+
+      const cursor_y = pad_y + commands.length * line_height
+      const cursor_element = `  <rect x="${pad_x}" y="${cursor_y - font_size}" width="8" height="${font_size + 2}" fill="${accent}" class="cursor"/>`
+
+      contentSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 600 340" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <style>
+            ${full_css}
+            </style>
+            <clipPath id="terminal-clip">
+              <rect width="600" height="340" rx="12" ry="12"/>
+            </clipPath>
+            <linearGradient id="termBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+          </defs>
+          <rect width="600" height="340" rx="12" ry="12" fill="url(#termBg)" stroke="${bg2}" stroke-width="1.5"/>
+          <rect width="600" height="36" rx="12" ry="12" fill="#151c25"/>
+          <rect y="24" width="600" height="12" fill="#151c25"/>
+          <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
+          <circle cx="40" cy="18" r="6" fill="#febc2e"/>
+          <circle cx="60" cy="18" r="6" fill="#28c840"/>
+          <text x="300" y="23" text-anchor="middle" fill="#888" font-size="12" font-family="${font}">terminal</text>
+          <g class="terminal-bg" clip-path="url(#terminal-clip)">
+            ${text_elements.join('\n')}
+            ${cursor_element}
+          </g>
+        </svg>
+      `
+      break
+    }
+
+    case 'godprofile-marquee': {
+      const selectedMarqueeLangs = Array.isArray(cfg.marqueeLangs)
+        ? (cfg.marqueeLangs as string[])
+        : ['react', 'ts', 'js', 'html', 'css', 'nodejs', 'python', 'git', 'docker', 'linux']
+
+      const techNameMap: Record<string, string> = {
+        js: 'JavaScript',
+        ts: 'TypeScript',
+        html: 'HTML5',
+        css: 'CSS3',
+        py: 'Python',
+        rust: 'Rust',
+        go: 'Go',
+        cpp: 'C++',
+        cs: 'C#',
+        c: 'C',
+        java: 'Java',
+        php: 'PHP',
+        ruby: 'Ruby',
+        kotlin: 'Kotlin',
+        swift: 'Swift',
+        dart: 'Dart',
+        bash: 'Bash',
+        graphql: 'GraphQL',
+        r: 'R',
+        elixir: 'Elixir',
+        solidity: 'Solidity',
+        haskell: 'Haskell',
+        react: 'React',
+        nextjs: 'Next.js',
+        vue: 'Vue.js',
+        nuxt: 'Nuxt',
+        angular: 'Angular',
+        svelte: 'Svelte',
+        tailwind: 'Tailwind',
+        bootstrap: 'Bootstrap',
+        sass: 'Sass',
+        flutter: 'Flutter',
+        reactnative: 'React Native',
+        redux: 'Redux',
+        threejs: 'Three.js',
+        vite: 'Vite',
+        astro: 'Astro',
+        solidjs: 'SolidJS',
+        remix: 'Remix',
+        recoil: 'Recoil',
+        zustand: 'Zustand',
+        nodejs: 'Node.js',
+        express: 'Express',
+        nest: 'NestJS',
+        django: 'Django',
+        fastapi: 'FastAPI',
+        flask: 'Flask',
+        spring: 'Spring',
+        laravel: 'Laravel',
+        postgres: 'PostgreSQL',
+        mongodb: 'MongoDB',
+        mysql: 'MySQL',
+        redis: 'Redis',
+        supabase: 'Supabase',
+        firebase: 'Firebase',
+        prisma: 'Prisma',
+        bun: 'Bun',
+        deno: 'Deno',
+        sqlite: 'SQLite',
+        git: 'Git',
+        github: 'GitHub',
+        gitlab: 'GitLab',
+        docker: 'Docker',
+        kubernetes: 'Kubernetes',
+        aws: 'AWS',
+        gcp: 'GCP',
+        azure: 'Azure',
+        vercel: 'Vercel',
+        netlify: 'Netlify',
+        linux: 'Linux',
+        figma: 'Figma',
+        postman: 'Postman',
+        vscode: 'VS Code',
+        terraform: 'Terraform',
+        githubactions: 'GitHub Actions',
+        jest: 'Jest',
+        vitest: 'Vitest',
+      }
+
+      const icons = selectedMarqueeLangs.map((id) => techNameMap[id] || id)
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const accent = '#b6a891'
+      const text_color = '#eceff4'
+      const border = '#2b303a'
+      const font_data = 'Consolas, monospace'
+
+      const PILL_H = 28
+      const PILL_PADDING_X = 14
+      const PILL_GAP = 10
+      const FONT_SIZE = 12
+      const STRIP_Y = Math.floor((60 - PILL_H) / 2)
+
+      const estimateTextWidth = (text: string) => text.length * Math.floor(FONT_SIZE * 0.62)
+      const pillWidth = (label: string) => estimateTextWidth(label) + PILL_PADDING_X * 2
+
+      const hexToRgba = (hex: string, alpha: number) => {
+        let h = hex.replace('#', '')
+        if (h.length === 3)
+          h = h
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        const r = parseInt(h.substring(0, 2), 16)
+        const g = parseInt(h.substring(2, 4), 16)
+        const b = parseInt(h.substring(4, 6), 16)
+        return `rgba(${r},${g},${b},${alpha})`
+      }
+
+      const pill_bg = hexToRgba(accent, 0.15)
+      const pill_stroke = hexToRgba(accent, 0.45)
+
+      const renderPillGroup = (pills: string[], xOffset: number) => {
+        const parts: string[] = []
+        let x = xOffset
+        for (const label of pills) {
+          const pw = pillWidth(label)
+          const ph = PILL_H
+          const py = STRIP_Y
+          const text_x = x + Math.floor(pw / 2)
+          const text_y = py + Math.floor(ph / 2) + Math.floor(FONT_SIZE / 2) - 1
+
+          parts.push(
+            `<rect x="${x}" y="${py}" width="${pw}" height="${ph}" rx="${Math.floor(ph / 2)}" fill="${pill_bg}" stroke="${pill_stroke}" stroke-width="1"/>`
+          )
+          parts.push(
+            `<text x="${text_x}" y="${text_y}" font-family="${font_data}" font-size="${FONT_SIZE}" fill="${text_color}" text-anchor="middle" dominant-baseline="auto" font-weight="500">${escapeXml(label)}</text>`
+          )
+          x += pw + PILL_GAP
+        }
+        const total_width = x - xOffset - PILL_GAP
+        return { svg: parts.join('\n'), width: total_width }
+      }
+
+      const single_width = icons.reduce((sum, ic) => sum + pillWidth(ic) + PILL_GAP, 0)
+      const repeat = Math.max(2, Math.ceil(800 / single_width) + 1)
+
+      const icons_repeated: string[] = []
+      for (let r = 0; r < repeat; r++) {
+        icons_repeated.push(...icons)
+      }
+
+      const group1 = renderPillGroup(icons_repeated, 0)
+      const group2 = renderPillGroup([...icons, ...icons], single_width)
+
+      contentSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 800 60" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="mqBg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+            <clipPath id="mqClip">
+              <rect width="800" height="60" rx="10"/>
+            </clipPath>
+            <style>
+              @keyframes mqScroll {
+                0% { transform: translateX(0px); }
+                100% { transform: translateX(-${single_width}px); }
+              }
+              .mq-track {
+                animation: mqScroll 30s linear infinite;
+                will-change: transform;
+              }
+            </style>
+          </defs>
+          <rect width="800" height="60" rx="10" fill="url(#mqBg)"/>
+          <rect width="800" height="60" rx="10" fill="none" stroke="${border}" stroke-width="1" opacity="0.5"/>
+          <g clip-path="url(#mqClip)">
+            <g class="mq-track">
+              ${group1.svg}
+              ${group2.svg}
+            </g>
+          </g>
+        </svg>
+      `
+      break
+    }
+
+    case 'godprofile-neural': {
+      const neuralTechs =
+        typeof cfg.neuralTechs === 'object' && cfg.neuralTechs !== null
+          ? (cfg.neuralTechs as Record<string, string[]>)
+          : {
+              Frontend: ['react', 'nextjs', 'tailwind'],
+              Backend: ['nodejs', 'postgres', 'docker'],
+              DevOps: ['git', 'github', 'linux'],
+            }
+
+      const techNameMap: Record<string, string> = {
+        js: 'JS',
+        ts: 'TS',
+        html: 'HTML',
+        css: 'CSS',
+        py: 'Python',
+        rust: 'Rust',
+        go: 'Go',
+        react: 'React',
+        nextjs: 'Next.js',
+        nodejs: 'Node.js',
+        postgres: 'Postgres',
+        docker: 'Docker',
+        git: 'Git',
+        github: 'GitHub',
+        linux: 'Linux',
+        tailwind: 'Tailwind',
+      }
+
+      const categories = Object.entries(neuralTechs).map(([cat, list]) => ({
+        cat,
+        techs: list.map((id) => techNameMap[id] || id.toUpperCase()),
+      }))
+
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const accent = '#b6a891'
+      const text_col = '#eceff4'
+      const font = 'Consolas, monospace'
+
+      const n_cols = categories.length
+      const col_xs = Array.from({ length: n_cols }, (_, i) =>
+        Math.floor((800 * (i + 1)) / (n_cols + 1))
+      )
+
+      const node_positions: { x: number; y: number; tech: string }[][] = []
+      categories.forEach((c, col_i) => {
+        const cx = col_xs[col_i]
+        const n = c.techs.length
+        const ys = Array.from({ length: n }, (_, j) => Math.floor((260 * (j + 1)) / (n + 1)))
+        node_positions.push(ys.map((y, idx) => ({ x: cx, y, tech: c.techs[idx] })))
+      })
+
+      const svgPaths: string[] = []
+      const edge_paths: string[] = []
+      for (let col_i = 0; col_i < n_cols - 1; col_i++) {
+        for (const node1 of node_positions[col_i]) {
+          for (const node2 of node_positions[col_i + 1]) {
+            const cp1x = node1.x + Math.floor((node2.x - node1.x) / 3)
+            const cp2x = node2.x - Math.floor((node2.x - node1.x) / 3)
+            const path = `M${node1.x} ${node1.y} C${cp1x} ${node1.y},${cp2x} ${node2.y},${node2.x} ${node2.y}`
+            edge_paths.push(path)
+            svgPaths.push(
+              `  <path d="${path}" fill="none" stroke="${accent}" stroke-width="1" opacity="0.2"/>`
+            )
+          }
+        }
+      }
+
+      edge_paths.forEach((path, i) => {
+        const dur = (2.5 + (i % 3) * 0.7).toFixed(1)
+        svgPaths.push(`
+          <circle r="2.5" fill="${accent}" opacity="0.9" filter="url(#glow)">
+            <animateMotion dur="${dur}s" repeatCount="indefinite" path="${path}"/>
+          </circle>
+        `)
+      })
+
+      categories.forEach((c, col_i) => {
+        const cx = col_xs[col_i]
+        svgPaths.push(`
+          <text x="${cx}" y="18" text-anchor="middle" font-family="${font}" font-size="10" fill="${accent}" opacity="0.7" font-weight="bold" letter-spacing="2">${c.cat.toUpperCase()}</text>
+        `)
+        node_positions[col_i].forEach((node) => {
+          svgPaths.push(`
+            <circle cx="${node.x}" cy="${node.y}" r="22" fill="url(#nglow)" opacity="0.5"/>
+            <circle cx="${node.x}" cy="${node.y}" r="14" fill="${bg2}" stroke="${accent}" stroke-width="1.5" opacity="0.9"/>
+            <circle cx="${node.x}" cy="${node.y}" r="5" fill="${accent}" filter="url(#glow)"/>
+            <text x="${node.x}" y="${node.y + 28}" text-anchor="middle" font-family="${font}" font-size="11" fill="${text_col}" opacity="0.9">${node.tech}</text>
+          `)
+        })
+      })
+
+      contentSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="nbg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+            <radialGradient id="nglow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="${accent}" stop-opacity="0.9"/>
+              <stop offset="60%" stop-color="${accent}" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="${accent}" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="800" height="260" fill="url(#nbg)" rx="12"/>
+          ${svgPaths.join('\n')}
+        </svg>
+      `
+      break
+    }
+
+    case 'godprofile-trophies': {
+      const username = data.user.login
+      const disabledTrophies = Array.isArray(cfg.disabledTrophies)
+        ? (cfg.disabledTrophies as string[])
+        : []
+
+      const stars = (data.user as any).stars || 15
+      const commits = (data.user as any).commits || 420
+      const prs = (data.user as any).prs || 45
+      const issues = (data.user as any).issues || 8
+      const repos = data.repos?.length || 12
+      const followers = data.user.followers || 50
+
+      const stats = { stars, commits, prs, issues, repos, followers }
+
+      const RANK_THRESHOLDS: Record<string, [number, number, number]> = {
+        Stars: [1000, 200, 50],
+        Commits: [3000, 1000, 300],
+        PRs: [200, 50, 10],
+        Issues: [200, 50, 10],
+        Repos: [100, 30, 10],
+        Followers: [500, 100, 20],
+      }
+
+      const RANK_COLORS: Record<string, string | null> = {
+        S: '#ffd700',
+        A: '#c0c0c0',
+        B: '#cd7f32',
+        C: null,
+      }
+
+      const TROPHY_CUP_PATH =
+        'M-16,-24 L16,-24 L20,-8 C20,4 12,12 4,14 L4,20 L10,20 L10,26 ' +
+        'L-10,26 L-10,20 L-4,20 L-4,14 C-12,12 -20,4 -20,-8 Z ' +
+        'M-22,-24 L-16,-24 L-16,-10 C-20,-12 -22,-18 -22,-24 Z ' +
+        'M22,-24 L16,-24 L16,-10 C20,-12 22,-18 22,-24 Z'
+
+      const STAR_PATH =
+        'M0,-10 L2.4,-3.1 L9.5,-3.1 L3.8,1.2 L6.2,8.1 ' +
+        'L0,4.5 L-6.2,8.1 L-3.8,1.2 L-9.5,-3.1 L-2.4,-3.1 Z'
+
+      const rankFor = (trophyName: string, val: number) => {
+        const [s, a, b] = RANK_THRESHOLDS[trophyName] || [9999, 999, 99]
+        if (val >= s) return 'S'
+        if (val >= a) return 'A'
+        if (val >= b) return 'B'
+        return 'C'
+      }
+
+      const formatValue = (val: number) => {
+        if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`
+        if (val >= 1000) return `${(val / 1000).toFixed(1)}k`
+        return String(val)
+      }
+
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const accent_color = '#b6a891'
+      const text_color = '#eceff4'
+      const font_header = 'Segoe UI, Inter, sans-serif'
+      const font_data = 'Consolas, monospace'
+
+      const rawTrophies: [string, number][] = [
+        ['Stars', stats.stars],
+        ['Commits', stats.commits],
+        ['PRs', stats.prs],
+        ['Issues', stats.issues],
+        ['Repos', stats.repos],
+        ['Followers', stats.followers],
+      ]
+
+      const trophies = rawTrophies.filter(([name]) => !disabledTrophies.includes(name))
+
+      const header_h = 36
+      const card_w = 120
+      const card_h = 170
+      const padding_x = Math.floor((800 - trophies.length * card_w) / (trophies.length + 1))
+      const start_y = header_h + Math.floor((230 - header_h - card_h) / 2)
+
+      const card_groups: string[] = []
+      const filter_defs: string[] = []
+
+      trophies.forEach(([name, value], idx) => {
+        const rank = rankFor(name, value)
+        const rank_color = RANK_COLORS[rank] || text_color
+        const cx = padding_x + idx * (card_w + padding_x) + Math.floor(card_w / 2)
+        const cy = start_y
+
+        let glow_filter = ''
+        let anim_inside_rect = ''
+        const filter_def_id = `sglow${idx}`
+        if (rank === 'S') {
+          glow_filter = `filter="url(#${filter_def_id})"`
+          anim_inside_rect = `
+            <animate attributeName="opacity" values="0.85;1;0.85" dur="2s" repeatCount="indefinite"/>
+          `
+          filter_defs.push(`
+            <filter id="${filter_def_id}" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feFlood flood-color="${rank_color}" flood-opacity="0.4" result="color"/>
+              <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+              <feMerge>
+                <feMergeNode in="shadow"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          `)
+        }
+
+        let star_el = ''
+        if (rank === 'S') {
+          star_el = `
+            <g transform="translate(${Math.floor(card_w / 2)},20)" fill="${rank_color}" opacity="0.9">
+              <path d="${STAR_PATH}"/>
+            </g>
+          `
+        }
+
+        card_groups.push(`
+          <!-- Trophy: ${name} (rank ${rank}) -->
+          <g transform="translate(${cx - Math.floor(card_w / 2)},${cy})">
+            <rect width="${card_w}" height="${card_h}" rx="10" ry="10" fill="${bg2}" fill-opacity="0.8" stroke="${rank_color}" stroke-width="1.5" ${glow_filter}>
+              ${anim_inside_rect}
+            </rect>
+            ${star_el}
+            <!-- Cup icon -->
+            <g transform="translate(${Math.floor(card_w / 2)},62)" fill="${rank_color}" opacity="0.9">
+              <path d="${TROPHY_CUP_PATH}"/>
+            </g>
+            <!-- Title -->
+            <text x="${Math.floor(card_w / 2)}" y="${card_h - 55}" text-anchor="middle" font-family="${font_data}" font-size="11" fill="${text_color}">${name}</text>
+            <!-- Value -->
+            <text x="${Math.floor(card_w / 2)}" y="${card_h - 38}" text-anchor="middle" font-family="${font_header}" font-size="15" font-weight="bold" fill="${rank_color}">${formatValue(value)}</text>
+            <!-- Rank badge -->
+            <rect x="${Math.floor(card_w / 2) - 13}" y="${card_h - 28}" width="26" height="18" rx="5" fill="${rank_color}" opacity="0.18"/>
+            <text x="${Math.floor(card_w / 2)}" y="${card_h - 14}" text-anchor="middle" font-family="${font_header}" font-size="12" font-weight="bold" fill="${rank_color}">${rank}</text>
+          </g>
+        `)
+      })
+
+      contentSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 800 230" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+            ${filter_defs.join('\n')}
+          </defs>
+          <rect width="800" height="230" fill="url(#bgGrad)" rx="12"/>
+          <text x="16" y="24" font-family="${font_header}" font-size="12" font-weight="bold" fill="${accent_color}" opacity="0.7" letter-spacing="1">TROPHY CASE</text>
+          <text x="200" y="24" font-family="${font_data}" font-size="11" fill="${text_color}" opacity="0.4">@${username}</text>
+          <line x1="16" y1="32" x2="784" y2="32" stroke="${accent_color}" stroke-width="0.5" opacity="0.2"/>
+          ${card_groups.join('\n')}
+        </svg>
+      `
+      break
+    }
+
+    case 'godprofile-wakatime': {
+      const hiddenWakatimeLangs = Array.isArray(cfg.hiddenWakatimeLangs)
+        ? (cfg.hiddenWakatimeLangs as string[])
+        : []
+
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const accent = '#b6a891'
+      const text_color = '#eceff4'
+      const border_color = '#2b303a'
+      const font = 'Segoe UI, Inter, sans-serif'
+      const mono = 'Consolas, monospace'
+
+      let filteredLangs = Object.entries(data.languages || {})
+      if (hiddenWakatimeLangs.length > 0) {
+        const lowerHidden = hiddenWakatimeLangs.map((l) => l.toLowerCase())
+        filteredLangs = filteredLangs.filter(([lang]) => !lowerHidden.includes(lang.toLowerCase()))
+      }
+
+      const totalBytes = filteredLangs.reduce((sum, [_, count]) => sum + (count as number), 0) || 1
+      const filteredItems = filteredLangs
+        .map(([name, count]) => [name, ((count as number) / totalBytes) * 100] as [string, number])
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+
+      const BAR_OPACITIES = [1.0, 0.78, 0.58, 0.42, 0.3, 0.22]
+      const bar_area_left = 100
+      const bar_area_right = 340
+      const bar_max_width = bar_area_right - bar_area_left
+      const row_height = 28
+      const chart_top = 44
+      const label_max_chars = 13
+
+      const rows_svg: string[] = []
+      filteredItems.forEach(([lang, pct], i) => {
+        const y = chart_top + i * row_height
+        const bar_w = Math.max(4, Math.floor((pct / 100.0) * bar_max_width))
+        const opacity = BAR_OPACITIES[i % BAR_OPACITIES.length]
+        const label =
+          lang.substring(0, label_max_chars) + (lang.length > label_max_chars ? '.' : '')
+        const pct_str = `${pct.toFixed(1)}%`
+
+        rows_svg.push(`
+          <rect x="${bar_area_left}" y="${y}" width="${bar_max_width}" height="14" rx="4" fill="${border_color}" opacity="0.18"/>
+          <rect x="${bar_area_left}" y="${y}" width="0" height="14" rx="4" fill="${accent}" opacity="${opacity}">
+            <animate attributeName="width" from="0" to="${bar_w}" dur="0.8s" begin="${(0.1 + i * 0.12).toFixed(2)}s" fill="freeze"/>
+          </rect>
+          <text x="${bar_area_left - 6}" y="${y + 11}" font-family="${font}" font-size="10" fill="${text_color}" text-anchor="end">${label}</text>
+          <text x="${bar_area_left + bar_w + 5}" y="${y + 11}" font-family="${mono}" font-size="9" fill="${accent}" opacity="0.85">${pct_str}</text>
+        `)
+      })
+
+      const chart_height = chart_top + filteredItems.length * row_height + 18
+
+      contentSvg = `
+        <svg width="${width}" height="${height}" viewBox="0 0 400 ${chart_height}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="wkBg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="${chart_height}" rx="12" fill="url(#wkBg)" stroke="${border_color}" stroke-width="1"/>
+          <text x="16" y="24" font-family="${font}" font-size="13" font-weight="700" fill="${text_color}">WakaTime — Weekly Coding Activity</text>
+          <line x1="16" y1="32" x2="384" y2="32" stroke="${accent}" stroke-width="1" opacity="0.3"/>
+          ${rows_svg.join('\n')}
+        </svg>
+      `
+      break
+    }
+
+    case 'godprofile-globe': {
+      const bg1 = '#0b0f14'
+      const bg2 = '#151c25'
+      const border_color = '#2b303a'
+      const accent_color = '#b6a891'
+      const text_color = '#eceff4'
+      const font_data = 'Consolas, monospace'
+
+      const cx = 200
+      const cy = 200
+      const scale = 100
+
+      const cos30 = Math.cos(Math.PI / 6)
+      const sin30 = Math.sin(Math.PI / 6)
+
+      const lon_path_els: string[] = []
+      for (let i = 0; i < 12; i++) {
+        const theta = (i * 30 * Math.PI) / 180
+        const pts = []
+        for (let j = 0; j <= 60; j++) {
+          const phi = (j * 3 * Math.PI) / 180
+          const x = Math.sin(phi) * Math.cos(theta)
+          const y = Math.cos(phi)
+          const z = Math.sin(phi) * Math.sin(theta)
+
+          const sx = (x - z) * cos30
+          const sy = y + (x + z) * sin30
+          pts.push(`${(cx + sx * scale).toFixed(2)},${(cy - sy * scale).toFixed(2)}`)
+        }
+        lon_path_els.push(
+          `<path d="M ${pts.join(' L ')}" fill="none" stroke="${border_color}" stroke-width="0.8" opacity="0.55"/>`
+        )
+      }
+
+      const lat_path_els: string[] = []
+      for (let i = 1; i < 9; i++) {
+        const phi = (i * 20 * Math.PI) / 180
+        const pts = []
+        for (let j = 0; j <= 72; j++) {
+          const theta = (j * 5 * Math.PI) / 180
+          const x = Math.sin(phi) * Math.cos(theta)
+          const y = Math.cos(phi)
+          const z = Math.sin(phi) * Math.sin(theta)
+
+          const sx = (x - z) * cos30
+          const sy = y + (x + z) * sin30
+          pts.push(`${(cx + sx * scale).toFixed(2)},${(cy - sy * scale).toFixed(2)}`)
+        }
+        lat_path_els.push(
+          `<path d="M ${pts.join(' L ')}" fill="none" stroke="${border_color}" stroke-width="0.8" opacity="0.55"/>`
+        )
+      }
+
+      contentSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="${bg1}"/>
+              <stop offset="100%" stop-color="${bg2}"/>
+            </radialGradient>
+            <radialGradient id="globeGrad" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="${bg1}" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="${bg2}" stop-opacity="0.92"/>
+            </radialGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <clipPath id="globeClip">
+              <circle cx="${cx}" cy="${cy}" r="${scale}"/>
+            </clipPath>
+          </defs>
+          <rect width="400" height="400" fill="url(#bgGrad)" rx="12"/>
+          <g id="globe-group">
+            <circle cx="${cx}" cy="${cy}" r="${scale}" fill="url(#globeGrad)" stroke="${border_color}" stroke-width="1.5" filter="url(#glow)"/>
+            <g clip-path="url(#globeClip)">
+              ${lon_path_els.join('\n')}
+              ${lat_path_els.join('\n')}
+            </g>
+            <circle cx="${cx}" cy="${cy}" r="${scale}" fill="none" stroke="${accent_color}" stroke-width="1.5" opacity="0.25"/>
+            <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="30s" repeatCount="indefinite"/>
+          </g>
+          <text x="${cx}" y="384" text-anchor="middle" font-family="${font_data}" font-size="11" fill="${text_color}" opacity="0.55">GodProfile Globe</text>
+        </svg>
+      `
+      break
+    }
+
     case 'ghstats': {
       const username = data.user.login
       const embedType = (cfg.embedType as string) || 'card'
@@ -1439,10 +2146,7 @@ export function renderWidgetSvg(
         !hideTitle && embedType !== 'card',
         globalStyles,
         accent,
-        'contain',
-        undefined,
-        undefined,
-        true
+        'contain'
       )
 
       break

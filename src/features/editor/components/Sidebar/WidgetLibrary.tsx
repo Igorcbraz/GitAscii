@@ -1,6 +1,16 @@
 'use client'
 
-import { Download, ExternalLink, GitFork, Plus, Search, Upload, X, Zap } from 'lucide-react'
+import {
+  Download,
+  ExternalLink,
+  GitFork,
+  Plus,
+  Search,
+  Sparkles,
+  Upload,
+  X,
+  Zap,
+} from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -106,9 +116,7 @@ export function WidgetLibrary() {
   } | null>(null)
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState<
-    'all' | 'popular' | 'essential' | 'external'
-  >('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isMouseDown, setIsMouseDown] = useState(false)
@@ -521,17 +529,85 @@ export function WidgetLibrary() {
 
                 <div>
                   <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <Sparkles size={10} className="text-[#b6a891] shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-[#b6a891] uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.godprofile_category', 'GodProfile MCP Toolkit')}
+                    </span>
+                    <a
+                      href="https://github.com/Luc0-0/GodProfile"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#b6a891] hover:text-[#d8d0c4] transition-colors ml-1"
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {filteredWidgets.filter((w) => w.category === 'godprofile').length}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {filteredWidgets
+                      .filter((w) => w.category === 'godprofile')
+                      .map((item) => {
+                        const Icon = item.icon
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => addWidget(item.id)}
+                            data-testid={`add-widget-${item.id}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setHoveredWidget({ item, rect })
+                            }}
+                            onMouseLeave={() => setHoveredWidget(null)}
+                            className="group relative p-3 border border-[#1e2530] hover:border-[#b6a891] bg-[#0b0f14] hover:bg-[#111820] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(182,168,145,0.2)]"
+                          >
+                            <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-[#b6a891]/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <div className="p-2 rounded-xs bg-[#1e2530] group-hover:bg-[#b6a891] text-[#b6a891] group-hover:text-[#0b0f14] transition-colors duration-300 shrink-0">
+                                <Icon size={16} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h4 className="font-inter-tight font-medium text-label text-[#d8d0c4] group-hover:text-[#b6a891] transition-colors duration-300">
+                                    {item.name}
+                                  </h4>
+                                </div>
+                                <p className="font-inter-tight text-eyebrow text-[#5a6070] group-hover:text-[#d8d0c4] transition-colors line-clamp-1">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 relative z-10">
+                              <button className="text-[#5a6070] group-hover:text-[#b6a891] transition-colors duration-300 p-1">
+                                <Plus size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
                     <ExternalLink size={10} className="text-violet-400/80 shrink-0" />
                     <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
                       {t('editor.sidebar.external_category', 'Integrações Externas')}
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash">
-                      {filteredWidgets.filter((w) => w.isExternal).length}
+                      {
+                        filteredWidgets.filter((w) => w.isExternal && w.category !== 'godprofile')
+                          .length
+                      }
                     </span>
                   </div>
                   <div className="space-y-1.5">
                     {filteredWidgets
-                      .filter((w) => w.isExternal)
+                      .filter((w) => w.isExternal && w.category !== 'godprofile')
                       .map((item) => {
                         const Icon = item.icon
                         return (
