@@ -611,11 +611,12 @@ export function SVGCanvas() {
       dragPosRef.current = { x: clientX, y: clientY }
       if (activeDragRef.current || marqueeRef.current) startAutoScroll()
 
-      if (marqueeRef.current) {
+      if (marqueeRef.current && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
         marqueeRef.current = {
           ...marqueeRef.current,
-          currentX: clientX,
-          currentY: clientY,
+          currentX: (clientX - rect.left) / zoomRef.current,
+          currentY: (clientY - rect.top) / zoomRef.current,
         }
         if (marqueeRafRef.current === null) {
           marqueeRafRef.current = requestAnimationFrame(() => {
@@ -632,16 +633,11 @@ export function SVGCanvas() {
 
       const currentMarquee = marqueeRef.current
       const currentConfig = configRef.current
-      if (currentMarquee && containerRef.current && currentConfig) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const startX = (currentMarquee.startX - rect.left) / zoomRef.current
-        const startY = (currentMarquee.startY - rect.top) / zoomRef.current
-        const endX = (currentMarquee.currentX - rect.left) / zoomRef.current
-        const endY = (currentMarquee.currentY - rect.top) / zoomRef.current
-        const minX = Math.min(startX, endX)
-        const maxX = Math.max(startX, endX)
-        const minY = Math.min(startY, endY)
-        const maxY = Math.max(startY, endY)
+      if (currentMarquee && currentConfig) {
+        const minX = Math.min(currentMarquee.startX, currentMarquee.currentX)
+        const maxX = Math.max(currentMarquee.startX, currentMarquee.currentX)
+        const minY = Math.min(currentMarquee.startY, currentMarquee.currentY)
+        const maxY = Math.max(currentMarquee.startY, currentMarquee.currentY)
         const selectedIds = currentConfig.widgets
           .filter(
             (widget) =>
@@ -718,11 +714,12 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-none') ||
           target.classList.contains('pointer-events-auto')
         ) {
+          const rect = containerRef.current?.getBoundingClientRect()
           const nextMarquee = {
-            startX: e.clientX,
-            startY: e.clientY,
-            currentX: e.clientX,
-            currentY: e.clientY,
+            startX: rect ? (e.clientX - rect.left) / zoom : e.clientX,
+            startY: rect ? (e.clientY - rect.top) / zoom : e.clientY,
+            currentX: rect ? (e.clientX - rect.left) / zoom : e.clientX,
+            currentY: rect ? (e.clientY - rect.top) / zoom : e.clientY,
           }
           marqueeRef.current = nextMarquee
           setMarquee(nextMarquee)
@@ -740,11 +737,12 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-auto')
         ) {
           const touch = e.touches[0]
+          const rect = containerRef.current?.getBoundingClientRect()
           const nextMarquee = {
-            startX: touch.clientX,
-            startY: touch.clientY,
-            currentX: touch.clientX,
-            currentY: touch.clientY,
+            startX: rect ? (touch.clientX - rect.left) / zoom : touch.clientX,
+            startY: rect ? (touch.clientY - rect.top) / zoom : touch.clientY,
+            currentX: rect ? (touch.clientX - rect.left) / zoom : touch.clientX,
+            currentY: rect ? (touch.clientY - rect.top) / zoom : touch.clientY,
           }
           marqueeRef.current = nextMarquee
           setMarquee(nextMarquee)
@@ -854,16 +852,10 @@ export function SVGCanvas() {
             <div
               className="absolute bg-signal-lime/20 border border-signal-lime z-50 pointer-events-none"
               style={{
-                left:
-                  (Math.min(marquee.startX, marquee.currentX) -
-                    containerRef.current.getBoundingClientRect().left) /
-                  zoom,
-                top:
-                  (Math.min(marquee.startY, marquee.currentY) -
-                    containerRef.current.getBoundingClientRect().top) /
-                  zoom,
-                width: Math.abs(marquee.currentX - marquee.startX) / zoom,
-                height: Math.abs(marquee.currentY - marquee.startY) / zoom,
+                left: Math.min(marquee.startX, marquee.currentX),
+                top: Math.min(marquee.startY, marquee.currentY),
+                width: Math.abs(marquee.currentX - marquee.startX),
+                height: Math.abs(marquee.currentY - marquee.startY),
               }}
             />
           )}
