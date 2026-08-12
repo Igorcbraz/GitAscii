@@ -9,6 +9,7 @@ import { useI18n } from '@/i18n'
 import { useEditorStore } from '../../store/editorStore'
 import { AnimationControls } from './AnimationControls'
 import { AsciiArtControls } from './AsciiArtControls'
+import { AsciiProfileControls } from './AsciiProfileControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
 import { ColorPicker } from './ColorPicker'
@@ -536,7 +537,8 @@ export function PropertiesPanel() {
           <AvatarControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'ascii-art' && (
+        {(selectedWidget.widgetId === 'ascii-art' ||
+          selectedWidget.widgetId === 'asciiprofile-portrait') && (
           <AsciiArtControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
@@ -609,11 +611,23 @@ export function PropertiesPanel() {
           />
         )}
 
-        <AnimationControls
-          instanceId={selectedWidget.instanceId}
-          widgetId={selectedWidget.widgetId}
-          config={cfg}
-        />
+        {['asciiprofile-portrait', 'asciiprofile-info', 'asciiprofile-heatmap'].includes(
+          selectedWidget.widgetId
+        ) && (
+          <AsciiProfileControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {!selectedWidget.widgetId.startsWith('asciiprofile-') && (
+          <AnimationControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">

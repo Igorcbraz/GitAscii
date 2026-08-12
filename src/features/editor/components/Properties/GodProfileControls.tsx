@@ -102,13 +102,11 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
-      {/* HEADER */}
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
         <LayoutGrid size={14} />
         <span>GodProfile Customization</span>
       </div>
 
-      {/* TERMINAL WIDGET */}
       {widgetId === 'godprofile-terminal' && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
@@ -150,7 +148,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
         </div>
       )}
 
-      {/* MARQUEE WIDGET */}
       {widgetId === 'godprofile-marquee' && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
@@ -197,7 +194,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
         </div>
       )}
 
-      {/* NEURAL WIDGET */}
       {widgetId === 'godprofile-neural' && (
         <div className="space-y-4">
           {Object.keys(neuralTechs).map((category) => (
@@ -236,7 +232,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
         </div>
       )}
 
-      {/* TROPHIES WIDGET */}
       {widgetId === 'godprofile-trophies' && (
         <div className="space-y-3">
           <label className="text-eyebrow text-ash font-medium">Configure Trophy Visibility</label>
@@ -257,7 +252,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
         </div>
       )}
 
-      {/* WAKATIME WIDGET */}
       {widgetId === 'godprofile-wakatime' && (
         <div className="space-y-3">
           <label className="text-eyebrow text-ash font-medium">

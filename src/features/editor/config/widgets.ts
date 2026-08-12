@@ -36,7 +36,7 @@ export interface WidgetBadge {
 }
 
 export type WidgetCategory =
-  'essential' | 'interactive' | 'stats' | 'external' | 'misc' | 'godprofile'
+  'essential' | 'interactive' | 'stats' | 'external' | 'misc' | 'godprofile' | 'asciiprofile'
 
 export interface WidgetCatalogItem {
   id: string
@@ -312,6 +312,33 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     isExternal: true,
     defaultSize: { width: 320, height: 350 },
   },
+  {
+    id: 'asciiprofile-portrait',
+    name: 'ASCII Portrait',
+    icon: Terminal,
+    desc: 'Animated monochrome typing ASCII portrait',
+    category: 'asciiprofile',
+    isExternal: true,
+    defaultSize: { width: 370, height: 400 },
+  },
+  {
+    id: 'asciiprofile-info',
+    name: 'ASCII Info Card',
+    icon: FileText,
+    desc: 'Neofetch-style ASCII profile info card',
+    category: 'asciiprofile',
+    isExternal: true,
+    defaultSize: { width: 490, height: 400 },
+  },
+  {
+    id: 'asciiprofile-heatmap',
+    name: 'ASCII Heatmap',
+    icon: Grid,
+    desc: 'Animated contribution heatmap calendar',
+    category: 'asciiprofile',
+    isExternal: true,
+    defaultSize: { width: 780, height: 240 },
+  },
 ]
 
 export const WIDGET_FILTERS: WidgetFilterItem[] = [
@@ -344,7 +371,8 @@ export const WIDGET_FILTERS: WidgetFilterItem[] = [
     labelKey: 'editor.sidebar.filter.external',
     defaultLabel: 'Externos',
     icon: Globe,
-    match: (item) => !!item.isExternal && item.category !== 'godprofile',
+    match: (item) =>
+      !!item.isExternal && item.category !== 'godprofile' && item.category !== 'asciiprofile',
   },
   {
     id: 'godprofile',
@@ -352,5 +380,12 @@ export const WIDGET_FILTERS: WidgetFilterItem[] = [
     defaultLabel: 'GodProfile',
     icon: Sparkles,
     match: (item) => item.category === 'godprofile',
+  },
+  {
+    id: 'asciiprofile',
+    labelKey: 'editor.sidebar.filter.asciiprofile',
+    defaultLabel: 'ASCII Profile',
+    icon: TerminalSquare,
+    match: (item) => item.category === 'asciiprofile',
   },
 ]

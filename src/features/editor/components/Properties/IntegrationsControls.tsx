@@ -101,8 +101,6 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
         )}
       </div>
 
-      {/* Campo de username removido conforme solicitado para usar sempre o logado */}
-
       {widgetId === 'gitfest-lineup' && (
         <div className="space-y-3 pt-2">
           <div>

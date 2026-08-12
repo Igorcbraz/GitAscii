@@ -68,5 +68,51 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
     },
     totalStars: 563,
     totalForks: 75,
+    contributions: generateMockContributions(),
+  }
+}
+
+export function generateMockContributions() {
+  const weeks = []
+  const today = new Date()
+  const oneYearAgo = new Date()
+  oneYearAgo.setFullYear(today.getFullYear() - 1)
+
+  const start = new Date(oneYearAgo)
+  start.setDate(start.getDate() - start.getDay())
+
+  const currentDate = new Date(start)
+  let totalContributions = 0
+
+  for (let w = 0; w < 53; w++) {
+    const days = []
+    for (let d = 0; d < 7; d++) {
+      const dateStr = currentDate.toISOString().split('T')[0]
+      const rand = Math.random()
+      let count = 0
+      if (rand > 0.45) count = Math.floor(Math.random() * 4)
+      if (rand > 0.82) count = Math.floor(Math.random() * 12)
+      if (rand > 0.96) count = Math.floor(Math.random() * 35)
+
+      let color = '#161b22'
+      if (count > 0) color = '#0e4429'
+      if (count > 4) color = '#006d32'
+      if (count > 10) color = '#26a641'
+      if (count > 20) color = '#39d353'
+
+      totalContributions += count
+      days.push({
+        color,
+        contributionCount: count,
+        date: dateStr,
+      })
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+    weeks.push({ contributionDays: days })
+  }
+
+  return {
+    totalContributions,
+    weeks,
   }
 }

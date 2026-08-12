@@ -594,6 +594,88 @@ export function WidgetLibrary() {
 
                 <div>
                   <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <span className="font-inter-tight text-caption font-medium text-[#ffa657] uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.asciiprofile_category', 'ASCII Profile Kit')}
+                    </span>
+                    <a
+                      href="https://github.com/mithun50/ascii-profile-kit"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#ffa657] hover:text-[#ffbd2e] transition-colors ml-1"
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {filteredWidgets.filter((w) => w.category === 'asciiprofile').length}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {filteredWidgets
+                      .filter((w) => w.category === 'asciiprofile')
+                      .map((item) => {
+                        const Icon = item.icon
+                        const shellScript =
+                          item.id === 'asciiprofile-portrait'
+                            ? './portrait.sh'
+                            : item.id === 'asciiprofile-info'
+                              ? 'neofetch'
+                              : 'contributions --graph'
+
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => addWidget(item.id)}
+                            data-testid={`add-widget-${item.id}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setHoveredWidget({ item, rect })
+                            }}
+                            onMouseLeave={() => setHoveredWidget(null)}
+                            className="group relative border border-[#30363d] hover:border-[#ffa657] bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(255,166,87,0.12)] flex flex-col"
+                          >
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#ffa657]/30 font-mono text-[9px] text-[#7d8590] transition-colors select-none">
+                              <div className="flex gap-0.5 text-[8px] font-bold">
+                                <span className="text-[#ff5f56]">[o]</span>
+                                <span className="text-[#ffbd2e]">[o]</span>
+                                <span className="text-[#27c93f]">[o]</span>
+                              </div>
+                              <span className="truncate flex-1 text-right text-[8px] opacity-75">
+                                {shellScript}
+                              </span>
+                            </div>
+
+                            <div className="p-3 flex items-center justify-between">
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 rounded-xs bg-[#161b22] group-hover:bg-[#ffa657] text-[#c9d1d9] group-hover:text-[#0d1117] transition-colors duration-300 shrink-0">
+                                  <Icon size={16} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-inter-tight font-medium text-label text-[#c9d1d9] group-hover:text-[#ffa657] transition-colors duration-300">
+                                      {item.name}
+                                    </h4>
+                                  </div>
+                                  <p className="font-inter-tight text-eyebrow text-[#7d8590] group-hover:text-[#c9d1d9] transition-colors line-clamp-1">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                <button className="text-[#7d8590] group-hover:text-[#ffa657] transition-colors duration-300 p-1">
+                                  <Plus size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
                     <ExternalLink size={10} className="text-violet-400/80 shrink-0" />
                     <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
                       {t('editor.sidebar.external_category', 'Integrações Externas')}

@@ -24,7 +24,6 @@ export default async function Image() {
         overflow: 'hidden',
       }}
     >
-      {/* Top-left wordmark */}
       <div
         style={{
           position: 'absolute',
@@ -51,7 +50,6 @@ export default async function Image() {
         </span>
       </div>
 
-      {/* Main content area — left column */}
       <div
         style={{
           position: 'absolute',
@@ -66,7 +64,6 @@ export default async function Image() {
           paddingRight: '40px',
         }}
       >
-        {/* Eyebrow label */}
         <div
           style={{
             fontSize: 11,
@@ -81,7 +78,6 @@ export default async function Image() {
           [ YOUR GITHUB PROFILE · TRANSFORMED ]
         </div>
 
-        {/* Display headline */}
         <div
           style={{
             display: 'flex',
@@ -124,7 +120,6 @@ export default async function Image() {
           </span>
         </div>
 
-        {/* Body text */}
         <div
           style={{
             fontSize: 16,
@@ -138,7 +133,6 @@ export default async function Image() {
         </div>
       </div>
 
-      {/* Right side — ASCII terminal panel */}
       <div
         style={{
           position: 'absolute',
@@ -156,7 +150,6 @@ export default async function Image() {
           overflow: 'hidden',
         }}
       >
-        {/* Terminal header */}
         <div
           style={{
             display: 'flex',
@@ -180,7 +173,6 @@ export default async function Image() {
             ascii-engine · output.txt
           </span>
         </div>
-        {/* ASCII art grid */}
         <div
           style={{
             fontFamily: 'monospace',
@@ -206,7 +198,6 @@ export default async function Image() {
   :@@@@=======@@@@@:
   ..::@@@@@@@@::..`}
         </div>
-        {/* Terminal footer */}
         <div
           style={{
             position: 'absolute',
@@ -233,7 +224,6 @@ export default async function Image() {
         </div>
       </div>
 
-      {/* Neon divider bar */}
       <div
         style={{
           position: 'absolute',
@@ -245,7 +235,6 @@ export default async function Image() {
         }}
       />
 
-      {/* Bottom badge */}
       <div
         style={{
           position: 'absolute',

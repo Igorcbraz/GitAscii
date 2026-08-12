@@ -50,6 +50,9 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   'godprofile-wakatime': { width: 420, height: 260 },
 
   'godprofile-globe': { width: 320, height: 350 },
+  'asciiprofile-portrait': { width: 370, height: 400 },
+  'asciiprofile-info': { width: 490, height: 400 },
+  'asciiprofile-heatmap': { width: 780, height: 240 },
 }
 
 export function WidgetPreviewTooltip({

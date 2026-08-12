@@ -1,4 +1,7 @@
 import { APP_DOMAIN } from '../../constants'
+import { renderAsciiHeatmap } from '../../features/widgets/renderers/AsciiHeatmapRenderer'
+import { renderAsciiInfoCard } from '../../features/widgets/renderers/AsciiInfoCardRenderer'
+import { renderAsciiPortrait } from '../../features/widgets/renderers/AsciiPortraitRenderer'
 import { renderGlobe } from '../../features/widgets/renderers/GlobeRenderer'
 import { renderMarquee } from '../../features/widgets/renderers/MarqueeRenderer'
 import { renderNeural } from '../../features/widgets/renderers/NeuralRenderer'
@@ -141,7 +144,8 @@ export function renderWidgetSvg(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles,
-  includeWrapper: boolean = true
+  includeWrapper: boolean = true,
+  forceStatic: boolean = false
 ): string {
   if (!widget.visible) return ''
 
@@ -1412,6 +1416,21 @@ export function renderWidgetSvg(
 
     case 'godprofile-globe': {
       contentSvg = renderGlobe(widget, data, globalStyles)
+      break
+    }
+
+    case 'asciiprofile-portrait': {
+      contentSvg = renderAsciiPortrait(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case 'asciiprofile-info': {
+      contentSvg = renderAsciiInfoCard(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case 'asciiprofile-heatmap': {
+      contentSvg = renderAsciiHeatmap(widget, data, globalStyles, forceStatic)
       break
     }
 

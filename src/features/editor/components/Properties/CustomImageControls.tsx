@@ -184,7 +184,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
         <span>{t('editor.custom_image.title', 'Configurações de Imagem')}</span>
       </div>
 
-      {/* Source Selection */}
       <div className="space-y-2">
         <label className="text-eyebrow text-ash font-medium block">
           {t('editor.ascii.source', 'Origem da Foto')}
@@ -233,7 +232,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           </button>
         </div>
 
-        {/* URL Input */}
         {sourceType === 'url' && (
           <div className="mt-2">
             <input
@@ -250,7 +248,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           </div>
         )}
 
-        {/* Suggested GIFs */}
         {sourceType === 'suggestions' && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {SUGGESTED_GIFS.map((gif) => (
@@ -272,7 +269,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           </div>
         )}
 
-        {/* File Upload Content */}
         {sourceType === 'upload' && (
           <div className="mt-2">
             <input
@@ -308,7 +304,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
         )}
       </div>
 
-      {/* Target URL (Clickable link) */}
       <div className="pt-2 border-t border-graphite/60">
         <label className="text-eyebrow text-ash block mb-1 font-inter-tight flex items-center gap-1.5">
           <LinkIcon size={12} className="text-signal-lime" />
@@ -325,7 +320,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
         />
       </div>
 
-      {/* Custom Title & Visibility */}
       <div className="pt-2 border-t border-graphite/60 space-y-3">
         <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
           <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
@@ -353,7 +347,6 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           </div>
         )}
 
-        {/* Display Mode */}
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
             {t('editor.custom_image.mode_label', 'Modo de Redimensionamento')}

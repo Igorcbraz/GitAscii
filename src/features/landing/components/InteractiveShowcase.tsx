@@ -252,9 +252,7 @@ export default function InteractiveShowcase() {
           </p>
         </div>
 
-        {/* Desktop Layout: Side-by-side Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-onyx border border-graphite p-6 md:p-8 rounded-none">
-          {/* Left Column: Tab Selector */}
           <div className="lg:col-span-4 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-graphite pb-6 lg:pb-0 lg:pr-8 gap-6">
             <div className="space-y-3">
               <span className="font-jetbrains-mono text-caption text-ash uppercase tracking-wider block mb-2">
@@ -287,7 +285,6 @@ export default function InteractiveShowcase() {
               </div>
             </div>
 
-            {/* Platform Stats Info Block */}
             <div className="hidden lg:block bg-carbon border border-graphite p-4 space-y-3">
               <div className="flex justify-between items-center text-caption font-jetbrains-mono text-ash">
                 <span>SYSTEM STATUS</span>
@@ -307,10 +304,8 @@ export default function InteractiveShowcase() {
             </div>
           </div>
 
-          {/* Right Column: Preview Area */}
           <div className="lg:col-span-8 flex flex-col justify-between pl-0 lg:pl-8 pt-6 lg:pt-0 min-w-0 lg:h-[480px]">
             <AnimatePresence mode="wait">
-              {/* TAB 1: TEMPLATES PREVIEW */}
               {activeTab === 'templates' && (
                 <motion.div
                   key="templates-tab"
@@ -342,7 +337,6 @@ export default function InteractiveShowcase() {
                       </div>
                     </div>
 
-                    {/* Rendering simulated template README */}
                     {(() => {
                       const tInfo =
                         popularTemplates.find((tItem) => tItem.id === selectedTemplate) ||
@@ -357,7 +351,6 @@ export default function InteractiveShowcase() {
                           </div>
 
                           <div className="space-y-4">
-                            {/* Simulated header */}
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-full bg-graphite flex items-center justify-center border border-ash/20 font-jetbrains-mono text-[10px] text-ash shrink-0">
                                 @USER
@@ -379,7 +372,6 @@ export default function InteractiveShowcase() {
                               </div>
                             </div>
 
-                            {/* Simulated ASCII / Stats widget */}
                             <div className="border border-graphite/60 bg-carbon/50 p-4 font-jetbrains-mono text-[11px] leading-relaxed">
                               <div className="flex items-center gap-2 mb-2">
                                 <span style={{ color: tInfo.accent }}>●</span>
@@ -451,7 +443,6 @@ export default function InteractiveShowcase() {
                 </motion.div>
               )}
 
-              {/* TAB 2: WIDGETS PREVIEW */}
               {activeTab === 'widgets' && (
                 <motion.div
                   key="widgets-tab"
@@ -483,7 +474,6 @@ export default function InteractiveShowcase() {
                       </div>
                     </div>
 
-                    {/* Rendering simulated widget preview */}
                     {(() => {
                       const wInfo =
                         showcaseWidgets.find((wItem) => wItem.id === selectedWidget) ||
@@ -498,7 +488,6 @@ export default function InteractiveShowcase() {
                             <p className="font-inter-tight text-body text-ash mt-1">{wInfo.desc}</p>
                           </div>
 
-                          {/* Mock Render */}
                           <div className="bg-onyx border border-graphite p-6 flex flex-col justify-center items-center min-h-36 font-jetbrains-mono relative">
                             {wInfo.id === 'stats' && (
                               <div className="w-full max-w-md border border-graphite/60 bg-[#060606] p-4 text-[11px] space-y-3 shadow-md">
@@ -608,7 +597,6 @@ export default function InteractiveShowcase() {
                             )}
                           </div>
 
-                          {/* Code Snippet Box */}
                           <div className="relative bg-carbon border border-graphite p-3 flex justify-between items-center font-jetbrains-mono text-[11px]">
                             <code className="text-bone truncate pr-16 select-all">
                               {wInfo.snippet}
@@ -660,7 +648,6 @@ export default function InteractiveShowcase() {
                 </motion.div>
               )}
 
-              {/* TAB 3: COMMUNITY PROFILES */}
               {activeTab === 'profiles' && (
                 <motion.div
                   key="profiles-tab"
@@ -692,7 +679,6 @@ export default function InteractiveShowcase() {
                       </div>
                     </div>
 
-                    {/* Rendering simulated developer profile preview */}
                     {(() => {
                       const pInfo =
                         featuredProfiles.find((pItem) => pItem.id === selectedProfile) ||
@@ -768,7 +754,6 @@ export default function InteractiveShowcase() {
                             </div>
                           </div>
 
-                          {/* Quick Inspect Button */}
                           <div className="pt-2">
                             <Link
                               href={`/${pInfo.username}`}
@@ -814,7 +799,6 @@ export default function InteractiveShowcase() {
                 </motion.div>
               )}
 
-              {/* TAB 4: RESOURCE GUIDES */}
               {activeTab === 'guides' && (
                 <motion.div
                   key="guides-tab"
@@ -846,7 +830,6 @@ export default function InteractiveShowcase() {
                       </div>
                     </div>
 
-                    {/* Rendering simulated guide layout */}
                     {(() => {
                       const gInfo =
                         featuredGuides.find((gItem) => gItem.id === selectedGuide) ||

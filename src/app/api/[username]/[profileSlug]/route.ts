@@ -63,6 +63,9 @@ export async function GET(
               'godprofile-trophies',
               'godprofile-wakatime',
               'godprofile-globe',
+              'asciiprofile-portrait',
+              'asciiprofile-info',
+              'asciiprofile-heatmap',
             ].includes(w)
           ) {
             const defaultSizeMap: Record<string, { width: number; height: number }> = {
@@ -72,6 +75,9 @@ export async function GET(
               'godprofile-trophies': { width: 800, height: 280 },
               'godprofile-wakatime': { width: 420, height: 260 },
               'godprofile-globe': { width: 320, height: 350 },
+              'asciiprofile-portrait': { width: 370, height: 400 },
+              'asciiprofile-info': { width: 490, height: 400 },
+              'asciiprofile-heatmap': { width: 780, height: 240 },
             }
             wWidth = defaultSizeMap[w].width
             wHeight = defaultSizeMap[w].height

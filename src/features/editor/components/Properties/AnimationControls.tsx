@@ -182,7 +182,6 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
         )}
       </div>
 
-      {/* Grid de presets de animação */}
       <div className="grid grid-cols-3 gap-1.5">
         {ANIMATION_PRESETS.filter((preset) => {
           if (widgetId === 'ascii-art') {
@@ -220,7 +219,6 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
 
       {animationType !== 'none' && (
         <>
-          {/* Duração */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-eyebrow">
               <span className="text-ash font-inter-tight">
@@ -280,7 +278,6 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
             />
           </div>
 
-          {/* Delay */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center text-eyebrow">
               <span className="text-ash font-inter-tight">
@@ -324,7 +321,6 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
             />
           </div>
 
-          {/* Easing */}
           <div className="space-y-1.5">
             <span className="text-eyebrow text-ash font-inter-tight block">
               {t('editor.animation.easing', 'Curva de aceleração')}
@@ -347,7 +343,6 @@ export function AnimationControls({ instanceId, config, widgetId }: AnimationCon
             </div>
           </div>
 
-          {/* Preview badge */}
           <div className="bg-carbon border border-signal-lime/30 p-2 rounded-xs text-center">
             <span className="text-caption font-jetbrains-mono text-signal-lime/70">
               {t('editor.animation.active', '✓ animação ativa ao montar')} ·{' '}
