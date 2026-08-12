@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.6.0](https://github.com/Igorcbraz/GitAscii/compare/v1.5.0...v1.6.0) (2026-08-12)
+
+
+### Features
+
+* add godprofile widgets and integration controls ([7752ba1](https://github.com/Igorcbraz/GitAscii/commit/7752ba18a220c36c3ea7f2269e7a013a99a5bec0))
+* **editor:** add ASCII Profile widgets (Portrait, Info Card, and Heatmap) ([3a46229](https://github.com/Igorcbraz/GitAscii/commit/3a46229dc84c8f3221cb0b1ffaccae2de66f7e9f))
+* **templates:** add 5 new diverse widget templates ([40717fc](https://github.com/Igorcbraz/GitAscii/commit/40717fcb45864082c10f0aec1073c1f2a7f3a270))
+
+
+### Bug Fixes
+
+* handle undefined profileSlug in widget export and embed links ([e6a32d7](https://github.com/Igorcbraz/GitAscii/commit/e6a32d70eecb1168654932b337be8afad0c63c35))
+* resolve double rendering on external image widgets and update default sizes ([ea1555f](https://github.com/Igorcbraz/GitAscii/commit/ea1555fc3bebe763fc48c17779e531c4ad6975fc))
+
 ## [1.5.0](https://github.com/Igorcbraz/GitAscii/compare/v1.4.2...v1.5.0) (2026-08-12)
 
 
