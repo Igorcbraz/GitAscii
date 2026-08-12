@@ -259,7 +259,7 @@ export function EditorToolbar() {
   if (!config || !githubData) return null
 
   const username = config.username
-  const profileSlug = config.profileSlug
+  const profileSlug = config.profileSlug || 'default'
   const viewerUsername = session?.username || username
 
   const embedUrl =
@@ -305,6 +305,7 @@ export function EditorToolbar() {
       widgets: config.widgets,
       globalStyles: config.globalStyles,
       templateId: config.templateId,
+      profileSlug,
     }
 
     try {

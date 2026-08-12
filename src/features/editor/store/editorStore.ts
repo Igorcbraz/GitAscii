@@ -14,7 +14,7 @@ const MAX_HISTORY_STEPS = 50
 function saveToLocalStorage(config: SavedConfiguration) {
   try {
     localStorage.setItem(
-      `gitascii_${config.githubId}_${config.profileSlug}`,
+      `gitascii_${config.githubId}_${config.profileSlug || 'default'}`,
       JSON.stringify(config)
     )
   } catch (e) {
@@ -583,7 +583,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         config.githubId,
         config.username,
         templateId,
-        config.profileSlug,
+        config.profileSlug || 'default',
         config.profileName
       )
 
