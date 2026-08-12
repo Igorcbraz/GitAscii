@@ -1,4 +1,13 @@
-import { APP_DOMAIN } from '../../constants'
+import { APP_DOMAIN, WIDGET_IDS } from '../../constants'
+import { renderAsciiHeatmap } from '../../features/widgets/renderers/AsciiHeatmapRenderer'
+import { renderAsciiInfoCard } from '../../features/widgets/renderers/AsciiInfoCardRenderer'
+import { renderAsciiPortrait } from '../../features/widgets/renderers/AsciiPortraitRenderer'
+import { renderGlobe } from '../../features/widgets/renderers/GlobeRenderer'
+import { renderMarquee } from '../../features/widgets/renderers/MarqueeRenderer'
+import { renderNeural } from '../../features/widgets/renderers/NeuralRenderer'
+import { renderTerminal } from '../../features/widgets/renderers/TerminalRenderer'
+import { renderTrophies } from '../../features/widgets/renderers/TrophiesRenderer'
+import { renderWakaTime } from '../../features/widgets/renderers/WakaTimeRenderer'
 import { generateAsciiArt } from '../ascii/converter'
 import { type AsciiFontName, convertTextToAscii } from '../ascii/textConverter'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
@@ -51,8 +60,7 @@ function renderExternalWidgetSvg(
   accent: string,
   mode: 'contain' | 'badge' = 'contain',
   targetUrl?: string,
-  fallbackUrl?: string,
-  skipImage: boolean = false
+  fallbackUrl?: string
 ): string {
   let processedUrl = url
   try {
@@ -92,9 +100,6 @@ function renderExternalWidgetSvg(
         ${innerContentHtml}
       </div>
     </foreignObject>
-    ${!skipImage ? (targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : '') : ''}
-    ${!skipImage ? `<image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />` : ''}
-    ${!skipImage ? (targetUrl ? `</a>` : '') : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
 }
@@ -139,7 +144,8 @@ export function renderWidgetSvg(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles,
-  includeWrapper: boolean = true
+  includeWrapper: boolean = true,
+  forceStatic: boolean = false
 ): string {
   if (!widget.visible) return ''
 
@@ -395,7 +401,6 @@ export function renderWidgetSvg(
 
       if (statsStyle === 'terminal') {
         // Monospaced bracket style: [ 1.2k ]  STARS
-        const rowH = 28
         const startY = 48
         const monoFont = `'JetBrains Mono', monospace`
         if (statsLayout === 'horizontal') {
@@ -1384,6 +1389,51 @@ export function renderWidgetSvg(
       break
     }
 
+    case 'godprofile-terminal': {
+      contentSvg = renderTerminal(widget, data, globalStyles)
+      break
+    }
+
+    case 'godprofile-marquee': {
+      contentSvg = renderMarquee(widget, data, globalStyles)
+      break
+    }
+
+    case 'godprofile-neural': {
+      contentSvg = renderNeural(widget, data, globalStyles)
+      break
+    }
+
+    case 'godprofile-trophies': {
+      contentSvg = renderTrophies(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.GODPROFILE_WAKATIME: {
+      contentSvg = renderWakaTime(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.GODPROFILE_GLOBE: {
+      contentSvg = renderGlobe(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.ASCII_PORTRAIT: {
+      contentSvg = renderAsciiPortrait(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.ASCII_INFO: {
+      contentSvg = renderAsciiInfoCard(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.ASCII_HEATMAP: {
+      contentSvg = renderAsciiHeatmap(widget, data, globalStyles, forceStatic)
+      break
+    }
+
     case 'ghstats': {
       const username = data.user.login
       const embedType = (cfg.embedType as string) || 'card'
@@ -1443,10 +1493,7 @@ export function renderWidgetSvg(
         !hideTitle && embedType !== 'card',
         globalStyles,
         accent,
-        'contain',
-        undefined,
-        undefined,
-        true
+        'contain'
       )
 
       break

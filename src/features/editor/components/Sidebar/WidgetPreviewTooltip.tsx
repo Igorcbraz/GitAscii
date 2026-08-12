@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
+import { WIDGET_IDS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
@@ -19,29 +20,40 @@ interface WidgetPreviewTooltipProps {
 }
 
 const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
-  header: { width: 800, height: 90 },
-  avatar: { width: 160, height: 160 },
-  'ascii-art': { width: 280, height: 280 },
-  'ascii-text': { width: 800, height: 120 },
-  'terminal-info': { width: 504, height: 280 },
-  'tech-stack': { width: 800, height: 140 },
-  'social-media': { width: 800, height: 120 },
-  bio: { width: 800, height: 160 },
-  stats: { width: 800, height: 120 },
-  languages: { width: 800, height: 140 },
-  repositories: { width: 800, height: 180 },
-  'gitfest-lineup': { width: 500, height: 650 },
-  'github-readme-stats': { width: 500, height: 210 },
-  'streak-stats': { width: 500, height: 210 },
-  'profile-trophy': { width: 800, height: 160 },
-  'activity-graph': { width: 800, height: 300 },
-  'contribution-snake': { width: 800, height: 200 },
-  'metrics-card': { width: 800, height: 380 },
-  'views-counter': { width: 320, height: 80 },
-  'readme-quotes': { width: 500, height: 180 },
-  'awesome-badge': { width: 360, height: 80 },
-  divider: { width: 800, height: 30 },
-  footer: { width: 800, height: 50 },
+  [WIDGET_IDS.HEADER]: { width: 800, height: 90 },
+  [WIDGET_IDS.AVATAR]: { width: 160, height: 160 },
+  [WIDGET_IDS.ASCII_ART]: { width: 280, height: 280 },
+  [WIDGET_IDS.ASCII_TEXT]: { width: 800, height: 120 },
+  [WIDGET_IDS.TERMINAL_INFO]: { width: 504, height: 280 },
+  [WIDGET_IDS.TECH_STACK]: { width: 800, height: 140 },
+  [WIDGET_IDS.SOCIAL_MEDIA]: { width: 800, height: 120 },
+  [WIDGET_IDS.BIO]: { width: 800, height: 160 },
+  [WIDGET_IDS.STATS]: { width: 800, height: 120 },
+  [WIDGET_IDS.LANGUAGES]: { width: 800, height: 140 },
+  [WIDGET_IDS.REPOSITORIES]: { width: 800, height: 300 },
+  [WIDGET_IDS.GITFEST_LINEUP]: { width: 500, height: 650 },
+  [WIDGET_IDS.GITHUB_README_STATS]: { width: 390, height: 210 },
+  [WIDGET_IDS.STREAK_STATS]: { width: 390, height: 210 },
+  [WIDGET_IDS.PROFILE_TROPHY]: { width: 800, height: 200 },
+  [WIDGET_IDS.ACTIVITY_GRAPH]: { width: 710, height: 300 },
+  [WIDGET_IDS.CONTRIBUTION_SNAKE]: { width: 800, height: 250 },
+  [WIDGET_IDS.METRICS_CARD]: { width: 440, height: 380 },
+  [WIDGET_IDS.VIEWS_COUNTER]: { width: 200, height: 96 },
+  [WIDGET_IDS.README_QUOTES]: { width: 500, height: 210 },
+  [WIDGET_IDS.AWESOME_BADGE]: { width: 360, height: 80 },
+  [WIDGET_IDS.GHSTATS]: { width: 390, height: 350 },
+  [WIDGET_IDS.DIVIDER]: { width: 800, height: 30 },
+  [WIDGET_IDS.FOOTER]: { width: 800, height: 50 },
+  [WIDGET_IDS.GODPROFILE_TERMINAL]: { width: 450, height: 300 },
+  [WIDGET_IDS.GODPROFILE_MARQUEE]: { width: 800, height: 120 },
+  [WIDGET_IDS.GODPROFILE_NEURAL]: { width: 800, height: 320 },
+  [WIDGET_IDS.GODPROFILE_TROPHIES]: { width: 800, height: 280 },
+  [WIDGET_IDS.GODPROFILE_WAKATIME]: { width: 420, height: 260 },
+
+  [WIDGET_IDS.GODPROFILE_GLOBE]: { width: 320, height: 350 },
+  [WIDGET_IDS.ASCII_PORTRAIT]: { width: 370, height: 400 },
+  [WIDGET_IDS.ASCII_INFO]: { width: 490, height: 400 },
+  [WIDGET_IDS.ASCII_HEATMAP]: { width: 780, height: 240 },
 }
 
 export function WidgetPreviewTooltip({

@@ -1,6 +1,6 @@
 import { getSession } from '../../../lib/auth'
 import type { GitHubRepo, GitHubUser, NormalizedGitHubData } from '../types/github'
-import { getMockGitHubData } from './mockProfile'
+import { generateMockContributions, getMockGitHubData } from './mockProfile'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
@@ -79,6 +79,55 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       totalStars,
       totalForks,
       readmeContent: null,
+      contributions: generateMockContributions(),
+    }
+
+    if (token) {
+      try {
+        const gqlQuery = {
+          query: `
+            query($username: String!) {
+              user(login: $username) {
+                contributionsCollection {
+                  contributionCalendar {
+                    totalContributions
+                    weeks {
+                      contributionDays {
+                        color
+                        contributionCount
+                        date
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          `,
+          variables: { username },
+        }
+
+        const gqlRes = await fetch('https://api.github.com/graphql', {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(gqlQuery),
+        })
+
+        if (gqlRes.ok) {
+          const gqlData = await gqlRes.json()
+          const calendar = gqlData?.data?.user?.contributionsCollection?.contributionCalendar
+          if (calendar) {
+            result.contributions = {
+              totalContributions: calendar.totalContributions,
+              weeks: calendar.weeks,
+            }
+          }
+        }
+      } catch (gqlErr) {
+        console.warn('Failed to fetch contributions via GraphQL:', gqlErr)
+      }
     }
 
     try {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 import { loadProfileConfig } from '@/lib/profileStorage'
 
@@ -69,7 +70,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
           let wWidth = 800
           let wHeight = 210
 
-          if (['github-readme-stats', 'streak-stats', 'metrics-card'].includes(w)) {
+          const catalogItem = WIDGET_CATALOG.find((item) => item.id === w)
+          if (catalogItem?.defaultSize) {
+            wWidth = catalogItem.defaultSize.width
+            wHeight = catalogItem.defaultSize.height
+          } else if (['github-readme-stats', 'streak-stats', 'metrics-card'].includes(w)) {
             wWidth = 390
             wHeight = 210
           } else if (['activity-graph', 'contribution-snake', 'readme-quotes'].includes(w)) {

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       const host = request.headers.get('host') || 'localhost:3000'
       const protocol = request.headers.get('x-forwarded-proto') || 'http'
       const v = Date.now()
-      const profileSlug = exportData?.templateId || 'default'
+      const profileSlug = exportData?.profileSlug || exportData?.templateId || 'default'
       const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
       finalEmbedCode = `<a href="${protocol}://${host}">
   <img

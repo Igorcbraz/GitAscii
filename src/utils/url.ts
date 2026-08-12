@@ -2,13 +2,10 @@ export function normalizeUrl(rawUrl: string): string {
   if (!rawUrl || typeof rawUrl !== 'string') return ''
   let trimmed = rawUrl.trim()
 
-  // Handle relative protocol //
   if (trimmed.startsWith('//')) {
     trimmed = `https:${trimmed}`
   }
 
-  // Convert GitHub blob web view URLs to raw user content URLs
-  // e.g. https://github.com/user/repo/blob/branch/path/file.gif -> https://raw.githubusercontent.com/user/repo/branch/path/file.gif
   try {
     const parsed = new URL(trimmed)
     if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
@@ -17,11 +14,8 @@ export function normalizeUrl(rawUrl: string): string {
         'https://raw.githubusercontent.com/$1/$2/$3'
       )
     }
-  } catch {
-    // Not a valid URL yet, skip
-  }
+  } catch {}
 
-  // Handle relative URLs or non-HTTP protocols gracefully
   if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
     return trimmed
   }
@@ -29,7 +23,6 @@ export function normalizeUrl(rawUrl: string): string {
   try {
     const parsed = new URL(trimmed)
 
-    // List of irrelevant tracking/cache params to strip
     const paramsToStrip = new Set([
       'utm_source',
       'utm_medium',
@@ -60,7 +53,6 @@ export function normalizeUrl(rawUrl: string): string {
 
     keysToDelete.forEach((k) => searchParams.delete(k))
 
-    // Sort remaining parameters alphabetically for deterministic matching & deduplication
     searchParams.sort()
 
     parsed.search = searchParams.toString()
@@ -78,7 +70,6 @@ export function extractUrlParams(url: string): Record<string, string> {
       params[key] = val
     })
   } catch {
-    // If parsing fails, attempt regex param extraction
     const match = url.match(/\?([^#]+)/)
     if (match) {
       const pairs = match[1].split('&')

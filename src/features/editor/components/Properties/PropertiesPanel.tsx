@@ -4,17 +4,20 @@ import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'luc
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { WIDGET_IDS } from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { AnimationControls } from './AnimationControls'
 import { AsciiArtControls } from './AsciiArtControls'
+import { AsciiProfileControls } from './AsciiProfileControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
 import { ColorPicker } from './ColorPicker'
 import { CustomImageControls } from './CustomImageControls'
 import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
+import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
@@ -531,59 +534,60 @@ export function PropertiesPanel() {
           </div>
         )}
 
-        {selectedWidget.widgetId === 'avatar' && (
+        {selectedWidget.widgetId === WIDGET_IDS.AVATAR && (
           <AvatarControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'ascii-art' && (
+        {(selectedWidget.widgetId === WIDGET_IDS.ASCII_ART ||
+          selectedWidget.widgetId === WIDGET_IDS.ASCII_PORTRAIT) && (
           <AsciiArtControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'ascii-text' && (
+        {selectedWidget.widgetId === WIDGET_IDS.ASCII_TEXT && (
           <AsciiTextControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {(selectedWidget.widgetId === 'terminal-info' ||
+        {(selectedWidget.widgetId === WIDGET_IDS.TERMINAL_INFO ||
           selectedWidget.widgetId === 'terminal-card') && (
           <TerminalInfoControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'tech-stack' && (
+        {selectedWidget.widgetId === WIDGET_IDS.TECH_STACK && (
           <TechStackControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'social-media' && (
+        {selectedWidget.widgetId === WIDGET_IDS.SOCIAL_MEDIA && (
           <SocialMediaControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'custom-image' && (
+        {selectedWidget.widgetId === WIDGET_IDS.CUSTOM_IMAGE && (
           <CustomImageControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'stats' && (
+        {selectedWidget.widgetId === WIDGET_IDS.STATS && (
           <GithubStatsControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'languages' && (
+        {selectedWidget.widgetId === WIDGET_IDS.LANGUAGES && (
           <TopLanguagesControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
-        {selectedWidget.widgetId === 'repositories' && (
+        {selectedWidget.widgetId === WIDGET_IDS.REPOSITORIES && (
           <FeaturedReposControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {[
-          'gitfest-lineup',
-          'github-readme-stats',
-          'ghstats',
-          'streak-stats',
-          'profile-trophy',
-          'activity-graph',
-          'contribution-snake',
-          'metrics-card',
-          'views-counter',
-          'readme-quotes',
-          'awesome-badge',
+          WIDGET_IDS.GITFEST_LINEUP as string,
+          WIDGET_IDS.GITHUB_README_STATS as string,
+          WIDGET_IDS.GHSTATS as string,
+          WIDGET_IDS.STREAK_STATS as string,
+          WIDGET_IDS.PROFILE_TROPHY as string,
+          WIDGET_IDS.ACTIVITY_GRAPH as string,
+          WIDGET_IDS.CONTRIBUTION_SNAKE as string,
+          WIDGET_IDS.METRICS_CARD as string,
+          WIDGET_IDS.VIEWS_COUNTER as string,
+          WIDGET_IDS.README_QUOTES as string,
+          WIDGET_IDS.AWESOME_BADGE as string,
         ].includes(selectedWidget.widgetId) && (
           <IntegrationsControls
             instanceId={selectedWidget.instanceId}
@@ -592,11 +596,41 @@ export function PropertiesPanel() {
           />
         )}
 
-        <AnimationControls
-          instanceId={selectedWidget.instanceId}
-          widgetId={selectedWidget.widgetId}
-          config={cfg}
-        />
+        {[
+          WIDGET_IDS.GODPROFILE_TERMINAL as string,
+          WIDGET_IDS.GODPROFILE_MARQUEE as string,
+          WIDGET_IDS.GODPROFILE_NEURAL as string,
+          WIDGET_IDS.GODPROFILE_TROPHIES as string,
+          WIDGET_IDS.GODPROFILE_WAKATIME as string,
+
+          WIDGET_IDS.GODPROFILE_GLOBE as string,
+        ].includes(selectedWidget.widgetId) && (
+          <GodProfileControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.ASCII_PORTRAIT as string,
+          WIDGET_IDS.ASCII_INFO as string,
+          WIDGET_IDS.ASCII_HEATMAP as string,
+        ].includes(selectedWidget.widgetId) && (
+          <AsciiProfileControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {!selectedWidget.widgetId.startsWith('asciiprofile-') && (
+          <AnimationControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">

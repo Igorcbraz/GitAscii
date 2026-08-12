@@ -4,6 +4,8 @@ import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
 
+import { WIDGET_CATALOG } from '../config/widgets'
+
 interface HistoryState {
   past: SavedConfiguration[]
   future: SavedConfiguration[]
@@ -14,7 +16,7 @@ const MAX_HISTORY_STEPS = 50
 function saveToLocalStorage(config: SavedConfiguration) {
   try {
     localStorage.setItem(
-      `gitascii_${config.githubId}_${config.profileSlug}`,
+      `gitascii_${config.githubId}_${config.profileSlug || 'default'}`,
       JSON.stringify(config)
     )
   } catch (e) {
@@ -443,22 +445,24 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         bio: { width: 800, height: 160 },
         stats: { width: 800, height: 120 },
         languages: { width: 800, height: 140 },
-        repositories: { width: 800, height: 180 },
+        repositories: { width: 800, height: 300 },
         'gitfest-lineup': { width: 500, height: 650 },
-        'github-readme-stats': { width: 500, height: 210 },
-        'streak-stats': { width: 500, height: 210 },
-        'profile-trophy': { width: 800, height: 160 },
-        'activity-graph': { width: 800, height: 300 },
-        'contribution-snake': { width: 800, height: 200 },
-        'metrics-card': { width: 800, height: 380 },
-        'views-counter': { width: 320, height: 80 },
-        'readme-quotes': { width: 500, height: 180 },
+        'github-readme-stats': { width: 390, height: 210 },
+        'streak-stats': { width: 390, height: 210 },
+        'profile-trophy': { width: 800, height: 200 },
+        'activity-graph': { width: 710, height: 300 },
+        'contribution-snake': { width: 800, height: 250 },
+        'metrics-card': { width: 440, height: 380 },
+        'views-counter': { width: 200, height: 96 },
+        'readme-quotes': { width: 500, height: 210 },
         'awesome-badge': { width: 360, height: 80 },
+        ghstats: { width: 390, height: 350 },
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
       }
-
-      const widgetSize = defaultSizeMap[widgetId] || { width: 800, height: 120 }
+      const catalogItem = WIDGET_CATALOG.find((item) => item.id === widgetId)
+      const widgetSize = catalogItem?.defaultSize ||
+        defaultSizeMap[widgetId] || { width: 800, height: 120 }
       const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0)
 
       const newInstance: WidgetInstance = {
@@ -583,7 +587,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         config.githubId,
         config.username,
         templateId,
-        config.profileSlug,
+        config.profileSlug || 'default',
         config.profileName
       )
 

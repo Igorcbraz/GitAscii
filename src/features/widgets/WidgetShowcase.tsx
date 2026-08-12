@@ -37,7 +37,7 @@ export function WidgetShowcase() {
 
   const externalWidgets: WidgetItem[] = React.useMemo(() => {
     const existingIds = new Set(widgetsList.map((w) => w.id))
-    return WIDGET_CATALOG.filter((w) => w.category === 'external')
+    return WIDGET_CATALOG.filter((w) => w.category === 'external' || w.category === 'godprofile')
       .map((w) => ({
         id: w.id,
         name: w.name,

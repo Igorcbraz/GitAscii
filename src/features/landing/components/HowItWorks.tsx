@@ -49,7 +49,6 @@ export function HowItWorks() {
       />
 
       <div className="max-w-7xl mx-auto space-y-24">
-        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="font-inter-tight font-medium text-eyebrow uppercase tracking-[0.22em] text-ash block">
             {t('landing.how_it_works.eyebrow', '[ THREE STEPS ]')}
@@ -62,11 +61,8 @@ export function HowItWorks() {
           </h2>
         </div>
 
-        {/* Steps: Staggered Alternating Editorial Rows */}
         <div className="space-y-20">
-          {/* STEP 01 */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
-            {/* Text Column */}
             <div className="lg:col-span-5 space-y-4 order-1 lg:order-1">
               <span className="font-jetbrains-mono text-caption text-signal-lime uppercase tracking-widest bg-signal-lime/5 px-2.5 py-1 border border-signal-lime/20 inline-block">
                 [ STEP 01 ]
@@ -83,7 +79,6 @@ export function HowItWorks() {
               </p>
             </div>
 
-            {/* Graphic Column */}
             <div className="lg:col-span-7 bg-onyx border border-graphite p-8 flex items-center justify-center relative min-h-56 order-2 lg:order-2">
               <div className="absolute top-4 left-4 font-pt-serif font-light text-7xl text-graphite/30 select-none">
                 01
@@ -96,9 +91,7 @@ export function HowItWorks() {
             </div>
           </div>
 
-          {/* STEP 02 */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
-            {/* Graphic Column */}
             <div className="lg:col-span-7 bg-onyx border border-graphite p-8 flex items-center justify-center relative min-h-56 order-2 lg:order-1">
               <div className="absolute top-4 left-4 font-pt-serif font-light text-7xl text-graphite/30 select-none">
                 02
@@ -112,7 +105,6 @@ export function HowItWorks() {
               </div>
             </div>
 
-            {/* Text Column */}
             <div className="lg:col-span-5 space-y-4 order-1 lg:order-2">
               <span className="font-jetbrains-mono text-caption text-signal-lime uppercase tracking-widest bg-signal-lime/5 px-2.5 py-1 border border-signal-lime/20 inline-block">
                 [ STEP 02 ]
@@ -130,9 +122,7 @@ export function HowItWorks() {
             </div>
           </div>
 
-          {/* STEP 03 */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
-            {/* Text Column */}
             <div className="lg:col-span-5 space-y-4 order-1">
               <span className="font-jetbrains-mono text-caption text-signal-lime uppercase tracking-widest bg-signal-lime/5 px-2.5 py-1 border border-signal-lime/20 inline-block">
                 [ STEP 03 ]
@@ -149,7 +139,6 @@ export function HowItWorks() {
               </p>
             </div>
 
-            {/* Graphic Column */}
             <div className="lg:col-span-7 bg-onyx border border-graphite p-8 flex items-center justify-center relative min-h-56 order-2">
               <div className="absolute top-4 left-4 font-pt-serif font-light text-7xl text-graphite/30 select-none">
                 03

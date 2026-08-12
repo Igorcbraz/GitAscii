@@ -126,9 +126,7 @@ export function SummarySection() {
   return (
     <section className="bg-void-black border-t border-graphite py-24 px-6 relative z-10 w-full">
       <div className="max-w-7xl mx-auto space-y-24">
-        {/* Core Thesis: Asymmetric Broadsheet Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Column: Thesis Statement */}
           <div className="lg:col-span-5 space-y-6">
             <span className="font-inter-tight font-medium text-eyebrow uppercase tracking-[0.22em] text-ash block">
               {tc('landing.summary.eyebrow', '[ PRODUCT THESIS ]', '[ TESE DO PRODUTO ]')}
@@ -158,7 +156,6 @@ export function SummarySection() {
             </p>
           </div>
 
-          {/* Right Column: Typographic Feature List */}
           <div className="lg:col-span-7 divide-y divide-graphite">
             {features.map((feat, idx) => (
               <div
@@ -179,12 +176,10 @@ export function SummarySection() {
           </div>
         </div>
 
-        {/* Neon accent divider (thin line with glow in the middle) */}
         <div className="h-px bg-graphite w-full relative">
           <div className="absolute left-1/2 -translate-x-1/2 w-48 h-px bg-signal-lime shadow-[0_0_10px_rgba(197,255,74,0.5)]"></div>
         </div>
 
-        {/* Comparison Section (Addressing VS Platforms request) */}
         <div className="space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="font-inter-tight font-medium text-eyebrow uppercase tracking-[0.22em] text-ash block">
@@ -209,7 +204,6 @@ export function SummarySection() {
             </p>
           </div>
 
-          {/* Minimalist Editorial Table */}
           <div className="max-w-4xl mx-auto border-t border-b border-graphite overflow-x-auto">
             <table className="w-full text-left font-inter-tight text-note min-w-[500px]">
               <thead>
@@ -229,7 +223,6 @@ export function SummarySection() {
                   <tr key={idx} className="hover:bg-onyx/20 transition-colors">
                     <td className="py-4 px-4 font-medium text-chalk">{row.feature}</td>
 
-                    {/* GitAscii column */}
                     <td className="py-4 px-4 text-signal-lime font-bold font-jetbrains-mono text-[13px] bg-signal-lime/5">
                       {row.gitascii === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
@@ -238,7 +231,6 @@ export function SummarySection() {
                           : row.gitascii}
                     </td>
 
-                    {/* Readme.so column */}
                     <td className="py-4 px-4 text-ash font-jetbrains-mono text-[13px]">
                       {row.readme === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
@@ -253,7 +245,6 @@ export function SummarySection() {
                                 : '✕ ' + row.readme}
                     </td>
 
-                    {/* GPRM column */}
                     <td className="py-4 px-4 text-ash font-jetbrains-mono text-[13px]">
                       {row.gprm === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
@@ -273,7 +264,6 @@ export function SummarySection() {
             </table>
           </div>
 
-          {/* Table CTA Link */}
           <div className="flex justify-center pt-2">
             <Link
               href="/vs"

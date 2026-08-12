@@ -17,13 +17,15 @@ const WidgetNode = memo(
     githubData,
     globalStyles,
     isSelected,
+    isStatic = false,
   }: {
     widget: WidgetInstance
     githubData: NormalizedGitHubData
     globalStyles: GlobalStyles
     isSelected?: boolean
+    isStatic?: boolean
   }) {
-    const innerSvg = renderWidgetSvg(widget, githubData, globalStyles, false)
+    const innerSvg = renderWidgetSvg(widget, githubData, globalStyles, false, isStatic)
     return (
       <g
         id={`widget-${widget.instanceId}`}
@@ -43,7 +45,8 @@ const WidgetNode = memo(
       prev.widget === next.widget &&
       prev.githubData === next.githubData &&
       prev.globalStyles === next.globalStyles &&
-      prev.isSelected === next.isSelected
+      prev.isSelected === next.isSelected &&
+      prev.isStatic === next.isStatic
     )
   }
 )
@@ -361,6 +364,15 @@ export function SVGCanvas() {
     activeDragRef.current = drag
     dragPreviewRef.current = null
     setDragPreview({ positions: {}, sizes: {}, guides: [] })
+
+    if (svgContainerRef.current) {
+      svgContainerRef.current.classList.add('canvas-is-dragging')
+      svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
+        try {
+          svg.pauseAnimations()
+        } catch (e) {}
+      })
+    }
   }
 
   useEffect(() => {
@@ -598,6 +610,15 @@ export function SVGCanvas() {
         }
       }
 
+      if (svgContainerRef.current) {
+        svgContainerRef.current.classList.remove('canvas-is-dragging')
+        svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
+          try {
+            svg.unpauseAnimations()
+          } catch (e) {}
+        })
+      }
+
       activeDragRef.current = null
       dragPreviewRef.current = null
       setDragPreview(null)
@@ -799,6 +820,10 @@ export function SVGCanvas() {
                   @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=PT+Serif:ital,wght@0,300;1,300&display=swap');
                   * { box-sizing: border-box; }
                   text { user-select: none; }
+                  .canvas-is-dragging * {
+                    animation: none !important;
+                    transition: none !important;
+                  }
                 `}
               </style>
               {!config.globalStyles.transparentBackground && (
@@ -818,6 +843,7 @@ export function SVGCanvas() {
                     githubData={githubData}
                     globalStyles={config.globalStyles}
                     isSelected={selectedInstanceIds.includes(widget.instanceId)}
+                    isStatic={false}
                   />
                 ))
               })()}
