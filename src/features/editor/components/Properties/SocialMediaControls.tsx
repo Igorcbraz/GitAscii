@@ -4,6 +4,7 @@ import { Check, ChevronDown, Share2, X } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -193,6 +194,8 @@ interface SocialMediaControlsProps {
 
 export function SocialMediaControls({ instanceId, config }: SocialMediaControlsProps) {
   const { t } = useI18n()
+  const showTitle = config.showTitle !== false
+  const customTitle = (config.customTitle as string) || ''
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
   const githubData = useEditorStore((state) => state.githubData)
   const username = githubData?.user.login || 'user'
@@ -205,8 +208,6 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
 
   const socialUrls = (config.socialUrls as Record<string, string>) || {}
   const badgeStyle = (config.badgeStyle as string) || 'for-the-badge'
-  const showTitle = config.showTitle !== false
-  const customTitle = (config.customTitle as string) || '[ SOCIAL MEDIA ]'
 
   const badgeStylesList = BADGE_STYLES(t)
   const selectedBadgeStyleObj =
@@ -244,11 +245,9 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
           <label className="text-eyebrow text-ash font-medium">
             {t('editor.properties.show_title_label', 'Exibir Título')}
           </label>
-          <input
-            type="checkbox"
+          <Switch
             checked={showTitle}
-            onChange={(e) => updateWidgetConfig(instanceId, { showTitle: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { showTitle: checkedValue })}
           />
         </div>
 

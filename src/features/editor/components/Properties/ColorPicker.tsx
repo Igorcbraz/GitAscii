@@ -13,6 +13,7 @@ interface ColorPickerProps {
 }
 
 const PRESET_SWATCHES = [
+  'transparent', // Clear / Transparent
   '#c5ff4a', // Signal Lime
   '#00ffff', // Cyber Cyan
   '#ff00ff', // Neon Pink
@@ -60,7 +61,7 @@ export function ColorPicker({
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setHexInput(val)
-    if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(val) || val === 'transparent') {
       onChange(val)
     }
   }
@@ -87,9 +88,23 @@ export function ColorPicker({
       >
         <div className="flex items-center gap-2">
           <div
-            className="w-5 h-5 rounded-[3px] border border-white/20 shadow-inner flex items-center justify-center shrink-0"
-            style={{ backgroundColor: value }}
-          />
+            className="w-5 h-5 rounded-[3px] border border-white/20 shadow-inner flex items-center justify-center shrink-0 relative overflow-hidden"
+            style={
+              value === 'transparent'
+                ? {
+                    backgroundImage:
+                      'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
+                    backgroundSize: '8px 8px',
+                  }
+                : { backgroundColor: value }
+            }
+          >
+            {value === 'transparent' && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-[140%] h-[1.5px] bg-red-500/80 -rotate-45" />
+              </div>
+            )}
+          </div>
           <span className="font-jetbrains-mono text-eyebrow text-chalk uppercase tracking-wider">
             {value}
           </span>
@@ -131,14 +146,32 @@ export function ColorPicker({
                   onChange(color)
                   setHexInput(color)
                 }}
-                className={`w-6 h-6 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer ${
+                className={`w-6 h-6 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer relative overflow-hidden ${
                   value.toLowerCase() === color.toLowerCase()
                     ? 'border-signal-lime ring-2 ring-signal-lime/40 scale-105'
                     : 'border-white/10 hover:border-white/40'
                 }`}
-                style={{ backgroundColor: color }}
-                title={color}
-              />
+                style={
+                  color === 'transparent'
+                    ? {
+                        backgroundImage:
+                          'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
+                        backgroundSize: '8px 8px',
+                      }
+                    : { backgroundColor: color }
+                }
+                title={
+                  color === 'transparent'
+                    ? t('editor.properties.color_picker.transparent', 'Transparent')
+                    : color
+                }
+              >
+                {color === 'transparent' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-[140%] h-[1.5px] bg-red-500/80 -rotate-45" />
+                  </div>
+                )}
+              </button>
             ))}
           </div>
 

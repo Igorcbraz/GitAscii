@@ -141,8 +141,7 @@ export function useContentAnimation(
     })
 
     return () => cancelAnimationFrame(raf)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [svgKey, targets])
+  }, [svgKey, targets, svgContainerRef])
 }
 
 function getWidgetSvgElements(

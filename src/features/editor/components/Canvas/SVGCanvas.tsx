@@ -90,13 +90,8 @@ export function SVGCanvas() {
     githubData,
     selectedInstanceId,
     selectedInstanceIds,
-    setSelection,
-    updateWidgetPositions,
     selectWidget,
-    updateWidgetPosition,
-    updateWidgetSize,
     updateWidgetConfig,
-    recordHistorySnapshot,
     zoom,
   } = useEditorStore()
 
@@ -131,7 +126,12 @@ export function SVGCanvas() {
 
   const [playingPreviews, setPlayingPreviews] = useState<Record<string, boolean>>({})
 
-  // Watch for changes in animationPreviewKey of widgets to trigger temporary play mode
+  const [editingText, setEditingText] = useState<{
+    instanceId: string
+    field: string
+    initialValue: string
+  } | null>(null)
+
   const widgetPreviewKeys = useMemo(() => {
     if (!config) return ''
     return config.widgets
@@ -154,7 +154,6 @@ export function SVGCanvas() {
     newParts.forEach((part, idx) => {
       if (part !== oldParts[idx]) {
         const [instanceId] = part.split(':')
-        // Enable live preview play for 2.5 seconds
         setPlayingPreviews((prev) => ({ ...prev, [instanceId]: true }))
         setTimeout(() => {
           setPlayingPreviews((prev) => ({ ...prev, [instanceId]: false }))
@@ -165,7 +164,6 @@ export function SVGCanvas() {
     prevKeysRef.current = widgetPreviewKeys
   }, [widgetPreviewKeys, config])
 
-  // Style block to inject into the canvas editor that forces static state (opacity 1, no anim) for any widget not actively previewing
   const editorAnimOverrideStyle = useMemo(() => {
     if (!config) return ''
     return config.widgets
@@ -263,8 +261,7 @@ export function SVGCanvas() {
         console.warn('Background ASCII Conversion Warning:', err)
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [asciiParamsStr, githubData, updateWidgetConfig])
+  }, [asciiParamsStr, githubData, updateWidgetConfig, config])
 
   useEffect(() => {
     if (!isLayersOpen) return
@@ -277,8 +274,38 @@ export function SVGCanvas() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isLayersOpen])
 
+  const previousWidgetsLength = useRef(config?.widgets.length || 0)
+
   useEffect(() => {
     configRef.current = config
+
+    if (config && config.widgets.length > previousWidgetsLength.current) {
+      const newWidget = config.widgets[config.widgets.length - 1]
+      if (containerRef.current?.parentElement && newWidget) {
+        const parent = containerRef.current.parentElement
+        const targetY = newWidget.position.y * zoomRef.current - 100
+
+        const startY = parent.scrollTop
+        const distance = targetY - startY
+        const duration = 400 // ms
+        let start: number | null = null
+
+        const step = (timestamp: number) => {
+          if (!start) start = timestamp
+          const progress = Math.min((timestamp - start) / duration, 1)
+
+          const ease = 1 - Math.pow(1 - progress, 3)
+          parent.scrollTop = startY + distance * ease
+          if (progress < 1) {
+            requestAnimationFrame(step)
+          }
+        }
+        requestAnimationFrame(step)
+      }
+    }
+    if (config) {
+      previousWidgetsLength.current = config.widgets.length
+    }
   }, [config])
 
   useEffect(() => {
@@ -584,11 +611,12 @@ export function SVGCanvas() {
       dragPosRef.current = { x: clientX, y: clientY }
       if (activeDragRef.current || marqueeRef.current) startAutoScroll()
 
-      if (marqueeRef.current) {
+      if (marqueeRef.current && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
         marqueeRef.current = {
           ...marqueeRef.current,
-          currentX: clientX,
-          currentY: clientY,
+          currentX: (clientX - rect.left) / zoomRef.current,
+          currentY: (clientY - rect.top) / zoomRef.current,
         }
         if (marqueeRafRef.current === null) {
           marqueeRafRef.current = requestAnimationFrame(() => {
@@ -605,16 +633,11 @@ export function SVGCanvas() {
 
       const currentMarquee = marqueeRef.current
       const currentConfig = configRef.current
-      if (currentMarquee && containerRef.current && currentConfig) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const startX = (currentMarquee.startX - rect.left) / zoomRef.current
-        const startY = (currentMarquee.startY - rect.top) / zoomRef.current
-        const endX = (currentMarquee.currentX - rect.left) / zoomRef.current
-        const endY = (currentMarquee.currentY - rect.top) / zoomRef.current
-        const minX = Math.min(startX, endX)
-        const maxX = Math.max(startX, endX)
-        const minY = Math.min(startY, endY)
-        const maxY = Math.max(startY, endY)
+      if (currentMarquee && currentConfig) {
+        const minX = Math.min(currentMarquee.startX, currentMarquee.currentX)
+        const maxX = Math.max(currentMarquee.startX, currentMarquee.currentX)
+        const minY = Math.min(currentMarquee.startY, currentMarquee.currentY)
+        const maxY = Math.max(currentMarquee.startY, currentMarquee.currentY)
         const selectedIds = currentConfig.widgets
           .filter(
             (widget) =>
@@ -660,7 +683,7 @@ export function SVGCanvas() {
       if (dragRafRef.current !== null) cancelAnimationFrame(dragRafRef.current)
       if (marqueeRafRef.current !== null) cancelAnimationFrame(marqueeRafRef.current)
     }
-  }, [scheduleDragPreview])
+  }, [githubData, scheduleDragPreview])
 
   if (!config || !githubData) {
     return (
@@ -691,11 +714,12 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-none') ||
           target.classList.contains('pointer-events-auto')
         ) {
+          const rect = containerRef.current?.getBoundingClientRect()
           const nextMarquee = {
-            startX: e.clientX,
-            startY: e.clientY,
-            currentX: e.clientX,
-            currentY: e.clientY,
+            startX: rect ? (e.clientX - rect.left) / zoom : e.clientX,
+            startY: rect ? (e.clientY - rect.top) / zoom : e.clientY,
+            currentX: rect ? (e.clientX - rect.left) / zoom : e.clientX,
+            currentY: rect ? (e.clientY - rect.top) / zoom : e.clientY,
           }
           marqueeRef.current = nextMarquee
           setMarquee(nextMarquee)
@@ -713,11 +737,12 @@ export function SVGCanvas() {
           target.classList.contains('pointer-events-auto')
         ) {
           const touch = e.touches[0]
+          const rect = containerRef.current?.getBoundingClientRect()
           const nextMarquee = {
-            startX: touch.clientX,
-            startY: touch.clientY,
-            currentX: touch.clientX,
-            currentY: touch.clientY,
+            startX: rect ? (touch.clientX - rect.left) / zoom : touch.clientX,
+            startY: rect ? (touch.clientY - rect.top) / zoom : touch.clientY,
+            currentX: rect ? (touch.clientX - rect.left) / zoom : touch.clientX,
+            currentY: rect ? (touch.clientY - rect.top) / zoom : touch.clientY,
           }
           marqueeRef.current = nextMarquee
           setMarquee(nextMarquee)
@@ -827,16 +852,10 @@ export function SVGCanvas() {
             <div
               className="absolute bg-signal-lime/20 border border-signal-lime z-50 pointer-events-none"
               style={{
-                left:
-                  (Math.min(marquee.startX, marquee.currentX) -
-                    containerRef.current.getBoundingClientRect().left) /
-                  zoom,
-                top:
-                  (Math.min(marquee.startY, marquee.currentY) -
-                    containerRef.current.getBoundingClientRect().top) /
-                  zoom,
-                width: Math.abs(marquee.currentX - marquee.startX) / zoom,
-                height: Math.abs(marquee.currentY - marquee.startY) / zoom,
+                left: Math.min(marquee.startX, marquee.currentX),
+                top: Math.min(marquee.startY, marquee.currentY),
+                width: Math.abs(marquee.currentX - marquee.startX),
+                height: Math.abs(marquee.currentY - marquee.startY),
               }}
             />
           )}
@@ -875,7 +894,25 @@ export function SVGCanvas() {
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation()
-                  useEditorStore.getState().setActiveMobilePanel('properties')
+
+                  if (widget.widgetId === 'ascii-text') {
+                    setEditingText({
+                      instanceId: widget.instanceId,
+                      field: 'customText',
+                      initialValue: (widget.config.customText as string) || 'GitAscii',
+                    })
+                  } else if (widget.widgetId === 'bio') {
+                    setEditingText({
+                      instanceId: widget.instanceId,
+                      field: 'customBio',
+                      initialValue:
+                        (widget.config.customBio as string) ||
+                        githubData.user.bio ||
+                        'No bio provided.',
+                    })
+                  } else {
+                    useEditorStore.getState().setActiveMobilePanel('properties')
+                  }
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation()
@@ -1092,6 +1129,45 @@ export function SVGCanvas() {
                       title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
                     />
                   </>
+                )}
+
+                {editingText?.instanceId === widget.instanceId && (
+                  <div
+                    className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-carbon/95 p-4 rounded-sm shadow-2xl"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                  >
+                    <textarea
+                      autoFocus
+                      defaultValue={editingText.initialValue}
+                      className="w-full h-full bg-transparent text-white font-jetbrains-mono outline-none resize-none p-2 border border-graphite rounded focus:border-signal-lime/50"
+                      style={{ fontSize: '14px' }}
+                      onBlur={(e) => {
+                        const val = e.target.value
+                        useEditorStore
+                          .getState()
+                          .updateWidgetConfig(widget.instanceId, { [editingText.field]: val })
+                        setEditingText(null)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          e.stopPropagation()
+                          setEditingText(null)
+                        } else if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          e.currentTarget.blur()
+                        }
+                      }}
+                    />
+                    <div className="text-center text-xs text-ash font-inter-tight mt-2">
+                      {t(
+                        'editor.canvas.edit_hint',
+                        'Enter para salvar, Shift+Enter para nova linha, Esc para cancelar'
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )

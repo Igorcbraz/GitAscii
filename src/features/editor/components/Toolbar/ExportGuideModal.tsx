@@ -109,6 +109,14 @@ export function ExportGuideModal({
     }
   }, [isOpen])
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true)
+    setTimeout(() => {
+      onClose()
+      setIsClosing(false)
+    }, 200)
+  }, [onClose])
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -117,16 +125,7 @@ export function ExportGuideModal({
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen])
-
-  const handleClose = useCallback(() => {
-    setIsClosing(true)
-    setTimeout(() => {
-      onClose()
-      setIsClosing(false)
-    }, 200)
-  }, [onClose])
+  }, [isOpen, handleClose])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode)

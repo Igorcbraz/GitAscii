@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { type AsciiConvertOptions, convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { useI18n } from '@/i18n'
 
@@ -30,8 +31,8 @@ const CHARSET_OPTIONS = [
   {
     id: 'dense',
     name: 'DENSE GRADIENT',
-    preview: '"$@B%8&WM#*oahk',
-    info: '67 chars - Máxima Precisão',
+    preview: ' .\'`^\\",:;I',
+    info: '70 chars - Máxima Precisão',
   },
   { id: 'standard', name: 'STANDARD', preview: ' .:-=+*#%@', info: '10 chars' },
   { id: 'blocks', name: 'BLOCKS / SHADING', preview: ' ░▒▓█', info: '5 chars' },
@@ -42,6 +43,12 @@ const CHARSET_OPTIONS = [
   { id: 'slash', name: 'SLASH PATTERN', preview: ' \\/|/\\/|', info: '3 chars' },
   { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
   { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
+  {
+    id: 'braille',
+    name: 'TRUE BRAILLE',
+    preview: '⡿⣟⣯⣷',
+    info: 'Alta Resolução 2x4',
+  },
   { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
 ]
 
@@ -61,10 +68,19 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
   const customCharset = (config.customCharset as string) || ''
   const invert = Boolean(config.invert)
 
-  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
+  const detail =
+    (config.detail as 'lowest' | 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
   const cols =
     Number(config.cols) ||
-    (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150)
+    (detail === 'lowest'
+      ? 50
+      : detail === 'low'
+        ? 100
+        : detail === 'medium'
+          ? 150
+          : detail === 'high'
+            ? 200
+            : 250)
 
   const contrast = Number(config.contrast !== undefined ? config.contrast : 10)
   const brightness = Number(config.brightness !== undefined ? config.brightness : 0)
@@ -141,10 +157,16 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
   ])
 
   const isInitialMount = useRef(true)
+  const asciiTextRef = useRef(config.asciiText)
+
+  useEffect(() => {
+    asciiTextRef.current = config.asciiText
+  }, [config.asciiText])
+
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
-      if (!config.asciiText) {
+      if (!asciiTextRef.current) {
         processImageToAscii()
       }
       return
@@ -155,7 +177,6 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     }, 150)
 
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     sourceType,
     customImageUrl,
@@ -385,11 +406,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.invert_chars', 'Inverter Caracteres (Invert)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={invert}
-            onChange={(e) => updateWidgetConfig(instanceId, { invert: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { invert: checkedValue })}
           />
         </div>
       </div>
@@ -402,19 +421,20 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-signal-lime font-mono font-semibold">{cols} cols</span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           {[
-            { id: 'low', label: t('editor.ascii.low', 'Baixo'), c: 28 },
-            { id: 'medium', label: t('editor.ascii.medium', 'Médio'), c: 45 },
-            { id: 'high', label: t('editor.ascii.high', 'Alto'), c: 85 },
-            { id: 'ultra', label: t('editor.ascii.ultra', 'Ultra'), c: 150 },
+            { id: 'lowest', label: t('editor.ascii.lowest', 'Min'), c: 50 },
+            { id: 'low', label: t('editor.ascii.low', 'Baixo'), c: 100 },
+            { id: 'medium', label: t('editor.ascii.medium', 'Médio'), c: 150 },
+            { id: 'high', label: t('editor.ascii.high', 'Alto'), c: 200 },
+            { id: 'ultra', label: t('editor.ascii.ultra', 'Max'), c: 250 },
           ].map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => updateWidgetConfig(instanceId, { detail: item.id, cols: item.c })}
               className={`py-1 text-caption font-medium rounded border transition-all ${
-                cols === item.c || detail === item.id
+                cols === item.c
                   ? 'bg-signal-lime text-black border-signal-lime font-semibold'
                   : 'bg-graphite text-ash border-graphite hover:text-chalk'
               }`}
@@ -427,7 +447,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
         <input
           type="range"
           min={16}
-          max={150}
+          max={300}
           step={2}
           value={cols}
           onChange={(e) =>
@@ -486,11 +506,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
             <Sparkles size={13} className="text-signal-lime" />{' '}
             {t('editor.ascii.edge_enhance', 'Realçar Contornos (Rosto)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={edgeEnhance}
-            onChange={(e) => updateWidgetConfig(instanceId, { edgeEnhance: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) =>
+              updateWidgetConfig(instanceId, { edgeEnhance: checkedValue })
+            }
           />
         </div>
 
@@ -498,11 +518,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.auto_contrast', 'Auto-Contraste (Gama Dinâmica)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={autoContrast}
-            onChange={(e) => updateWidgetConfig(instanceId, { autoContrast: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) =>
+              updateWidgetConfig(instanceId, { autoContrast: checkedValue })
+            }
           />
         </div>
 
@@ -510,11 +530,9 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
           <span className="text-eyebrow text-chalk font-medium">
             {t('editor.ascii.dithering', 'Pontilhado Fotográfico (Dithering)')}
           </span>
-          <input
-            type="checkbox"
+          <Switch
             checked={dithering}
-            onChange={(e) => updateWidgetConfig(instanceId, { dithering: e.target.checked })}
-            className="w-4 h-4 accent-signal-lime cursor-pointer rounded"
+            onChange={(checkedValue) => updateWidgetConfig(instanceId, { dithering: checkedValue })}
           />
         </div>
 
