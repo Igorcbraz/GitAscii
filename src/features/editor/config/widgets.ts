@@ -46,6 +46,7 @@ export interface WidgetCatalogItem {
   isExternal?: boolean
   badge?: WidgetBadge
   category?: WidgetCategory
+  defaultSize?: { width: number; height: number }
 }
 
 export interface WidgetFilterItem {
@@ -263,6 +264,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Animated typewriter terminal SVG',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 450, height: 300 },
   },
   {
     id: 'godprofile-marquee',
@@ -271,6 +273,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Infinite CSS-scrolling tech badges',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 800, height: 120 },
   },
   {
     id: 'godprofile-neural',
@@ -279,6 +282,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Animated tech stack visualization',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 800, height: 320 },
   },
   {
     id: 'godprofile-trophies',
@@ -287,6 +291,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Trophy case with S/A/B/C tiers',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 800, height: 280 },
   },
   {
     id: 'godprofile-wakatime',
@@ -295,6 +300,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Coding stats horizontal bar chart',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 420, height: 260 },
   },
 
   {
@@ -304,6 +310,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     desc: 'Isometric 3D globe SVG',
     category: 'godprofile',
     isExternal: true,
+    defaultSize: { width: 320, height: 350 },
   },
 ]
 

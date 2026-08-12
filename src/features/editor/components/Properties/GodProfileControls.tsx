@@ -5,7 +5,6 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { TECH_CATALOG } from './TechStackControls'
@@ -17,7 +16,6 @@ interface GodProfileControlsProps {
 }
 
 export function GodProfileControls({ instanceId, widgetId, config }: GodProfileControlsProps) {
-  const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
   // 1. Terminal Config

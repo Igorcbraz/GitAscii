@@ -4,6 +4,8 @@ import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
 
+import { WIDGET_CATALOG } from '../config/widgets'
+
 interface HistoryState {
   past: SavedConfiguration[]
   future: SavedConfiguration[]
@@ -457,16 +459,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         ghstats: { width: 390, height: 350 },
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
-        'godprofile-terminal': { width: 450, height: 300 },
-        'godprofile-marquee': { width: 800, height: 120 },
-        'godprofile-neural': { width: 800, height: 320 },
-        'godprofile-trophies': { width: 800, height: 280 },
-        'godprofile-wakatime': { width: 420, height: 260 },
-
-        'godprofile-globe': { width: 320, height: 350 },
       }
-
-      const widgetSize = defaultSizeMap[widgetId] || { width: 800, height: 120 }
+      const catalogItem = WIDGET_CATALOG.find((item) => item.id === widgetId)
+      const widgetSize = catalogItem?.defaultSize ||
+        defaultSizeMap[widgetId] || { width: 800, height: 120 }
       const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0)
 
       const newInstance: WidgetInstance = {
