@@ -51,8 +51,7 @@ function renderExternalWidgetSvg(
   accent: string,
   mode: 'contain' | 'badge' = 'contain',
   targetUrl?: string,
-  fallbackUrl?: string,
-  skipImage: boolean = false
+  fallbackUrl?: string
 ): string {
   let processedUrl = url
   try {
@@ -92,9 +91,6 @@ function renderExternalWidgetSvg(
         ${innerContentHtml}
       </div>
     </foreignObject>
-    ${!skipImage ? (targetUrl ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer">` : '') : ''}
-    ${!skipImage ? `<image href="${escapeXml(processedUrl)}" xlink:href="${escapeXml(processedUrl)}" x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}" preserveAspectRatio="${mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'}" onerror="this.style.display='none';" />` : ''}
-    ${!skipImage ? (targetUrl ? `</a>` : '') : ''}
     <!-- EXTERNAL_WIDGET_END -->
   `
 }
