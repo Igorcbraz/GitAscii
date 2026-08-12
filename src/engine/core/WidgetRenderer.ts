@@ -215,6 +215,12 @@ export function renderWidgetSvg(
       const viewW = maxCols * charWidth
       const viewH = asciiLines.length * lineHeight
 
+      const xCoords = Array.from({ length: maxCols }, (_, i) => (i * charWidth).toFixed(2)).join(
+        ' '
+      )
+      const fontFamily =
+        "'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace"
+
       let innerContent = ''
 
       if (colorMode === 'color' && asciiColors && asciiColors.length === asciiLines.length) {
@@ -227,11 +233,7 @@ export function renderWidgetSvg(
               let chunk = line[charIndex]
               const charColor = rowColors[charIndex] || accent
               let nextIndex = charIndex + 1
-              while (
-                nextIndex < line.length &&
-                (rowColors[nextIndex] || accent) === charColor &&
-                nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
-              ) {
+              while (nextIndex < line.length && (rowColors[nextIndex] || accent) === charColor) {
                 chunk += line[nextIndex]
                 nextIndex++
               }
@@ -240,35 +242,16 @@ export function renderWidgetSvg(
             }
 
             const yPos = (rowIndex + 0.85) * lineHeight
-            return `<text x="0" y="${yPos}" font-family="'JetBrains Mono', monospace" font-size="${fontSize}" xml:space="preserve">${rowSvg}</text>`
+            return `<text x="${xCoords}" y="${yPos}" font-family="${fontFamily}" font-size="${fontSize}" xml:space="preserve">${rowSvg}</text>`
           })
           .join('\n')
       } else {
-        const linesContent = asciiLines
-          .map((line, i) => {
-            let rowSvg = ''
-            for (let charIndex = 0; charIndex < line.length;) {
-              let chunk = line[charIndex]
-              let nextIndex = charIndex + 1
-              while (
-                nextIndex < line.length &&
-                nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
-              ) {
-                chunk += line[nextIndex]
-                nextIndex++
-              }
-              rowSvg += `<tspan>${escapeXml(chunk)}</tspan>`
-              charIndex = nextIndex
-            }
-            return `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${rowSvg}</tspan>`
+        innerContent = asciiLines
+          .map((line, rowIndex) => {
+            const yPos = (rowIndex + 0.85) * lineHeight
+            return `<text x="${xCoords}" y="${yPos}" font-family="${fontFamily}" font-size="${fontSize}" fill="${accent}" xml:space="preserve">${escapeXml(line)}</text>`
           })
-          .join('')
-
-        innerContent = `
-          <text x="0" y="${fontSize * 0.85}" font-family="'JetBrains Mono', monospace" font-size="${fontSize}" fill="${accent}" xml:space="preserve">
-            ${linesContent}
-          </text>
-        `
+          .join('\n')
       }
 
       contentSvg = `
@@ -297,31 +280,22 @@ export function renderWidgetSvg(
       const viewW = maxCols * charWidth
       const viewH = asciiLines.length * lineHeight
 
+      const xCoords = Array.from({ length: maxCols }, (_, i) => (i * charWidth).toFixed(2)).join(
+        ' '
+      )
+      const fontFamily =
+        "'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace"
+
       const linesContent = asciiLines
-        .map((line, i) => {
-          let rowSvg = ''
-          for (let charIndex = 0; charIndex < line.length;) {
-            let chunk = line[charIndex]
-            let nextIndex = charIndex + 1
-            while (
-              nextIndex < line.length &&
-              nextIndex - charIndex < Math.max(1, Math.floor(maxCols / 25))
-            ) {
-              chunk += line[nextIndex]
-              nextIndex++
-            }
-            rowSvg += `<tspan>${escapeXml(chunk)}</tspan>`
-            charIndex = nextIndex
-          }
-          return `<tspan x="0" dy="${i === 0 ? 0 : lineHeight}">${rowSvg}</tspan>`
+        .map((line, rowIndex) => {
+          const yPos = (rowIndex + 0.85) * lineHeight
+          return `<text x="${xCoords}" y="${yPos}" font-family="${fontFamily}" font-size="${fontSize}" fill="${accent}" xml:space="preserve">${escapeXml(line)}</text>`
         })
-        .join('')
+        .join('\n')
 
       contentSvg = `
         <svg x="16" y="16" width="${width - 32}" height="${height - 32}" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
-          <text x="0" y="${fontSize * 0.85}" font-family="'JetBrains Mono', monospace" font-size="${fontSize}" fill="${accent}" xml:space="preserve">
-            ${linesContent}
-          </text>
+          ${linesContent}
         </svg>
       `
       break

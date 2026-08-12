@@ -31,8 +31,8 @@ const CHARSET_OPTIONS = [
   {
     id: 'dense',
     name: 'DENSE GRADIENT',
-    preview: '"$@B%8&WM#*oahk',
-    info: '67 chars - Máxima Precisão',
+    preview: ' .\'`^\\",:;I',
+    info: '70 chars - Máxima Precisão',
   },
   { id: 'standard', name: 'STANDARD', preview: ' .:-=+*#%@', info: '10 chars' },
   { id: 'blocks', name: 'BLOCKS / SHADING', preview: ' ░▒▓█', info: '5 chars' },
@@ -43,6 +43,12 @@ const CHARSET_OPTIONS = [
   { id: 'slash', name: 'SLASH PATTERN', preview: ' \\/|/\\/|', info: '3 chars' },
   { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
   { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
+  {
+    id: 'braille',
+    name: 'TRUE BRAILLE',
+    preview: '⡿⣟⣯⣷',
+    info: 'Alta Resolução 2x4',
+  },
   { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
 ]
 
@@ -62,7 +68,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
   const customCharset = (config.customCharset as string) || ''
   const invert = Boolean(config.invert)
 
-  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'medium'
+  const detail = (config.detail as 'low' | 'medium' | 'high' | 'ultra' | 'custom') || 'ultra'
   const cols =
     Number(config.cols) ||
     (detail === 'low' ? 28 : detail === 'medium' ? 45 : detail === 'high' ? 85 : 150)
