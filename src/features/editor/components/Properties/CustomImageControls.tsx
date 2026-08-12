@@ -11,9 +11,9 @@ import {
 import React, { useRef, useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { normalizeUrl } from '@/engine/import/url/UrlNormalizer'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
+import { normalizeUrl } from '@/utils/url'
 
 import { useEditorStore } from '../../store/editorStore'
 

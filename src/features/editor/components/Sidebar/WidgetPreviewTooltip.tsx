@@ -29,7 +29,7 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   bio: { width: 800, height: 160 },
   stats: { width: 800, height: 120 },
   languages: { width: 800, height: 140 },
-  repositories: { width: 800, height: 180 },
+  repositories: { width: 800, height: 300 },
   'gitfest-lineup': { width: 500, height: 650 },
   'github-readme-stats': { width: 500, height: 210 },
   'streak-stats': { width: 500, height: 210 },

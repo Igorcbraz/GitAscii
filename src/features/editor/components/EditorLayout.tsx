@@ -1,22 +1,12 @@
 'use client'
 
-import {
-  AlertCircle,
-  ArrowRight,
-  FileCode2,
-  Grid,
-  Monitor,
-  Sliders,
-  Sparkles,
-  Terminal,
-} from 'lucide-react'
+import { AlertCircle, ArrowRight, Grid, Monitor, Sliders, Sparkles, Terminal } from 'lucide-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
-import { importReadme } from '@/engine/import/readmeImporter'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
@@ -222,54 +212,26 @@ export function EditorLayout({
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-500 flex flex-col gap-3 w-full">
               <button
                 onClick={() => {
-                  const config = importReadme(githubData)
+                  const config = generateBestProfile(githubData)
                   initEditor(config, githubData)
                   setShowOnboarding(false)
                 }}
                 className="group relative w-full flex items-center gap-5 px-6 py-5 bg-signal-lime text-black rounded-sm shadow-[0_0_20px_rgba(197,255,74,0.3)] hover:shadow-[0_0_32px_rgba(197,255,74,0.55)] hover:brightness-105 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 cursor-pointer text-left"
               >
                 <div className="shrink-0 w-10 h-10 bg-black/15 rounded-sm flex items-center justify-center">
-                  <FileCode2 size={20} className="text-black" />
+                  <Sparkles size={20} className="text-black" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-inter-tight font-semibold text-body leading-tight tracking-[0.01em] mb-0.5">
-                    Importar do meu README atual
-                  </div>
-                  <div className="font-inter-tight text-note text-black/60 leading-snug">
-                    Lê seu README do GitHub e converte para o editor
-                  </div>
-                </div>
-                <ArrowRight
-                  size={18}
-                  className="shrink-0 text-black/50 group-hover:translate-x-1 transition-transform duration-300"
-                />
-              </button>
-
-              <button
-                onClick={() => {
-                  const config = generateBestProfile(githubData)
-                  initEditor(config, githubData)
-                  setShowOnboarding(false)
-                }}
-                className="group relative w-full flex items-center gap-5 px-6 py-5 bg-onyx border border-graphite hover:border-signal-lime/40 hover:bg-iron rounded-sm transition-all duration-300 cursor-pointer text-left"
-              >
-                <div className="shrink-0 w-10 h-10 bg-graphite rounded-sm flex items-center justify-center group-hover:bg-signal-lime/10 transition-colors duration-300">
-                  <Sparkles
-                    size={20}
-                    className="text-ash group-hover:text-signal-lime transition-colors duration-300"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-inter-tight font-semibold text-body text-white leading-tight tracking-[0.01em] mb-0.5">
                     Começar com um Template
                   </div>
-                  <div className="font-inter-tight text-note text-ash leading-snug">
+                  <div className="font-inter-tight text-note text-black/60 leading-snug">
                     Layouts prontos pensados para diferentes tipos de perfil
                   </div>
                 </div>
                 <ArrowRight
                   size={18}
-                  className="shrink-0 text-fog group-hover:text-signal-lime group-hover:translate-x-1 transition-all duration-300"
+                  className="shrink-0 text-black/50 group-hover:translate-x-1 transition-transform duration-300"
                 />
               </button>
 
@@ -285,25 +247,25 @@ export function EditorLayout({
                   initEditor(config, githubData)
                   setShowOnboarding(false)
                 }}
-                className="group relative w-full flex items-center gap-5 px-6 py-4 bg-void-black border border-graphite/60 hover:border-graphite rounded-sm transition-all duration-300 cursor-pointer text-left"
+                className="group relative w-full flex items-center gap-5 px-6 py-5 bg-onyx border border-graphite hover:border-signal-lime/40 hover:bg-iron rounded-sm transition-all duration-300 cursor-pointer text-left"
               >
-                <div className="shrink-0 w-10 h-10 bg-onyx rounded-sm flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 bg-graphite rounded-sm flex items-center justify-center group-hover:bg-signal-lime/10 transition-colors duration-300">
                   <Monitor
                     size={20}
-                    className="text-fog group-hover:text-ash transition-colors duration-300"
+                    className="text-ash group-hover:text-signal-lime transition-colors duration-300"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-inter-tight font-medium text-body text-ash group-hover:text-white leading-tight tracking-[0.01em] mb-0.5 transition-colors duration-300">
+                  <div className="font-inter-tight font-semibold text-body text-white leading-tight tracking-[0.01em] mb-0.5">
                     Começar do Zero
                   </div>
-                  <div className="font-inter-tight text-note text-fog leading-snug">
+                  <div className="font-inter-tight text-note text-ash leading-snug">
                     Canvas vazio — total liberdade criativa
                   </div>
                 </div>
                 <ArrowRight
                   size={18}
-                  className="shrink-0 text-fog/40 group-hover:text-fog group-hover:translate-x-1 transition-all duration-300"
+                  className="shrink-0 text-fog group-hover:text-signal-lime group-hover:translate-x-1 transition-all duration-300"
                 />
               </button>
             </div>

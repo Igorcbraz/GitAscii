@@ -1,9 +1,9 @@
 import { Image, Upload, User } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 
-import { normalizeUrl } from '@/engine/import/url/UrlNormalizer'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
+import { normalizeUrl } from '@/utils/url'
 
 import { useEditorStore } from '../../store/editorStore'
 
