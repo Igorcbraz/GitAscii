@@ -77,6 +77,11 @@ export function TopLanguagesControls({ instanceId, config }: TopLanguagesControl
     if (!currentWidget) return
     const newHeight = computeHeight(layout, langsCount)
     const currentWidth = currentWidget.size?.width ?? 300
+
+    if (currentWidget.size?.height === newHeight && currentWidget.size?.width === currentWidth) {
+      return
+    }
+
     updateWidgetSize(instanceId, { width: currentWidth, height: newHeight }, false)
   }, [layout, langsCount, currentWidget, updateWidgetSize, instanceId])
 

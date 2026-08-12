@@ -261,8 +261,7 @@ export function SVGCanvas() {
         console.warn('Background ASCII Conversion Warning:', err)
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [asciiParamsStr, githubData, updateWidgetConfig])
+  }, [asciiParamsStr, githubData, updateWidgetConfig, config])
 
   useEffect(() => {
     if (!isLayersOpen) return

@@ -142,10 +142,16 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
   ])
 
   const isInitialMount = useRef(true)
+  const asciiTextRef = useRef(config.asciiText)
+
+  useEffect(() => {
+    asciiTextRef.current = config.asciiText
+  }, [config.asciiText])
+
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
-      if (!config.asciiText) {
+      if (!asciiTextRef.current) {
         processImageToAscii()
       }
       return
@@ -156,7 +162,6 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     }, 150)
 
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     sourceType,
     customImageUrl,
