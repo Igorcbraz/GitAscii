@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { WIDGET_IDS } from '@/constants'
 import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
@@ -46,38 +47,50 @@ export async function GET(
           let wWidth = 800
           let wHeight = 210
 
-          if (['github-readme-stats', 'streak-stats', 'metrics-card'].includes(w)) {
-            wWidth = 390
-            wHeight = 210
-          } else if (['activity-graph', 'contribution-snake', 'readme-quotes'].includes(w)) {
-            wWidth = 800
-            wHeight = 210
-          } else if (w === 'stats' || w === 'streak') {
+          if (
+            [
+              WIDGET_IDS.GITHUB_README_STATS as string,
+              WIDGET_IDS.STREAK_STATS as string,
+              WIDGET_IDS.METRICS_CARD as string,
+            ].includes(w)
+          ) {
             wWidth = 390
             wHeight = 210
           } else if (
             [
-              'godprofile-terminal',
-              'godprofile-marquee',
-              'godprofile-neural',
-              'godprofile-trophies',
-              'godprofile-wakatime',
-              'godprofile-globe',
-              'asciiprofile-portrait',
-              'asciiprofile-info',
-              'asciiprofile-heatmap',
+              WIDGET_IDS.ACTIVITY_GRAPH as string,
+              WIDGET_IDS.CONTRIBUTION_SNAKE as string,
+              WIDGET_IDS.README_QUOTES as string,
+            ].includes(w)
+          ) {
+            wWidth = 800
+            wHeight = 210
+          } else if (w === WIDGET_IDS.STATS || w === 'streak') {
+            wWidth = 390
+            wHeight = 210
+          } else if (
+            [
+              WIDGET_IDS.GODPROFILE_TERMINAL as string,
+              WIDGET_IDS.GODPROFILE_MARQUEE as string,
+              WIDGET_IDS.GODPROFILE_NEURAL as string,
+              WIDGET_IDS.GODPROFILE_TROPHIES as string,
+              WIDGET_IDS.GODPROFILE_WAKATIME as string,
+              WIDGET_IDS.GODPROFILE_GLOBE as string,
+              WIDGET_IDS.ASCII_PORTRAIT as string,
+              WIDGET_IDS.ASCII_INFO as string,
+              WIDGET_IDS.ASCII_HEATMAP as string,
             ].includes(w)
           ) {
             const defaultSizeMap: Record<string, { width: number; height: number }> = {
-              'godprofile-terminal': { width: 450, height: 300 },
-              'godprofile-marquee': { width: 800, height: 120 },
-              'godprofile-neural': { width: 800, height: 320 },
-              'godprofile-trophies': { width: 800, height: 280 },
-              'godprofile-wakatime': { width: 420, height: 260 },
-              'godprofile-globe': { width: 320, height: 350 },
-              'asciiprofile-portrait': { width: 370, height: 400 },
-              'asciiprofile-info': { width: 490, height: 400 },
-              'asciiprofile-heatmap': { width: 780, height: 240 },
+              [WIDGET_IDS.GODPROFILE_TERMINAL]: { width: 450, height: 300 },
+              [WIDGET_IDS.GODPROFILE_MARQUEE]: { width: 800, height: 120 },
+              [WIDGET_IDS.GODPROFILE_NEURAL]: { width: 800, height: 320 },
+              [WIDGET_IDS.GODPROFILE_TROPHIES]: { width: 800, height: 280 },
+              [WIDGET_IDS.GODPROFILE_WAKATIME]: { width: 420, height: 260 },
+              [WIDGET_IDS.GODPROFILE_GLOBE]: { width: 320, height: 350 },
+              [WIDGET_IDS.ASCII_PORTRAIT]: { width: 370, height: 400 },
+              [WIDGET_IDS.ASCII_INFO]: { width: 490, height: 400 },
+              [WIDGET_IDS.ASCII_HEATMAP]: { width: 780, height: 240 },
             }
             wWidth = defaultSizeMap[w].width
             wHeight = defaultSizeMap[w].height

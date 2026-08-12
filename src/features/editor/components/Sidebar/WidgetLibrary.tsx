@@ -15,6 +15,7 @@ import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
+import { WIDGET_CATEGORIES, WIDGET_IDS } from '@/constants'
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
 import { useI18n } from '@/i18n'
 
@@ -606,18 +607,21 @@ export function WidgetLibrary() {
                       <ExternalLink size={10} />
                     </a>
                     <span className="ml-auto font-inter-tight text-caption text-ash">
-                      {filteredWidgets.filter((w) => w.category === 'asciiprofile').length}
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE)
+                          .length
+                      }
                     </span>
                   </div>
                   <div className="space-y-2">
                     {filteredWidgets
-                      .filter((w) => w.category === 'asciiprofile')
+                      .filter((w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE)
                       .map((item) => {
                         const Icon = item.icon
                         const shellScript =
-                          item.id === 'asciiprofile-portrait'
+                          item.id === WIDGET_IDS.ASCII_PORTRAIT
                             ? './portrait.sh'
-                            : item.id === 'asciiprofile-info'
+                            : item.id === WIDGET_IDS.ASCII_INFO
                               ? 'neofetch'
                               : 'contributions --graph'
 

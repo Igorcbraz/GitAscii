@@ -4,6 +4,7 @@ import { LayoutGrid, Sliders } from 'lucide-react'
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { WIDGET_IDS } from '@/constants'
 
 import { useEditorStore } from '../../store/editorStore'
 
@@ -75,7 +76,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
         <span>ASCII Profile Customization</span>
       </div>
 
-      {widgetId === 'asciiprofile-portrait' && (
+      {widgetId === WIDGET_IDS.ASCII_PORTRAIT && (
         <div className="space-y-3">
           <div>
             <label className="text-eyebrow text-ash block mb-1">Título do Terminal</label>
@@ -205,7 +206,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
         </div>
       )}
 
-      {widgetId === 'asciiprofile-info' && (
+      {widgetId === WIDGET_IDS.ASCII_INFO && (
         <div className="space-y-3">
           <div>
             <label className="text-eyebrow text-ash block mb-1">Nome do Terminal (Host)</label>
@@ -423,7 +424,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
         </div>
       )}
 
-      {widgetId === 'asciiprofile-heatmap' && (
+      {widgetId === WIDGET_IDS.ASCII_HEATMAP && (
         <div className="space-y-3">
           <div className="flex items-center justify-between pt-1">
             <span className="text-eyebrow text-chalk font-medium">

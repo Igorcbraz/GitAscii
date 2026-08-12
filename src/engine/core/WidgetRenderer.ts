@@ -1,4 +1,4 @@
-import { APP_DOMAIN } from '../../constants'
+import { APP_DOMAIN, WIDGET_IDS } from '../../constants'
 import { renderAsciiHeatmap } from '../../features/widgets/renderers/AsciiHeatmapRenderer'
 import { renderAsciiInfoCard } from '../../features/widgets/renderers/AsciiInfoCardRenderer'
 import { renderAsciiPortrait } from '../../features/widgets/renderers/AsciiPortraitRenderer'
@@ -1409,27 +1409,27 @@ export function renderWidgetSvg(
       break
     }
 
-    case 'godprofile-wakatime': {
+    case WIDGET_IDS.GODPROFILE_WAKATIME: {
       contentSvg = renderWakaTime(widget, data, globalStyles)
       break
     }
 
-    case 'godprofile-globe': {
+    case WIDGET_IDS.GODPROFILE_GLOBE: {
       contentSvg = renderGlobe(widget, data, globalStyles)
       break
     }
 
-    case 'asciiprofile-portrait': {
+    case WIDGET_IDS.ASCII_PORTRAIT: {
       contentSvg = renderAsciiPortrait(widget, data, globalStyles, forceStatic)
       break
     }
 
-    case 'asciiprofile-info': {
+    case WIDGET_IDS.ASCII_INFO: {
       contentSvg = renderAsciiInfoCard(widget, data, globalStyles, forceStatic)
       break
     }
 
-    case 'asciiprofile-heatmap': {
+    case WIDGET_IDS.ASCII_HEATMAP: {
       contentSvg = renderAsciiHeatmap(widget, data, globalStyles, forceStatic)
       break
     }
