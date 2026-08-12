@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export const metadata: Metadata = {
   title: 'Explore Community GitHub Profiles & Portfolios (2026)',
   description:
@@ -12,13 +14,13 @@ export const metadata: Metadata = {
     'GitAscii community profiles',
   ],
   alternates: {
-    canonical: 'https://git-ascii.vercel.app/explore',
+    canonical: `${APP_URL}/explore`,
   },
   openGraph: {
     title: 'Explore Community GitHub Profiles | GitAscii Directory',
     description:
       'Community gallery of real developer profiles, GitHub READMEs, and ASCII portfolios.',
-    url: 'https://git-ascii.vercel.app/explore',
+    url: `${APP_URL}/explore`,
     siteName: 'GitAscii',
     type: 'website',
   },

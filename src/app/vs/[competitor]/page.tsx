@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -129,7 +130,7 @@ export async function generateMetadata({
   const data = competitors[competitor]
   if (!data) return {}
 
-  const url = `https://git-ascii.vercel.app/vs/${competitor}`
+  const url = `${APP_URL}/vs/${competitor}`
 
   return {
     title: `${data.title} | GitAscii`,
@@ -166,7 +167,7 @@ export default async function CompetitorPage({
     '@type': 'WebPage',
     name: data.title,
     description: data.description,
-    url: `https://git-ascii.vercel.app/vs/${data.slug}`,
+    url: `${APP_URL}/vs/${data.slug}`,
   }
 
   const faqLd = {
@@ -187,19 +188,19 @@ export default async function CompetitorPage({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Comparisons',
-        item: 'https://git-ascii.vercel.app/vs',
+        item: `${APP_URL}/vs`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: data.name,
-        item: `https://git-ascii.vercel.app/vs/${data.slug}`,
+        item: `${APP_URL}/vs/${data.slug}`,
       },
     ],
   }

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
+import { APP_URL } from '@/constants'
 import { attributions, WidgetItem, widgetsList } from '@/data/widgetsData'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { useI18n } from '@/i18n'
@@ -42,7 +43,7 @@ export function WidgetShowcase() {
         name: w.name,
         type: 'External Widget',
         description: w.desc,
-        codeSnippet: `![${w.name}](https://git-ascii.vercel.app/api/YOUR_USERNAME?widgets=${w.id})`,
+        codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
         features: ['Live SVG Rendering', 'Editor Integration', 'Dynamic Theme Support'],
         githubSourceUrl: 'https://github.com/Igorcbraz/GitAscii',
       }))

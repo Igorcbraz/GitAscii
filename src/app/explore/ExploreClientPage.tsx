@@ -1,6 +1,7 @@
 'use client'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { ExploreCommunityGallery } from '@/features/explore/ExploreCommunityGallery'
 import type { CommunityProfileItem } from '@/features/explore/getCommunityProfiles'
 import { Footer } from '@/features/landing/components/Footer'
@@ -20,7 +21,7 @@ export default function ExploreClientPage({ profiles }: ExploreClientPageProps) 
     name: 'Explore Community GitHub Profile Portfolios',
     description:
       'Directory of real developer profiles, GitHub READMEs, and ASCII portfolios created with GitAscii.',
-    url: 'https://git-ascii.vercel.app/explore',
+    url: `${APP_URL}/explore`,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: profiles.length,
@@ -28,7 +29,7 @@ export default function ExploreClientPage({ profiles }: ExploreClientPageProps) 
         '@type': 'ListItem',
         position: idx + 1,
         name: `@${p.username}`,
-        url: `https://git-ascii.vercel.app/${p.username}`,
+        url: `${APP_URL}/${p.username}`,
       })),
     },
   }
@@ -41,13 +42,13 @@ export default function ExploreClientPage({ profiles }: ExploreClientPageProps) 
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Explore Community',
-        item: 'https://git-ascii.vercel.app/explore',
+        item: `${APP_URL}/explore`,
       },
     ],
   }

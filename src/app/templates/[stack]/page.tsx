@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -37,9 +38,9 @@ const stacks: Record<string, StackData> = {
     badges: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Redux', 'Zustand'],
     codeSnippet: `<!-- React Developer Profile Card -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=tokyo-night">
-  <source media="(prefers-color-scheme: light)" srcset="https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=minimal">
-  <img alt="React Developer Stats" src="https://git-ascii.vercel.app/api/YOUR_USERNAME">
+  <source media="(prefers-color-scheme: dark)" srcset="${APP_URL}/api/YOUR_USERNAME?theme=tokyo-night">
+  <source media="(prefers-color-scheme: light)" srcset="${APP_URL}/api/YOUR_USERNAME?theme=minimal">
+  <img alt="React Developer Stats" src="${APP_URL}/api/YOUR_USERNAME">
 </picture>`,
     bestPractices: [
       'Highlight key React component libraries and open-source packages you maintain.',
@@ -74,7 +75,7 @@ const stacks: Record<string, StackData> = {
     bg: '#000000',
     badges: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Prisma', 'Vercel'],
     codeSnippet: `<!-- Next.js Fullstack Profile Card -->
-![Next.js Profile](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=terminal)`,
+![Next.js Profile](${APP_URL}/api/YOUR_USERNAME?theme=terminal)`,
     bestPractices: [
       'Highlight serverless API routes, ISR/SSG projects, and deployed web apps.',
       'Include live SVG widgets showing total pull requests merged and star counts.',
@@ -98,7 +99,7 @@ const stacks: Record<string, StackData> = {
     bg: '#0e1726',
     badges: ['Python', 'PyTorch', 'TensorFlow', 'FastAPI', 'Pandas', 'Docker'],
     codeSnippet: `<!-- Python & AI Developer Profile Card -->
-![Python Profile](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=nord)`,
+![Python Profile](${APP_URL}/api/YOUR_USERNAME?theme=nord)`,
     bestPractices: [
       'Feature Jupyter notebooks, ML models, and automated Python pipelines.',
       'Use ASCII art headers to represent neural networks or Python code blocks.',
@@ -123,7 +124,7 @@ const stacks: Record<string, StackData> = {
     bg: '#111b11',
     badges: ['Node.js', 'Express', 'NestJS', 'TypeScript', 'PostgreSQL', 'Redis'],
     codeSnippet: `<!-- Node.js Backend Profile Card -->
-![Node.js Profile](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=matrix)`,
+![Node.js Profile](${APP_URL}/api/YOUR_USERNAME?theme=matrix)`,
     bestPractices: [
       'Highlight REST & GraphQL API performance, database optimizations, and npm packages.',
     ],
@@ -146,7 +147,7 @@ const stacks: Record<string, StackData> = {
     bg: '#0b1620',
     badges: ['Go', 'Kubernetes', 'Docker', 'gRPC', 'PostgreSQL', 'AWS'],
     codeSnippet: `<!-- Go Developer Profile Card -->
-![Go Profile](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=dracula)`,
+![Go Profile](${APP_URL}/api/YOUR_USERNAME?theme=dracula)`,
     bestPractices: ['Highlight CLI utilities, gRPC services, and Kubernetes operators.'],
     commonMistakes: ['Using generic templates that don’t highlight Golang CLI projects.'],
     faqs: [
@@ -167,7 +168,7 @@ const stacks: Record<string, StackData> = {
     bg: '#1a120c',
     badges: ['Rust', 'WebAssembly', 'Tokio', 'Cargo', 'Linux', 'C++'],
     codeSnippet: `<!-- Rust Developer Profile Card -->
-![Rust Profile](https://git-ascii.vercel.app/api/YOUR_USERNAME?theme=gruvbox)`,
+![Rust Profile](${APP_URL}/api/YOUR_USERNAME?theme=gruvbox)`,
     bestPractices: ['Showcase crates.io published packages and memory safety benchmarks.'],
     commonMistakes: ['Forgetting to list CLI tools created with Rust.'],
     faqs: [
@@ -193,7 +194,7 @@ export async function generateMetadata({
   const data = stacks[stack]
   if (!data) return {}
 
-  const url = `https://git-ascii.vercel.app/templates/${stack}`
+  const url = `${APP_URL}/templates/${stack}`
 
   return {
     title: `${data.title} | GitAscii`,
@@ -241,19 +242,19 @@ export default async function StackTemplatePage({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://git-ascii.vercel.app',
+        item: APP_URL,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Templates',
-        item: 'https://git-ascii.vercel.app/templates',
+        item: `${APP_URL}/templates`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: data.name,
-        item: `https://git-ascii.vercel.app/templates/${data.slug}`,
+        item: `${APP_URL}/templates/${data.slug}`,
       },
     ],
   }

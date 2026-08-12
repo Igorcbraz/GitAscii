@@ -1,5 +1,5 @@
-export const APP_URL = 'https://git-ascii.vercel.app'
-export const APP_DOMAIN = 'git-ascii.vercel.app'
+export const APP_URL = 'https://gitascii.com'
+export const APP_DOMAIN = 'gitascii.com'
 
 export const WIDGET_IDS = {
   HEADER: 'header',

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { APP_DOMAIN, APP_URL } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   description:
     'Read the Terms of Use for GitAscii — the free, open-source GitHub Profile README generator.',
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://git-ascii.vercel.app/terms' },
+  alternates: { canonical: `${APP_URL}/terms` },
 }
 
 const LAST_UPDATED = '2026-08-09'
@@ -48,11 +49,8 @@ export default function TermsPage() {
             <p>
               These Terms of Use (&ldquo;Terms&rdquo;) govern your access to and use of GitAscii, a
               free and open-source GitHub Profile README generator available at{' '}
-              <a
-                href="https://git-ascii.vercel.app"
-                className="text-signal-lime hover:brightness-110 transition-colors"
-              >
-                git-ascii.vercel.app
+              <a href={APP_URL} className="text-signal-lime hover:brightness-110 transition-colors">
+                {APP_DOMAIN}
               </a>{' '}
               (the &ldquo;Service&rdquo;), operated by{' '}
               <strong className="text-chalk">

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export const metadata: Metadata = {
   title: 'GitAscii vs Competitors & Alternatives (2026 Comparison)',
   description:
@@ -11,12 +13,12 @@ export const metadata: Metadata = {
     'Best GitHub README maker comparison',
   ],
   alternates: {
-    canonical: 'https://git-ascii.vercel.app/vs',
+    canonical: `${APP_URL}/vs`,
   },
   openGraph: {
     title: 'GitAscii vs Competitors & Alternatives | 2026 Comparison',
     description: 'Detailed feature matrix comparing GitAscii with Readme.so and GPRM.',
-    url: 'https://git-ascii.vercel.app/vs',
+    url: `${APP_URL}/vs`,
     siteName: 'GitAscii',
     type: 'website',
   },

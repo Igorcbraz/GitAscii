@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export default function robots(): MetadataRoute.Robots {
   const allowedUserAgents = [
     '*',
@@ -35,7 +37,7 @@ export default function robots(): MetadataRoute.Robots {
       ],
       disallow: ['/api/auth/', '/api/save/', '/_next/'],
     })),
-    sitemap: 'https://git-ascii.vercel.app/sitemap.xml',
-    host: 'https://git-ascii.vercel.app',
+    sitemap: `${APP_URL}/sitemap.xml`,
+    host: APP_URL,
   }
 }

@@ -1,5 +1,60 @@
 # Changelog
 
+## [1.5.0](https://github.com/Igorcbraz/GitAscii/compare/v1.4.2...v1.5.0) (2026-08-12)
+
+
+### Features
+
+* add animation support in widget renderer and auto-scroll on SVGCanvas ([280aba0](https://github.com/Igorcbraz/GitAscii/commit/280aba0b564e87b4380c6b785d409b06e5c75b10))
+* add AvatarControls and integrate into properties panel ([db48850](https://github.com/Igorcbraz/GitAscii/commit/db488507af302763eb38528b19aaacd5e2f5e8f4))
+* adiciona suporte a charset braille e melhora kerning de texto svg ([7a3220b](https://github.com/Igorcbraz/GitAscii/commit/7a3220b2627a002b52c07aec885672c5578e3d3e))
+* **api:** optimize github api commit check and dynamically add snake workflow ([5724b64](https://github.com/Igorcbraz/GitAscii/commit/5724b6402e608f0aa9af0d7775812a8370b5f48e))
+* **ascii:** improve mapping precision and expand detail levels ([1855d2c](https://github.com/Igorcbraz/GitAscii/commit/1855d2ca141ff03e1cd082e11f3ea246bd53f7a7))
+* **editor:** add inline editing for ascii-text and bio widgets ([e0ea979](https://github.com/Igorcbraz/GitAscii/commit/e0ea979b4e3cfff8cdf8f29afc6dcfaa62196d4c))
+* **seo:** dynamic localized opengraph image for pt-br ([9ea20e5](https://github.com/Igorcbraz/GitAscii/commit/9ea20e586f3b31a9b6c5ea47c6ab95b209df145f))
+
+
+### Bug Fixes
+
+* anchor marquee selection to canvas coordinates to allow scrolling while selecting ([b11f8b0](https://github.com/Igorcbraz/GitAscii/commit/b11f8b03c02fb27606966f41089279cab4a82a42))
+
+## [1.4.2](https://github.com/Igorcbraz/GitAscii/compare/v1.4.1...v1.4.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* migrate old domain to gitascii.com and modularize APP_URL ([4e9d56f](https://github.com/Igorcbraz/GitAscii/commit/4e9d56f18f62ed9a369b91ca4a46f69018a5f6c9))
+
+## [1.4.1](https://github.com/Igorcbraz/GitAscii/compare/v1.4.0...v1.4.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* **analytics:** explicit clarity consent signal ([db04be6](https://github.com/Igorcbraz/GitAscii/commit/db04be6daed18b2203f006873a2a2791503c26bb))
+
+## [1.4.0](https://github.com/Igorcbraz/GitAscii/compare/v1.3.0...v1.4.0) (2026-08-10)
+
+
+### Features
+
+* **analytics:** add microsoft clarity integration ([73fe748](https://github.com/Igorcbraz/GitAscii/commit/73fe74867d13cd69f45de79c35a2850ad8890d8d))
+* **editor:** add Command Palette and extract CanvasStatusBar ([b4e8f7e](https://github.com/Igorcbraz/GitAscii/commit/b4e8f7e5ee93190409d8e7eb4daa534807f8ddb1))
+* google analytics integration with consent management ([ac0ce98](https://github.com/Igorcbraz/GitAscii/commit/ac0ce985ee96c61dd11200e4ac7c8cac3fa78035))
+* **seo:** add static OG image and align dynamic edge component with brand style ([13cc7a2](https://github.com/Igorcbraz/GitAscii/commit/13cc7a222d545869fa27a63d557aa3b2e404f984))
+
+## [1.3.0](https://github.com/Igorcbraz/GitAscii/compare/v1.2.0...v1.3.0) (2026-08-07)
+
+
+### Features
+
+* export widget embed code using 100% width HTML tags ([e1e52d7](https://github.com/Igorcbraz/GitAscii/commit/e1e52d7d4405d64ce1fd6a932c3b871aec1a4ae8))
+
+
+### Bug Fixes
+
+* convert string tags to array in blog frontmatter ([3dec848](https://github.com/Igorcbraz/GitAscii/commit/3dec848c26203ff48c3ce89e7b7805a6f4dd01ba))
+* resolve github repository creation and bio widget text wrapping ([39662b5](https://github.com/Igorcbraz/GitAscii/commit/39662b5b3096ee8749af1907fa40435f9a576e13)), closes [#37](https://github.com/Igorcbraz/GitAscii/issues/37) [#30](https://github.com/Igorcbraz/GitAscii/issues/30)
+
 ## [1.2.0](https://github.com/Igorcbraz/GitAscii/compare/v1.1.0...v1.2.0) (2026-08-05)
 
 

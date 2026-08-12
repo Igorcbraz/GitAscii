@@ -33,7 +33,7 @@ https://github.com/user-attachments/assets/1e262f59-e63b-438c-bc6e-9776dc796d8f
 
 Experience the platform live. No installation required.
 
-> **[🚀 Launch GitAscii in your Browser](https://git-ascii.vercel.app/)**
+> **[🚀 Launch GitAscii in your Browser](https://gitascii.com/)**
 
 ---
 

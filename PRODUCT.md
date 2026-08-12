@@ -40,7 +40,7 @@ Beyond single-purpose ASCII generators or static badge tools, GitAscii provides 
 
 ## Evidence on Hand
 
-- **Live Platform:** `https://git-ascii.vercel.app/`
+- **Live Platform:** `https://gitascii.com/`
 - **Output Preview:** [`public/example.svg`](file:///C:/Repos/GitAscii/public/example.svg)
 - **Interface Previews:** [`public/hero.png`](file:///C:/Repos/GitAscii/public/hero.png), [`public/editor.png`](file:///C:/Repos/GitAscii/public/editor.png)
 

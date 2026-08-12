@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { APP_URL } from '@/constants'
+
 export const metadata: Metadata = {
   title: 'GitHub Profile README Guides & Resource Articles (2026)',
   description:
@@ -13,13 +15,13 @@ export const metadata: Metadata = {
     'Medium GitHub profile guide',
   ],
   alternates: {
-    canonical: 'https://git-ascii.vercel.app/guides',
+    canonical: `${APP_URL}/guides`,
   },
   openGraph: {
     title: 'GitHub Profile README Guides & Resource Articles | GitAscii',
     description:
       'Curated tutorials & Medium guides on building professional GitHub Profile READMEs.',
-    url: 'https://git-ascii.vercel.app/guides',
+    url: `${APP_URL}/guides`,
     siteName: 'GitAscii',
     type: 'website',
   },

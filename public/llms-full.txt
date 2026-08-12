@@ -5,7 +5,7 @@
 ## 1. System Architecture
 
 GitAscii is built on Next.js App Router, React 19, TypeScript, and Tailwind CSS. It serves two primary functions:
-1. **Interactive Visual Web Application**: A web editor available at `https://git-ascii.vercel.app/[username]` for creating custom GitHub profile layouts.
+1. **Interactive Visual Web Application**: A web editor available at `https://gitascii.com/[username]` for creating custom GitHub profile layouts.
 2. **Serverless Dynamic SVG Engine**: Edge API routes that compute and render clean SVG markups on-the-fly containing real-time GitHub statistics, ASCII art, streak badges, tech stack pills, and customizable widgets.
 
 ## 2. API Reference
@@ -47,15 +47,15 @@ GitAscii is built on Next.js App Router, React 19, TypeScript, and Tailwind CSS.
 
 ### Standard Markdown Embed
 ```markdown
-![GitAscii Profile](https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME)
+![GitAscii Profile](https://gitascii.com/api/YOUR_GITHUB_USERNAME)
 ```
 
 ### Advanced HTML Picture Tag (Dark / Light Theme Adaptation)
 ```html
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=github-dark">
-  <source media="(prefers-color-scheme: light)" srcset="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME?theme=minimal">
-  <img alt="GitAscii Profile Widget" src="https://git-ascii.vercel.app/api/YOUR_GITHUB_USERNAME">
+  <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/YOUR_GITHUB_USERNAME?theme=github-dark">
+  <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/YOUR_GITHUB_USERNAME?theme=minimal">
+  <img alt="GitAscii Profile Widget" src="https://gitascii.com/api/YOUR_GITHUB_USERNAME">
 </picture>
 ```
 

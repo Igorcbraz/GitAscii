@@ -15,7 +15,7 @@ export const widgetsList: WidgetItem[] = [
     type: 'SVG Widget',
     description:
       'Calculates total commits, stars earned, PRs merged, issues closed, and repository count directly from GitHub API in real time.',
-    codeSnippet: '![Stats](https://git-ascii.vercel.app/api/YOUR_USERNAME)',
+    codeSnippet: '![Stats](${APP_URL}/api/YOUR_USERNAME)',
     features: [
       'Real-time GraphQL calculation',
       'Automatic caching (4h TTL)',
@@ -29,7 +29,7 @@ export const widgetsList: WidgetItem[] = [
     type: 'SVG Widget',
     description:
       'Displays active daily contribution streak, longest streak, and total contributions over the past year with vector streak flame icons.',
-    codeSnippet: '![Streak](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=streak)',
+    codeSnippet: '![Streak](${APP_URL}/api/YOUR_USERNAME?widget=streak)',
     features: [
       'Counts public & private commits',
       'Dynamic flame icons',
@@ -44,7 +44,7 @@ export const widgetsList: WidgetItem[] = [
     type: 'SVG Widget',
     description:
       'Visual breakdown of your most used programming languages across public repositories with color-coded percentage progress bars.',
-    codeSnippet: '![Languages](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=languages)',
+    codeSnippet: '![Languages](${APP_URL}/api/YOUR_USERNAME?widget=languages)',
     features: [
       'GraphQL repo language bytes',
       'Color-coded ecosystem bars',
@@ -59,7 +59,7 @@ export const widgetsList: WidgetItem[] = [
     type: 'ASCII Engine',
     description:
       'Converts user avatar or custom uploaded artwork into character-based text grids with configurable character sets and color density.',
-    codeSnippet: '![ASCII](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=ascii)',
+    codeSnippet: '![ASCII](${APP_URL}/api/YOUR_USERNAME?widget=ascii)',
     features: [
       'Custom character density mapping',
       'High-contrast edge detection',
@@ -73,7 +73,7 @@ export const widgetsList: WidgetItem[] = [
     type: 'Shields Badge',
     description:
       'Customizable technology badges with official brand logos, background fills, custom labels, and clean SVG rendering.',
-    codeSnippet: '![Stack](https://git-ascii.vercel.app/api/YOUR_USERNAME?widget=stack)',
+    codeSnippet: '![Stack](${APP_URL}/api/YOUR_USERNAME?widget=stack)',
     features: [
       '500+ technology brand logos',
       'Shields.io schema compatibility',

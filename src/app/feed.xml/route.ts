@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 
+import { APP_URL } from '@/constants'
+
 export const dynamic = 'force-static'
 
 export async function GET() {
-  const baseUrl = 'https://git-ascii.vercel.app'
+  const baseUrl = APP_URL
   const pubDate = new Date().toUTCString()
 
   const items = [
