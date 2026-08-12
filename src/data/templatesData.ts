@@ -159,6 +159,63 @@ export const templateList: TemplateItem[] = [
     description:
       'Emphasizes contribution streaks, merged PRs, open-source repositories, and star counts.',
   },
+  {
+    slug: 'nordic',
+    name: 'Nordic Frost',
+    vibe: 'Arctic ice blues, slate gray, editorial precision',
+    accent: '#88c0d0',
+    bg: '#2e3440',
+    category: 'themes',
+    tags: ['Nordic', 'Editorial', 'Activity Graph'],
+    description:
+      'Avatar + bio, native GitHub stats, language breakdown, and a live 31-day activity graph — all in the calming Nord palette.',
+    featured: true,
+  },
+  {
+    slug: 'hackerspace',
+    name: 'Hackerspace',
+    vibe: 'Phosphor green, CRT terminal, deep hacker',
+    accent: '#00ff41',
+    bg: '#0a0f0a',
+    category: 'cli',
+    tags: ['Hacker', 'ASCII Text', 'Quotes', 'CLI'],
+    description:
+      'ASCII text banner, neofetch terminal info, language chart, neon divider, and a daily developer quote.',
+  },
+  {
+    slug: 'contributor',
+    name: 'OSS Contributor',
+    vibe: 'GitHub green, trophy wall, contribution snake',
+    accent: '#3fb950',
+    bg: '#0d1117',
+    category: 'pro',
+    tags: ['OSS', 'Trophies', 'Snake', 'Social'],
+    description:
+      'Showcases your open-source impact: stats + language side-by-side, GitHub trophies, animated contribution snake, and social badges.',
+    featured: true,
+  },
+  {
+    slug: 'galaxy',
+    name: 'Deep Space',
+    vibe: 'Nebula violet, dark cosmos, amethyst glow',
+    accent: '#c084fc',
+    bg: '#06010f',
+    category: 'themes',
+    tags: ['Sci-Fi', 'Views Counter', 'Activity', 'Cosmos'],
+    description:
+      'ASCII avatar beside compact stats and a profile views counter, followed by an activity graph and featured repos.',
+  },
+  {
+    slug: 'devcard',
+    name: 'Dev Card',
+    vibe: 'Amber-on-black, editorial identity, metrics',
+    accent: '#facc15',
+    bg: '#080808',
+    category: 'pro',
+    tags: ['Pro', 'Metrics', 'Avatar', 'Amber'],
+    description:
+      'Sharp developer identity card: avatar + bio, full tech stack, GitHub stats alongside an advanced metrics infographic.',
+  },
 ]
 
 export const languageStacks = [
