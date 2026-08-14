@@ -239,6 +239,8 @@ export function WidgetLibrary() {
   if (!config) return null
 
   const renderWidgetCard = (item: WidgetCatalogItem) => {
+    const Icon = item.icon
+
     if (item.id === 'gitfest-lineup') {
       return (
         <div
@@ -326,7 +328,49 @@ export function WidgetLibrary() {
       )
     }
 
-    const Icon = item.icon
+    if (item.category === WIDGET_CATEGORIES.CODEWEB_DEV) {
+      return (
+        <div
+          key={item.id}
+          onClick={() => addWidget(item.id)}
+          data-testid={`add-widget-${item.id}`}
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            setHoveredWidget({ item, rect })
+          }}
+          onMouseLeave={() => setHoveredWidget(null)}
+          className="group relative p-3 border border-white/10 hover:border-white/20 bg-[#08080d] hover:bg-[#0c0c14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-2xl cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_8px_24px_rgba(108,195,130,0.15)]"
+        >
+          {/* Subtle Aura Cosmic Ambient Orbs */}
+          <div className="absolute -left-4 -top-4 w-20 h-20 bg-[radial-gradient(circle,rgba(108,195,130,0.2)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/80 group-hover:text-white group-hover:bg-white/[0.08] transition-all duration-300 shrink-0">
+              <Icon size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
+                  {item.name}
+                </h4>
+                <span className="text-[9px] font-inter-tight font-normal text-white/60 bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded-full shrink-0 tracking-wider">
+                  aura
+                </span>
+              </div>
+              <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
+                {item.desc}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0 relative z-10">
+            <button className="text-white/40 group-hover:text-white transition-colors duration-300 p-1">
+              <Plus size={15} />
+            </button>
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div
@@ -552,14 +596,29 @@ export function WidgetLibrary() {
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash/50">
                       {
-                        filteredWidgets.filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
-                          .length
+                        filteredWidgets.filter(
+                          (w) =>
+                            !w.isExternal &&
+                            w.id !== 'gitfest-lineup' &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
+                            w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                            w.category !== WIDGET_CATEGORIES.GODPROFILE &&
+                            w.category !== WIDGET_CATEGORIES.CONTROLPLANE
+                        ).length
                       }
                     </span>
                   </div>
                   <div className="space-y-1.5">
                     {filteredWidgets
-                      .filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
+                      .filter(
+                        (w) =>
+                          !w.isExternal &&
+                          w.id !== 'gitfest-lineup' &&
+                          w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
+                          w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                          w.category !== WIDGET_CATEGORIES.GODPROFILE &&
+                          w.category !== WIDGET_CATEGORIES.CONTROLPLANE
+                      )
                       .map(renderWidgetCard)}
                   </div>
                 </div>
@@ -814,6 +873,89 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
+                {/* Codeweb-dev Aura Toolkit */}
+                <div>
+                  <button
+                    onClick={() => toggleSection('codeweb-dev')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <Sparkles size={10} className="text-[#6cc382] shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-[#6cc382] uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.codeweb_category', 'Codeweb-dev Aura')}
+                    </span>
+                    <a
+                      href="https://github.com/codeweb-dev/codeweb-dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6cc382] hover:text-[#9de5ad] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV)
+                          .length
+                      }
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#6cc382]/60 transition-transform duration-200 ${collapsedSections['codeweb-dev'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['codeweb-dev'] && (
+                    <div className="space-y-1.5">
+                      {filteredWidgets
+                        .filter((w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV)
+                        .map((item) => {
+                          const Icon = item.icon
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative p-3 border border-white/10 hover:border-white/20 bg-[#08080d] hover:bg-[#0c0c14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-2xl cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_8px_24px_rgba(108,195,130,0.15)]"
+                            >
+                              <div className="absolute -left-4 -top-4 w-20 h-20 bg-[radial-gradient(circle,rgba(108,195,130,0.2)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                              <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/80 group-hover:text-white group-hover:bg-white/[0.08] transition-all duration-300 shrink-0">
+                                  <Icon size={16} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
+                                      {item.name}
+                                    </h4>
+                                    <span className="text-[9px] font-inter-tight font-normal text-white/60 bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded-full shrink-0 tracking-wider">
+                                      aura
+                                    </span>
+                                  </div>
+                                  <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                <button className="text-white/40 group-hover:text-white transition-colors duration-300 p-1">
+                                  <Plus size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
                 {/* External Integrations — excludes widgets that have their own category sections (Bug 2) */}
                 <div>
                   <button
@@ -831,7 +973,8 @@ export function WidgetLibrary() {
                             w.isExternal &&
                             w.category !== 'godprofile' &&
                             w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-                            w.category !== 'controlplane'
+                            w.category !== 'controlplane' &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV
                         ).length
                       }
                     </span>
@@ -848,7 +991,8 @@ export function WidgetLibrary() {
                             w.isExternal &&
                             w.category !== 'godprofile' &&
                             w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-                            w.category !== 'controlplane'
+                            w.category !== 'controlplane' &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV
                         )
                         .map((item) => {
                           const Icon = item.icon

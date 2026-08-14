@@ -13,6 +13,7 @@ import { AsciiArtControls } from './AsciiArtControls'
 import { AsciiProfileControls } from './AsciiProfileControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
+import { CodewebDevControls } from './CodewebDevControls'
 import { ColorPicker } from './ColorPicker'
 import { ControlPlaneControls } from './ControlPlaneControls'
 import { CustomImageControls } from './CustomImageControls'
@@ -643,6 +644,20 @@ export function PropertiesPanel() {
           WIDGET_IDS.CONTROLPLANE_FOUNDRY as string,
         ].includes(selectedWidget.widgetId) && (
           <ControlPlaneControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.CODEWEB_HERO_ORBIT as string,
+          WIDGET_IDS.CODEWEB_SOCIAL_BADGE as string,
+          WIDGET_IDS.CODEWEB_SHOWCASE_CARDS as string,
+          WIDGET_IDS.CODEWEB_RETRO_GRID as string,
+          WIDGET_IDS.CODEWEB_MINIMAL_BADGE as string,
+        ].includes(selectedWidget.widgetId) && (
+          <CodewebDevControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

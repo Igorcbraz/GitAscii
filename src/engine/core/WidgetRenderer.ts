@@ -6,6 +6,11 @@ import { renderBentoGrid } from '../../features/widgets/renderers/BentoGridRende
 import { renderBlueprint } from '../../features/widgets/renderers/BlueprintRenderer'
 import { renderCartograph } from '../../features/widgets/renderers/CartographRenderer'
 import { renderCipherPrint } from '../../features/widgets/renderers/CipherPrintRenderer'
+import { renderCodewebHeroOrbit } from '../../features/widgets/renderers/CodewebHeroOrbitRenderer'
+import { renderCodewebMinimalBadge } from '../../features/widgets/renderers/CodewebMinimalBadgeRenderer'
+import { renderCodewebRetroGrid } from '../../features/widgets/renderers/CodewebRetroGridRenderer'
+import { renderCodewebShowcaseCards } from '../../features/widgets/renderers/CodewebShowcaseCardsRenderer'
+import { renderCodewebSocialBadge } from '../../features/widgets/renderers/CodewebSocialBadgeRenderer'
 import { renderCommandDeck } from '../../features/widgets/renderers/CommandDeckRenderer'
 import { renderConstellation } from '../../features/widgets/renderers/ConstellationRenderer'
 import { renderEditorial } from '../../features/widgets/renderers/EditorialRenderer'
@@ -1524,6 +1529,31 @@ export function renderWidgetSvg(
       break
     }
 
+    case WIDGET_IDS.CODEWEB_HERO_ORBIT: {
+      contentSvg = renderCodewebHeroOrbit(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_RETRO_GRID: {
+      contentSvg = renderCodewebRetroGrid(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_SHOWCASE_CARDS: {
+      contentSvg = renderCodewebShowcaseCards(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_SOCIAL_BADGE: {
+      contentSvg = renderCodewebSocialBadge(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_MINIMAL_BADGE: {
+      contentSvg = renderCodewebMinimalBadge(widget, data, globalStyles, forceStatic)
+      break
+    }
+
     case 'ghstats': {
       const username = data.user.login
       const embedType = (cfg.embedType as string) || 'card'
@@ -2091,11 +2121,20 @@ export function renderWidgetSvg(
     }
   }
 
+  const isSelfContained =
+    contentSvg.trim().startsWith('<svg') ||
+    widget.widgetId.startsWith('controlplane-') ||
+    widget.widgetId.startsWith('codeweb-')
+
+  const baseBackgroundRect = isSelfContained
+    ? ''
+    : `<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
+
   const innerHtml = `
       ${styleBlock}
       ${shadowRect}
-      <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />
-      ${templateDecorationSvg}
+      ${baseBackgroundRect}
+      ${isSelfContained ? '' : templateDecorationSvg}
       ${contentSvg}
   `
 

@@ -54,6 +54,11 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.ASCII_PORTRAIT]: { width: 370, height: 400 },
   [WIDGET_IDS.ASCII_INFO]: { width: 490, height: 400 },
   [WIDGET_IDS.ASCII_HEATMAP]: { width: 780, height: 240 },
+  [WIDGET_IDS.CODEWEB_HERO_ORBIT]: { width: 800, height: 360 },
+  [WIDGET_IDS.CODEWEB_RETRO_GRID]: { width: 800, height: 260 },
+  [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS]: { width: 800, height: 220 },
+  [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
+  [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
 }
 
 export function WidgetPreviewTooltip({

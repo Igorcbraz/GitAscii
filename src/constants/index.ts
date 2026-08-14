@@ -51,6 +51,11 @@ export const WIDGET_IDS = {
   CONTROLPLANE_PATCHBAY: 'controlplane-patchbay',
   CONTROLPLANE_CARTOGRAPH: 'controlplane-cartograph',
   CONTROLPLANE_FOUNDRY: 'controlplane-foundry',
+  CODEWEB_HERO_ORBIT: 'codeweb-hero-orbit',
+  CODEWEB_RETRO_GRID: 'codeweb-retro-grid',
+  CODEWEB_SHOWCASE_CARDS: 'codeweb-showcase-cards',
+  CODEWEB_SOCIAL_BADGE: 'codeweb-social-badge',
+  CODEWEB_MINIMAL_BADGE: 'codeweb-minimal-badge',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -64,6 +69,7 @@ export const WIDGET_CATEGORIES = {
   GODPROFILE: 'godprofile',
   ASCIIPROFILE: 'asciiprofile',
   CONTROLPLANE: 'controlplane',
+  CODEWEB_DEV: 'codeweb-dev',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

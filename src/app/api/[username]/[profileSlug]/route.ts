@@ -100,6 +100,11 @@ export async function GET(
               [WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID]: { width: 800, height: 320 },
               [WIDGET_IDS.CONTROLPLANE_METRO]: { width: 800, height: 350 },
               [WIDGET_IDS.CONTROLPLANE_BENTO]: { width: 800, height: 340 },
+              [WIDGET_IDS.CODEWEB_HERO_ORBIT]: { width: 800, height: 360 },
+              [WIDGET_IDS.CODEWEB_RETRO_GRID]: { width: 800, height: 220 },
+              [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS]: { width: 800, height: 260 },
+              [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
+              [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
             }
             wWidth = defaultSizeMap[w]?.width || 800
             wHeight = defaultSizeMap[w]?.height || 210

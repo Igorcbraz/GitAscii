@@ -11,6 +11,7 @@ import {
   Globe,
   Grid,
   Heading,
+  LayoutGrid,
   LayoutTemplate,
   Minus,
   PieChart,
@@ -473,6 +474,56 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     isExternal: true,
     defaultSize: { width: 800, height: 330 },
   },
+  {
+    id: WIDGET_IDS.CODEWEB_HERO_ORBIT,
+    name: 'Aura Hero Orbit',
+    icon: Sparkles,
+    desc: 'Cosmic orbit banner with pulsating glowing orbs and radar concentric rings',
+    category: WIDGET_CATEGORIES.CODEWEB_DEV,
+    isExternal: true,
+    badge: { text: 'Codeweb', type: 'highlight' },
+    defaultSize: { width: 800, height: 360 },
+  },
+  {
+    id: WIDGET_IDS.CODEWEB_SHOWCASE_CARDS,
+    name: 'Aura Showcase Cards',
+    icon: LayoutTemplate,
+    desc: 'Aura dual card showcase with cosmic glow, animated Giphy GIF backgrounds, customizable Lucide icons and terminal prompt',
+    category: WIDGET_CATEGORIES.CODEWEB_DEV,
+    isExternal: true,
+    badge: { text: 'Codeweb', type: 'highlight' },
+    defaultSize: { width: 800, height: 220 },
+  },
+  {
+    id: WIDGET_IDS.CODEWEB_RETRO_GRID,
+    name: 'Aura Bento Cards',
+    icon: LayoutGrid,
+    desc: 'Modular glassmorphic bento identity showcase with stats chips and cover',
+    category: WIDGET_CATEGORIES.CODEWEB_DEV,
+    isExternal: true,
+    badge: { text: 'Codeweb', type: 'new' },
+    defaultSize: { width: 800, height: 260 },
+  },
+  {
+    id: WIDGET_IDS.CODEWEB_SOCIAL_BADGE,
+    name: 'Aura Social Badge',
+    icon: Share2,
+    desc: 'Glowing animated rotating gradient badges with strip and grid modes',
+    category: WIDGET_CATEGORIES.CODEWEB_DEV,
+    isExternal: true,
+    badge: { text: 'Codeweb', type: 'popular' },
+    defaultSize: { width: 800, height: 44 },
+  },
+  {
+    id: WIDGET_IDS.CODEWEB_MINIMAL_BADGE,
+    name: 'Aura Minimalist Banner',
+    icon: Heading,
+    desc: 'Sleek minimalist badge with precision tracking and typography accents',
+    category: WIDGET_CATEGORIES.CODEWEB_DEV,
+    isExternal: true,
+    badge: { text: 'Codeweb', type: 'new' },
+    defaultSize: { width: 800, height: 44 },
+  },
 ]
 
 export const WIDGET_FILTERS: WidgetFilterItem[] = [
@@ -510,7 +561,15 @@ export const WIDGET_FILTERS: WidgetFilterItem[] = [
       !!item.isExternal &&
       item.category !== WIDGET_CATEGORIES.GODPROFILE &&
       item.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-      item.category !== WIDGET_CATEGORIES.CONTROLPLANE,
+      item.category !== WIDGET_CATEGORIES.CONTROLPLANE &&
+      item.category !== WIDGET_CATEGORIES.CODEWEB_DEV,
+  },
+  {
+    id: 'codeweb-dev',
+    labelKey: 'editor.sidebar.filter.codeweb',
+    defaultLabel: 'Codeweb-dev',
+    icon: Sparkles,
+    match: (item) => item.category === WIDGET_CATEGORIES.CODEWEB_DEV,
   },
   {
     id: 'godprofile',
