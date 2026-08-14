@@ -5,6 +5,7 @@ import {
   Download,
   ExternalLink,
   GitFork,
+  Github,
   Plus,
   Search,
   Sparkles,
@@ -243,7 +244,7 @@ export function WidgetLibrary() {
   const renderWidgetCard = (item: WidgetCatalogItem) => {
     const Icon = item.icon
 
-    if (item.id === 'gitfest-lineup') {
+    if (item.id === WIDGET_IDS.GITFEST_LINEUP) {
       return (
         <div
           key={item.id}
@@ -256,75 +257,72 @@ export function WidgetLibrary() {
             setHoveredWidget({ item, rect })
           }}
           onMouseLeave={() => setHoveredWidget(null)}
-          className="group relative w-full px-3 py-2 rounded-xl font-bold text-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden cursor-pointer my-2 transform hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
-          style={{
-            background: 'linear-gradient(145deg, #3d2b5e 0%, #2d1b4e 50%, #3d2b5e 100%)',
-            border: '2px solid rgba(139, 92, 246, 0.4)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)',
-          }}
+          className="group relative w-full transition-all duration-300 ease-out cursor-pointer my-1.5 select-none transform hover:-translate-y-0.5"
         >
-          <div
-            className="absolute inset-0 bg-linear-to-br from-[#c084fc]/20 via-[#a855f7]/20 to-[#e9d5ff]/20 transition-opacity duration-700 opacity-0 group-hover:opacity-80"
-            style={{ filter: 'blur(15px)' }}
-          ></div>
+          <div className="relative w-full h-[70px] flex items-stretch filter drop-shadow-[0_4px_16px_rgba(88,28,135,0.3)] group-hover:drop-shadow-[0_8px_26px_rgba(147,51,234,0.45)] transition-all duration-300">
+            <div
+              className="flex-1 h-full pl-3.5 pr-2 flex items-center justify-between relative transition-all duration-300 group-hover:brightness-105"
+              style={{
+                background: 'linear-gradient(135deg, #220b3f 0%, #140626 50%, #0c0317 100%)',
+                maskImage:
+                  'radial-gradient(circle 8px at 100% 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 100% 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 0% 50%, transparent 0, transparent 6px, black 6.5px)',
+                WebkitMaskImage:
+                  'radial-gradient(circle 8px at 100% 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 100% 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 0% 50%, transparent 0, transparent 6px, black 6.5px)',
+                maskComposite: 'intersect',
+                WebkitMaskComposite: 'source-in',
+              }}
+            >
+              <div
+                className="absolute inset-0 pointer-events-none opacity-15"
+                style={{
+                  backgroundImage: 'radial-gradient(#c084fc 0.8px, transparent 0.8px)',
+                  backgroundSize: '5px 5px',
+                }}
+              />
 
-          <div
-            className="absolute -inset-1 bg-linear-to-r from-[#c084fc] via-[#a855f7] to-[#e9d5ff] rounded-2xl transition-all duration-500 opacity-0 group-hover:opacity-40 animate-pulse"
-            style={{ filter: 'blur(10px)', zIndex: -1 }}
-          ></div>
-
-          <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-transparent via-transparent to-black/50"></div>
-
-          <div className="relative z-20 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 shrink-0 transition-transform duration-500 group-hover:scale-110">
-                <div className="absolute -inset-2 bg-linear-to-br from-[#c084fc]/60 via-[#a855f7]/60 to-[#e9d5ff]/60 transition-all duration-500 blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg"></div>
-
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <div
-                    className="absolute inset-0 bg-linear-to-br from-[#8B5CF6] to-[#C084FC] rounded-lg transition-transform duration-500 group-hover:rotate-12"
-                    style={{
-                      boxShadow:
-                        '0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.4)',
-                    }}
-                  ></div>
-
-                  <svg
-                    className="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:scale-110"
-                    viewBox="0 0 24 24"
-                    fill="white"
-                    style={{
-                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6))',
-                      opacity: 0.95,
-                    }}
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 via-purple-300/15 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
               </div>
 
-              <div className="flex items-center justify-center pl-2">
-                <Image
-                  src={'/gitfest.png'}
-                  alt="GitFest"
-                  width={120}
-                  height={36}
-                  className="h-9 w-auto object-contain transition-all duration-300 drop-shadow-[0_2px_6px_rgba(139,92,246,0.5)] group-hover:drop-shadow-[0_4px_16px_rgba(168,85,247,0.9)] group-hover:brightness-125"
+              <div className="flex items-center gap-3.5 relative z-10 min-w-0 pl-1">
+                <Github
+                  size={24}
+                  className="text-purple-300 group-hover:text-white transition-colors duration-300 drop-shadow-[0_2px_8px_rgba(168,85,247,0.5)] shrink-0"
+                />
+
+                <div className="flex items-center min-w-0">
+                  <Image
+                    src="/gitfest.png"
+                    alt="GitFest"
+                    width={140}
+                    height={36}
+                    className="h-9 w-auto object-contain drop-shadow-[0_2px_14px_rgba(168,85,247,0.65)] group-hover:drop-shadow-[0_2px_22px_rgba(192,132,252,1)] group-hover:brightness-110 transition-all duration-300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="w-[50px] h-full flex items-center justify-center relative shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-top-left group-hover:translate-x-2 group-hover:rotate-[4.5deg] group-hover:translate-y-[2px] group-hover:shadow-[-4px_4px_12px_rgba(0,0,0,0.5)]"
+              style={{
+                background: 'linear-gradient(135deg, #1c0836 0%, #120522 50%, #0a0214 100%)',
+                maskImage:
+                  'radial-gradient(circle 8px at 0px 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 0px 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 100% 50%, transparent 0, transparent 6px, black 6.5px)',
+                WebkitMaskImage:
+                  'radial-gradient(circle 8px at 0px 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 0px 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 100% 50%, transparent 0, transparent 6px, black 6.5px)',
+                maskComposite: 'intersect',
+                WebkitMaskComposite: 'source-in',
+              }}
+            >
+              <div className="absolute top-2.5 bottom-2.5 left-0 border-l border-dashed border-purple-400/40 group-hover:border-purple-300/90 group-hover:shadow-[0_0_8px_rgba(192,132,252,0.6)] transition-all duration-300 z-10" />
+
+              <div className="text-purple-300/80 group-hover:text-white transition-colors duration-300 flex items-center justify-center relative z-20">
+                <Plus
+                  size={16}
+                  className="group-hover:scale-120 transition-transform duration-300"
                 />
               </div>
             </div>
-
-            <div className="text-white/60 group-hover:text-white transition-colors duration-300 p-1 shrink-0 self-center">
-              <Plus size={15} />
-            </div>
-          </div>
-
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#d8b4fe]/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
           </div>
         </div>
       )
