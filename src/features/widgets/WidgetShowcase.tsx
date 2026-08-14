@@ -45,7 +45,7 @@ export function WidgetShowcase() {
         id: w.id,
         name: w.name,
         type: 'External Widget',
-        description: w.desc,
+        description: w.desc || '',
         codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
         features: ['Live SVG Rendering', 'Editor Integration', 'Dynamic Theme Support'],
         githubSourceUrl: 'https://github.com/Igorcbraz/GitAscii',

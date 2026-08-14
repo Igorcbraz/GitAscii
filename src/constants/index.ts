@@ -56,6 +56,7 @@ export const WIDGET_IDS = {
   CODEWEB_SHOWCASE_CARDS: 'codeweb-showcase-cards',
   CODEWEB_SOCIAL_BADGE: 'codeweb-social-badge',
   CODEWEB_MINIMAL_BADGE: 'codeweb-minimal-badge',
+  POKEMON_CARD: 'pokemon-card',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]

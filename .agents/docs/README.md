@@ -16,3 +16,8 @@
 2. [**Princípios de Design de Controles de Widgets**](file:///C:/Repos/GitAscii/.agents/docs/widget-controls-design-principles.md) (`widget-controls-design-principles.md`)
    - Fundamentos conceituais sobre as 4 dimensões de controle (Conteúdo/Filtros, Layout, Estilo, Tamanho).
    - Padrões de UX para controles inline, disclosure progressivo e ausência de emojis em UI funcional.
+
+3. [**Padrão de Estilo para Widgets em Destaque**](file:///C:/Repos/GitAscii/.agents/docs/featured-widgets-design-standard.md) (`featured-widgets-design-standard.md`)
+   - Anatomia visual das 6 camadas para Featured Widgets na barra lateral.
+   - Padrões de chassi tátil, acentos de hardware/LEDs, prismáticos e micro-animações.
+   - Diretrizes de densidade/altura compacta e checklist de qualidade anti "IA-made".

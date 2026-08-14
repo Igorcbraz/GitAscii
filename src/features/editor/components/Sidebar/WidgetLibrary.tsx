@@ -207,7 +207,7 @@ export function WidgetLibrary() {
     return WIDGET_CATALOG.map((item) => ({
       ...item,
       name: t(`widget.catalog.${item.id}.name`, item.name),
-      desc: t(`widget.catalog.${item.id}.desc`, item.desc),
+      desc: item.desc ? t(`widget.catalog.${item.id}.desc`, item.desc) : undefined,
       badge: item.badge
         ? {
             ...item.badge,
@@ -231,7 +231,7 @@ export function WidgetLibrary() {
       const q = searchQuery.toLowerCase()
       return (
         item.name.toLowerCase().includes(q) ||
-        item.desc.toLowerCase().includes(q) ||
+        (item.desc && item.desc.toLowerCase().includes(q)) ||
         item.badge?.text.toLowerCase().includes(q) ||
         item.id.toLowerCase().includes(q)
       )
@@ -343,7 +343,6 @@ export function WidgetLibrary() {
           onMouseLeave={() => setHoveredWidget(null)}
           className="group relative p-3 border border-white/10 hover:border-white/20 bg-[#08080d] hover:bg-[#0c0c14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-2xl cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_8px_24px_rgba(108,195,130,0.15)]"
         >
-          {/* Subtle Aura Cosmic Ambient Orbs */}
           <div className="absolute -left-4 -top-4 w-20 h-20 bg-[radial-gradient(circle,rgba(108,195,130,0.2)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
@@ -366,6 +365,98 @@ export function WidgetLibrary() {
             <button className="text-white/40 group-hover:text-white transition-colors duration-300 p-1">
               <Plus size={15} />
             </button>
+          </div>
+        </div>
+      )
+    }
+
+    if (item.id === WIDGET_IDS.POKEMON_CARD) {
+      return (
+        <div
+          key={item.id}
+          onClick={() => addWidget(item.id)}
+          data-testid={`add-widget-${item.id}`}
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            setHoveredWidget({ item, rect })
+          }}
+          onMouseLeave={() => setHoveredWidget(null)}
+          className="group relative w-full rounded-lg transition-all duration-300 ease-out overflow-hidden cursor-pointer my-1.5 transform hover:-translate-y-0.5 select-none shadow-[0_4px_16px_rgba(197,32,40,0.3)] hover:shadow-[0_8px_24px_rgba(220,38,38,0.5)]"
+          style={{
+            background: 'linear-gradient(180deg, #d8232a 0%, #a8131b 60%, #850c12 100%)',
+            border: '1.5px solid #5a070c',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 via-amber-300/25 via-cyan-300/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+          </div>
+
+          <div className="flex items-center justify-between px-2.5 py-1 border-b border-black/25 bg-black/15 relative z-10">
+            <div className="flex items-center gap-1.5">
+              <div className="relative w-3.5 h-3.5 rounded-full bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-700 border border-white/80 shadow-[0_0_6px_rgba(56,189,248,0.7)] flex items-center justify-center">
+                <div className="w-1 h-1 rounded-full bg-white/90 absolute top-0.5 left-0.5 blur-[0.2px]" />
+              </div>
+              <div className="flex items-center gap-1 pl-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff3b30] border border-black/40 shadow-[0_0_3px_rgba(255,59,48,0.7)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffcc00] border border-black/40 shadow-[0_0_3px_rgba(255,204,0,0.7)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#34c759] border border-black/40 shadow-[0_0_3px_rgba(52,199,89,0.7)]" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="font-jetbrains-mono text-[8.5px] font-bold text-white/80 tracking-wider uppercase drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                PKMN // TCG-025
+              </span>
+              <div className="flex gap-0.5 opacity-60">
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-1.5 relative z-10">
+            <div className="relative rounded-md p-2 bg-[#0b1219] border border-[#1e2d3d] shadow-[inset_0_1px_6px_rgba(0,0,0,0.8)] overflow-hidden">
+              <div
+                className="absolute inset-0 pointer-events-none opacity-20"
+                style={{
+                  backgroundImage: 'radial-gradient(#38bdf8 1px, transparent 1px)',
+                  backgroundSize: '4px 4px',
+                }}
+              />
+
+              <div className="relative z-10 flex items-center justify-between gap-2.5">
+                <div className="relative shrink-0 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-b from-[#e53e3e] via-[#e53e3e] to-[#ffffff] border-[1.5px] border-[#1a202c] shadow-[0_1px_6px_rgba(0,0,0,0.6)] relative overflow-hidden group-hover:rotate-12 transition-transform duration-300">
+                    <div className="absolute top-0 left-0 right-0 h-[48%] bg-[#e53e3e]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-[48%] bg-white" />
+                    <div className="absolute top-1/2 left-0 right-0 h-[14%] bg-[#1a202c] -translate-y-1/2" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white border border-[#1a202c] flex items-center justify-center shadow-xs">
+                      <div className="w-1 h-1 rounded-full bg-[#cbd5e1]" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-jetbrains-mono font-bold text-xs text-white tracking-wider uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                      {item.name}
+                    </h4>
+                  </div>
+                  {item.desc && (
+                    <p className="font-jetbrains-mono text-[10px] text-cyan-300/80 group-hover:text-cyan-200 transition-colors truncate mt-0.5 tracking-tight">
+                      {item.desc}
+                    </p>
+                  )}
+                </div>
+
+                <div className="text-white/60 group-hover:text-white transition-colors duration-300 p-1 shrink-0">
+                  <Plus size={15} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -529,29 +620,10 @@ export function WidgetLibrary() {
                 {translatedCatalog.find((w) => w.id === 'gitfest-lineup') &&
                   renderWidgetCard(translatedCatalog.find((w) => w.id === 'gitfest-lineup')!)}
 
-                <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xs bg-graphite/50 group-hover:bg-signal-lime/10 text-ash group-hover:text-signal-lime transition-colors shrink-0">
-                      <Plus size={16} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-inter-tight font-medium text-label text-ash group-hover:text-chalk transition-colors">
-                          {t('editor.sidebar.featured_slot', 'Espaço Disponível')}
-                        </h4>
-                        <span className="text-[9px] font-inter-tight font-medium text-signal-lime bg-signal-lime/10 border border-signal-lime/20 px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
-                          {t('editor.sidebar.announce', 'Anuncie Aqui')}
-                        </span>
-                      </div>
-                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
-                        {t(
-                          'editor.sidebar.featured_slot_desc',
-                          'Destaque seu widget para a comunidade'
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.POKEMON_CARD) &&
+                  renderWidgetCard(
+                    translatedCatalog.find((w) => w.id === WIDGET_IDS.POKEMON_CARD)!
+                  )}
 
                 <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
                   <div className="flex items-center gap-3">
@@ -618,7 +690,6 @@ export function WidgetLibrary() {
                           w.category !== WIDGET_CATEGORIES.GODPROFILE &&
                           w.category !== WIDGET_CATEGORIES.CONTROLPLANE
                       )
-                      const displayed = expandedLists['native'] ? items : items.slice(0, 5)
                       const baseItems = items.slice(0, 5)
                       const extraItems = items.slice(5)
                       return (
@@ -658,7 +729,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* ASCII Profile Kit — before GodProfile (Bug 1) */}
                 <div>
                   <button
                     onClick={() => toggleSection('asciiprofile')}
@@ -717,7 +787,6 @@ export function WidgetLibrary() {
                               onMouseLeave={() => setHoveredWidget(null)}
                               className="group relative border border-[#30363d] hover:border-[#ffa657]/60 bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_15px_rgba(255,166,87,0.15)] flex flex-col"
                             >
-                              {/* Retro Scanlines & Glowing Accents */}
                               <div
                                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                                 style={{
@@ -807,7 +876,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* GodProfile MCP Toolkit */}
                 <div>
                   <button
                     onClick={() => toggleSection('godprofile')}
@@ -926,7 +994,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* Control Plane Toolkit */}
                 <div>
                   <button
                     onClick={() => toggleSection('controlplane')}
@@ -1057,7 +1124,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* Codeweb-dev Aura Toolkit */}
                 <div>
                   <button
                     onClick={() => toggleSection('codeweb-dev')}
@@ -1178,7 +1244,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* External Integrations — excludes widgets that have their own category sections (Bug 2) */}
                 <div>
                   <button
                     onClick={() => toggleSection('external')}

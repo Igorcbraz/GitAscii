@@ -23,6 +23,7 @@ import { renderMetroMap } from '../../features/widgets/renderers/MetroMapRendere
 import { renderMonolith } from '../../features/widgets/renderers/MonolithRenderer'
 import { renderNeural } from '../../features/widgets/renderers/NeuralRenderer'
 import { renderPatchbay } from '../../features/widgets/renderers/PatchbayRenderer'
+import { renderPokemonCard } from '../../features/widgets/renderers/PokemonCardRenderer'
 import { renderSignalGrid } from '../../features/widgets/renderers/SignalGridRenderer'
 import { renderSystemLoop } from '../../features/widgets/renderers/SystemLoopRenderer'
 import { renderTerminal } from '../../features/widgets/renderers/TerminalRenderer'
@@ -545,6 +546,11 @@ export function renderWidgetSvg(
         <text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ GITHUB METRICS ]</text>
         ${statsSvg}
       `
+      break
+    }
+
+    case 'pokemon-card': {
+      contentSvg = renderPokemonCard(widget, data, globalStyles, width, height)
       break
     }
 

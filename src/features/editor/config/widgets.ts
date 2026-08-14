@@ -41,7 +41,7 @@ export interface WidgetBadge {
 export interface WidgetCatalogItem {
   id: WidgetId
   name: string
-  desc: string
+  desc?: string
   icon: React.ElementType
   isExternal?: boolean
   badge?: WidgetBadge
@@ -119,6 +119,14 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     icon: FileText,
     desc: 'Custom image or banner',
     category: WIDGET_CATEGORIES.MISC,
+  },
+  {
+    id: WIDGET_IDS.POKEMON_CARD,
+    name: 'Pokémon Card',
+    icon: Sparkles,
+    category: WIDGET_CATEGORIES.INTERACTIVE,
+    badge: { text: 'Novo', type: 'highlight' },
+    defaultSize: { width: 300, height: 418 },
   },
   {
     id: WIDGET_IDS.STATS,

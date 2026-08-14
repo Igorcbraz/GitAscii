@@ -21,6 +21,7 @@ import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
 import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
+import { PokemonCardControls } from './PokemonCardControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
@@ -564,6 +565,10 @@ export function PropertiesPanel() {
 
         {selectedWidget.widgetId === WIDGET_IDS.CUSTOM_IMAGE && (
           <CustomImageControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === WIDGET_IDS.POKEMON_CARD && (
+          <PokemonCardControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {selectedWidget.widgetId === WIDGET_IDS.STATS && (
