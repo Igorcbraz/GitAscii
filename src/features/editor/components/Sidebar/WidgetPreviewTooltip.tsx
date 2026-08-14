@@ -54,6 +54,12 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.ASCII_PORTRAIT]: { width: 370, height: 400 },
   [WIDGET_IDS.ASCII_INFO]: { width: 490, height: 400 },
   [WIDGET_IDS.ASCII_HEATMAP]: { width: 780, height: 240 },
+  [WIDGET_IDS.CODEWEB_HERO_ORBIT]: { width: 800, height: 360 },
+  [WIDGET_IDS.CODEWEB_RETRO_GRID]: { width: 800, height: 260 },
+  [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS]: { width: 800, height: 220 },
+  [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
+  [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
+  [WIDGET_IDS.POKEMON_CARD]: { width: 300, height: 418 },
 }
 
 export function WidgetPreviewTooltip({
@@ -105,7 +111,9 @@ export function WidgetPreviewTooltip({
   if (!widgetItem || !targetRect) return null
 
   const translatedName = t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name)
-  const translatedDesc = t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc)
+  const translatedDesc = widgetItem.desc
+    ? t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc)
+    : ''
   const translatedBadgeText = widgetItem.badge
     ? t(
         `widget.badge.${widgetItem.badge.text.toLowerCase().replace(/\s+/g, '_')}`,
@@ -123,6 +131,7 @@ export function WidgetPreviewTooltip({
       ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art'
         ? { lockAspectRatio: true }
         : {}),
+      ...(widgetItem.category === 'controlplane' ? { layoutType: 'hero' } : {}),
       ...(widgetItem.id === 'ascii-art' && asciiArtCache
         ? {
             asciiText: asciiArtCache.lines,

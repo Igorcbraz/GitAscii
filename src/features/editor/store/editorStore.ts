@@ -473,6 +473,11 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         size: widgetSize,
         config: {
           ...(widgetId === 'avatar' || widgetId === 'ascii-art' ? { lockAspectRatio: true } : {}),
+          ...(catalogItem?.category === 'controlplane'
+            ? { layoutType: 'hero', accentColor: '#00A7D1' }
+            : {}),
+          ...(catalogItem?.category === 'godprofile' ? { accentColor: '#b6a891' } : {}),
+          ...(catalogItem?.category === 'asciiprofile' ? { accentColor: '#ffa657' } : {}),
           ...(widgetId === 'ascii-text'
             ? {
                 customText: 'GitAscii',

@@ -80,20 +80,55 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
     return base.filter((r) => r.name.toLowerCase().includes(q))
   }, [allRepos, selectedRepos, searchQuery])
 
-  const currentWidth = React.useMemo(() => {
-    const widget = savedConfig?.widgets?.find((w) => w.instanceId === instanceId)
-    return widget?.size?.width ?? 320
+  const widget = React.useMemo(() => {
+    return savedConfig?.widgets?.find((w) => w.instanceId === instanceId)
   }, [savedConfig, instanceId])
 
-  React.useEffect(() => {
-    const height = computeWidgetHeight(maxRepos, viewMode)
-    updateWidgetSize(instanceId, { width: currentWidth, height }, false)
-  }, [maxRepos, viewMode, instanceId, currentWidth, updateWidgetSize])
+  const widgetId = widget?.widgetId
+  const currentWidth = widget?.size?.width ?? 320
+
+  const isControlPlane = widgetId?.startsWith('controlplane-')
+  const showViewMode = !isControlPlane
+  const showLanguageToggle = !isControlPlane
+  const showForksToggle = !isControlPlane
+  const showUpdatedToggle = !isControlPlane
+
+  const layoutType =
+    (config.layoutType as 'hero' | 'closed-loop') || (isControlPlane ? 'hero' : 'closed-loop')
+
+  const showStarsToggle =
+    !isControlPlane ||
+    ((widgetId === 'controlplane-cartograph' || widgetId === 'controlplane-foundry') &&
+      layoutType === 'closed-loop')
+
+  const showDescToggle =
+    !isControlPlane ||
+    ((widgetId === 'controlplane-bento' ||
+      widgetId === 'controlplane-cartograph' ||
+      widgetId === 'controlplane-foundry') &&
+      layoutType === 'hero')
 
   React.useEffect(() => {
+    if (widgetId?.startsWith('controlplane-')) return
+    const height = computeWidgetHeight(maxRepos, viewMode)
+    updateWidgetSize(instanceId, { width: currentWidth, height }, false)
+  }, [maxRepos, viewMode, instanceId, currentWidth, updateWidgetSize, widgetId])
+
+  React.useEffect(() => {
+    if (widgetId?.startsWith('controlplane-')) return
     const cardHeight = computeRepoCardHeight(showUpdated)
     updateWidgetConfig(instanceId, { repoCardHeight: cardHeight })
-  }, [showUpdated, instanceId, updateWidgetConfig])
+  }, [showUpdated, instanceId, updateWidgetConfig, widgetId])
+
+  const repoLanguages = (config.repoLanguages as Record<string, string>) || {}
+  const handleUpdateLanguage = (repoName: string, lang: string) => {
+    updateWidgetConfig(instanceId, {
+      repoLanguages: {
+        ...repoLanguages,
+        [repoName]: lang,
+      },
+    })
+  }
 
   const toggleRepo = (repoName: string) => {
     if (selectedRepos.includes(repoName)) {
@@ -127,37 +162,39 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
         <span>{t('editor.repos.title', 'Configurações de Repositórios')}</span>
       </div>
 
-      <div>
-        <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-          {t('editor.repos.view_mode', 'Modo de Visualização')}
-        </label>
-        <div className="grid grid-cols-2 gap-1.5">
-          <button
-            type="button"
-            onClick={() => updateWidgetConfig(instanceId, { repoViewMode: 'list' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xs text-eyebrow font-inter-tight transition-all cursor-pointer border ${
-              viewMode === 'list'
-                ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
-            }`}
-          >
-            <List size={12} />
-            Lista
-          </button>
-          <button
-            type="button"
-            onClick={() => updateWidgetConfig(instanceId, { repoViewMode: 'grid' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xs text-eyebrow font-inter-tight transition-all cursor-pointer border ${
-              viewMode === 'grid'
-                ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
-            }`}
-          >
-            <LayoutGrid size={12} />
-            Grid
-          </button>
+      {showViewMode && (
+        <div>
+          <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+            {t('editor.repos.view_mode', 'Modo de Visualização')}
+          </label>
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              onClick={() => updateWidgetConfig(instanceId, { repoViewMode: 'list' })}
+              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xs text-eyebrow font-inter-tight transition-all cursor-pointer border ${
+                viewMode === 'list'
+                  ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                  : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+              }`}
+            >
+              <List size={12} />
+              Lista
+            </button>
+            <button
+              type="button"
+              onClick={() => updateWidgetConfig(instanceId, { repoViewMode: 'grid' })}
+              className={`flex items-center justify-center gap-1.5 py-1.5 rounded-xs text-eyebrow font-inter-tight transition-all cursor-pointer border ${
+                viewMode === 'grid'
+                  ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                  : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+              }`}
+            >
+              <LayoutGrid size={12} />
+              Grid
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <div className="flex justify-between text-eyebrow mb-1">
@@ -195,53 +232,99 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
         </div>
       )}
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
-          <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            <Tag size={11} className="text-ash" />
-            {t('editor.repos.show_language', 'Linguagem')}
-          </label>
-          <Switch
-            checked={showLanguage}
-            onChange={() => handleToggle('showRepoLanguage', showLanguage)}
-          />
-        </div>
+      {(showLanguageToggle ||
+        showForksToggle ||
+        showStarsToggle ||
+        showDescToggle ||
+        showUpdatedToggle) && (
+        <div className="space-y-1">
+          {showLanguageToggle && (
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                <Tag size={11} className="text-ash" />
+                {t('editor.repos.show_language', 'Linguagem')}
+              </label>
+              <Switch
+                checked={showLanguage}
+                onChange={() => handleToggle('showRepoLanguage', showLanguage)}
+              />
+            </div>
+          )}
 
-        <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
-          <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            <GitFork size={11} className="text-ash" />
-            {t('editor.repos.show_forks', 'Forks')}
-          </label>
-          <Switch checked={showForks} onChange={() => handleToggle('showRepoForks', showForks)} />
-        </div>
+          {showForksToggle && (
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                <GitFork size={11} className="text-ash" />
+                {t('editor.repos.show_forks', 'Forks')}
+              </label>
+              <Switch
+                checked={showForks}
+                onChange={() => handleToggle('showRepoForks', showForks)}
+              />
+            </div>
+          )}
 
-        <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
-          <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            <Star size={11} className="text-ash" />
-            {t('editor.repos.show_stars', 'Estrelas')}
-          </label>
-          <Switch checked={showStars} onChange={() => handleToggle('showRepoStars', showStars)} />
-        </div>
+          {showStarsToggle && (
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                <Star size={11} className="text-ash" />
+                {t('editor.repos.show_stars', 'Estrelas')}
+              </label>
+              <Switch
+                checked={showStars}
+                onChange={() => handleToggle('showRepoStars', showStars)}
+              />
+            </div>
+          )}
 
-        <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
-          <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            <AlignJustify size={11} className="text-ash" />
-            {t('editor.repos.show_desc', 'Descrição')}
-          </label>
-          <Switch checked={showDesc} onChange={() => handleToggle('showRepoDesc', showDesc)} />
-        </div>
+          {showDescToggle && (
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                <AlignJustify size={11} className="text-ash" />
+                {t('editor.repos.show_desc', 'Descrição')}
+              </label>
+              <Switch checked={showDesc} onChange={() => handleToggle('showRepoDesc', showDesc)} />
+            </div>
+          )}
 
-        <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
-          <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            <Clock size={11} className="text-ash" />
-            {t('editor.repos.show_updated', 'Última Atualização')}
-          </label>
-          <Switch
-            checked={showUpdated}
-            onChange={() => handleToggle('showRepoUpdated', showUpdated)}
-          />
+          {showUpdatedToggle && (
+            <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
+              <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+                <Clock size={11} className="text-ash" />
+                {t('editor.repos.show_updated', 'Última Atualização')}
+              </label>
+              <Switch
+                checked={showUpdated}
+                onChange={() => handleToggle('showRepoUpdated', showUpdated)}
+              />
+            </div>
+          )}
         </div>
-      </div>
+      )}
+
+      {selectedRepos.length > 0 && widgetId?.startsWith('controlplane-') && (
+        <div className="space-y-2 border-t border-graphite/40 pt-3">
+          <label className="text-eyebrow text-ash font-inter-tight block">
+            Customizar Tecnologias / Tags
+          </label>
+          <div className="space-y-1.5">
+            {selectedRepos.map((repoName) => (
+              <div key={repoName} className="flex items-center gap-2">
+                <span className="text-caption text-chalk truncate w-1/2" title={repoName}>
+                  {repoName}
+                </span>
+                <input
+                  type="text"
+                  value={repoLanguages[repoName] || ''}
+                  onChange={(e) => handleUpdateLanguage(repoName, e.target.value)}
+                  placeholder="Original language"
+                  className="w-1/2 bg-graphite border border-graphite rounded-xs text-caption font-inter-tight text-chalk px-2 py-1 placeholder:text-ash/40 focus:border-signal-lime focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">

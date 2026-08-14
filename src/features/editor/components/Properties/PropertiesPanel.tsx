@@ -13,12 +13,15 @@ import { AsciiArtControls } from './AsciiArtControls'
 import { AsciiProfileControls } from './AsciiProfileControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
+import { CodewebDevControls } from './CodewebDevControls'
 import { ColorPicker } from './ColorPicker'
+import { ControlPlaneControls } from './ControlPlaneControls'
 import { CustomImageControls } from './CustomImageControls'
 import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
 import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
+import { PokemonCardControls } from './PokemonCardControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
@@ -564,6 +567,10 @@ export function PropertiesPanel() {
           <CustomImageControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
+        {selectedWidget.widgetId === WIDGET_IDS.POKEMON_CARD && (
+          <PokemonCardControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
         {selectedWidget.widgetId === WIDGET_IDS.STATS && (
           <GithubStatsControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
@@ -618,6 +625,44 @@ export function PropertiesPanel() {
           WIDGET_IDS.ASCII_HEATMAP as string,
         ].includes(selectedWidget.widgetId) && (
           <AsciiProfileControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP as string,
+          WIDGET_IDS.CONTROLPLANE_COMMAND_DECK as string,
+          WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID as string,
+          WIDGET_IDS.CONTROLPLANE_METRO as string,
+          WIDGET_IDS.CONTROLPLANE_BENTO as string,
+          WIDGET_IDS.CONTROLPLANE_EDITORIAL as string,
+          WIDGET_IDS.CONTROLPLANE_BLUEPRINT as string,
+          WIDGET_IDS.CONTROLPLANE_CONSTELLATION as string,
+          WIDGET_IDS.CONTROLPLANE_MONOLITH as string,
+          WIDGET_IDS.CONTROLPLANE_INTERLACE as string,
+          WIDGET_IDS.CONTROLPLANE_CIPHER as string,
+          WIDGET_IDS.CONTROLPLANE_SPECIMEN as string,
+          WIDGET_IDS.CONTROLPLANE_PATCHBAY as string,
+          WIDGET_IDS.CONTROLPLANE_CARTOGRAPH as string,
+          WIDGET_IDS.CONTROLPLANE_FOUNDRY as string,
+        ].includes(selectedWidget.widgetId) && (
+          <ControlPlaneControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.CODEWEB_HERO_ORBIT as string,
+          WIDGET_IDS.CODEWEB_SOCIAL_BADGE as string,
+          WIDGET_IDS.CODEWEB_SHOWCASE_CARDS as string,
+          WIDGET_IDS.CODEWEB_RETRO_GRID as string,
+          WIDGET_IDS.CODEWEB_MINIMAL_BADGE as string,
+        ].includes(selectedWidget.widgetId) && (
+          <CodewebDevControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

@@ -2,6 +2,9 @@
   "mcpServers": {
     "openseo": {
       "serverUrl": "https://app.openseo.so/mcp"
+    },
+    "sentry": {
+      "serverUrl": "https://mcp.sentry.dev/mcp"
     }
   }
 }

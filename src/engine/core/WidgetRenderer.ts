@@ -2,9 +2,30 @@ import { APP_DOMAIN, WIDGET_IDS } from '../../constants'
 import { renderAsciiHeatmap } from '../../features/widgets/renderers/AsciiHeatmapRenderer'
 import { renderAsciiInfoCard } from '../../features/widgets/renderers/AsciiInfoCardRenderer'
 import { renderAsciiPortrait } from '../../features/widgets/renderers/AsciiPortraitRenderer'
+import { renderBentoGrid } from '../../features/widgets/renderers/BentoGridRenderer'
+import { renderBlueprint } from '../../features/widgets/renderers/BlueprintRenderer'
+import { renderCartograph } from '../../features/widgets/renderers/CartographRenderer'
+import { renderCipherPrint } from '../../features/widgets/renderers/CipherPrintRenderer'
+import { renderCodewebHeroOrbit } from '../../features/widgets/renderers/CodewebHeroOrbitRenderer'
+import { renderCodewebMinimalBadge } from '../../features/widgets/renderers/CodewebMinimalBadgeRenderer'
+import { renderCodewebRetroGrid } from '../../features/widgets/renderers/CodewebRetroGridRenderer'
+import { renderCodewebShowcaseCards } from '../../features/widgets/renderers/CodewebShowcaseCardsRenderer'
+import { renderCodewebSocialBadge } from '../../features/widgets/renderers/CodewebSocialBadgeRenderer'
+import { renderCommandDeck } from '../../features/widgets/renderers/CommandDeckRenderer'
+import { renderConstellation } from '../../features/widgets/renderers/ConstellationRenderer'
+import { renderEditorial } from '../../features/widgets/renderers/EditorialRenderer'
+import { renderFieldSpecimen } from '../../features/widgets/renderers/FieldSpecimenRenderer'
+import { renderFoundry } from '../../features/widgets/renderers/FoundryRenderer'
 import { renderGlobe } from '../../features/widgets/renderers/GlobeRenderer'
+import { renderInterlace } from '../../features/widgets/renderers/InterlaceRenderer'
 import { renderMarquee } from '../../features/widgets/renderers/MarqueeRenderer'
+import { renderMetroMap } from '../../features/widgets/renderers/MetroMapRenderer'
+import { renderMonolith } from '../../features/widgets/renderers/MonolithRenderer'
 import { renderNeural } from '../../features/widgets/renderers/NeuralRenderer'
+import { renderPatchbay } from '../../features/widgets/renderers/PatchbayRenderer'
+import { renderPokemonCard } from '../../features/widgets/renderers/PokemonCardRenderer'
+import { renderSignalGrid } from '../../features/widgets/renderers/SignalGridRenderer'
+import { renderSystemLoop } from '../../features/widgets/renderers/SystemLoopRenderer'
 import { renderTerminal } from '../../features/widgets/renderers/TerminalRenderer'
 import { renderTrophies } from '../../features/widgets/renderers/TrophiesRenderer'
 import { renderWakaTime } from '../../features/widgets/renderers/WakaTimeRenderer'
@@ -525,6 +546,11 @@ export function renderWidgetSvg(
         <text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ GITHUB METRICS ]</text>
         ${statsSvg}
       `
+      break
+    }
+
+    case 'pokemon-card': {
+      contentSvg = renderPokemonCard(widget, data, globalStyles, width, height)
       break
     }
 
@@ -1434,6 +1460,106 @@ export function renderWidgetSvg(
       break
     }
 
+    case WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP: {
+      contentSvg = renderSystemLoop(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_COMMAND_DECK: {
+      contentSvg = renderCommandDeck(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID: {
+      contentSvg = renderSignalGrid(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_METRO: {
+      contentSvg = renderMetroMap(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_BENTO: {
+      contentSvg = renderBentoGrid(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_EDITORIAL: {
+      contentSvg = renderEditorial(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_BLUEPRINT: {
+      contentSvg = renderBlueprint(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_CONSTELLATION: {
+      contentSvg = renderConstellation(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_MONOLITH: {
+      contentSvg = renderMonolith(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_INTERLACE: {
+      contentSvg = renderInterlace(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_CIPHER: {
+      contentSvg = renderCipherPrint(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_SPECIMEN: {
+      contentSvg = renderFieldSpecimen(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_PATCHBAY: {
+      contentSvg = renderPatchbay(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_CARTOGRAPH: {
+      contentSvg = renderCartograph(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CONTROLPLANE_FOUNDRY: {
+      contentSvg = renderFoundry(widget, data, globalStyles)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_HERO_ORBIT: {
+      contentSvg = renderCodewebHeroOrbit(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_RETRO_GRID: {
+      contentSvg = renderCodewebRetroGrid(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_SHOWCASE_CARDS: {
+      contentSvg = renderCodewebShowcaseCards(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_SOCIAL_BADGE: {
+      contentSvg = renderCodewebSocialBadge(widget, data, globalStyles, forceStatic)
+      break
+    }
+
+    case WIDGET_IDS.CODEWEB_MINIMAL_BADGE: {
+      contentSvg = renderCodewebMinimalBadge(widget, data, globalStyles, forceStatic)
+      break
+    }
+
     case 'ghstats': {
       const username = data.user.login
       const embedType = (cfg.embedType as string) || 'card'
@@ -2001,11 +2127,20 @@ export function renderWidgetSvg(
     }
   }
 
+  const isSelfContained =
+    contentSvg.trim().startsWith('<svg') ||
+    widget.widgetId.startsWith('controlplane-') ||
+    widget.widgetId.startsWith('codeweb-')
+
+  const baseBackgroundRect = isSelfContained
+    ? ''
+    : `<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
+
   const innerHtml = `
       ${styleBlock}
       ${shadowRect}
-      <rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />
-      ${templateDecorationSvg}
+      ${baseBackgroundRect}
+      ${isSelfContained ? '' : templateDecorationSvg}
       ${contentSvg}
   `
 

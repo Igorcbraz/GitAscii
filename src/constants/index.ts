@@ -36,6 +36,27 @@ export const WIDGET_IDS = {
   ASCII_PORTRAIT: 'asciiprofile-portrait',
   ASCII_INFO: 'asciiprofile-info',
   ASCII_HEATMAP: 'asciiprofile-heatmap',
+  CONTROLPLANE_SYSTEM_LOOP: 'controlplane-system-loop',
+  CONTROLPLANE_COMMAND_DECK: 'controlplane-command-deck',
+  CONTROLPLANE_SIGNAL_GRID: 'controlplane-signal-grid',
+  CONTROLPLANE_METRO: 'controlplane-metro',
+  CONTROLPLANE_BENTO: 'controlplane-bento',
+  CONTROLPLANE_EDITORIAL: 'controlplane-editorial',
+  CONTROLPLANE_BLUEPRINT: 'controlplane-blueprint',
+  CONTROLPLANE_CONSTELLATION: 'controlplane-constellation',
+  CONTROLPLANE_MONOLITH: 'controlplane-monolith',
+  CONTROLPLANE_INTERLACE: 'controlplane-interlace',
+  CONTROLPLANE_CIPHER: 'controlplane-cipher',
+  CONTROLPLANE_SPECIMEN: 'controlplane-specimen',
+  CONTROLPLANE_PATCHBAY: 'controlplane-patchbay',
+  CONTROLPLANE_CARTOGRAPH: 'controlplane-cartograph',
+  CONTROLPLANE_FOUNDRY: 'controlplane-foundry',
+  CODEWEB_HERO_ORBIT: 'codeweb-hero-orbit',
+  CODEWEB_RETRO_GRID: 'codeweb-retro-grid',
+  CODEWEB_SHOWCASE_CARDS: 'codeweb-showcase-cards',
+  CODEWEB_SOCIAL_BADGE: 'codeweb-social-badge',
+  CODEWEB_MINIMAL_BADGE: 'codeweb-minimal-badge',
+  POKEMON_CARD: 'pokemon-card',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -48,6 +69,8 @@ export const WIDGET_CATEGORIES = {
   MISC: 'misc',
   GODPROFILE: 'godprofile',
   ASCIIPROFILE: 'asciiprofile',
+  CONTROLPLANE: 'controlplane',
+  CODEWEB_DEV: 'codeweb-dev',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

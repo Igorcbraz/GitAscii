@@ -1,9 +1,11 @@
 'use client'
 
 import {
+  ChevronDown,
   Download,
   ExternalLink,
   GitFork,
+  Github,
   Plus,
   Search,
   Sparkles,
@@ -11,6 +13,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -93,7 +96,39 @@ export function WidgetLibrary() {
           return
         }
 
-        importLayout(data.widgets, data.globalStyles, data.templateId)
+        // Strip user-specific data fields from imported widgets so the current
+        // session's GitHub data is used instead of the exported user's data.
+        const USER_SPECIFIC_FIELDS = [
+          'avatarUrl',
+          'uploadedImageData',
+          'customBio',
+          'customLocation',
+          'customBlog',
+          'customBullet1',
+          'customBullet2',
+          'customNow',
+          'customAlso',
+          'customLoc',
+          'customSite',
+          'customFrontend',
+          'customBackend',
+          'customLangs',
+          'customWhoami',
+          'asciiText',
+        ]
+        const sanitizedWidgets = data.widgets.map((w: Record<string, unknown>) => {
+          const { config: widgetCfg, ...rest } = w as {
+            config: Record<string, unknown>
+            [key: string]: unknown
+          }
+          if (!widgetCfg) return w
+          const cleanCfg = { ...widgetCfg }
+          USER_SPECIFIC_FIELDS.forEach((field) => {
+            delete cleanCfg[field]
+          })
+          return { ...rest, config: cleanCfg }
+        })
+        importLayout(sanitizedWidgets, data.globalStyles, data.templateId)
 
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
@@ -118,6 +153,12 @@ export function WidgetLibrary() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({})
+  const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>({})
+
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }))
+  }
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isMouseDown, setIsMouseDown] = useState(false)
@@ -167,7 +208,7 @@ export function WidgetLibrary() {
     return WIDGET_CATALOG.map((item) => ({
       ...item,
       name: t(`widget.catalog.${item.id}.name`, item.name),
-      desc: t(`widget.catalog.${item.id}.desc`, item.desc),
+      desc: item.desc ? t(`widget.catalog.${item.id}.desc`, item.desc) : undefined,
       badge: item.badge
         ? {
             ...item.badge,
@@ -191,7 +232,7 @@ export function WidgetLibrary() {
       const q = searchQuery.toLowerCase()
       return (
         item.name.toLowerCase().includes(q) ||
-        item.desc.toLowerCase().includes(q) ||
+        (item.desc && item.desc.toLowerCase().includes(q)) ||
         item.badge?.text.toLowerCase().includes(q) ||
         item.id.toLowerCase().includes(q)
       )
@@ -201,7 +242,9 @@ export function WidgetLibrary() {
   if (!config) return null
 
   const renderWidgetCard = (item: WidgetCatalogItem) => {
-    if (item.id === 'gitfest-lineup') {
+    const Icon = item.icon
+
+    if (item.id === WIDGET_IDS.GITFEST_LINEUP) {
       return (
         <div
           key={item.id}
@@ -214,81 +257,236 @@ export function WidgetLibrary() {
             setHoveredWidget({ item, rect })
           }}
           onMouseLeave={() => setHoveredWidget(null)}
-          className="group relative w-full px-3 py-2 rounded-xl font-bold text-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] overflow-hidden cursor-pointer my-2 transform hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
-          style={{
-            background: 'linear-gradient(145deg, #3d2b5e 0%, #2d1b4e 50%, #3d2b5e 100%)',
-            border: '2px solid rgba(139, 92, 246, 0.4)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1)',
-          }}
+          className="group relative w-full transition-all duration-300 ease-out cursor-pointer my-1.5 select-none transform hover:-translate-y-0.5"
         >
-          <div
-            className="absolute inset-0 bg-linear-to-br from-[#c084fc]/20 via-[#a855f7]/20 to-[#e9d5ff]/20 transition-opacity duration-700 opacity-0 group-hover:opacity-80"
-            style={{ filter: 'blur(15px)' }}
-          ></div>
+          <div className="relative w-full h-[70px] flex items-stretch filter drop-shadow-[0_4px_16px_rgba(88,28,135,0.3)] group-hover:drop-shadow-[0_8px_26px_rgba(147,51,234,0.45)] transition-all duration-300">
+            <div
+              className="flex-1 h-full pl-3.5 pr-2 flex items-center justify-between relative transition-all duration-300 group-hover:brightness-105"
+              style={{
+                background: 'linear-gradient(135deg, #220b3f 0%, #140626 50%, #0c0317 100%)',
+                maskImage:
+                  'radial-gradient(circle 8px at 100% 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 100% 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 0% 50%, transparent 0, transparent 6px, black 6.5px)',
+                WebkitMaskImage:
+                  'radial-gradient(circle 8px at 100% 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 100% 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 0% 50%, transparent 0, transparent 6px, black 6.5px)',
+                maskComposite: 'intersect',
+                WebkitMaskComposite: 'source-in',
+              }}
+            >
+              <div
+                className="absolute inset-0 pointer-events-none opacity-15"
+                style={{
+                  backgroundImage: 'radial-gradient(#c084fc 0.8px, transparent 0.8px)',
+                  backgroundSize: '5px 5px',
+                }}
+              />
 
-          <div
-            className="absolute -inset-1 bg-linear-to-r from-[#c084fc] via-[#a855f7] to-[#e9d5ff] rounded-2xl transition-all duration-500 opacity-0 group-hover:opacity-40 animate-pulse"
-            style={{ filter: 'blur(10px)', zIndex: -1 }}
-          ></div>
-
-          <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-transparent via-transparent to-black/50"></div>
-
-          <div className="relative z-20 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 shrink-0 transition-transform duration-500 group-hover:scale-110">
-                <div className="absolute -inset-2 bg-linear-to-br from-[#c084fc]/60 via-[#a855f7]/60 to-[#e9d5ff]/60 transition-all duration-500 blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg"></div>
-
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <div
-                    className="absolute inset-0 bg-linear-to-br from-[#8B5CF6] to-[#C084FC] rounded-lg transition-transform duration-500 group-hover:rotate-12"
-                    style={{
-                      boxShadow:
-                        '0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.4)',
-                    }}
-                  ></div>
-
-                  <svg
-                    className="relative z-10 w-6 h-6 transition-transform duration-300 group-hover:scale-110"
-                    viewBox="0 0 24 24"
-                    fill="white"
-                    style={{
-                      filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6))',
-                      opacity: 0.95,
-                    }}
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 via-purple-300/15 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
               </div>
 
-              <div className="flex items-center justify-center pl-2">
-                <Image
-                  src={'/gitfest.png'}
-                  alt="GitFest"
-                  width={120}
-                  height={36}
-                  className="h-9 w-auto object-contain transition-all duration-300 drop-shadow-[0_2px_6px_rgba(139,92,246,0.5)] group-hover:drop-shadow-[0_4px_16px_rgba(168,85,247,0.9)] group-hover:brightness-125"
+              <div className="flex items-center gap-3.5 relative z-10 min-w-0 pl-1">
+                <Github
+                  size={24}
+                  className="text-purple-300 group-hover:text-white transition-colors duration-300 drop-shadow-[0_2px_8px_rgba(168,85,247,0.5)] shrink-0"
+                />
+
+                <div className="flex items-center min-w-0">
+                  <Image
+                    src="/gitfest.png"
+                    alt="GitFest"
+                    width={140}
+                    height={36}
+                    className="h-9 w-auto object-contain drop-shadow-[0_2px_14px_rgba(168,85,247,0.65)] group-hover:drop-shadow-[0_2px_22px_rgba(192,132,252,1)] group-hover:brightness-110 transition-all duration-300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="w-[50px] h-full flex items-center justify-center relative shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-top-left group-hover:translate-x-2 group-hover:rotate-[4.5deg] group-hover:translate-y-[2px] group-hover:shadow-[-4px_4px_12px_rgba(0,0,0,0.5)]"
+              style={{
+                background: 'linear-gradient(135deg, #1c0836 0%, #120522 50%, #0a0214 100%)',
+                maskImage:
+                  'radial-gradient(circle 8px at 0px 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 0px 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 100% 50%, transparent 0, transparent 6px, black 6.5px)',
+                WebkitMaskImage:
+                  'radial-gradient(circle 8px at 0px 0px, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 8px at 0px 100%, transparent 0, transparent 8px, black 8.5px), radial-gradient(circle 6px at 100% 50%, transparent 0, transparent 6px, black 6.5px)',
+                maskComposite: 'intersect',
+                WebkitMaskComposite: 'source-in',
+              }}
+            >
+              <div className="absolute top-2.5 bottom-2.5 left-0 border-l border-dashed border-purple-400/40 group-hover:border-purple-300/90 group-hover:shadow-[0_0_8px_rgba(192,132,252,0.6)] transition-all duration-300 z-10" />
+
+              <div className="text-purple-300/80 group-hover:text-white transition-colors duration-300 flex items-center justify-center relative z-20">
+                <Plus
+                  size={16}
+                  className="group-hover:scale-120 transition-transform duration-300"
                 />
               </div>
             </div>
-
-            <div className="text-white/60 group-hover:text-white transition-colors duration-300 p-1 shrink-0 self-center">
-              <Plus size={15} />
-            </div>
-          </div>
-
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-            <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#d8b4fe]/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
           </div>
         </div>
       )
     }
 
-    const Icon = item.icon
+    if (item.category === WIDGET_CATEGORIES.CODEWEB_DEV) {
+      return (
+        <div
+          key={item.id}
+          onClick={() => addWidget(item.id)}
+          data-testid={`add-widget-${item.id}`}
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            setHoveredWidget({ item, rect })
+          }}
+          onMouseLeave={() => setHoveredWidget(null)}
+          className="group relative p-3 border border-white/10 hover:border-white/20 bg-[#08080d] hover:bg-[#0c0c14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-2xl cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_8px_24px_rgba(108,195,130,0.15)]"
+        >
+          <div className="absolute -left-4 -top-4 w-20 h-20 bg-[radial-gradient(circle,rgba(108,195,130,0.2)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/80 group-hover:text-white group-hover:bg-white/[0.08] transition-all duration-300 shrink-0">
+              <Icon size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
+                  {item.name}
+                </h4>
+              </div>
+              <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
+                {item.desc}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0 relative z-10">
+            <button className="text-white/40 group-hover:text-white transition-colors duration-300 p-1">
+              <Plus size={15} />
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    if (item.id === WIDGET_IDS.POKEMON_CARD) {
+      return (
+        <div
+          key={item.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => addWidget(item.id)}
+          data-testid="add-widget-pokemon-card"
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            setHoveredWidget({ item, rect })
+          }}
+          onMouseLeave={() => setHoveredWidget(null)}
+          className="group relative w-full rounded-lg transition-all duration-300 ease-out overflow-hidden cursor-pointer my-1.5 transform hover:-translate-y-0.5 select-none shadow-[0_4px_16px_rgba(197,32,40,0.3)] hover:shadow-[0_8px_28px_rgba(220,38,38,0.55)]"
+          style={{
+            background: 'linear-gradient(180deg, #d8232a 0%, #a8131b 60%, #850c12 100%)',
+            border: '1.5px solid #5a070c',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Prismatic Holofoil Rainbow Sweep */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-400/20 via-amber-300/25 via-emerald-300/20 via-cyan-400/25 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+          </div>
+
+          {/* Top Pokédex Ribbon Header */}
+          <div className="flex items-center justify-between px-2.5 py-1 border-b border-black/25 bg-black/20 relative z-10">
+            <div className="flex items-center gap-1.5">
+              {/* Pokédex Primary Cyan Scanner Eye with Hover Surge */}
+              <div className="relative w-3.5 h-3.5 rounded-full bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-700 border border-white/90 shadow-[0_0_6px_rgba(56,189,248,0.7)] group-hover:shadow-[0_0_12px_rgba(56,189,248,1)] group-hover:scale-110 transition-all duration-300 flex items-center justify-center">
+                <div className="w-1 h-1 rounded-full bg-white/95 absolute top-0.5 left-0.5 blur-[0.2px]" />
+              </div>
+              {/* Status Indicator LED Array */}
+              <div className="flex items-center gap-1 pl-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff3b30] border border-black/40 shadow-[0_0_3px_rgba(255,59,48,0.7)] group-hover:shadow-[0_0_6px_rgba(255,59,48,1)] transition-shadow duration-300" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffcc00] border border-black/40 shadow-[0_0_3px_rgba(255,204,0,0.7)] group-hover:shadow-[0_0_6px_rgba(255,204,0,1)] transition-shadow duration-300" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#34c759] border border-black/40 shadow-[0_0_3px_rgba(52,199,89,0.7)] group-hover:shadow-[0_0_6px_rgba(52,199,89,1)] transition-shadow duration-300" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="font-jetbrains-mono text-[8.5px] font-bold text-white/90 tracking-wider uppercase drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] group-hover:text-amber-200 transition-colors">
+                PKMN // TCG-025
+              </span>
+              <div className="flex gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+                <div className="w-0.5 h-2 bg-black/60 rounded-full" />
+              </div>
+            </div>
+          </div>
+
+          {/* Inner Chamber */}
+          <div className="p-1.5 relative z-10">
+            <div className="relative rounded-md p-2 bg-[#0b1219] border border-[#1e2d3d] group-hover:border-cyan-500/40 shadow-[inset_0_1px_6px_rgba(0,0,0,0.8)] group-hover:shadow-[inset_0_1px_8px_rgba(6,182,212,0.2)] transition-all duration-300 overflow-hidden">
+              {/* Cyan Micro Grid Overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-20 group-hover:opacity-35 transition-opacity duration-300"
+                style={{
+                  backgroundImage: 'radial-gradient(#38bdf8 1px, transparent 1px)',
+                  backgroundSize: '4px 4px',
+                }}
+              />
+
+              <div className="relative z-10 flex items-center justify-between gap-2.5">
+                {/* Pokéball Throw & Energy Blast Stage */}
+                <div className="relative shrink-0 flex items-center justify-center w-9 h-9">
+                  {/* Energy Shockwave Radial Burst on Hover */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-14 h-14 rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.45)_0%,rgba(56,189,248,0.1)_50%,transparent_75%)] scale-0 group-hover:scale-125 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out" />
+                    {/* Dynamic Throw Speed Lines */}
+                    <div className="absolute -left-2.5 top-1.5 w-4 h-0.5 bg-gradient-to-r from-transparent to-white/70 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out" />
+                    <div className="absolute -left-3 bottom-1.5 w-5 h-0.5 bg-gradient-to-r from-transparent to-cyan-400/80 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 delay-75 ease-out" />
+                  </div>
+
+                  {/* Clean Lacquer Pokéball with 360° Throw Physics */}
+                  <div className="relative w-8 h-8 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-1.5 group-hover:translate-x-1.5 group-hover:rotate-[360deg] group-hover:scale-120 group-hover:shadow-[0_8px_18px_rgba(239,68,68,0.45),0_0_12px_rgba(255,255,255,0.5)] shadow-[0_3px_8px_rgba(0,0,0,0.6)] z-20">
+                    <div className="w-full h-full rounded-full border-[1.5px] border-[#18181b] overflow-hidden relative bg-white">
+                      {/* Top Red Half */}
+                      <div className="absolute top-0 left-0 right-0 h-[48%] bg-gradient-to-b from-[#ff3838] to-[#cc0a0a]" />
+
+                      {/* Glossy Curved Glare Pill */}
+                      <div className="absolute top-1 left-1.5 w-2.5 h-1 bg-white/75 rounded-full rotate-[-25deg] pointer-events-none" />
+
+                      {/* Equatorial Seam */}
+                      <div className="absolute top-1/2 left-0 right-0 h-[14%] bg-[#18181b] -translate-y-1/2" />
+
+                      {/* Center Button (Kept Pure White) */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#18181b] flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white border border-black/40 group-hover:bg-white group-hover:shadow-[0_0_6px_rgba(255,255,255,0.9)] transition-all duration-300" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-jetbrains-mono font-bold text-xs text-white tracking-wider uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-cyan-200 transition-colors">
+                      {item.name}
+                    </h4>
+                  </div>
+                  {item.desc && (
+                    <p className="font-jetbrains-mono text-[10px] text-cyan-300/80 group-hover:text-cyan-100 transition-colors truncate mt-0.5 tracking-tight">
+                      {item.desc}
+                    </p>
+                  )}
+                </div>
+
+                {/* Interactive Action Plus Button with Cyan Flare */}
+                <div className="text-white/60 group-hover:text-cyan-300 group-hover:scale-115 transition-all duration-300 p-1 shrink-0 drop-shadow-[0_0_6px_rgba(56,189,248,0)] group-hover:drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]">
+                  <Plus size={16} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div
@@ -448,29 +646,10 @@ export function WidgetLibrary() {
                 {translatedCatalog.find((w) => w.id === 'gitfest-lineup') &&
                   renderWidgetCard(translatedCatalog.find((w) => w.id === 'gitfest-lineup')!)}
 
-                <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xs bg-graphite/50 group-hover:bg-signal-lime/10 text-ash group-hover:text-signal-lime transition-colors shrink-0">
-                      <Plus size={16} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-inter-tight font-medium text-label text-ash group-hover:text-chalk transition-colors">
-                          {t('editor.sidebar.featured_slot', 'Espaço Disponível')}
-                        </h4>
-                        <span className="text-[9px] font-inter-tight font-medium text-signal-lime bg-signal-lime/10 border border-signal-lime/20 px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
-                          {t('editor.sidebar.announce', 'Anuncie Aqui')}
-                        </span>
-                      </div>
-                      <p className="font-inter-tight text-eyebrow text-ash group-hover:text-chalk transition-colors line-clamp-1">
-                        {t(
-                          'editor.sidebar.featured_slot_desc',
-                          'Destaque seu widget para a comunidade'
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.POKEMON_CARD) &&
+                  renderWidgetCard(
+                    translatedCatalog.find((w) => w.id === WIDGET_IDS.POKEMON_CARD)!
+                  )}
 
                 <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
                   <div className="flex items-center gap-3">
@@ -514,87 +693,75 @@ export function WidgetLibrary() {
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash/50">
                       {
-                        filteredWidgets.filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
-                          .length
+                        filteredWidgets.filter(
+                          (w) =>
+                            !w.isExternal &&
+                            w.id !== 'gitfest-lineup' &&
+                            w.id !== WIDGET_IDS.POKEMON_CARD &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
+                            w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                            w.category !== WIDGET_CATEGORIES.GODPROFILE &&
+                            w.category !== WIDGET_CATEGORIES.CONTROLPLANE
+                        ).length
                       }
                     </span>
                   </div>
                   <div className="space-y-1.5">
-                    {filteredWidgets
-                      .filter((w) => !w.isExternal && w.id !== 'gitfest-lineup')
-                      .map(renderWidgetCard)}
+                    {(() => {
+                      const items = filteredWidgets.filter(
+                        (w) =>
+                          !w.isExternal &&
+                          w.id !== 'gitfest-lineup' &&
+                          w.id !== WIDGET_IDS.POKEMON_CARD &&
+                          w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
+                          w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                          w.category !== WIDGET_CATEGORIES.GODPROFILE &&
+                          w.category !== WIDGET_CATEGORIES.CONTROLPLANE
+                      )
+                      const baseItems = items.slice(0, 5)
+                      const extraItems = items.slice(5)
+                      return (
+                        <>
+                          {baseItems.map(renderWidgetCard)}
+                          <AnimatePresence initial={false}>
+                            {expandedLists['native'] && extraItems.length > 0 && (
+                              <motion.div
+                                key="extra-native"
+                                initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                className="space-y-1.5 overflow-hidden"
+                              >
+                                {extraItems.map(renderWidgetCard)}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          {items.length > 5 && (
+                            <button
+                              onClick={() =>
+                                setExpandedLists((prev) => ({ ...prev, native: !prev.native }))
+                              }
+                              className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                            >
+                              {expandedLists['native']
+                                ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                : t('editor.sidebar.load_more', 'Carregar mais')}
+                            </button>
+                          )}
+                        </>
+                      )
+                    })()}
                   </div>
                 </div>
 
                 <div className="border-t border-graphite/50" />
 
                 <div>
-                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
-                    <Sparkles size={10} className="text-[#b6a891] shrink-0" />
-                    <span className="font-inter-tight text-caption font-medium text-[#b6a891] uppercase tracking-[0.16em]">
-                      {t('editor.sidebar.godprofile_category', 'GodProfile MCP Toolkit')}
-                    </span>
-                    <a
-                      href="https://github.com/Luc0-0/GodProfile"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#b6a891] hover:text-[#d8d0c4] transition-colors ml-1"
-                    >
-                      <ExternalLink size={10} />
-                    </a>
-                    <span className="ml-auto font-inter-tight text-caption text-ash">
-                      {filteredWidgets.filter((w) => w.category === 'godprofile').length}
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {filteredWidgets
-                      .filter((w) => w.category === 'godprofile')
-                      .map((item) => {
-                        const Icon = item.icon
-                        return (
-                          <div
-                            key={item.id}
-                            onClick={() => addWidget(item.id)}
-                            data-testid={`add-widget-${item.id}`}
-                            onMouseEnter={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect()
-                              setHoveredWidget({ item, rect })
-                            }}
-                            onMouseLeave={() => setHoveredWidget(null)}
-                            className="group relative p-3 border border-[#1e2530] hover:border-[#b6a891] bg-[#0b0f14] hover:bg-[#111820] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(182,168,145,0.2)]"
-                          >
-                            <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-[#b6a891]/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
-
-                            <div className="flex items-center gap-3 relative z-10">
-                              <div className="p-2 rounded-xs bg-[#1e2530] group-hover:bg-[#b6a891] text-[#b6a891] group-hover:text-[#0b0f14] transition-colors duration-300 shrink-0">
-                                <Icon size={16} />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="font-inter-tight font-medium text-label text-[#d8d0c4] group-hover:text-[#b6a891] transition-colors duration-300">
-                                    {item.name}
-                                  </h4>
-                                </div>
-                                <p className="font-inter-tight text-eyebrow text-[#5a6070] group-hover:text-[#d8d0c4] transition-colors line-clamp-1">
-                                  {item.desc}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0 relative z-10">
-                              <button className="text-[#5a6070] group-hover:text-[#b6a891] transition-colors duration-300 p-1">
-                                <Plus size={15} />
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })}
-                  </div>
-                </div>
-
-                <div className="border-t border-graphite/50" />
-
-                <div>
-                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                  <button
+                    onClick={() => toggleSection('asciiprofile')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
                     <span className="font-inter-tight text-caption font-medium text-[#ffa657] uppercase tracking-[0.16em]">
                       {t('editor.sidebar.asciiprofile_category', 'ASCII Profile Kit')}
                     </span>
@@ -603,6 +770,7 @@ export function WidgetLibrary() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#ffa657] hover:text-[#ffbd2e] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink size={10} />
                     </a>
@@ -612,137 +780,624 @@ export function WidgetLibrary() {
                           .length
                       }
                     </span>
-                  </div>
-                  <div className="space-y-2">
-                    {filteredWidgets
-                      .filter((w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE)
-                      .map((item) => {
-                        const Icon = item.icon
-                        const shellScript =
-                          item.id === WIDGET_IDS.ASCII_PORTRAIT
-                            ? './portrait.sh'
-                            : item.id === WIDGET_IDS.ASCII_INFO
-                              ? 'neofetch'
-                              : 'contributions --graph'
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#ffa657]/60 transition-transform duration-200 ${collapsedSections['asciiprofile'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['asciiprofile'] && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
+                          const Icon = item.icon
+                          const shellScript =
+                            item.id === WIDGET_IDS.ASCII_PORTRAIT
+                              ? './portrait.sh'
+                              : item.id === WIDGET_IDS.ASCII_INFO
+                                ? 'neofetch'
+                                : 'contributions --graph'
+
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative border border-[#30363d] hover:border-[#ffa657]/60 bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_15px_rgba(255,166,87,0.15)] flex flex-col"
+                            >
+                              <div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                                style={{
+                                  backgroundImage:
+                                    'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 166, 87, 0.05) 2px, rgba(255, 166, 87, 0.05) 4px)',
+                                }}
+                              ></div>
+                              <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#ffa657] scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+                              <div className="absolute right-0 bottom-0 w-3 h-3 border-r-[2px] border-b-[2px] border-[#ffa657] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+                              <div className="absolute left-0 top-0 w-3 h-3 border-l-[2px] border-t-[2px] border-[#ffa657] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+
+                              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#ffa657]/30 font-mono text-[9px] text-[#7d8590] transition-colors select-none relative z-10">
+                                <div className="flex gap-0.5 text-[8px] font-bold">
+                                  <span className="text-[#ff5f56]">[o]</span>
+                                  <span className="text-[#ffbd2e]">[o]</span>
+                                  <span className="text-[#27c93f]">[o]</span>
+                                </div>
+                                <span className="truncate flex-1 text-right text-[8px] opacity-75">
+                                  {shellScript}
+                                </span>
+                              </div>
+
+                              <div className="p-3 flex items-center justify-between">
+                                <div className="flex items-center gap-3 relative z-10">
+                                  <div className="p-2 rounded-xs bg-[#161b22] group-hover:bg-[#ffa657] text-[#c9d1d9] group-hover:text-[#0d1117] transition-colors duration-300 shrink-0">
+                                    <Icon size={16} />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <h4 className="font-inter-tight font-medium text-label text-[#c9d1d9] group-hover:text-[#ffa657] transition-colors duration-300">
+                                        {item.name}
+                                      </h4>
+                                    </div>
+                                    <p className="font-inter-tight text-eyebrow text-[#7d8590] group-hover:text-[#c9d1d9] transition-colors line-clamp-1">
+                                      {item.desc}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                  <button className="text-[#7d8590] group-hover:text-[#ffa657] transition-colors duration-300 p-1">
+                                    <Plus size={15} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
 
                         return (
-                          <div
-                            key={item.id}
-                            onClick={() => addWidget(item.id)}
-                            data-testid={`add-widget-${item.id}`}
-                            onMouseEnter={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect()
-                              setHoveredWidget({ item, rect })
-                            }}
-                            onMouseLeave={() => setHoveredWidget(null)}
-                            className="group relative border border-[#30363d] hover:border-[#ffa657] bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(255,166,87,0.12)] flex flex-col"
-                          >
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#ffa657]/30 font-mono text-[9px] text-[#7d8590] transition-colors select-none">
-                              <div className="flex gap-0.5 text-[8px] font-bold">
-                                <span className="text-[#ff5f56]">[o]</span>
-                                <span className="text-[#ffbd2e]">[o]</span>
-                                <span className="text-[#27c93f]">[o]</span>
-                              </div>
-                              <span className="truncate flex-1 text-right text-[8px] opacity-75">
-                                {shellScript}
-                              </span>
-                            </div>
-
-                            <div className="p-3 flex items-center justify-between">
-                              <div className="flex items-center gap-3 relative z-10">
-                                <div className="p-2 rounded-xs bg-[#161b22] group-hover:bg-[#ffa657] text-[#c9d1d9] group-hover:text-[#0d1117] transition-colors duration-300 shrink-0">
-                                  <Icon size={16} />
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <h4 className="font-inter-tight font-medium text-label text-[#c9d1d9] group-hover:text-[#ffa657] transition-colors duration-300">
-                                      {item.name}
-                                    </h4>
-                                  </div>
-                                  <p className="font-inter-tight text-eyebrow text-[#7d8590] group-hover:text-[#c9d1d9] transition-colors line-clamp-1">
-                                    {item.desc}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1 shrink-0 relative z-10">
-                                <button className="text-[#7d8590] group-hover:text-[#ffa657] transition-colors duration-300 p-1">
-                                  <Plus size={15} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['asciiprofile'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-ascii"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.5rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-2 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    asciiprofile: !prev.asciiprofile,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['asciiprofile']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
                         )
-                      })}
-                  </div>
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-graphite/50" />
 
                 <div>
-                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                  <button
+                    onClick={() => toggleSection('godprofile')}
+                    className="w-full flex items-center gap-2 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#b6a891]/30 group-hover:bg-[#b6a891] transition-colors shrink-0"></div>
+                    <span className="font-inter-tight text-caption font-medium text-[#b6a891]/70 uppercase tracking-[0.2em] group-hover:text-[#b6a891] transition-colors">
+                      {t('editor.sidebar.godprofile_category', 'GodProfile MCP')}
+                    </span>
+                    <a
+                      href="https://github.com/Luc0-0/GodProfile"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-ash/50 hover:text-[#b6a891] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-inter-tight text-caption text-ash/40 group-hover:text-[#b6a891]/70 transition-colors">
+                      {filteredWidgets.filter((w) => w.category === 'godprofile').length}
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-ash/40 group-hover:text-[#b6a891]/70 transition-transform duration-200 ${collapsedSections['godprofile'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['godprofile'] && (
+                    <div className="space-y-1.5">
+                      {(() => {
+                        const items = filteredWidgets.filter((w) => w.category === 'godprofile')
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
+                          const Icon = item.icon
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative px-3 py-2.5 bg-[#27272a] hover:bg-[#323238] border border-transparent hover:border-[#b6a891]/30 rounded-lg cursor-pointer flex items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-xs hover:shadow-lg hover:-translate-y-0.5"
+                            >
+                              <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
+                                <div className="absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-[#b6a891]/10 to-transparent skew-x-[25deg] group-hover:translate-x-[400%] transition-transform duration-1000 ease-out"></div>
+                              </div>
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#18181b] group-hover:bg-[#b6a891] group-hover:text-[#18181b] text-[#b6a891]/80 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 border border-white/5 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(182,168,145,0.4)]">
+                                  <Icon
+                                    size={14}
+                                    className="transition-transform duration-500 group-hover:scale-110"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-inter-tight font-medium text-label text-[#d4d4d8] group-hover:text-[#b6a891] transition-colors duration-500">
+                                      {item.name}
+                                    </h4>
+                                  </div>
+                                  <p className="font-inter-tight text-eyebrow text-[#a1a1aa] group-hover:text-[#b6a891]/80 transition-colors line-clamp-1 mt-0.5 duration-500">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center shrink-0 relative z-10">
+                                <div className="w-6 h-6 flex items-center justify-center rounded-full text-[#a1a1aa]/50 group-hover:text-[#b6a891] group-hover:bg-[#b6a891]/10 group-hover:rotate-90 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+                                  <Plus size={14} />
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['godprofile'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-godprofile"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    godprofile: !prev.godprofile,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['godprofile']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    onClick={() => toggleSection('controlplane')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <div className="relative flex items-center justify-center p-0.5">
+                      <div className="absolute inset-0 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-xs group-hover:bg-[#00E5FF]/20 transition-colors"></div>
+                      <span className="relative z-10 font-mono text-[9px] font-bold text-[#00E5FF] leading-none select-none group-hover:text-white transition-colors">
+                        CP
+                      </span>
+                    </div>
+                    <span
+                      className="font-mono text-[11px] font-semibold text-[#00E5FF] uppercase tracking-[0.16em] group-hover:text-[#66B2FF] transition-colors"
+                      style={{ textShadow: '0 0 8px rgba(0,229,255,0.4)' }}
+                    >
+                      {t('editor.sidebar.controlplane_category', 'Control Plane Toolkit')}
+                    </span>
+                    <a
+                      href="https://github.com/majiayu000/profile-control-plane"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#00E5FF]/70 hover:text-[#00E5FF] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-mono text-caption text-[#4A6B8C]">
+                      {filteredWidgets.filter((w) => w.category === 'controlplane').length}
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#4A6B8C] transition-transform duration-200 ${collapsedSections['controlplane'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['controlplane'] && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const items = filteredWidgets.filter((w) => w.category === 'controlplane')
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
+                          const Icon = item.icon
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative p-3 border border-[#0A1929] hover:border-[#00E5FF]/50 bg-[#020617] hover:bg-[#031024] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden"
+                            >
+                              <div
+                                className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+                                style={{
+                                  backgroundImage:
+                                    "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='rgba(0,229,255,0.2)' stroke-width='1'/%3E%3C/svg%3E\")",
+                                }}
+                              ></div>
+                              <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00E5FF] scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300"></div>
+                              <div className="absolute right-0 bottom-0 w-2 h-2 border-r-[1.5px] border-b-[1.5px] border-[#00E5FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 bg-[#0A1929]/80 backdrop-blur-xs border border-[#132F4C] group-hover:border-[#00E5FF]/40 text-[#66B2FF] group-hover:text-[#00E5FF] transition-all duration-300 shrink-0 shadow-[0_0_10px_rgba(0,229,255,0)] group-hover:shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+                                  <Icon size={16} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-mono font-medium text-[11px] text-[#B2D8FF] group-hover:text-[#00E5FF] transition-colors duration-300 tracking-tight">
+                                      {item.name}
+                                    </h4>
+                                  </div>
+                                  <p className="font-mono text-[9px] text-[#4A6B8C] group-hover:text-[#66B2FF] transition-colors line-clamp-1 mt-0.5 uppercase tracking-wider">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                <button className="text-[#4A6B8C] group-hover:text-[#00E5FF] transition-colors duration-300 p-1">
+                                  <Plus size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['controlplane'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-controlplane"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    controlplane: !prev.controlplane,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['controlplane']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    onClick={() => toggleSection('codeweb-dev')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <Sparkles size={10} className="text-[#6cc382] shrink-0" />
+                    <span className="font-inter-tight text-caption font-medium text-[#6cc382] uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.codeweb_category', 'Codeweb-dev Aura')}
+                    </span>
+                    <a
+                      href="https://github.com/codeweb-dev/codeweb-dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6cc382] hover:text-[#9de5ad] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV)
+                          .length
+                      }
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#6cc382]/60 transition-transform duration-200 ${collapsedSections['codeweb-dev'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['codeweb-dev'] && (
+                    <div className="space-y-1.5">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
+                          const Icon = item.icon
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative p-3 border border-white/10 hover:border-white/20 bg-[#08080d] hover:bg-[#0c0c14] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-2xl cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_8px_24px_rgba(108,195,130,0.15)]"
+                            >
+                              <div className="absolute -left-4 -top-4 w-20 h-20 bg-[radial-gradient(circle,rgba(108,195,130,0.2)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                              <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/80 group-hover:text-white group-hover:bg-white/[0.08] transition-all duration-300 shrink-0">
+                                  <Icon size={16} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
+                                      {item.name}
+                                    </h4>
+                                  </div>
+                                  <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                <button className="text-white/40 group-hover:text-white transition-colors duration-300 p-1">
+                                  <Plus size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['codeweb-dev'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-codeweb"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    'codeweb-dev': !prev['codeweb-dev'],
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['codeweb-dev']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    onClick={() => toggleSection('external')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
                     <ExternalLink size={10} className="text-violet-400/80 shrink-0" />
                     <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
                       {t('editor.sidebar.external_category', 'Integrações Externas')}
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash">
                       {
-                        filteredWidgets.filter((w) => w.isExternal && w.category !== 'godprofile')
-                          .length
+                        filteredWidgets.filter(
+                          (w) =>
+                            w.isExternal &&
+                            w.category !== 'godprofile' &&
+                            w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                            w.category !== 'controlplane' &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV
+                        ).length
                       }
                     </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {filteredWidgets
-                      .filter((w) => w.isExternal && w.category !== 'godprofile')
-                      .map((item) => {
-                        const Icon = item.icon
-                        return (
-                          <div
-                            key={item.id}
-                            onClick={() => addWidget(item.id)}
-                            data-testid={`add-widget-${item.id}`}
-                            onMouseEnter={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect()
-                              setHoveredWidget({ item, rect })
-                            }}
-                            onMouseLeave={() => setHoveredWidget(null)}
-                            className="group relative p-3 border border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]"
-                          >
-                            <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
-
-                            <div className="flex items-center gap-3 relative z-10">
-                              <div className="p-2 rounded-xs bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white transition-colors duration-300 shrink-0">
-                                <Icon size={16} />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-violet-400 transition-colors duration-300">
-                                    {item.name}
-                                  </h4>
-                                  {item.badge && (
-                                    <span className="text-[9px] font-inter-tight font-medium text-bone bg-graphite border border-slate px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
-                                      {item.badge.text}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="font-inter-tight text-eyebrow text-ash group-hover:text-bone transition-colors line-clamp-1">
-                                  {item.desc}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0 relative z-10">
-                              <ExternalLink
-                                size={11}
-                                className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
-                              />
-                              <button className="text-ash group-hover:text-violet-400 transition-colors duration-300 p-1">
-                                <Plus size={15} />
-                              </button>
-                            </div>
-                          </div>
+                    <ChevronDown
+                      size={12}
+                      className={`text-violet-400/60 transition-transform duration-200 ${collapsedSections['external'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['external'] && (
+                    <div className="space-y-1.5">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) =>
+                            w.isExternal &&
+                            w.category !== 'godprofile' &&
+                            w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+                            w.category !== 'controlplane' &&
+                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV
                         )
-                      })}
-                  </div>
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
+                          const Icon = item.icon
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => addWidget(item.id)}
+                              data-testid={`add-widget-${item.id}`}
+                              onMouseEnter={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect()
+                                setHoveredWidget({ item, rect })
+                              }}
+                              onMouseLeave={() => setHoveredWidget(null)}
+                              className="group relative p-3 border border-graphite hover:border-violet-500 bg-void-black/60 hover:bg-[#1a1423] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(139,92,246,0.2)]"
+                            >
+                              <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-violet-500/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+
+                              <div className="flex items-center gap-3 relative z-10">
+                                <div className="p-2 rounded-xs bg-graphite group-hover:bg-violet-500 text-violet-400 group-hover:text-white transition-colors duration-300 shrink-0">
+                                  <Icon size={16} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="font-inter-tight font-medium text-label text-chalk group-hover:text-violet-400 transition-colors duration-300">
+                                      {item.name}
+                                    </h4>
+                                    {item.badge && (
+                                      <span className="text-[9px] font-inter-tight font-medium text-bone bg-graphite border border-slate px-1.5 py-0.5 rounded-xs shrink-0 whitespace-nowrap">
+                                        {item.badge.text}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="font-inter-tight text-eyebrow text-ash group-hover:text-bone transition-colors line-clamp-1">
+                                    {item.desc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 relative z-10">
+                                <ExternalLink
+                                  size={11}
+                                  className="text-ash/50 group-hover:text-violet-400/70 transition-colors"
+                                />
+                                <button className="text-ash group-hover:text-violet-400 transition-colors duration-300 p-1">
+                                  <Plus size={15} />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['external'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-external"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    external: !prev.external,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['external']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 <a

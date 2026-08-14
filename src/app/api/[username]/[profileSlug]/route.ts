@@ -67,7 +67,6 @@ export async function GET(
             wHeight = 210
           } else if (w === WIDGET_IDS.STATS || w === 'streak') {
             wWidth = 390
-            wHeight = 210
           } else if (
             [
               WIDGET_IDS.GODPROFILE_TERMINAL as string,
@@ -79,6 +78,11 @@ export async function GET(
               WIDGET_IDS.ASCII_PORTRAIT as string,
               WIDGET_IDS.ASCII_INFO as string,
               WIDGET_IDS.ASCII_HEATMAP as string,
+              WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP as string,
+              WIDGET_IDS.CONTROLPLANE_COMMAND_DECK as string,
+              WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID as string,
+              WIDGET_IDS.CONTROLPLANE_METRO as string,
+              WIDGET_IDS.CONTROLPLANE_BENTO as string,
             ].includes(w)
           ) {
             const defaultSizeMap: Record<string, { width: number; height: number }> = {
@@ -91,9 +95,19 @@ export async function GET(
               [WIDGET_IDS.ASCII_PORTRAIT]: { width: 370, height: 400 },
               [WIDGET_IDS.ASCII_INFO]: { width: 490, height: 400 },
               [WIDGET_IDS.ASCII_HEATMAP]: { width: 780, height: 240 },
+              [WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP]: { width: 800, height: 360 },
+              [WIDGET_IDS.CONTROLPLANE_COMMAND_DECK]: { width: 800, height: 300 },
+              [WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID]: { width: 800, height: 320 },
+              [WIDGET_IDS.CONTROLPLANE_METRO]: { width: 800, height: 350 },
+              [WIDGET_IDS.CONTROLPLANE_BENTO]: { width: 800, height: 340 },
+              [WIDGET_IDS.CODEWEB_HERO_ORBIT]: { width: 800, height: 360 },
+              [WIDGET_IDS.CODEWEB_RETRO_GRID]: { width: 800, height: 220 },
+              [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS]: { width: 800, height: 260 },
+              [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
+              [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
             }
-            wWidth = defaultSizeMap[w].width
-            wHeight = defaultSizeMap[w].height
+            wWidth = defaultSizeMap[w]?.width || 800
+            wHeight = defaultSizeMap[w]?.height || 210
           }
 
           config.widgets.push({
