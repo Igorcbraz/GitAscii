@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.7.0](https://github.com/Igorcbraz/GitAscii/compare/v1.6.0...v1.7.0) (2026-08-14)
+
+
+### Features
+
+* **editor:** add clean glossy pokeball with dynamic throw animation ([71930f8](https://github.com/Igorcbraz/GitAscii/commit/71930f81e5444a6703afbbb3f1c33f33159351f0))
+* **editor:** enhance pokemon card widget styling and document featured widgets design standard ([0442ceb](https://github.com/Igorcbraz/GitAscii/commit/0442ceb8e42ab750e63a61477b430f2a2b37befb))
+* **editor:** transform gitfest button into interactive tear-off voucher ([d902030](https://github.com/Igorcbraz/GitAscii/commit/d902030f0c9cfe98fcae33cde8e3a6b3f6e26fac))
+* **sidebar:** add show more/less expansion for widget library categories ([31b252c](https://github.com/Igorcbraz/GitAscii/commit/31b252c0593f87ed55cc19e819654cae5774d095))
+* **ui:** improve hovers and remove static badges ([d51382d](https://github.com/Igorcbraz/GitAscii/commit/d51382d05328be7dc939f673d0d37aeb7f52785b))
+* **widgets:** add Codeweb Aura widgets suite, tech catalog, and agent docs ([7bcc9b7](https://github.com/Igorcbraz/GitAscii/commit/7bcc9b785dfab9c2d22e5faf1316d154779fe391))
+
+
+### Bug Fixes
+
+* **editor:** ensure featured widgets only appear in featured section ([8174e62](https://github.com/Igorcbraz/GitAscii/commit/8174e62bd25095bba30b6ff418c6e35f430d593a))
+
 ## [1.6.0](https://github.com/Igorcbraz/GitAscii/compare/v1.5.0...v1.6.0) (2026-08-12)
 
 
