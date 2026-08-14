@@ -12,6 +12,7 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -152,6 +153,7 @@ export function WidgetLibrary() {
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({})
+  const [expandedLists, setExpandedLists] = useState<Record<string, boolean>>({})
 
   const toggleSection = (sectionId: string) => {
     setCollapsedSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }))
@@ -609,8 +611,8 @@ export function WidgetLibrary() {
                     </span>
                   </div>
                   <div className="space-y-1.5">
-                    {filteredWidgets
-                      .filter(
+                    {(() => {
+                      const items = filteredWidgets.filter(
                         (w) =>
                           !w.isExternal &&
                           w.id !== 'gitfest-lineup' &&
@@ -619,7 +621,41 @@ export function WidgetLibrary() {
                           w.category !== WIDGET_CATEGORIES.GODPROFILE &&
                           w.category !== WIDGET_CATEGORIES.CONTROLPLANE
                       )
-                      .map(renderWidgetCard)}
+                      const displayed = expandedLists['native'] ? items : items.slice(0, 5)
+                      const baseItems = items.slice(0, 5)
+                      const extraItems = items.slice(5)
+                      return (
+                        <>
+                          {baseItems.map(renderWidgetCard)}
+                          <AnimatePresence initial={false}>
+                            {expandedLists['native'] && extraItems.length > 0 && (
+                              <motion.div
+                                key="extra-native"
+                                initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                className="space-y-1.5 overflow-hidden"
+                              >
+                                {extraItems.map(renderWidgetCard)}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          {items.length > 5 && (
+                            <button
+                              onClick={() =>
+                                setExpandedLists((prev) => ({ ...prev, native: !prev.native }))
+                              }
+                              className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                            >
+                              {expandedLists['native']
+                                ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                : t('editor.sidebar.load_more', 'Carregar mais')}
+                            </button>
+                          )}
+                        </>
+                      )
+                    })()}
                   </div>
                 </div>
 
@@ -656,9 +692,14 @@ export function WidgetLibrary() {
                   </button>
                   {!collapsedSections['asciiprofile'] && (
                     <div className="space-y-2">
-                      {filteredWidgets
-                        .filter((w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE)
-                        .map((item) => {
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
                           const Icon = item.icon
                           const shellScript =
                             item.id === WIDGET_IDS.ASCII_PORTRAIT
@@ -714,7 +755,43 @@ export function WidgetLibrary() {
                               </div>
                             </div>
                           )
-                        })}
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['asciiprofile'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-ascii"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.5rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-2 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    asciiprofile: !prev.asciiprofile,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['asciiprofile']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
@@ -750,9 +827,12 @@ export function WidgetLibrary() {
                   </button>
                   {!collapsedSections['godprofile'] && (
                     <div className="space-y-1.5">
-                      {filteredWidgets
-                        .filter((w) => w.category === 'godprofile')
-                        .map((item) => {
+                      {(() => {
+                        const items = filteredWidgets.filter((w) => w.category === 'godprofile')
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
                           const Icon = item.icon
                           return (
                             <div
@@ -790,7 +870,43 @@ export function WidgetLibrary() {
                               </div>
                             </div>
                           )
-                        })}
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['godprofile'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-godprofile"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    godprofile: !prev.godprofile,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['godprofile']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
@@ -826,9 +942,12 @@ export function WidgetLibrary() {
                   </button>
                   {!collapsedSections['controlplane'] && (
                     <div className="space-y-1.5">
-                      {filteredWidgets
-                        .filter((w) => w.category === 'controlplane')
-                        .map((item) => {
+                      {(() => {
+                        const items = filteredWidgets.filter((w) => w.category === 'controlplane')
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
                           const Icon = item.icon
                           return (
                             <div
@@ -866,7 +985,43 @@ export function WidgetLibrary() {
                               </div>
                             </div>
                           )
-                        })}
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['controlplane'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-controlplane"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    controlplane: !prev.controlplane,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['controlplane']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
@@ -905,9 +1060,14 @@ export function WidgetLibrary() {
                   </button>
                   {!collapsedSections['codeweb-dev'] && (
                     <div className="space-y-1.5">
-                      {filteredWidgets
-                        .filter((w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV)
-                        .map((item) => {
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.CODEWEB_DEV
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
                           const Icon = item.icon
                           return (
                             <div
@@ -949,7 +1109,43 @@ export function WidgetLibrary() {
                               </div>
                             </div>
                           )
-                        })}
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['codeweb-dev'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-codeweb"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    'codeweb-dev': !prev['codeweb-dev'],
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['codeweb-dev']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
@@ -985,8 +1181,8 @@ export function WidgetLibrary() {
                   </button>
                   {!collapsedSections['external'] && (
                     <div className="space-y-1.5">
-                      {filteredWidgets
-                        .filter(
+                      {(() => {
+                        const items = filteredWidgets.filter(
                           (w) =>
                             w.isExternal &&
                             w.category !== 'godprofile' &&
@@ -994,7 +1190,10 @@ export function WidgetLibrary() {
                             w.category !== 'controlplane' &&
                             w.category !== WIDGET_CATEGORIES.CODEWEB_DEV
                         )
-                        .map((item) => {
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+
+                        const renderItem = (item: any) => {
                           const Icon = item.icon
                           return (
                             <div
@@ -1041,7 +1240,43 @@ export function WidgetLibrary() {
                               </div>
                             </div>
                           )
-                        })}
+                        }
+
+                        return (
+                          <>
+                            {baseItems.map(renderItem)}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['external'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-external"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map(renderItem)}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    external: !prev.external,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['external']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
