@@ -671,6 +671,7 @@ export function WidgetLibrary() {
                           (w) =>
                             !w.isExternal &&
                             w.id !== 'gitfest-lineup' &&
+                            w.id !== WIDGET_IDS.POKEMON_CARD &&
                             w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
                             w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
                             w.category !== WIDGET_CATEGORIES.GODPROFILE &&
@@ -685,6 +686,7 @@ export function WidgetLibrary() {
                         (w) =>
                           !w.isExternal &&
                           w.id !== 'gitfest-lineup' &&
+                          w.id !== WIDGET_IDS.POKEMON_CARD &&
                           w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
                           w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
                           w.category !== WIDGET_CATEGORIES.GODPROFILE &&
