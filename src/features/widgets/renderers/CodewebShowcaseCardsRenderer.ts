@@ -1,6 +1,4 @@
 import { icons } from 'lucide-react'
-import React from 'react'
-import ReactDOMServer from 'react-dom/server'
 
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 
@@ -24,27 +22,29 @@ function getLucideSvg(iconName: string, size = 28, color = '#ffffff'): string {
     .join('')
 
   const IconComponent =
-    (icons as Record<string, React.ElementType>)[pascalCase] ||
-    (icons as Record<string, React.ElementType>)[cleaned] ||
-    (icons as Record<string, React.ElementType>)[cleaned.toLowerCase()] ||
+    (icons as any)[pascalCase] ||
+    (icons as any)[cleaned] ||
+    (icons as any)[cleaned.toLowerCase()] ||
     icons.Target
 
   try {
-    return ReactDOMServer.renderToStaticMarkup(
-      React.createElement(IconComponent, {
-        size,
-        color,
-        strokeWidth: 2,
+    const rendered = IconComponent.render ? IconComponent.render({}, null) : IconComponent({})
+    const iconNode = rendered?.props?.iconNode || []
+
+    const childrenStr = iconNode
+      .map(([tag, attrs]: [string, any]) => {
+        const attrStr = Object.entries(attrs)
+          .filter(([k]) => k !== 'key')
+          .map(([k, v]) => `${k}="${v}"`)
+          .join(' ')
+        return `<${tag} ${attrStr} />`
       })
-    )
-  } catch {
-    return ReactDOMServer.renderToStaticMarkup(
-      React.createElement(icons.Target, {
-        size,
-        color,
-        strokeWidth: 2,
-      })
-    )
+      .join('')
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${cleaned.toLowerCase()}">${childrenStr}</svg>`
+  } catch (err) {
+    console.error('Error generating svg', err)
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`
   }
 }
 

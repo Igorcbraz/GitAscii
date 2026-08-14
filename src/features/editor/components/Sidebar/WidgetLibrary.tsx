@@ -356,9 +356,6 @@ export function WidgetLibrary() {
                 <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
                   {item.name}
                 </h4>
-                <span className="text-[9px] font-inter-tight font-normal text-white/60 bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded-full shrink-0 tracking-wider">
-                  aura
-                </span>
               </div>
               <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
                 {item.desc}
@@ -718,9 +715,21 @@ export function WidgetLibrary() {
                                 setHoveredWidget({ item, rect })
                               }}
                               onMouseLeave={() => setHoveredWidget(null)}
-                              className="group relative border border-[#30363d] hover:border-[#ffa657] bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(255,166,87,0.12)] flex flex-col"
+                              className="group relative border border-[#30363d] hover:border-[#ffa657]/60 bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_15px_rgba(255,166,87,0.15)] flex flex-col"
                             >
-                              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#ffa657]/30 font-mono text-[9px] text-[#7d8590] transition-colors select-none">
+                              {/* Retro Scanlines & Glowing Accents */}
+                              <div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                                style={{
+                                  backgroundImage:
+                                    'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 166, 87, 0.05) 2px, rgba(255, 166, 87, 0.05) 4px)',
+                                }}
+                              ></div>
+                              <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#ffa657] scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+                              <div className="absolute right-0 bottom-0 w-3 h-3 border-r-[2px] border-b-[2px] border-[#ffa657] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+                              <div className="absolute left-0 top-0 w-3 h-3 border-l-[2px] border-t-[2px] border-[#ffa657] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(255,166,87,0.8)] z-20"></div>
+
+                              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#ffa657]/30 font-mono text-[9px] text-[#7d8590] transition-colors select-none relative z-10">
                                 <div className="flex gap-0.5 text-[8px] font-bold">
                                   <span className="text-[#ff5f56]">[o]</span>
                                   <span className="text-[#ffbd2e]">[o]</span>
@@ -802,27 +811,27 @@ export function WidgetLibrary() {
                 <div>
                   <button
                     onClick={() => toggleSection('godprofile')}
-                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                    className="w-full flex items-center gap-2 mb-2 px-0.5 cursor-pointer group"
                   >
-                    <Sparkles size={10} className="text-[#b6a891] shrink-0" />
-                    <span className="font-inter-tight text-caption font-medium text-[#b6a891] uppercase tracking-[0.16em]">
-                      {t('editor.sidebar.godprofile_category', 'GodProfile MCP Toolkit')}
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#b6a891]/30 group-hover:bg-[#b6a891] transition-colors shrink-0"></div>
+                    <span className="font-inter-tight text-caption font-medium text-[#b6a891]/70 uppercase tracking-[0.2em] group-hover:text-[#b6a891] transition-colors">
+                      {t('editor.sidebar.godprofile_category', 'GodProfile MCP')}
                     </span>
                     <a
                       href="https://github.com/Luc0-0/GodProfile"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#b6a891] hover:text-[#d8d0c4] transition-colors ml-1"
+                      className="text-ash/50 hover:text-[#b6a891] transition-colors ml-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink size={10} />
                     </a>
-                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                    <span className="ml-auto font-inter-tight text-caption text-ash/40 group-hover:text-[#b6a891]/70 transition-colors">
                       {filteredWidgets.filter((w) => w.category === 'godprofile').length}
                     </span>
                     <ChevronDown
                       size={12}
-                      className={`text-[#b6a891]/60 transition-transform duration-200 ${collapsedSections['godprofile'] ? '-rotate-90' : ''}`}
+                      className={`text-ash/40 group-hover:text-[#b6a891]/70 transition-transform duration-200 ${collapsedSections['godprofile'] ? '-rotate-90' : ''}`}
                     />
                   </button>
                   {!collapsedSections['godprofile'] && (
@@ -844,29 +853,33 @@ export function WidgetLibrary() {
                                 setHoveredWidget({ item, rect })
                               }}
                               onMouseLeave={() => setHoveredWidget(null)}
-                              className="group relative p-3 border border-[#1e2530] hover:border-[#b6a891] bg-[#0b0f14] hover:bg-[#111820] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(182,168,145,0.2)]"
+                              className="group relative px-3 py-2.5 bg-[#27272a] hover:bg-[#323238] border border-transparent hover:border-[#b6a891]/30 rounded-lg cursor-pointer flex items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-xs hover:shadow-lg hover:-translate-y-0.5"
                             >
-                              <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-[#b6a891]/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
-
+                              <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
+                                <div className="absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-[#b6a891]/10 to-transparent skew-x-[25deg] group-hover:translate-x-[400%] transition-transform duration-1000 ease-out"></div>
+                              </div>
                               <div className="flex items-center gap-3 relative z-10">
-                                <div className="p-2 rounded-xs bg-[#1e2530] group-hover:bg-[#b6a891] text-[#b6a891] group-hover:text-[#0b0f14] transition-colors duration-300 shrink-0">
-                                  <Icon size={16} />
+                                <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#18181b] group-hover:bg-[#b6a891] group-hover:text-[#18181b] text-[#b6a891]/80 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shrink-0 border border-white/5 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(182,168,145,0.4)]">
+                                  <Icon
+                                    size={14}
+                                    className="transition-transform duration-500 group-hover:scale-110"
+                                  />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1.5">
-                                    <h4 className="font-inter-tight font-medium text-label text-[#d8d0c4] group-hover:text-[#b6a891] transition-colors duration-300">
+                                    <h4 className="font-inter-tight font-medium text-label text-[#d4d4d8] group-hover:text-[#b6a891] transition-colors duration-500">
                                       {item.name}
                                     </h4>
                                   </div>
-                                  <p className="font-inter-tight text-eyebrow text-[#5a6070] group-hover:text-[#d8d0c4] transition-colors line-clamp-1">
+                                  <p className="font-inter-tight text-eyebrow text-[#a1a1aa] group-hover:text-[#b6a891]/80 transition-colors line-clamp-1 mt-0.5 duration-500">
                                     {item.desc}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 shrink-0 relative z-10">
-                                <button className="text-[#5a6070] group-hover:text-[#b6a891] transition-colors duration-300 p-1">
-                                  <Plus size={15} />
-                                </button>
+                              <div className="flex items-center shrink-0 relative z-10">
+                                <div className="w-6 h-6 flex items-center justify-center rounded-full text-[#a1a1aa]/50 group-hover:text-[#b6a891] group-hover:bg-[#b6a891]/10 group-hover:rotate-90 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]">
+                                  <Plus size={14} />
+                                </div>
                               </div>
                             </div>
                           )
@@ -919,29 +932,37 @@ export function WidgetLibrary() {
                     onClick={() => toggleSection('controlplane')}
                     className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
                   >
-                    <Sparkles size={10} className="text-[#00A7D1] shrink-0" />
-                    <span className="font-inter-tight text-caption font-medium text-[#00A7D1] uppercase tracking-[0.16em]">
+                    <div className="relative flex items-center justify-center p-0.5">
+                      <div className="absolute inset-0 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-xs group-hover:bg-[#00E5FF]/20 transition-colors"></div>
+                      <span className="relative z-10 font-mono text-[9px] font-bold text-[#00E5FF] leading-none select-none group-hover:text-white transition-colors">
+                        CP
+                      </span>
+                    </div>
+                    <span
+                      className="font-mono text-[11px] font-semibold text-[#00E5FF] uppercase tracking-[0.16em] group-hover:text-[#66B2FF] transition-colors"
+                      style={{ textShadow: '0 0 8px rgba(0,229,255,0.4)' }}
+                    >
                       {t('editor.sidebar.controlplane_category', 'Control Plane Toolkit')}
                     </span>
                     <a
                       href="https://github.com/majiayu000/profile-control-plane"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#00A7D1] hover:text-[#38bdf8] transition-colors ml-1"
+                      className="text-[#00E5FF]/70 hover:text-[#00E5FF] transition-colors ml-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ExternalLink size={10} />
                     </a>
-                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                    <span className="ml-auto font-mono text-caption text-[#4A6B8C]">
                       {filteredWidgets.filter((w) => w.category === 'controlplane').length}
                     </span>
                     <ChevronDown
                       size={12}
-                      className={`text-[#00A7D1]/60 transition-transform duration-200 ${collapsedSections['controlplane'] ? '-rotate-90' : ''}`}
+                      className={`text-[#4A6B8C] transition-transform duration-200 ${collapsedSections['controlplane'] ? '-rotate-90' : ''}`}
                     />
                   </button>
                   {!collapsedSections['controlplane'] && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {(() => {
                         const items = filteredWidgets.filter((w) => w.category === 'controlplane')
                         const baseItems = items.slice(0, 3)
@@ -959,27 +980,35 @@ export function WidgetLibrary() {
                                 setHoveredWidget({ item, rect })
                               }}
                               onMouseLeave={() => setHoveredWidget(null)}
-                              className="group relative p-3 border border-[#0d131f] hover:border-[#00A7D1] bg-[#090d16] hover:bg-[#0f1724] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_12px_rgba(0,167,209,0.2)]"
+                              className="group relative p-3 border border-[#0A1929] hover:border-[#00E5FF]/50 bg-[#020617] hover:bg-[#031024] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden"
                             >
-                              <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-[#00A7D1]/30 pointer-events-none transition-colors duration-200 rounded-xs"></div>
+                              <div
+                                className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+                                style={{
+                                  backgroundImage:
+                                    "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 20 0 L 0 0 0 20' fill='none' stroke='rgba(0,229,255,0.2)' stroke-width='1'/%3E%3C/svg%3E\")",
+                                }}
+                              ></div>
+                              <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00E5FF] scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300"></div>
+                              <div className="absolute right-0 bottom-0 w-2 h-2 border-r-[1.5px] border-b-[1.5px] border-[#00E5FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                               <div className="flex items-center gap-3 relative z-10">
-                                <div className="p-2 rounded-xs bg-[#0d131f] group-hover:bg-[#00A7D1] text-[#00A7D1] group-hover:text-[#090d16] transition-colors duration-300 shrink-0">
+                                <div className="p-2 bg-[#0A1929]/80 backdrop-blur-xs border border-[#132F4C] group-hover:border-[#00E5FF]/40 text-[#66B2FF] group-hover:text-[#00E5FF] transition-all duration-300 shrink-0 shadow-[0_0_10px_rgba(0,229,255,0)] group-hover:shadow-[0_0_15px_rgba(0,229,255,0.2)]">
                                   <Icon size={16} />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1.5">
-                                    <h4 className="font-inter-tight font-medium text-label text-[#88c0d0] group-hover:text-[#00A7D1] transition-colors duration-300">
+                                    <h4 className="font-mono font-medium text-[11px] text-[#B2D8FF] group-hover:text-[#00E5FF] transition-colors duration-300 tracking-tight">
                                       {item.name}
                                     </h4>
                                   </div>
-                                  <p className="font-inter-tight text-eyebrow text-[#4c566a] group-hover:text-[#88c0d0] transition-colors line-clamp-1">
+                                  <p className="font-mono text-[9px] text-[#4A6B8C] group-hover:text-[#66B2FF] transition-colors line-clamp-1 mt-0.5 uppercase tracking-wider">
                                     {item.desc}
                                   </p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-1 shrink-0 relative z-10">
-                                <button className="text-[#4c566a] group-hover:text-[#00A7D1] transition-colors duration-300 p-1">
+                                <button className="text-[#4A6B8C] group-hover:text-[#00E5FF] transition-colors duration-300 p-1">
                                   <Plus size={15} />
                                 </button>
                               </div>
@@ -1093,9 +1122,6 @@ export function WidgetLibrary() {
                                     <h4 className="font-inter-tight font-medium text-label text-white group-hover:text-white transition-colors duration-300">
                                       {item.name}
                                     </h4>
-                                    <span className="text-[9px] font-inter-tight font-normal text-white/60 bg-white/[0.05] border border-white/[0.08] px-2 py-0.5 rounded-full shrink-0 tracking-wider">
-                                      aura
-                                    </span>
                                   </div>
                                   <p className="font-inter-tight text-eyebrow text-white/45 group-hover:text-white/70 transition-colors line-clamp-1">
                                     {item.desc}

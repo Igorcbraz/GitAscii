@@ -191,34 +191,54 @@ Ofereça botões de 1 clique para temas pré-configurados:
 
 ## 6. Estilização Única por Categoria na Library
 
-Ao renderizar os cards de uma categoria na `WidgetLibrary.tsx`, adote classes Tailwind que transmitam a identidade do conjunto:
+Ao renderizar os cards de uma categoria na `WidgetLibrary.tsx`, você **DEVE** ir além do básico e implementar **animações de hover avançadas e bonitas** que transmitam a identidade do conjunto. O GitAscii preza por um design impecável, "premium" e dinâmico.
 
-### Exemplos de Temas Existentes:
+### Exemplos de Identidade Visual Existentes:
 
-| Categoria         | Identidade Visual                          | Classes & Cores Chave                                                    |
-| :---------------- | :----------------------------------------- | :----------------------------------------------------------------------- |
-| **Codeweb Aura**  | Aurora boreal, cosmic glow, glassmorphism  | `border-[#8b5cf6]/30 hover:border-[#ec4899] bg-[#0d0915] text-[#c084fc]` |
-| **Control Plane** | Blueprint técnico, cyber grid, CAD         | `border-[#00f3ff]/20 hover:border-[#00f3ff] bg-[#050b14] text-[#00f3ff]` |
-| **ASCII Profile** | Terminal retrô monoespaçado, hacker        | `border-[#30363d] hover:border-[#ffa657] bg-[#0d1117] text-[#ffa657]`    |
-| **GodProfile**    | Cyberpunk neon, alta densidade de métricas | `border-[#a855f7]/30 hover:border-[#a855f7] bg-[#120726] text-[#c084fc]` |
+| Categoria         | Identidade Visual                          | Efeitos de Hover Obrigatórios                                                                                               |
+| :---------------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| **Codeweb Aura**  | Aurora boreal, cosmic glow, glassmorphism  | `radial-gradient` orbs ocultos que revelam opacidade no hover; caixas translúcidas. Sem badges `aura`.                      |
+| **Control Plane** | Blueprint técnico, cyber grid, CAD         | SVG de grid no background revelando opacidade no hover; linhas vetoriais brilhantes crescendo nas bordas. Sem badges `sys`. |
+| **ASCII Profile** | Terminal retrô monoespaçado, hacker        | Padrões de `repeating-linear-gradient` (scanlines); cantos brilhantes desenhados com bordas expandindo no hover.            |
+| **GodProfile**    | Cyberpunk neon, alta densidade de métricas | Sombras profundas (glows coloridos) no hover; bordas de alta opacidade ou efeitos glitchy sutis.                            |
 
-### Estrutura de Card Recomendada:
+### Estrutura de Card Recomendada com Efeitos (Modelo Control Plane/ASCII):
+
+Sempre envolva seu card em um `group relative overflow-hidden` e inclua `<div>`s absolutas estilizadas para o efeito de fundo no hover.
 
 ```tsx
 <div
   onClick={() => addWidget(item.id)}
-  className="group relative border border-thematic/30 hover:border-thematic bg-thematic-bg hover:bg-thematic-hover transition-all duration-300 rounded-xs cursor-pointer p-3 flex flex-col"
+  className="group relative border border-thematic/30 hover:border-thematic/60 bg-thematic-bg hover:bg-thematic-hover transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_15px_rgba(THEMATIC_COLOR,0.15)] flex flex-col"
 >
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-2">
-      <Icon size={14} className="text-thematic" />
-      <span className="font-mono text-xs font-semibold text-white">{item.name}</span>
+  {/* Efeitos de Fundo & Animações Dinâmicas (Revealed on Hover) */}
+  <div
+    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+    style={{
+      backgroundImage:
+        'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(THEMA_R, THEMA_G, THEMA_B, 0.05) 2px, rgba(THEMA_R, THEMA_G, THEMA_B, 0.05) 4px)',
+    }}
+  ></div>
+  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-thematic scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300 shadow-[0_0_8px_rgba(THEMATIC_COLOR,0.8)] z-20"></div>
+
+  {/* Conteúdo do Card (z-index superior para ficar acima dos efeitos) */}
+  <div className="flex items-center gap-3 relative z-10 p-3">
+    <div className="p-2 bg-thematic-dark backdrop-blur-xs border border-thematic/40 text-thematic-light group-hover:text-thematic transition-all duration-300 shrink-0">
+      <Icon size={16} />
     </div>
-    {renderWidgetBadge(item.badge)}
+    <div>
+      <h4 className="font-mono font-medium text-[11px] text-thematic-light group-hover:text-thematic transition-colors duration-300">
+        {item.name}
+      </h4>
+      <p className="font-mono text-[9px] text-thematic-muted group-hover:text-thematic-light transition-colors line-clamp-1 mt-0.5">
+        {item.desc}
+      </p>
+    </div>
   </div>
-  <p className="text-[11px] text-ash mt-1 line-clamp-2">{item.desc}</p>
 </div>
 ```
+
+> **Atenção:** Evite utilizar badges fixos que poluem o visual (como "aura" ou "sys"). Use as cores, o grid e o comportamento de animação do card para transmitir a identidade da categoria.
 
 ---
 
