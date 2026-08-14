@@ -9,6 +9,9 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;')
 }
 
+const INTERNAL_W = 490
+const INTERNAL_H = 400
+
 export function renderAsciiInfoCard(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
@@ -16,6 +19,9 @@ export function renderAsciiInfoCard(
   isStaticOverride?: boolean
 ): string {
   const { width, height } = widget.size
+  // Use fixed internal coordinate space so content scales on resize
+  const IW = INTERNAL_W
+  const IH = INTERNAL_H
   const cfg = widget.config
 
   const username = data.user.login
@@ -109,13 +115,13 @@ export function renderAsciiInfoCard(
   // Calculate line spacing dynamically based on row count and widget height
   const nonGapRows = rows.filter((r) => r[0] !== 'gap').length
   const gapRows = rows.filter((r) => r[0] === 'gap').length
-  const availableHeight = height - TITLEBAR_H - 48
+  const availableHeight = IH - TITLEBAR_H - 48
   const LINE_H = Math.max(16, Math.min(24, availableHeight / (nonGapRows + gapRows * 0.5)))
 
   const parts: string[] = []
 
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" ` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${IW} ${IH}" preserveAspectRatio="xMidYMid meet" ` +
       `font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">`
   )
   parts.push(
@@ -128,22 +134,22 @@ export function renderAsciiInfoCard(
 
   // Background
   parts.push(
-    `<rect width="${width}" height="${height}" rx="${globalStyles.borderRadius || 12}" fill="url(#infocard-bg-${widget.instanceId})"/>`
+    `<rect width="${IW}" height="${IH}" rx="${globalStyles.borderRadius || 12}" fill="url(#infocard-bg-${widget.instanceId})"/>`
   )
   parts.push(
-    `<rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="${globalStyles.borderRadius || 12}" fill="none" stroke="${frameColor}"/>`
+    `<rect x="0.5" y="0.5" width="${IW - 1}" height="${IH - 1}" rx="${globalStyles.borderRadius || 12}" fill="none" stroke="${frameColor}"/>`
   )
 
   // Title bar
   parts.push(
-    `<line x1="0" y1="${TITLEBAR_H}" x2="${width}" y2="${TITLEBAR_H}" stroke="${frameColor}"/>`
+    `<line x1="0" y1="${TITLEBAR_H}" x2="${IW}" y2="${TITLEBAR_H}" stroke="${frameColor}"/>`
   )
   const dotcols = ['#ff5f56', '#ffbd2e', '#27c93f']
   for (let i = 0; i < 3; i++) {
     parts.push(`<circle cx="${PAD + i * 16}" cy="${TITLEBAR_H / 2}" r="5" fill="${dotcols[i]}"/>`)
   }
   parts.push(
-    `<text x="${width / 2}" y="${TITLEBAR_H / 2 + 4}" fill="${mutedColor}" font-size="12" ` +
+    `<text x="${IW / 2}" y="${TITLEBAR_H / 2 + 4}" fill="${mutedColor}" font-size="12" ` +
       `text-anchor="middle">${escapeXml(host)}@github: ~$ neofetch</text>`
   )
 
@@ -180,14 +186,14 @@ export function renderAsciiInfoCard(
         `<text x="${KEY_X}" y="${y.toFixed(1)}" font-size="14" font-weight="700">` +
         `<tspan fill="${greenColor}">${safeHost}</tspan><tspan fill="${mutedColor}">@</tspan>` +
         `<tspan fill="${accentColor}">github</tspan></text>` +
-        `<line x1="${ruleX}" y1="${(y - 4).toFixed(1)}" x2="${width - PAD}" y2="${(y - 4).toFixed(1)}" ` +
+        `<line x1="${ruleX}" y1="${(y - 4).toFixed(1)}" x2="${IW - PAD}" y2="${(y - 4).toFixed(1)}" ` +
         `stroke="${frameColor}" stroke-opacity="0.8"/>`
     } else if (kind === 'sec') {
       const title = escapeXml(row[1])
       const textLen = row[1] ? row[1].length : 0
       inner =
         `<text x="${KEY_X}" y="${y.toFixed(1)}" fill="${sectionColor}" font-size="12.5" font-weight="700">&#8212; ${title}</text>` +
-        `<line x1="${KEY_X + 12 + textLen * 8}" y1="${(y - 4).toFixed(1)}" x2="${width - PAD}" y2="${(y - 4).toFixed(1)}" ` +
+        `<line x1="${KEY_X + 12 + textLen * 8}" y1="${(y - 4).toFixed(1)}" x2="${IW - PAD}" y2="${(y - 4).toFixed(1)}" ` +
         `stroke="${frameColor}" stroke-opacity="0.8"/>`
     } else if (kind === 'kv') {
       const key = escapeXml(row[1])

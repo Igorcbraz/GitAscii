@@ -1,7 +1,6 @@
-// We will export escapeXml or define it here
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import type { GitHubRepo } from '@/features/github/types/github'
 
-// Helper to escape XML
 function localEscapeXml(str: string): string {
   return str
     .replace(/&/g, '&amp;')
@@ -11,6 +10,10 @@ function localEscapeXml(str: string): string {
     .replace(/'/g, '&apos;')
 }
 
+function shorten(value: string, maximumLength: number): string {
+  return value.length <= maximumLength ? value : `${value.slice(0, maximumLength - 1).trimEnd()}…`
+}
+
 export function renderTerminal(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
@@ -18,81 +21,106 @@ export function renderTerminal(
 ): string {
   const { width, height } = widget.size
   const cfg = widget.config
-  const commands = Array.isArray(cfg.terminalCommands)
-    ? (cfg.terminalCommands as string[])
-    : ['$ whoami', 'user', '$ uname -a', 'Linux GitAscii']
 
-  const bg1 = '#0b0f14'
-  const bg2 = '#151c25'
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#b6a891'
-  const text_color = (cfg.textColor as string) || globalStyles.textColor || '#eceff4'
-  const font = 'Consolas, monospace'
+  const isDark = true
+  const bg = isDark ? '#0B0F0C' : '#F4F6F4'
+  const panel = isDark ? '#101511' : '#FFFFFF'
+  const chrome = isDark ? '#1A211B' : '#E8EDE8'
+  const border = isDark ? '#2A342B' : '#C8D2C8'
+  const textClr = isDark ? '#D7E4D9' : '#1F2B21'
+  const muted = isDark ? '#8CA08E' : '#5E6E60'
+  const faint = isDark ? '#59695B' : '#96A497'
 
-  const line_height = 22
-  const font_size = 14
-  const pad_x = 20
-  const pad_y = 60
+  const primary = (cfg.accentColor as string) || globalStyles.accentColor || '#b6a891'
+  const secondary = (cfg.secondaryColor as string) || '#E84A8A'
 
-  const delay_per_line = 0.8
-  const css_rules: string[] = []
-  for (let i = 0; i < commands.length; i++) {
-    const delay = i * delay_per_line
-    css_rules.push(
-      `.line${i}-${widget.instanceId} { opacity: 0; animation: reveal 0.1s ${delay.toFixed(2)}s forwards; }`
+  const repos = data.repos || []
+  const layers = repos.slice(0, 10)
+  const count = layers.length
+
+  const TEE = `├── `
+  const ELBOW = `└── `
+  const PIPE = `│   `
+
+  const lines: string[] = []
+
+  // Prompt Whoami
+  lines.push(
+    `<tspan fill="${primary}" font-weight="700">$ </tspan><tspan fill="${textClr}">whoami</tspan>`
+  )
+  lines.push(
+    `<tspan fill="${textClr}" font-weight="700">${localEscapeXml(data.user.name || data.user.login || 'USER')}</tspan>`
+  )
+
+  // Prompt Tree
+  lines.push(
+    `<tspan fill="${primary}" font-weight="700">$ </tspan><tspan fill="${textClr}">tree projects/</tspan>`
+  )
+  lines.push(`<tspan fill="${secondary}" font-weight="700">projects/</tspan>`)
+
+  layers.forEach((layer: GitHubRepo, index: number) => {
+    const last = index === count - 1
+    const branch = last ? ELBOW : TEE
+    const name = localEscapeXml(shorten(layer.name, 22))
+    const lang = localEscapeXml(shorten(layer.language || 'Code', 15))
+    lines.push(
+      `<tspan fill="${faint}">${branch}</tspan>` +
+        `<tspan fill="${secondary}" font-weight="700">${name}/</tspan>`
     )
-  }
+    lines.push(
+      `<tspan fill="${faint}">${last ? '    ' : PIPE}${ELBOW}</tspan>` +
+        `<tspan fill="${primary}" font-weight="700">${lang}</tspan>` +
+        `<tspan fill="${muted}"> · ★ ${layer.stargazers_count || 0}</tspan>`
+    )
+  })
 
-  const css_keyframes = '@keyframes reveal { from { opacity: 0; } to { opacity: 1; } }'
-  const cursor_delay = commands.length * delay_per_line
-  const css_cursor = `.cursor-${widget.instanceId} { opacity: 0; animation: reveal 0.1s ${cursor_delay.toFixed(2)}s forwards, blink 1s ${cursor_delay.toFixed(2)}s step-end infinite; }`
-  const css_blink = '@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }'
+  lines.push(`<tspan fill="${muted}">${count} directories, ${count} projects</tspan>`)
 
-  const full_css = `
-    ${css_keyframes}
-    ${css_blink}
-    ${css_rules.join('\n    ')}
-    ${css_cursor}
-    .terminal-bg-${widget.instanceId} { font-family: ${font}, 'Courier New', monospace; font-size: ${font_size}px; }
+  const text_elements = lines.map((lineHtml, i) => {
+    const y = 72 + i * 18
+    return `
+      <g class="ln-${widget.instanceId}" style="animation-delay: ${i * 45}ms">
+        <text x="46" y="${y}" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">${lineHtml}</text>
+      </g>
+    `
+  })
+
+  // Cursor position
+  const cursorY = 72 + lines.length * 18
+  const cursor_element = `
+    <g class="cur-${widget.instanceId}">
+      <text x="46" y="${cursorY}" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5" fill="${primary}" font-weight="700">$</text>
+      <rect x="61" y="${cursorY - 10}" width="7" height="13" fill="${primary}"/>
+    </g>
   `
 
-  const text_elements: string[] = []
-  for (let i = 0; i < commands.length; i++) {
-    const line = commands[i]
-    const y = pad_y + i * line_height
-    const is_command =
-      line.trim().startsWith('$') || line.trim().startsWith('#') || line.trim().startsWith('>')
-    const color = is_command ? accent : text_color
-    const safe_line = localEscapeXml(line)
-    text_elements.push(
-      `  <text x="${pad_x}" y="${y}" fill="${color}" class="line${i}-${widget.instanceId}">${safe_line}</text>`
-    )
-  }
-
-  const cursor_y = pad_y + commands.length * line_height
-  const cursor_element = `  <rect x="${pad_x}" y="${cursor_y - font_size}" width="8" height="${font_size + 2}" fill="${accent}" class="cursor-${widget.instanceId}"/>`
-
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 600 340" preserveAspectRatio="xMidYMid meet">
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 800 520" preserveAspectRatio="xMidYMid meet">
       <defs>
         <style>
-        ${full_css}
+          @keyframes reveal { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes blink { 50% { opacity: 0; } }
+          .ln-${widget.instanceId} { animation: reveal .3s ease-out forwards; opacity: 0; }
+          .cur-${widget.instanceId} { animation: blink 1.1s steps(1) infinite; }
         </style>
-        <clipPath id="terminal-clip-${widget.instanceId}">
-          <rect width="600" height="340" rx="12" ry="12"/>
-        </clipPath>
-        <linearGradient id="termBg-${widget.instanceId}" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${bg1}"/>
-          <stop offset="100%" stop-color="${bg2}"/>
-        </linearGradient>
       </defs>
-      <rect width="600" height="340" rx="12" ry="12" fill="url(#termBg-${widget.instanceId})" stroke="${bg2}" stroke-width="1.5"/>
-      <rect width="600" height="36" rx="12" ry="12" fill="#151c25"/>
-      <rect y="24" width="600" height="12" fill="#151c25"/>
-      <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
-      <circle cx="40" cy="18" r="6" fill="#febc2e"/>
-      <circle cx="60" cy="18" r="6" fill="#28c840"/>
-      <text x="300" y="23" text-anchor="middle" fill="#888" font-size="12" font-family="${font}">terminal</text>
-      <g class="terminal-bg-${widget.instanceId}" clip-path="url(#terminal-clip-${widget.instanceId})">
+
+      <rect width="800" height="520" fill="${bg}"/>
+      <rect x="14" y="14" width="772" height="492" rx="10" fill="${panel}" stroke="${border}" stroke-width="1.2"/>
+      
+      <!-- Chrome Bar -->
+      <path d="M14 48V24 a10 10 0 0 1 10-10 h752 a10 10 0 0 1 10 10 v24 Z" fill="${chrome}"/>
+      <path d="M14 48 h772" stroke="${border}" stroke-width="1"/>
+      
+      <!-- Control Circles -->
+      <circle cx="38" cy="31" r="5.5" fill="#FF5F57"/>
+      <circle cx="57" cy="31" r="5.5" fill="#FEBC2E"/>
+      <circle cx="76" cy="31" r="5.5" fill="#28C840"/>
+
+      <text x="400" y="35" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" letter-spacing=".5" fill="${muted}">${localEscapeXml(data.user.login)}@github: ~/projects</text>
+
+      <!-- Terminal Body -->
+      <g>
         ${text_elements.join('\n')}
         ${cursor_element}
       </g>

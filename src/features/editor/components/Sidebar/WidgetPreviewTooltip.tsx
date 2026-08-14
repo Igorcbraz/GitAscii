@@ -123,6 +123,7 @@ export function WidgetPreviewTooltip({
       ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art'
         ? { lockAspectRatio: true }
         : {}),
+      ...(widgetItem.category === 'controlplane' ? { layoutType: 'hero' } : {}),
       ...(widgetItem.id === 'ascii-art' && asciiArtCache
         ? {
             asciiText: asciiArtCache.lines,

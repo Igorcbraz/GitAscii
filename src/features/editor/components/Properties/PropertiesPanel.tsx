@@ -14,6 +14,7 @@ import { AsciiProfileControls } from './AsciiProfileControls'
 import { AsciiTextControls } from './AsciiTextControls'
 import { AvatarControls } from './AvatarControls'
 import { ColorPicker } from './ColorPicker'
+import { ControlPlaneControls } from './ControlPlaneControls'
 import { CustomImageControls } from './CustomImageControls'
 import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
@@ -618,6 +619,30 @@ export function PropertiesPanel() {
           WIDGET_IDS.ASCII_HEATMAP as string,
         ].includes(selectedWidget.widgetId) && (
           <AsciiProfileControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP as string,
+          WIDGET_IDS.CONTROLPLANE_COMMAND_DECK as string,
+          WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID as string,
+          WIDGET_IDS.CONTROLPLANE_METRO as string,
+          WIDGET_IDS.CONTROLPLANE_BENTO as string,
+          WIDGET_IDS.CONTROLPLANE_EDITORIAL as string,
+          WIDGET_IDS.CONTROLPLANE_BLUEPRINT as string,
+          WIDGET_IDS.CONTROLPLANE_CONSTELLATION as string,
+          WIDGET_IDS.CONTROLPLANE_MONOLITH as string,
+          WIDGET_IDS.CONTROLPLANE_INTERLACE as string,
+          WIDGET_IDS.CONTROLPLANE_CIPHER as string,
+          WIDGET_IDS.CONTROLPLANE_SPECIMEN as string,
+          WIDGET_IDS.CONTROLPLANE_PATCHBAY as string,
+          WIDGET_IDS.CONTROLPLANE_CARTOGRAPH as string,
+          WIDGET_IDS.CONTROLPLANE_FOUNDRY as string,
+        ].includes(selectedWidget.widgetId) && (
+          <ControlPlaneControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}
