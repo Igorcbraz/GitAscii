@@ -100,7 +100,7 @@ export function PropertiesPanel() {
 
   if (!selectedInstanceId || !selectedWidget) {
     return (
-      <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
+      <aside id="tour-properties-sidebar" className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
         <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
           <div>
             <span className="label-stamp">{t('editor.properties.title', '[ PROPRIEDADES ]')}</span>
@@ -274,7 +274,7 @@ export function PropertiesPanel() {
   const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
 
   return (
-    <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
+    <aside id="tour-properties-sidebar" className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
       <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
         <div>
           <span className="label-stamp">{t('editor.properties.title', '[ PROPRIEDADES ]')}</span>

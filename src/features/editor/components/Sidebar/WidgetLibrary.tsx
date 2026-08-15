@@ -175,7 +175,7 @@ export function WidgetLibrary() {
             />
 
             {categoryFilter === 'all' && !searchQuery && (
-              <div className="mb-6 space-y-2">
+              <div className="mb-6 space-y-2" id="tour-featured-widgets">
                 <div className="label-stamp text-signal-lime/80 mb-3">
                   {t('editor.sidebar.featured_widgets', '[ FEATURED WIDGETS ]')}
                 </div>
@@ -234,7 +234,7 @@ export function WidgetLibrary() {
             ) : categoryFilter === 'all' && !searchQuery ? (
               <div className="space-y-5">
                 {/* Native Section */}
-                <div>
+                <div id="tour-normal-widgets">
                   <div className="flex items-center gap-1.5 mb-2 px-0.5">
                     <Zap size={10} className="text-signal-lime shrink-0" />
                     <span className="font-inter-tight text-caption font-medium text-signal-lime uppercase tracking-[0.16em]">

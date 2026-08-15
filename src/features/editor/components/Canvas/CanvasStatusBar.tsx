@@ -30,7 +30,10 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
   const resetZoom = () => setZoom(1)
 
   return (
-    <div className="flex h-9 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-ash select-none z-10">
+    <div
+      id="tour-status-bar"
+      className="flex h-9 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-ash select-none z-10"
+    >
       <div className="flex items-center gap-1">
         <button
           onClick={undo}

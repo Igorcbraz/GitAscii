@@ -5,6 +5,7 @@ import {
   Command,
   Download,
   Github,
+  Info,
   Loader2,
   LogIn,
   LogOut,
@@ -417,6 +418,7 @@ export function EditorToolbar() {
         <button
           onClick={() => setCommandPaletteOpen(true)}
           data-testid="command-palette-btn"
+          id="tour-global-search"
           title="Busca Global (Ctrl+K)"
           className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
         >
@@ -430,7 +432,14 @@ export function EditorToolbar() {
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" id="tour-export-buttons">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
+          title={t('editor.toolbar.tour', 'Ver Tutorial')}
+          className="p-1.5 rounded-[4px] text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+        >
+          <Info size={14} />
+        </button>
         <button
           onClick={handleExport}
           data-testid="export-layout-btn"

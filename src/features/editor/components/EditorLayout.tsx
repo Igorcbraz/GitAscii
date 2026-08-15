@@ -18,6 +18,7 @@ import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
 import { PropertiesPanel } from './Properties/PropertiesPanel'
 import { WidgetLibrary } from './Sidebar/WidgetLibrary'
 import { EditorToolbar } from './Toolbar/EditorToolbar'
+import { EditorTour } from './Tour/EditorTour'
 
 interface EditorLayoutProps {
   username: string
@@ -294,7 +295,7 @@ export function EditorLayout({
               </span>
             </div>
 
-            <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-250 font-pt-serif font-light text-white text-4xl md:text-[52px] leading-heading tracking-[-1.2px] text-center mb-4">
+            <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-250 font-inter-tight font-light text-white text-4xl md:text-[52px] leading-heading tracking-[-1.2px] text-center mb-4">
               {t('editor.onboarding.title_prefix', 'Como deseja ')}
               <span className="italic text-signal-lime">
                 {t('editor.onboarding.title_italic', 'começar,')}
@@ -494,6 +495,7 @@ export function EditorLayout({
           </button>
         </div>
       </div>
+      <EditorTour />
     </div>
   )
 }
