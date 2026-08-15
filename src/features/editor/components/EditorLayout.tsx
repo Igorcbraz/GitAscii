@@ -238,6 +238,41 @@ export function EditorLayout({
     }
   }, [username, profileSlug, autoGenerate, initEditor, setSession, setStep, t])
 
+  useEffect(() => {
+    const handleZoomKeyboard = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+' || e.key === '-')) {
+        e.preventDefault()
+        const store = useEditorStore.getState()
+        if (e.key === '=' || e.key === '+') {
+          store.setZoom(Math.min(1.5, store.zoom + 0.1))
+        } else if (e.key === '-') {
+          store.setZoom(Math.max(0.5, store.zoom - 0.1))
+        }
+      }
+    }
+
+    const handleZoomWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const store = useEditorStore.getState()
+        // e.deltaY < 0 means scroll up (zoom in), e.deltaY > 0 means scroll down (zoom out)
+        if (e.deltaY < 0) {
+          store.setZoom(Math.min(1.5, store.zoom + 0.1))
+        } else if (e.deltaY > 0) {
+          store.setZoom(Math.max(0.5, store.zoom - 0.1))
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleZoomKeyboard, { capture: true, passive: false })
+    window.addEventListener('wheel', handleZoomWheel, { capture: true, passive: false })
+
+    return () => {
+      window.removeEventListener('keydown', handleZoomKeyboard, { capture: true } as any)
+      window.removeEventListener('wheel', handleZoomWheel, { capture: true } as any)
+    }
+  }, [])
+
   if (loading) {
     return <EditorLoadingScreen username={username} steps={steps} />
   }
