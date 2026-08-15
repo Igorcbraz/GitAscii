@@ -36,9 +36,14 @@ async function fetchConfigFromGitHub(
         next: { revalidate: 60 },
       })
       if (res.ok) {
-        const config = await res.json()
-        if (config && typeof config === 'object') {
-          return config as SavedConfiguration
+        const text = await res.text()
+        try {
+          const config = JSON.parse(text)
+          if (config && typeof config === 'object') {
+            return config as SavedConfiguration
+          }
+        } catch {
+          // Response is not valid JSON (e.g. XML/HTML error or 404 payload)
         }
       }
     } catch {

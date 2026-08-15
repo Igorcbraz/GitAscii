@@ -12,6 +12,7 @@ import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { useEditorStore } from '../store/editorStore'
+import { calculateFitZoom, getCanvasContainerWidth } from '../utils/canvasZoom'
 import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
 import { SVGCanvas } from './Canvas/SVGCanvas'
 import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
@@ -128,18 +129,36 @@ export function EditorLayout({
 
         setStep('github', 'active', `api.github.com/users/${username}`)
         const res = await fetch(API_ENDPOINTS.GITHUB.PROFILE(username))
-        if (!res.ok) {
+        let data: NormalizedGitHubData | null = null
+        const resContentType = res.headers.get('content-type') || ''
+
+        if (res.ok && resContentType.includes('application/json')) {
+          try {
+            data = await res.json()
+          } catch {
+            data = null
+          }
+        }
+
+        if (!data || !data.user) {
           let errMsg = t('errors.fetch_profile_failed', 'Failed to fetch GitHub profile')
           try {
-            const errJson = await res.json()
-            errMsg = errJson.error || errMsg
+            const errText = await res.text()
+            try {
+              const errJson = JSON.parse(errText)
+              errMsg = errJson.error || errMsg
+            } catch {
+              if (errText && !errText.trim().startsWith('<')) {
+                errMsg = errText
+              }
+            }
           } catch {
-            errMsg = (await res.text()) || errMsg
+            // ignore
           }
           setStep('github', 'error', errMsg)
           throw new Error(errMsg)
         }
-        const data: NormalizedGitHubData = await res.json()
+
         setStep(
           'github',
           'done',
@@ -155,7 +174,8 @@ export function EditorLayout({
         let serverConfig: SavedConfiguration | null = null
         try {
           const configRes = await fetch(API_ENDPOINTS.CONFIG.GET(username, profileSlug))
-          if (configRes.ok) {
+          const contentType = configRes.headers.get('content-type') || ''
+          if (configRes.ok && contentType.includes('application/json')) {
             serverConfig = await configRes.json()
           }
         } catch (e) {
@@ -216,8 +236,10 @@ export function EditorLayout({
             setShowOnboarding(true)
             setLoading(false)
           }
-          if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-            useEditorStore.getState().setZoom(0.4)
+          if (typeof window !== 'undefined') {
+            const availableW = getCanvasContainerWidth()
+            const optimalZoom = calculateFitZoom(availableW)
+            useEditorStore.getState().setZoom(optimalZoom)
           }
         }
       } catch (err: unknown) {
