@@ -9,18 +9,22 @@ import { getWidgetMinSize } from '@/engine/core/WidgetRenderer'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import {
+  type AlignmentGuide,
+  CANVAS_WIDTH,
+  clamp,
+  computeSmartGuides,
+  DEFAULT_SNAP_THRESHOLD as SNAP_THRESHOLD,
+  GRID_SIZE,
+  type SpacingGuide,
+} from '../../utils/smartGuides'
 import { LayersPanel } from '../Sidebar/LayersPanel'
 import { CanvasAlignmentGuides } from './CanvasAlignmentGuides'
 import { CanvasMarquee } from './CanvasMarquee'
 import { WidgetNode } from './WidgetNode'
 
-const CANVAS_WIDTH = 800
-const GRID_SIZE = 8
-const SNAP_THRESHOLD = 6
-
 type Position = { x: number; y: number }
 type Size = { width: number; height: number }
-type AlignmentGuide = { x?: number; y?: number }
 type DragType = 'move' | 'resize-r' | 'resize-b' | 'resize-br'
 
 type DragState = {
@@ -38,15 +42,7 @@ type DragPreview = {
   positions: Record<string, Position>
   sizes: Record<string, Size>
   guides: AlignmentGuide[]
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value))
-}
-
-function snapToGrid(value: number) {
-  const gridValue = Math.round(value / GRID_SIZE) * GRID_SIZE
-  return Math.abs(gridValue - value) <= SNAP_THRESHOLD ? gridValue : value
+  spacingGuides: SpacingGuide[]
 }
 
 export function SVGCanvas() {
@@ -66,7 +62,6 @@ export function SVGCanvas() {
   const activeDragRef = useRef<DragState | null>(null)
   const dragPreviewRef = useRef<DragPreview | null>(null)
   const dragRafRef = useRef<number | null>(null)
-  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const svgContainerRef = useRef<HTMLDivElement>(null)
@@ -89,6 +84,7 @@ export function SVGCanvas() {
   const zoomRef = useRef(zoom)
 
   const [alignmentGuides, setAlignmentGuides] = useState<AlignmentGuide[]>([])
+  const [spacingGuides, setSpacingGuides] = useState<SpacingGuide[]>([])
 
   const [playingPreviews, setPlayingPreviews] = useState<Record<string, boolean>>({})
 
@@ -293,18 +289,46 @@ export function SVGCanvas() {
       if (!widget) continue
 
       const widgetElementId = 'widget-' + instanceId
-      const widgetElement = Array.from(
-        svgContainerRef.current.querySelectorAll<SVGGElement>('g[id]')
-      ).find((element) => element.id === widgetElementId)
-      if (!widgetElement) continue
-
+      const widgetElement = svgContainerRef.current.querySelector<SVGGElement>(
+        `g#${widgetElementId}`
+      )
       const size = preview.sizes[instanceId] || widget.size
       const scaleX = size.width / widget.size.width
       const scaleY = size.height / widget.size.height
-      widgetElement.setAttribute(
-        'transform',
-        'translate(' + position.x + ', ' + position.y + ') scale(' + scaleX + ' ' + scaleY + ')'
-      )
+
+      if (widgetElement) {
+        widgetElement.setAttribute(
+          'transform',
+          `translate(${position.x}, ${position.y}) scale(${scaleX} ${scaleY})`
+        )
+      }
+
+      const overlayEl = document.getElementById('overlay-widget-' + instanceId)
+      if (overlayEl) {
+        overlayEl.style.left = `${position.x}px`
+        overlayEl.style.top = `${position.y}px`
+        overlayEl.style.width = `${size.width}px`
+        overlayEl.style.height = `${size.height}px`
+
+        const sizeBadge = overlayEl.querySelector<HTMLElement>('.widget-size-badge')
+        if (sizeBadge) {
+          sizeBadge.textContent = `(${size.width}x${size.height})`
+        }
+      }
+    }
+
+    for (const [instanceId, size] of Object.entries(preview.sizes)) {
+      if (preview.positions[instanceId]) continue // already updated above
+      const overlayEl = document.getElementById('overlay-widget-' + instanceId)
+      if (overlayEl) {
+        overlayEl.style.width = `${size.width}px`
+        overlayEl.style.height = `${size.height}px`
+
+        const sizeBadge = overlayEl.querySelector<HTMLElement>('.widget-size-badge')
+        if (sizeBadge) {
+          sizeBadge.textContent = `(${size.width}x${size.height})`
+        }
+      }
     }
   }, [])
 
@@ -319,7 +343,7 @@ export function SVGCanvas() {
         if (!nextPreview) return
         applyPreviewToCanvas(nextPreview)
         setAlignmentGuides(nextPreview.guides)
-        setDragPreview(nextPreview)
+        setSpacingGuides(nextPreview.spacingGuides || [])
       })
     },
     [applyPreviewToCanvas]
@@ -328,7 +352,8 @@ export function SVGCanvas() {
   const startDrag = (drag: DragState) => {
     activeDragRef.current = drag
     dragPreviewRef.current = null
-    setDragPreview({ positions: {}, sizes: {}, guides: [] })
+    setAlignmentGuides([])
+    setSpacingGuides([])
 
     if (svgContainerRef.current) {
       svgContainerRef.current.classList.add('canvas-is-dragging')
@@ -388,52 +413,31 @@ export function SVGCanvas() {
         const rawX = clamp(activeDrag.initialPos.x + deltaX, minX, maxX)
         const rawY = Math.max(minY, activeDrag.initialPos.y + deltaY)
 
-        const xSnapCandidates: { value: number; guide: number; distance: number }[] = []
-        const ySnapCandidates: { value: number; guide: number; distance: number }[] = []
-        const considerX = (value: number, guide: number) => {
-          if (value < minX || value > maxX) return
-          const distance = Math.abs(value - rawX)
-          if (distance <= SNAP_THRESHOLD) xSnapCandidates.push({ value, guide, distance })
-        }
-        const considerY = (value: number, guide: number) => {
-          if (value < minY) return
-          const distance = Math.abs(value - rawY)
-          if (distance <= SNAP_THRESHOLD) ySnapCandidates.push({ value, guide, distance })
-        }
-
-        considerX(0, 0)
-        considerX(CANVAS_WIDTH - width, CANVAS_WIDTH)
-        considerX(CANVAS_WIDTH / 2 - width / 2, CANVAS_WIDTH / 2)
-        considerY(0, 0)
-
         const movingIds = new Set(activeDrag.selectedInstanceIds)
-        for (const other of currentConfig.widgets) {
-          if (!other.visible || movingIds.has(other.instanceId)) continue
+        const otherRects = currentConfig.widgets
+          .filter((w) => w.visible && !movingIds.has(w.instanceId))
+          .map((w) => ({
+            id: w.instanceId,
+            rect: {
+              x: w.position.x,
+              y: w.position.y,
+              width: w.size.width,
+              height: w.size.height,
+            },
+          }))
 
-          const otherLeft = other.position.x
-          const otherRight = other.position.x + other.size.width
-          const otherCenterX = otherLeft + other.size.width / 2
-          const otherTop = other.position.y
-          const otherBottom = other.position.y + other.size.height
-          const otherCenterY = otherTop + other.size.height / 2
+        const smartResult = computeSmartGuides({
+          activeRect: { x: rawX, y: rawY, width, height },
+          otherRects,
+          minX,
+          maxX,
+          minY,
+          snapThreshold: SNAP_THRESHOLD,
+          canvasWidth: CANVAS_WIDTH,
+        })
 
-          considerX(otherLeft, otherLeft)
-          considerX(otherRight, otherRight)
-          considerX(otherLeft - width, otherLeft)
-          considerX(otherRight - width, otherRight)
-          considerX(otherCenterX - width / 2, otherCenterX)
-
-          considerY(otherTop, otherTop)
-          considerY(otherBottom, otherBottom)
-          considerY(otherTop - height, otherTop)
-          considerY(otherBottom - height, otherBottom)
-          considerY(otherCenterY - height / 2, otherCenterY)
-        }
-
-        const xSnap = xSnapCandidates.sort((a, b) => a.distance - b.distance)[0]
-        const ySnap = ySnapCandidates.sort((a, b) => a.distance - b.distance)[0]
-        const x = xSnap ? xSnap.value : clamp(snapToGrid(rawX), minX, maxX)
-        const y = ySnap ? ySnap.value : Math.max(minY, snapToGrid(rawY))
+        const x = smartResult.snappedX
+        const y = smartResult.snappedY
         const offsetX = x - activeDrag.initialPos.x
         const offsetY = y - activeDrag.initialPos.y
         const positions = Object.fromEntries(
@@ -442,12 +446,13 @@ export function SVGCanvas() {
             { x: position.x + offsetX, y: position.y + offsetY },
           ])
         )
-        const guides: AlignmentGuide[] = [
-          ...(xSnap ? [{ x: xSnap.guide }] : []),
-          ...(ySnap ? [{ y: ySnap.guide }] : []),
-        ]
 
-        scheduleDragPreview({ positions, sizes: {}, guides })
+        scheduleDragPreview({
+          positions,
+          sizes: {},
+          guides: smartResult.alignmentGuides,
+          spacingGuides: smartResult.spacingGuides,
+        })
         return
       }
 
@@ -491,6 +496,7 @@ export function SVGCanvas() {
         positions: { [activeDrag.instanceId]: activeDrag.initialPos },
         sizes: { [activeDrag.instanceId]: { width, height } },
         guides: [],
+        spacingGuides: [],
       })
     }
 
@@ -568,13 +574,26 @@ export function SVGCanvas() {
         store.recordHistorySnapshot()
       }
 
-      if (svgContainerRef.current && configRef.current) {
+      if (configRef.current) {
         for (const widget of configRef.current.widgets) {
-          const el = svgContainerRef.current.querySelector<SVGGElement>(
-            `g#widget-${widget.instanceId}`
-          )
-          if (el) {
-            el.setAttribute('transform', `translate(${widget.position.x}, ${widget.position.y})`)
+          if (svgContainerRef.current) {
+            const el = svgContainerRef.current.querySelector<SVGGElement>(
+              `g#widget-${widget.instanceId}`
+            )
+            if (el) {
+              el.setAttribute('transform', `translate(${widget.position.x}, ${widget.position.y})`)
+            }
+          }
+          const overlayEl = document.getElementById('overlay-widget-' + widget.instanceId)
+          if (overlayEl) {
+            overlayEl.style.left = `${widget.position.x}px`
+            overlayEl.style.top = `${widget.position.y}px`
+            overlayEl.style.width = `${widget.size.width}px`
+            overlayEl.style.height = `${widget.size.height}px`
+            const sizeBadge = overlayEl.querySelector<HTMLElement>('.widget-size-badge')
+            if (sizeBadge) {
+              sizeBadge.textContent = `(${widget.size.width}x${widget.size.height})`
+            }
           }
         }
       }
@@ -594,8 +613,8 @@ export function SVGCanvas() {
 
       activeDragRef.current = null
       dragPreviewRef.current = null
-      setDragPreview(null)
       setAlignmentGuides([])
+      setSpacingGuides([])
     }
 
     const handleGlobalMouseMove = (event: MouseEvent | TouchEvent) => {
@@ -690,9 +709,7 @@ export function SVGCanvas() {
   let canvasHeight = 400
   config.widgets.forEach((w) => {
     if (w.visible) {
-      const previewPosition = dragPreview?.positions[w.instanceId]
-      const previewSize = dragPreview?.sizes[w.instanceId]
-      const bottom = (previewPosition || w.position).y + (previewSize || w.size).height + 40
+      const bottom = w.position.y + w.size.height + 40
       if (bottom > canvasHeight) canvasHeight = bottom
     }
   })
@@ -826,20 +843,13 @@ export function SVGCanvas() {
           )}
         </div>
 
-        <CanvasAlignmentGuides guides={alignmentGuides} />
+        <CanvasAlignmentGuides guides={alignmentGuides} spacingGuides={spacingGuides} />
 
         <div className="absolute inset-0 pointer-events-auto">
           <CanvasMarquee marquee={marquee && containerRef.current ? marquee : null} />
           {config.widgets.map((widget) => {
             if (!widget.visible) return null
 
-            const previewPosition = dragPreview?.positions[widget.instanceId]
-            const previewSize = dragPreview?.sizes[widget.instanceId]
-            const widgetPosition = previewPosition || widget.position
-            const widgetSize = previewSize || widget.size
-            const isDraggingWidget =
-              dragPreview !== null &&
-              Boolean(activeDragRef.current?.selectedInstanceIds.includes(widget.instanceId))
             const isSelected =
               (selectedInstanceIds && selectedInstanceIds.includes(widget.instanceId)) ||
               widget.instanceId === selectedInstanceId
@@ -849,6 +859,7 @@ export function SVGCanvas() {
             return (
               <div
                 key={widget.instanceId}
+                id={`overlay-widget-${widget.instanceId}`}
                 data-testid={`canvas-widget-${widget.widgetId}`}
                 data-selected={isSelected}
                 data-x={widget.position.x}
@@ -968,13 +979,13 @@ export function SVGCanvas() {
                 }}
                 style={{
                   position: 'absolute',
-                  left: widgetPosition.x,
-                  top: widgetPosition.y,
-                  width: widgetSize.width,
-                  height: widgetSize.height,
+                  left: widget.position.x,
+                  top: widget.position.y,
+                  width: widget.size.width,
+                  height: widget.size.height,
                   zIndex: widget.zIndex,
                 }}
-                className={`group ${isDraggingWidget ? 'transition-none' : 'transition-all'} ${
+                className={`group transition-all ${
                   widget.locked
                     ? 'cursor-not-allowed'
                     : isSelected
@@ -986,8 +997,8 @@ export function SVGCanvas() {
                   <div className="absolute -top-7 left-0 flex items-center gap-1.5 bg-signal-lime text-black font-inter-tight text-caption uppercase tracking-wider font-semibold px-2 py-0.5 rounded-xs shadow-md z-30">
                     {widget.locked ? <Lock size={10} className="text-black" /> : <Move size={10} />}
                     <span>{displayName}</span>
-                    <span className="font-jetbrains-mono opacity-60">
-                      ({widgetSize.width}x{widgetSize.height})
+                    <span className="font-jetbrains-mono opacity-60 widget-size-badge">
+                      ({widget.size.width}x{widget.size.height})
                     </span>
                   </div>
                 )}
