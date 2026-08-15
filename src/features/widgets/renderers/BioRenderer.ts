@@ -1,5 +1,6 @@
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { sanitizeSafeHref } from '@/utils/svgSanitizer'
 
 export function renderBio(
   widget: WidgetInstance,
@@ -52,16 +53,18 @@ export function renderBio(
   if (blogHref && !blogHref.startsWith('http://') && !blogHref.startsWith('https://')) {
     blogHref = `https://${blogHref}`
   }
+  blogHref = sanitizeSafeHref(blogHref, '')
 
   const locationSvg = customLocation
     ? `<text x="0" y="0" font-family="${globalStyles.fontFamily}" font-size="12" fill="#7a7a7a">📍 ${escapeXml(customLocation)}</text>`
     : ''
 
-  const blogSvg = customBlog
-    ? `<a href="${escapeXml(blogHref)}" target="_blank" rel="noopener noreferrer" cursor="pointer">
-         <text x="${customLocation ? 180 : 0}" y="0" font-family="${globalStyles.fontFamily}" font-size="12" fill="${accent}" text-decoration="underline">🌐 ${escapeXml(customBlog)}</text>
-       </a>`
-    : ''
+  const blogSvg =
+    customBlog && blogHref
+      ? `<a href="${escapeXml(blogHref)}" target="_blank" rel="noopener noreferrer" cursor="pointer">
+           <text x="${customLocation ? 180 : 0}" y="0" font-family="${globalStyles.fontFamily}" font-size="12" fill="${accent}" text-decoration="underline">🌐 ${escapeXml(customBlog)}</text>
+         </a>`
+      : ''
 
   return `
     <text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ BIOGRAPHY ]</text>

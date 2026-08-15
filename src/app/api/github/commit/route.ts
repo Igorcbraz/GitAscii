@@ -7,46 +7,56 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { embedCode, exportData, installation_id } = await request.json()
     if (!embedCode && !installation_id) {
       return NextResponse.json({ error: 'Missing embedCode' }, { status: 400 })
     }
 
-    let username = ''
+    const username = session.username
     let appToken = null
     let finalEmbedCode = embedCode
 
     if (installation_id) {
       const { token, username: instUsername } = await getInstallationTokenById(installation_id)
-      if (!token || !instUsername) {
-        return NextResponse.json({ error: 'Invalid installation' }, { status: 403 })
+      if (
+        !token ||
+        !instUsername ||
+        instUsername.toLowerCase() !== session.username.toLowerCase()
+      ) {
+        return NextResponse.json(
+          { error: 'Forbidden: Installation does not belong to the authenticated user' },
+          { status: 403 }
+        )
       }
-      username = instUsername
       appToken = token
 
       const host = request.headers.get('host') || 'localhost:3000'
-      const protocol = request.headers.get('x-forwarded-proto') || 'http'
+      const protocol = request.headers.get('x-forwarded-proto') || 'https'
       const v = Date.now()
-      const profileSlug = exportData?.profileSlug || exportData?.templateId || 'default'
+      const rawSlug = exportData?.profileSlug || exportData?.templateId || 'default'
+      const profileSlug =
+        typeof rawSlug === 'string'
+          ? rawSlug.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'default'
+          : 'default'
       const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
       finalEmbedCode = `<a href="${protocol}://${host}">
   <img
-    src="${protocol}://${host}/api/${username}${slugPath}?v=${v}"
+    src="${protocol}://${host}/api/${encodeURIComponent(username)}${slugPath}?v=${v}"
     alt="GitAscii Widget"
     width="100%"
   />
 </a>`
 
-      if (exportData) {
+      if (exportData && typeof exportData === 'object') {
         exportData.username = username
+        exportData.profileSlug = profileSlug
       }
     } else {
-      const session = await getSession()
-      if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-      username = session.username
-
       const { token, installUrl } = await getInstallationTokenForUser(username)
       if (!token) {
         if (installUrl) {
@@ -190,47 +200,68 @@ export async function POST(request: Request) {
 
       if (hasSnakeWidget) {
         try {
-          // Busca o workflow dinamicamente do repositório de exemplo do Platane
-          const yamlRes = await fetch(API_ENDPOINTS.EXTERNAL_RESOURCES.PLATANE_SNAKE_WORKFLOW, {
-            signal: AbortSignal.timeout(6000),
-          })
-          if (yamlRes.ok) {
-            let snakeYaml = await yamlRes.text()
+          const snakeYaml = `name: Generate Snake Animation
 
-            // Substitui o usuário fixo 'platane' pela variável dinâmica do GitHub, se houver,
-            // tomando cuidado para não alterar a action 'Platane/snk'
-            snakeYaml = snakeYaml.replace(
-              /github_user_name:\s*\w+/g,
-              'github_user_name: ${{ github.repository_owner }}'
-            )
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
 
-            const actionRes = await fetch(
-              API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
-              { headers, signal: AbortSignal.timeout(6000) }
-            )
-            let actionSha = undefined
-            if (actionRes.status === 200) {
-              const actionData = await actionRes.json()
-              actionSha = actionData.sha
+jobs:
+  generate:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: generate-snake-game-from-github-contribution-grid
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: \${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+
+      - name: push github-contribution-grid-snake.svg to the output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+`
+
+          const actionRes = await fetch(
+            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
+            { headers, signal: AbortSignal.timeout(6000) }
+          )
+          let actionSha = undefined
+          if (actionRes.status === 200) {
+            const actionData = await actionRes.json()
+            actionSha = actionData.sha
+          }
+
+          const updateActionRes = await fetch(
+            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
+            {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify({
+                message: 'Configura GitHub Action do Contribution Snake',
+                content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
+                sha: actionSha,
+              }),
+              signal: AbortSignal.timeout(6000),
             }
+          )
 
-            const updateActionRes = await fetch(
-              API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
-              {
-                method: 'PUT',
-                headers,
-                body: JSON.stringify({
-                  message: 'Configura GitHub Action do Contribution Snake',
-                  content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
-                  sha: actionSha,
-                }),
-                signal: AbortSignal.timeout(6000),
-              }
-            )
-
-            if (!updateActionRes.ok) {
-              console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
-            }
+          if (!updateActionRes.ok) {
+            console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
           }
         } catch (err) {
           console.error('Erro ao configurar o workflow da snake:', err)

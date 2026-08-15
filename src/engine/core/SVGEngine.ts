@@ -1,3 +1,6 @@
+import { safeFetch, validateSafeExternalUrl } from '@/utils/ssrfValidator'
+import { sanitizeSvg } from '@/utils/svgSanitizer'
+
 import type { NormalizedGitHubData, RenderOptions, SavedConfiguration } from '../types'
 import { renderWidgetSvg } from './WidgetRenderer'
 
@@ -101,7 +104,8 @@ function inlineSvg(
   height: string,
   preserve: string
 ): string {
-  let svg = fetchedSvg.replace(/<\?xml[\s\S]*?\?>/i, '').trim()
+  const sanitized = sanitizeSvg(fetchedSvg)
+  let svg = sanitized.replace(/<\?xml[\s\S]*?\?>/i, '').trim()
   svg = svg.replace(/<!DOCTYPE[\s\S]*?>/i, '').trim()
 
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
@@ -169,36 +173,22 @@ async function fetchAndProcessExternalImage(
   height: string,
   preserve: string
 ): Promise<string> {
-  try {
-    const parsedUrl = new URL(url)
-    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      throw new Error('Invalid protocol')
-    }
-    const hostname = parsedUrl.hostname
-    if (
-      hostname === 'localhost' ||
-      hostname === '127.0.0.1' ||
-      hostname === '::1' ||
-      hostname === '169.254.169.254' ||
-      hostname.endsWith('.local') ||
-      hostname === '0.0.0.0' ||
-      hostname.startsWith('10.') ||
-      hostname.startsWith('192.168.')
-    ) {
-      throw new Error('Forbidden hostname')
-    }
-  } catch {
-    throw new Error('Invalid URL')
+  const urlCheck = await validateSafeExternalUrl(url)
+  if (!urlCheck.safe) {
+    console.warn(`SSRF protection blocked external request: ${url} (${urlCheck.error})`)
+    return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
+      <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Blocked URL</text>
+    </svg>`
   }
 
   try {
-    const response = await fetch(url, {
-      headers: { accept: 'image/svg+xml, */*' },
-      signal: AbortSignal.timeout(6000),
+    const response = await safeFetch(url, {
+      headers: { accept: 'image/svg+xml, image/*;q=0.9, */*;q=0.1' },
+      signal: AbortSignal.timeout(5000),
     })
     if (!response.ok) {
       console.warn(`Failed to fetch external SVG: ${url} (HTTP ${response.status})`)
-      // Return a basic error SVG for this widget rather than crashing the whole grid
       return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
         <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
@@ -207,6 +197,10 @@ async function fetchAndProcessExternalImage(
 
     const contentType = response.headers.get('content-type') || ''
     const buffer = await response.arrayBuffer()
+
+    if (buffer.byteLength > 5 * 1024 * 1024) {
+      throw new Error('Image response too large')
+    }
 
     const isSvg =
       contentType.includes('image/svg+xml') ||
@@ -225,7 +219,7 @@ async function fetchAndProcessExternalImage(
     } else {
       const base64 = Buffer.from(buffer).toString('base64')
       let mimeType = contentType.split(';')[0].trim()
-      if (!mimeType) mimeType = 'image/png'
+      if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
       return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
     }
   } catch (error: unknown) {
@@ -301,30 +295,14 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     const url = hrefMatch[1].replace(/&amp;/g, '&')
 
     try {
-      const parsedUrl = new URL(url)
-      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-        throw new Error('Invalid protocol')
-      }
-      const hostname = parsedUrl.hostname
-      if (
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname === '::1' ||
-        hostname === '169.254.169.254' ||
-        hostname.endsWith('.local') ||
-        hostname === '0.0.0.0' ||
-        hostname.startsWith('10.') ||
-        hostname.startsWith('192.168.')
-      ) {
-        throw new Error('Forbidden hostname')
-      }
-
-      const response = await fetch(url, {
+      const response = await safeFetch(url, {
         headers: { accept: 'image/*, */*' },
         signal: AbortSignal.timeout(4000),
       })
       if (!response.ok) continue
       const buffer = await response.arrayBuffer()
+      if (buffer.byteLength > 5 * 1024 * 1024) continue
+
       const contentType = response.headers.get('content-type') || 'image/png'
       const base64 = Buffer.from(buffer).toString('base64')
       const dataUri = `data:${contentType};base64,${base64}`

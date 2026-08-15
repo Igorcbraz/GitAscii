@@ -135,10 +135,12 @@ export function SVGCanvas() {
     return config.widgets
       .map((w) => {
         const isPlaying = playingPreviews[w.instanceId]
+        const safeId = (w.instanceId || '').replace(/[^a-zA-Z0-9_-]/g, '')
+        if (!safeId) return ''
         if (!isPlaying) {
           return `
-            .static-anim-${w.instanceId} #widget-${w.instanceId} .anim-target,
-            .static-anim-${w.instanceId} #widget-${w.instanceId} .typewriter-target {
+            .static-anim-${safeId} #widget-${safeId} .anim-target,
+            .static-anim-${safeId} #widget-${safeId} .typewriter-target {
               animation: none !important;
               opacity: 1 !important;
               clip-path: none !important;
@@ -772,11 +774,10 @@ export function SVGCanvas() {
           data-testid="canvas-svg-container"
           tabIndex={-1}
           className={`w-full h-full pointer-events-none ${config.widgets
-            .map((w) =>
-              playingPreviews[w.instanceId]
-                ? `play-anim-${w.instanceId}`
-                : `static-anim-${w.instanceId}`
-            )
+            .map((w) => {
+              const safeId = (w.instanceId || '').replace(/[^a-zA-Z0-9_-]/g, '')
+              return playingPreviews[w.instanceId] ? `play-anim-${safeId}` : `static-anim-${safeId}`
+            })
             .join(' ')}`}
         >
           {config && githubData && (

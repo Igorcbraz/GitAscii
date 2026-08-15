@@ -89,11 +89,13 @@ export default async function NamedProfileEditorPage({
     ],
   }
 
+  const safeJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c')
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <EditorLayout username={username} profileSlug={profile} />
     </>

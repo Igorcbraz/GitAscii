@@ -24,10 +24,31 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const cspHeader = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.clarity.ms https://*.clarity.ms https://*.sentry.io",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net https://*.sentry.io https://*.clarity.ms https://api.tcgdex.net https://api.indexnow.org https://*.vercel-storage.com https://github-readme-stats-fast.vercel.app https://ghstats.dev https://streak-stats.demolab.com https://github-profile-trophy-fast.vercel.app https://github-readme-activity-graph.vercel.app https://metrics.lecoq.io https://komarev.com https://quotes-github-readme.vercel.app",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://github.com",
+    ].join('; ')
+
     return [
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',

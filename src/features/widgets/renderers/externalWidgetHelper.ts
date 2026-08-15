@@ -1,5 +1,6 @@
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles } from '@/engine/types'
+import { sanitizeSafeHref } from '@/utils/svgSanitizer'
 
 export function renderExternalWidgetSvg(
   url: string,
@@ -8,12 +9,12 @@ export function renderExternalWidgetSvg(
   title: string,
   showTitle: boolean,
   globalStyles: GlobalStyles,
-  accent: string,
+  _accent: string,
   mode: 'contain' | 'badge' = 'contain',
   targetUrl?: string,
   fallbackUrl?: string
 ): string {
-  let processedUrl = url
+  let processedUrl = sanitizeSafeHref(url, '')
   try {
     const parsed = new URL(processedUrl)
     if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
@@ -23,6 +24,9 @@ export function renderExternalWidgetSvg(
       )
     }
   } catch {}
+
+  const safeTargetUrl = targetUrl ? sanitizeSafeHref(targetUrl, '') : undefined
+  const safeFallbackUrl = fallbackUrl ? sanitizeSafeHref(fallbackUrl, '') : undefined
 
   const imgY = showTitle ? 44 : 16
   const paddingX = 16
@@ -34,16 +38,16 @@ export function renderExternalWidgetSvg(
       ? 'height:32px; width:auto; max-width:100%; object-fit:contain; object-position:left center;'
       : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:left top;'
 
-  const imgHtml = fallbackUrl
-    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(fallbackUrl)}';" />`
+  const imgHtml = safeFallbackUrl
+    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(safeFallbackUrl)}';" />`
     : `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" />`
-  const innerContentHtml = targetUrl
-    ? `<a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;max-width:100%;max-height:100%;">${imgHtml}</a>`
+  const innerContentHtml = safeTargetUrl
+    ? `<a href="${escapeXml(safeTargetUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;max-width:100%;max-height:100%;">${imgHtml}</a>`
     : imgHtml
 
   return `
     ${showTitle ? `<text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">${escapeXml(title)}</text>` : ''}
-    <!-- EXTERNAL_WIDGET_START: ${escapeXml(processedUrl)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${fallbackUrl ? escapeXml(fallbackUrl) : ''} -->
+    <!-- EXTERNAL_WIDGET_START: ${escapeXml(processedUrl)} | ${paddingX} | ${imgY} | ${imgW} | ${imgH} | ${mode} | ${safeFallbackUrl ? escapeXml(safeFallbackUrl) : ''} -->
     <foreignObject x="${paddingX}" y="${imgY}" width="${imgW}" height="${imgH}">
       <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;">
         ${innerContentHtml}

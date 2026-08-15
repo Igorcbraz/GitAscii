@@ -5,8 +5,11 @@ export async function GET(request: Request) {
   const state = url.searchParams.get('state')
 
   if (state) {
-    return NextResponse.redirect(new URL(`/${state}`, request.url))
+    const trimmed = state.trim().replace(/^[/\\+]+/, '')
+    if (/^[a-zA-Z0-9_.-]+(\/[a-zA-Z0-9_.-]+)*$/.test(trimmed)) {
+      return NextResponse.redirect(new URL(`/${trimmed}`, url.origin))
+    }
   }
 
-  return NextResponse.redirect(new URL('/', request.url))
+  return NextResponse.redirect(new URL('/', url.origin))
 }

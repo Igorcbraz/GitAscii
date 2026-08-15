@@ -2,6 +2,7 @@ import { SOCIAL_PLATFORMS } from '@/constants'
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { sanitizeSafeHref } from '@/utils/svgSanitizer'
 
 export function renderSocialMedia(
   widget: WidgetInstance,
@@ -72,8 +73,9 @@ export function renderSocialMedia(
       currentX += badgeW + gapX
 
       const badgeUrl = API_ENDPOINTS.SHIELDS_IO.CUSTOM_BADGE(label, p.color, badgeStyle, p.logo)
-      const targetUrl =
+      const rawTargetUrl =
         socialUrls[platformId] || p.defaultUrl.replace('{username}', data.user.login)
+      const targetUrl = sanitizeSafeHref(rawTargetUrl, '#')
 
       return `
         <a href="${escapeXml(targetUrl)}" target="_blank" rel="noopener noreferrer" cursor="pointer">

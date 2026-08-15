@@ -77,19 +77,91 @@ export function TemplateLibrarySection({
           return
         }
 
-        const sanitizedWidgets = data.widgets.map((w: Record<string, unknown>) => {
-          const { config: widgetCfg, ...rest } = w as {
-            config: Record<string, unknown>
-            [key: string]: unknown
-          }
-          if (!widgetCfg) return w
-          const cleanCfg = { ...widgetCfg }
-          USER_SPECIFIC_FIELDS.forEach((field) => {
-            delete cleanCfg[field]
+        const sanitizedWidgets = data.widgets
+          .filter((w: unknown) => w && typeof w === 'object')
+          .map((w: Record<string, unknown>, idx: number) => {
+            const rawId =
+              typeof w.instanceId === 'string' ? w.instanceId : `widget-${Date.now()}-${idx}`
+            const safeInstanceId = rawId.replace(/[^a-zA-Z0-9_-]/g, '') || `widget-${idx}`
+            const rawWidgetId = typeof w.widgetId === 'string' ? w.widgetId : 'unknown'
+            const safeWidgetId = rawWidgetId.replace(/[^a-zA-Z0-9_-]/g, '')
+
+            const rawPos = (
+              w.position && typeof w.position === 'object' ? w.position : {}
+            ) as Record<string, unknown>
+            const rawSize = (w.size && typeof w.size === 'object' ? w.size : {}) as Record<
+              string,
+              unknown
+            >
+
+            const position = {
+              x: Math.max(-200, Math.min(2000, Number(rawPos.x) || 0)),
+              y: Math.max(0, Math.min(10000, Number(rawPos.y) || 0)),
+            }
+            const size = {
+              width: Math.max(20, Math.min(1200, Number(rawSize.width) || 400)),
+              height: Math.max(20, Math.min(3000, Number(rawSize.height) || 200)),
+            }
+
+            const { config: widgetCfg } = w as {
+              config?: Record<string, unknown>
+            }
+
+            const cleanCfg = widgetCfg && typeof widgetCfg === 'object' ? { ...widgetCfg } : {}
+            USER_SPECIFIC_FIELDS.forEach((field) => {
+              delete cleanCfg[field]
+            })
+
+            return {
+              instanceId: safeInstanceId,
+              widgetId: safeWidgetId,
+              position,
+              size,
+              config: cleanCfg,
+              locked: Boolean(w.locked),
+              visible: w.visible !== false,
+              zIndex: Math.max(0, Math.min(999, Number(w.zIndex) || 1)),
+            }
           })
-          return { ...rest, config: cleanCfg }
-        })
-        importLayout(sanitizedWidgets, data.globalStyles, data.templateId)
+
+        const rawStyles = (
+          data.globalStyles && typeof data.globalStyles === 'object' ? data.globalStyles : {}
+        ) as Record<string, unknown>
+        const safeGlobalStyles = {
+          backgroundColor:
+            typeof rawStyles.backgroundColor === 'string'
+              ? rawStyles.backgroundColor.replace(/[^#a-zA-Z0-9(),\s.-]/g, '').slice(0, 50)
+              : '#060606',
+          borderColor:
+            typeof rawStyles.borderColor === 'string'
+              ? rawStyles.borderColor.replace(/[^#a-zA-Z0-9(),\s.-]/g, '').slice(0, 50)
+              : '#252525',
+          textColor:
+            typeof rawStyles.textColor === 'string'
+              ? rawStyles.textColor.replace(/[^#a-zA-Z0-9(),\s.-]/g, '').slice(0, 50)
+              : '#ffffff',
+          accentColor:
+            typeof rawStyles.accentColor === 'string'
+              ? rawStyles.accentColor.replace(/[^#a-zA-Z0-9(),\s.-]/g, '').slice(0, 50)
+              : '#c5ff4a',
+          fontFamily:
+            typeof rawStyles.fontFamily === 'string'
+              ? rawStyles.fontFamily.replace(/[^a-zA-Z0-9\s,'"-]/g, '').slice(0, 100)
+              : "'Inter Tight', sans-serif",
+          borderRadius: Math.max(0, Math.min(64, Number(rawStyles.borderRadius) || 0)),
+          transparentBackground: Boolean(rawStyles.transparentBackground),
+          templateStyle:
+            typeof rawStyles.templateStyle === 'string'
+              ? rawStyles.templateStyle.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50)
+              : 'terminal',
+        }
+
+        const safeTemplateId =
+          typeof data.templateId === 'string'
+            ? data.templateId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50)
+            : 'custom'
+
+        importLayout(sanitizedWidgets, safeGlobalStyles, safeTemplateId)
 
         if (fileInputRef.current) {
           fileInputRef.current.value = ''

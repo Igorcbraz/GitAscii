@@ -2,6 +2,7 @@ import { EXTERNAL_LINKS } from '@/constants'
 import { getTechInfo } from '@/data/techCatalog'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { sanitizeSafeHref } from '@/utils/svgSanitizer'
 
 function localEscapeXml(str: string): string {
   return str
@@ -35,13 +36,15 @@ export function renderCodewebRetroGrid(
   } else if (cfg.avatarUrl && !cfg.sourceType) {
     avatarUrl = cfg.avatarUrl as string
   }
+  avatarUrl = sanitizeSafeHref(avatarUrl, '')
 
-  const cardLink =
+  const rawCardLink =
     (cfg.link as string) ||
     (cfg.devCardLink as string) ||
     (data.user.login
       ? API_ENDPOINTS.GITHUB.USER_PROFILE(data.user.login)
       : EXTERNAL_LINKS.GITHUB_REPO)
+  const cardLink = sanitizeSafeHref(rawCardLink, EXTERNAL_LINKS.GITHUB_REPO)
 
   const userName = (cfg.userName as string) || data.user.name || data.user.login || 'Developer'
   const userHandle = (cfg.userHandle as string) || `@${data.user.login || 'developer'}`

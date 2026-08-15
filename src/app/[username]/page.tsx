@@ -108,15 +108,17 @@ export default async function DefaultEditorPage({
     },
   }
 
+  const safeJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c')
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(profileLd) }}
       />
       <EditorLayout username={username} profileSlug="default" autoGenerate={autoGenerate} />
     </>

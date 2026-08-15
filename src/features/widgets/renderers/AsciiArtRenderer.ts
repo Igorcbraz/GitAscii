@@ -1,6 +1,7 @@
 import { generateAsciiArt } from '@/engine/ascii/converter'
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { sanitizeColor } from '@/utils/svgSanitizer'
 
 export function renderAsciiArt(
   widget: WidgetInstance,
@@ -9,7 +10,7 @@ export function renderAsciiArt(
 ): string {
   const { width, height } = widget.size
   const cfg = widget.config
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+  const accent = sanitizeColor((cfg.accentColor as string) || globalStyles.accentColor, '#c5ff4a')
 
   const fontSize = Number(cfg.fontSize) || 9
   const charWidth = fontSize * 0.58
@@ -46,9 +47,13 @@ export function renderAsciiArt(
 
         for (let charIndex = 0; charIndex < line.length;) {
           let chunk = line[charIndex]
-          const charColor = rowColors[charIndex] || accent
+          const rawCharColor = rowColors[charIndex] || accent
+          const charColor = sanitizeColor(rawCharColor, accent)
           let nextIndex = charIndex + 1
-          while (nextIndex < line.length && (rowColors[nextIndex] || accent) === charColor) {
+          while (
+            nextIndex < line.length &&
+            sanitizeColor(rowColors[nextIndex] || accent, accent) === charColor
+          ) {
             chunk += line[nextIndex]
             nextIndex++
           }
