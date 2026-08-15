@@ -47,6 +47,8 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
   const [shineX, setShineX] = useState(Number(config.shineX) || 50)
   const [shineY, setShineY] = useState(Number(config.shineY) || 50)
 
+  const [error, setError] = useState<string | null>(null)
+
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,12 +59,16 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
         (!config.searchCards || config.searchCards.length === 0)
       ) {
         try {
+          setError(null)
           const randomName = SUGGESTED_POKEMON[Math.floor(Math.random() * SUGGESTED_POKEMON.length)]
           setSearchQuery(randomName)
 
           const res = await fetch(
             `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(randomName)}`
           )
+          if (!res.ok) {
+            throw new Error(`API error: ${res.status}`)
+          }
           const json = await res.json()
           if (Array.isArray(json)) {
             const validCards = json.filter((c: any) => c.image)
@@ -80,31 +86,55 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
             }
           }
         } catch (err) {
-          console.error('Error fetching random card:', err)
+          console.warn('Unable to load initial random Pokemon card:', err)
+          setError(
+            t(
+              'editor.pokemon.fetch_error',
+              'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
+            ) as string
+          )
         }
       }
     }
     fetchRandom()
-  }, [config.imageUrl, config.searchQuery, config.searchCards, instanceId, updateWidgetConfig])
+  }, [config.imageUrl, config.searchQuery, config.searchCards, instanceId, updateWidgetConfig, t])
 
   const handleSearch = async (queryToSearch?: string) => {
     const query = typeof queryToSearch === 'string' ? queryToSearch : searchQuery
     if (!query) return
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch(
         `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(query)}`
       )
+      if (!res.ok) {
+        throw new Error(`API error: ${res.status}`)
+      }
       const json = await res.json()
       if (Array.isArray(json)) {
         const newCards = json.filter((c: any) => c.image).slice(0, 20)
         setCards(newCards)
         updateWidgetConfig(instanceId, { searchQuery: query, searchCards: newCards })
+        if (newCards.length === 0) {
+          setError(
+            t(
+              'editor.pokemon.no_cards_found',
+              'Nenhuma carta encontrada para esta busca.'
+            ) as string
+          )
+        }
       } else {
         setCards([])
       }
     } catch (err) {
-      console.error(err)
+      console.warn('Error fetching Pokemon cards:', err)
+      setError(
+        t(
+          'editor.pokemon.fetch_error',
+          'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
+        ) as string
+      )
     } finally {
       setLoading(false)
     }
@@ -247,6 +277,12 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           </button>
         ))}
       </div>
+
+      {error && (
+        <div className="text-[12px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xs font-inter-tight">
+          {error}
+        </div>
+      )}
 
       {cards.length > 0 && (
         <div
