@@ -72,7 +72,10 @@ export function EditorToolbar() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `gitascii_layout_${currentConfig.username}.json`
+      link.download =
+        profileSlug && profileSlug !== 'default'
+          ? `gitascii_${profileSlug.toLowerCase()}.json`
+          : 'gitascii.json'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -85,7 +88,7 @@ export function EditorToolbar() {
     } catch (err) {
       console.error('Failed to export layout:', err)
     }
-  }, [])
+  }, [profileSlug])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -254,14 +257,19 @@ export function EditorToolbar() {
 
   const viewerUsername = session?.username || username
 
-  const embedUrl =
+  const v = Date.now()
+  const currentViewerEmbedUrl =
     profileSlug === 'default'
       ? `${currentOrigin}/api/${viewerUsername}`
       : `${currentOrigin}/api/${viewerUsername}/${profileSlug}`
 
+  const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
+    ? `${currentViewerEmbedUrl}&v=${v}`
+    : `${currentViewerEmbedUrl}?v=${v}`
+
   const embedCode = `<a href="${currentOrigin}">
   <img
-    src="${embedUrl}"
+    src="${urlWithCacheBust}"
     alt="GitAscii Widget"
     width="100%"
   />
@@ -464,6 +472,7 @@ export function EditorToolbar() {
         isOpen={showExportGuide}
         onClose={() => setShowExportGuide(false)}
         username={username}
+        profileSlug={profileSlug}
         onDownload={handleExport}
         embedCode={embedCode}
       />

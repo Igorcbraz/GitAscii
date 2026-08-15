@@ -45,10 +45,10 @@ export interface ExportGuideStepDef {
 export const EXPORT_GUIDE_STEPS: readonly ExportGuideStepDef[] = [
   {
     icon: Download,
-    title: 'Arquivo Baixado',
+    title: 'Baixe o Arquivo de Configuração',
     titleKey: 'editor.guide.export.step1_title',
     description:
-      'O arquivo do seu layout foi baixado para o seu computador. Ele contém toda a configuração do seu perfil.',
+      'O arquivo de configuração contém toda a estrutura de layout e widgets do seu perfil.',
     descriptionKey: 'editor.guide.export.step1_desc',
     descriptionIcon: FileJson,
     linkLabel: null,
@@ -56,25 +56,23 @@ export const EXPORT_GUIDE_STEPS: readonly ExportGuideStepDef[] = [
   },
   {
     icon: Github,
-    title: 'Adicione ao GitHub',
+    title: 'Upload no Repositório',
     titleKey: 'editor.guide.export.step2_title',
-    description:
-      'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.',
+    description: 'Faça o upload do arquivo na raiz do seu repositório especial no GitHub.',
     descriptionKey: 'editor.guide.export.step2_desc',
     descriptionIcon: null,
-    linkLabel: 'Adicionar arquivo',
+    linkLabel: 'Fazer upload no GitHub',
     linkLabelKey: 'editor.guide.export.step2_link',
     getLinkUrl: (username: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_UPLOAD(username),
   },
   {
     icon: Sparkles,
-    title: 'Tudo Pronto!',
+    title: 'Adicione ao seu README.md',
     titleKey: 'editor.guide.export.step3_title',
-    description:
-      'Nosso site renderiza automaticamente o JSON do seu repositório. Basta copiar a URL da imagem gerada e colar no seu README.',
+    description: 'Copie o código HTML formatado e cole no arquivo README.md do seu repositório.',
     descriptionKey: 'editor.guide.export.step3_desc',
     descriptionIcon: null,
-    linkLabel: 'Editar README',
+    linkLabel: 'Editar README.md no GitHub',
     linkLabelKey: 'editor.guide.export.step3_link',
     getLinkUrl: (username: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_EDIT_README(username),
   },

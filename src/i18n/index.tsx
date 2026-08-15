@@ -241,6 +241,27 @@ export const translations: Record<Language, Record<string, string>> = {
       'Click "Commit changes" to save. Then, visit your profile to see the result!',
     'editor.guide.step3_link': 'View my profile',
 
+    'editor.guide.export.title': 'Export Layout Guide',
+    'editor.guide.export.subtitle': 'Follow these steps to configure your profile manually',
+    'editor.guide.export.step1_title': 'Download Configuration File',
+    'editor.guide.export.step1_desc':
+      'The configuration file contains the full visual layout and widget settings for your profile.',
+    'editor.guide.export.step1_warning':
+      'DO NOT change the file name. Keep it strictly as {fileName}, as GitAscii looks specifically for this file in your repository.',
+    'editor.guide.export.step1_download_btn': 'Download {fileName}',
+    'editor.guide.export.redownload': 'Download again',
+    'editor.guide.export.step2_title': 'Upload to {repo}',
+    'editor.guide.export.step2_desc':
+      'Upload the {fileName} file directly to the root of your special repository {repo} on GitHub.',
+    'editor.guide.export.step2_link': 'Upload to GitHub',
+    'editor.guide.export.step3_title': 'Add to your README.md',
+    'editor.guide.export.step3_desc':
+      'Copy the formatted HTML snippet below and paste it into the README.md of your {repo} repository:',
+    'editor.guide.export.step3_cache_title': 'GitHub Cache',
+    'editor.guide.export.step3_cache_desc':
+      'Whenever you edit the JSON, update the ?v= parameter in your README to force the image to refresh.',
+    'editor.guide.export.step3_link': 'Edit README.md on GitHub',
+
     'widget.badge.mais_usado': 'Most Used',
     'widget.badge.destaque': 'Featured',
     'widget.badge.essencial': 'Essential',
@@ -723,6 +744,27 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.guide.step3_desc':
       'Clique em "Commit changes" para salvar. Depois, acesse seu perfil para ver o resultado!',
     'editor.guide.step3_link': 'Ver meu perfil',
+
+    'editor.guide.export.title': 'Guia de Exportação Manual',
+    'editor.guide.export.subtitle': 'Siga os passos para configurar o seu perfil manualmente',
+    'editor.guide.export.step1_title': 'Baixe o Arquivo de Configuração',
+    'editor.guide.export.step1_desc':
+      'O arquivo de configuração contém toda a estrutura de layout e widgets do seu perfil.',
+    'editor.guide.export.step1_warning':
+      'NÃO altere o nome do arquivo. Mantenha estritamente como {fileName}, pois o GitAscii busca exatamente por este nome na raiz do seu repositório.',
+    'editor.guide.export.step1_download_btn': 'Baixar {fileName}',
+    'editor.guide.export.redownload': 'Baixar novamente',
+    'editor.guide.export.step2_title': 'Upload em {repo}',
+    'editor.guide.export.step2_desc':
+      'Faça o upload do arquivo {fileName} na raiz do seu repositório especial {repo} no GitHub.',
+    'editor.guide.export.step2_link': 'Fazer upload no GitHub',
+    'editor.guide.export.step3_title': 'Adicione ao seu README.md',
+    'editor.guide.export.step3_desc':
+      'Copie o código HTML formatado abaixo e cole no arquivo README.md do seu repositório {repo}:',
+    'editor.guide.export.step3_cache_title': 'Cache do GitHub',
+    'editor.guide.export.step3_cache_desc':
+      'Ao alterar o JSON, mude o valor de ?v= no README para forçar a atualização da imagem.',
+    'editor.guide.export.step3_link': 'Editar README.md no GitHub',
 
     'widget.badge.mais_usado': 'Mais Usado',
     'widget.badge.destaque': 'Destaque',
@@ -1208,6 +1250,27 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.guide.step3_desc':
       'Haz clic en "Commit changes" para guardar. ¡Luego, visita tu perfil para ver el resultado!',
     'editor.guide.step3_link': 'Ver mi perfil',
+
+    'editor.guide.export.title': 'Guía de Exportación Manual',
+    'editor.guide.export.subtitle': 'Sigue los pasos para configurar tu perfil manualmente',
+    'editor.guide.export.step1_title': 'Descarga el Archivo de Configuración',
+    'editor.guide.export.step1_desc':
+      'El archivo de configuración contiene toda la estructura de diseño y widgets de tu perfil.',
+    'editor.guide.export.step1_warning':
+      'NO cambies el nombre del archivo. Mantenlo estrictamente como {fileName}, ya que GitAscii busca exactamente este nombre en la raíz de tu repositorio.',
+    'editor.guide.export.step1_download_btn': 'Descargar {fileName}',
+    'editor.guide.export.redownload': 'Descargar de nuevo',
+    'editor.guide.export.step2_title': 'Subir a {repo}',
+    'editor.guide.export.step2_desc':
+      'Sube el archivo {fileName} a la raíz de tu repositorio especial {repo} en GitHub.',
+    'editor.guide.export.step2_link': 'Subir a GitHub',
+    'editor.guide.export.step3_title': 'Agrega a tu README.md',
+    'editor.guide.export.step3_desc':
+      'Copia el fragmento de código HTML a continuación y pégalo en el archivo README.md de tu repositorio {repo}:',
+    'editor.guide.export.step3_cache_title': 'Caché de GitHub',
+    'editor.guide.export.step3_cache_desc':
+      'Al modificar el JSON, cambia el valor de ?v= en tu README para forzar la actualización de la imagen.',
+    'editor.guide.export.step3_link': 'Editar README.md en GitHub',
 
     'widget.badge.mais_usado': 'Más Usado',
     'widget.badge.destaque': 'Destacado',
