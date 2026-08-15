@@ -693,7 +693,9 @@ export function SVGCanvas() {
 
   return (
     <main
-      className="flex-1 h-full bg-carbon overflow-auto p-8 flex flex-col items-center justify-start relative select-none touch-none"
+      id="svg-canvas-viewport"
+      data-canvas-container="true"
+      className="flex-1 h-full bg-carbon overflow-auto p-4 sm:p-8 flex flex-col items-center justify-start relative select-none touch-none"
       onMouseDown={(e) => {
         const target = e.target as HTMLElement
         if (

@@ -1,11 +1,12 @@
 'use client'
 
-import { Minus, Plus, Redo2, RotateCcw, Undo2 } from 'lucide-react'
+import { Maximize2, Minus, Plus, Redo2, RotateCcw, Undo2 } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import { calculateFitZoom, getCanvasContainerWidth } from '../../utils/canvasZoom'
 
 interface CanvasStatusBarProps {
   showInfo?: boolean
@@ -25,9 +26,13 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
 
   const zoomPct = Math.round(zoom * 100)
 
-  const stepDown = () => setZoom(Math.max(0.5, zoom - 0.1))
+  const stepDown = () => setZoom(Math.max(0.25, zoom - 0.1))
   const stepUp = () => setZoom(Math.min(1.5, zoom + 0.1))
   const resetZoom = () => setZoom(1)
+  const fitZoom = () => {
+    const width = getCanvasContainerWidth()
+    setZoom(calculateFitZoom(width))
+  }
 
   return (
     <div
@@ -72,6 +77,15 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
       </div>
 
       <div className="flex items-center gap-1">
+        <button
+          onClick={fitZoom}
+          title={t('editor.statusbar.zoom_fit', 'Ajustar à tela')}
+          data-testid="statusbar-zoom-fit"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-signal-lime transition-colors cursor-pointer mr-0.5"
+        >
+          <Maximize2 size={12} />
+        </button>
+
         <button
           onClick={stepDown}
           title={t('editor.statusbar.zoom_out')}

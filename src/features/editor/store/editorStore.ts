@@ -502,10 +502,12 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }
 
       applyConfigChange(newConfig, true)
-      set({
+      set((state) => ({
         selectedInstanceId: newInstance.instanceId,
         selectedInstanceIds: [newInstance.instanceId],
-      })
+        activeMobilePanel:
+          state.activeMobilePanel === 'widgets' ? 'canvas' : state.activeMobilePanel,
+      }))
     },
 
     duplicateWidget: (instanceId) => {
