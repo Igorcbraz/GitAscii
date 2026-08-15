@@ -1,56 +1,18 @@
 'use client'
 
 import { Layers, Lock, Move, X } from 'lucide-react'
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EXTERNAL_LINKS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
-import { getWidgetMinSize, renderWidgetSvg } from '@/engine/core/WidgetRenderer'
-import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { getWidgetMinSize } from '@/engine/core/WidgetRenderer'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { LayersPanel } from '../Sidebar/LayersPanel'
-
-const WidgetNode = memo(
-  function WidgetNode({
-    widget,
-    githubData,
-    globalStyles,
-    isSelected,
-    isStatic = false,
-  }: {
-    widget: WidgetInstance
-    githubData: NormalizedGitHubData
-    globalStyles: GlobalStyles
-    isSelected?: boolean
-    isStatic?: boolean
-  }) {
-    const innerSvg = renderWidgetSvg(widget, githubData, globalStyles, false, isStatic)
-    return (
-      <g
-        id={`widget-${widget.instanceId}`}
-        data-testid={`canvas-widget-${widget.widgetId}`}
-        data-selected={isSelected ? 'true' : undefined}
-        data-x={widget.position.x}
-        data-y={widget.position.y}
-        data-width={widget.size.width}
-        data-height={widget.size.height}
-        transform={`translate(${widget.position.x}, ${widget.position.y})`}
-        dangerouslySetInnerHTML={{ __html: innerSvg }}
-      />
-    )
-  },
-  (prev, next) => {
-    return (
-      prev.widget === next.widget &&
-      prev.githubData === next.githubData &&
-      prev.globalStyles === next.globalStyles &&
-      prev.isSelected === next.isSelected &&
-      prev.isStatic === next.isStatic
-    )
-  }
-)
+import { CanvasAlignmentGuides } from './CanvasAlignmentGuides'
+import { CanvasMarquee } from './CanvasMarquee'
+import { WidgetNode } from './WidgetNode'
 
 const CANVAS_WIDTH = 800
 const GRID_SIZE = 8
@@ -857,40 +819,10 @@ export function SVGCanvas() {
           )}
         </div>
 
-        {alignmentGuides.map((guide, idx) => {
-          if (guide.x !== undefined) {
-            return (
-              <div
-                key={`v-guide-${idx}`}
-                className="absolute top-0 bottom-0 w-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
-                style={{ left: guide.x }}
-              />
-            )
-          }
-          if (guide.y !== undefined) {
-            return (
-              <div
-                key={`h-guide-${idx}`}
-                className="absolute left-0 right-0 h-px bg-signal-lime/80 shadow-[0_0_4px_rgba(197,255,74,0.8)] pointer-events-none z-50"
-                style={{ top: guide.y }}
-              />
-            )
-          }
-          return null
-        })}
+        <CanvasAlignmentGuides guides={alignmentGuides} />
 
         <div className="absolute inset-0 pointer-events-auto">
-          {marquee && containerRef.current && (
-            <div
-              className="absolute bg-signal-lime/20 border border-signal-lime z-50 pointer-events-none"
-              style={{
-                left: Math.min(marquee.startX, marquee.currentX),
-                top: Math.min(marquee.startY, marquee.currentY),
-                width: Math.abs(marquee.currentX - marquee.startX),
-                height: Math.abs(marquee.currentY - marquee.startY),
-              }}
-            />
-          )}
+          <CanvasMarquee marquee={marquee && containerRef.current ? marquee : null} />
           {config.widgets.map((widget) => {
             if (!widget.visible) return null
 

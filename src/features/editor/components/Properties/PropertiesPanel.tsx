@@ -80,19 +80,25 @@ const WIDTH_PRESETS = [
 
 export function PropertiesPanel() {
   const { t } = useI18n()
-  const {
-    config,
-    selectedInstanceId,
-    updateWidgetConfig,
-    updateWidgetSize,
-    updateWidgetPosition,
-    toggleWidgetVisibility,
-    toggleWidgetLock,
-    removeWidget,
-  } = useEditorStore()
+  const selectedInstanceId = useEditorStore((state) => state.selectedInstanceId)
+  const selectedWidget = useEditorStore((state) =>
+    state.selectedInstanceId
+      ? state.config?.widgets.find((w) => w.instanceId === state.selectedInstanceId)
+      : null
+  )
+  const globalStyles = useEditorStore((state) => state.config?.globalStyles)
+  const hasConfig = useEditorStore((state) => Boolean(state.config))
 
-  if (!config || !selectedInstanceId) {
-    if (!config) return null
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const updateWidgetSize = useEditorStore((state) => state.updateWidgetSize)
+  const updateWidgetPosition = useEditorStore((state) => state.updateWidgetPosition)
+  const toggleWidgetVisibility = useEditorStore((state) => state.toggleWidgetVisibility)
+  const toggleWidgetLock = useEditorStore((state) => state.toggleWidgetLock)
+  const removeWidget = useEditorStore((state) => state.removeWidget)
+
+  if (!hasConfig || !globalStyles) return null
+
+  if (!selectedInstanceId || !selectedWidget) {
     return (
       <aside className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto">
         <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
@@ -116,7 +122,7 @@ export function PropertiesPanel() {
                 {t('editor.properties.transparent_bg', 'Fundo Transparente')}
               </label>
               <Switch
-                checked={Boolean(config.globalStyles.transparentBackground)}
+                checked={Boolean(globalStyles.transparentBackground)}
                 onChange={(checkedValue) =>
                   useEditorStore.getState().updateGlobalStyles({
                     transparentBackground: checkedValue,
@@ -126,11 +132,11 @@ export function PropertiesPanel() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {!config.globalStyles.transparentBackground && (
+              {!globalStyles.transparentBackground && (
                 <ColorPicker
                   label="Background"
                   align="left"
-                  value={config.globalStyles.backgroundColor || '#060606'}
+                  value={globalStyles.backgroundColor || '#060606'}
                   onChange={(color) =>
                     useEditorStore.getState().updateGlobalStyles({ backgroundColor: color })
                   }
@@ -138,8 +144,8 @@ export function PropertiesPanel() {
               )}
               <ColorPicker
                 label={t('editor.properties.color_destaque', 'Cor de Destaque')}
-                align={config.globalStyles.transparentBackground ? 'left' : 'right'}
-                value={config.globalStyles.accentColor || '#c5ff4a'}
+                align={globalStyles.transparentBackground ? 'left' : 'right'}
+                value={globalStyles.accentColor || '#c5ff4a'}
                 onChange={(color) =>
                   useEditorStore.getState().updateGlobalStyles({ accentColor: color })
                 }
@@ -147,7 +153,7 @@ export function PropertiesPanel() {
               <ColorPicker
                 label={t('editor.properties.color_texto', 'Cor do Texto')}
                 align="left"
-                value={config.globalStyles.textColor || '#ffffff'}
+                value={globalStyles.textColor || '#ffffff'}
                 onChange={(color) =>
                   useEditorStore.getState().updateGlobalStyles({ textColor: color })
                 }
@@ -155,7 +161,7 @@ export function PropertiesPanel() {
               <ColorPicker
                 label={t('editor.properties.color_borda', 'Cor da Borda')}
                 align="right"
-                value={config.globalStyles.borderColor || '#252525'}
+                value={globalStyles.borderColor || '#252525'}
                 onChange={(color) =>
                   useEditorStore.getState().updateGlobalStyles({ borderColor: color })
                 }
@@ -174,7 +180,7 @@ export function PropertiesPanel() {
                 {t('editor.properties.global_font', 'Fonte Global')}
               </label>
               <select
-                value={config.globalStyles.fontFamily || 'Inter Tight'}
+                value={globalStyles.fontFamily || 'Inter Tight'}
                 onChange={(e) =>
                   useEditorStore.getState().updateGlobalStyles({ fontFamily: e.target.value })
                 }
@@ -194,7 +200,7 @@ export function PropertiesPanel() {
                   {t('editor.properties.border_radius', 'Arredondamento das Bordas')}
                 </span>
                 <span className="text-chalk font-jetbrains-mono">
-                  {config.globalStyles.borderRadius || 0}px
+                  {globalStyles.borderRadius || 0}px
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -203,7 +209,7 @@ export function PropertiesPanel() {
                   min="0"
                   max="32"
                   step="1"
-                  value={config.globalStyles.borderRadius || 0}
+                  value={globalStyles.borderRadius || 0}
                   onChange={(e) =>
                     useEditorStore
                       .getState()
@@ -220,7 +226,7 @@ export function PropertiesPanel() {
                   {t('editor.properties.padding', 'Espaçamento Interno (Padding)')}
                 </span>
                 <span className="text-chalk font-jetbrains-mono">
-                  {config.globalStyles.padding || 0}px
+                  {globalStyles.padding || 0}px
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -229,7 +235,7 @@ export function PropertiesPanel() {
                   min="0"
                   max="64"
                   step="4"
-                  value={config.globalStyles.padding || 0}
+                  value={globalStyles.padding || 0}
                   onChange={(e) =>
                     useEditorStore
                       .getState()
@@ -245,7 +251,7 @@ export function PropertiesPanel() {
                 {t('editor.properties.theme_mode', 'Forçar Tema Escuro/Claro')}
               </label>
               <select
-                value={config.globalStyles.themeMode || 'dark'}
+                value={globalStyles.themeMode || 'dark'}
                 onChange={(e) =>
                   useEditorStore
                     .getState()
@@ -263,10 +269,6 @@ export function PropertiesPanel() {
       </aside>
     )
   }
-
-  const selectedWidget = config.widgets.find((w) => w.instanceId === selectedInstanceId)
-
-  if (!selectedWidget) return null
 
   const cfg = selectedWidget.config
   const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
@@ -332,9 +334,7 @@ export function PropertiesPanel() {
             <ColorPicker
               label="Background"
               align="left"
-              value={
-                (cfg.backgroundColor as string) || config.globalStyles.backgroundColor || '#1f1f1f'
-              }
+              value={(cfg.backgroundColor as string) || globalStyles.backgroundColor || '#1f1f1f'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { backgroundColor: color })
               }
@@ -343,7 +343,7 @@ export function PropertiesPanel() {
             <ColorPicker
               label={t('editor.properties.color_destaque', 'Cor de Destaque')}
               align="right"
-              value={(cfg.accentColor as string) || config.globalStyles.accentColor || '#c5ff4a'}
+              value={(cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { accentColor: color })
               }
@@ -352,7 +352,7 @@ export function PropertiesPanel() {
             <ColorPicker
               label={t('editor.properties.color_texto', 'Cor do Texto')}
               align="left"
-              value={(cfg.textColor as string) || config.globalStyles.textColor || '#ffffff'}
+              value={(cfg.textColor as string) || globalStyles.textColor || '#ffffff'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { textColor: color })
               }
@@ -361,7 +361,7 @@ export function PropertiesPanel() {
             <ColorPicker
               label={t('editor.properties.color_borda', 'Cor da Borda')}
               align="right"
-              value={(cfg.borderColor as string) || config.globalStyles.borderColor || '#252525'}
+              value={(cfg.borderColor as string) || globalStyles.borderColor || '#252525'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { borderColor: color })
               }

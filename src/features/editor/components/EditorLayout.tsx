@@ -31,8 +31,12 @@ export function EditorLayout({
   autoGenerate = false,
 }: EditorLayoutProps) {
   const { t } = useI18n()
-  const { initEditor, config, setSession, session, activeMobilePanel, setActiveMobilePanel } =
-    useEditorStore()
+  const initEditor = useEditorStore((state) => state.initEditor)
+  const hasConfig = useEditorStore((state) => Boolean(state.config))
+  const setSession = useEditorStore((state) => state.setSession)
+  const session = useEditorStore((state) => state.session)
+  const activeMobilePanel = useEditorStore((state) => state.activeMobilePanel)
+  const setActiveMobilePanel = useEditorStore((state) => state.setActiveMobilePanel)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
@@ -344,7 +348,7 @@ export function EditorLayout({
     )
   }
 
-  if (error || !config) {
+  if (error || !hasConfig) {
     return (
       <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
         <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">

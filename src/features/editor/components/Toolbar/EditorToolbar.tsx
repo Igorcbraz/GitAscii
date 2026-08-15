@@ -12,7 +12,7 @@ import {
   User,
 } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
@@ -23,16 +23,11 @@ import { ExportGuideModal } from './ExportGuideModal'
 
 export function EditorToolbar() {
   const { t } = useI18n()
-  const {
-    config,
-    githubData,
-    selectedInstanceId,
-    removeWidget,
-    selectWidget,
-    updateWidgetPosition,
-    duplicateWidget,
-    session,
-  } = useEditorStore()
+
+  const username = useEditorStore((state) => state.config?.username)
+  const profileSlug = useEditorStore((state) => state.config?.profileSlug || 'default')
+  const hasData = useEditorStore((state) => Boolean(state.config && state.githubData))
+  const session = useEditorStore((state) => state.session)
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
   const [showExportGuide, setShowExportGuide] = useState(false)
@@ -53,26 +48,27 @@ export function EditorToolbar() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentOrigin(window.location.origin)
     }
   }, [])
 
-  const handleExport = () => {
-    if (!config) return
+  const handleExport = useCallback(() => {
+    const currentConfig = useEditorStore.getState().config
+    if (!currentConfig) return
     try {
       const exportData = {
-        widgets: config.widgets,
-        globalStyles: config.globalStyles,
-        templateId: config.templateId,
+        widgets: currentConfig.widgets,
+        globalStyles: currentConfig.globalStyles,
+        templateId: currentConfig.templateId,
       }
       const jsonString = JSON.stringify(exportData, null, 2)
       const blob = new Blob([jsonString], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `gitascii_layout_${config.username}.json`
+      link.download = `gitascii_layout_${currentConfig.username}.json`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -87,9 +83,9 @@ export function EditorToolbar() {
     } catch (err) {
       console.error('Failed to export layout:', err)
     }
-  }
+  }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey
@@ -108,113 +104,116 @@ export function EditorToolbar() {
         return
       }
 
+      const store = useEditorStore.getState()
+
       if (cmdOrCtrl && e.key.toLowerCase() === 'z') {
         if (e.shiftKey) {
-          if (useEditorStore.getState().canRedo) {
+          if (store.canRedo) {
             e.preventDefault()
-            useEditorStore.getState().redo()
+            store.redo()
           }
         } else {
-          if (useEditorStore.getState().canUndo) {
+          if (store.canUndo) {
             e.preventDefault()
-            useEditorStore.getState().undo()
+            store.undo()
           }
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'y') {
-        if (useEditorStore.getState().canRedo) {
+        if (store.canRedo) {
           e.preventDefault()
-          useEditorStore.getState().redo()
+          store.redo()
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'c') {
         e.preventDefault()
-        useEditorStore.getState().copyWidgets()
+        store.copyWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'v') {
         e.preventDefault()
-        useEditorStore.getState().pasteWidgets()
+        store.pasteWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'x') {
         e.preventDefault()
-        useEditorStore.getState().cutWidgets()
+        store.cutWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'a') {
         e.preventDefault()
-        if (config) {
-          useEditorStore.getState().setSelection(config.widgets.map((w) => w.instanceId))
+        if (store.config) {
+          store.setSelection(store.config.widgets.map((w) => w.instanceId))
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'd') {
         e.preventDefault()
-        useEditorStore.getState().copyWidgets()
-        useEditorStore.getState().pasteWidgets()
+        store.copyWidgets()
+        store.pasteWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key === '[') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'down'))
+          ids.forEach((id) => store.moveWidgetLayer(id, 'down'))
         }
         return
       }
 
       if (cmdOrCtrl && e.key === ']') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'up'))
+          ids.forEach((id) => store.moveWidgetLayer(id, 'up'))
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'l') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().toggleWidgetLock(id))
+          ids.forEach((id) => store.toggleWidgetLock(id))
         }
         return
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
           e.preventDefault()
-          useEditorStore.getState().removeWidgets(ids)
+          store.removeWidgets(ids)
         }
         return
       }
 
       if (e.key === 'Escape') {
         e.preventDefault()
-        selectWidget(null)
+        store.selectWidget(null)
         return
       }
 
-      const selectedIds = useEditorStore.getState().selectedInstanceIds
-      if (selectedIds && selectedIds.length > 0 && config) {
+      const selectedIds = store.selectedInstanceIds
+      const currentConfig = store.config
+      if (selectedIds && selectedIds.length > 0 && currentConfig) {
         const step = e.shiftKey ? 10 : 2
 
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
           e.preventDefault()
           const deltas = selectedIds
             .map((id) => {
-              const widget = config.widgets.find((w) => w.instanceId === id)
+              const widget = currentConfig.widgets.find((w) => w.instanceId === id)
               if (!widget || widget.locked) return null
 
               let nx = widget.position.x
@@ -231,7 +230,7 @@ export function EditorToolbar() {
             )
 
           if (deltas.length > 0) {
-            useEditorStore.getState().updateWidgetPositions(deltas, true)
+            store.updateWidgetPositions(deltas, true)
           }
         }
       }
@@ -239,16 +238,9 @@ export function EditorToolbar() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    selectedInstanceId,
-    removeWidget,
-    selectWidget,
-    updateWidgetPosition,
-    duplicateWidget,
-    config,
-  ])
+  }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleOpenExportGuide = () => {
       setShowExportGuide(true)
     }
@@ -256,10 +248,8 @@ export function EditorToolbar() {
     return () => window.removeEventListener('openExportGuide', handleOpenExportGuide)
   }, [])
 
-  if (!config || !githubData) return null
+  if (!hasData || !username) return null
 
-  const username = config.username
-  const profileSlug = config.profileSlug || 'default'
   const viewerUsername = session?.username || username
 
   const embedUrl =
@@ -300,11 +290,14 @@ export function EditorToolbar() {
   />
 </a>`
 
+    const currentConfig = useEditorStore.getState().config
+    if (!currentConfig) return
+
     const exportData = {
       username: session.username,
-      widgets: config.widgets,
-      globalStyles: config.globalStyles,
-      templateId: config.templateId,
+      widgets: currentConfig.widgets,
+      globalStyles: currentConfig.globalStyles,
+      templateId: currentConfig.templateId,
       profileSlug,
     }
 
@@ -358,99 +351,106 @@ export function EditorToolbar() {
       )}
       <span className="hidden sm:inline">
         {commitStatus === 'committing'
-          ? t('common.committing', 'Committing...')
+          ? t('editor.toolbar.updating', 'Atualizando...')
           : commitStatus === 'success'
-            ? t('common.committed', 'Committed!')
+            ? t('editor.toolbar.updated', 'Atualizado!')
             : commitStatus === 'error'
-              ? t('common.error', 'Error!')
-              : t('common.update_readme', 'Update README')}
+              ? t('editor.toolbar.error', 'Erro ao salvar')
+              : t('editor.toolbar.update_readme', 'Update README')}
       </span>
     </button>
   )
 
   return (
-    <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
+    <header className="h-14 border-b border-graphite bg-void-black flex items-center justify-between px-4 z-20 shrink-0">
       <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-1">
-          <span className="font-inter-tight text-[16px] font-medium text-chalk">Git</span>
-          <span className="font-pt-serif text-[16px] font-light italic text-signal-lime">
-            Ascii
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
+            G
+          </div>
+          <span className="font-mono text-base font-semibold text-white tracking-tight">
+            GitAscii
           </span>
         </Link>
 
-        <div className="h-4 w-px bg-graphite" />
+        <div className="h-4 w-px bg-graphite hidden sm:block" />
 
-        <div className="flex items-center gap-3 z-10">
-          {session ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/${session.username}`}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-3.5 py-2 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 hover:border-signal-lime hover:shadow-[0_0_8px_rgba(197,255,74,0.2)] hover:bg-onyx/80"
-              >
-                <User className="size-3.5" />
-                <span className="hidden sm:inline">@{session.username}</span>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
-                title="Sair"
-              >
-                <LogOut className="size-4" />
-              </button>
-            </div>
-          ) : (
-            <a
-              href={`/api/auth/login?redirect_to=/${username}`}
-              onClick={() => setIsLoginLoading(true)}
-              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer"
-            >
-              {isLoginLoading ? (
-                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <LogIn className="size-4" />
-              )}
-              <span>LOGIN</span>
-            </a>
+        <div className="hidden sm:flex items-center gap-2 text-note font-inter-tight text-ash">
+          <span>@{username}</span>
+          {profileSlug !== 'default' && (
+            <>
+              <span className="text-graphite">/</span>
+              <span className="text-signal-lime font-medium">#{profileSlug}</span>
+            </>
           )}
         </div>
       </div>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
+      <div className="flex items-center gap-2">
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          data-testid="command-palette-btn"
-          title="Busca Global (Ctrl+K)"
-          className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
+          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-xs bg-onyx border border-graphite text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight cursor-pointer"
         >
-          <Search size={13} className="shrink-0 text-fog" />
-          <span className="font-inter-tight text-note text-fog flex-1 text-left">
-            Pesquisar widgets, templates...
-          </span>
-          <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
-            <Command size={9} />K
+          <Search size={13} />
+          <span>{t('editor.toolbar.search_commands', 'Comandos')}</span>
+          <kbd className="px-1.5 py-0.5 bg-graphite/60 rounded-xs text-[10px] font-mono text-fog border border-graphite/40">
+            <Command size={10} className="inline mr-0.5" />K
           </kbd>
         </button>
-      </div>
 
-      <div className="flex items-center gap-3">
         <button
           onClick={handleExport}
-          data-testid="export-layout-btn"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
+          title={t('editor.toolbar.export_json', 'Exportar Layout (JSON)')}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs bg-onyx border border-graphite text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight cursor-pointer"
         >
-          <Download size={14} />
-          <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
+          <Download size={13} />
+          <span className="hidden lg:inline">{t('editor.toolbar.export', 'Exportar')}</span>
         </button>
-        {renderUpdateReadmeButton()}
-      </div>
 
-      <ExportGuideModal
-        isOpen={showExportGuide}
-        onClose={() => setShowExportGuide(false)}
-        username={username}
-        onDownload={handleExport}
-        embedCode={embedCode}
-      />
+        <button
+          onClick={() => setShowExportGuide(true)}
+          className="px-3 py-1.5 border border-graphite hover:border-slate text-chalk rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-colors cursor-pointer"
+        >
+          {t('editor.toolbar.embed', 'Embed')}
+        </button>
+
+        {renderUpdateReadmeButton()}
+
+        <div className="h-4 w-px bg-graphite hidden sm:block mx-1" />
+
+        {session ? (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/${session.username}`}
+              className="flex items-center gap-1.5 px-2 py-1 bg-onyx border border-graphite rounded-xs text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight"
+            >
+              <User size={13} className="text-signal-lime" />
+              <span className="hidden sm:inline font-mono">@{session.username}</span>
+            </Link>
+            <button
+              onClick={handleLogout}
+              title={t('editor.toolbar.logout', 'Sair da conta')}
+              className="p-1.5 rounded-xs text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setIsLoginLoading(true)
+              window.location.href = `/api/auth/login?redirect_to=/${username}`
+            }}
+            disabled={isLoginLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#24292F] hover:bg-[#24292F]/80 text-white rounded-sm font-inter-tight font-medium text-note transition-colors cursor-pointer disabled:opacity-60"
+          >
+            {isLoginLoading ? <Loader2 size={13} className="animate-spin" /> : <LogIn size={13} />}
+            <span className="hidden sm:inline">
+              {t('editor.toolbar.login_github', 'Login GitHub')}
+            </span>
+          </button>
+        )}
+      </div>
 
       <CommandPalette
         open={commandPaletteOpen}
@@ -458,6 +458,13 @@ export function EditorToolbar() {
         onCommit={handleCommitToGithub}
         onExport={handleExport}
         commitStatus={commitStatus}
+      />
+      <ExportGuideModal
+        isOpen={showExportGuide}
+        onClose={() => setShowExportGuide(false)}
+        username={username}
+        onDownload={handleExport}
+        embedCode={embedCode}
       />
     </header>
   )
