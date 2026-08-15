@@ -3,7 +3,19 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { profileRepository } from './profileRepository'
 
-const memoryCache = new Map<string, SavedConfiguration>()
+interface CacheEntry {
+  config: SavedConfiguration
+  expiresAt: number
+}
+
+const memoryCache = new Map<string, CacheEntry>()
+const MEMORY_CACHE_TTL_MS = 60 * 1000 // 60 seconds TTL
+
+export function invalidateProfileConfig(username: string, slug: string = 'default'): void {
+  const usernameLower = username.toLowerCase()
+  const slugLower = slug.toLowerCase()
+  memoryCache.delete(`${usernameLower}_${slugLower}`)
+}
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
   const username = config.username.toLowerCase()
@@ -12,7 +24,10 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
 
   await profileRepository.save(config)
 
-  memoryCache.set(cacheKey, config)
+  memoryCache.set(cacheKey, {
+    config,
+    expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+  })
 }
 
 async function fetchConfigFromGitHub(
@@ -20,27 +35,29 @@ async function fetchConfigFromGitHub(
   slug: string
 ): Promise<SavedConfiguration | null> {
   const filename = slug === 'default' ? 'gitascii.json' : `gitascii_${slug.toLowerCase()}.json`
+  const timestamp = Date.now()
   const urls = [
-    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename),
-    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`),
-    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename),
-    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', `.github/${filename}`),
+    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename)}?t=${timestamp}`,
+    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`)}?t=${timestamp}`,
+    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename)}?t=${timestamp}`,
+    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', `.github/${filename}`)}?t=${timestamp}`,
   ]
 
   for (const url of urls) {
     try {
       const res = await fetch(url, {
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
         },
-        next: { revalidate: 60 },
+        cache: 'no-store',
         signal: AbortSignal.timeout(3000),
       })
       if (res.ok) {
         const text = await res.text()
         try {
           const config = JSON.parse(text)
-          if (config && typeof config === 'object') {
+          if (config && typeof config === 'object' && Array.isArray(config.widgets)) {
             return config as SavedConfiguration
           }
         } catch {
@@ -62,18 +79,26 @@ export async function loadProfileConfig(
   const slugLower = slug.toLowerCase()
   const cacheKey = `${usernameLower}_${slugLower}`
 
-  if (memoryCache.has(cacheKey)) {
-    return memoryCache.get(cacheKey) || null
+  const cached = memoryCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.config
   }
 
-  let config = await profileRepository.get(usernameLower, slugLower)
+  let config = await fetchConfigFromGitHub(username, slugLower)
 
   if (!config) {
-    config = await fetchConfigFromGitHub(username, slugLower)
+    config = await profileRepository.get(usernameLower, slugLower)
+  } else {
+    void profileRepository.save(config).catch(() => {})
   }
 
   if (config) {
-    memoryCache.set(cacheKey, config)
+    memoryCache.set(cacheKey, {
+      config,
+      expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+    })
+  } else {
+    memoryCache.delete(cacheKey)
   }
   return config
 }

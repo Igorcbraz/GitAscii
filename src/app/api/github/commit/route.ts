@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
+import { saveProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
@@ -266,6 +267,14 @@ jobs:
         } catch (err) {
           console.error('Erro ao configurar o workflow da snake:', err)
         }
+      }
+    }
+
+    if (exportData && typeof exportData === 'object') {
+      try {
+        await saveProfileConfig(exportData)
+      } catch (saveErr) {
+        console.error('Failed to sync profile configuration locally:', saveErr)
       }
     }
 
