@@ -362,7 +362,7 @@ export function EditorToolbar() {
   )
 
   return (
-    <header className="h-14 border-b border-graphite bg-void-black flex items-center justify-between px-4 z-20 shrink-0">
+    <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
@@ -375,81 +375,72 @@ export function EditorToolbar() {
 
         <div className="h-4 w-px bg-graphite hidden sm:block" />
 
-        <div className="hidden sm:flex items-center gap-2 text-note font-inter-tight text-ash">
-          <span>@{username}</span>
-          {profileSlug !== 'default' && (
-            <>
-              <span className="text-graphite">/</span>
-              <span className="text-signal-lime font-medium">#{profileSlug}</span>
-            </>
+        <div className="flex items-center gap-3 z-10">
+          {session ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${session.username}`}
+                className="inline-flex items-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-3.5 py-2 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 hover:border-signal-lime hover:shadow-[0_0_8px_rgba(197,255,74,0.2)] hover:bg-onyx/80"
+              >
+                <User className="size-3.5" />
+                <span className="hidden sm:inline">@{session.username}</span>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
+                title={t('editor.toolbar.logout', 'Sair da conta')}
+              >
+                <LogOut className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setIsLoginLoading(true)
+                window.location.href = `/api/auth/login?redirect_to=/${username}`
+              }}
+              disabled={isLoginLoading}
+              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
+            >
+              {isLoginLoading ? (
+                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LogIn className="size-4" />
+              )}
+              <span>{t('editor.toolbar.login_github', 'LOGIN')}</span>
+            </button>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-xs bg-onyx border border-graphite text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight cursor-pointer"
+          data-testid="command-palette-btn"
+          title="Busca Global (Ctrl+K)"
+          className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
         >
-          <Search size={13} />
-          <span>{t('editor.toolbar.search_commands', 'Comandos')}</span>
-          <kbd className="px-1.5 py-0.5 bg-graphite/60 rounded-xs text-[10px] font-mono text-fog border border-graphite/40">
-            <Command size={10} className="inline mr-0.5" />K
+          <Search size={13} className="shrink-0 text-fog" />
+          <span className="font-inter-tight text-note text-fog flex-1 text-left">
+            {t('editor.toolbar.search_commands', 'Pesquisar widgets, templates...')}
+          </span>
+          <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
+            <Command size={9} />K
           </kbd>
         </button>
+      </div>
 
+      <div className="flex items-center gap-3">
         <button
           onClick={handleExport}
+          data-testid="export-layout-btn"
           title={t('editor.toolbar.export_json', 'Exportar Layout (JSON)')}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs bg-onyx border border-graphite text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
         >
-          <Download size={13} />
-          <span className="hidden lg:inline">{t('editor.toolbar.export', 'Exportar')}</span>
+          <Download size={14} />
+          <span className="hidden sm:inline">{t('editor.toolbar.export', 'Export Layout')}</span>
         </button>
-
-        <button
-          onClick={() => setShowExportGuide(true)}
-          className="px-3 py-1.5 border border-graphite hover:border-slate text-chalk rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-colors cursor-pointer"
-        >
-          {t('editor.toolbar.embed', 'Embed')}
-        </button>
-
         {renderUpdateReadmeButton()}
-
-        <div className="h-4 w-px bg-graphite hidden sm:block mx-1" />
-
-        {session ? (
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/${session.username}`}
-              className="flex items-center gap-1.5 px-2 py-1 bg-onyx border border-graphite rounded-xs text-ash hover:text-chalk hover:border-slate transition-colors text-note font-inter-tight"
-            >
-              <User size={13} className="text-signal-lime" />
-              <span className="hidden sm:inline font-mono">@{session.username}</span>
-            </Link>
-            <button
-              onClick={handleLogout}
-              title={t('editor.toolbar.logout', 'Sair da conta')}
-              className="p-1.5 rounded-xs text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-            >
-              <LogOut size={14} />
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              setIsLoginLoading(true)
-              window.location.href = `/api/auth/login?redirect_to=/${username}`
-            }}
-            disabled={isLoginLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#24292F] hover:bg-[#24292F]/80 text-white rounded-sm font-inter-tight font-medium text-note transition-colors cursor-pointer disabled:opacity-60"
-          >
-            {isLoginLoading ? <Loader2 size={13} className="animate-spin" /> : <LogIn size={13} />}
-            <span className="hidden sm:inline">
-              {t('editor.toolbar.login_github', 'Login GitHub')}
-            </span>
-          </button>
-        )}
       </div>
 
       <CommandPalette
