@@ -37,7 +37,7 @@ async function fetchConfigFromGitHub(
       })
       if (res.ok) {
         const config = await res.json()
-        if (config && typeof config === 'object' && config.username) {
+        if (config && typeof config === 'object') {
           return config as SavedConfiguration
         }
       }
