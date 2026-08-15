@@ -365,10 +365,47 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.banner.logged_in_as_middle': ', but editing the profile of',
     'editor.banner.logged_in_as_suffix': '. Your changes will not be saved on the server.',
     'editor.banner.lite_mode_prefix': 'You are in',
-    'editor.banner.lite_mode_name': 'Lite Mode (Self-Hosted)',
+    'editor.banner.lite_mode_name': 'Guest Mode',
     'editor.banner.lite_mode_suffix':
-      '. Log in to save to the server, or download the layout file and push it to your GitHub repository.',
+      '. You can export manually for free, or connect your GitHub account to automatically sync your README in 1 click.',
     'editor.banner.view_tutorial': 'View Tutorial',
+
+    'editor.guest_banner.badge': 'GUEST MODE',
+    'editor.guest_banner.message':
+      'You can export manually or connect your GitHub account to automatically sync your README in 1 click.',
+    'editor.guest_banner.btn_connect': 'Connect GitHub',
+
+    'editor.guest_modal.header_tag': '1-CLICK AUTOMATION',
+    'editor.guest_modal.title_prefix': 'Sync in ',
+    'editor.guest_modal.title_highlight': '1 click',
+    'editor.guest_modal.title_suffix': ' with GitHub',
+    'editor.guest_modal.feature1_title': '1-Click README Sync',
+    'editor.guest_modal.feature1_desc':
+      'The "Update README" button instantly saves and updates your special profile repository.',
+    'editor.guest_modal.feature2_title': 'Zero Files to Download',
+    'editor.guest_modal.feature2_desc':
+      'No need to download JSON, upload files, or edit repository markdown by hand.',
+    'editor.guest_modal.feature3_title': 'Instant Live Previews',
+    'editor.guest_modal.feature3_desc':
+      'Your dynamic SVG widgets and layout render flawlessly with zero manual configuration.',
+    'editor.guest_modal.btn_stay_manual': 'Continue Manual',
+    'editor.guest_modal.btn_connect': 'Connect with GitHub',
+
+    'editor.star_modal.badge': 'SUPPORT OPEN SOURCE',
+    'editor.star_modal.title_prefix': 'Leave a ',
+    'editor.star_modal.title_highlight': 'star',
+    'editor.star_modal.title_suffix': ' on GitAscii',
+    'editor.star_modal.title_export': 'Layout Exported Successfully!',
+    'editor.star_modal.title_commit': 'README Updated Successfully!',
+    'editor.star_modal.desc_short':
+      'Support open-source development and fuel future features with a star on GitHub.',
+    'editor.star_modal.thank_you':
+      'Thank you so much for your support! Your star helps GitAscii grow.',
+    'editor.star_modal.btn_star': 'Star on GitHub',
+    'editor.star_modal.starring': 'Starring...',
+    'editor.star_modal.opening_github': 'Opening GitHub...',
+    'editor.star_modal.starred_success': 'Starred! ⭐',
+    'editor.star_modal.btn_later': 'Maybe later, continue editing',
 
     'editor.godprofile.title': 'GodProfile Customization',
     'editor.godprofile.terminal_lines': 'Terminal Lines',
@@ -870,10 +907,47 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.banner.logged_in_as_middle': ', mas editando o perfil de',
     'editor.banner.logged_in_as_suffix': '. Suas alterações não serão salvas no servidor.',
     'editor.banner.lite_mode_prefix': 'Você está no',
-    'editor.banner.lite_mode_name': 'Modo Lite (Self-Hosted)',
+    'editor.banner.lite_mode_name': 'Modo Visitante',
     'editor.banner.lite_mode_suffix':
-      '. Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o seu repositório GitHub.',
+      '. Você pode exportar manualmente de graça, ou conectar sua conta GitHub para sincronizar seu README automaticamente em 1 clique.',
     'editor.banner.view_tutorial': 'Ver Tutorial',
+
+    'editor.guest_banner.badge': 'MODO VISITANTE',
+    'editor.guest_banner.message':
+      'Você pode exportar manualmente ou conectar sua conta para sincronizar seu README do GitHub automaticamente em 1 clique.',
+    'editor.guest_banner.btn_connect': 'Conectar GitHub',
+
+    'editor.guest_modal.header_tag': 'AUTOMAÇÃO COM 1 CLIQUE',
+    'editor.guest_modal.title_prefix': 'Sincronize em ',
+    'editor.guest_modal.title_highlight': '1 clique',
+    'editor.guest_modal.title_suffix': ' com o GitHub',
+    'editor.guest_modal.feature1_title': 'Sincronização Direta',
+    'editor.guest_modal.feature1_desc':
+      'O botão "Update README" salva e atualiza o seu repositório de perfil instantaneamente.',
+    'editor.guest_modal.feature2_title': 'Zero Arquivos para Baixar',
+    'editor.guest_modal.feature2_desc':
+      'Dispensa baixar JSON, fazer upload no GitHub ou colar código manualmente.',
+    'editor.guest_modal.feature3_title': 'Preview Instantâneo e Dinâmico',
+    'editor.guest_modal.feature3_desc':
+      'Seus widgets e SVGs funcionam com máxima qualidade e atualização em tempo real.',
+    'editor.guest_modal.btn_stay_manual': 'Continuar Manual',
+    'editor.guest_modal.btn_connect': 'Conectar com GitHub',
+
+    'editor.star_modal.badge': 'APOIE O PROJETO OPEN-SOURCE',
+    'editor.star_modal.title_prefix': 'Deixe sua ',
+    'editor.star_modal.title_highlight': 'estrela',
+    'editor.star_modal.title_suffix': ' no GitAscii',
+    'editor.star_modal.title_export': 'Layout Exportado com Sucesso!',
+    'editor.star_modal.title_commit': 'README Atualizado com Sucesso!',
+    'editor.star_modal.desc_short':
+      'Apoie o desenvolvimento open-source e novas ferramentas deixando uma estrela no GitHub.',
+    'editor.star_modal.thank_you':
+      'Muito obrigado pelo apoio! Sua estrela ajuda o GitAscii a crescer.',
+    'editor.star_modal.btn_star': 'Dar Estrela no GitHub',
+    'editor.star_modal.starring': 'Dando Estrela...',
+    'editor.star_modal.opening_github': 'Abrindo GitHub...',
+    'editor.star_modal.starred_success': 'Estrela Concedida! ⭐',
+    'editor.star_modal.btn_later': 'Agora não',
 
     'editor.godprofile.title': 'Personalização GodProfile',
     'editor.godprofile.terminal_lines': 'Linhas do Terminal',
@@ -1374,10 +1448,47 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.banner.logged_in_as_middle': ', pero editando el perfil de',
     'editor.banner.logged_in_as_suffix': '. Tus cambios no se guardarán en el servidor.',
     'editor.banner.lite_mode_prefix': 'Estás en el',
-    'editor.banner.lite_mode_name': 'Modo Lite (Self-Hosted)',
+    'editor.banner.lite_mode_name': 'Modo Invitado',
     'editor.banner.lite_mode_suffix':
-      '. Inicia sesión para guardar en el servidor, o descarga el archivo de diseño y súbelo a tu repositorio de GitHub.',
+      '. Puedes exportar manualmente gratis, o conectar tu cuenta de GitHub para sincronizar tu README automáticamente en 1 clic.',
     'editor.banner.view_tutorial': 'Ver Tutorial',
+
+    'editor.guest_banner.badge': 'MODO INVITADO',
+    'editor.guest_banner.message':
+      'Puedes exportar manualmente o conectar tu cuenta de GitHub para sincronizar tu README automáticamente en 1 clic.',
+    'editor.guest_banner.btn_connect': 'Conectar GitHub',
+
+    'editor.guest_modal.header_tag': 'AUTOMATIZACIÓN EN 1 CLIC',
+    'editor.guest_modal.title_prefix': 'Sincroniza en ',
+    'editor.guest_modal.title_highlight': '1 clic',
+    'editor.guest_modal.title_suffix': ' con GitHub',
+    'editor.guest_modal.feature1_title': 'Sincronización Directa',
+    'editor.guest_modal.feature1_desc':
+      'El botón "Update README" guarda y actualiza tu repositorio de perfil al instante.',
+    'editor.guest_modal.feature2_title': 'Cero Archivos para Descargar',
+    'editor.guest_modal.feature2_desc':
+      'Olvídate de descargar JSON, subir archivos a GitHub o editar código a mano.',
+    'editor.guest_modal.feature3_title': 'Vista Previa Dinámica',
+    'editor.guest_modal.feature3_desc':
+      'Tus widgets y SVGs se actualizan con máxima calidad y en tiempo real.',
+    'editor.guest_modal.btn_stay_manual': 'Continuar Manual',
+    'editor.guest_modal.btn_connect': 'Conectar con GitHub',
+
+    'editor.star_modal.badge': 'APOYA EL PROYECTO OPEN-SOURCE',
+    'editor.star_modal.title_prefix': 'Deja tu ',
+    'editor.star_modal.title_highlight': 'estrella',
+    'editor.star_modal.title_suffix': ' en GitAscii',
+    'editor.star_modal.title_export': '¡Diseño Exportado con Éxito!',
+    'editor.star_modal.title_commit': '¡README Actualizado con Éxito!',
+    'editor.star_modal.desc_short':
+      'Apoya el desarrollo open-source y nuevas herramientas dejando una estrella en GitHub.',
+    'editor.star_modal.thank_you':
+      '¡Muchas gracias por tu apoyo! Tu estrella ayuda a GitAscii a crecer.',
+    'editor.star_modal.btn_star': 'Dar Estrella en GitHub',
+    'editor.star_modal.starring': 'Dando Estrella...',
+    'editor.star_modal.opening_github': 'Abriendo GitHub...',
+    'editor.star_modal.starred_success': '¡Estrella Concedida! ⭐',
+    'editor.star_modal.btn_later': 'Ahora no',
 
     'editor.godprofile.title': 'Personalización GodProfile',
     'editor.godprofile.terminal_lines': 'Líneas del Terminal',

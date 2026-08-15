@@ -30,6 +30,7 @@ interface ExportGuideModalProps {
   onDownload: () => void
   embedCode: string
   profileSlug?: string
+  onFinished?: () => void
 }
 
 const STEPS = EXPORT_GUIDE_STEPS
@@ -41,6 +42,7 @@ export function ExportGuideModal({
   onDownload,
   embedCode,
   profileSlug = 'default',
+  onFinished,
 }: ExportGuideModalProps) {
   const [currentStep, setCurrentStep] = useState(0)
   const [isClosing, setIsClosing] = useState(false)
@@ -110,8 +112,9 @@ export function ExportGuideModal({
     setTimeout(() => {
       onClose()
       setIsClosing(false)
+      onFinished?.()
     }, 200)
-  }, [onClose])
+  }, [onClose, onFinished])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {

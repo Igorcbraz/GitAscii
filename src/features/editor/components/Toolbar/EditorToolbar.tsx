@@ -16,12 +16,15 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { ExportGuideModal } from './ExportGuideModal'
+import { GuestLoginModal } from './GuestLoginModal'
+import { StarPromptModal } from './StarPromptModal'
 
 export function EditorToolbar() {
   const { t } = useI18n()
@@ -33,11 +36,46 @@ export function EditorToolbar() {
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
   const [showExportGuide, setShowExportGuide] = useState(false)
+  const [showGuestModal, setShowGuestModal] = useState(false)
+  const [showStarPrompt, setShowStarPrompt] = useState(false)
+  const [starPromptSource, setStarPromptSource] = useState<'export' | 'commit'>('export')
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [commitStatus, setCommitStatus] = useState<'idle' | 'committing' | 'success' | 'error'>(
     'idle'
   )
   const [isLoginLoading, setIsLoginLoading] = useState(false)
+
+  const triggerStarPromptIfNeeded = useCallback((source: 'export' | 'commit') => {
+    const hasStarred = safeStorage.getItem('gitascii_has_starred') === 'true'
+    if (!hasStarred) {
+      setStarPromptSource(source)
+      setShowStarPrompt(true)
+    }
+  }, [])
+
+  const handleExportFinished = useCallback(() => {
+    if (!session) {
+      const hasBeenPrompted = safeStorage.getItem('gitascii_guest_export_prompted') === 'true'
+      if (!hasBeenPrompted) {
+        setShowGuestModal(true)
+        return
+      }
+    }
+    triggerStarPromptIfNeeded('export')
+  }, [session, triggerStarPromptIfNeeded])
+
+  useEffect(() => {
+    if (session?.username) {
+      fetch(API_ENDPOINTS.GITHUB.STAR)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.starred) {
+            safeStorage.setItem('gitascii_has_starred', 'true')
+          }
+        })
+        .catch(() => {})
+    }
+  }, [session?.username])
 
   const handleLogout = async () => {
     try {
@@ -84,11 +122,15 @@ export function EditorToolbar() {
       const skipGuide = safeStorage.getItem('gitascii_skip_export_guide') === 'true'
       if (!skipGuide) {
         setShowExportGuide(true)
+      } else {
+        setTimeout(() => {
+          handleExportFinished()
+        }, 500)
       }
     } catch (err) {
       console.error('Failed to export layout:', err)
     }
-  }, [profileSlug])
+  }, [profileSlug, handleExportFinished])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -278,7 +320,7 @@ export function EditorToolbar() {
   const handleCommitToGithub = async () => {
     if (!session) {
       setCommitStatus('committing')
-      window.location.href = `/api/auth/login?redirect_to=/${username}`
+      window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
       return
     }
 
@@ -332,6 +374,9 @@ export function EditorToolbar() {
 
       setCommitStatus('success')
       setTimeout(() => setCommitStatus('idle'), 2000)
+      setTimeout(() => {
+        triggerStarPromptIfNeeded('commit')
+      }, 600)
     } catch (e) {
       console.error(e)
       setCommitStatus('error')
@@ -407,7 +452,7 @@ export function EditorToolbar() {
             <button
               onClick={() => {
                 setIsLoginLoading(true)
-                window.location.href = `/api/auth/login?redirect_to=/${username}`
+                window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
               }}
               disabled={isLoginLoading}
               className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
@@ -475,6 +520,20 @@ export function EditorToolbar() {
         profileSlug={profileSlug}
         onDownload={handleExport}
         embedCode={embedCode}
+        onFinished={handleExportFinished}
+      />
+      <GuestLoginModal
+        isOpen={showGuestModal}
+        onClose={() => {
+          setShowGuestModal(false)
+          triggerStarPromptIfNeeded('export')
+        }}
+        username={username}
+      />
+      <StarPromptModal
+        isOpen={showStarPrompt}
+        onClose={() => setShowStarPrompt(false)}
+        source={starPromptSource}
       />
     </header>
   )

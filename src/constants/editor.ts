@@ -5,6 +5,7 @@ import {
   ArrowRight,
   ArrowUp,
   Ban,
+  Check,
   Cloud,
   Download,
   FileCode2,
@@ -632,4 +633,45 @@ export const ANIMATION_DURATION_PRESETS: readonly AnimationDurationPreset[] = [
   { label: '1.5s', value: 1500 },
   { label: '2s', value: 2000 },
   { label: '3s', value: 3000 },
+]
+
+export interface GuestBenefitItem {
+  readonly id: string
+  readonly icon: LucideIcon
+  readonly badge: string
+  readonly titleKey: string
+  readonly defaultTitle: string
+  readonly descKey: string
+  readonly defaultDesc: string
+}
+
+export const GUEST_BENEFIT_ITEMS: readonly GuestBenefitItem[] = [
+  {
+    id: 'sync',
+    icon: Zap,
+    badge: '1-CLICK',
+    titleKey: 'editor.guest_modal.feature1_title',
+    defaultTitle: 'Sincronização Direta',
+    descKey: 'editor.guest_modal.feature1_desc',
+    defaultDesc:
+      'O botão "Update README" salva e atualiza o seu repositório de perfil instantaneamente.',
+  },
+  {
+    id: 'no-download',
+    icon: Check,
+    badge: 'AUTO',
+    titleKey: 'editor.guest_modal.feature2_title',
+    defaultTitle: 'Zero Arquivos para Baixar',
+    descKey: 'editor.guest_modal.feature2_desc',
+    defaultDesc: 'Dispensa baixar JSON, fazer upload no GitHub ou colar código manualmente.',
+  },
+  {
+    id: 'live-preview',
+    icon: Sparkles,
+    badge: 'LIVE',
+    titleKey: 'editor.guest_modal.feature3_title',
+    defaultTitle: 'Preview Instantâneo e Dinâmico',
+    descKey: 'editor.guest_modal.feature3_desc',
+    defaultDesc: 'Seus widgets e SVGs funcionam com máxima qualidade e atualização em tempo real.',
+  },
 ]

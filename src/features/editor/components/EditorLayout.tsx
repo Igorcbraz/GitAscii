@@ -449,19 +449,30 @@ export function EditorLayout({
                 </>
               ) : (
                 <>
-                  {t('editor.banner.lite_mode_prefix', 'Você está no')}{' '}
-                  <strong className="text-signal-lime font-medium">
-                    {t('editor.banner.lite_mode_name', 'Modo Lite (Self-Hosted)')}
-                  </strong>
-                  {t(
-                    'editor.banner.lite_mode_suffix',
-                    '. Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o seu repositório GitHub.'
-                  )}
+                  <span className="text-signal-lime font-semibold uppercase tracking-wider mr-1">
+                    {t('editor.guest_banner.badge', '[ MODO VISITANTE ]')}
+                  </span>
+                  <span className="text-pearl">
+                    {t(
+                      'editor.guest_banner.message',
+                      'Você pode exportar manualmente ou conectar sua conta para sincronizar seu README do GitHub automaticamente em 1 clique.'
+                    )}
+                  </span>
                 </>
               )}
             </span>
           </div>
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
+            {!session && (
+              <button
+                onClick={() => {
+                  window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
+                }}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-signal-lime text-black font-bold text-caption uppercase tracking-wider glow-lime hover:brightness-110 cursor-pointer transition-all"
+              >
+                <span>{t('editor.guest_banner.btn_connect', 'Conectar GitHub')}</span>
+              </button>
+            )}
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('openExportGuide'))}
               className="flex items-center gap-1 text-caption text-ash hover:text-white transition-colors cursor-pointer"

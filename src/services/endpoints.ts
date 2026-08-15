@@ -46,6 +46,10 @@ export const API_ENDPOINTS = {
     SPECIAL_REPO_EDIT_README: (username: string) =>
       `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/edit/main/README.md`,
     GITASCII_REPO: 'https://api.github.com/repos/Igorcbraz/GitAscii',
+    GITASCII_STAR_STATUS: 'https://api.github.com/user/starred/Igorcbraz/GitAscii',
+    USER_STARRED_REPO: (owner: string, repo: string) =>
+      `https://api.github.com/user/starred/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+    STAR: '/api/github/star',
   },
   CONFIG: {
     GET: (username: string, profileSlug: string) =>
