@@ -76,6 +76,7 @@ export function WidgetCardItem({ item, onAdd, onHover, onLeave }: WidgetCardItem
                   alt="GitFest"
                   width={140}
                   height={36}
+                  style={{ width: 'auto', height: 'auto' }}
                   className="h-9 w-auto object-contain drop-shadow-[0_2px_14px_rgba(168,85,247,0.65)] group-hover:drop-shadow-[0_2px_22px_rgba(192,132,252,1)] group-hover:brightness-110 transition-all duration-300"
                 />
               </div>
