@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og'
 import { APP_URL } from '@/constants'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export const alt = 'GitAscii — GitHub Profile README & ASCII Art Generator'
 export const size = {
