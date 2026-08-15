@@ -69,7 +69,6 @@ export function EditorTour() {
           </p>
         </div>
       ),
-
     },
     {
       target: '#tour-featured-widgets',
