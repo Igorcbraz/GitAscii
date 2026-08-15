@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/Igorcbraz/GitAscii/compare/v1.7.0...v1.7.1) (2026-08-15)
+
+
+### Bug Fixes
+
+* remove username check from profile config loading ([36cef44](https://github.com/Igorcbraz/GitAscii/commit/36cef444f04a06de7b443561f5af338432bc1f92))
+
 ## [1.7.0](https://github.com/Igorcbraz/GitAscii/compare/v1.6.0...v1.7.0) (2026-08-14)
 
 
