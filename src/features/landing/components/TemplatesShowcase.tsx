@@ -3,101 +3,8 @@
 import { GitFork } from 'lucide-react'
 import React from 'react'
 
+import { EXTERNAL_LINKS, TEMPLATES_SHOWCASE_LIST } from '@/constants'
 import { useI18n } from '@/i18n'
-
-const templates = [
-  {
-    name: 'Terminal',
-    gradient: 'from-[#000000] to-[#1a1a2e]',
-    accent: '#c5ff4a',
-    tags: ['Classic', 'CLI'],
-    preview: 'root@host:~$ ./run\n[OK] System Ready\n> Executing ASCII...',
-  },
-  {
-    name: 'Minimal',
-    gradient: 'from-[#ffffff] to-[#f5f5f5]',
-    accent: '#000000',
-    tags: ['Clean', 'Light'],
-    preview: '      .       \n    .   .     \n  .       .   ',
-  },
-  {
-    name: 'GitHub Dark',
-    gradient: 'from-[#0d1117] to-[#161b22]',
-    accent: '#58a6ff',
-    tags: ['Native', 'Dark'],
-    preview: 'const profile = {\n  commits: 492,\n  stars: 128\n};',
-  },
-  {
-    name: 'Dracula',
-    gradient: 'from-[#282a36] to-[#44475a]',
-    accent: '#bd93f9',
-    tags: ['Theme', 'Vibrant'],
-    preview: 'function magic() {\n  return "sparkles";\n}',
-  },
-  {
-    name: 'Nord',
-    gradient: 'from-[#2e3440] to-[#3b4252]',
-    accent: '#88c0d0',
-    tags: ['Cold', 'Elegant'],
-    preview: '# ~ / nordic / cold\n\n[===        ] 30%',
-  },
-  {
-    name: 'Tokyo Night',
-    gradient: 'from-[#1a1b26] to-[#24283b]',
-    accent: '#7aa2f7',
-    tags: ['Neon', 'Modern'],
-    preview: 'import neon from "night";\n\nneon.glow();',
-  },
-  {
-    name: 'Gruvbox',
-    gradient: 'from-[#282828] to-[#3c3836]',
-    accent: '#fabd2f',
-    tags: ['Warm', 'Retro'],
-    preview: '>> Retro mode\n>> Warm colors\n>> Active',
-  },
-  {
-    name: 'Cyberpunk',
-    gradient: 'from-[#0a0a0f] to-[#1a0a2e]',
-    accent: '#ff00ff',
-    tags: ['Sci-Fi', 'Glow'],
-    preview: 'WAKE UP SAMURAI\nWE HAVE A CITY\nTO BURN',
-  },
-  {
-    name: 'Matrix',
-    gradient: 'from-[#000000] to-[#001100]',
-    accent: '#00ff00',
-    tags: ['Hacker', 'Green'],
-    preview: '01010101 00000000\n11111111 10101010\n00000000 11111111',
-  },
-  {
-    name: 'Japanese',
-    gradient: 'from-[#1a1a1a] to-[#2d2d2d]',
-    accent: '#e74c3c',
-    tags: ['Minimal', 'Zen'],
-    preview: '「 こんにちは 」\n\n  ZEN MODE   ',
-  },
-  {
-    name: 'Bento',
-    gradient: 'from-[#0f0f0f] to-[#1a1a1a]',
-    accent: '#ffffff',
-    tags: ['Grid', 'Modern'],
-    preview: '+---+ +---+\n|   | |   |\n+---+ +---+',
-  },
-  {
-    name: 'Portfolio',
-    gradient: 'from-[#0a0a0a] to-[#1a1a2e]',
-    accent: '#c5ff4a',
-    tags: ['Pro', 'Lime'],
-    preview: "HELLO WORLD.\nI MAKE THINGS.\nLET'S TALK.",
-  },
-  {
-    name: 'Open Source',
-    gradient: 'from-[#0d1117] to-[#161b22]',
-    accent: '#3fb950',
-    tags: ['Community', 'Green'],
-    preview: 'git commit -m "feat"\ngit push origin main\n🚀 Deployed.',
-  },
-]
 
 export default function TemplatesShowcase() {
   const { t } = useI18n()
@@ -128,7 +35,7 @@ export default function TemplatesShowcase() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {templates.map((template, idx) => (
+          {TEMPLATES_SHOWCASE_LIST.map((template, idx) => (
             <div
               key={idx}
               className="bg-onyx border border-graphite rounded-none hover:border-signal-lime/30 transition-all duration-300 cursor-pointer group flex flex-col"
@@ -169,7 +76,7 @@ export default function TemplatesShowcase() {
           ))}
 
           <a
-            href="https://github.com/Igorcbraz/GitAscii/fork"
+            href={EXTERNAL_LINKS.GITHUB_FORK}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-onyx border-2 border-signal-lime rounded-none transition-all duration-300 cursor-pointer group flex flex-col hover:shadow-[0_0_30px_rgba(197,255,74,0.2)]"

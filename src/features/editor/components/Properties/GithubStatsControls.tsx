@@ -1,9 +1,10 @@
 'use client'
 
-import { BarChart3, FileCode2, FolderGit2, GitFork, Star, UserCheck, Users } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import React, { useEffect } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { GITHUB_STATS_METRICS, GITHUB_STATS_STYLES } from '@/constants'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
@@ -15,22 +16,8 @@ interface GithubStatsControlsProps {
 }
 
 const TOTAL_METRICS = 6
-
-const METRICS: { id: string; label: string; icon: React.ElementType }[] = [
-  { id: 'stars', label: 'Stars', icon: Star },
-  { id: 'repos', label: 'Repos', icon: FolderGit2 },
-  { id: 'followers', label: 'Followers', icon: Users },
-  { id: 'following', label: 'Following', icon: UserCheck },
-  { id: 'forks', label: 'Total Forks', icon: GitFork },
-  { id: 'gists', label: 'Public Gists', icon: FileCode2 },
-]
-
-const STATS_STYLES: { value: string; label: string; preview: string }[] = [
-  { value: 'default', label: 'Números grandes', preview: '42\nSTARS' },
-  { value: 'terminal', label: 'Terminal', preview: '[ 42 ]\nSTARS' },
-  { value: 'minimal', label: 'Minimalista', preview: '42' },
-  { value: 'cards', label: 'Cartões', preview: '┌──────┐\n│  42  │\n└──────┘' },
-]
+const METRICS = GITHUB_STATS_METRICS
+const STATS_STYLES = GITHUB_STATS_STYLES
 
 function computeHeight(layout: string, visibleCount: number): number {
   if (layout === 'vertical') return visibleCount * 52 + 64

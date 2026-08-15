@@ -3,7 +3,8 @@
 import { Check, ChevronDown, Globe } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { type Language, useI18n } from '@/i18n'
+import { AVAILABLE_LANGUAGES } from '@/constants'
+import { useI18n } from '@/i18n'
 
 interface LanguageSelectorProps {
   align?: 'left' | 'right'
@@ -28,11 +29,11 @@ export default function LanguageSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const languagesList: { code: Language; label: string; flag: string }[] = [
-    { code: 'en', label: t('common.english', 'English'), flag: '🇬🇧' },
-    { code: 'pt', label: t('common.portuguese', 'Português'), flag: '🇧🇷' },
-    { code: 'es', label: t('common.spanish', 'Español'), flag: '🇪🇸' },
-  ]
+  const languagesList = AVAILABLE_LANGUAGES.map((lang) => ({
+    code: lang.code,
+    label: t(lang.labelKey, lang.defaultLabel),
+    flag: lang.flag,
+  }))
 
   return (
     <div ref={containerRef} className={`relative inline-block text-left z-50 ${className}`}>

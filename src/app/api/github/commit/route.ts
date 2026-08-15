@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
   try {
@@ -63,13 +64,13 @@ export async function POST(request: Request) {
       'User-Agent': 'GitAscii-App',
     }
 
-    const repoRes = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
+    const repoRes = await fetch(API_ENDPOINTS.GITHUB.REPO_INFO(username, repoName), {
       headers,
     })
 
     if (repoRes.status === 200) {
     } else if (repoRes.status === 404) {
-      const createRes = await fetch('https://api.github.com/user/repos', {
+      const createRes = await fetch(API_ENDPOINTS.GITHUB.USER_REPOS, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
 
     if (exportData) {
       const jsonRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
         { headers }
       )
       if (jsonRes.status === 200) {
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
     }
 
     const readmeRes = await fetch(
-      `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
+      API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
       { headers }
     )
 
@@ -145,7 +146,7 @@ export async function POST(request: Request) {
       }
 
       const updateRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
         {
           method: 'PUT',
           headers,
@@ -167,7 +168,7 @@ export async function POST(request: Request) {
 
     if (exportData && hasJsonChanged) {
       const updateJsonRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
         {
           method: 'PUT',
           headers,
@@ -189,9 +190,7 @@ export async function POST(request: Request) {
       if (hasSnakeWidget) {
         try {
           // Busca o workflow dinamicamente do repositório de exemplo do Platane
-          const yamlRes = await fetch(
-            'https://raw.githubusercontent.com/Platane/Platane/master/.github/workflows/main.yml'
-          )
+          const yamlRes = await fetch(API_ENDPOINTS.EXTERNAL_RESOURCES.PLATANE_SNAKE_WORKFLOW)
           if (yamlRes.ok) {
             let snakeYaml = await yamlRes.text()
 
@@ -203,7 +202,7 @@ export async function POST(request: Request) {
             )
 
             const actionRes = await fetch(
-              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
+              API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
               { headers }
             )
             let actionSha = undefined
@@ -213,7 +212,7 @@ export async function POST(request: Request) {
             }
 
             const updateActionRes = await fetch(
-              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
+              API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
               {
                 method: 'PUT',
                 headers,

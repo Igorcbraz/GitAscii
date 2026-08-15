@@ -3,7 +3,7 @@
 import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-import { WIDGET_IDS } from '@/constants'
+import { EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
@@ -84,7 +84,7 @@ export function WidgetPreviewTooltip({
 
     let isCurrent = true
     async function loadPreviewAscii() {
-      const avatarUrl = data.user.avatar_url || 'https://github.com/github.png'
+      const avatarUrl = data.user.avatar_url || EXTERNAL_LINKS.DEFAULT_GITHUB_AVATAR
       try {
         const result = await convertImageToAsciiCanvas(avatarUrl, {
           charset: 'dense',

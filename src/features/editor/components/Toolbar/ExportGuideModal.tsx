@@ -7,14 +7,13 @@ import {
   Copy,
   Download,
   ExternalLink,
-  FileJson,
-  Github,
   Sparkles,
   X,
 } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { EXPORT_GUIDE_STEPS } from '@/constants'
 import { useI18n } from '@/i18n'
 
 interface ExportGuideModalProps {
@@ -25,36 +24,7 @@ interface ExportGuideModalProps {
   embedCode: string
 }
 
-const STEPS = [
-  {
-    icon: Download,
-    title: 'Arquivo Baixado',
-    description:
-      'O arquivo do seu layout foi baixado para o seu computador. Ele contém toda a configuração do seu perfil.',
-    descriptionIcon: FileJson,
-    linkLabel: null,
-    getLinkUrl: () => '',
-  },
-  {
-    icon: Github,
-    title: 'Adicione ao GitHub',
-    description:
-      'Salve este arquivo na raiz do seu repositório especial (ex: username/username) no GitHub.',
-    descriptionIcon: null,
-    linkLabel: 'Adicionar arquivo',
-    getLinkUrl: (username: string) => `https://github.com/${username}/${username}/upload/main`,
-  },
-  {
-    icon: Sparkles,
-    title: 'Tudo Pronto!',
-    description:
-      'Nosso site renderiza automaticamente o JSON do seu repositório. Basta copiar a URL da imagem gerada e colar no seu README.',
-    descriptionIcon: null,
-    linkLabel: 'Editar README',
-    getLinkUrl: (username: string) =>
-      `https://github.com/${username}/${username}/edit/main/README.md`,
-  },
-]
+const STEPS = EXPORT_GUIDE_STEPS
 
 export function ExportGuideModal({
   isOpen,

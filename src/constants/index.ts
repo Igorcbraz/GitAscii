@@ -74,3 +74,12 @@ export const WIDGET_CATEGORIES = {
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]
+
+export * from './comparisons'
+export * from './editor'
+export * from './explore'
+export * from './landing'
+export * from './languages'
+export * from './legal'
+export * from './links'
+export * from './widgets'

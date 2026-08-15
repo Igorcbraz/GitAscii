@@ -1,10 +1,11 @@
 'use client'
 
-import { Check, Cloud, Globe, Layers, Moon, Search, Server, Sparkles, Sun, X } from 'lucide-react'
+import { Check, Moon, Search, Sparkles, Sun, X } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { TECH_STACK_PRESETS } from '@/constants'
 import { TECH_CATALOG, type TechItem } from '@/data/techCatalog'
 import { useI18n } from '@/i18n'
 
@@ -12,28 +13,7 @@ import { useEditorStore } from '../../store/editorStore'
 
 export { TECH_CATALOG, type TechItem }
 
-const PRESETS = [
-  {
-    label: 'Frontend',
-    icon: Globe,
-    items: ['html', 'css', 'js', 'ts', 'react', 'nextjs', 'tailwind', 'vite'],
-  },
-  {
-    label: 'Backend',
-    icon: Server,
-    items: ['nodejs', 'ts', 'express', 'postgres', 'mongodb', 'docker', 'redis'],
-  },
-  {
-    label: 'Full Stack',
-    icon: Layers,
-    items: ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'postgres', 'docker', 'git'],
-  },
-  {
-    label: 'DevOps & Cloud',
-    icon: Cloud,
-    items: ['linux', 'docker', 'kubernetes', 'aws', 'git', 'github', 'bash', 'python'],
-  },
-]
+const PRESETS = TECH_STACK_PRESETS
 
 interface TechStackControlsProps {
   instanceId: string
@@ -67,8 +47,8 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
     updateWidgetConfig(instanceId, { selectedTechs: updated })
   }
 
-  const applyPreset = (presetItems: string[]) => {
-    updateWidgetConfig(instanceId, { selectedTechs: presetItems })
+  const applyPreset = (presetItems: readonly string[] | string[]) => {
+    updateWidgetConfig(instanceId, { selectedTechs: [...presetItems] })
   }
 
   const clearAll = () => {

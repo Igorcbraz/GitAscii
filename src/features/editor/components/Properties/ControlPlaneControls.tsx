@@ -4,6 +4,7 @@ import { Sliders } from 'lucide-react'
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 import { ColorPicker } from './ColorPicker'
@@ -20,6 +21,7 @@ export function ControlPlaneControls({
   widgetId: _widgetId,
   config,
 }: ControlPlaneControlsProps) {
+  const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
   const showGrid = config.showGrid !== false
@@ -34,13 +36,13 @@ export function ControlPlaneControls({
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
         <Sliders size={14} />
-        <span>Control Plane Customization</span>
+        <span>{t('editor.controlplane.title', 'Control Plane Customization')}</span>
       </div>
 
       <div className="space-y-3">
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-            Design Variant (Type)
+            {t('editor.controlplane.variant', 'Design Variant (Type)')}
           </label>
           <div className="grid grid-cols-2 gap-1.5">
             <button
@@ -52,7 +54,7 @@ export function ControlPlaneControls({
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Closed-Loop
+              {t('editor.controlplane.closed_loop', 'Closed-Loop')}
             </button>
             <button
               type="button"
@@ -63,13 +65,15 @@ export function ControlPlaneControls({
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Hero Layout
+              {t('editor.controlplane.hero_layout', 'Hero Layout')}
             </button>
           </div>
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1 font-inter-tight">Custom Title</label>
+          <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
+            {t('editor.controlplane.custom_title', 'Custom Title')}
+          </label>
           <input
             type="text"
             value={(config.customTitle as string) || ''}
@@ -81,7 +85,7 @@ export function ControlPlaneControls({
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-            Custom Biography / Subtitle
+            {t('editor.controlplane.custom_bio', 'Custom Biography / Subtitle')}
           </label>
           <textarea
             value={(config.customBio as string) || ''}
@@ -94,7 +98,7 @@ export function ControlPlaneControls({
 
         <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite">
           <label className="text-eyebrow text-chalk font-inter-tight cursor-pointer">
-            Show Grid Matrix
+            {t('editor.controlplane.show_grid', 'Show Grid Matrix')}
           </label>
           <Switch
             checked={showGrid}
@@ -104,30 +108,30 @@ export function ControlPlaneControls({
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-inter-tight">
-            Animation Speed Factor
+            {t('editor.controlplane.speed_factor', 'Animation Speed Factor')}
           </label>
           <select
             value={speed}
             onChange={(e) => handleUpdate({ animationSpeed: parseFloat(e.target.value) })}
             className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-[#00A7D1] focus:outline-none"
           >
-            <option value="0.5">0.5x (Slow)</option>
-            <option value="1">1.0x (Normal)</option>
-            <option value="1.5">1.5x (Fast)</option>
-            <option value="2">2.0x (Hyper)</option>
+            <option value="0.5">{t('editor.controlplane.speed_slow', '0.5x (Slow)')}</option>
+            <option value="1">{t('editor.controlplane.speed_normal', '1.0x (Normal)')}</option>
+            <option value="1.5">{t('editor.controlplane.speed_fast', '1.5x (Fast)')}</option>
+            <option value="2">{t('editor.controlplane.speed_hyper', '2.0x (Hyper)')}</option>
           </select>
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-1">
           <ColorPicker
-            label="Accent Color"
+            label={t('editor.controlplane.accent_color', 'Accent Color')}
             align="left"
             value={(config.accentColor as string) || '#00A7D1'}
             onChange={(color) => handleUpdate({ accentColor: color })}
           />
 
           <ColorPicker
-            label="Secondary Color"
+            label={t('editor.controlplane.secondary_color', 'Secondary Color')}
             align="right"
             value={(config.secondaryColor as string) || '#E84A8A'}
             onChange={(color) => handleUpdate({ secondaryColor: color })}

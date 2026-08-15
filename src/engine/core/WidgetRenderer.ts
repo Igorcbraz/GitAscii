@@ -1,4 +1,4 @@
-import { APP_DOMAIN, WIDGET_IDS } from '../../constants'
+import { APP_DOMAIN, EXTERNAL_LINKS, SOCIAL_PLATFORMS, WIDGET_IDS } from '../../constants'
 import { renderAsciiHeatmap } from '../../features/widgets/renderers/AsciiHeatmapRenderer'
 import { renderAsciiInfoCard } from '../../features/widgets/renderers/AsciiInfoCardRenderer'
 import { renderAsciiPortrait } from '../../features/widgets/renderers/AsciiPortraitRenderer'
@@ -29,6 +29,7 @@ import { renderSystemLoop } from '../../features/widgets/renderers/SystemLoopRen
 import { renderTerminal } from '../../features/widgets/renderers/TerminalRenderer'
 import { renderTrophies } from '../../features/widgets/renderers/TrophiesRenderer'
 import { renderWakaTime } from '../../features/widgets/renderers/WakaTimeRenderer'
+import { API_ENDPOINTS } from '../../services/endpoints'
 import { generateAsciiArt } from '../ascii/converter'
 import { type AsciiFontName, convertTextToAscii } from '../ascii/textConverter'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
@@ -92,9 +93,7 @@ function renderExternalWidgetSvg(
         'https://raw.githubusercontent.com/$1/$2/$3'
       )
     }
-  } catch {
-    // Ignore invalid URL
-  }
+  } catch {}
 
   const imgY = showTitle ? 44 : 16
   const paddingX = 16
@@ -421,7 +420,6 @@ export function renderWidgetSvg(
       let statsSvg = ''
 
       if (statsStyle === 'terminal') {
-        // Monospaced bracket style: [ 1.2k ]  STARS
         const startY = 48
         const monoFont = `'JetBrains Mono', monospace`
         if (statsLayout === 'horizontal') {
@@ -458,7 +456,6 @@ export function renderWidgetSvg(
             .join('')
         }
       } else if (statsStyle === 'minimal') {
-        // Pure values, no decoration
         const fs = valueFontSize
         if (statsLayout === 'horizontal') {
           const itemW = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
@@ -485,7 +482,6 @@ export function renderWidgetSvg(
             .join('')
         }
       } else if (statsStyle === 'cards') {
-        // Each metric in a pill card
         const cardH = 52
         const gap = 8
         const cols = statsLayout === 'vertical' ? 1 : 2
@@ -506,7 +502,6 @@ export function renderWidgetSvg(
           })
           .join('')
       } else {
-        // default: big numbers
         if (statsLayout === 'horizontal') {
           const itemWidth = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
           statsSvg = statItems
@@ -691,13 +686,11 @@ export function renderWidgetSvg(
           })
           .join('')
 
-        // Center label — biggest language
         const centerSvg =
           donutCenterLabel && topLangs.length > 0
             ? `<text x="${donutCx}" y="${donutCy + 4}" text-anchor="middle" font-family="'Inter Tight', sans-serif" font-size="11" font-weight="600" fill="${textClr}">${escapeXml(topLangs[0][0])}</text>`
             : ''
 
-        // Legend
         let legendSvg = ''
         if (donutLegendPos === 'bottom') {
           const legendStartY = donutCy + donutR + 16
@@ -747,18 +740,15 @@ export function renderWidgetSvg(
       const showRepoLanguage = cfg.showRepoLanguage !== false
       const showRepoForks = Boolean(cfg.showRepoForks)
 
-      // Resolve repo list
       let repoList = [...data.repos].filter((r) => !r.fork)
 
       if (selectedRepos.length > 0) {
-        // Use user-specified order
         const ordered = selectedRepos
           .map((name) => repoList.find((r) => r.name === name))
           .filter(Boolean) as typeof repoList
         const rest = repoList.filter((r) => !selectedRepos.includes(r.name))
         repoList = [...ordered, ...rest]
       } else {
-        // Auto sort
         if (repoSortBy === 'updated') {
           repoList.sort(
             (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
@@ -799,13 +789,10 @@ export function renderWidgetSvg(
             .join('')}
         `
       } else {
-        // list mode — adaptive card height based on enabled fields
         const showRepoStars = cfg.showRepoStars !== false
         const showRepoDesc = cfg.showRepoDesc !== false
         const showRepoUpdated = Boolean(cfg.showRepoUpdated)
 
-        // Compute card height: name row always shown (20px top)
-        // desc line: +18, language/meta line: +14, updated: +14
         const metaLineNeeded = showRepoLanguage || showRepoForks || showRepoStars || showRepoUpdated
         const cardH = 24 + (showRepoDesc ? 18 : 0) + (metaLineNeeded ? 18 : 0) + 8
         const rowSpacing = cardH + 8
@@ -890,7 +877,7 @@ export function renderWidgetSvg(
       const mappedTechs = selectedTechs.map((t) => (t === 'reactnative' ? 'react' : t))
       const uniqueTechs = Array.from(new Set(mappedTechs))
       const techString = uniqueTechs.join(',')
-      const skillIconsUrl = `https://skillicons.dev/icons?i=${techString}&theme=${theme}&perline=${perLine}`
+      const skillIconsUrl = API_ENDPOINTS.SKILL_ICONS.GET(techString, theme, perLine)
 
       const titleY = 32
       const imageY = showTitle ? 44 : 16
@@ -921,7 +908,7 @@ export function renderWidgetSvg(
 
       if (badgeStyle === 'skillicons') {
         const socialTechString = selectedSocials.join(',')
-        const skillIconsUrl = `https://skillicons.dev/icons?i=${socialTechString}&theme=${theme}&perline=12`
+        const skillIconsUrl = API_ENDPOINTS.SKILL_ICONS.GET(socialTechString, theme, 12)
         const imageWidth = width - 48
         const imageHeight = Math.max(40, height - startY - 16)
 
@@ -930,131 +917,12 @@ export function renderWidgetSvg(
           <image href="${escapeXml(skillIconsUrl)}" x="24" y="${startY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMinYMin meet" />
         `
       } else {
-        const socialPlatformsMap: Record<
-          string,
-          { label: string; logo: string; color: string; defaultUrl: string }
-        > = {
-          github: {
-            label: 'GitHub',
-            logo: 'github',
-            color: '181717',
-            defaultUrl: 'https://github.com/{username}',
-          },
-          linkedin: {
-            label: 'LinkedIn',
-            logo: 'linkedin',
-            color: '0A66C2',
-            defaultUrl: 'https://linkedin.com/in/{username}',
-          },
-          twitter: {
-            label: 'X',
-            logo: 'x',
-            color: '000000',
-            defaultUrl: 'https://x.com/{username}',
-          },
-          discord: {
-            label: 'Discord',
-            logo: 'discord',
-            color: '5865F2',
-            defaultUrl: 'https://discord.gg/yourserver',
-          },
-          youtube: {
-            label: 'YouTube',
-            logo: 'youtube',
-            color: 'FF0000',
-            defaultUrl: 'https://youtube.com/@{username}',
-          },
-          instagram: {
-            label: 'Instagram',
-            logo: 'instagram',
-            color: 'E4405F',
-            defaultUrl: 'https://instagram.com/{username}',
-          },
-          twitch: {
-            label: 'Twitch',
-            logo: 'twitch',
-            color: '9146FF',
-            defaultUrl: 'https://twitch.tv/{username}',
-          },
-          devto: {
-            label: 'Dev.to',
-            logo: 'devto',
-            color: '0A0A0A',
-            defaultUrl: 'https://dev.to/{username}',
-          },
-          medium: {
-            label: 'Medium',
-            logo: 'medium',
-            color: '000000',
-            defaultUrl: 'https://medium.com/@{username}',
-          },
-          email: {
-            label: 'Email',
-            logo: 'gmail',
-            color: 'EA4335',
-            defaultUrl: 'mailto:user@example.com',
-          },
-          website: {
-            label: 'Portfolio',
-            logo: 'googlechrome',
-            color: '2563EB',
-            defaultUrl: 'https://{username}.dev',
-          },
-          stackoverflow: {
-            label: 'StackOverflow',
-            logo: 'stackoverflow',
-            color: 'F48024',
-            defaultUrl: 'https://stackoverflow.com/users/{username}',
-          },
-          bluesky: {
-            label: 'Bluesky',
-            logo: 'bluesky',
-            color: '1185FE',
-            defaultUrl: 'https://bsky.app/profile/{username}',
-          },
-          mastodon: {
-            label: 'Mastodon',
-            logo: 'mastodon',
-            color: '6364FF',
-            defaultUrl: 'https://mastodon.social/@{username}',
-          },
-          reddit: {
-            label: 'Reddit',
-            logo: 'reddit',
-            color: 'FF4500',
-            defaultUrl: 'https://reddit.com/user/{username}',
-          },
-          spotify: {
-            label: 'Spotify',
-            logo: 'spotify',
-            color: '1DB954',
-            defaultUrl: 'https://open.spotify.com/user/{username}',
-          },
-          telegram: {
-            label: 'Telegram',
-            logo: 'telegram',
-            color: '26A5E4',
-            defaultUrl: 'https://t.me/{username}',
-          },
-          tiktok: {
-            label: 'TikTok',
-            logo: 'tiktok',
-            color: '000000',
-            defaultUrl: 'https://tiktok.com/@{username}',
-          },
-          steam: {
-            label: 'Steam',
-            logo: 'steam',
-            color: '000000',
-            defaultUrl: 'https://steamcommunity.com/id/{username}',
-          },
-          hashnode: {
-            label: 'Hashnode',
-            logo: 'hashnode',
-            color: '2962FF',
-            defaultUrl: 'https://hashnode.com/@{username}',
-          },
-        }
+        const socialPlatformsMap = SOCIAL_PLATFORMS.reduce<
+          Record<string, (typeof SOCIAL_PLATFORMS)[number]>
+        >((acc, curr) => {
+          acc[curr.id] = curr
+          return acc
+        }, {})
 
         const badgeH = badgeStyle === 'for-the-badge' ? 28 : 22
         const gapX = 10
@@ -1083,7 +951,12 @@ export function renderWidgetSvg(
             const posX = currentX
             currentX += badgeW + gapX
 
-            const badgeUrl = `https://img.shields.io/badge/${encodeURIComponent(label)}-${p.color}?style=${badgeStyle}&logo=${p.logo}&logoColor=white`
+            const badgeUrl = API_ENDPOINTS.SHIELDS_IO.CUSTOM_BADGE(
+              label,
+              p.color,
+              badgeStyle,
+              p.logo
+            )
             const targetUrl =
               socialUrls[platformId] || p.defaultUrl.replace('{username}', data.user.login)
 
@@ -1093,7 +966,8 @@ export function renderWidgetSvg(
             </a>
           `
           })
-          .join('')
+          .filter(Boolean)
+          .join('\n')
 
         contentSvg = `
           ${showTitle ? `<text x="24" y="${titleY}" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">${escapeXml(customTitle)}</text>` : ''}
@@ -1395,11 +1269,21 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ GITHUB README STATS ]'
 
-      let statsUrl = `https://github-readme-stats-fast.vercel.app/api?username=${encodeURIComponent(username)}&show_icons=${showIcons}&theme=${theme}${countPrivate ? '&count_private=true' : ''}${includeAllCommits ? '&include_all_commits=true' : ''}${hideRank ? '&hide_rank=true' : ''}${hideBorder ? '&hide_border=true' : ''}`
+      let statsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.README_STATS(
+        username,
+        `&show_icons=${showIcons}&theme=${theme}${countPrivate ? '&count_private=true' : ''}${includeAllCommits ? '&include_all_commits=true' : ''}${hideRank ? '&hide_rank=true' : ''}${hideBorder ? '&hide_border=true' : ''}`
+      )
       if (statType === 'top-langs') {
-        statsUrl = `https://github-readme-stats-fast.vercel.app/api/top-langs/?username=${encodeURIComponent(username)}&layout=${layout}&langs_count=${langsCount}&theme=${theme}${hideLangs ? `&hide=${encodeURIComponent(hideLangs)}` : ''}${hideBorder ? '&hide_border=true' : ''}`
+        statsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.TOP_LANGS(
+          username,
+          `&layout=${layout}&langs_count=${langsCount}&theme=${theme}${hideLangs ? `&hide=${encodeURIComponent(hideLangs)}` : ''}${hideBorder ? '&hide_border=true' : ''}`
+        )
       } else if (statType === 'pin') {
-        statsUrl = `https://github-readme-stats-fast.vercel.app/api/pin/?username=${encodeURIComponent(username)}&repo=${encodeURIComponent(repoName)}&theme=${theme}${hideBorder ? '&hide_border=true' : ''}`
+        statsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.PIN_REPO(
+          username,
+          repoName,
+          `&theme=${theme}${hideBorder ? '&hide_border=true' : ''}`
+        )
       }
 
       contentSvg = renderExternalWidgetSvg(
@@ -1578,7 +1462,7 @@ export function renderWidgetSvg(
       const maxLangs = Number(cfg.maxLangs) || 8
       const badgeStyle = (cfg.badgeStyle as string) || 'flat'
 
-      let statsUrl = `https://ghstats.dev/api/${embedType}?username=${encodeURIComponent(username)}&theme=${theme}`
+      let statsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.GH_STATS(embedType, username, theme)
 
       const bgColor = cfg.backgroundColor as string
       if (bgColor) statsUrl += `&bg=${bgColor.replace('#', '')}`
@@ -1636,7 +1520,10 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ GITHUB STREAK STATS ]'
 
-      const streakUrl = `https://streak-stats.demolab.com/?user=${encodeURIComponent(username)}&theme=${theme}&mode=${mode}&date_format=${encodeURIComponent(dateFormat)}&border_radius=${streakBorderRadius}${hideBorder ? '&hide_border=true' : ''}`
+      const streakUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.STREAK_STATS(
+        username,
+        `&theme=${theme}&mode=${mode}&date_format=${encodeURIComponent(dateFormat)}&border_radius=${streakBorderRadius}${hideBorder ? '&hide_border=true' : ''}`
+      )
 
       contentSvg = renderExternalWidgetSvg(
         streakUrl,
@@ -1662,7 +1549,10 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ PROFILE TROPHIES ]'
 
-      const trophyUrl = `https://github-profile-trophy-fast.vercel.app/?username=${encodeURIComponent(username)}&theme=${theme}&column=${column}&row=${row}${noFrame ? '&margin-w=0' : ''}${noBg ? '&no-bg=true' : ''}`
+      const trophyUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.PROFILE_TROPHY(
+        username,
+        `&theme=${theme}&column=${column}&row=${row}${noFrame ? '&margin-w=0' : ''}${noBg ? '&no-bg=true' : ''}`
+      )
 
       contentSvg = renderExternalWidgetSvg(
         trophyUrl,
@@ -1687,7 +1577,10 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ ACTIVITY GRAPH ]'
 
-      const graphUrl = `https://github-readme-activity-graph.vercel.app/graph?username=${encodeURIComponent(username)}&theme=${theme}&days=${days}&area=${showArea}${hideBorder ? '&hide_border=true' : ''}`
+      const graphUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.ACTIVITY_GRAPH(
+        username,
+        `&theme=${theme}&days=${days}&area=${showArea}${hideBorder ? '&hide_border=true' : ''}`
+      )
 
       contentSvg = renderExternalWidgetSvg(
         graphUrl,
@@ -1714,8 +1607,14 @@ export function renderWidgetSvg(
         theme === 'light'
           ? 'github-contribution-grid-snake.svg'
           : 'github-contribution-grid-snake-dark.svg'
-      const snakeUrl = `https://cdn.jsdelivr.net/gh/${encodeURIComponent(username)}/${encodeURIComponent(username)}@${encodeURIComponent(branch)}/${snakeFileName}`
-      const fallbackSnakeUrl = `https://cdn.jsdelivr.net/gh/platane/platane@output/${snakeFileName}`
+      const snakeUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.JSDELIVR_GH(
+        username,
+        username,
+        branch,
+        snakeFileName
+      )
+      const fallbackSnakeUrl =
+        API_ENDPOINTS.EXTERNAL_RESOURCES.PLATANE_FALLBACK_SNAKE(snakeFileName)
 
       contentSvg = renderExternalWidgetSvg(
         snakeUrl,
@@ -1740,7 +1639,11 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ GITHUB METRICS CARD ]'
 
-      const metricsUrl = `https://metrics.lecoq.io/${encodeURIComponent(username)}?template=${encodeURIComponent(template)}&base=${encodeURIComponent(baseSections)}`
+      const metricsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.LECOQ_METRICS(
+        username,
+        template,
+        baseSections
+      )
 
       contentSvg = renderExternalWidgetSvg(
         metricsUrl,
@@ -1765,7 +1668,10 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ VIEWS COUNTER ]'
 
-      const viewsUrl = `https://komarev.com/ghpvc/?username=${encodeURIComponent(username)}&color=${color}&style=${style}&label=${encodeURIComponent(label)}${baseVal > 0 ? `&base=${baseVal}` : ''}`
+      const viewsUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.KOMAREV_VIEWS(
+        username,
+        `&color=${color}&style=${style}&label=${encodeURIComponent(label)}${baseVal > 0 ? `&base=${baseVal}` : ''}`
+      )
 
       contentSvg = renderExternalWidgetSvg(
         viewsUrl,
@@ -1788,7 +1694,10 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ DEVELOPER QUOTE ]'
 
-      const quoteUrl = `https://quotes-github-readme.vercel.app/api?type=${quoteType === 'quote-day' ? 'quote-day' : layout}&theme=${theme}`
+      const quoteUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.QUOTES(
+        quoteType === 'quote-day' ? 'quote-day' : layout,
+        theme
+      )
 
       contentSvg = renderExternalWidgetSvg(
         quoteUrl,
@@ -1812,8 +1721,14 @@ export function renderWidgetSvg(
       const showTitle = cfg.showTitle !== false
       const customTitle = (cfg.customTitle as string) || '[ AWESOME PROFILE BADGE ]'
 
-      const badgeUrl = `https://img.shields.io/badge/${encodeURIComponent(label)}-Featured-${badgeColor}?style=${badgeStyle}&logo=${encodeURIComponent(logo)}`
-      const targetUrl = 'https://github.com/abhisheknaiidu/awesome-github-profile-readme'
+      const badgeUrl = API_ENDPOINTS.SHIELDS_IO.BADGE(
+        label,
+        'Featured',
+        badgeColor,
+        badgeStyle,
+        logo
+      )
+      const targetUrl = EXTERNAL_LINKS.AWESOME_GITHUB_PROFILE_README
 
       contentSvg = renderExternalWidgetSvg(
         badgeUrl,

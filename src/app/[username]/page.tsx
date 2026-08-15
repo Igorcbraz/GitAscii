@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,7 +104,7 @@ export default async function DefaultEditorPage({
       '@type': 'Person',
       name: username,
       identifier: username,
-      sameAs: `https://github.com/${username}`,
+      sameAs: API_ENDPOINTS.GITHUB.USER_PROFILE(username),
     },
   }
 

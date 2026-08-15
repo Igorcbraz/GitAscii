@@ -1,26 +1,20 @@
 'use client'
 
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Ban,
-  FlipHorizontal,
-  FlipVertical,
-  Keyboard,
-  Monitor,
-  Play,
-  Sparkles,
-  Zap,
-  ZoomIn,
-  ZoomOut,
-} from 'lucide-react'
+import { Play, Zap } from 'lucide-react'
 import React from 'react'
 
+import {
+  ANIMATION_DURATION_PRESETS,
+  ANIMATION_EASING_OPTIONS,
+  ANIMATION_PRESETS,
+  type AnimationEasing,
+  type AnimationType,
+} from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+
+export type { AnimationEasing, AnimationType }
 
 interface AnimationControlsProps {
   instanceId: string
@@ -28,127 +22,8 @@ interface AnimationControlsProps {
   widgetId?: string
 }
 
-export type AnimationType =
-  | 'none'
-  | 'fade-in'
-  | 'slide-up'
-  | 'slide-down'
-  | 'slide-left'
-  | 'slide-right'
-  | 'zoom-in'
-  | 'zoom-out'
-  | 'flip-x'
-  | 'flip-y'
-  | 'typewriter'
-  | 'glitch'
-  | 'scan-lines'
-
-export type AnimationEasing = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | 'spring'
-
-interface AnimationPreset {
-  id: AnimationType
-  label: string
-  icon: React.ElementType
-  description: string
-}
-
-const ANIMATION_PRESETS: AnimationPreset[] = [
-  {
-    id: 'none',
-    label: 'Sem animação',
-    icon: Ban,
-    description: 'Widget aparece instantaneamente',
-  },
-  {
-    id: 'fade-in',
-    label: 'Fade In',
-    icon: Sparkles,
-    description: 'Aparece gradualmente com opacidade',
-  },
-  {
-    id: 'slide-up',
-    label: 'Slide Up',
-    icon: ArrowUp,
-    description: 'Desliza de baixo para cima',
-  },
-  {
-    id: 'slide-down',
-    label: 'Slide Down',
-    icon: ArrowDown,
-    description: 'Desliza de cima para baixo',
-  },
-  {
-    id: 'slide-left',
-    label: 'Slide Left',
-    icon: ArrowLeft,
-    description: 'Desliza da direita para esquerda',
-  },
-  {
-    id: 'slide-right',
-    label: 'Slide Right',
-    icon: ArrowRight,
-    description: 'Desliza da esquerda para direita',
-  },
-  {
-    id: 'zoom-in',
-    label: 'Zoom In',
-    icon: ZoomIn,
-    description: 'Expande de um ponto central',
-  },
-  {
-    id: 'zoom-out',
-    label: 'Zoom Out',
-    icon: ZoomOut,
-    description: 'Reduz desde tamanho maior',
-  },
-  {
-    id: 'flip-x',
-    label: 'Flip Horizontal',
-    icon: FlipHorizontal,
-    description: 'Gira no eixo horizontal',
-  },
-  {
-    id: 'flip-y',
-    label: 'Flip Vertical',
-    icon: FlipVertical,
-    description: 'Gira no eixo vertical',
-  },
-  {
-    id: 'typewriter',
-    label: 'Typing',
-    icon: Keyboard,
-    description: 'Digita caractere por caractere',
-  },
-  {
-    id: 'glitch',
-    label: 'Glitch',
-    icon: Zap,
-    description: 'Efeito de falha digital',
-  },
-  {
-    id: 'scan-lines',
-    label: 'Scan Lines',
-    icon: Monitor,
-    description: 'Varredura estilo terminal CRT',
-  },
-]
-
-const EASING_OPTIONS: { id: AnimationEasing; label: string }[] = [
-  { id: 'ease', label: 'Ease' },
-  { id: 'ease-in', label: 'Ease In' },
-  { id: 'ease-out', label: 'Ease Out' },
-  { id: 'ease-in-out', label: 'Ease In-Out' },
-  { id: 'linear', label: 'Linear' },
-  { id: 'spring', label: 'Spring' },
-]
-
-const DURATION_PRESETS = [
-  { label: '600ms', value: 600 },
-  { label: '1s', value: 1000 },
-  { label: '1.5s', value: 1500 },
-  { label: '2s', value: 2000 },
-  { label: '3s', value: 3000 },
-]
+const EASING_OPTIONS = ANIMATION_EASING_OPTIONS
+const DURATION_PRESETS = ANIMATION_DURATION_PRESETS
 
 export function AnimationControls({ instanceId, config, widgetId }: AnimationControlsProps) {
   const { t } = useI18n()

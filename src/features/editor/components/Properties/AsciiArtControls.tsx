@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { ASCII_ART_CHARSET_OPTIONS } from '@/constants'
 import { type AsciiConvertOptions, convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { useI18n } from '@/i18n'
 
@@ -27,30 +28,7 @@ interface AsciiArtControlsProps {
   config: Record<string, unknown>
 }
 
-const CHARSET_OPTIONS = [
-  {
-    id: 'dense',
-    name: 'DENSE GRADIENT',
-    preview: ' .\'`^\\",:;I',
-    info: '70 chars - Máxima Precisão',
-  },
-  { id: 'standard', name: 'STANDARD', preview: ' .:-=+*#%@', info: '10 chars' },
-  { id: 'blocks', name: 'BLOCKS / SHADING', preview: ' ░▒▓█', info: '5 chars' },
-  { id: 'dots', name: 'BRAILLE / DOTS', preview: ' ⠁⠃⠇⡇⣇⣿', info: '7 chars' },
-  { id: 'matrix', name: 'MATRIX / HEX', preview: ' 0123456789ABCDEF', info: '16 chars' },
-  { id: 'ascii', name: 'CLASSIC ASCII', preview: " .',:;!|/>(){}", info: '13 chars' },
-  { id: 'binary', name: 'BINARY', preview: ' 01010101', info: '2 chars' },
-  { id: 'slash', name: 'SLASH PATTERN', preview: ' \\/|/\\/|', info: '3 chars' },
-  { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
-  { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
-  {
-    id: 'braille',
-    name: 'TRUE BRAILLE',
-    preview: '⡿⣟⣯⣷',
-    info: 'Alta Resolução 2x4',
-  },
-  { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
-]
+const CHARSET_OPTIONS = ASCII_ART_CHARSET_OPTIONS
 
 export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) {
   const { t } = useI18n()

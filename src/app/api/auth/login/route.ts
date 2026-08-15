@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 export async function GET(request: Request) {
   const clientId = process.env.GITHUB_CLIENT_ID
   if (!clientId) {
@@ -12,7 +14,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const redirectTo = searchParams.get('redirect_to') || '/'
 
-  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=read:user&state=${encodeURIComponent(redirectTo)}`
+  const githubAuthUrl = API_ENDPOINTS.GITHUB.OAUTH_AUTHORIZE(clientId, redirectTo)
 
   return NextResponse.redirect(githubAuthUrl)
 }

@@ -1,8 +1,8 @@
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 import { getSession } from '../../../lib/auth'
 import type { GitHubRepo, GitHubUser, NormalizedGitHubData } from '../types/github'
 import { generateMockContributions, getMockGitHubData } from './mockProfile'
-
-const GITHUB_API_BASE = 'https://api.github.com'
 
 interface CacheEntry {
   data: NormalizedGitHubData
@@ -32,7 +32,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       headers.Authorization = `token ${token}`
     }
 
-    const userRes = await fetch(`${GITHUB_API_BASE}/users/${encodeURIComponent(username)}`, {
+    const userRes = await fetch(API_ENDPOINTS.GITHUB.USER_INFO(username), {
       headers,
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(8000),
@@ -48,7 +48,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     const user: GitHubUser = await userRes.json()
 
     const reposRes = await fetch(
-      `${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=30`,
+      `${API_ENDPOINTS.GITHUB.USER_INFO(username)}/repos?sort=updated&per_page=30`,
       {
         headers,
         next: { revalidate: 3600 },
@@ -106,7 +106,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
           variables: { username },
         }
 
-        const gqlRes = await fetch('https://api.github.com/graphql', {
+        const gqlRes = await fetch(API_ENDPOINTS.GITHUB.GRAPHQL, {
           method: 'POST',
           headers: {
             ...headers,
@@ -131,16 +131,14 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     }
 
     try {
-      const encodedUser = encodeURIComponent(username)
-      const readmeRes = await fetch(
-        `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/main/README.md`,
-        { signal: AbortSignal.timeout(4000) }
-      )
+      const readmeRes = await fetch(API_ENDPOINTS.GITHUB.RAW_PROFILE_README(username, 'main'), {
+        signal: AbortSignal.timeout(4000),
+      })
       if (readmeRes.ok) {
         result.readmeContent = await readmeRes.text()
       } else {
         const readmeResMaster = await fetch(
-          `https://raw.githubusercontent.com/${encodedUser}/${encodedUser}/master/README.md`,
+          API_ENDPOINTS.GITHUB.RAW_PROFILE_README(username, 'master'),
           { signal: AbortSignal.timeout(4000) }
         )
         if (readmeResMaster.ok) {

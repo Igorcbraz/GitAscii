@@ -4,50 +4,8 @@ import { ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
+import { LANDING_FAQS } from '@/constants'
 import { useI18n } from '@/i18n'
-
-const faqs = [
-  {
-    question: 'What is GitAscii?',
-    answer:
-      'GitAscii is a platform for creating premium GitHub Profile READMEs using customizable SVGs and a visual editor. Think of it as Canva for your GitHub profile.',
-  },
-  {
-    question: 'Is GitAscii free?',
-    answer:
-      'Yes! GitAscii is completely free and open source. We believe every developer deserves a beautiful profile.',
-  },
-  {
-    question: 'How does the live SVG rendering work?',
-    answer:
-      'Instead of uploading SVG files to GitHub, you embed a URL that points to our servers. We generate your SVG on-the-fly with your latest GitHub data, so your profile is always up to date.',
-  },
-  {
-    question: 'What is ASCII Art conversion?',
-    answer:
-      'Our ASCII Art Engine converts any image (like your GitHub avatar) into stunning character-based art using configurable character sets, density, and color options.',
-  },
-  {
-    question: 'Can I have multiple profile layouts?',
-    answer:
-      'Absolutely! Each user can create multiple named profiles (e.g., Portfolio, Terminal, Resume) with different templates and configurations.',
-  },
-  {
-    question: 'Does it support dark and light mode?',
-    answer:
-      "Yes. GitAscii generates separate SVGs for dark and light themes. Using the HTML picture element, GitHub automatically shows the right version based on the viewer's preference.",
-  },
-  {
-    question: 'What is Generate Best Profile?',
-    answer:
-      'Our smart generation feature analyzes your GitHub data (repos, languages, contributions, bio) and automatically creates an optimized profile layout tailored to your activity.',
-  },
-  {
-    question: 'Can I customize everything?',
-    answer:
-      'Yes. While templates give you a great starting point, every single widget property (colors, fonts, sizes, positions) can be customized in the visual editor.',
-  },
-]
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -57,7 +15,7 @@ export function FAQ() {
     setOpenIndex(openIndex === index ? null : index)
   }
 
-  const translatedFaqs = faqs.map((faq, index) => ({
+  const translatedFaqs = LANDING_FAQS.map((faq, index) => ({
     question: t(`landing.faq.q${index + 1}`, faq.question),
     answer: t(`landing.faq.a${index + 1}`, faq.answer),
   }))

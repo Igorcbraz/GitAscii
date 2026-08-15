@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
+import { EXTERNAL_LINKS } from '@/constants'
 import DemoSection from '@/features/landing/components/DemoSection'
 import { FAQ } from '@/features/landing/components/FAQ'
 import { FeaturesGrid } from '@/features/landing/components/FeaturesGrid'
@@ -20,8 +21,8 @@ export async function generateMetadata({
   const isPtBr = params.lang === 'pt'
 
   const ogImage = isPtBr
-    ? 'https://git-ascii.vercel.app/og-image-pt-br.png'
-    : 'https://git-ascii.vercel.app/og-image.png'
+    ? EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE_PT
+    : EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE
 
   const title = isPtBr
     ? 'GitAscii — Gerador Premium de README e Arte ASCII para o GitHub'

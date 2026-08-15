@@ -3,6 +3,7 @@
 import { Layers, Lock, Move, X } from 'lucide-react'
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { EXTERNAL_LINKS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { getWidgetMinSize, renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
@@ -216,7 +217,7 @@ export function SVGCanvas() {
       const customImageUrl = (cfg.imageUrl as string) || ''
       const uploadedImageData = (cfg.uploadedImageData as string) || ''
 
-      let imgSrc = githubData.user.avatar_url || 'https://github.com/github.png'
+      let imgSrc = githubData.user.avatar_url || EXTERNAL_LINKS.DEFAULT_GITHUB_AVATAR
       if (sourceType === 'upload' && uploadedImageData) {
         imgSrc = uploadedImageData
       } else if (sourceType === 'url' && customImageUrl) {
@@ -370,7 +371,9 @@ export function SVGCanvas() {
       svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
         try {
           svg.pauseAnimations()
-        } catch (e) {}
+        } catch {
+          // ignore if not supported
+        }
       })
     }
   }
@@ -615,7 +618,9 @@ export function SVGCanvas() {
         svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
           try {
             svg.unpauseAnimations()
-          } catch (e) {}
+          } catch {
+            // ignore if not supported
+          }
         })
       }
 
@@ -817,8 +822,9 @@ export function SVGCanvas() {
             >
               <style>
                 {`
-                  @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=PT+Serif:ital,wght@0,300;1,300&display=swap');
+                  @import url('${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}');
                   * { box-sizing: border-box; }
+
                   text { user-select: none; }
                   .canvas-is-dragging * {
                     animation: none !important;

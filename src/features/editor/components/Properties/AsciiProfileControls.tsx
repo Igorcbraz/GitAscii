@@ -5,6 +5,7 @@ import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
 import { WIDGET_IDS } from '@/constants'
+import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
 
@@ -15,6 +16,7 @@ interface AsciiProfileControlsProps {
 }
 
 export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProfileControlsProps) {
+  const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
   const user = useEditorStore((state) => state.githubData?.user)
 
@@ -25,11 +27,11 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
   const customWhoami = (config.customWhoami as string) || ''
 
   const TIMING_PRESETS = [
-    { label: 'Muito Rápido', val: 0.05 },
-    { label: 'Rápido', val: 0.08 },
-    { label: 'Médio', val: 0.11 },
-    { label: 'Lento', val: 0.18 },
-    { label: 'Muito Lento', val: 0.25 },
+    { label: t('editor.asciiprofile.speed_very_fast', 'Muito Rápido'), val: 0.05 },
+    { label: t('editor.asciiprofile.speed_fast', 'Rápido'), val: 0.08 },
+    { label: t('editor.asciiprofile.speed_medium', 'Médio'), val: 0.11 },
+    { label: t('editor.asciiprofile.speed_slow', 'Lento'), val: 0.18 },
+    { label: t('editor.asciiprofile.speed_very_slow', 'Muito Lento'), val: 0.25 },
   ]
 
   const infoHost = (config.infoHost as string) || ''
@@ -73,13 +75,15 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
         <LayoutGrid size={14} />
-        <span>ASCII Profile Customization</span>
+        <span>{t('editor.asciiprofile.title', 'ASCII Profile Customization')}</span>
       </div>
 
       {widgetId === WIDGET_IDS.ASCII_PORTRAIT && (
         <div className="space-y-3">
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Título do Terminal</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.asciiprofile.terminal_title', 'Título do Terminal')}
+            </label>
             <input
               type="text"
               value={customTitle}
@@ -90,7 +94,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Nome (whoami)</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.asciiprofile.whoami', 'Nome (whoami)')}
+            </label>
             <input
               type="text"
               value={customWhoami}
@@ -103,11 +109,13 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
           <div className="space-y-3.5 pt-2 border-t border-graphite/40">
             <div className="flex items-center gap-1 text-ash text-eyebrow font-medium">
               <Sliders size={13} />
-              <span>Velocidade de Digitação</span>
+              <span>{t('editor.asciiprofile.typing_speed', 'Velocidade de Digitação')}</span>
             </div>
 
             <div>
-              <label className="text-[10px] text-ash block mb-1">Atalhos de Velocidade</label>
+              <label className="text-[10px] text-ash block mb-1">
+                {t('editor.asciiprofile.speed_shortcuts', 'Atalhos de Velocidade')}
+              </label>
               <div className="grid grid-cols-5 gap-1">
                 {TIMING_PRESETS.map((preset) => (
                   <button
@@ -119,7 +127,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
                         rowDur: preset.val,
                       })
                     }
-                    className={`py-1 text-[9px] font-semibold rounded border transition-all ${
+                    className={`py-1 text-[9px] font-semibold rounded border transition-all cursor-pointer ${
                       stagger === preset.val
                         ? 'bg-signal-lime text-black border-signal-lime font-bold'
                         : 'bg-graphite text-ash border-graphite hover:text-chalk'
@@ -133,7 +141,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1">
               <div className="flex justify-between items-center text-eyebrow">
-                <span className="text-ash">Stagger Linha (Intervalo)</span>
+                <span className="text-ash">
+                  {t('editor.asciiprofile.stagger_line', 'Stagger Linha (Intervalo)')}
+                </span>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="number"
@@ -164,7 +174,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1">
               <div className="flex justify-between items-center text-eyebrow">
-                <span className="text-ash">Duração da Linha (Digitação)</span>
+                <span className="text-ash">
+                  {t('editor.asciiprofile.row_dur', 'Duração da Linha (Digitação)')}
+                </span>
                 <div className="flex items-center gap-1.5">
                   <input
                     type="number"
@@ -194,7 +206,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
           <div className="flex items-center justify-between pt-2 border-t border-graphite/40">
             <span className="text-eyebrow text-chalk font-medium">
-              Modo de Visualização Estático
+              {t('editor.asciiprofile.static_mode', 'Modo de Visualização Estático')}
             </span>
             <Switch
               checked={staticMode}
@@ -209,7 +221,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
       {widgetId === WIDGET_IDS.ASCII_INFO && (
         <div className="space-y-3">
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Nome do Terminal (Host)</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.asciiprofile.info_host', 'Nome do Terminal (Host)')}
+            </label>
             <input
               type="text"
               value={infoHost}
@@ -221,7 +235,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
           <div className="flex items-center justify-between pt-1 pb-2 border-b border-graphite/40">
             <span className="text-eyebrow text-chalk font-medium">
-              Modo de Visualização Estático
+              {t('editor.asciiprofile.static_mode', 'Modo de Visualização Estático')}
             </span>
             <Switch
               checked={staticMode}
@@ -232,11 +246,15 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
           </div>
 
           <div className="space-y-3.5">
-            <div className="label-stamp text-caption text-ash mb-1">[ INFORMAÇÕES TERMINAL ]</div>
+            <div className="label-stamp text-caption text-ash mb-1">
+              {t('editor.asciiprofile.terminal_info_section', '[ INFORMAÇÕES TERMINAL ]')}
+            </div>
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Now (Cargo/Bio)</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.now_label', '. Now (Cargo/Bio)')}
+                </span>
                 <Switch
                   checked={showNow}
                   onChange={(val) => updateWidgetConfig(instanceId, { showNow: val })}
@@ -255,7 +273,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Also (Empresa/Extra)</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.also_label', '. Also (Empresa/Extra)')}
+                </span>
                 <Switch
                   checked={showAlso}
                   onChange={(val) => updateWidgetConfig(instanceId, { showAlso: val })}
@@ -274,7 +294,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Loc (Localização)</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.loc_label', '. Loc (Localização)')}
+                </span>
                 <Switch
                   checked={showLoc}
                   onChange={(val) => updateWidgetConfig(instanceId, { showLoc: val })}
@@ -293,7 +315,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Site (Link)</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.site_label', '. Site (Link)')}
+                </span>
                 <Switch
                   checked={showSite}
                   onChange={(val) => updateWidgetConfig(instanceId, { showSite: val })}
@@ -311,12 +335,14 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
             </div>
 
             <div className="label-stamp text-caption text-ash pt-2 mb-1 border-t border-graphite/40">
-              [ STACK (TECNOLOGIAS) ]
+              {t('editor.asciiprofile.stack_section', '[ STACK (TECNOLOGIAS) ]')}
             </div>
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Langs (Linguagens)</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.langs_label', '. Langs (Linguagens)')}
+                </span>
                 <Switch
                   checked={showLangs}
                   onChange={(val) => updateWidgetConfig(instanceId, { showLangs: val })}
@@ -335,7 +361,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Frontend</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.frontend_label', '. Frontend')}
+                </span>
                 <Switch
                   checked={showFrontend}
                   onChange={(val) => updateWidgetConfig(instanceId, { showFrontend: val })}
@@ -356,7 +384,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Backend</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.backend_label', '. Backend')}
+                </span>
                 <Switch
                   checked={showBackend}
                   onChange={(val) => updateWidgetConfig(instanceId, { showBackend: val })}
@@ -376,12 +406,14 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
             </div>
 
             <div className="label-stamp text-caption text-ash pt-2 mb-1 border-t border-graphite/40">
-              [ HIGHLIGHTS (DESTAQUES) ]
+              {t('editor.asciiprofile.highlights_section', '[ HIGHLIGHTS (DESTAQUES) ]')}
             </div>
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Bullet 1</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.bullet1_label', '. Bullet 1')}
+                </span>
                 <Switch
                   checked={showBullet1}
                   onChange={(val) => updateWidgetConfig(instanceId, { showBullet1: val })}
@@ -402,7 +434,9 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
             <div className="space-y-1.5 p-2 bg-carbon/40 rounded border border-graphite/30">
               <div className="flex items-center justify-between">
-                <span className="text-eyebrow text-chalk font-medium">. Bullet 2</span>
+                <span className="text-eyebrow text-chalk font-medium">
+                  {t('editor.asciiprofile.bullet2_label', '. Bullet 2')}
+                </span>
                 <Switch
                   checked={showBullet2}
                   onChange={(val) => updateWidgetConfig(instanceId, { showBullet2: val })}
@@ -428,7 +462,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
         <div className="space-y-3">
           <div className="flex items-center justify-between pt-1">
             <span className="text-eyebrow text-chalk font-medium">
-              Modo de Visualização Estático
+              {t('editor.asciiprofile.static_mode', 'Modo de Visualização Estático')}
             </span>
             <Switch
               checked={staticMode}
@@ -440,7 +474,7 @@ export function AsciiProfileControls({ instanceId, widgetId, config }: AsciiProf
 
           <div>
             <label className="text-eyebrow text-ash block mb-2">
-              Paleta de Cores (Pré-visualização)
+              {t('editor.asciiprofile.color_palette', 'Paleta de Cores (Pré-visualização)')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {['Classic Green', 'Purple Hues', 'Ocean Blue', 'Warm Reds'].map((pName, idx) => (

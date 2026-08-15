@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { setSession } from '@/lib/auth'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function GET(request: Request) {
   try {
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+    const tokenResponse = await fetch(API_ENDPOINTS.GITHUB.OAUTH_ACCESS_TOKEN, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const userResponse = await fetch('https://api.github.com/user', {
+    const userResponse = await fetch(API_ENDPOINTS.GITHUB.CURRENT_USER, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'User-Agent': 'GitAscii-App',

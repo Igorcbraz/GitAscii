@@ -1,4 +1,5 @@
 import type { SavedConfiguration } from '@/engine/types'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { profileRepository } from './profileRepository'
 
@@ -20,10 +21,10 @@ async function fetchConfigFromGitHub(
 ): Promise<SavedConfiguration | null> {
   const filename = slug === 'default' ? 'gitascii.json' : `gitascii_${slug.toLowerCase()}.json`
   const urls = [
-    `https://raw.githubusercontent.com/${username}/${username}/main/${filename}`,
-    `https://raw.githubusercontent.com/${username}/${username}/main/.github/${filename}`,
-    `https://raw.githubusercontent.com/${username}/${username}/master/${filename}`,
-    `https://raw.githubusercontent.com/${username}/${username}/master/.github/${filename}`,
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', `.github/${filename}`),
   ]
 
   for (const url of urls) {

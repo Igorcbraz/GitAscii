@@ -1,23 +1,20 @@
 'use client'
 
-import {
-  ArrowRight,
-  BookOpen,
-  Check,
-  Copy,
-  ExternalLink,
-  Github,
-  Layout,
-  User,
-  Users,
-  Zap,
-} from 'lucide-react'
+import { ArrowRight, Check, Copy, ExternalLink, Github, User, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
+import {
+  FEATURED_GUIDES,
+  FEATURED_PROFILES,
+  POPULAR_TEMPLATES,
+  SHOWCASE_TABS,
+  SHOWCASE_WIDGETS,
+} from '@/constants'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export default function InteractiveShowcase() {
   const { language } = useI18n()
@@ -27,7 +24,6 @@ export default function InteractiveShowcase() {
   const [copied, setCopied] = useState(false)
   const [copiedText, setCopiedText] = useState('')
 
-  // State for sub-items
   const [selectedTemplate, setSelectedTemplate] = useState('terminal')
   const [selectedWidget, setSelectedWidget] = useState('stats')
   const [selectedProfile, setSelectedProfile] = useState('igorcbraz')
@@ -43,185 +39,35 @@ export default function InteractiveShowcase() {
     }, 2000)
   }
 
-  // Translation helpers that fall back to english
   const tc = (key: string, enVal: string, ptVal: string) => {
     return language === 'pt' ? ptVal : enVal
   }
 
-  const tabs = [
-    {
-      id: 'templates',
-      label: tc('landing.showcase.tab.templates', '01 · TEMPLATES', '01 · TEMPLATES'),
-      icon: Layout,
-    },
-    {
-      id: 'widgets',
-      label: tc('landing.showcase.tab.widgets', '02 · DYNAMIC WIDGETS', '02 · WIDGETS DINÂMICOS'),
-      icon: Zap,
-    },
-    {
-      id: 'profiles',
-      label: tc(
-        'landing.showcase.tab.profiles',
-        '03 · COMMUNITY PROFILES',
-        '03 · PERFIS DA COMUNIDADE'
-      ),
-      icon: Users,
-    },
-    {
-      id: 'guides',
-      label: tc('landing.showcase.tab.guides', '04 · README GUIDES', '04 · GUIAS DE README'),
-      icon: BookOpen,
-    },
-  ] as const
+  const tabs = SHOWCASE_TABS.map((tab) => ({
+    id: tab.id,
+    label: tc(tab.labelKey, tab.labelEn, tab.labelPt),
+    icon: tab.icon,
+  }))
 
-  const popularTemplates = [
-    {
-      id: 'terminal',
-      name: 'Terminal CLI',
-      bg: 'bg-[#000000]',
-      border: 'border-signal-lime/30',
-      accent: '#c5ff4a',
-      text: '#ffffff',
-      category: 'cli',
-      tags: ['Classic', 'CLI'],
-    },
-    {
-      id: 'tokyo-night',
-      name: 'Tokyo Night',
-      bg: 'bg-[#1a1b26]',
-      border: 'border-[#7aa2f7]/30',
-      accent: '#7aa2f7',
-      text: '#a9b1d6',
-      category: 'themes',
-      tags: ['Neon', 'Modern'],
-    },
-    {
-      id: 'dracula',
-      name: 'Dracula Theme',
-      bg: 'bg-[#282a36]',
-      border: 'border-[#bd93f9]/30',
-      accent: '#bd93f9',
-      text: '#f8f8f2',
-      category: 'themes',
-      tags: ['Vibrant', 'Theme'],
-    },
-    {
-      id: 'minimal',
-      name: 'Minimal Light',
-      bg: 'bg-[#ffffff]',
-      border: 'border-black/30',
-      accent: '#000000',
-      text: '#222222',
-      category: 'minimal',
-      tags: ['Clean', 'Light'],
-    },
-  ]
+  const popularTemplates = POPULAR_TEMPLATES
 
-  const showcaseWidgets = [
-    {
-      id: 'stats',
-      name: tc('widget.name.stats', 'Live Stats Card', 'Cartão de Estatísticas'),
-      snippet: '![Stats](${APP_URL}/api/YOUR_USERNAME)',
-      desc: tc(
-        'widget.desc.stats',
-        'Calculates total commits, stars, PRs, issues and repos dynamically.',
-        'Calcula commits, estrelas, PRs, issues e repositórios em tempo real.'
-      ),
-    },
-    {
-      id: 'streak',
-      name: tc('widget.name.streak', 'Contribution Streak', 'Racha de Contribuições'),
-      snippet: '![Streak](${APP_URL}/api/YOUR_USERNAME?widget=streak)',
-      desc: tc(
-        'widget.desc.streak',
-        'Displays active daily contribution streak and longest record.',
-        'Exibe sua racha de contribuição diária atual e recorde histórico.'
-      ),
-    },
-    {
-      id: 'languages',
-      name: tc('widget.name.languages', 'Top Languages', 'Principais Linguagens'),
-      snippet: '![Languages](${APP_URL}/api/YOUR_USERNAME?widget=languages)',
-      desc: tc(
-        'widget.desc.languages',
-        'Visual breakdown of programming languages used across public repositories.',
-        'Detalhamento visual das linguagens mais usadas em repositórios públicos.'
-      ),
-    },
-    {
-      id: 'stack',
-      name: tc('widget.name.stack', 'Tech Stack Badges', 'Badges de Habilidades'),
-      snippet: '![Stack](${APP_URL}/api/YOUR_USERNAME?widget=stack)',
-      desc: tc(
-        'widget.desc.stack',
-        'Displays customized tech stack skill badges dynamically.',
-        'Exibe badges personalizados de suas habilidades e tecnologias.'
-      ),
-    },
-  ]
+  const showcaseWidgets = SHOWCASE_WIDGETS.map((widget) => ({
+    id: widget.id,
+    name: tc(widget.nameKey, widget.nameEn, widget.namePt),
+    snippet: widget.snippet,
+    desc: tc(widget.descKey, widget.descEn, widget.descPt),
+  }))
 
-  const featuredProfiles = [
-    {
-      id: 'igorcbraz',
-      username: 'Igorcbraz',
-      name: 'Igor Braz',
-      role: 'Creator / Developer',
-      template: 'terminal',
-      widgets: 4,
-      avatar: 'https://github.com/Igorcbraz.png?size=150',
-      tags: ['Terminal CLI', 'Verified Creator'],
-    },
-    {
-      id: 'schunckleonardo',
-      username: 'schunckleonardo',
-      name: 'Leonardo Schunck',
-      role: 'Contributor / Engineer',
-      template: 'dracula',
-      widgets: 3,
-      avatar: 'https://github.com/schunckleonardo.png?size=150',
-      tags: ['Dracula Theme', 'Core Contributor'],
-    },
-  ]
+  const featuredProfiles = FEATURED_PROFILES
 
-  const featuredGuides = [
-    {
-      id: 'github',
-      title: 'Managing Your Profile README (Official GitHub)',
-      publisher: 'GITHUB DOCS',
-      url: 'https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme',
-      readTime: '4 min read',
-      summary: tc(
-        'guide.desc.github',
-        'Official instructions on initializing your special repository (username/username) and publishing your developer README.',
-        'Instruções oficiais sobre como inicializar seu repositório especial (username/username) e publicar seu README.'
-      ),
-    },
-    {
-      id: 'themes',
-      title: 'Dark & Light Mode Switching in GitHub Markdown',
-      publisher: 'GITHUB MARKUP',
-      url: 'https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax',
-      readTime: '5 min read',
-      summary: tc(
-        'guide.desc.themes',
-        'Learn to use HTML <picture> and media queries (prefers-color-scheme) to render adaptive SVGs.',
-        'Aprenda a usar a tag HTML <picture> e media queries para renderizar SVGs adaptativos.'
-      ),
-    },
-    {
-      id: 'badges',
-      title: 'Mastering Shields.io Badges & Custom SVG Layouts',
-      publisher: 'SHIELDS.IO',
-      url: 'https://shields.io',
-      readTime: '6 min read',
-      summary: tc(
-        'guide.desc.badges',
-        'Guide to embedding custom technology badges, social media links and custom stats parameters.',
-        'Guia para incorporar badges de tecnologia customizados, redes sociais e parâmetros de estatísticas.'
-      ),
-    },
-  ]
+  const featuredGuides = FEATURED_GUIDES.map((guide) => ({
+    id: guide.id,
+    title: guide.title,
+    publisher: guide.publisher,
+    url: guide.url,
+    readTime: guide.readTime,
+    summary: tc(guide.summaryKey, guide.summaryEn, guide.summaryPt),
+  }))
 
   return (
     <section
@@ -291,7 +137,7 @@ export default function InteractiveShowcase() {
                 <span className="text-signal-lime font-bold">● ONLINE</span>
               </div>
               <div className="h-px bg-graphite" />
-              <div className="grid grid-cols-2 gap-2 font-jetbrains-mono text-[11px]">
+              <div className="grid grid-cols-2 gap-2 font-jetbrains-mono text-eyebrow">
                 <div>
                   <span className="text-ash block">TEMPLATES</span>
                   <span className="text-chalk font-semibold">13+ Catalog</span>
@@ -304,7 +150,7 @@ export default function InteractiveShowcase() {
             </div>
           </div>
 
-          <div className="lg:col-span-8 flex flex-col justify-between pl-0 lg:pl-8 pt-6 lg:pt-0 min-w-0 lg:h-[480px]">
+          <div className="lg:col-span-8 flex flex-col justify-between pl-0 lg:pl-8 pt-6 lg:pt-0 min-w-0 lg:h-120">
             <AnimatePresence mode="wait">
               {activeTab === 'templates' && (
                 <motion.div
@@ -352,7 +198,7 @@ export default function InteractiveShowcase() {
 
                           <div className="space-y-4">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-full bg-graphite flex items-center justify-center border border-ash/20 font-jetbrains-mono text-[10px] text-ash shrink-0">
+                              <div className="w-12 h-12 rounded-full bg-graphite flex items-center justify-center border border-ash/20 font-jetbrains-mono text-caption text-ash shrink-0">
                                 @USER
                               </div>
                               <div>
@@ -372,7 +218,7 @@ export default function InteractiveShowcase() {
                               </div>
                             </div>
 
-                            <div className="border border-graphite/60 bg-carbon/50 p-4 font-jetbrains-mono text-[11px] leading-relaxed">
+                            <div className="border border-graphite/60 bg-carbon/50 p-4 font-jetbrains-mono text-eyebrow leading-relaxed">
                               <div className="flex items-center gap-2 mb-2">
                                 <span style={{ color: tInfo.accent }}>●</span>
                                 <span className={isMinimal ? 'text-black' : 'text-ash'}>
@@ -400,7 +246,7 @@ export default function InteractiveShowcase() {
                             </div>
                           </div>
 
-                          <div className="flex justify-between items-center pt-4 border-t border-graphite/40 mt-4 text-[10px] font-jetbrains-mono text-ash">
+                          <div className="flex justify-between items-center pt-4 border-t border-graphite/40 mt-4 text-caption font-jetbrains-mono text-ash">
                             <span>[ POWERED BY GITASCII ENGINE ]</span>
                             <span className="flex gap-2">
                               {tInfo.tags.map((tag) => (
@@ -490,7 +336,7 @@ export default function InteractiveShowcase() {
 
                           <div className="bg-onyx border border-graphite p-6 flex flex-col justify-center items-center min-h-36 font-jetbrains-mono relative">
                             {wInfo.id === 'stats' && (
-                              <div className="w-full max-w-md border border-graphite/60 bg-[#060606] p-4 text-[11px] space-y-3 shadow-md">
+                              <div className="w-full max-w-md border border-graphite/60 bg-carbon p-4 text-eyebrow space-y-3 shadow-md">
                                 <div className="flex justify-between items-center text-signal-lime border-b border-graphite pb-2">
                                   <span className="font-bold">GITASCII STATS</span>
                                   <span className="text-[9px] border border-signal-lime px-1 rounded-sm">
@@ -519,7 +365,7 @@ export default function InteractiveShowcase() {
                             )}
 
                             {wInfo.id === 'streak' && (
-                              <div className="w-full max-w-sm border border-graphite/60 bg-[#060606] p-4 text-[11px] flex justify-around items-center text-center shadow-md">
+                              <div className="w-full max-w-sm border border-graphite/60 bg-carbon p-4 text-eyebrow flex justify-around items-center text-center shadow-md">
                                 <div className="space-y-1">
                                   <span className="text-ash block uppercase text-[9px]">
                                     Current Streak
@@ -543,8 +389,8 @@ export default function InteractiveShowcase() {
                             )}
 
                             {wInfo.id === 'languages' && (
-                              <div className="w-full max-w-md border border-graphite/60 bg-[#060606] p-4 text-[11px] space-y-3 shadow-md text-bone">
-                                <div className="text-[10px] font-bold text-ash tracking-wider">
+                              <div className="w-full max-w-md border border-graphite/60 bg-carbon p-4 text-eyebrow space-y-3 shadow-md text-bone">
+                                <div className="text-caption font-bold text-ash tracking-wider">
                                   TOP LANGUAGES BYTES
                                 </div>
                                 <div className="space-y-2">
@@ -578,26 +424,26 @@ export default function InteractiveShowcase() {
 
                             {wInfo.id === 'stack' && (
                               <div className="flex flex-wrap gap-2 justify-center max-w-md">
-                                <span className="px-3 py-1 border border-graphite bg-carbon text-[11px] font-bold text-[#61dafb]">
+                                <span className="px-3 py-1 border border-graphite bg-carbon text-eyebrow font-bold text-[#61dafb]">
                                   React.js
                                 </span>
-                                <span className="px-3 py-1 border border-graphite bg-carbon text-[11px] font-bold text-[#ffffff]">
+                                <span className="px-3 py-1 border border-graphite bg-carbon text-eyebrow font-bold text-chalk">
                                   Next.js
                                 </span>
-                                <span className="px-3 py-1 border border-graphite bg-carbon text-[11px] font-bold text-[#339933]">
+                                <span className="px-3 py-1 border border-graphite bg-carbon text-eyebrow font-bold text-[#339933]">
                                   Node.js
                                 </span>
-                                <span className="px-3 py-1 border border-graphite bg-carbon text-[11px] font-bold text-[#3776ab]">
+                                <span className="px-3 py-1 border border-graphite bg-carbon text-eyebrow font-bold text-[#3776ab]">
                                   Python
                                 </span>
-                                <span className="px-3 py-1 border border-graphite bg-carbon text-[11px] font-bold text-[#c5ff4a]">
+                                <span className="px-3 py-1 border border-graphite bg-carbon text-eyebrow font-bold text-signal-lime">
                                   GitAscii
                                 </span>
                               </div>
                             )}
                           </div>
 
-                          <div className="relative bg-carbon border border-graphite p-3 flex justify-between items-center font-jetbrains-mono text-[11px]">
+                          <div className="relative bg-carbon border border-graphite p-3 flex justify-between items-center font-jetbrains-mono text-eyebrow">
                             <code className="text-bone truncate pr-16 select-all">
                               {wInfo.snippet}
                             </code>
@@ -608,12 +454,12 @@ export default function InteractiveShowcase() {
                               {copied && copiedText === wInfo.snippet ? (
                                 <>
                                   <Check size={11} className="text-signal-lime" />
-                                  <span className="text-[10px] text-signal-lime">Copiado</span>
+                                  <span className="text-caption text-signal-lime">Copiado</span>
                                 </>
                               ) : (
                                 <>
                                   <Copy size={11} />
-                                  <span className="text-[10px]">Copiar</span>
+                                  <span className="text-caption">Copiar</span>
                                 </>
                               )}
                             </button>
@@ -709,7 +555,7 @@ export default function InteractiveShowcase() {
                             </div>
 
                             <a
-                              href={`https://github.com/${pInfo.username}`}
+                              href={API_ENDPOINTS.GITHUB.USER_PROFILE(pInfo.username)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center justify-center p-2 border border-graphite hover:border-signal-lime text-ash hover:text-white transition-colors bg-onyx cursor-pointer"
@@ -724,7 +570,7 @@ export default function InteractiveShowcase() {
                               <span className="text-[9px] font-jetbrains-mono text-ash uppercase block">
                                 CONFIGURATION STATS
                               </span>
-                              <div className="space-y-1 font-jetbrains-mono text-[11px] text-bone">
+                              <div className="space-y-1 font-jetbrains-mono text-eyebrow text-bone">
                                 <div>
                                   Active Template:{' '}
                                   <span className="text-signal-lime font-bold">
@@ -841,7 +687,7 @@ export default function InteractiveShowcase() {
                               <span className="font-jetbrains-mono text-[9px] text-signal-lime uppercase tracking-widest bg-onyx px-2 py-0.5 border border-graphite">
                                 [ {gInfo.publisher} ]
                               </span>
-                              <span className="font-jetbrains-mono text-[10px] text-ash">
+                              <span className="font-jetbrains-mono text-caption text-ash">
                                 {gInfo.readTime}
                               </span>
                             </div>

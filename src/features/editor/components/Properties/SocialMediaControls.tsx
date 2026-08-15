@@ -5,187 +5,13 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { BADGE_STYLES, SOCIAL_PLATFORMS, type SocialPlatform } from '@/constants'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { useEditorStore } from '../../store/editorStore'
 
-export interface SocialPlatform {
-  id: string
-  label: string
-  logo: string
-  color: string
-  defaultUrl: string
-}
-
-export const SOCIAL_PLATFORMS: SocialPlatform[] = [
-  {
-    id: 'github',
-    label: 'GitHub',
-    logo: 'github',
-    color: '181717',
-    defaultUrl: 'https://github.com/{username}',
-  },
-  {
-    id: 'linkedin',
-    label: 'LinkedIn',
-    logo: 'linkedin',
-    color: '0A66C2',
-    defaultUrl: 'https://linkedin.com/in/{username}',
-  },
-  {
-    id: 'twitter',
-    label: 'X (Twitter)',
-    logo: 'x',
-    color: '000000',
-    defaultUrl: 'https://x.com/{username}',
-  },
-  {
-    id: 'discord',
-    label: 'Discord',
-    logo: 'discord',
-    color: '5865F2',
-    defaultUrl: 'https://discord.gg/yourserver',
-  },
-  {
-    id: 'youtube',
-    label: 'YouTube',
-    logo: 'youtube',
-    color: 'FF0000',
-    defaultUrl: 'https://youtube.com/@{username}',
-  },
-  {
-    id: 'instagram',
-    label: 'Instagram',
-    logo: 'instagram',
-    color: 'E4405F',
-    defaultUrl: 'https://instagram.com/{username}',
-  },
-  {
-    id: 'twitch',
-    label: 'Twitch',
-    logo: 'twitch',
-    color: '9146FF',
-    defaultUrl: 'https://twitch.tv/{username}',
-  },
-  {
-    id: 'devto',
-    label: 'Dev.to',
-    logo: 'devto',
-    color: '0A0A0A',
-    defaultUrl: 'https://dev.to/{username}',
-  },
-  {
-    id: 'medium',
-    label: 'Medium',
-    logo: 'medium',
-    color: '000000',
-    defaultUrl: 'https://medium.com/@{username}',
-  },
-  {
-    id: 'email',
-    label: 'Email',
-    logo: 'gmail',
-    color: 'EA4335',
-    defaultUrl: 'mailto:user@example.com',
-  },
-  {
-    id: 'website',
-    label: 'Portfolio',
-    logo: 'googlechrome',
-    color: '2563EB',
-    defaultUrl: 'https://{username}.dev',
-  },
-  {
-    id: 'stackoverflow',
-    label: 'StackOverflow',
-    logo: 'stackoverflow',
-    color: 'F48024',
-    defaultUrl: 'https://stackoverflow.com/users/{username}',
-  },
-  {
-    id: 'bluesky',
-    label: 'Bluesky',
-    logo: 'bluesky',
-    color: '1185FE',
-    defaultUrl: 'https://bsky.app/profile/{username}',
-  },
-  {
-    id: 'mastodon',
-    label: 'Mastodon',
-    logo: 'mastodon',
-    color: '6364FF',
-    defaultUrl: 'https://mastodon.social/@{username}',
-  },
-  {
-    id: 'reddit',
-    label: 'Reddit',
-    logo: 'reddit',
-    color: 'FF4500',
-    defaultUrl: 'https://reddit.com/user/{username}',
-  },
-  {
-    id: 'spotify',
-    label: 'Spotify',
-    logo: 'spotify',
-    color: '1DB954',
-    defaultUrl: 'https://open.spotify.com/user/{username}',
-  },
-  {
-    id: 'telegram',
-    label: 'Telegram',
-    logo: 'telegram',
-    color: '26A5E4',
-    defaultUrl: 'https://t.me/{username}',
-  },
-  {
-    id: 'tiktok',
-    label: 'TikTok',
-    logo: 'tiktok',
-    color: '000000',
-    defaultUrl: 'https://tiktok.com/@{username}',
-  },
-  {
-    id: 'steam',
-    label: 'Steam',
-    logo: 'steam',
-    color: '000000',
-    defaultUrl: 'https://steamcommunity.com/id/{username}',
-  },
-  {
-    id: 'hashnode',
-    label: 'Hashnode',
-    logo: 'hashnode',
-    color: '2962FF',
-    defaultUrl: 'https://hashnode.com/@{username}',
-  },
-]
-
-const BADGE_STYLES = (t: (key: string, def?: string) => string) => [
-  {
-    id: 'for-the-badge',
-    name: 'SHIELDS BOLD',
-    preview: 'for-the-badge',
-    info: t('editor.social.bold_info', 'Caixa alta preenchida'),
-  },
-  {
-    id: 'flat-square',
-    name: 'SHIELDS FLAT',
-    preview: 'flat-square',
-    info: t('editor.social.flat_info', 'Badge retangular clean'),
-  },
-  {
-    id: 'social',
-    name: 'SHIELDS SOCIAL',
-    preview: 'social',
-    info: t('editor.social.social_info', 'Estilo contador social'),
-  },
-  {
-    id: 'skillicons',
-    name: 'SKILL ICONS',
-    preview: 'skillicons',
-    info: t('editor.social.skill_info', 'Ícones circulares minimalistas'),
-  },
-]
+export { SOCIAL_PLATFORMS, type SocialPlatform }
 
 interface SocialMediaControlsProps {
   instanceId: string
@@ -209,7 +35,12 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
   const socialUrls = (config.socialUrls as Record<string, string>) || {}
   const badgeStyle = (config.badgeStyle as string) || 'for-the-badge'
 
-  const badgeStylesList = BADGE_STYLES(t)
+  const badgeStylesList = BADGE_STYLES.map((b) => ({
+    id: b.id,
+    name: b.name,
+    preview: b.preview,
+    info: t(b.infoKey, b.defaultInfo),
+  }))
   const selectedBadgeStyleObj =
     badgeStylesList.find((b) => b.id === badgeStyle) || badgeStylesList[0]
 
@@ -328,7 +159,12 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
         <div className="grid grid-cols-2 gap-1.5 max-h-45 overflow-y-auto p-1 bg-void-black border border-graphite rounded-xs">
           {SOCIAL_PLATFORMS.map((platform) => {
             const isSelected = selectedSocials.includes(platform.id)
-            const badgePreviewUrl = `https://img.shields.io/badge/${encodeURIComponent(platform.label)}-${platform.color}?style=flat-square&logo=${platform.logo}&logoColor=white`
+            const badgePreviewUrl = API_ENDPOINTS.SHIELDS_IO.CUSTOM_BADGE(
+              platform.label,
+              platform.color,
+              'flat-square',
+              platform.logo
+            )
 
             return (
               <div

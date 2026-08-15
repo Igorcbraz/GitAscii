@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
+import { SUMMARY_FEATURES_RAW, SUMMARY_VS_MATRIX_RAW } from '@/constants'
 import { useI18n } from '@/i18n'
 
 export function SummarySection() {
@@ -13,115 +14,18 @@ export function SummarySection() {
     return language === 'pt' ? ptVal : enVal
   }
 
-  const features = [
-    {
-      num: '[ ENGINE-01 ]',
-      title: tc('landing.summary.feat1.title', 'Real-Time SVG Engine', 'Motor SVG em Tempo Real'),
-      desc: tc(
-        'landing.summary.feat1.desc',
-        'Generates live statistics, contribution streaks, and language charts directly from public APIs on-the-fly.',
-        'Gera estatísticas, racha de commits e gráficos de linguagens dinamicamente via APIs públicas.'
-      ),
-    },
-    {
-      num: '[ ENGINE-02 ]',
-      title: tc(
-        'landing.summary.feat2.title',
-        'Image-to-ASCII Converter',
-        'Conversor de Imagem para ASCII'
-      ),
-      desc: tc(
-        'landing.summary.feat2.desc',
-        'Convert your avatar or custom branding into text-based art grids with adjustable character density and contrast.',
-        'Converta seu avatar ou logo em matrizes de caracteres com densidade e contraste ajustáveis.'
-      ),
-    },
-    {
-      num: '[ ENGINE-03 ]',
-      title: tc('landing.summary.feat3.title', 'Theme Adaptability', 'Adaptabilidade de Temas'),
-      desc: tc(
-        'landing.summary.feat3.desc',
-        'Seamless switching between dark and light themes using standard HTML <picture> tags and media queries.',
-        'Alternância automática de temas claro e escuro usando tags HTML <picture> e media queries.'
-      ),
-    },
-    {
-      num: '[ ENGINE-04 ]',
-      title: tc(
-        'landing.summary.feat4.title',
-        'Edge Native & Zero Setup',
-        'Edge Native e Zero Setup'
-      ),
-      desc: tc(
-        'landing.summary.feat4.desc',
-        'Rendered instantly on Serverless Edge functions. Cached efficiently for fast loading on GitHub Camo.',
-        'Renderização instantânea em Serverless Edge. Cache otimizado para carregamento ultra-rápido no GitHub Camo.'
-      ),
-    },
-  ]
+  const features = SUMMARY_FEATURES_RAW.map((f) => ({
+    num: f.num,
+    title: tc(f.titleKey, f.titleEn, f.titlePt),
+    desc: tc(f.descKey, f.descEn, f.descPt),
+  }))
 
-  const vsMatrix = [
-    {
-      feature: tc(
-        'vs.concept_edge_rendering',
-        'Dynamic SVG Edge Rendering',
-        'Renderização de SVG na Edge'
-      ),
-      gitascii: 'included',
-      readme: 'no',
-      gprm: 'no',
-    },
-    {
-      feature: tc(
-        'vs.concept_theme_toggle',
-        'Native Light/Dark Auto-Toggle',
-        'Alternância Clara/Escura Nativa'
-      ),
-      gitascii: 'included',
-      readme: 'manual',
-      gprm: 'manual',
-    },
-    {
-      feature: tc(
-        'vs.concept_ascii_engine',
-        'Luminance-Based ASCII Engine',
-        'Motor ASCII por Luminância'
-      ),
-      gitascii: 'included',
-      readme: 'no',
-      gprm: 'no',
-    },
-    {
-      feature: tc(
-        'vs.concept_visual_builder',
-        'Visual Layout Canvas Builder',
-        'Construtor de Layout Visual'
-      ),
-      gitascii: 'included',
-      readme: 'included',
-      gprm: 'form',
-    },
-    {
-      feature: tc(
-        'vs.concept_zero_db',
-        'Zero Database Dependency',
-        'Dependência Zero de Banco de Dados'
-      ),
-      gitascii: 'included',
-      readme: 'requires_db',
-      gprm: 'included',
-    },
-    {
-      feature: tc(
-        'vs.concept_self_host',
-        'MIT Open Source & Self-Hostable',
-        'Código Aberto MIT / Auto-Hospedável'
-      ),
-      gitascii: 'mit',
-      readme: 'open_source',
-      gprm: 'open_source',
-    },
-  ]
+  const vsMatrix = SUMMARY_VS_MATRIX_RAW.map((m) => ({
+    feature: tc(m.featureKey, m.featureEn, m.featurePt),
+    gitascii: m.gitascii,
+    readme: m.readme,
+    gprm: m.gprm,
+  }))
 
   return (
     <section className="bg-void-black border-t border-graphite py-24 px-6 relative z-10 w-full">
@@ -132,7 +36,7 @@ export function SummarySection() {
               {tc('landing.summary.eyebrow', '[ PRODUCT THESIS ]', '[ TESE DO PRODUTO ]')}
             </span>
 
-            <h2 className="font-pt-serif font-light text-4xl md:text-heading leading-[1.05] tracking-[-0.02em] text-chalk">
+            <h2 className="font-pt-serif font-light text-4xl md:text-heading leading-heading tracking-[-0.02em] text-chalk">
               {tc('landing.summary.title', 'Where terminals meet ', 'Onde terminais encontram ')}
               <span className="italic text-signal-lime">
                 {tc('landing.summary.title_italic', 'editorial design.', 'design editorial.')}
@@ -205,7 +109,7 @@ export function SummarySection() {
           </div>
 
           <div className="max-w-4xl mx-auto border-t border-b border-graphite overflow-x-auto">
-            <table className="w-full text-left font-inter-tight text-note min-w-[500px]">
+            <table className="w-full text-left font-inter-tight text-note min-w-125">
               <thead>
                 <tr className="border-b border-graphite bg-carbon/40 text-ash uppercase tracking-wider text-caption">
                   <th className="py-4 px-4 font-jetbrains-mono font-medium">
@@ -223,7 +127,7 @@ export function SummarySection() {
                   <tr key={idx} className="hover:bg-onyx/20 transition-colors">
                     <td className="py-4 px-4 font-medium text-chalk">{row.feature}</td>
 
-                    <td className="py-4 px-4 text-signal-lime font-bold font-jetbrains-mono text-[13px] bg-signal-lime/5">
+                    <td className="py-4 px-4 text-signal-lime font-bold font-jetbrains-mono text-label bg-signal-lime/5">
                       {row.gitascii === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
                         : row.gitascii === 'mit'
@@ -231,7 +135,7 @@ export function SummarySection() {
                           : row.gitascii}
                     </td>
 
-                    <td className="py-4 px-4 text-ash font-jetbrains-mono text-[13px]">
+                    <td className="py-4 px-4 text-ash font-jetbrains-mono text-label">
                       {row.readme === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
                         : row.readme === 'no'
@@ -245,7 +149,7 @@ export function SummarySection() {
                                 : '✕ ' + row.readme}
                     </td>
 
-                    <td className="py-4 px-4 text-ash font-jetbrains-mono text-[13px]">
+                    <td className="py-4 px-4 text-ash font-jetbrains-mono text-label">
                       {row.gprm === 'included'
                         ? '✓ ' + tc('vs.td_included', 'Included', 'Incluso')
                         : row.gprm === 'no'

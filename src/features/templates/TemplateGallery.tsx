@@ -102,7 +102,7 @@ export function TemplateGallery() {
           ))}
         </div>
 
-        <div className="relative min-w-[240px]">
+        <div className="relative min-w-60">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ash" />
           <input
             type="text"
@@ -151,7 +151,7 @@ export function TemplateGallery() {
                       className="size-2 rounded-full animate-pulse"
                       style={{ backgroundColor: tpl.accent }}
                     />
-                    <span className="font-jetbrains-mono text-[11px] text-white/90 truncate">
+                    <span className="font-jetbrains-mono text-eyebrow text-white/90 truncate">
                       user@github:~$ gitascii --theme={tpl.slug}
                     </span>
                   </div>
@@ -185,9 +185,7 @@ export function TemplateGallery() {
               <h2 className="text-subheading font-medium text-chalk mb-2 group-hover:text-signal-lime transition-colors">
                 {tpl.name}
               </h2>
-              <p className="text-body text-bone leading-relaxed text-note mb-6">
-                {tpl.description}
-              </p>
+              <p className="text-body text-bone leading-relaxed mb-6">{tpl.description}</p>
             </div>
 
             <div className="space-y-2 pt-4 border-t border-graphite/60">

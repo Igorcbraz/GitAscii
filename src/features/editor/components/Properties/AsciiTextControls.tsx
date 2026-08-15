@@ -3,6 +3,7 @@
 import { ChevronDown, Type } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
+import { ASCII_TEXT_CHARSET_OPTIONS } from '@/constants'
 import { type AsciiFontName, convertTextToAscii } from '@/engine/ascii/textConverter'
 import { useI18n } from '@/i18n'
 
@@ -13,20 +14,7 @@ interface AsciiTextControlsProps {
   config: Record<string, unknown>
 }
 
-const CHARSET_OPTIONS = [
-  { id: 'default', name: 'NATURAL / FONTE', preview: 'Native', info: 'Original do estilo' },
-  { id: 'dense', name: 'DENSE GRADIENT', preview: '"$@B%8&WM#*oahk', info: '67 chars' },
-  { id: 'standard', name: 'STANDARD', preview: ' .:-=+*#%@', info: '10 chars' },
-  { id: 'blocks', name: 'BLOCKS / SHADING', preview: ' ░▒▓█', info: '5 chars' },
-  { id: 'dots', name: 'BRAILLE / DOTS', preview: ' ⠁⠃⠇⡇⣇⣿', info: '7 chars' },
-  { id: 'matrix', name: 'MATRIX / HEX', preview: ' 0123456789ABCDEF', info: '16 chars' },
-  { id: 'ascii', name: 'CLASSIC ASCII', preview: " .',:;!|/>(){}", info: '13 chars' },
-  { id: 'binary', name: 'BINARY', preview: ' 01010101', info: '2 chars' },
-  { id: 'slash', name: 'SLASH PATTERN', preview: ' \\/|/\\/|', info: '3 chars' },
-  { id: 'retro', name: 'RETRO ORBS', preview: ' .oO@Oop', info: '5 chars' },
-  { id: 'minimal', name: 'MINIMAL', preview: ' .*#*.*#', info: '4 chars' },
-  { id: 'custom', name: 'CUSTOMIZADO', preview: ' [ Digitar... ]', info: 'Personalizado' },
-]
+const CHARSET_OPTIONS = ASCII_TEXT_CHARSET_OPTIONS
 
 export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps) {
   const { t } = useI18n()

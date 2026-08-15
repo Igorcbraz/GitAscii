@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { APP_DOMAIN } from '@/constants'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
       urlList,
     }
 
-    const res = await fetch('https://api.indexnow.org/indexnow', {
+    const res = await fetch(API_ENDPOINTS.INDEXNOW.SUBMIT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(indexNowPayload),

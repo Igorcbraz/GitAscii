@@ -4,81 +4,14 @@ import { BookOpen, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
-import { APP_URL } from '@/constants'
+import { APP_URL, GUIDES_RESOURCES_LIST, type ResourceGuide } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 import { useI18n } from '@/i18n'
 
-export interface ResourceGuide {
-  slug: string
-  title: string
-  publisher: string
-  publisherBadge: string
-  externalUrl: string
-  summary: string
-  readTime: string
-  tags: string[]
-}
+export type { ResourceGuide }
 
-const guidesList: ResourceGuide[] = [
-  {
-    slug: 'github-official-profile-readme-guide',
-    title: 'Official GitHub Guide: Managing Your Profile README',
-    publisher: 'GitHub Documentation',
-    publisherBadge: 'GITHUB DOCS',
-    externalUrl:
-      'https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/customizing-your-profile/managing-your-profile-readme',
-    summary:
-      'Official step-by-step instructions from GitHub on initializing your special repository (username/username), configuring visibility, and publishing your developer README.',
-    readTime: '4 min read',
-    tags: ['Official', 'Setup', 'GitHub Docs'],
-  },
-  {
-    slug: 'medium-awesome-github-profile-readme',
-    title: 'How to Create an Outstanding GitHub Profile README (Medium Guide)',
-    publisher: 'Medium Engineering',
-    publisherBadge: 'MEDIUM',
-    externalUrl: 'https://medium.com/topic/software-engineering',
-    summary:
-      'Comprehensive tutorial breaking down effective developer profile structures, technical badges, contribution streak displays, and project showcases.',
-    readTime: '6 min read',
-    tags: ['Medium', 'Portfolio', 'Design'],
-  },
-  {
-    slug: 'shields-io-badge-guide',
-    title: 'Mastering Shields.io Badges & Custom SVG Layouts',
-    publisher: 'Shields.io Docs',
-    publisherBadge: 'SHIELDS.IO',
-    externalUrl: 'https://shields.io',
-    summary:
-      'Guide to embedding custom technology badges, social media links, build status indicators, and SVG styling parameters in your profile.',
-    readTime: '5 min read',
-    tags: ['Badges', 'SVG', 'Documentation'],
-  },
-  {
-    slug: 'github-dark-light-mode-switching',
-    title: 'Dark & Light Mode Automatic Theme Switching in GitHub Markdown',
-    publisher: 'GitHub Markup Guide',
-    publisherBadge: 'GITHUB DOCS',
-    externalUrl:
-      'https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax',
-    summary:
-      'Learn how to use HTML <picture> and media queries (prefers-color-scheme) to render adaptive SVGs on GitHub dark and light themes.',
-    readTime: '4 min read',
-    tags: ['Themes', 'HTML', 'Markdown'],
-  },
-  {
-    slug: 'freecodecamp-ascii-art-banners',
-    title: 'Building ASCII Art Banners for Developer Portfolios',
-    publisher: 'FreeCodeCamp',
-    publisherBadge: 'FREECODECAMP',
-    externalUrl: 'https://www.freecodecamp.org/news/tag/markdown/',
-    summary:
-      'Tutorial on converting avatars, logos, and custom graphics into character density text grids that render cleanly across all Markdown renderers.',
-    readTime: '7 min read',
-    tags: ['ASCII Art', 'FreeCodeCamp', 'Tutorial'],
-  },
-]
+const guidesList = GUIDES_RESOURCES_LIST
 
 export default function GuidesPage() {
   const { t } = useI18n()

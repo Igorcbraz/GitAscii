@@ -5,7 +5,9 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
+import { EXPLORE_GALLERY_FILTERS } from '@/constants'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { CommunityProfileItem } from './getCommunityProfiles'
 
@@ -38,13 +40,7 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
           <span className="font-jetbrains-mono text-caption text-ash uppercase tracking-wider shrink-0 mr-2 ml-2">
             {t('explore.gallery.filter', 'Filter:')}
           </span>
-          {[
-            { id: 'all', label: t('explore.gallery.all', 'All Community Profiles') },
-            { id: 'terminal', label: t('explore.gallery.terminal', 'Terminal CLI') },
-            { id: 'dracula', label: t('explore.gallery.dracula', 'Dracula') },
-            { id: 'tokyo-night', label: t('explore.gallery.tokyo_night', 'Tokyo Night') },
-            { id: 'minimal', label: t('explore.gallery.minimal', 'Minimal') },
-          ].map((item) => (
+          {EXPLORE_GALLERY_FILTERS.map((item) => (
             <button
               key={item.id}
               onClick={() => setSelectedTemplate(item.id)}
@@ -54,12 +50,12 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
                   : 'bg-carbon text-ash hover:text-white border border-graphite'
               }`}
             >
-              {item.label}
+              {t(item.labelKey, item.defaultLabel)}
             </button>
           ))}
         </div>
 
-        <div className="relative min-w-[240px]">
+        <div className="relative min-w-60">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-ash" />
           <input
             type="text"
@@ -81,7 +77,7 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
               <div className="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-graphite/60">
                 <div className="flex items-center gap-3">
                   <Image
-                    src={`https://github.com/${p.username}.png?size=80`}
+                    src={API_ENDPOINTS.GITHUB.AVATAR(p.username, 80)}
                     alt={`@${p.username}`}
                     width={44}
                     height={44}
@@ -103,7 +99,7 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
                 </div>
 
                 <a
-                  href={`https://github.com/${p.username}`}
+                  href={API_ENDPOINTS.GITHUB.USER_PROFILE(p.username)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 border border-graphite bg-carbon hover:border-signal-lime text-ash hover:text-white transition-colors cursor-pointer"
@@ -113,7 +109,7 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
                 </a>
               </div>
 
-              <div className="bg-carbon border border-graphite p-3 mb-5 rounded-none overflow-hidden min-h-[120px] flex items-center justify-center relative">
+              <div className="bg-carbon border border-graphite p-3 mb-5 rounded-none overflow-hidden min-h-30 flex items-center justify-center relative">
                 <Image
                   src={`/api/${p.username}?template=${p.templateId}`}
                   alt={`GitAscii Card for @${p.username}`}

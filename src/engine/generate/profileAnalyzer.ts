@@ -1,3 +1,4 @@
+import { RECOMMENDED_PROFILE_WIDGETS } from '@/constants'
 import type { NormalizedGitHubData } from '@/features/github/types/github'
 
 import { createConfiguration } from '../core/TemplateRenderer'
@@ -39,15 +40,7 @@ export function analyzeProfile(data: NormalizedGitHubData): ProfileScore {
     suggestedTemplate = 'cyberpunk'
   }
 
-  const recommendedWidgets = [
-    'header',
-    'ascii-art',
-    'bio',
-    'stats',
-    'languages',
-    'repositories',
-    'footer',
-  ]
+  const recommendedWidgets = [...RECOMMENDED_PROFILE_WIDGETS]
 
   return {
     suggestedTemplate,

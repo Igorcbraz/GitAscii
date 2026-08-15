@@ -18,7 +18,7 @@ import Image from 'next/image'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
-import { WIDGET_CATEGORIES, WIDGET_IDS } from '@/constants'
+import { EXTERNAL_LINKS, USER_SPECIFIC_FIELDS, WIDGET_CATEGORIES, WIDGET_IDS } from '@/constants'
 import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
 import { useI18n } from '@/i18n'
 
@@ -96,26 +96,6 @@ export function WidgetLibrary() {
           return
         }
 
-        // Strip user-specific data fields from imported widgets so the current
-        // session's GitHub data is used instead of the exported user's data.
-        const USER_SPECIFIC_FIELDS = [
-          'avatarUrl',
-          'uploadedImageData',
-          'customBio',
-          'customLocation',
-          'customBlog',
-          'customBullet1',
-          'customBullet2',
-          'customNow',
-          'customAlso',
-          'customLoc',
-          'customSite',
-          'customFrontend',
-          'customBackend',
-          'customLangs',
-          'customWhoami',
-          'asciiText',
-        ]
         const sanitizedWidgets = data.widgets.map((w: Record<string, unknown>) => {
           const { config: widgetCfg, ...rest } = w as {
             config: Record<string, unknown>
@@ -259,7 +239,7 @@ export function WidgetLibrary() {
           onMouseLeave={() => setHoveredWidget(null)}
           className="group relative w-full transition-all duration-300 ease-out cursor-pointer my-1.5 select-none transform hover:-translate-y-0.5"
         >
-          <div className="relative w-full h-[70px] flex items-stretch filter drop-shadow-[0_4px_16px_rgba(88,28,135,0.3)] group-hover:drop-shadow-[0_8px_26px_rgba(147,51,234,0.45)] transition-all duration-300">
+          <div className="relative w-full h-17.5 flex items-stretch filter drop-shadow-[0_4px_16px_rgba(88,28,135,0.3)] group-hover:drop-shadow-[0_8px_26px_rgba(147,51,234,0.45)] transition-all duration-300">
             <div
               className="flex-1 h-full pl-3.5 pr-2 flex items-center justify-between relative transition-all duration-300 group-hover:brightness-105"
               style={{
@@ -281,7 +261,7 @@ export function WidgetLibrary() {
               />
 
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 via-purple-300/15 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
               </div>
 
               <div className="flex items-center gap-3.5 relative z-10 min-w-0 pl-1">
@@ -303,7 +283,7 @@ export function WidgetLibrary() {
             </div>
 
             <div
-              className="w-[50px] h-full flex items-center justify-center relative shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-top-left group-hover:translate-x-2 group-hover:rotate-[4.5deg] group-hover:translate-y-[2px] group-hover:shadow-[-4px_4px_12px_rgba(0,0,0,0.5)]"
+              className="w-12.5 h-full flex items-center justify-center relative shrink-0 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-top-left group-hover:translate-x-2 group-hover:rotate-[4.5deg] group-hover:translate-y-0.5 group-hover:shadow-[-4px_4px_12px_rgba(0,0,0,0.5)]"
               style={{
                 background: 'linear-gradient(135deg, #1c0836 0%, #120522 50%, #0a0214 100%)',
                 maskImage:
@@ -345,7 +325,7 @@ export function WidgetLibrary() {
           <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[radial-gradient(circle,rgba(230,100,115,0.15)_0%,transparent_70%)] opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
           <div className="flex items-center gap-3 relative z-10">
-            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/80 group-hover:text-white group-hover:bg-white/[0.08] transition-all duration-300 shrink-0">
+            <div className="p-2 rounded-xl bg-white/4 border border-white/8 text-white/80 group-hover:text-white group-hover:bg-white/8 transition-all duration-300 shrink-0">
               <Icon size={16} />
             </div>
             <div>
@@ -389,19 +369,15 @@ export function WidgetLibrary() {
               'inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 0 rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.4)',
           }}
         >
-          {/* Prismatic Holofoil Rainbow Sweep */}
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-30">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-400/20 via-amber-300/25 via-emerald-300/20 via-cyan-400/25 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-rose-400/20 via-amber-300/25 via-emerald-300/20 via-cyan-400/25 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
           </div>
 
-          {/* Top Pokédex Ribbon Header */}
           <div className="flex items-center justify-between px-2.5 py-1 border-b border-black/25 bg-black/20 relative z-10">
             <div className="flex items-center gap-1.5">
-              {/* Pokédex Primary Cyan Scanner Eye with Hover Surge */}
-              <div className="relative w-3.5 h-3.5 rounded-full bg-gradient-to-br from-cyan-300 via-sky-500 to-blue-700 border border-white/90 shadow-[0_0_6px_rgba(56,189,248,0.7)] group-hover:shadow-[0_0_12px_rgba(56,189,248,1)] group-hover:scale-110 transition-all duration-300 flex items-center justify-center">
+              <div className="relative w-3.5 h-3.5 rounded-full bg-linear-to-br from-cyan-300 via-sky-500 to-blue-700 border border-white/90 shadow-[0_0_6px_rgba(56,189,248,0.7)] group-hover:shadow-[0_0_12px_rgba(56,189,248,1)] group-hover:scale-110 transition-all duration-300 flex items-center justify-center">
                 <div className="w-1 h-1 rounded-full bg-white/95 absolute top-0.5 left-0.5 blur-[0.2px]" />
               </div>
-              {/* Status Indicator LED Array */}
               <div className="flex items-center gap-1 pl-0.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#ff3b30] border border-black/40 shadow-[0_0_3px_rgba(255,59,48,0.7)] group-hover:shadow-[0_0_6px_rgba(255,59,48,1)] transition-shadow duration-300" />
                 <div className="w-1.5 h-1.5 rounded-full bg-[#ffcc00] border border-black/40 shadow-[0_0_3px_rgba(255,204,0,0.7)] group-hover:shadow-[0_0_6px_rgba(255,204,0,1)] transition-shadow duration-300" />
@@ -421,10 +397,8 @@ export function WidgetLibrary() {
             </div>
           </div>
 
-          {/* Inner Chamber */}
           <div className="p-1.5 relative z-10">
             <div className="relative rounded-md p-2 bg-[#0b1219] border border-[#1e2d3d] group-hover:border-cyan-500/40 shadow-[inset_0_1px_6px_rgba(0,0,0,0.8)] group-hover:shadow-[inset_0_1px_8px_rgba(6,182,212,0.2)] transition-all duration-300 overflow-hidden">
-              {/* Cyan Micro Grid Overlay */}
               <div
                 className="absolute inset-0 pointer-events-none opacity-20 group-hover:opacity-35 transition-opacity duration-300"
                 style={{
@@ -434,29 +408,21 @@ export function WidgetLibrary() {
               />
 
               <div className="relative z-10 flex items-center justify-between gap-2.5">
-                {/* Pokéball Throw & Energy Blast Stage */}
                 <div className="relative shrink-0 flex items-center justify-center w-9 h-9">
-                  {/* Energy Shockwave Radial Burst on Hover */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-14 h-14 rounded-full bg-[radial-gradient(circle,rgba(56,189,248,0.45)_0%,rgba(56,189,248,0.1)_50%,transparent_75%)] scale-0 group-hover:scale-125 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out" />
-                    {/* Dynamic Throw Speed Lines */}
-                    <div className="absolute -left-2.5 top-1.5 w-4 h-0.5 bg-gradient-to-r from-transparent to-white/70 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out" />
-                    <div className="absolute -left-3 bottom-1.5 w-5 h-0.5 bg-gradient-to-r from-transparent to-cyan-400/80 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 delay-75 ease-out" />
+                    <div className="absolute -left-2.5 top-1.5 w-4 h-0.5 bg-linear-to-r from-transparent to-white/70 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out" />
+                    <div className="absolute -left-3 bottom-1.5 w-5 h-0.5 bg-linear-to-r from-transparent to-cyan-400/80 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 delay-75 ease-out" />
                   </div>
 
-                  {/* Clean Lacquer Pokéball with 360° Throw Physics */}
                   <div className="relative w-8 h-8 rounded-full transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-1.5 group-hover:translate-x-1.5 group-hover:rotate-[360deg] group-hover:scale-120 group-hover:shadow-[0_8px_18px_rgba(239,68,68,0.45),0_0_12px_rgba(255,255,255,0.5)] shadow-[0_3px_8px_rgba(0,0,0,0.6)] z-20">
                     <div className="w-full h-full rounded-full border-[1.5px] border-[#18181b] overflow-hidden relative bg-white">
-                      {/* Top Red Half */}
-                      <div className="absolute top-0 left-0 right-0 h-[48%] bg-gradient-to-b from-[#ff3838] to-[#cc0a0a]" />
+                      <div className="absolute top-0 left-0 right-0 h-[48%] bg-linear-to-b from-[#ff3838] to-[#cc0a0a]" />
 
-                      {/* Glossy Curved Glare Pill */}
                       <div className="absolute top-1 left-1.5 w-2.5 h-1 bg-white/75 rounded-full rotate-[-25deg] pointer-events-none" />
 
-                      {/* Equatorial Seam */}
                       <div className="absolute top-1/2 left-0 right-0 h-[14%] bg-[#18181b] -translate-y-1/2" />
 
-                      {/* Center Button (Kept Pure White) */}
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[#18181b] flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-white border border-black/40 group-hover:bg-white group-hover:shadow-[0_0_6px_rgba(255,255,255,0.9)] transition-all duration-300" />
                       </div>
@@ -471,13 +437,12 @@ export function WidgetLibrary() {
                     </h4>
                   </div>
                   {item.desc && (
-                    <p className="font-jetbrains-mono text-[10px] text-cyan-300/80 group-hover:text-cyan-100 transition-colors truncate mt-0.5 tracking-tight">
+                    <p className="font-jetbrains-mono text-caption text-cyan-300/80 group-hover:text-cyan-100 transition-colors truncate mt-0.5 tracking-tight">
                       {item.desc}
                     </p>
                   )}
                 </div>
 
-                {/* Interactive Action Plus Button with Cyan Flare */}
                 <div className="text-white/60 group-hover:text-cyan-300 group-hover:scale-115 transition-all duration-300 p-1 shrink-0 drop-shadow-[0_0_6px_rgba(56,189,248,0)] group-hover:drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]">
                   <Plus size={16} />
                 </div>
@@ -766,7 +731,7 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.asciiprofile_category', 'ASCII Profile Kit')}
                     </span>
                     <a
-                      href="https://github.com/mithun50/ascii-profile-kit"
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.ASCII_PROFILE_KIT}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#ffa657] hover:text-[#ffbd2e] transition-colors ml-1"
@@ -774,6 +739,7 @@ export function WidgetLibrary() {
                     >
                       <ExternalLink size={10} />
                     </a>
+
                     <span className="ml-auto font-inter-tight text-caption text-ash">
                       {
                         filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.ASCIIPROFILE)
@@ -914,7 +880,7 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.godprofile_category', 'GodProfile MCP')}
                     </span>
                     <a
-                      href="https://github.com/Luc0-0/GodProfile"
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.GOD_PROFILE}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-ash/50 hover:text-[#b6a891] transition-colors ml-1"
@@ -1025,13 +991,11 @@ export function WidgetLibrary() {
                 <div>
                   <button
                     onClick={() => toggleSection('controlplane')}
-                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                    className="w-full flex items-center gap-2 mb-2 px-1 py-1.5 bg-[#030d1a] border border-[#0A2744] hover:border-[#00E5FF]/40 rounded-none cursor-pointer group transition-all duration-300 relative overflow-hidden"
                   >
-                    <div className="relative flex items-center justify-center p-0.5">
-                      <div className="absolute inset-0 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-xs group-hover:bg-[#00E5FF]/20 transition-colors"></div>
-                      <span className="relative z-10 font-mono text-[9px] font-bold text-[#00E5FF] leading-none select-none group-hover:text-white transition-colors">
-                        CP
-                      </span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-caption text-[#00E5FF] font-bold">»</span>
+                      <span className="w-1.5 h-1.5 bg-[#00E5FF] group-hover:shadow-[0_0_8px_#00E5FF] transition-all"></span>
                     </div>
                     <span
                       className="font-mono text-[11px] font-semibold text-[#00E5FF] uppercase tracking-[0.16em] group-hover:text-[#66B2FF] transition-colors"
@@ -1040,7 +1004,7 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.controlplane_category', 'Control Plane Toolkit')}
                     </span>
                     <a
-                      href="https://github.com/majiayu000/profile-control-plane"
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.PROFILE_CONTROL_PLANE}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#00E5FF]/70 hover:text-[#00E5FF] transition-colors ml-1"
@@ -1162,7 +1126,7 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.codeweb_category', 'Codeweb-dev Aura')}
                     </span>
                     <a
-                      href="https://github.com/codeweb-dev/codeweb-dev"
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.CODEWEB_DEV}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[#6cc382] hover:text-[#9de5ad] transition-colors ml-1"
@@ -1401,7 +1365,7 @@ export function WidgetLibrary() {
                 </div>
 
                 <a
-                  href="https://github.com/Igorcbraz/GitAscii/fork"
+                  href={EXTERNAL_LINKS.GITHUB_FORK}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
@@ -1430,7 +1394,7 @@ export function WidgetLibrary() {
                 {filteredWidgets.map(renderWidgetCard)}
 
                 <a
-                  href="https://github.com/Igorcbraz/GitAscii/fork"
+                  href={EXTERNAL_LINKS.GITHUB_FORK}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
@@ -1559,7 +1523,7 @@ export function WidgetLibrary() {
             ))}
 
             <a
-              href="https://github.com/Igorcbraz/GitAscii/fork"
+              href={EXTERNAL_LINKS.GITHUB_FORK}
               target="_blank"
               rel="noopener noreferrer"
               className="group block p-2.5 border border-signal-lime/60 bg-signal-lime/5 hover:bg-signal-lime/15 transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer hover:shadow-[0_0_20px_rgba(197,255,74,0.15)] hover:-translate-y-0.5"

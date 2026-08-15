@@ -1,3 +1,5 @@
+import { EXTERNAL_LINKS } from '@/constants'
+
 export function normalizeUrl(rawUrl: string): string {
   if (!rawUrl || typeof rawUrl !== 'string') return ''
   let trimmed = rawUrl.trim()
@@ -11,7 +13,7 @@ export function normalizeUrl(rawUrl: string): string {
     if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
       trimmed = trimmed.replace(
         /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
-        'https://raw.githubusercontent.com/$1/$2/$3'
+        `${EXTERNAL_LINKS.GITHUB_RAW_BASE}/$1/$2/$3`
       )
     }
   } catch {}

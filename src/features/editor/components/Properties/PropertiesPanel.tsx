@@ -385,7 +385,7 @@ export function PropertiesPanel() {
               }
             >
               <span
-                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.hideBorder ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+                className={`absolute left-0.5 w-4 h-4 rounded-full transition-transform ${cfg.hideBorder ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
               />
             </button>
           </div>
@@ -411,7 +411,7 @@ export function PropertiesPanel() {
               }
             >
               <span
-                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.hideDecorations ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+                className={`absolute left-0.5 w-4 h-4 rounded-full transition-transform ${cfg.hideDecorations ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
               />
             </button>
           </div>
@@ -437,7 +437,7 @@ export function PropertiesPanel() {
               }
             >
               <span
-                className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${cfg.showTitle !== false ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+                className={`absolute left-0.5 w-4 h-4 rounded-full transition-transform ${cfg.showTitle !== false ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
               />
             </button>
           </div>

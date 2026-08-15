@@ -3,6 +3,7 @@ import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { renderPokemonCard } from '../../../widgets/renderers/PokemonCardRenderer'
 import { useEditorStore } from '../../store/editorStore'
@@ -63,9 +64,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           const randomName = SUGGESTED_POKEMON[Math.floor(Math.random() * SUGGESTED_POKEMON.length)]
           setSearchQuery(randomName)
 
-          const res = await fetch(
-            `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(randomName)}`
-          )
+          const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(randomName))
           if (!res.ok) {
             throw new Error(`API error: ${res.status}`)
           }
@@ -89,9 +88,9 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           console.warn('Unable to load initial random Pokemon card:', err)
           setError(
             t(
-              'editor.pokemon.fetch_error',
+              'errors.pokemon_service_unavailable',
               'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
-            ) as string
+            )
           )
         }
       }
@@ -105,9 +104,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(
-        `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(query)}`
-      )
+      const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(query))
       if (!res.ok) {
         throw new Error(`API error: ${res.status}`)
       }
@@ -117,12 +114,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
         setCards(newCards)
         updateWidgetConfig(instanceId, { searchQuery: query, searchCards: newCards })
         if (newCards.length === 0) {
-          setError(
-            t(
-              'editor.pokemon.no_cards_found',
-              'Nenhuma carta encontrada para esta busca.'
-            ) as string
-          )
+          setError(t('errors.pokemon_no_cards', 'Nenhuma carta encontrada para esta busca.'))
         }
       } else {
         setCards([])
@@ -131,9 +123,9 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
       console.warn('Error fetching Pokemon cards:', err)
       setError(
         t(
-          'editor.pokemon.fetch_error',
+          'errors.pokemon_service_unavailable',
           'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
-        ) as string
+        )
       )
     } finally {
       setLoading(false)
@@ -271,7 +263,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
                 handleSearch(name)
               }
             }}
-            className="shrink-0 px-2 py-1 text-[11px] bg-graphite border border-graphite text-ash rounded-xs hover:border-signal-lime hover:text-signal-lime transition-colors"
+            className="shrink-0 px-2 py-1 text-eyebrow bg-graphite border border-graphite text-ash rounded-xs hover:border-signal-lime hover:text-signal-lime transition-colors"
           >
             {name}
           </button>
@@ -279,7 +271,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
       </div>
 
       {error && (
-        <div className="text-[12px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xs font-inter-tight">
+        <div className="text-note text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xs font-inter-tight">
           {error}
         </div>
       )}
@@ -348,7 +340,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               onClick={saveVisualState}
-              className="relative w-[250px] h-[350px] cursor-crosshair"
+              className="relative w-62.5 h-87.5 cursor-crosshair"
             >
               <svg
                 width="250"
@@ -398,7 +390,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           </div>
 
           <div className="flex justify-center">
-            <div className="relative w-[250px] h-[350px]">
+            <div className="relative w-62.5 h-87.5">
               <svg
                 width="250"
                 height="350"

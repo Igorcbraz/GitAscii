@@ -2,6 +2,7 @@
 import { ImageResponse } from 'next/og'
 
 import { APP_URL } from '@/constants'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export const runtime = 'edge'
 
@@ -15,7 +16,7 @@ export const contentType = 'image/png'
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params
   const cleanUsername = username || 'Developer'
-  const avatarUrl = `https://github.com/${cleanUsername}.png`
+  const avatarUrl = API_ENDPOINTS.GITHUB.AVATAR(cleanUsername)
 
   return new ImageResponse(
     <div

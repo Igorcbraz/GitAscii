@@ -9,6 +9,7 @@ import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { useEditorStore } from '../store/editorStore'
 import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
@@ -24,18 +25,12 @@ interface EditorLayoutProps {
   autoGenerate?: boolean
 }
 
-const INITIAL_STEPS: LoadStep[] = [
-  { id: 'session', label: 'Verificando sessão', status: 'pending' },
-  { id: 'github', label: 'Buscando dados do GitHub', status: 'pending' },
-  { id: 'profile', label: 'Analisando perfil', status: 'pending' },
-  { id: 'editor', label: 'Inicializando editor', status: 'pending' },
-]
-
 export function EditorLayout({
   username,
   profileSlug = 'default',
   autoGenerate = false,
 }: EditorLayoutProps) {
+  const { t } = useI18n()
   const { initEditor, config, setSession, session, activeMobilePanel, setActiveMobilePanel } =
     useEditorStore()
   const [loading, setLoading] = useState(true)
@@ -43,7 +38,30 @@ export function EditorLayout({
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [githubData, setGithubData] = useState<NormalizedGitHubData | null>(null)
 
-  const [steps, setSteps] = useState<LoadStep[]>(INITIAL_STEPS)
+  const initialSteps: LoadStep[] = [
+    {
+      id: 'session',
+      label: t('editor.loading.step_session', 'Verificando sessão'),
+      status: 'pending',
+    },
+    {
+      id: 'github',
+      label: t('editor.loading.step_github', 'Buscando dados do GitHub'),
+      status: 'pending',
+    },
+    {
+      id: 'profile',
+      label: t('editor.loading.step_profile', 'Analisando perfil'),
+      status: 'pending',
+    },
+    {
+      id: 'editor',
+      label: t('editor.loading.step_editor', 'Inicializando editor'),
+      status: 'pending',
+    },
+  ]
+
+  const [steps, setSteps] = useState<LoadStep[]>(initialSteps)
 
   const setStep = useCallback((id: string, status: LoadStep['status'], detail?: string) => {
     setSteps((prev) =>
@@ -57,11 +75,32 @@ export function EditorLayout({
     async function loadData() {
       try {
         setLoading(true)
-        setSteps(INITIAL_STEPS)
+        setSteps([
+          {
+            id: 'session',
+            label: t('editor.loading.step_session', 'Verificando sessão'),
+            status: 'pending',
+          },
+          {
+            id: 'github',
+            label: t('editor.loading.step_github', 'Buscando dados do GitHub'),
+            status: 'pending',
+          },
+          {
+            id: 'profile',
+            label: t('editor.loading.step_profile', 'Analisando perfil'),
+            status: 'pending',
+          },
+          {
+            id: 'editor',
+            label: t('editor.loading.step_editor', 'Inicializando editor'),
+            status: 'pending',
+          },
+        ])
 
         setStep('session', 'active')
         try {
-          const sessionRes = await fetch('/api/auth/session')
+          const sessionRes = await fetch(API_ENDPOINTS.AUTH.SESSION)
           if (sessionRes.ok) {
             const sessionData = await sessionRes.json()
             if (isMounted) {
@@ -69,21 +108,23 @@ export function EditorLayout({
               setStep(
                 'session',
                 'done',
-                sessionData.session ? `@${sessionData.session.username}` : 'Não autenticado'
+                sessionData.session
+                  ? `@${sessionData.session.username}`
+                  : t('editor.loading.unauthenticated', 'Não autenticado')
               )
             }
           } else {
-            setStep('session', 'done', 'Não autenticado')
+            setStep('session', 'done', t('editor.loading.unauthenticated', 'Não autenticado'))
           }
         } catch (e) {
           console.warn('Failed to fetch session', e)
-          setStep('session', 'done', 'Não autenticado')
+          setStep('session', 'done', t('editor.loading.unauthenticated', 'Não autenticado'))
         }
 
         setStep('github', 'active', `api.github.com/users/${username}`)
-        const res = await fetch(`/api/github/${username}`)
+        const res = await fetch(API_ENDPOINTS.GITHUB.PROFILE(username))
         if (!res.ok) {
-          let errMsg = 'Failed to fetch GitHub profile'
+          let errMsg = t('errors.fetch_profile_failed', 'Failed to fetch GitHub profile')
           try {
             const errJson = await res.json()
             errMsg = errJson.error || errMsg
@@ -108,7 +149,7 @@ export function EditorLayout({
 
         let serverConfig: SavedConfiguration | null = null
         try {
-          const configRes = await fetch(`/api/config/${username}/${profileSlug}`)
+          const configRes = await fetch(API_ENDPOINTS.CONFIG.GET(username, profileSlug))
           if (configRes.ok) {
             serverConfig = await configRes.json()
           }
@@ -119,35 +160,47 @@ export function EditorLayout({
         if (savedDraft) {
           try {
             initialConfig = JSON.parse(savedDraft)
-            setStep('profile', 'done', 'Rascunho salvo encontrado')
+            setStep('profile', 'done', t('editor.loading.draft_found', 'Rascunho salvo encontrado'))
           } catch {
             initialConfig = serverConfig || (autoGenerate ? generateBestProfile(data) : null)
             setStep(
               'profile',
               'done',
               serverConfig
-                ? 'Configuração carregada'
+                ? t('editor.loading.config_loaded', 'Configuração carregada')
                 : autoGenerate
-                  ? 'Gerado automaticamente'
-                  : 'Sem configuração prévia'
+                  ? t('editor.loading.auto_generated', 'Gerado automaticamente')
+                  : t('editor.loading.no_prev_config', 'Sem configuração prévia')
             )
           }
         } else if (serverConfig) {
           initialConfig = serverConfig
-          setStep('profile', 'done', 'Perfil carregado do repositório')
+          setStep(
+            'profile',
+            'done',
+            t('editor.loading.repo_loaded', 'Perfil carregado do repositório')
+          )
         } else if (autoGenerate) {
           initialConfig = generateBestProfile(data)
-          setStep('profile', 'done', 'Perfil gerado automaticamente')
+          setStep(
+            'profile',
+            'done',
+            t('editor.loading.profile_auto_generated', 'Perfil gerado automaticamente')
+          )
         } else {
           initialConfig = null
-          setStep('profile', 'done', 'Aguardando escolha de template')
+          setStep(
+            'profile',
+            'done',
+            t('editor.loading.waiting_template', 'Aguardando escolha de template')
+          )
         }
 
         setStep('editor', 'active')
         await new Promise((r) => setTimeout(r, 260))
 
         if (isMounted) {
-          setStep('editor', 'done', 'Pronto')
+          setStep('editor', 'done', t('editor.loading.ready', 'Pronto'))
           await new Promise((r) => setTimeout(r, 180))
 
           if (initialConfig) {
@@ -164,7 +217,11 @@ export function EditorLayout({
         }
       } catch (err: unknown) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load profile')
+          setError(
+            err instanceof Error
+              ? err.message
+              : t('errors.fetch_profile_failed', 'Failed to load profile')
+          )
           setLoading(false)
         }
       }
@@ -175,9 +232,7 @@ export function EditorLayout({
     return () => {
       isMounted = false
     }
-  }, [username, profileSlug, autoGenerate, initEditor, setSession, setStep])
-
-  const { t } = useI18n()
+  }, [username, profileSlug, autoGenerate, initEditor, setSession, setStep, t])
 
   if (loading) {
     return <EditorLoadingScreen username={username} steps={steps} />
@@ -195,18 +250,24 @@ export function EditorLayout({
           <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100 mb-8">
               <span className="flex items-center gap-2 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
-                <Terminal size={11} className="text-signal-lime shrink-0" />[ GITASCII · NOVO PERFIL
-                ]
+                <Terminal size={11} className="text-signal-lime shrink-0" />
+                {t('editor.onboarding.eyebrow', '[ GITASCII · NOVO PERFIL ]')}
               </span>
             </div>
 
             <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-250 font-pt-serif font-light text-white text-4xl md:text-[52px] leading-heading tracking-[-1.2px] text-center mb-4">
-              Como deseja <span className="italic text-signal-lime">começar,</span>{' '}
+              {t('editor.onboarding.title_prefix', 'Como deseja ')}
+              <span className="italic text-signal-lime">
+                {t('editor.onboarding.title_italic', 'começar,')}
+              </span>{' '}
               <span className="text-white/80">@{username}?</span>
             </h1>
 
             <p className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-350 font-inter-tight text-body leading-body text-ash text-center max-w-md mb-10">
-              Escolha como montar seu README. Você poderá personalizar tudo depois.
+              {t(
+                'editor.onboarding.subtitle',
+                'Escolha como montar seu README. Você poderá personalizar tudo depois.'
+              )}
             </p>
 
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-500 flex flex-col gap-3 w-full">
@@ -223,10 +284,13 @@ export function EditorLayout({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-inter-tight font-semibold text-body leading-tight tracking-[0.01em] mb-0.5">
-                    Começar com um Template
+                    {t('editor.onboarding.start_template_title', 'Começar com um Template')}
                   </div>
                   <div className="font-inter-tight text-note text-black/60 leading-snug">
-                    Layouts prontos pensados para diferentes tipos de perfil
+                    {t(
+                      'editor.onboarding.start_template_desc',
+                      'Layouts prontos pensados para diferentes tipos de perfil'
+                    )}
                   </div>
                 </div>
                 <ArrowRight
@@ -257,10 +321,13 @@ export function EditorLayout({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-inter-tight font-semibold text-body text-white leading-tight tracking-[0.01em] mb-0.5">
-                    Começar do Zero
+                    {t('editor.onboarding.start_blank_title', 'Começar do Zero')}
                   </div>
                   <div className="font-inter-tight text-note text-ash leading-snug">
-                    Canvas vazio — total liberdade criativa
+                    {t(
+                      'editor.onboarding.start_blank_desc',
+                      'Canvas vazio — total liberdade criativa'
+                    )}
                   </div>
                 </div>
                 <ArrowRight
@@ -306,16 +373,25 @@ export function EditorLayout({
             <span className="text-eyebrow leading-none">
               {session ? (
                 <>
-                  Você está logado como <strong className="text-white">@{session.username}</strong>,
-                  mas editando o perfil de <strong className="text-white">@{username}</strong>. Suas
-                  alterações não serão salvas no servidor.
+                  {t('editor.banner.logged_in_as_prefix', 'Você está logado como')}{' '}
+                  <strong className="text-white">@{session.username}</strong>
+                  {t('editor.banner.logged_in_as_middle', ', mas editando o perfil de')}{' '}
+                  <strong className="text-white">@{username}</strong>
+                  {t(
+                    'editor.banner.logged_in_as_suffix',
+                    '. Suas alterações não serão salvas no servidor.'
+                  )}
                 </>
               ) : (
                 <>
-                  Você está no{' '}
-                  <strong className="text-signal-lime font-medium">Modo Lite (Self-Hosted)</strong>.
-                  Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o
-                  seu repositório GitHub.
+                  {t('editor.banner.lite_mode_prefix', 'Você está no')}{' '}
+                  <strong className="text-signal-lime font-medium">
+                    {t('editor.banner.lite_mode_name', 'Modo Lite (Self-Hosted)')}
+                  </strong>
+                  {t(
+                    'editor.banner.lite_mode_suffix',
+                    '. Para salvar no servidor, faça login. Ou baixe o arquivo de layout e envie para o seu repositório GitHub.'
+                  )}
                 </>
               )}
             </span>
@@ -325,7 +401,7 @@ export function EditorLayout({
               onClick={() => window.dispatchEvent(new CustomEvent('openExportGuide'))}
               className="flex items-center gap-1 text-caption text-ash hover:text-white transition-colors cursor-pointer"
             >
-              Ver Tutorial
+              {t('editor.banner.view_tutorial', 'Ver Tutorial')}
             </button>
           </div>
         </div>
