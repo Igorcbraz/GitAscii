@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Joyride, STATUS, Step } from 'react-joyride'
 
 import { useI18n } from '@/i18n'
+import { safeStorage } from '@/utils/storage'
 
 export function EditorTour() {
   const { t } = useI18n()
@@ -15,11 +16,11 @@ export function EditorTour() {
 
     const startTour = () => {
       setRun(true)
-      localStorage.setItem('gitascii_has_seen_tour', 'true')
+      safeStorage.setItem('gitascii_has_seen_tour', 'true')
     }
 
     const timer = setTimeout(() => {
-      const hasSeenTour = localStorage.getItem('gitascii_has_seen_tour')
+      const hasSeenTour = safeStorage.getItem('gitascii_has_seen_tour')
       if (!hasSeenTour) {
         startTour()
       }
@@ -158,7 +159,7 @@ export function EditorTour() {
 
     if (finishedStatuses.includes(status as any)) {
       setRun(false)
-      localStorage.setItem('gitascii_has_seen_tour', 'true')
+      safeStorage.setItem('gitascii_has_seen_tour', 'true')
     }
   }
 

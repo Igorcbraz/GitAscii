@@ -34,6 +34,7 @@ async function fetchConfigFromGitHub(
           'Cache-Control': 'no-cache',
         },
         next: { revalidate: 60 },
+        signal: AbortSignal.timeout(3000),
       })
       if (res.ok) {
         const text = await res.text()

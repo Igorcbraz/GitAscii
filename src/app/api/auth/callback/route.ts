@@ -76,11 +76,11 @@ export async function GET(request: Request) {
     })
 
     const origin = new URL(request.url).origin
-    let finalState = state
-    if (finalState === '/') {
-      finalState = `/${userData.login}`
+    let safePath = `/${userData.login}`
+    if (state && state.startsWith('/') && !state.startsWith('//') && !state.includes('\\')) {
+      safePath = state === '/' ? `/${userData.login}` : state
     }
-    const redirectUrl = finalState.startsWith('/') ? `${origin}${finalState}` : finalState
+    const redirectUrl = new URL(safePath, origin).toString()
 
     return NextResponse.redirect(redirectUrl)
   } catch (error: unknown) {

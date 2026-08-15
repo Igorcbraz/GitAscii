@@ -163,13 +163,16 @@ export async function getAppInstallUrl(): Promise<string> {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'GitAscii-App',
       },
+      signal: AbortSignal.timeout(5000),
     })
     if (appRes.ok) {
       const appData = await appRes.json()
-      return `${appData.html_url}/installations/new`
+      if (appData && appData.html_url) {
+        return `${appData.html_url}/installations/new`
+      }
     }
   } catch (e) {
-    console.error(e)
+    console.warn('Unable to fetch GitHub App info, falling back to default install URL:', e)
   }
   return API_ENDPOINTS.GITHUB.APP_DEV_INSTALL
 }

@@ -64,7 +64,9 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           const randomName = SUGGESTED_POKEMON[Math.floor(Math.random() * SUGGESTED_POKEMON.length)]
           setSearchQuery(randomName)
 
-          const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(randomName))
+          const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(randomName), {
+            signal: AbortSignal.timeout(6000),
+          })
           if (!res.ok) {
             throw new Error(`API error: ${res.status}`)
           }
@@ -104,7 +106,9 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(query))
+      const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(query), {
+        signal: AbortSignal.timeout(6000),
+      })
       if (!res.ok) {
         throw new Error(`API error: ${res.status}`)
       }

@@ -5,11 +5,20 @@ import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    let body: Record<string, unknown>
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body in request' }, { status: 400 })
+    }
+
     const { username } = body
 
-    if (!username) {
-      return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+    if (!username || typeof username !== 'string') {
+      return NextResponse.json(
+        { error: 'Username is required and must be a string' },
+        { status: 400 }
+      )
     }
 
     const data = await fetchGitHubProfile(username)

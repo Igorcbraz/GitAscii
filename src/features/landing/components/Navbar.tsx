@@ -30,7 +30,7 @@ export default function Navbar() {
 
   useEffect(() => {
     fetch(API_ENDPOINTS.GITHUB.GITASCII_REPO)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && typeof data.stargazers_count === 'number') {
           setStars(data.stargazers_count)
@@ -39,7 +39,7 @@ export default function Navbar() {
       .catch(() => {})
 
     fetch(API_ENDPOINTS.AUTH.SESSION)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.session) {
           setSession(data.session)
@@ -54,9 +54,11 @@ export default function Navbar() {
       if (res.ok) {
         setSession(null)
         window.location.reload()
+      } else {
+        console.warn('Logout endpoint returned non-ok status:', res.status)
       }
     } catch (e) {
-      console.error(e)
+      console.error('Failed to log out:', e)
     }
   }
 

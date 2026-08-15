@@ -331,10 +331,12 @@ export function SVGCanvas() {
     if (svgContainerRef.current) {
       svgContainerRef.current.classList.add('canvas-is-dragging')
       svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
-        try {
-          svg.pauseAnimations()
-        } catch {
-          // ignore if not supported
+        if (typeof svg.pauseAnimations === 'function') {
+          try {
+            svg.pauseAnimations()
+          } catch (err) {
+            console.debug('SVG pauseAnimations not supported in current environment', err)
+          }
         }
       })
     }
@@ -578,10 +580,12 @@ export function SVGCanvas() {
       if (svgContainerRef.current) {
         svgContainerRef.current.classList.remove('canvas-is-dragging')
         svgContainerRef.current.querySelectorAll('svg').forEach((svg) => {
-          try {
-            svg.unpauseAnimations()
-          } catch {
-            // ignore if not supported
+          if (typeof svg.unpauseAnimations === 'function') {
+            try {
+              svg.unpauseAnimations()
+            } catch (err) {
+              console.debug('SVG unpauseAnimations not supported in current environment', err)
+            }
           }
         })
       }

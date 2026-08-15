@@ -1,9 +1,10 @@
+import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 
 import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
 import { loadProfileConfig } from '@/lib/profileStorage'
 
@@ -39,61 +40,40 @@ export async function generateProfileSvgResponse(
   options: ProfileSvgRequestOptions
 ): Promise<NextResponse> {
   const startTime = Date.now()
-  const { username, profileSlug = 'default', template, widgets } = options
+  const { username, profileSlug = 'default' } = options
 
   if (!username) {
     return new NextResponse('Username is required', { status: 400 })
   }
 
-  const { searchParams } = new URL(request.url)
-  let theme: 'dark' | 'light' = options.theme || 'dark'
-  const queryTheme = searchParams.get('theme')
-  if (queryTheme === 'light' || queryTheme === 'dark') {
-    theme = queryTheme
-  }
-
-  const templateParam = template || searchParams.get('template')
-  const widgetsParam = widgets || (searchParams.get('widgets')?.split(',').filter(Boolean) ?? null)
-
   try {
+    const { searchParams } = new URL(request.url)
+    const queryTheme = searchParams.get('theme')
+    const theme: 'dark' | 'light' =
+      queryTheme === 'light' || queryTheme === 'dark' ? queryTheme : options.theme || 'dark'
+
+    const templateParam = searchParams.get('template') || options.template
+    const widgetsParam = searchParams.get('widgets')?.split(',').filter(Boolean) || options.widgets
+
     const data = await fetchGitHubProfile(username)
 
-    let config
-    if (templateParam) {
-      config = createConfiguration(data.user.id, data.user.login, templateParam, profileSlug)
-    } else {
-      config = await loadProfileConfig(username, profileSlug)
-      if (!config) {
-        config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
-      }
+    let config = await loadProfileConfig(username, profileSlug)
+
+    if (!config) {
+      const templateId = templateParam || 'terminal'
+      config = createConfiguration(data.user.id, data.user.login, templateId, profileSlug)
     }
 
     if (widgetsParam && widgetsParam.length > 0) {
-      for (const w of widgetsParam) {
-        if (!config.widgets.some((cw: any) => cw.widgetId === w || cw.instanceId === w)) {
-          let wWidth = 800
-          let wHeight = 210
-
-          const catalogItem = WIDGET_CATALOG.find((item) => item.id === w)
-          if (catalogItem?.defaultSize) {
-            wWidth = catalogItem.defaultSize.width
-            wHeight = catalogItem.defaultSize.height
-          } else if (['github-readme-stats', 'streak-stats', 'metrics-card'].includes(w)) {
-            wWidth = 390
-            wHeight = 210
-          } else if (['activity-graph', 'contribution-snake', 'readme-quotes'].includes(w)) {
-            wWidth = 800
-            wHeight = 210
-          } else if (w === 'stats' || w === 'streak') {
-            wWidth = 390
-            wHeight = 210
-          }
-
+      for (const widgetId of widgetsParam) {
+        const hasWidget = config.widgets.some((w: any) => w.widgetId === widgetId)
+        if (!hasWidget) {
+          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
           config.widgets.push({
-            instanceId: `temp-${w}`,
-            widgetId: w,
-            position: { x: 0, y: 0 },
-            size: { width: wWidth, height: wHeight },
+            instanceId: `${widgetId}-query-${Date.now()}`,
+            widgetId,
+            position: { x: 20, y: 20 },
+            size: item?.defaultSize || { width: 400, height: 200 },
             config: {},
             locked: false,
             visible: true,
@@ -162,12 +142,20 @@ export async function generateProfileSvgResponse(
       headers,
     })
   } catch (error: unknown) {
+    const isNotFound =
+      error instanceof GitHubUserNotFoundError ||
+      (error instanceof Error && error.message.toLowerCase().includes('not found'))
+
+    if (!isNotFound) {
+      Sentry.captureException(error)
+    }
+
     const message = error instanceof Error ? error.message : 'Error rendering SVG'
     const escaped = escapeErrorXml(message)
     return new NextResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${escaped}</text></svg>`,
       {
-        status: 500,
+        status: isNotFound ? 404 : 500,
         headers: { 'Content-Type': 'image/svg+xml' },
       }
     )

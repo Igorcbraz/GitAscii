@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
 import { APP_DOMAIN } from '@/constants'
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(indexNowPayload),
+      signal: AbortSignal.timeout(6000),
     })
 
     return NextResponse.json({
@@ -36,10 +38,10 @@ export async function POST(request: Request) {
       status: res.status,
       submittedUrls: urlList.length,
     })
-  } catch {
-    return NextResponse.json(
-      { success: false, error: 'Failed to submit IndexNow request' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    Sentry.captureException(error)
+    const message = error instanceof Error ? error.message : 'Failed to submit IndexNow request'
+    console.error('IndexNow submission error:', error)
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
@@ -190,7 +191,9 @@ export async function POST(request: Request) {
       if (hasSnakeWidget) {
         try {
           // Busca o workflow dinamicamente do repositório de exemplo do Platane
-          const yamlRes = await fetch(API_ENDPOINTS.EXTERNAL_RESOURCES.PLATANE_SNAKE_WORKFLOW)
+          const yamlRes = await fetch(API_ENDPOINTS.EXTERNAL_RESOURCES.PLATANE_SNAKE_WORKFLOW, {
+            signal: AbortSignal.timeout(6000),
+          })
           if (yamlRes.ok) {
             let snakeYaml = await yamlRes.text()
 
@@ -203,7 +206,7 @@ export async function POST(request: Request) {
 
             const actionRes = await fetch(
               API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
-              { headers }
+              { headers, signal: AbortSignal.timeout(6000) }
             )
             let actionSha = undefined
             if (actionRes.status === 200) {
@@ -221,6 +224,7 @@ export async function POST(request: Request) {
                   content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
                   sha: actionSha,
                 }),
+                signal: AbortSignal.timeout(6000),
               }
             )
 
@@ -235,8 +239,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    Sentry.captureException(error)
     console.error('Commit error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -12,6 +12,13 @@ interface CacheEntry {
 const profileCache = new Map<string, CacheEntry>()
 const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache
 
+export class GitHubUserNotFoundError extends Error {
+  constructor(username: string) {
+    super(`GitHub user '${username}' not found.`)
+    this.name = 'GitHubUserNotFoundError'
+  }
+}
+
 export async function fetchGitHubProfile(username: string): Promise<NormalizedGitHubData> {
   const cacheKey = username.toLowerCase()
   const cached = profileCache.get(cacheKey)
@@ -40,7 +47,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
     if (!userRes.ok) {
       if (userRes.status === 404) {
-        throw new Error(`GitHub user '${username}' not found.`)
+        throw new GitHubUserNotFoundError(username)
       }
       return getMockGitHubData(username)
     }
@@ -113,6 +120,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(gqlQuery),
+          signal: AbortSignal.timeout(8000),
         })
 
         if (gqlRes.ok) {
@@ -156,6 +164,9 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
     return result
   } catch (error) {
+    if (error instanceof GitHubUserNotFoundError) {
+      throw error
+    }
     console.warn("Falling back to mock data for user '%s':", username, error)
     return getMockGitHubData(username)
   }

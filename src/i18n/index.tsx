@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+import { safeStorage } from '@/utils/storage'
+
 export type Language = 'en' | 'pt' | 'es'
 
 interface I18nContextType {
@@ -1472,7 +1474,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('gitascii_lang') as Language
+      const saved = safeStorage.getItem('gitascii_lang') as Language
       if (saved && (saved === 'en' || saved === 'pt' || saved === 'es')) {
         setLanguageState(saved)
       } else {
@@ -1491,7 +1493,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('gitascii_lang', lang)
+      safeStorage.setItem('gitascii_lang', lang)
       document.documentElement.lang = lang
     }
   }

@@ -265,4 +265,6 @@ export class BlobProfileRepository implements ProfileRepository {
 }
 
 export const profileRepository: ProfileRepository =
-  process.env.NODE_ENV === 'production' ? new BlobProfileRepository() : new LocalProfileRepository()
+  process.env.NODE_ENV === 'production' && process.env.BLOB_READ_WRITE_TOKEN
+    ? new BlobProfileRepository()
+    : new LocalProfileRepository()

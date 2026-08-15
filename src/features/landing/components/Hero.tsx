@@ -29,7 +29,7 @@ export default function Hero() {
     setMounted(true)
 
     fetch(API_ENDPOINTS.AUTH.SESSION)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.session) {
           setSession(data.session)

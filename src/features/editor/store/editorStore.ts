@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
+import { safeStorage } from '@/utils/storage'
 
 import { WIDGET_CATALOG } from '../config/widgets'
 
@@ -14,14 +15,7 @@ interface HistoryState {
 const MAX_HISTORY_STEPS = 50
 
 function saveToLocalStorage(config: SavedConfiguration) {
-  try {
-    localStorage.setItem(
-      `gitascii_${config.githubId}_${config.profileSlug || 'default'}`,
-      JSON.stringify(config)
-    )
-  } catch (e) {
-    console.warn('Auto-save failed:', e)
-  }
+  safeStorage.setJSON(`gitascii_${config.githubId}_${config.profileSlug || 'default'}`, config)
 }
 
 export interface EditorStore {

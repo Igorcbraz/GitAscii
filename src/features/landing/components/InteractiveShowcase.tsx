@@ -15,6 +15,7 @@ import {
 } from '@/constants'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { copyToClipboard } from '@/utils/clipboard'
 
 export default function InteractiveShowcase() {
   const { language } = useI18n()
@@ -29,14 +30,16 @@ export default function InteractiveShowcase() {
   const [selectedProfile, setSelectedProfile] = useState('igorcbraz')
   const [selectedGuide, setSelectedGuide] = useState('github')
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedText(text)
-    setCopied(true)
-    setTimeout(() => {
-      setCopied(false)
-      setCopiedText('')
-    }, 2000)
+  const handleCopy = async (text: string) => {
+    const success = await copyToClipboard(text)
+    if (success) {
+      setCopiedText(text)
+      setCopied(true)
+      setTimeout(() => {
+        setCopied(false)
+        setCopiedText('')
+      }, 2000)
+    }
   }
 
   const tc = (key: string, enVal: string, ptVal: string) => {

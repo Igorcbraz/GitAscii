@@ -16,6 +16,7 @@ import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { safeStorage } from '@/utils/storage'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
@@ -43,9 +44,11 @@ export function EditorToolbar() {
       const res = await fetch('/api/auth/logout', { method: 'POST' })
       if (res.ok) {
         window.location.reload()
+      } else {
+        console.warn('Logout endpoint returned non-ok status:', res.status)
       }
     } catch (e) {
-      console.error(e)
+      console.error('Failed to log out:', e)
     }
   }
 
@@ -75,9 +78,7 @@ export function EditorToolbar() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      const skipGuide =
-        typeof window !== 'undefined' &&
-        localStorage.getItem('gitascii_skip_export_guide') === 'true'
+      const skipGuide = safeStorage.getItem('gitascii_skip_export_guide') === 'true'
       if (!skipGuide) {
         setShowExportGuide(true)
       }

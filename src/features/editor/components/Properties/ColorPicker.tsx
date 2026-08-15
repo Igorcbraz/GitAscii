@@ -4,6 +4,7 @@ import { Check, ChevronDown, Copy, Pipette } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
 
 interface ColorPickerProps {
   label?: string
@@ -23,16 +24,15 @@ const PRESET_SWATCHES = [
   '#ff4a4a', // Crimson
   '#060606', // Carbon Black
   '#1f1f1f', // Graphite
-  '#2d3748', // Slate Dark
-  '#718096', // Cool Ash
-  '#ffffff', // Pure White
+  '#7a7a7a', // Ash Gray
+  '#f0f0f0', // Chalk White
 ]
 
 export function ColorPicker({
   label,
   value = '#1f1f1f',
   onChange,
-  align = 'right',
+  align = 'left',
 }: ColorPickerProps) {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
@@ -66,11 +66,13 @@ export function ColorPicker({
     }
   }
 
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+    const success = await copyToClipboard(value)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }
   }
 
   return (

@@ -192,7 +192,10 @@ async function fetchAndProcessExternalImage(
   }
 
   try {
-    const response = await fetch(url, { headers: { accept: 'image/svg+xml, */*' } })
+    const response = await fetch(url, {
+      headers: { accept: 'image/svg+xml, */*' },
+      signal: AbortSignal.timeout(6000),
+    })
     if (!response.ok) {
       console.warn(`Failed to fetch external SVG: ${url} (HTTP ${response.status})`)
       // Return a basic error SVG for this widget rather than crashing the whole grid
@@ -225,8 +228,9 @@ async function fetchAndProcessExternalImage(
       if (!mimeType) mimeType = 'image/png'
       return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
     }
-  } catch (error: any) {
-    console.warn(`Failed to fetch external SVG: ${url} (${error.message})`)
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    console.warn(`Failed to fetch external SVG: ${url} (${errorMsg})`)
     return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
       <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
@@ -272,7 +276,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
             height,
             preserve
           )
-          finalSvg = finalSvg.replace(fullMatch, replacement)
+          finalSvg = finalSvg.replace(fullMatch, () => replacement)
           continue
         } catch (fbErr) {
           console.error('Failed to fetch fallback widget:', fallbackUrl, fbErr)
@@ -281,7 +285,8 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
 
       finalSvg = finalSvg.replace(
         fullMatch,
-        `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+        () =>
+          `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
       )
     }
   }
@@ -314,7 +319,10 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
         throw new Error('Forbidden hostname')
       }
 
-      const response = await fetch(url, { headers: { accept: 'image/*, */*' } })
+      const response = await fetch(url, {
+        headers: { accept: 'image/*, */*' },
+        signal: AbortSignal.timeout(4000),
+      })
       if (!response.ok) continue
       const buffer = await response.arrayBuffer()
       const contentType = response.headers.get('content-type') || 'image/png'

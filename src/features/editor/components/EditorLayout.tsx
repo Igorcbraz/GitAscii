@@ -10,6 +10,7 @@ import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { safeStorage } from '@/utils/storage'
 
 import { useEditorStore } from '../store/editorStore'
 import { calculateFitZoom, getCanvasContainerWidth } from '../utils/canvasZoom'
@@ -146,14 +147,16 @@ export function EditorLayout({
             const errText = await res.text()
             try {
               const errJson = JSON.parse(errText)
-              errMsg = errJson.error || errMsg
+              if (errJson && typeof errJson.error === 'string') {
+                errMsg = errJson.error
+              }
             } catch {
-              if (errText && !errText.trim().startsWith('<')) {
-                errMsg = errText
+              if (errText && !errText.trim().startsWith('<') && errText.length < 200) {
+                errMsg = errText.trim()
               }
             }
-          } catch {
-            // ignore
+          } catch (textErr) {
+            console.debug('Failed to read error response text:', textErr)
           }
           setStep('github', 'error', errMsg)
           throw new Error(errMsg)
@@ -169,7 +172,7 @@ export function EditorLayout({
         let initialConfig: SavedConfiguration | null = null
 
         const storageKey = `gitascii_${data.user.id}_${profileSlug}`
-        const savedDraft = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
+        const savedDraft = safeStorage.getItem(storageKey)
 
         let serverConfig: SavedConfiguration | null = null
         try {

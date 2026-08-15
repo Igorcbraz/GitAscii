@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/toast'
 import { APP_URL } from '@/constants'
 import { languageStacks, templateList } from '@/data/templatesData'
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
 
 export function TemplateGallery() {
   const { t } = useI18n()
@@ -27,14 +28,16 @@ export function TemplateGallery() {
     return matchesCategory && matchesSearch
   })
 
-  const handleCopyMarkdown = (slug: string, e: React.MouseEvent) => {
+  const handleCopyMarkdown = async (slug: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     const markdown = `<!-- GitAscii ${slug} template -->\n![GitHub Profile Card](${APP_URL}/api/YOUR_USERNAME?theme=${slug})`
-    navigator.clipboard.writeText(markdown)
-    setCopiedSlug(slug)
-    success(`Copied ${slug} template SVG snippet to clipboard.`)
-    setTimeout(() => setCopiedSlug(null), 2000)
+    const copied = await copyToClipboard(markdown)
+    if (copied) {
+      setCopiedSlug(slug)
+      success(`Copied ${slug} template SVG snippet to clipboard.`)
+      setTimeout(() => setCopiedSlug(null), 2000)
+    }
   }
 
   return (

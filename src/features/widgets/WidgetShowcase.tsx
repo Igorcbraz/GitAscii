@@ -10,6 +10,7 @@ import { APP_URL, EXTERNAL_LINKS } from '@/constants'
 import { attributions, WidgetItem, widgetsList } from '@/data/widgetsData'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
 
 export function WidgetShowcase() {
   const { t } = useI18n()
@@ -25,12 +26,14 @@ export function WidgetShowcase() {
     }
   }
 
-  const handleCopyMarkdown = (widget: WidgetItem) => {
+  const handleCopyMarkdown = async (widget: WidgetItem) => {
     const snippet = widget.codeSnippet.replace('YOUR_USERNAME', activeUsername)
-    navigator.clipboard.writeText(snippet)
-    setCopiedId(widget.id)
-    success(`Copied ${widget.name} markdown for @${activeUsername}.`)
-    setTimeout(() => setCopiedId(null), 2000)
+    const copied = await copyToClipboard(snippet)
+    if (copied) {
+      setCopiedId(widget.id)
+      success(`Copied ${widget.name} markdown for @${activeUsername}.`)
+      setTimeout(() => setCopiedId(null), 2000)
+    }
   }
 
   const nativeWidgets = widgetsList

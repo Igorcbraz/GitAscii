@@ -15,6 +15,8 @@ import { createPortal } from 'react-dom'
 
 import { EXPORT_GUIDE_STEPS } from '@/constants'
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
+import { safeStorage } from '@/utils/storage'
 
 interface ExportGuideModalProps {
   isOpen: boolean
@@ -97,17 +99,19 @@ export function ExportGuideModal({
     return () => window.removeEventListener('keydown', handleKey)
   }, [isOpen, handleClose])
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(embedCode)
-    setReCopied(true)
-    setTimeout(() => setReCopied(false), 2000)
+  const handleCopy = async () => {
+    const success = await copyToClipboard(embedCode)
+    if (success) {
+      setReCopied(true)
+      setTimeout(() => setReCopied(false), 2000)
+    }
   }
 
   const [dontShowAgain, setDontShowAgain] = useState(false)
 
   useEffect(() => {
-    if (isOpen && typeof window !== 'undefined') {
-      setDontShowAgain(localStorage.getItem('gitascii_skip_export_guide') === 'true')
+    if (isOpen) {
+      setDontShowAgain(safeStorage.getItem('gitascii_skip_export_guide') === 'true')
     }
   }, [isOpen])
 
@@ -245,9 +249,9 @@ export function ExportGuideModal({
                 const newValue = !dontShowAgain
                 setDontShowAgain(newValue)
                 if (newValue) {
-                  localStorage.setItem('gitascii_skip_export_guide', 'true')
+                  safeStorage.setItem('gitascii_skip_export_guide', 'true')
                 } else {
-                  localStorage.removeItem('gitascii_skip_export_guide')
+                  safeStorage.removeItem('gitascii_skip_export_guide')
                 }
               }}
               className="inline-flex items-center gap-2.5 text-ash hover:text-chalk transition-colors cursor-pointer select-none group"

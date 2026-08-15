@@ -5,6 +5,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react
 
 import { getConsentChoice } from '@/lib/consent'
 import { ConsentBanner } from '@/lib/consent/ConsentBanner'
+import { safeStorage } from '@/utils/storage'
 
 import { GoogleAnalyticsProvider } from './google-analytics'
 import { AnalyticsProvider } from './interface'
@@ -187,10 +188,10 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!consentGranted) return
 
-    const isFirstVisit = !localStorage.getItem('gitascii_visited')
+    const isFirstVisit = !safeStorage.getItem('gitascii_visited')
     if (isFirstVisit) {
       analytics.track('first_visit')
-      localStorage.setItem('gitascii_visited', 'true')
+      safeStorage.setItem('gitascii_visited', 'true')
     }
     analytics.track('session_start')
 

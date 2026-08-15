@@ -55,6 +55,12 @@ export function TemplateLibrarySection({
     if (!file) return
 
     const reader = new FileReader()
+    reader.onerror = () => {
+      error(t('editor.sidebar.import.read_error', 'Erro ao ler arquivo selecionado.'))
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
     reader.onload = (event) => {
       try {
         const result = event.target?.result
