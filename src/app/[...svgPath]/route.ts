@@ -74,7 +74,14 @@ export async function GET(
 
     let config = await loadProfileConfig(username, profileSlug)
     if (!config) {
-      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
+      config = createConfiguration(
+        data.user.id,
+        data.user.login,
+        'terminal',
+        profileSlug,
+        'Default',
+        data
+      )
     }
 
     const rawSvgContent = renderSvg(config, data, { theme, widgets })

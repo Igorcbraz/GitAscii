@@ -1,19 +1,22 @@
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { detectTechStackFromProfile } from '@/features/editor/utils/profileAutoDetection'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export function renderTechStack(
   widget: WidgetInstance,
-  _data: NormalizedGitHubData,
+  data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
   const { width, height } = widget.size
   const cfg = widget.config
 
+  const defaultTechs = detectTechStackFromProfile(data)
+
   const selectedTechs =
     Array.isArray(cfg.selectedTechs) && cfg.selectedTechs.length > 0
       ? (cfg.selectedTechs as string[])
-      : ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'python', 'docker', 'git', 'postgres']
+      : defaultTechs
 
   const theme = (cfg.theme as string) || 'dark'
   const perLine = Number(cfg.perLine) || 12

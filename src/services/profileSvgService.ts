@@ -61,7 +61,14 @@ export async function generateProfileSvgResponse(
 
     if (!config) {
       const templateId = templateParam || 'terminal'
-      config = createConfiguration(data.user.id, data.user.login, templateId, profileSlug)
+      config = createConfiguration(
+        data.user.id,
+        data.user.login,
+        templateId,
+        profileSlug,
+        'Default',
+        data
+      )
     }
 
     if (widgetsParam && widgetsParam.length > 0) {

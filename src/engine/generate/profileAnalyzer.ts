@@ -59,7 +59,8 @@ export function generateBestProfile(data: NormalizedGitHubData): SavedConfigurat
     data.user.login,
     analysis.suggestedTemplate,
     'default',
-    'Default Profile'
+    'Default Profile',
+    data
   )
 
   config.metadata.generatedBy = 'auto'

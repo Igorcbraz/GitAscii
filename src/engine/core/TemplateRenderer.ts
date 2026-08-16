@@ -1,4 +1,14 @@
-import type { GlobalStyles, SavedConfiguration, WidgetInstance } from '../types'
+import {
+  detectSocialsFromProfile,
+  detectTechStackFromProfile,
+} from '@/features/editor/utils/profileAutoDetection'
+
+import type {
+  GlobalStyles,
+  NormalizedGitHubData,
+  SavedConfiguration,
+  WidgetInstance,
+} from '../types'
 
 export interface TemplatePreset {
   id: string
@@ -1045,15 +1055,45 @@ export function createConfiguration(
   username: string,
   templateId = 'terminal',
   profileSlug = 'default',
-  profileName = 'Default'
+  profileName = 'Default',
+  githubData?: NormalizedGitHubData | null
 ): SavedConfiguration {
   const preset = TEMPLATE_PRESETS[templateId] || TEMPLATE_PRESETS.terminal
 
-  const widgets: WidgetInstance[] = preset.layout.map((item, index) => ({
-    ...item,
-    instanceId: `widget_${Date.now()}_${index}`,
-    name: `${item.widgetId.charAt(0).toUpperCase() + item.widgetId.slice(1)} Widget`,
-  }))
+  const detectedSocials = githubData ? detectSocialsFromProfile(githubData) : null
+  const detectedTechs = githubData ? detectTechStackFromProfile(githubData) : null
+
+  const widgets: WidgetInstance[] = preset.layout.map((item, index) => {
+    let autoConfig: Record<string, unknown> = {}
+
+    if (item.widgetId === 'social-media' && detectedSocials) {
+      autoConfig = {
+        selectedSocials: detectedSocials.selectedSocials,
+        socialUrls: detectedSocials.socialUrls,
+      }
+    } else if (
+      (item.widgetId === 'tech-stack' || item.widgetId === 'codeweb-retro-grid') &&
+      detectedTechs
+    ) {
+      autoConfig = {
+        selectedTechs: detectedTechs,
+      }
+    } else if (item.widgetId === 'codeweb-social-badge' && detectedSocials) {
+      autoConfig = {
+        platforms: detectedSocials.selectedSocials,
+      }
+    }
+
+    return {
+      ...item,
+      config: {
+        ...autoConfig,
+        ...item.config,
+      },
+      instanceId: `widget_${Date.now()}_${index}`,
+      name: `${item.widgetId.charAt(0).toUpperCase() + item.widgetId.slice(1)} Widget`,
+    }
+  })
 
   const globalStyles: GlobalStyles = {
     backgroundColor: preset.colors.background,

@@ -1,6 +1,7 @@
 import { SOCIAL_PLATFORMS } from '@/constants'
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { detectSocialsFromProfile } from '@/features/editor/utils/profileAutoDetection'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { sanitizeSafeHref } from '@/utils/svgSanitizer'
 
@@ -12,12 +13,14 @@ export function renderSocialMedia(
   const { width, height } = widget.size
   const cfg = widget.config
 
+  const detected = detectSocialsFromProfile(data)
+
   const selectedSocials =
     Array.isArray(cfg.selectedSocials) && cfg.selectedSocials.length > 0
       ? (cfg.selectedSocials as string[])
-      : ['github', 'linkedin', 'twitter', 'discord', 'youtube', 'website']
+      : detected.selectedSocials
 
-  const socialUrls = (cfg.socialUrls as Record<string, string>) || {}
+  const socialUrls = (cfg.socialUrls as Record<string, string>) || detected.socialUrls
   const badgeStyle = (cfg.badgeStyle as string) || 'for-the-badge'
   const showTitle = cfg.showTitle !== false
   const customTitle = (cfg.customTitle as string) || '[ SOCIAL MEDIA ]'

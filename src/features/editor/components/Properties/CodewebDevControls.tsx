@@ -28,6 +28,10 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 import { normalizeUrl } from '@/utils/url'
 
 import { useEditorStore } from '../../store/editorStore'
+import {
+  detectSocialsFromProfile,
+  detectTechStackFromProfile,
+} from '../../utils/profileAutoDetection'
 
 interface CodewebDevControlsProps {
   instanceId: string
@@ -54,6 +58,7 @@ const ALL_PLATFORMS = [
 export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevControlsProps) {
   const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const githubData = useEditorStore((state) => state.githubData)
   const [newTagInput, setNewTagInput] = useState('')
 
   const handleUpdate = (patch: Record<string, unknown>) => {
@@ -70,10 +75,15 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
     const staticMode = Boolean(config.staticMode)
     const gridColumns = Number(config.gridColumns) || 2
 
+    const detectedSocials = detectSocialsFromProfile(githubData)
+    const fallbackPlatforms = detectedSocials.selectedSocials.map((s) =>
+      s === 'twitter' ? 'x' : s === 'email' ? 'gmail' : s === 'website' ? 'portfolio' : s
+    )
+
     const activePlatforms =
       Array.isArray(config.platforms) && config.platforms.length > 0
         ? (config.platforms as string[])
-        : ['github', 'instagram', 'facebook', 'gmail']
+        : fallbackPlatforms
 
     const togglePlatform = (pId: string) => {
       let updated: string[]
@@ -785,6 +795,7 @@ function CodewebBentoControls({
   handleUpdate: (patch: Record<string, unknown>) => void
 }) {
   const { t } = useI18n()
+  const githubData = useEditorStore((state) => state.githubData)
   const title = (config.title as string) || 'Tech Stack'
   const displayMode = (config.displayMode as 'both' | 'logo' | 'name') || 'both'
   const staticMode = Boolean(config.staticMode)
@@ -800,11 +811,12 @@ function CodewebBentoControls({
   const [errorMsg, setErrorMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const detectedTechs = detectTechStackFromProfile(githubData)
   const selectedTechs = Array.isArray(config.selectedTechs)
     ? (config.selectedTechs as string[])
     : Array.isArray(config.technologies)
       ? (config.technologies as string[])
-      : ['TypeScript', 'React', 'Next.js', 'TailwindCSS', 'Node.js']
+      : detectedTechs
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

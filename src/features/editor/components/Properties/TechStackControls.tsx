@@ -10,6 +10,7 @@ import { TECH_CATALOG, type TechItem } from '@/data/techCatalog'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import { detectTechStackFromProfile } from '../../utils/profileAutoDetection'
 
 export { TECH_CATALOG, type TechItem }
 
@@ -25,14 +26,17 @@ export function TechStackControls({ instanceId, config }: TechStackControlsProps
   const showTitle = config.showTitle !== false
   const customTitle = (config.customTitle as string) || ''
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const githubData = useEditorStore((state) => state.githubData)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState<
     'all' | 'languages' | 'frontend' | 'backend' | 'devops'
   >('all')
 
+  const defaultTechs = detectTechStackFromProfile(githubData)
+
   const selectedTechs = Array.isArray(config.selectedTechs)
     ? (config.selectedTechs as string[])
-    : ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'python', 'docker', 'git', 'postgres']
+    : defaultTechs
 
   const theme = (config.theme as string) || 'dark'
   const perLine = Number(config.perLine) || 12

@@ -55,9 +55,12 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     const user: GitHubUser = await userRes.json()
 
     const reposRes = await fetch(
-      `${API_ENDPOINTS.GITHUB.USER_INFO(username)}/repos?sort=updated&per_page=30`,
+      `${API_ENDPOINTS.GITHUB.USER_INFO(username)}/repos?sort=updated&per_page=100`,
       {
-        headers,
+        headers: {
+          ...headers,
+          Accept: 'application/vnd.github.mercy-preview+json, application/vnd.github.v3+json',
+        },
         next: { revalidate: 3600 },
         signal: AbortSignal.timeout(8000),
       }
@@ -86,7 +89,24 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       totalStars,
       totalForks,
       readmeContent: null,
+      socialAccounts: [],
       contributions: generateMockContributions(),
+    }
+
+    try {
+      const socialRes = await fetch(API_ENDPOINTS.GITHUB.USER_SOCIAL_ACCOUNTS(username), {
+        headers,
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(4000),
+      })
+      if (socialRes.ok) {
+        const socialData = await socialRes.json()
+        if (Array.isArray(socialData)) {
+          result.socialAccounts = socialData
+        }
+      }
+    } catch (socialErr) {
+      console.warn('Failed to fetch social accounts for', username, socialErr)
     }
 
     if (token) {
@@ -95,6 +115,32 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
           query: `
             query($username: String!) {
               user(login: $username) {
+                socialAccounts(first: 20) {
+                  nodes {
+                    provider
+                    url
+                  }
+                }
+                repositories(first: 100, ownerAffiliations: [OWNER], orderBy: {field: UPDATED_AT, direction: DESC}) {
+                  nodes {
+                    name
+                    description
+                    stargazerCount
+                    forkCount
+                    repositoryTopics(first: 10) {
+                      nodes {
+                        topic {
+                          name
+                        }
+                      }
+                    }
+                    languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+                      nodes {
+                        name
+                      }
+                    }
+                  }
+                }
                 contributionsCollection {
                   contributionCalendar {
                     totalContributions
@@ -125,6 +171,35 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
         if (gqlRes.ok) {
           const gqlData = await gqlRes.json()
+          const gqlSocials = gqlData?.data?.user?.socialAccounts?.nodes
+          if (
+            Array.isArray(gqlSocials) &&
+            gqlSocials.length > 0 &&
+            (!result.socialAccounts || result.socialAccounts.length === 0)
+          ) {
+            result.socialAccounts = gqlSocials
+          }
+
+          const gqlRepos = gqlData?.data?.user?.repositories?.nodes
+          if (Array.isArray(gqlRepos)) {
+            gqlRepos.forEach((r: any) => {
+              const langNodes = r.languages?.nodes || []
+              langNodes.forEach((l: any) => {
+                if (l.name) {
+                  result.languages[l.name] = (result.languages[l.name] || 0) + 1
+                }
+              })
+              const topicNodes = r.repositoryTopics?.nodes || []
+              const topics = topicNodes.map((t: any) => t.topic?.name).filter(Boolean)
+              if (topics.length > 0) {
+                const existing = result.repos.find((er) => er.name === r.name)
+                if (existing) {
+                  existing.topics = topics
+                }
+              }
+            })
+          }
+
           const calendar = gqlData?.data?.user?.contributionsCollection?.contributionCalendar
           if (calendar) {
             result.contributions = {
@@ -151,6 +226,14 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
         )
         if (readmeResMaster.ok) {
           result.readmeContent = await readmeResMaster.text()
+        } else {
+          const apiReadmeRes = await fetch(API_ENDPOINTS.GITHUB.REPO_README(username, username), {
+            headers: { ...headers, Accept: 'application/vnd.github.raw' },
+            signal: AbortSignal.timeout(4000),
+          })
+          if (apiReadmeRes.ok) {
+            result.readmeContent = await apiReadmeRes.text()
+          }
         }
       }
     } catch (e) {

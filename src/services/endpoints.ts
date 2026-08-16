@@ -18,6 +18,10 @@ export const API_ENDPOINTS = {
     REPO_INFO: (owner: string, repo: string) =>
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
     USER_INFO: (username: string) => `https://api.github.com/users/${encodeURIComponent(username)}`,
+    USER_SOCIAL_ACCOUNTS: (username: string) =>
+      `https://api.github.com/users/${encodeURIComponent(username)}/social_accounts`,
+    REPO_README: (owner: string, repo: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
     USER_PROFILE: (username: string) => `https://github.com/${encodeURIComponent(username)}`,
     REPO_CONTENTS: (owner: string, repo: string, path: string) =>
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`,

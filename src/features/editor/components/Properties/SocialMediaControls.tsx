@@ -10,6 +10,7 @@ import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { useEditorStore } from '../../store/editorStore'
+import { detectSocialsFromProfile } from '../../utils/profileAutoDetection'
 
 export { SOCIAL_PLATFORMS, type SocialPlatform }
 
@@ -26,13 +27,15 @@ export function SocialMediaControls({ instanceId, config }: SocialMediaControlsP
   const githubData = useEditorStore((state) => state.githubData)
   const username = githubData?.user.login || 'user'
 
+  const detected = detectSocialsFromProfile(githubData)
+
   const [isBadgeMenuOpen, setIsBadgeMenuOpen] = useState(false)
 
   const selectedSocials = Array.isArray(config.selectedSocials)
     ? (config.selectedSocials as string[])
-    : ['github', 'linkedin', 'twitter', 'discord', 'youtube', 'website']
+    : detected.selectedSocials
 
-  const socialUrls = (config.socialUrls as Record<string, string>) || {}
+  const socialUrls = (config.socialUrls as Record<string, string>) || detected.socialUrls
   const badgeStyle = (config.badgeStyle as string) || 'for-the-badge'
 
   const badgeStylesList = BADGE_STYLES.map((b) => ({

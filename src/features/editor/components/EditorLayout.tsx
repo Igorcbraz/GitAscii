@@ -371,7 +371,8 @@ export function EditorLayout({
                     githubData.user.login,
                     'blank',
                     profileSlug,
-                    profileSlug === 'default' ? 'Default' : profileSlug.toUpperCase()
+                    profileSlug === 'default' ? 'Default' : profileSlug.toUpperCase(),
+                    githubData
                   )
                   initEditor(config, githubData)
                   setShowOnboarding(false)
