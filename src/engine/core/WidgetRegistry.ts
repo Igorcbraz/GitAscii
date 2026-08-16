@@ -53,89 +53,107 @@ export type WidgetRendererFn = (
   forceStatic?: boolean
 ) => string
 
-const REGISTRY: Record<string, WidgetRendererFn> = {
+const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   // Core Profile Widgets
-  header: (w, d, g) => renderHeader(w, d, g),
-  avatar: (w, d, g) => renderAvatar(w, d, g),
-  'ascii-art': (w, d, g) => renderAsciiArt(w, d, g),
-  'ascii-text': (w, d, g) => renderAsciiText(w, d, g),
-  bio: (w, d, g) => renderBio(w, d, g),
-  stats: (w, d, g) => renderStats(w, d, g),
-  languages: (w, d, g) => renderLanguages(w, d, g),
-  repositories: (w, d, g) => renderRepositories(w, d, g),
-  divider: (w, d, g) => renderDivider(w, d, g),
-  footer: (w, d, g) => renderFooter(w, d, g),
-  'tech-stack': (w, d, g) => renderTechStack(w, d, g),
-  'social-media': (w, d, g) => renderSocialMedia(w, d, g),
-  'terminal-info': (w, d, g) => renderTerminalInfo(w, d, g),
-  'terminal-card': (w, d, g) => renderTerminalInfo(w, d, g),
-  'pokemon-card': (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height),
+  ['header', (w, d, g) => renderHeader(w, d, g)],
+  ['avatar', (w, d, g) => renderAvatar(w, d, g)],
+  ['ascii-art', (w, d, g) => renderAsciiArt(w, d, g)],
+  ['ascii-text', (w, d, g) => renderAsciiText(w, d, g)],
+  ['bio', (w, d, g) => renderBio(w, d, g)],
+  ['stats', (w, d, g) => renderStats(w, d, g)],
+  ['languages', (w, d, g) => renderLanguages(w, d, g)],
+  ['repositories', (w, d, g) => renderRepositories(w, d, g)],
+  ['divider', (w, d, g) => renderDivider(w, d, g)],
+  ['footer', (w, d, g) => renderFooter(w, d, g)],
+  ['tech-stack', (w, d, g) => renderTechStack(w, d, g)],
+  ['social-media', (w, d, g) => renderSocialMedia(w, d, g)],
+  ['terminal-info', (w, d, g) => renderTerminalInfo(w, d, g)],
+  ['terminal-card', (w, d, g) => renderTerminalInfo(w, d, g)],
+  ['pokemon-card', (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
 
   // GodProfile & Specialized
-  'godprofile-terminal': (w, d, g) => renderTerminal(w, d, g),
-  'godprofile-marquee': (w, d, g) => renderMarquee(w, d, g),
-  'godprofile-neural': (w, d, g) => renderNeural(w, d, g),
-  'godprofile-trophies': (w, d, g) => renderTrophies(w, d, g),
-  [WIDGET_IDS.GODPROFILE_WAKATIME]: (w, d, g) => renderWakaTime(w, d, g),
-  [WIDGET_IDS.GODPROFILE_GLOBE]: (w, d, g) => renderGlobe(w, d, g),
+  ['godprofile-terminal', (w, d, g) => renderTerminal(w, d, g)],
+  ['godprofile-marquee', (w, d, g) => renderMarquee(w, d, g)],
+  ['godprofile-neural', (w, d, g) => renderNeural(w, d, g)],
+  ['godprofile-trophies', (w, d, g) => renderTrophies(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_WAKATIME, (w, d, g) => renderWakaTime(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_GLOBE, (w, d, g) => renderGlobe(w, d, g)],
 
   // ASCII Variants
-  [WIDGET_IDS.ASCII_PORTRAIT]: (w, d, g, s) => renderAsciiPortrait(w, d, g, s),
-  [WIDGET_IDS.ASCII_INFO]: (w, d, g, s) => renderAsciiInfoCard(w, d, g, s),
-  [WIDGET_IDS.ASCII_HEATMAP]: (w, d, g, s) => renderAsciiHeatmap(w, d, g, s),
+  [WIDGET_IDS.ASCII_PORTRAIT, (w, d, g, s) => renderAsciiPortrait(w, d, g, s)],
+  [WIDGET_IDS.ASCII_INFO, (w, d, g, s) => renderAsciiInfoCard(w, d, g, s)],
+  [WIDGET_IDS.ASCII_HEATMAP, (w, d, g, s) => renderAsciiHeatmap(w, d, g, s)],
 
   // ControlPlane Variants
-  [WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP]: (w, d, g) => renderSystemLoop(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_COMMAND_DECK]: (w, d, g) => renderCommandDeck(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID]: (w, d, g) => renderSignalGrid(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_METRO]: (w, d, g) => renderMetroMap(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_BENTO]: (w, d, g) => renderBentoGrid(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_EDITORIAL]: (w, d, g) => renderEditorial(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_BLUEPRINT]: (w, d, g) => renderBlueprint(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_CONSTELLATION]: (w, d, g) => renderConstellation(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_MONOLITH]: (w, d, g) => renderMonolith(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_INTERLACE]: (w, d, g) => renderInterlace(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_CIPHER]: (w, d, g) => renderCipherPrint(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_SPECIMEN]: (w, d, g) => renderFieldSpecimen(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_PATCHBAY]: (w, d, g) => renderPatchbay(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_CARTOGRAPH]: (w, d, g) => renderCartograph(w, d, g),
-  [WIDGET_IDS.CONTROLPLANE_FOUNDRY]: (w, d, g) => renderFoundry(w, d, g),
+  [WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP, (w, d, g) => renderSystemLoop(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_COMMAND_DECK, (w, d, g) => renderCommandDeck(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID, (w, d, g) => renderSignalGrid(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_METRO, (w, d, g) => renderMetroMap(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_BENTO, (w, d, g) => renderBentoGrid(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_EDITORIAL, (w, d, g) => renderEditorial(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_BLUEPRINT, (w, d, g) => renderBlueprint(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_CONSTELLATION, (w, d, g) => renderConstellation(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_MONOLITH, (w, d, g) => renderMonolith(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_INTERLACE, (w, d, g) => renderInterlace(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_CIPHER, (w, d, g) => renderCipherPrint(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_SPECIMEN, (w, d, g) => renderFieldSpecimen(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_PATCHBAY, (w, d, g) => renderPatchbay(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_CARTOGRAPH, (w, d, g) => renderCartograph(w, d, g)],
+  [WIDGET_IDS.CONTROLPLANE_FOUNDRY, (w, d, g) => renderFoundry(w, d, g)],
 
   // Codeweb Variants
-  [WIDGET_IDS.CODEWEB_HERO_ORBIT]: (w, d, g, s) => renderCodewebHeroOrbit(w, d, g, s),
-  [WIDGET_IDS.CODEWEB_RETRO_GRID]: (w, d, g, s) => renderCodewebRetroGrid(w, d, g, s),
-  [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS]: (w, d, g, s) => renderCodewebShowcaseCards(w, d, g, s),
-  [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: (w, d, g, s) => renderCodewebSocialBadge(w, d, g, s),
-  [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: (w, d, g, s) => renderCodewebMinimalBadge(w, d, g, s),
+  [WIDGET_IDS.CODEWEB_HERO_ORBIT, (w, d, g, s) => renderCodewebHeroOrbit(w, d, g, s)],
+  [WIDGET_IDS.CODEWEB_RETRO_GRID, (w, d, g, s) => renderCodewebRetroGrid(w, d, g, s)],
+  [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS, (w, d, g, s) => renderCodewebShowcaseCards(w, d, g, s)],
+  [WIDGET_IDS.CODEWEB_SOCIAL_BADGE, (w, d, g, s) => renderCodewebSocialBadge(w, d, g, s)],
+  [WIDGET_IDS.CODEWEB_MINIMAL_BADGE, (w, d, g, s) => renderCodewebMinimalBadge(w, d, g, s)],
 
   // External Integration Widgets
-  'gitfest-lineup': (w, d, g) => renderExternalWidgets(w, d, g),
-  'github-readme-stats': (w, d, g) => renderExternalWidgets(w, d, g),
-  ghstats: (w, d, g) => renderExternalWidgets(w, d, g),
-  'streak-stats': (w, d, g) => renderExternalWidgets(w, d, g),
-  'profile-trophy': (w, d, g) => renderExternalWidgets(w, d, g),
-  'activity-graph': (w, d, g) => renderExternalWidgets(w, d, g),
-  'contribution-snake': (w, d, g) => renderExternalWidgets(w, d, g),
-  'metrics-card': (w, d, g) => renderExternalWidgets(w, d, g),
-  'views-counter': (w, d, g) => renderExternalWidgets(w, d, g),
-  'readme-quotes': (w, d, g) => renderExternalWidgets(w, d, g),
-  'awesome-badge': (w, d, g) => renderExternalWidgets(w, d, g),
-  'custom-image': (w, d, g) => renderExternalWidgets(w, d, g),
+  ['gitfest-lineup', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['github-readme-stats', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['ghstats', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['streak-stats', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['profile-trophy', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['activity-graph', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['contribution-snake', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['metrics-card', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['views-counter', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['readme-quotes', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['awesome-badge', (w, d, g) => renderExternalWidgets(w, d, g)],
+  ['custom-image', (w, d, g) => renderExternalWidgets(w, d, g)],
+])
+
+export function renderFallbackWidget(
+  widget: WidgetInstance,
+  globalStyles: GlobalStyles
+): string {
+  const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
+  return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(String(widget.widgetId || '').toUpperCase())}</text>`
+}
+
+export function renderWidgetContent(
+  widget: WidgetInstance,
+  data: NormalizedGitHubData,
+  globalStyles: GlobalStyles,
+  forceStatic?: boolean
+): string {
+  const wid = typeof widget.widgetId === 'string' ? widget.widgetId : ''
+  const renderer = REGISTRY_MAP.get(wid)
+  if (typeof renderer === 'function') {
+    return renderer(widget, data, globalStyles, forceStatic)
+  }
+  return renderFallbackWidget(widget, globalStyles)
 }
 
 export function getRenderer(widgetId: string): WidgetRendererFn {
-  if (typeof widgetId === 'string' && Object.prototype.hasOwnProperty.call(REGISTRY, widgetId)) {
-    const renderer = REGISTRY[widgetId]
-    if (typeof renderer === 'function') {
-      return renderer
-    }
+  const wid = typeof widgetId === 'string' ? widgetId : ''
+  const renderer = REGISTRY_MAP.get(wid)
+  if (typeof renderer === 'function') {
+    return renderer
   }
-  return (widget, _data, globalStyles) => {
-    const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
-    return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(widget.widgetId.toUpperCase())}</text>`
-  }
+  return (widget, _data, globalStyles) => renderFallbackWidget(widget, globalStyles)
 }
 
 export function registerWidget(widgetId: string, renderer: WidgetRendererFn): void {
-  REGISTRY[widgetId] = renderer
+  REGISTRY_MAP.set(widgetId, renderer)
 }

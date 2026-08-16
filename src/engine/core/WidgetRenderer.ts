@@ -1,5 +1,5 @@
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
-import { getRenderer } from './WidgetRegistry'
+import { renderWidgetContent } from './WidgetRegistry'
 
 export function getWidgetMinSize(
   widget: WidgetInstance,
@@ -56,9 +56,7 @@ export function renderWidgetSvg(
   const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
   const rx = cfg.borderRadius !== undefined ? cfg.borderRadius : globalStyles.borderRadius || 0
 
-  const renderer = getRenderer(widget.widgetId)
-  let contentSvg =
-    typeof renderer === 'function' ? renderer(widget, data, globalStyles, forceStatic) : ''
+  let contentSvg = renderWidgetContent(widget, data, globalStyles, forceStatic)
 
   let templateDecorationSvg = ''
   const tmplStyle = globalStyles.templateStyle || 'terminal'
