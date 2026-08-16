@@ -50,6 +50,9 @@ const IGNORED_DOMAINS = [
   'cdnjs.cloudflare.com',
   'img.shields.io',
   'raw.githubusercontent.com',
+]
+
+const IGNORED_DOMAIN_PREFIXES = [
   'github-readme-stats',
   'streak-stats',
   'profile-trophy',
@@ -177,6 +180,25 @@ export function detectSocialsFromProfile(
   }
 }
 
+function parseUrlSafe(rawUrl: string): URL | null {
+  try {
+    const trimmed = rawUrl.trim()
+    if (!trimmed) return null
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) {
+      return new URL(trimmed)
+    }
+    return new URL(`https://${trimmed}`)
+  } catch {
+    return null
+  }
+}
+
+function isMatchingDomain(hostname: string, targetDomain: string): boolean {
+  const host = hostname.toLowerCase()
+  const domain = targetDomain.toLowerCase()
+  return host === domain || host.endsWith(`.${domain}`)
+}
+
 function classifyAndStoreUrl(
   url: string,
   foundSocials: Set<string>,
@@ -196,135 +218,171 @@ function classifyAndStoreUrl(
       return
     }
 
+    const parsed = parseUrlSafe(cleanUrl)
+    if (!parsed) return
+
+    const host = parsed.hostname.toLowerCase()
+    const path = parsed.pathname
+
     // LinkedIn
-    if (lower.includes('linkedin.com')) {
+    if (isMatchingDomain(host, 'linkedin.com')) {
       foundSocials.add('linkedin')
       if (!socialUrls.linkedin) socialUrls.linkedin = cleanUrl
       return
     }
 
-    if (lower.includes('twitter.com/') || lower.includes('x.com/')) {
-      if (!lower.includes('/intent/') && !lower.includes('/share')) {
+    // Twitter / X
+    if (isMatchingDomain(host, 'twitter.com') || isMatchingDomain(host, 'x.com')) {
+      if (!path.includes('/intent/') && !path.includes('/share')) {
         foundSocials.add('twitter')
         if (!socialUrls.twitter) socialUrls.twitter = cleanUrl
       }
       return
     }
 
+    // Discord
     if (
-      lower.includes('discord.gg/') ||
-      lower.includes('discord.com/invite/') ||
-      lower.includes('discord.com/users/')
+      isMatchingDomain(host, 'discord.gg') ||
+      (isMatchingDomain(host, 'discord.com') &&
+        (path.startsWith('/invite/') || path.startsWith('/users/')))
     ) {
       foundSocials.add('discord')
       if (!socialUrls.discord) socialUrls.discord = cleanUrl
       return
     }
 
+    // YouTube
     if (
-      lower.includes('youtube.com/@') ||
-      lower.includes('youtube.com/c/') ||
-      lower.includes('youtube.com/channel/') ||
-      lower.includes('youtube.com/user/')
+      (isMatchingDomain(host, 'youtube.com') &&
+        (path.startsWith('/@') ||
+          path.startsWith('/c/') ||
+          path.startsWith('/channel/') ||
+          path.startsWith('/user/'))) ||
+      isMatchingDomain(host, 'youtu.be')
     ) {
       foundSocials.add('youtube')
       if (!socialUrls.youtube) socialUrls.youtube = cleanUrl
       return
     }
 
-    if (lower.includes('instagram.com/')) {
-      if (!lower.includes('/p/') && !lower.includes('/reel/')) {
+    // Instagram
+    if (isMatchingDomain(host, 'instagram.com')) {
+      if (!path.startsWith('/p/') && !path.startsWith('/reel/')) {
         foundSocials.add('instagram')
         if (!socialUrls.instagram) socialUrls.instagram = cleanUrl
       }
       return
     }
 
-    if (lower.includes('twitch.tv/')) {
+    // Twitch
+    if (isMatchingDomain(host, 'twitch.tv')) {
       foundSocials.add('twitch')
       if (!socialUrls.twitch) socialUrls.twitch = cleanUrl
       return
     }
 
-    if (lower.includes('dev.to/')) {
+    // Dev.to
+    if (isMatchingDomain(host, 'dev.to')) {
       foundSocials.add('devto')
       if (!socialUrls.devto) socialUrls.devto = cleanUrl
       return
     }
 
-    if (lower.includes('medium.com/@') || /https?:\/\/[a-zA-Z0-9_-]+\.medium\.com/i.test(lower)) {
+    // Medium
+    if (
+      (isMatchingDomain(host, 'medium.com') && path.startsWith('/@')) ||
+      (host.endsWith('.medium.com') && host !== 'medium.com')
+    ) {
       foundSocials.add('medium')
       if (!socialUrls.medium) socialUrls.medium = cleanUrl
       return
     }
 
-    if (lower.includes('stackoverflow.com/users/')) {
+    // StackOverflow
+    if (isMatchingDomain(host, 'stackoverflow.com') && path.startsWith('/users/')) {
       foundSocials.add('stackoverflow')
       if (!socialUrls.stackoverflow) socialUrls.stackoverflow = cleanUrl
       return
     }
 
-    if (lower.includes('bsky.app/profile/')) {
+    // Bluesky
+    if (isMatchingDomain(host, 'bsky.app') && path.startsWith('/profile/')) {
       foundSocials.add('bluesky')
       if (!socialUrls.bluesky) socialUrls.bluesky = cleanUrl
       return
     }
 
+    // Mastodon
     if (
-      lower.includes('mastodon.social/@') ||
-      lower.includes('fosstodon.org/@') ||
-      lower.includes('mstdn.social/@') ||
-      /https?:\/\/[a-zA-Z0-9.-]+\/@[a-zA-Z0-9_]+/i.test(lower)
+      isMatchingDomain(host, 'mastodon.social') ||
+      isMatchingDomain(host, 'fosstodon.org') ||
+      isMatchingDomain(host, 'mstdn.social') ||
+      (path.startsWith('/@') && !isMatchingDomain(host, 'github.com'))
     ) {
       foundSocials.add('mastodon')
       if (!socialUrls.mastodon) socialUrls.mastodon = cleanUrl
       return
     }
 
-    if (lower.includes('reddit.com/user/')) {
+    // Reddit
+    if (isMatchingDomain(host, 'reddit.com') && path.startsWith('/user/')) {
       foundSocials.add('reddit')
       if (!socialUrls.reddit) socialUrls.reddit = cleanUrl
       return
     }
 
-    if (lower.includes('spotify.com/user/') || lower.includes('spotify.com/artist/')) {
+    // Spotify
+    if (
+      isMatchingDomain(host, 'spotify.com') &&
+      (path.startsWith('/user/') || path.startsWith('/artist/'))
+    ) {
       foundSocials.add('spotify')
       if (!socialUrls.spotify) socialUrls.spotify = cleanUrl
       return
     }
 
-    if (lower.includes('t.me/') || lower.includes('telegram.me/')) {
+    // Telegram
+    if (isMatchingDomain(host, 't.me') || isMatchingDomain(host, 'telegram.me')) {
       foundSocials.add('telegram')
       if (!socialUrls.telegram) socialUrls.telegram = cleanUrl
       return
     }
 
-    if (lower.includes('tiktok.com/@')) {
+    // TikTok
+    if (isMatchingDomain(host, 'tiktok.com') && path.startsWith('/@')) {
       foundSocials.add('tiktok')
       if (!socialUrls.tiktok) socialUrls.tiktok = cleanUrl
       return
     }
 
+    // Steam
     if (
-      lower.includes('steamcommunity.com/id/') ||
-      lower.includes('steamcommunity.com/profiles/')
+      isMatchingDomain(host, 'steamcommunity.com') &&
+      (path.startsWith('/id/') || path.startsWith('/profiles/'))
     ) {
       foundSocials.add('steam')
       if (!socialUrls.steam) socialUrls.steam = cleanUrl
       return
     }
 
+    // Hashnode
     if (
-      lower.includes('hashnode.com/@') ||
-      /https?:\/\/[a-zA-Z0-9_-]+\.hashnode\.dev/i.test(lower)
+      (isMatchingDomain(host, 'hashnode.com') && path.startsWith('/@')) ||
+      (host.endsWith('.hashnode.dev') && host !== 'hashnode.dev')
     ) {
       foundSocials.add('hashnode')
       if (!socialUrls.hashnode) socialUrls.hashnode = cleanUrl
       return
     }
 
-    if (!foundSocials.has('website') && /^https?:\/\/[a-zA-Z0-9.-]+/i.test(cleanUrl)) {
-      const isIgnored = IGNORED_DOMAINS.some((domain) => lower.includes(domain))
+    if (
+      !foundSocials.has('website') &&
+      (parsed.protocol === 'http:' || parsed.protocol === 'https:')
+    ) {
+      const isIgnored =
+        IGNORED_DOMAINS.some((domain) => isMatchingDomain(host, domain)) ||
+        IGNORED_DOMAIN_PREFIXES.some((prefix) => host.startsWith(prefix))
+
       if (!isIgnored) {
         foundSocials.add('website')
         socialUrls.website = cleanUrl

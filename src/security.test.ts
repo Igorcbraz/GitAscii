@@ -337,4 +337,71 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       expect(svgText).toContain('<svg')
     })
   })
+
+  describe('Widget Registry Prototype Safety (GHAS Unvalidated Dynamic Method Call)', () => {
+    it('returns safe fallback renderer and avoids prototype pollution for special property names', async () => {
+      const { getRenderer } = await import('./engine/core/WidgetRegistry')
+      const prototypeKeys = ['toString', 'constructor', 'valueOf', '__proto__', 'hasOwnProperty']
+      for (const key of prototypeKeys) {
+        const renderer = getRenderer(key)
+        expect(typeof renderer).toBe('function')
+        const dummyWidget: any = {
+          instanceId: '1',
+          widgetId: key,
+          position: { x: 0, y: 0 },
+          size: { width: 100, height: 100 },
+          visible: true,
+          config: {},
+        }
+        const rendered = renderer(dummyWidget, {} as any, {} as any)
+        expect(rendered).toContain(key.toUpperCase())
+      }
+    })
+  })
+
+  describe('Profile URL Hostname Sanitization (GHAS Incomplete URL Substring Sanitization)', () => {
+    it('correctly matches valid domains and rejects spoofed domain substrings', async () => {
+      const { detectSocialsFromProfile } =
+        await import('./features/editor/utils/profileAutoDetection')
+      const data: any = {
+        user: {
+          id: 1,
+          login: 'victim',
+          name: 'Victim',
+          avatar_url: '',
+          bio: null,
+          company: null,
+          location: null,
+          blog: null,
+          twitter_username: null,
+          email: null,
+          public_repos: 0,
+          public_gists: 0,
+          followers: 0,
+          following: 0,
+          created_at: '',
+          updated_at: '',
+        },
+        readmeContent: `
+          Check out my fake links:
+          - https://evil.com/linkedin.com
+          - https://linkedin.com.attacker.org/profile
+          - https://phishing.site/twitter.com/victim
+          - https://badactor.net/instagram.com/myfeed
+          - https://x.com.malicious.com/victim
+          - https://sub.linkedin.com/in/legitimate
+          - https://x.com/legitimate_user
+        `,
+        repos: [],
+        languages: {},
+        totalStars: 0,
+        totalForks: 0,
+      }
+
+      const result = detectSocialsFromProfile(data)
+      expect(result.socialUrls.linkedin).toBe('https://sub.linkedin.com/in/legitimate')
+      expect(result.socialUrls.twitter).toBe('https://x.com/legitimate_user')
+      expect(result.socialUrls.instagram).toBeUndefined()
+    })
+  })
 })

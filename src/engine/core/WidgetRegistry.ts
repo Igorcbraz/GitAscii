@@ -124,13 +124,16 @@ const REGISTRY: Record<string, WidgetRendererFn> = {
 }
 
 export function getRenderer(widgetId: string): WidgetRendererFn {
-  return (
-    REGISTRY[widgetId] ||
-    ((widget, _data, globalStyles) => {
-      const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
-      return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(widget.widgetId.toUpperCase())}</text>`
-    })
-  )
+  if (typeof widgetId === 'string' && Object.prototype.hasOwnProperty.call(REGISTRY, widgetId)) {
+    const renderer = REGISTRY[widgetId]
+    if (typeof renderer === 'function') {
+      return renderer
+    }
+  }
+  return (widget, _data, globalStyles) => {
+    const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
+    return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(widget.widgetId.toUpperCase())}</text>`
+  }
 }
 
 export function registerWidget(widgetId: string, renderer: WidgetRendererFn): void {

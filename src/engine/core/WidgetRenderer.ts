@@ -57,7 +57,8 @@ export function renderWidgetSvg(
   const rx = cfg.borderRadius !== undefined ? cfg.borderRadius : globalStyles.borderRadius || 0
 
   const renderer = getRenderer(widget.widgetId)
-  let contentSvg = renderer(widget, data, globalStyles, forceStatic)
+  let contentSvg =
+    typeof renderer === 'function' ? renderer(widget, data, globalStyles, forceStatic) : ''
 
   let templateDecorationSvg = ''
   const tmplStyle = globalStyles.templateStyle || 'terminal'
