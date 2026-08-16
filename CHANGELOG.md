@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.8.0](https://github.com/Igorcbraz/GitAscii/compare/v1.7.1...v1.8.0) (2026-08-16)
+
+
+### Features
+
+* **editor:** add guest automation prompt and repository star hooks ([772171f](https://github.com/Igorcbraz/GitAscii/commit/772171f73ecd1420d86ed0a8a4a56b63a7ae9c7f))
+* **editor:** implement smart guides, spacing snapping and drag performance optimization ([dfdcee4](https://github.com/Igorcbraz/GitAscii/commit/dfdcee4fe02a9f39e19e1471bdef563bc8578e9c))
+* **editor:** improve auto-detection for social media and tech stack widgets ([2fd1363](https://github.com/Igorcbraz/GitAscii/commit/2fd1363114199612fa5bcede7f6b0dfcf34573a7))
+* **editor:** improve manual export guide modal and cache bust rule ([96b51b0](https://github.com/Igorcbraz/GitAscii/commit/96b51b0908652fa646532b311113d6f02204885b))
+* **editor:** improve responsiveness with adaptive fit-to-screen zoom and mobile UX ([27c772c](https://github.com/Igorcbraz/GitAscii/commit/27c772c0d9a3c17933dd7d5b8ac1f0c853fdd312))
+
+
+### Bug Fixes
+
+* **api:** handle reserved route collisions and safely parse profile responses ([838def0](https://github.com/Igorcbraz/GitAscii/commit/838def032fa3eaf99b10e2d2c4892e8adddfa9df))
+* **cache:** resolve profile configuration caching and sync on commit ([21d1b56](https://github.com/Igorcbraz/GitAscii/commit/21d1b567d0b9e98f6c8ce34f801ba9b48ed8a4cb))
+* **resilience:** harden error handling, storage access, clipboard and API timeouts ([69eda3a](https://github.com/Igorcbraz/GitAscii/commit/69eda3a4857ac000b3a48dbf30bbbe49c7f3a027))
+* **security:** eliminate dynamic method dispatch in widget rendering ([8a0c173](https://github.com/Igorcbraz/GitAscii/commit/8a0c173f427dd20f845391f23c185abe2251b36f))
+* **security:** resolve GHAS code scanning alerts for dynamic method calls and URL sanitization ([d8e509a](https://github.com/Igorcbraz/GitAscii/commit/d8e509a004b1acbbb5ae904059d14b1aa5d1ebe7))
+* **security:** resolve SSRF, SVG/XSS, supply chain and auth vulnerabilities ([3222023](https://github.com/Igorcbraz/GitAscii/commit/3222023d5991bce646d1b1e73a6bbd1cefd7d782))
+* **server:** increase EventEmitter defaultMaxListeners and fix image aspect ratio ([369a850](https://github.com/Igorcbraz/GitAscii/commit/369a850410897c401cd3a94bd0c538b3a4a3b6ff))
+
 ## [1.7.1](https://github.com/Igorcbraz/GitAscii/compare/v1.7.0...v1.7.1) (2026-08-15)
 
 ### Bug Fixes
