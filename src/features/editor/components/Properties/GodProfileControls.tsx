@@ -5,6 +5,8 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { useEditorStore } from '../../store/editorStore'
 import { TECH_CATALOG } from './TechStackControls'
@@ -16,9 +18,9 @@ interface GodProfileControlsProps {
 }
 
 export function GodProfileControls({ instanceId, widgetId, config }: GodProfileControlsProps) {
+  const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
-  // 1. Terminal Config
   const terminalCommands = Array.isArray(config.terminalCommands)
     ? (config.terminalCommands as string[])
     : ['$ whoami', 'user', '$ uname -a', 'Linux GitAscii']
@@ -27,7 +29,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
     updateWidgetConfig(instanceId, { terminalCommands: newCmds })
   }
 
-  // 2. Marquee Config
   const selectedMarqueeLangs = Array.isArray(config.marqueeLangs)
     ? (config.marqueeLangs as string[])
     : ['react', 'ts', 'js', 'html', 'css', 'nodejs', 'python', 'git', 'docker', 'linux']
@@ -42,7 +43,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
     updateWidgetConfig(instanceId, { marqueeLangs: updated })
   }
 
-  // 3. Neural Config
   const neuralTechs =
     typeof config.neuralTechs === 'object' && config.neuralTechs !== null
       ? (config.neuralTechs as Record<string, string[]>)
@@ -68,7 +68,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
     })
   }
 
-  // 4. Trophies Config
   const disabledTrophies = Array.isArray(config.disabledTrophies)
     ? (config.disabledTrophies as string[])
     : []
@@ -83,7 +82,6 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
     updateWidgetConfig(instanceId, { disabledTrophies: updated })
   }
 
-  // 5. WakaTime Config
   const hiddenWakatimeLangs = Array.isArray(config.hiddenWakatimeLangs)
     ? (config.hiddenWakatimeLangs as string[])
     : []
@@ -104,18 +102,20 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
         <LayoutGrid size={14} />
-        <span>GodProfile Customization</span>
+        <span>{t('editor.godprofile.title', 'GodProfile Customization')}</span>
       </div>
 
       {widgetId === 'godprofile-terminal' && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <label className="text-eyebrow text-ash font-medium">Terminal Lines</label>
+            <label className="text-eyebrow text-ash font-medium">
+              {t('editor.godprofile.terminal_lines', 'Terminal Lines')}
+            </label>
             <button
               onClick={() => updateTerminalCommands([...terminalCommands, ''])}
-              className="text-caption text-signal-lime flex items-center gap-1 hover:underline"
+              className="text-caption text-signal-lime flex items-center gap-1 hover:underline cursor-pointer"
             >
-              <Plus size={12} /> Add Line
+              <Plus size={12} /> {t('editor.godprofile.add_line', 'Add Line')}
             </button>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
@@ -138,7 +138,7 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
                     const copy = terminalCommands.filter((_, idx) => idx !== i)
                     updateTerminalCommands(copy)
                   }}
-                  className="text-red-400 hover:text-red-500 p-1"
+                  className="text-red-400 hover:text-red-500 p-1 cursor-pointer"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -151,14 +151,18 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
       {widgetId === 'godprofile-marquee' && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <label className="text-eyebrow text-ash font-medium">Select Marquee Technologies</label>
+            <label className="text-eyebrow text-ash font-medium">
+              {t('editor.godprofile.marquee_techs', 'Select Marquee Technologies')}
+            </label>
             <span className="text-caption text-ash font-jetbrains-mono bg-carbon px-1.5 py-0.5 rounded border border-graphite">
-              {selectedMarqueeLangs.length} active
+              {t('editor.godprofile.active_count', '{count} active', {
+                count: String(selectedMarqueeLangs.length),
+              })}
             </span>
           </div>
           <input
             type="text"
-            placeholder="Search stack..."
+            placeholder={t('editor.godprofile.search_placeholder', 'Search stack...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-graphite border border-graphite text-chalk text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
@@ -168,18 +172,19 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
               tech.name.toLowerCase().includes(searchTerm.toLowerCase())
             ).map((tech) => {
               const active = selectedMarqueeLangs.includes(tech.id)
+              const iconCode = tech.id === 'reactnative' ? 'react' : tech.id
               return (
                 <button
                   key={tech.id}
                   onClick={() => toggleMarqueeLang(tech.id)}
-                  className={`flex items-center gap-1.5 p-1.5 rounded-xs border text-eyebrow text-left font-medium transition-all ${
+                  className={`flex items-center gap-1.5 p-1.5 rounded-xs border text-eyebrow text-left font-medium transition-all cursor-pointer ${
                     active
                       ? 'bg-graphite border-signal-lime/40 text-signal-lime'
                       : 'bg-carbon border-transparent text-ash hover:text-chalk'
                   }`}
                 >
                   <Image
-                    src={`https://skillicons.dev/icons?i=${tech.id === 'reactnative' ? 'react' : tech.id}`}
+                    src={API_ENDPOINTS.SKILL_ICONS.GET(iconCode)}
                     alt={tech.name}
                     width={14}
                     height={14}
@@ -199,23 +204,24 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
           {Object.keys(neuralTechs).map((category) => (
             <div key={category} className="space-y-2">
               <label className="text-eyebrow text-ash font-semibold uppercase tracking-wider">
-                {category} Column
+                {t('editor.godprofile.column', '{category} Column', { category })}
               </label>
               <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto p-1.5 bg-void-black border border-graphite rounded-xs">
                 {TECH_CATALOG.map((tech) => {
                   const active = (neuralTechs[category] || []).includes(tech.id)
+                  const iconCode = tech.id === 'reactnative' ? 'react' : tech.id
                   return (
                     <button
                       key={tech.id}
                       onClick={() => toggleNeuralTech(category, tech.id)}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-xs border text-eyebrow text-left font-medium transition-all ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xs border text-eyebrow text-left font-medium transition-all cursor-pointer ${
                         active
                           ? 'bg-graphite border-signal-lime/40 text-signal-lime'
                           : 'bg-carbon border-transparent text-ash hover:text-chalk'
                       }`}
                     >
                       <Image
-                        src={`https://skillicons.dev/icons?i=${tech.id === 'reactnative' ? 'react' : tech.id}`}
+                        src={API_ENDPOINTS.SKILL_ICONS.GET(iconCode)}
                         alt={tech.name}
                         width={14}
                         height={14}
@@ -234,7 +240,9 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
 
       {widgetId === 'godprofile-trophies' && (
         <div className="space-y-3">
-          <label className="text-eyebrow text-ash font-medium">Configure Trophy Visibility</label>
+          <label className="text-eyebrow text-ash font-medium">
+            {t('editor.godprofile.trophy_visibility', 'Configure Trophy Visibility')}
+          </label>
           <div className="space-y-2 bg-void-black border border-graphite rounded-xs p-2">
             {['Stars', 'Commits', 'PRs', 'Issues', 'Repos', 'Followers'].map((trophy) => {
               const active = !disabledTrophies.includes(trophy)
@@ -243,7 +251,9 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
                   key={trophy}
                   className="flex items-center justify-between py-1 border-b border-graphite/40 last:border-0"
                 >
-                  <span className="text-eyebrow text-chalk">{trophy} Trophy</span>
+                  <span className="text-eyebrow text-chalk">
+                    {t('editor.godprofile.trophy_label', '{trophy} Trophy', { trophy })}
+                  </span>
                   <Switch checked={active} onChange={() => toggleTrophy(trophy)} />
                 </div>
               )
@@ -255,7 +265,7 @@ export function GodProfileControls({ instanceId, widgetId, config }: GodProfileC
       {widgetId === 'godprofile-wakatime' && (
         <div className="space-y-3">
           <label className="text-eyebrow text-ash font-medium">
-            Exclude Languages from WakaTime
+            {t('editor.godprofile.wakatime_exclude', 'Exclude Languages from WakaTime')}
           </label>
           <div className="grid grid-cols-2 gap-2 bg-void-black border border-graphite rounded-xs p-2">
             {[

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
-import { APP_URL } from '@/constants'
+import { APP_URL, COMPARISON_HUB_ITEMS } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 import { useI18n } from '@/i18n'
@@ -11,32 +11,11 @@ import { useI18n } from '@/i18n'
 export default function ComparisonHubPage() {
   const { t } = useI18n()
 
-  const comparisons = [
-    {
-      slug: 'readme-so',
-      name: t('vs.readme_so_title', 'GitAscii vs Readme.so'),
-      summary: t(
-        'vs.readme_so_summary',
-        'Compare GitAscii with Readme.so. Learn why GitAscii offers live SVG rendering, custom ASCII art engine, and multi-profile support.'
-      ),
-    },
-    {
-      slug: 'gprm',
-      name: t('vs.gprm_title', 'GitAscii vs GPRM'),
-      summary: t(
-        'vs.gprm_summary',
-        'Compare GitAscii with GitHub Profile README Maker (GPRM). Discover GitAscii visual drag-and-drop editor and 13+ modern themes.'
-      ),
-    },
-    {
-      slug: 'github-profile-readme-generator',
-      name: t('vs.generic_title', 'GitAscii vs Generic Generators'),
-      summary: t(
-        'vs.generic_summary',
-        'Compare GitAscii against static GitHub README generators. Live statistics, dark/light theme switching, and real-time SVG previews.'
-      ),
-    },
-  ]
+  const comparisons = COMPARISON_HUB_ITEMS.map((item) => ({
+    slug: item.slug,
+    name: t(item.titleKey, item.defaultTitle),
+    summary: t(item.summaryKey, item.defaultSummary),
+  }))
 
   const collectionLd = {
     '@context': 'https://schema.org',

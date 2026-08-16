@@ -4,6 +4,7 @@ import { Check, Copy, Terminal as TerminalIcon } from 'lucide-react'
 import React, { useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
 
 import { APP_DOMAIN, APP_URL } from '../../../constants'
 
@@ -19,10 +20,12 @@ export default function DemoSection() {
   />
 </a>`
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(embedCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleCopy = async () => {
+    const success = await copyToClipboard(embedCode)
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   return (

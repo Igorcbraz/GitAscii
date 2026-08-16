@@ -21,12 +21,17 @@ import Image from 'next/image'
 import React, { useRef, useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { WIDGET_IDS } from '@/constants'
+import { EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
 import { TECH_CATALOG } from '@/data/techCatalog'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 import { normalizeUrl } from '@/utils/url'
 
 import { useEditorStore } from '../../store/editorStore'
+import {
+  detectSocialsFromProfile,
+  detectTechStackFromProfile,
+} from '../../utils/profileAutoDetection'
 
 interface CodewebDevControlsProps {
   instanceId: string
@@ -51,7 +56,9 @@ const ALL_PLATFORMS = [
 ]
 
 export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevControlsProps) {
+  const { t } = useI18n()
   const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const githubData = useEditorStore((state) => state.githubData)
   const [newTagInput, setNewTagInput] = useState('')
 
   const handleUpdate = (patch: Record<string, unknown>) => {
@@ -68,10 +75,15 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
     const staticMode = Boolean(config.staticMode)
     const gridColumns = Number(config.gridColumns) || 2
 
+    const detectedSocials = detectSocialsFromProfile(githubData)
+    const fallbackPlatforms = detectedSocials.selectedSocials.map((s) =>
+      s === 'twitter' ? 'x' : s === 'email' ? 'gmail' : s === 'website' ? 'portfolio' : s
+    )
+
     const activePlatforms =
       Array.isArray(config.platforms) && config.platforms.length > 0
         ? (config.platforms as string[])
-        : ['github', 'instagram', 'facebook', 'gmail']
+        : fallbackPlatforms
 
     const togglePlatform = (pId: string) => {
       let updated: string[]
@@ -88,12 +100,12 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
       <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Share2 size={14} />
-          <span>Aura Social Badge Customization</span>
+          <span>{t('editor.codeweb.social_title', 'Aura Social Badge Customization')}</span>
         </div>
 
         <div>
           <label className="text-eyebrow text-ash block mb-1.5 font-medium">
-            Display Layout Mode
+            {t('editor.codeweb.layout_mode', 'Display Layout Mode')}
           </label>
           <div className="grid grid-cols-3 gap-1.5">
             <button
@@ -105,7 +117,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Strip (Row)
+              {t('editor.codeweb.mode_strip', 'Strip (Row)')}
             </button>
             <button
               type="button"
@@ -116,7 +128,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Grid (Matrix)
+              {t('editor.codeweb.mode_grid', 'Grid (Matrix)')}
             </button>
             <button
               type="button"
@@ -127,14 +139,16 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Single Pill
+              {t('editor.codeweb.mode_single', 'Single Pill')}
             </button>
           </div>
         </div>
 
         {renderMode === 'grid' && (
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Grid Columns</label>
+            <label className="text-eyebrow text-ash block mb-1 font-medium">
+              {t('editor.codeweb.grid_columns', 'Grid Columns')}
+            </label>
             <div className="grid grid-cols-3 gap-1.5">
               {[2, 3, 4].map((cols) => (
                 <button
@@ -147,7 +161,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
                       : 'bg-graphite text-ash border-graphite hover:border-slate'
                   }`}
                 >
-                  {cols} Columns
+                  {t('editor.codeweb.columns_count', '{count} Columns', { count: String(cols) })}
                 </button>
               ))}
             </div>
@@ -156,21 +170,27 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div className="space-y-2 pt-2 border-t border-graphite">
           <div className="flex items-center justify-between">
-            <span className="text-eyebrow text-ash">Show Platform Icons</span>
+            <span className="text-eyebrow text-ash">
+              {t('editor.codeweb.show_icons', 'Show Platform Icons')}
+            </span>
             <Switch
               checked={showIcons}
               onChange={(checked: boolean) => handleUpdate({ showIcons: checked })}
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-eyebrow text-ash">Show Text Labels</span>
+            <span className="text-eyebrow text-ash">
+              {t('editor.codeweb.show_text', 'Show Text Labels')}
+            </span>
             <Switch
               checked={showText}
               onChange={(checked: boolean) => handleUpdate({ showText: checked })}
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-eyebrow text-ash">Static Mode (No Animation)</span>
+            <span className="text-eyebrow text-ash">
+              {t('editor.codeweb.static_mode', 'Static Mode (No Animation)')}
+            </span>
             <Switch
               checked={staticMode}
               onChange={(checked: boolean) => handleUpdate({ staticMode: checked })}
@@ -182,7 +202,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
           <div className="space-y-3 pt-2 border-t border-graphite">
             <div>
               <label className="text-eyebrow text-ash block mb-1 font-medium">
-                Active Platform
+                {t('editor.codeweb.active_platform', 'Active Platform')}
               </label>
               <select
                 value={platform}
@@ -198,7 +218,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
             </div>
             <div>
               <label className="text-eyebrow text-ash block mb-1 font-medium">
-                Custom Label (optional)
+                {t('editor.codeweb.custom_label', 'Custom Label (optional)')}
               </label>
               <input
                 type="text"
@@ -212,7 +232,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         ) : (
           <div className="space-y-3 pt-2 border-t border-graphite">
             <label className="text-eyebrow text-ash block mb-1 font-medium">
-              Enabled Social Networks
+              {t('editor.codeweb.enabled_networks', 'Enabled Social Networks')}
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {ALL_PLATFORMS.map((p) => {
@@ -237,7 +257,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
             <div className="space-y-2 pt-2">
               <label className="text-eyebrow text-ash block font-medium">
-                Custom Labels for Active Platforms
+                {t('editor.codeweb.custom_labels_active', 'Custom Labels for Active Platforms')}
               </label>
               {activePlatforms.map((pKey) => {
                 const pDef = ALL_PLATFORMS.find((x) => x.id === pKey)
@@ -264,17 +284,17 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         {!staticMode && (
           <div>
             <label className="text-eyebrow text-ash block mb-1 font-medium">
-              Rotation Animation Speed
+              {t('editor.codeweb.rot_speed', 'Rotation Animation Speed')}
             </label>
             <select
               value={animSpeed}
               onChange={(e) => handleUpdate({ animSpeed: e.target.value })}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
             >
-              <option value="4s">Fast (4s)</option>
-              <option value="8s">Normal (8s)</option>
-              <option value="14s">Smooth & Slow (14s)</option>
-              <option value="20s">Ultra Slow (20s)</option>
+              <option value="4s">{t('editor.codeweb.speed_fast', 'Fast (4s)')}</option>
+              <option value="8s">{t('editor.codeweb.speed_normal', 'Normal (8s)')}</option>
+              <option value="14s">{t('editor.codeweb.speed_slow', 'Smooth & Slow (14s)')}</option>
+              <option value="20s">{t('editor.codeweb.speed_ultra', 'Ultra Slow (20s)')}</option>
             </select>
           </div>
         )}
@@ -305,12 +325,12 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
       <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Sparkles size={14} />
-          <span>Aura Hero Orbit Customization</span>
+          <span>{t('editor.codeweb.hero_title', 'Aura Hero Orbit Customization')}</span>
         </div>
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-medium">
-            Main Headline / Name
+            {t('editor.codeweb.headline', 'Main Headline / Name')}
           </label>
           <input
             type="text"
@@ -323,7 +343,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-medium">
-            Subtitle / Role Badge
+            {t('editor.codeweb.subtitle', 'Subtitle / Role Badge')}
           </label>
           <input
             type="text"
@@ -336,7 +356,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div className="space-y-2 pt-2 border-t border-graphite">
           <label className="text-eyebrow text-ash block font-medium">
-            Dynamic Technologies / Tags Pills
+            {t('editor.codeweb.dynamic_tags', 'Dynamic Technologies / Tags Pills')}
           </label>
           <div className="flex flex-wrap gap-1.5">
             {rawTags.map((tag, i) => (
@@ -360,7 +380,10 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
             <input
               type="text"
               value={newTagInput}
-              placeholder="Add skill or badge (e.g. Next.js)..."
+              placeholder={t(
+                'editor.codeweb.add_skill_placeholder',
+                'Add skill or badge (e.g. Next.js)...'
+              )}
               onChange={(e) => setNewTagInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addTag()}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
@@ -376,7 +399,9 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-graphite">
-          <span className="text-eyebrow text-ash">Static Mode (No Animation)</span>
+          <span className="text-eyebrow text-ash">
+            {t('editor.codeweb.static_mode', 'Static Mode (No Animation)')}
+          </span>
           <Switch
             checked={staticMode}
             onChange={(checked: boolean) => handleUpdate({ staticMode: checked })}
@@ -392,22 +417,15 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
       (config.titleLine1 as string) ?? (config.title as string) ?? 'Building things'
     const titleLine2 = (config.titleLine2 as string) ?? (config.role as string) ?? 'that matter.'
     const terminalText = (config.terminalText as string) ?? '> open to collaborations'
-
-    const leftGifUrl =
-      (config.leftGifUrl as string) ??
-      'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif'
+    const leftGifUrl = (config.leftGifUrl as string) ?? EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.LEFT
 
     const card1Icon = (config.card1Icon as string) ?? 'Target'
     const card1Text = (config.card1Text as string) ?? 'always learning'
-    const card1GifUrl =
-      (config.card1GifUrl as string) ??
-      'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW95cTRnOXM1dTc1YTFwNjRkcGNkN2RqYjdhdTB3NTc3NDFiNjFxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h58dtf5vTpjulO4M5o/giphy.gif'
+    const card1GifUrl = (config.card1GifUrl as string) ?? EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.CARD1
 
     const card2Icon = (config.card2Icon as string) ?? 'Star'
     const card2Text = (config.card2Text as string) ?? 'craft matters'
-    const card2GifUrl =
-      (config.card2GifUrl as string) ??
-      'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExemdhbXMwdWNkaDA5eTM4Y3ZjYnYzNTR5YnB0M21jdzlrd2gyczQxNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VGh13y4IVFZzCACfTX/giphy.gif'
+    const card2GifUrl = (config.card2GifUrl as string) ?? EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.CARD2
 
     const staticMode = Boolean(config.staticMode)
 
@@ -415,65 +433,73 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
       <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Layers size={14} />
-          <span>Aura Showcase Cards</span>
+          <span>{t('editor.codeweb.showcase_title', 'Aura Showcase Cards')}</span>
         </div>
 
         <div className="space-y-3 p-3 bg-carbon/60 border border-graphite rounded-xs">
           <span className="text-eyebrow text-signal-lime font-semibold uppercase tracking-wider block">
-            Card Principal (Esquerda)
+            {t('editor.codeweb.card_main', 'Card Principal (Esquerda)')}
           </span>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Tag / Eyebrow</label>
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.tag_pill', 'Tag / Pill')}
+            </label>
             <input
               type="text"
               value={aboutTag}
               placeholder="about"
-              onChange={(e) => handleUpdate({ aboutTag: e.target.value, status: e.target.value })}
+              onChange={(e) => handleUpdate({ aboutTag: e.target.value })}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
             />
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Título - Linha 1</label>
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.title_line_1', 'Título Linha 1')}
+            </label>
             <input
               type="text"
               value={titleLine1}
               placeholder="Building things"
-              onChange={(e) => handleUpdate({ titleLine1: e.target.value, title: e.target.value })}
+              onChange={(e) => handleUpdate({ titleLine1: e.target.value })}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
             />
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Título - Linha 2</label>
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.title_line_2', 'Título Linha 2')}
+            </label>
             <input
               type="text"
               value={titleLine2}
               placeholder="that matter."
-              onChange={(e) => handleUpdate({ titleLine2: e.target.value, role: e.target.value })}
+              onChange={(e) => handleUpdate({ titleLine2: e.target.value })}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
             />
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">
-              Texto do Prompt / Terminal
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.terminal_subtext', 'Subtexto Terminal')}
             </label>
             <input
               type="text"
               value={terminalText}
               placeholder="> open to collaborations"
               onChange={(e) => handleUpdate({ terminalText: e.target.value })}
-              className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note font-mono text-chalk focus:outline-hidden focus:border-signal-lime"
+              className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime font-jetbrains-mono"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-eyebrow text-ash font-medium">URL do GIF de Fundo</label>
+              <label className="text-eyebrow text-ash font-medium">
+                {t('editor.codeweb.bg_gif_url', 'URL do GIF de Fundo')}
+              </label>
               <a
-                href="https://giphy.com/"
+                href={EXTERNAL_LINKS.GIPHY}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-signal-lime hover:underline"
@@ -494,19 +520,21 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div className="space-y-3 p-3 bg-carbon/60 border border-graphite rounded-xs">
           <span className="text-eyebrow text-signal-lime font-semibold uppercase tracking-wider block">
-            Card Superior (Direita 1)
+            {t('editor.codeweb.card_top', 'Card Superior (Direita 1)')}
           </span>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-eyebrow text-ash font-medium">Nome do Ícone Lucide</label>
+              <label className="text-eyebrow text-ash font-medium">
+                {t('editor.codeweb.lucide_icon_name', 'Nome do Ícone Lucide')}
+              </label>
               <a
-                href="https://lucide.dev/icons"
+                href={EXTERNAL_LINKS.LUCIDE_ICONS}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-signal-lime hover:underline"
               >
-                <span>Ver ícones (Lucide)</span>
+                <span>{t('editor.codeweb.view_icons', 'Ver ícones (Lucide)')}</span>
                 <ExternalLink size={10} />
               </a>
             </div>
@@ -520,7 +548,9 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Texto do Card</label>
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.card_text', 'Texto do Card')}
+            </label>
             <input
               type="text"
               value={card1Text}
@@ -532,9 +562,11 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-eyebrow text-ash font-medium">URL do GIF de Fundo</label>
+              <label className="text-eyebrow text-ash font-medium">
+                {t('editor.codeweb.bg_gif_url', 'URL do GIF de Fundo')}
+              </label>
               <a
-                href="https://giphy.com/"
+                href={EXTERNAL_LINKS.GIPHY}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-signal-lime hover:underline"
@@ -555,33 +587,37 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div className="space-y-3 p-3 bg-carbon/60 border border-graphite rounded-xs">
           <span className="text-eyebrow text-signal-lime font-semibold uppercase tracking-wider block">
-            Card Inferior (Direita 2)
+            {t('editor.codeweb.card_bottom', 'Card Inferior (Direita 2)')}
           </span>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-eyebrow text-ash font-medium">Nome do Ícone Lucide</label>
+              <label className="text-eyebrow text-ash font-medium">
+                {t('editor.codeweb.lucide_icon_name', 'Nome do Ícone Lucide')}
+              </label>
               <a
-                href="https://lucide.dev/icons"
+                href={EXTERNAL_LINKS.LUCIDE_ICONS}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-signal-lime hover:underline"
               >
-                <span>Ver ícones (Lucide)</span>
+                <span>{t('editor.codeweb.view_icons', 'Ver ícones (Lucide)')}</span>
                 <ExternalLink size={10} />
               </a>
             </div>
             <input
               type="text"
               value={card2Icon}
-              placeholder="Star, Code, Cpu, Award..."
+              placeholder="Star, Code, Coffee, Heart..."
               onChange={(e) => handleUpdate({ card2Icon: e.target.value })}
               className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
             />
           </div>
 
           <div>
-            <label className="text-eyebrow text-ash block mb-1 font-medium">Texto do Card</label>
+            <label className="text-eyebrow text-ash font-medium mb-1 block">
+              {t('editor.codeweb.card_text', 'Texto do Card')}
+            </label>
             <input
               type="text"
               value={card2Text}
@@ -593,9 +629,11 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-eyebrow text-ash font-medium">URL do GIF de Fundo</label>
+              <label className="text-eyebrow text-ash font-medium">
+                {t('editor.codeweb.bg_gif_url', 'URL do GIF de Fundo')}
+              </label>
               <a
-                href="https://giphy.com/"
+                href={EXTERNAL_LINKS.GIPHY}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-signal-lime hover:underline"
@@ -615,7 +653,9 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-graphite">
-          <span className="text-eyebrow text-ash">Static Mode (No Animation)</span>
+          <span className="text-eyebrow text-ash">
+            {t('editor.codeweb.static_mode', 'Static Mode (No Animation)')}
+          </span>
           <Switch
             checked={staticMode}
             onChange={(checked: boolean) => handleUpdate({ staticMode: checked })}
@@ -642,11 +682,13 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
       <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
         <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Type size={14} />
-          <span>Aura Minimalist Banner</span>
+          <span>{t('editor.codeweb.banner_title', 'Aura Minimalist Banner')}</span>
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1 font-medium">Prefix Text</label>
+          <label className="text-eyebrow text-ash block mb-1 font-medium">
+            {t('editor.codeweb.prefix_text', 'Prefix Text')}
+          </label>
           <input
             type="text"
             value={prefix}
@@ -658,7 +700,7 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-medium">
-            Highlighted Text (Bold)
+            {t('editor.codeweb.highlight_text', 'Highlighted Text (Bold)')}
           </label>
           <input
             type="text"
@@ -670,7 +712,9 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1 font-medium">Suffix Text</label>
+          <label className="text-eyebrow text-ash block mb-1 font-medium">
+            {t('editor.codeweb.suffix_text', 'Suffix Text')}
+          </label>
           <input
             type="text"
             value={suffix}
@@ -681,7 +725,9 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1 font-medium">Alignment</label>
+          <label className="text-eyebrow text-ash block mb-1 font-medium">
+            {t('editor.codeweb.alignment', 'Alignment')}
+          </label>
           <div className="grid grid-cols-3 gap-1.5">
             {(['left', 'center', 'right'] as const).map((a) => (
               <button
@@ -694,14 +740,16 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
                     : 'bg-graphite text-ash border-graphite hover:border-slate'
                 }`}
               >
-                {a}
+                {t(`editor.codeweb.align_${a}`, a)}
               </button>
             ))}
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-2 border-t border-graphite">
-          <span className="text-eyebrow text-ash">Show Outer Pill Border</span>
+          <span className="text-eyebrow text-ash">
+            {t('editor.codeweb.show_outer_border', 'Show Outer Pill Border')}
+          </span>
           <Switch
             checked={showBorder}
             onChange={(checked: boolean) => handleUpdate({ showBorder: checked })}
@@ -716,24 +764,24 @@ export function CodewebDevControls({ instanceId, widgetId, config }: CodewebDevC
 
 const BENTO_PRESETS = [
   {
-    label: 'Frontend',
+    label: 'Modern Fullstack',
     icon: Globe,
-    items: ['html', 'css', 'js', 'ts', 'react', 'nextjs', 'tailwind', 'vite'],
+    items: ['TypeScript', 'Next.js', 'React', 'TailwindCSS', 'Node.js', 'PostgreSQL', 'Docker'],
   },
   {
-    label: 'Backend',
-    icon: Server,
-    items: ['nodejs', 'ts', 'express', 'postgres', 'mongodb', 'docker', 'redis'],
-  },
-  {
-    label: 'Full Stack',
+    label: 'Frontend Specialist',
     icon: Layers,
-    items: ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'postgres', 'docker', 'git'],
+    items: ['React', 'Next.js', 'TypeScript', 'TailwindCSS', 'Figma', 'CSS3', 'HTML5'],
   },
   {
-    label: 'DevOps & Cloud',
+    label: 'Backend & Cloud',
+    icon: Server,
+    items: ['Go', 'Node.js', 'Python', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS'],
+  },
+  {
+    label: 'DevOps & Infra',
     icon: Cloud,
-    items: ['linux', 'docker', 'kubernetes', 'aws', 'git', 'github', 'bash', 'python'],
+    items: ['Docker', 'Kubernetes', 'Terraform', 'AWS', 'Linux', 'GitHub Actions', 'Go'],
   },
 ]
 
@@ -747,7 +795,8 @@ function CodewebBentoControls({
   handleUpdate: (patch: Record<string, unknown>) => void
 }) {
   const { t } = useI18n()
-  const title = (config.title as string) || ''
+  const githubData = useEditorStore((state) => state.githubData)
+  const title = (config.title as string) || 'Tech Stack'
   const displayMode = (config.displayMode as 'both' | 'logo' | 'name') || 'both'
   const staticMode = Boolean(config.staticMode)
   const devCardLink = (config.devCardLink as string) || (config.link as string) || ''
@@ -755,8 +804,19 @@ function CodewebBentoControls({
   const sourceType = (config.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
   const customImageUrl = (config.imageUrl as string) || ''
   const uploadedImageData = (config.uploadedImageData as string) || ''
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [customTechInput, setCustomTechInput] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const detectedTechs = detectTechStackFromProfile(githubData)
+  const selectedTechs = Array.isArray(config.selectedTechs)
+    ? (config.selectedTechs as string[])
+    : Array.isArray(config.technologies)
+      ? (config.technologies as string[])
+      : detectedTechs
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -764,36 +824,32 @@ function CodewebBentoControls({
 
     if (!file.type.startsWith('image/')) {
       setErrorMsg(
-        t('editor.avatar.error_invalid_image', 'Por favor selecione um arquivo de imagem válido.')
+        t('errors.invalid_image_type', 'Por favor, selecione um arquivo de imagem válido.')
       )
       return
     }
 
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg(t('errors.image_too_large', 'A imagem deve ter no máximo 5MB.'))
+      return
+    }
+
+    setErrorMsg('')
     const reader = new FileReader()
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string
-      if (base64Data) {
+      const dataUrl = event.target?.result as string
+      if (dataUrl) {
         handleUpdate({
+          uploadedImageData: dataUrl,
           sourceType: 'upload',
-          uploadedImageData: base64Data,
         })
-        setErrorMsg(null)
       }
+    }
+    reader.onerror = () => {
+      setErrorMsg(t('errors.image_read_error', 'Erro ao ler o arquivo de imagem.'))
     }
     reader.readAsDataURL(file)
   }
-
-  const [searchTerm, setSearchTerm] = useState('')
-  const [activeCategory, setActiveCategory] = useState<
-    'all' | 'languages' | 'frontend' | 'backend' | 'devops'
-  >('all')
-  const [customTechInput, setCustomTechInput] = useState('')
-
-  const selectedTechs = Array.isArray(config.selectedTechs)
-    ? (config.selectedTechs as string[])
-    : Array.isArray(config.technologies)
-      ? (config.technologies as string[])
-      : ['js', 'ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'python', 'docker', 'git', 'postgres']
 
   const toggleTech = (id: string) => {
     let updated: string[]
@@ -832,12 +888,12 @@ function CodewebBentoControls({
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
         <LayoutGrid size={14} />
-        <span>Aura Bento Cards Customization</span>
+        <span>{t('editor.codeweb.bento_title', 'Aura Bento Cards Customization')}</span>
       </div>
 
       <div>
         <label className="text-eyebrow text-ash block mb-1 font-medium">
-          Tech Stack Header Label
+          {t('editor.codeweb.stack_header', 'Tech Stack Header Label')}
         </label>
         <input
           type="text"
@@ -941,7 +997,7 @@ function CodewebBentoControls({
 
         <div>
           <label className="text-eyebrow text-ash block mb-1 font-medium">
-            Link de Destino ao Clicar (opcional)
+            {t('editor.codeweb.dest_link', 'Link de Destino ao Clicar (opcional)')}
           </label>
           <input
             type="text"
@@ -955,7 +1011,7 @@ function CodewebBentoControls({
 
       <div className="space-y-2 pt-2 border-t border-graphite">
         <label className="text-eyebrow text-ash font-medium block">
-          Modo de Exibição das Badges
+          {t('editor.codeweb.badge_display_mode', 'Modo de Exibição das Badges')}
         </label>
         <div className="grid grid-cols-3 gap-1 bg-carbon p-1 rounded-xs border border-graphite">
           <button
@@ -967,7 +1023,7 @@ function CodewebBentoControls({
                 : 'text-ash hover:text-chalk border-transparent'
             }`}
           >
-            Nome + Logo
+            {t('editor.codeweb.badge_name_logo', 'Nome + Logo')}
           </button>
           <button
             type="button"
@@ -978,7 +1034,7 @@ function CodewebBentoControls({
                 : 'text-ash hover:text-chalk border-transparent'
             }`}
           >
-            Apenas Logo
+            {t('editor.codeweb.badge_logo_only', 'Apenas Logo')}
           </button>
           <button
             type="button"
@@ -989,7 +1045,7 @@ function CodewebBentoControls({
                 : 'text-ash hover:text-chalk border-transparent'
             }`}
           >
-            Apenas Nome
+            {t('editor.codeweb.badge_name_only', 'Apenas Nome')}
           </button>
         </div>
       </div>
@@ -998,29 +1054,34 @@ function CodewebBentoControls({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
             <Sparkles size={14} />
-            <span>Tecnologias & Skills</span>
+            <span>{t('editor.tech.title', 'Tecnologias & Skills')}</span>
           </div>
           <span className="text-caption font-jetbrains-mono text-ash bg-carbon px-1.5 py-0.5 rounded-xs border border-graphite">
-            {selectedTechs.length} selecionadas
+            {selectedTechs.length} {t('editor.godprofile.active_count', 'selecionadas')}
           </span>
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-eyebrow text-ash font-medium">Tecnologias Ativas</span>
+            <span className="text-eyebrow text-ash font-medium">
+              {t('editor.codeweb.active_techs', 'Tecnologias Ativas')}
+            </span>
             {selectedTechs.length > 0 && (
               <button
                 onClick={clearAll}
                 className="text-caption text-red-400 hover:underline cursor-pointer"
               >
-                Limpar todas
+                {t('editor.codeweb.clear_all', 'Limpar todas')}
               </button>
             )}
           </div>
 
           {selectedTechs.length === 0 ? (
             <div className="p-3 text-center border border-dashed border-graphite rounded-xs text-eyebrow text-ash">
-              Nenhuma tecnologia selecionada. Escolha no catálogo abaixo.
+              {t(
+                'editor.codeweb.no_techs_selected',
+                'Nenhuma tecnologia selecionada. Escolha no catálogo abaixo.'
+              )}
             </div>
           ) : (
             <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto p-1.5 bg-void-black border border-graphite rounded-xs">
@@ -1031,6 +1092,7 @@ function CodewebBentoControls({
                     t.name.toLowerCase() === techId.toLowerCase()
                 )
                 const iconId = info ? info.id : techId.toLowerCase().replace(/[^a-z0-9]/g, '')
+                const iconCode = iconId === 'reactnative' ? 'react' : iconId
                 return (
                   <div
                     key={techId}
@@ -1038,7 +1100,7 @@ function CodewebBentoControls({
                     className="group flex items-center gap-1 bg-graphite border border-signal-lime/40 text-signal-lime px-2 py-0.5 rounded-xs text-eyebrow font-jetbrains-mono cursor-pointer hover:bg-red-500/20 hover:border-red-500 hover:text-red-400 transition-colors"
                   >
                     <Image
-                      src={`https://skillicons.dev/icons?i=${iconId === 'reactnative' ? 'react' : iconId}&theme=dark`}
+                      src={`${API_ENDPOINTS.SKILL_ICONS.GET(iconCode)}&theme=dark`}
                       alt={techId}
                       width={14}
                       height={14}
@@ -1055,7 +1117,9 @@ function CodewebBentoControls({
         </div>
 
         <div>
-          <span className="text-eyebrow text-ash font-medium block mb-1.5">Presets Rápidos</span>
+          <span className="text-eyebrow text-ash font-medium block mb-1.5">
+            {t('editor.codeweb.quick_presets', 'Presets Rápidos')}
+          </span>
           <div className="grid grid-cols-2 gap-1.5">
             {BENTO_PRESETS.map((preset) => {
               const Icon = preset.icon
@@ -1077,11 +1141,11 @@ function CodewebBentoControls({
         <div className="flex gap-1 overflow-x-auto pb-1">
           {(
             [
-              { id: 'all', label: 'Todos' },
-              { id: 'languages', label: 'Linguagens' },
-              { id: 'frontend', label: 'Frontend' },
-              { id: 'backend', label: 'Backend' },
-              { id: 'devops', label: 'DevOps' },
+              { id: 'all', label: t('editor.codeweb.cat_all', 'Todos') },
+              { id: 'languages', label: t('editor.codeweb.cat_languages', 'Linguagens') },
+              { id: 'frontend', label: t('editor.codeweb.cat_frontend', 'Frontend') },
+              { id: 'backend', label: t('editor.codeweb.cat_backend', 'Backend') },
+              { id: 'devops', label: t('editor.codeweb.cat_devops', 'DevOps') },
             ] as const
           ).map((cat) => (
             <button
@@ -1105,7 +1169,7 @@ function CodewebBentoControls({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar tecnologia..."
+            placeholder={t('editor.codeweb.search_tech', 'Buscar tecnologia...')}
             className="w-full bg-graphite border border-graphite rounded-xs pl-7 pr-2.5 py-1 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
           />
         </div>
@@ -1117,6 +1181,7 @@ function CodewebBentoControls({
                 t.toLowerCase() === tech.id.toLowerCase() ||
                 t.toLowerCase() === tech.name.toLowerCase()
             )
+            const iconCode = tech.id === 'reactnative' ? 'react' : tech.id
             return (
               <button
                 key={tech.id}
@@ -1129,7 +1194,7 @@ function CodewebBentoControls({
                 }`}
               >
                 <Image
-                  src={`https://skillicons.dev/icons?i=${tech.id === 'reactnative' ? 'react' : tech.id}&theme=dark`}
+                  src={`${API_ENDPOINTS.SKILL_ICONS.GET(iconCode)}&theme=dark`}
                   alt={tech.name}
                   width={14}
                   height={14}
@@ -1147,7 +1212,7 @@ function CodewebBentoControls({
           <input
             type="text"
             value={customTechInput}
-            placeholder="Tecnologia personalizada..."
+            placeholder={t('editor.codeweb.custom_tech_placeholder', 'Tecnologia personalizada...')}
             onChange={(e) => setCustomTechInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addCustomTech()}
             className="w-full bg-graphite border border-graphite rounded-xs px-2.5 py-1.5 text-note text-chalk focus:outline-hidden focus:border-signal-lime"
@@ -1163,7 +1228,9 @@ function CodewebBentoControls({
       </div>
 
       <div className="flex items-center justify-between pt-2 border-t border-graphite">
-        <span className="text-eyebrow text-ash">Static Mode (No Animation)</span>
+        <span className="text-eyebrow text-ash">
+          {t('editor.codeweb.static_mode', 'Static Mode (No Animation)')}
+        </span>
         <Switch
           checked={staticMode}
           onChange={(checked: boolean) => handleUpdate({ staticMode: checked })}

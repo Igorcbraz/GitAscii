@@ -172,9 +172,11 @@ function getWidgetSvgElements(
   const matched: SVGElement[] = []
 
   for (const el of allTexts) {
-    if (el.tagName === 'g') continue
+    if (el.tagName === 'g' || !el.isConnected) continue
     try {
-      const bbox = (el as SVGGraphicsElement).getBBox?.()
+      const graphicsEl = el as SVGGraphicsElement
+      if (typeof graphicsEl.getBBox !== 'function') continue
+      const bbox = graphicsEl.getBBox()
       if (!bbox) continue
       if (
         bbox.x >= px - margin &&
@@ -185,7 +187,8 @@ function getWidgetSvgElements(
         matched.push(el)
       }
     } catch {
-      // getBBox can fail for invisible elements
+      // Elements that are not rendered (e.g. display: none) cannot compute bbox
+      continue
     }
   }
 

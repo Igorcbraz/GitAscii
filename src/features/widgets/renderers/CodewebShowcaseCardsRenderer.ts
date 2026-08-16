@@ -1,5 +1,6 @@
 import { icons } from 'lucide-react'
 
+import { EXTERNAL_LINKS } from '@/constants'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 
 function localEscapeXml(str: string): string {
@@ -64,15 +65,9 @@ export function renderCodewebShowcaseCards(
   const titleLine2 = (cfg.titleLine2 as string) ?? (cfg.role as string) ?? 'that matter.'
   const terminalText = (cfg.terminalText as string) ?? '> open to collaborations'
 
-  const leftGif =
-    (cfg.leftGifUrl as string) ||
-    'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif'
-  const card1Gif =
-    (cfg.card1GifUrl as string) ||
-    'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW95cTRnOXM1dTc1YTFwNjRkcGNkN2RqYjdhdTB3NTc3NDFiNjFxYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h58dtf5vTpjulO4M5o/giphy.gif'
-  const card2Gif =
-    (cfg.card2GifUrl as string) ||
-    'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExemdhbXMwdWNkaDA5eTM4Y3ZjYnYzNTR5YnB0M21jdzlrd2gyczQxNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VGh13y4IVFZzCACfTX/giphy.gif'
+  const leftGif = (cfg.leftGifUrl as string) || EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.LEFT
+  const card1Gif = (cfg.card1GifUrl as string) || EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.CARD1
+  const card2Gif = (cfg.card2GifUrl as string) || EXTERNAL_LINKS.CODEWEB_DEFAULT_GIFS.CARD2
 
   const card1IconName = (cfg.card1Icon as string) || 'Target'
   const card1Text = (cfg.card1Text as string) || 'always learning'

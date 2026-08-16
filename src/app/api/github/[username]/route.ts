@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 
 export async function GET(request: Request, { params }: { params: Promise<{ username: string }> }) {
   try {
@@ -18,7 +18,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       },
     })
   } catch (error: unknown) {
+    const isNotFound =
+      error instanceof GitHubUserNotFoundError ||
+      (error instanceof Error && error.message.toLowerCase().includes('not found'))
     const message = error instanceof Error ? error.message : 'Failed to fetch GitHub profile'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: isNotFound ? 404 : 500 })
   }
 }

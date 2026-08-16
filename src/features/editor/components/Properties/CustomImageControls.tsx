@@ -11,6 +11,7 @@ import {
 import React, { useRef, useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { SUGGESTED_GIFS } from '@/constants'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
 import { normalizeUrl } from '@/utils/url'
@@ -67,16 +68,13 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
 
     if (!file.type.startsWith('image/')) {
       setErrorMsg(
-        t(
-          'editor.custom_image.error_invalid_type',
-          'Por favor, selecione um arquivo de imagem válido.'
-        )
+        t('errors.invalid_image_type', 'Por favor, selecione um arquivo de imagem válido.')
       )
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg(t('editor.custom_image.error_too_large', 'A imagem deve ter no máximo 5MB.'))
+      setErrorMsg(t('errors.image_too_large', 'A imagem deve ter no máximo 5MB.'))
       return
     }
 
@@ -89,93 +87,10 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
       }
     }
     reader.onerror = () => {
-      setErrorMsg(t('editor.custom_image.error_reading', 'Erro ao ler o arquivo de imagem.'))
+      setErrorMsg(t('errors.image_read_error', 'Erro ao ler o arquivo de imagem.'))
     }
     reader.readAsDataURL(file)
   }
-
-  const SUGGESTED_GIFS = [
-    {
-      name: 'Designer',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Designer.gif',
-    },
-    {
-      name: 'Developer',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Developer.gif',
-    },
-    {
-      name: 'Earth',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Earth.gif',
-    },
-    {
-      name: 'Handshake',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Handshake.gif',
-    },
-    {
-      name: 'Hi',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Hi.gif',
-    },
-    {
-      name: 'Mario Gameplay',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Mario_Gameplay.gif',
-    },
-    {
-      name: 'Mario Hello',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Mario_Hello_Big.gif',
-    },
-    {
-      name: 'Medal',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Medal.gif',
-    },
-    {
-      name: 'PC',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/PC.gif',
-    },
-    {
-      name: 'Point Down',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Point_Down.gif',
-    },
-    {
-      name: 'Rocket',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Rocket.gif',
-    },
-    {
-      name: 'Super Mario',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/Super_Mario.gif',
-    },
-    {
-      name: 'Coin',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/coin.gif',
-    },
-    {
-      name: 'Dino',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/dino.gif',
-    },
-    {
-      name: 'Gandalf',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/gandalf_parrot.gif',
-    },
-    {
-      name: 'Happy',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/happy.gif',
-    },
-    {
-      name: 'Headbang',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/headbang.gif',
-    },
-    {
-      name: 'Hmm',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/hmm.gif',
-    },
-    {
-      name: 'Powerup',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/powerup.gif',
-    },
-    {
-      name: 'Wave',
-      url: 'https://raw.githubusercontent.com/TheDudeThatCode/TheDudeThatCode/master/Assets/wave.gif',
-    },
-  ]
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite">
@@ -192,19 +107,19 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'suggestions' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'suggestions'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
             }`}
           >
             <Library size={12} />
-            <span>Sugestões</span>
+            <span>{t('editor.custom_image.suggestions', 'Sugestões')}</span>
           </button>
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'url' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'url'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
@@ -221,14 +136,14 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
                 fileInputRef.current?.click()
               }
             }}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'upload'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
             }`}
           >
             <Upload size={12} />
-            <span>Upload</span>
+            <span>{t('editor.custom_image.upload', 'Upload')}</span>
           </button>
         </div>
 
@@ -257,7 +172,7 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
                 onClick={() => {
                   handleImageSelect(gif.url)
                 }}
-                className={`px-2 py-1 text-[10px] uppercase font-bold tracking-wider rounded transition-colors border ${
+                className={`px-2 py-1 text-caption uppercase font-bold tracking-wider rounded transition-colors border cursor-pointer ${
                   currentUrl === gif.url
                     ? 'bg-graphite border-signal-lime text-signal-lime'
                     : 'bg-carbon border-graphite hover:border-signal-lime/60 text-ash hover:text-signal-lime hover:bg-graphite/40'
@@ -356,8 +271,12 @@ export function CustomImageControls({ instanceId, config }: CustomImageControlsP
             onChange={(e) => updateWidgetConfig(instanceId, { mode: e.target.value })}
             className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
           >
-            <option value="contain">Ajustar ao Container (Contain)</option>
-            <option value="badge">Estilo Badge (Altura fixa 32px)</option>
+            <option value="contain">
+              {t('editor.custom_image.mode_contain', 'Ajustar ao Container (Contain)')}
+            </option>
+            <option value="badge">
+              {t('editor.custom_image.mode_badge', 'Estilo Badge (Altura fixa 32px)')}
+            </option>
           </select>
         </div>
       </div>

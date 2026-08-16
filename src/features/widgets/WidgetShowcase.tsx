@@ -6,10 +6,11 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
-import { APP_URL } from '@/constants'
+import { APP_URL, EXTERNAL_LINKS } from '@/constants'
 import { attributions, WidgetItem, widgetsList } from '@/data/widgetsData'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { useI18n } from '@/i18n'
+import { copyToClipboard } from '@/utils/clipboard'
 
 export function WidgetShowcase() {
   const { t } = useI18n()
@@ -25,12 +26,14 @@ export function WidgetShowcase() {
     }
   }
 
-  const handleCopyMarkdown = (widget: WidgetItem) => {
+  const handleCopyMarkdown = async (widget: WidgetItem) => {
     const snippet = widget.codeSnippet.replace('YOUR_USERNAME', activeUsername)
-    navigator.clipboard.writeText(snippet)
-    setCopiedId(widget.id)
-    success(`Copied ${widget.name} markdown for @${activeUsername}.`)
-    setTimeout(() => setCopiedId(null), 2000)
+    const copied = await copyToClipboard(snippet)
+    if (copied) {
+      setCopiedId(widget.id)
+      success(`Copied ${widget.name} markdown for @${activeUsername}.`)
+      setTimeout(() => setCopiedId(null), 2000)
+    }
   }
 
   const nativeWidgets = widgetsList
@@ -48,8 +51,9 @@ export function WidgetShowcase() {
         description: w.desc || '',
         codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
         features: ['Live SVG Rendering', 'Editor Integration', 'Dynamic Theme Support'],
-        githubSourceUrl: 'https://github.com/Igorcbraz/GitAscii',
+        githubSourceUrl: EXTERNAL_LINKS.GITHUB_REPO,
       }))
+
       .filter((w) => !existingIds.has(w.id))
   }, [])
 

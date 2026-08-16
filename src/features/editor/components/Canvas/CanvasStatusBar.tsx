@@ -1,11 +1,12 @@
 'use client'
 
-import { Minus, Plus, Redo2, RotateCcw, Undo2 } from 'lucide-react'
+import { Maximize2, Minus, Plus, Redo2, RotateCcw, Undo2 } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import { calculateFitZoom, getCanvasContainerWidth } from '../../utils/canvasZoom'
 
 interface CanvasStatusBarProps {
   showInfo?: boolean
@@ -13,19 +14,31 @@ interface CanvasStatusBarProps {
 
 export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
   const { t } = useI18n()
-  const { zoom, setZoom, config, selectedInstanceIds, undo, redo, canUndo, canRedo } =
-    useEditorStore()
+
+  const zoom = useEditorStore((state) => state.zoom)
+  const setZoom = useEditorStore((state) => state.setZoom)
+  const widgetCount = useEditorStore((state) => state.config?.widgets?.length ?? 0)
+  const selCount = useEditorStore((state) => state.selectedInstanceIds.length)
+  const undo = useEditorStore((state) => state.undo)
+  const redo = useEditorStore((state) => state.redo)
+  const canUndo = useEditorStore((state) => state.canUndo)
+  const canRedo = useEditorStore((state) => state.canRedo)
 
   const zoomPct = Math.round(zoom * 100)
-  const widgetCount = config?.widgets?.length ?? 0
-  const selCount = selectedInstanceIds?.length ?? 0
 
-  const stepDown = () => setZoom(Math.max(0.5, zoom - 0.1))
+  const stepDown = () => setZoom(Math.max(0.25, zoom - 0.1))
   const stepUp = () => setZoom(Math.min(1.5, zoom + 0.1))
   const resetZoom = () => setZoom(1)
+  const fitZoom = () => {
+    const width = getCanvasContainerWidth()
+    setZoom(calculateFitZoom(width))
+  }
 
   return (
-    <div className="flex h-9 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-ash select-none z-10">
+    <div
+      id="tour-status-bar"
+      className="flex h-9 w-full bg-void-black border-t border-graphite px-3 items-center justify-between text-eyebrow font-inter-tight text-ash select-none z-10"
+    >
       <div className="flex items-center gap-1">
         <button
           onClick={undo}
@@ -63,7 +76,16 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
+        <button
+          onClick={fitZoom}
+          title={t('editor.statusbar.zoom_fit', 'Ajustar à tela')}
+          data-testid="statusbar-zoom-fit"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-signal-lime transition-colors cursor-pointer mr-0.5"
+        >
+          <Maximize2 size={12} />
+        </button>
+
         <button
           onClick={stepDown}
           title={t('editor.statusbar.zoom_out')}
@@ -73,14 +95,12 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
           <Minus size={13} />
         </button>
 
-        <button
-          onClick={resetZoom}
-          title={t('editor.statusbar.zoom_reset')}
-          data-testid="statusbar-zoom-reset"
-          className="min-w-11.5 text-center text-pearl hover:text-chalk hover:bg-graphite rounded-xs px-1.5 py-0.5 transition-colors cursor-pointer font-jetbrains-mono text-[11px] font-semibold"
+        <span
+          data-testid="statusbar-zoom-level"
+          className="w-11 text-center font-mono font-medium text-chalk text-caption"
         >
           {zoomPct}%
-        </button>
+        </span>
 
         <button
           onClick={stepUp}
@@ -91,13 +111,11 @@ export function CanvasStatusBar({ showInfo = true }: CanvasStatusBarProps) {
           <Plus size={13} />
         </button>
 
-        <div className="w-px h-3 bg-graphite mx-1" />
-
         <button
           onClick={resetZoom}
           title={t('editor.statusbar.zoom_reset')}
-          data-testid="statusbar-zoom-fit"
-          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+          data-testid="statusbar-zoom-reset"
+          className="p-1 rounded-xs text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer ml-0.5"
         >
           <RotateCcw size={12} />
         </button>

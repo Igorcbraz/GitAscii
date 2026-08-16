@@ -16,6 +16,7 @@
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
@@ -27,9 +28,10 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "motion": "^12.43.0",
-    "next": "^15.3.0",
+    "next": "^16.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-joyride": "^3.2.0",
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.14"
   },
@@ -48,7 +50,7 @@
     "@storybook/nextjs-vite": "^10.5.6",
     "@storybook/test": "*",
     "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^26.1.2",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.0.0",
     "@vitest/browser-playwright": "^4.1.10",

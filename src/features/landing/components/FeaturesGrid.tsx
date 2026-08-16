@@ -1,65 +1,20 @@
 'use client'
 
-import { Cpu, Layout, Paintbrush, Sparkles, Terminal, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 
 import { FeatureCard } from '@/components/ui/grid-feature-cards'
+import { FEATURES_GRID_LIST } from '@/constants'
 import { useI18n } from '@/i18n'
 
 export function FeaturesGrid() {
   const { t } = useI18n()
 
-  const features = [
-    {
-      title: t('landing.features.visual_editor.title', 'Visual Editor'),
-      icon: Paintbrush,
-      description: t(
-        'landing.features.visual_editor.desc',
-        'Drag-and-drop editor inspired by Canva and Figma. See every change in real-time.'
-      ),
-    },
-    {
-      title: t('landing.features.ascii_art.title', 'ASCII Art Engine'),
-      icon: Terminal,
-      description: t(
-        'landing.features.ascii_art.desc',
-        'Convert any image to stunning ASCII art with 6+ character sets, adjustable density and color.'
-      ),
-    },
-    {
-      title: t('landing.features.templates.title', 'Premium Templates'),
-      icon: Layout,
-      description: t(
-        'landing.features.templates.desc',
-        '13+ handcrafted templates. From Terminal to Cyberpunk. One-click apply, fully customizable.'
-      ),
-    },
-    {
-      title: t('landing.features.live_rendering.title', 'Live Rendering'),
-      icon: Zap,
-      description: t(
-        'landing.features.live_rendering.desc',
-        'Your SVG is served via URL — always up to date. No manual uploads, no stale data.'
-      ),
-    },
-    {
-      title: t('landing.features.adaptive_themes.title', 'Adaptive Themes'),
-      icon: Sparkles,
-      description: t(
-        'landing.features.adaptive_themes.desc',
-        'Automatically switch between dark and light themes using embedded SVG media queries and prefers-color-scheme.'
-      ),
-    },
-    {
-      title: t('landing.features.edge_native.title', 'Edge Native Caching'),
-      icon: Cpu,
-      description: t(
-        'landing.features.edge_native.desc',
-        'Served from global Serverless Edge functions with 4-hour caching to ensure fast loading on GitHub Camo.'
-      ),
-    },
-  ]
+  const features = FEATURES_GRID_LIST.map((f) => ({
+    title: t(f.titleKey, f.titleDef),
+    icon: f.icon,
+    description: t(f.descKey, f.descDef),
+  }))
 
   return (
     <section id="features" className="py-16 md:py-32 relative z-10 w-full bg-carbon">

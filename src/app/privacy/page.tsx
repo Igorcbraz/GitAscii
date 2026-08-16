@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { APP_DOMAIN, APP_URL } from '@/constants'
+import {
+  APP_DOMAIN,
+  APP_URL,
+  COOKIE_INVENTORY,
+  EXTERNAL_LINKS,
+  LEGAL_LAST_UPDATED,
+  PRIVACY_DATA_PRACTICES,
+} from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -12,8 +19,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   alternates: { canonical: `${APP_URL}/privacy` },
 }
-
-const LAST_UPDATED = '2026-08-09'
 
 export default function PrivacyPage() {
   return (
@@ -30,8 +35,8 @@ export default function PrivacyPage() {
           </h1>
           <p className="font-inter-tight text-body text-ash">
             Last updated:{' '}
-            <time dateTime={LAST_UPDATED}>
-              {new Date(LAST_UPDATED).toLocaleDateString('en-US', {
+            <time dateTime={LEGAL_LAST_UPDATED}>
+              {new Date(LEGAL_LAST_UPDATED).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -72,12 +77,7 @@ export default function PrivacyPage() {
             </h2>
             <p>We do not collect personal data in the traditional sense. Specifically:</p>
             <ul className="list-none mt-4 space-y-3">
-              {[
-                'We do not have user accounts — no email, password, or profile database.',
-                'GitHub login is used only to authorise README commits on your behalf. We do not store your GitHub credentials.',
-                'The GitHub username you type in the generator is sent to the GitHub public API to fetch public profile data (avatar, stats, etc.). We do not log or store it.',
-                'We do not sell, rent, or trade any personal data.',
-              ].map((item, i) => (
+              {PRIVACY_DATA_PRACTICES.map((item, i) => (
                 <li key={i} className="flex gap-3 items-start">
                   <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
                   <span>{item}</span>
@@ -128,7 +128,7 @@ export default function PrivacyPage() {
             <p className="mt-3 text-ash text-note">
               Google&rsquo;s Privacy Policy:{' '}
               <a
-                href="https://policies.google.com/privacy"
+                href={EXTERNAL_LINKS.GOOGLE_PRIVACY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
             <p className="mt-3 text-ash text-note">
               Microsoft Privacy Statement:{' '}
               <a
-                href="https://privacy.microsoft.com"
+                href={EXTERNAL_LINKS.MICROSOFT_PRIVACY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"
@@ -187,7 +187,7 @@ export default function PrivacyPage() {
             <p className="mt-3 text-ash text-note">
               Sentry Privacy Policy:{' '}
               <a
-                href="https://sentry.io/privacy/"
+                href={EXTERNAL_LINKS.SENTRY_PRIVACY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"
@@ -212,38 +212,14 @@ export default function PrivacyPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-graphite/50">
-                  {[
-                    [
-                      'gitascii_analytics_consent',
-                      'GitAscii',
-                      'Stores your accept/decline choice',
-                      'No (essential)',
-                    ],
-                    [
-                      'gitascii_visited',
-                      'GitAscii',
-                      'First-visit flag for session tracking',
-                      'Yes (analytics)',
-                    ],
-                    [
-                      '_ga, _ga_*',
-                      'Google Analytics',
-                      'User/session identification',
-                      'Yes (analytics)',
-                    ],
-                    [
-                      '_clck, _clsk, MUID',
-                      'Microsoft Clarity',
-                      'Session replay identification',
-                      'Yes (analytics)',
-                    ],
-                    ['sentry-*', 'Sentry', 'Error-session correlation', 'No (technical)'],
-                  ].map(([name, provider, purpose, req], i) => (
+                  {COOKIE_INVENTORY.map((item, i) => (
                     <tr key={i}>
-                      <td className="py-2 pr-4 font-jetbrains-mono text-signal-lime">{name}</td>
-                      <td className="py-2 pr-4 text-bone">{provider}</td>
-                      <td className="py-2 pr-4 text-ash">{purpose}</td>
-                      <td className="py-2 text-ash">{req}</td>
+                      <td className="py-2 pr-4 font-jetbrains-mono text-signal-lime">
+                        {item.name}
+                      </td>
+                      <td className="py-2 pr-4 text-bone">{item.provider}</td>
+                      <td className="py-2 pr-4 text-ash">{item.purpose}</td>
+                      <td className="py-2 text-ash">{item.consentRequired}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -279,7 +255,7 @@ export default function PrivacyPage() {
             <p className="mt-3">
               Our hosting provider is{' '}
               <a
-                href="https://vercel.com/legal/privacy-policy"
+                href={EXTERNAL_LINKS.VERCEL_PRIVACY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"

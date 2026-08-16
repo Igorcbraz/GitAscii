@@ -178,7 +178,7 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
               }`}
             >
               <List size={12} />
-              Lista
+              {t('editor.repos.list', 'Lista')}
             </button>
             <button
               type="button"
@@ -190,7 +190,7 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
               }`}
             >
               <LayoutGrid size={12} />
-              Grid
+              {t('editor.repos.grid', 'Grid')}
             </button>
           </div>
         </div>
@@ -224,10 +224,12 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
             onChange={(e) => updateWidgetConfig(instanceId, { repoSortBy: e.target.value })}
             className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
           >
-            <option value="stars">Mais Estrelados</option>
-            <option value="updated">Atualizado Recentemente</option>
-            <option value="forks">Mais Forkados</option>
-            <option value="name">Nome (A&#8211;Z)</option>
+            <option value="stars">{t('editor.repos.sort_stars', 'Mais Estrelados')}</option>
+            <option value="updated">
+              {t('editor.repos.sort_updated', 'Atualizado Recentemente')}
+            </option>
+            <option value="forks">{t('editor.repos.sort_forks', 'Mais Forkados')}</option>
+            <option value="name">{t('editor.repos.sort_name', 'Nome (A–Z)')}</option>
           </select>
         </div>
       )}
@@ -305,7 +307,7 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
       {selectedRepos.length > 0 && widgetId?.startsWith('controlplane-') && (
         <div className="space-y-2 border-t border-graphite/40 pt-3">
           <label className="text-eyebrow text-ash font-inter-tight block">
-            Customizar Tecnologias / Tags
+            {t('editor.repos.customize_techs', 'Customizar Tecnologias / Tags')}
           </label>
           <div className="space-y-1.5">
             {selectedRepos.map((repoName) => (
@@ -317,7 +319,7 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
                   type="text"
                   value={repoLanguages[repoName] || ''}
                   onChange={(e) => handleUpdateLanguage(repoName, e.target.value)}
-                  placeholder="Original language"
+                  placeholder={t('editor.repos.original_language', 'Original language')}
                   className="w-1/2 bg-graphite border border-graphite rounded-xs text-caption font-inter-tight text-chalk px-2 py-1 placeholder:text-ash/40 focus:border-signal-lime focus:outline-none"
                 />
               </div>

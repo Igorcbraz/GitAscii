@@ -1,4 +1,4 @@
-import { Image, Upload, User } from 'lucide-react'
+import { Image as ImageIcon, Upload, User } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 
 import type { WidgetConfig } from '@/engine/types'
@@ -28,8 +28,13 @@ export function AvatarControls({ instanceId, config }: AvatarControlsProps) {
 
     if (!file.type.startsWith('image/')) {
       setErrorMsg(
-        t('editor.avatar.error_invalid_image', 'Por favor selecione um arquivo de imagem válido.')
+        t('errors.invalid_image_type', 'Por favor selecione um arquivo de imagem válido.')
       )
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg(t('errors.image_too_large', 'A imagem deve ter no máximo 5MB.'))
       return
     }
 
@@ -44,13 +49,16 @@ export function AvatarControls({ instanceId, config }: AvatarControlsProps) {
         setErrorMsg(null)
       }
     }
+    reader.onerror = () => {
+      setErrorMsg(t('errors.image_read_error', 'Erro ao ler o arquivo de imagem.'))
+    }
     reader.readAsDataURL(file)
   }
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
       <div className="flex items-center gap-2 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
-        <Image size={14} />
+        <ImageIcon size={14} />
         <span>{t('editor.properties.avatar_title', 'Imagem do Avatar')}</span>
       </div>
 
@@ -62,7 +70,7 @@ export function AvatarControls({ instanceId, config }: AvatarControlsProps) {
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'avatar' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'avatar'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
@@ -74,19 +82,19 @@ export function AvatarControls({ instanceId, config }: AvatarControlsProps) {
           <button
             type="button"
             onClick={() => updateWidgetConfig(instanceId, { sourceType: 'url' })}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'url'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
             }`}
           >
-            <Image size={12} />
+            <ImageIcon size={12} />
             <span>URL</span>
           </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all ${
+            className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded text-eyebrow font-medium transition-all cursor-pointer ${
               sourceType === 'upload'
                 ? 'bg-graphite text-signal-lime border border-signal-lime/40'
                 : 'text-ash hover:text-chalk'
@@ -131,7 +139,7 @@ export function AvatarControls({ instanceId, config }: AvatarControlsProps) {
             <span>{t('editor.ascii.image_uploaded', 'Imagem carregada com sucesso!')}</span>
             <button
               onClick={() => updateWidgetConfig(instanceId, { uploadedImageData: '' })}
-              className="text-ash hover:text-chalk"
+              className="text-ash hover:text-chalk cursor-pointer"
             >
               Remover
             </button>

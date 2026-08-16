@@ -5,6 +5,7 @@ import {
   Command,
   Download,
   Github,
+  Info,
   Loader2,
   LogIn,
   LogOut,
@@ -12,84 +13,126 @@ import {
   User,
 } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
+import { safeStorage } from '@/utils/storage'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { ExportGuideModal } from './ExportGuideModal'
+import { GuestLoginModal } from './GuestLoginModal'
+import { StarPromptModal } from './StarPromptModal'
 
 export function EditorToolbar() {
   const { t } = useI18n()
-  const {
-    config,
-    githubData,
-    selectedInstanceId,
-    removeWidget,
-    selectWidget,
-    updateWidgetPosition,
-    duplicateWidget,
-    session,
-  } = useEditorStore()
+
+  const username = useEditorStore((state) => state.config?.username)
+  const profileSlug = useEditorStore((state) => state.config?.profileSlug || 'default')
+  const hasData = useEditorStore((state) => Boolean(state.config && state.githubData))
+  const session = useEditorStore((state) => state.session)
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
   const [showExportGuide, setShowExportGuide] = useState(false)
+  const [showGuestModal, setShowGuestModal] = useState(false)
+  const [showStarPrompt, setShowStarPrompt] = useState(false)
+  const [starPromptSource, setStarPromptSource] = useState<'export' | 'commit'>('export')
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [commitStatus, setCommitStatus] = useState<'idle' | 'committing' | 'success' | 'error'>(
     'idle'
   )
   const [isLoginLoading, setIsLoginLoading] = useState(false)
 
+  const triggerStarPromptIfNeeded = useCallback((source: 'export' | 'commit') => {
+    const hasStarred = safeStorage.getItem('gitascii_has_starred') === 'true'
+    if (!hasStarred) {
+      setStarPromptSource(source)
+      setShowStarPrompt(true)
+    }
+  }, [])
+
+  const handleExportFinished = useCallback(() => {
+    if (!session) {
+      const hasBeenPrompted = safeStorage.getItem('gitascii_guest_export_prompted') === 'true'
+      if (!hasBeenPrompted) {
+        setShowGuestModal(true)
+        return
+      }
+    }
+    triggerStarPromptIfNeeded('export')
+  }, [session, triggerStarPromptIfNeeded])
+
+  useEffect(() => {
+    if (session?.username) {
+      fetch(API_ENDPOINTS.GITHUB.STAR)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.starred) {
+            safeStorage.setItem('gitascii_has_starred', 'true')
+          }
+        })
+        .catch(() => {})
+    }
+  }, [session?.username])
+
   const handleLogout = async () => {
     try {
       const res = await fetch('/api/auth/logout', { method: 'POST' })
       if (res.ok) {
         window.location.reload()
+      } else {
+        console.warn('Logout endpoint returned non-ok status:', res.status)
       }
     } catch (e) {
-      console.error(e)
+      console.error('Failed to log out:', e)
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       setCurrentOrigin(window.location.origin)
     }
   }, [])
 
-  const handleExport = () => {
-    if (!config) return
+  const handleExport = useCallback(() => {
+    const currentConfig = useEditorStore.getState().config
+    if (!currentConfig) return
     try {
       const exportData = {
-        widgets: config.widgets,
-        globalStyles: config.globalStyles,
-        templateId: config.templateId,
+        widgets: currentConfig.widgets,
+        globalStyles: currentConfig.globalStyles,
+        templateId: currentConfig.templateId,
       }
       const jsonString = JSON.stringify(exportData, null, 2)
       const blob = new Blob([jsonString], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `gitascii_layout_${config.username}.json`
+      link.download =
+        profileSlug && profileSlug !== 'default'
+          ? `gitascii_${profileSlug.toLowerCase()}.json`
+          : 'gitascii.json'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      const skipGuide =
-        typeof window !== 'undefined' &&
-        localStorage.getItem('gitascii_skip_export_guide') === 'true'
+      const skipGuide = safeStorage.getItem('gitascii_skip_export_guide') === 'true'
       if (!skipGuide) {
         setShowExportGuide(true)
+      } else {
+        setTimeout(() => {
+          handleExportFinished()
+        }, 500)
       }
     } catch (err) {
       console.error('Failed to export layout:', err)
     }
-  }
+  }, [profileSlug, handleExportFinished])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey
@@ -108,113 +151,116 @@ export function EditorToolbar() {
         return
       }
 
+      const store = useEditorStore.getState()
+
       if (cmdOrCtrl && e.key.toLowerCase() === 'z') {
         if (e.shiftKey) {
-          if (useEditorStore.getState().canRedo) {
+          if (store.canRedo) {
             e.preventDefault()
-            useEditorStore.getState().redo()
+            store.redo()
           }
         } else {
-          if (useEditorStore.getState().canUndo) {
+          if (store.canUndo) {
             e.preventDefault()
-            useEditorStore.getState().undo()
+            store.undo()
           }
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'y') {
-        if (useEditorStore.getState().canRedo) {
+        if (store.canRedo) {
           e.preventDefault()
-          useEditorStore.getState().redo()
+          store.redo()
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'c') {
         e.preventDefault()
-        useEditorStore.getState().copyWidgets()
+        store.copyWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'v') {
         e.preventDefault()
-        useEditorStore.getState().pasteWidgets()
+        store.pasteWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'x') {
         e.preventDefault()
-        useEditorStore.getState().cutWidgets()
+        store.cutWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'a') {
         e.preventDefault()
-        if (config) {
-          useEditorStore.getState().setSelection(config.widgets.map((w) => w.instanceId))
+        if (store.config) {
+          store.setSelection(store.config.widgets.map((w) => w.instanceId))
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'd') {
         e.preventDefault()
-        useEditorStore.getState().copyWidgets()
-        useEditorStore.getState().pasteWidgets()
+        store.copyWidgets()
+        store.pasteWidgets()
         return
       }
 
       if (cmdOrCtrl && e.key === '[') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'down'))
+          ids.forEach((id) => store.moveWidgetLayer(id, 'down'))
         }
         return
       }
 
       if (cmdOrCtrl && e.key === ']') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().moveWidgetLayer(id, 'up'))
+          ids.forEach((id) => store.moveWidgetLayer(id, 'up'))
         }
         return
       }
 
       if (cmdOrCtrl && e.key.toLowerCase() === 'l') {
         e.preventDefault()
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
-          ids.forEach((id) => useEditorStore.getState().toggleWidgetLock(id))
+          ids.forEach((id) => store.toggleWidgetLock(id))
         }
         return
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        const ids = useEditorStore.getState().selectedInstanceIds
+        const ids = store.selectedInstanceIds
         if (ids && ids.length > 0) {
           e.preventDefault()
-          useEditorStore.getState().removeWidgets(ids)
+          store.removeWidgets(ids)
         }
         return
       }
 
       if (e.key === 'Escape') {
         e.preventDefault()
-        selectWidget(null)
+        store.selectWidget(null)
         return
       }
 
-      const selectedIds = useEditorStore.getState().selectedInstanceIds
-      if (selectedIds && selectedIds.length > 0 && config) {
+      const selectedIds = store.selectedInstanceIds
+      const currentConfig = store.config
+      if (selectedIds && selectedIds.length > 0 && currentConfig) {
         const step = e.shiftKey ? 10 : 2
 
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
           e.preventDefault()
           const deltas = selectedIds
             .map((id) => {
-              const widget = config.widgets.find((w) => w.instanceId === id)
+              const widget = currentConfig.widgets.find((w) => w.instanceId === id)
               if (!widget || widget.locked) return null
 
               let nx = widget.position.x
@@ -231,7 +277,7 @@ export function EditorToolbar() {
             )
 
           if (deltas.length > 0) {
-            useEditorStore.getState().updateWidgetPositions(deltas, true)
+            store.updateWidgetPositions(deltas, true)
           }
         }
       }
@@ -239,16 +285,9 @@ export function EditorToolbar() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    selectedInstanceId,
-    removeWidget,
-    selectWidget,
-    updateWidgetPosition,
-    duplicateWidget,
-    config,
-  ])
+  }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleOpenExportGuide = () => {
       setShowExportGuide(true)
     }
@@ -256,20 +295,23 @@ export function EditorToolbar() {
     return () => window.removeEventListener('openExportGuide', handleOpenExportGuide)
   }, [])
 
-  if (!config || !githubData) return null
+  if (!hasData || !username) return null
 
-  const username = config.username
-  const profileSlug = config.profileSlug || 'default'
   const viewerUsername = session?.username || username
 
-  const embedUrl =
+  const v = Date.now()
+  const currentViewerEmbedUrl =
     profileSlug === 'default'
       ? `${currentOrigin}/api/${viewerUsername}`
       : `${currentOrigin}/api/${viewerUsername}/${profileSlug}`
 
+  const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
+    ? `${currentViewerEmbedUrl}&v=${v}`
+    : `${currentViewerEmbedUrl}?v=${v}`
+
   const embedCode = `<a href="${currentOrigin}">
   <img
-    src="${embedUrl}"
+    src="${urlWithCacheBust}"
     alt="GitAscii Widget"
     width="100%"
   />
@@ -278,7 +320,7 @@ export function EditorToolbar() {
   const handleCommitToGithub = async () => {
     if (!session) {
       setCommitStatus('committing')
-      window.location.href = `/api/auth/login?redirect_to=/${username}`
+      window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
       return
     }
 
@@ -300,11 +342,14 @@ export function EditorToolbar() {
   />
 </a>`
 
+    const currentConfig = useEditorStore.getState().config
+    if (!currentConfig) return
+
     const exportData = {
       username: session.username,
-      widgets: config.widgets,
-      globalStyles: config.globalStyles,
-      templateId: config.templateId,
+      widgets: currentConfig.widgets,
+      globalStyles: currentConfig.globalStyles,
+      templateId: currentConfig.templateId,
       profileSlug,
     }
 
@@ -329,6 +374,9 @@ export function EditorToolbar() {
 
       setCommitStatus('success')
       setTimeout(() => setCommitStatus('idle'), 2000)
+      setTimeout(() => {
+        triggerStarPromptIfNeeded('commit')
+      }, 600)
     } catch (e) {
       console.error(e)
       setCommitStatus('error')
@@ -358,12 +406,12 @@ export function EditorToolbar() {
       )}
       <span className="hidden sm:inline">
         {commitStatus === 'committing'
-          ? t('common.committing', 'Committing...')
+          ? t('editor.toolbar.updating', 'Atualizando...')
           : commitStatus === 'success'
-            ? t('common.committed', 'Committed!')
+            ? t('editor.toolbar.updated', 'Atualizado!')
             : commitStatus === 'error'
-              ? t('common.error', 'Error!')
-              : t('common.update_readme', 'Update README')}
+              ? t('editor.toolbar.error', 'Erro ao salvar')
+              : t('editor.toolbar.update_readme', 'Update README')}
       </span>
     </button>
   )
@@ -371,14 +419,16 @@ export function EditorToolbar() {
   return (
     <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
       <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-1">
-          <span className="font-inter-tight text-[16px] font-medium text-chalk">Git</span>
-          <span className="font-pt-serif text-[16px] font-light italic text-signal-lime">
-            Ascii
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
+            G
+          </div>
+          <span className="font-mono text-base font-semibold text-white tracking-tight">
+            GitAscii
           </span>
         </Link>
 
-        <div className="h-4 w-px bg-graphite" />
+        <div className="h-4 w-px bg-graphite hidden sm:block" />
 
         <div className="flex items-center gap-3 z-10">
           {session ? (
@@ -393,24 +443,27 @@ export function EditorToolbar() {
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
-                title="Sair"
+                title={t('editor.toolbar.logout', 'Sair da conta')}
               >
                 <LogOut className="size-4" />
               </button>
             </div>
           ) : (
-            <a
-              href={`/api/auth/login?redirect_to=/${username}`}
-              onClick={() => setIsLoginLoading(true)}
-              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer"
+            <button
+              onClick={() => {
+                setIsLoginLoading(true)
+                window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
+              }}
+              disabled={isLoginLoading}
+              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
             >
               {isLoginLoading ? (
                 <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
               ) : (
                 <LogIn className="size-4" />
               )}
-              <span>LOGIN</span>
-            </a>
+              <span>{t('editor.toolbar.login_github', 'LOGIN')}</span>
+            </button>
           )}
         </div>
       </div>
@@ -419,12 +472,13 @@ export function EditorToolbar() {
         <button
           onClick={() => setCommandPaletteOpen(true)}
           data-testid="command-palette-btn"
+          id="tour-global-search"
           title="Busca Global (Ctrl+K)"
           className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
         >
           <Search size={13} className="shrink-0 text-fog" />
           <span className="font-inter-tight text-note text-fog flex-1 text-left">
-            Pesquisar widgets, templates...
+            {t('editor.toolbar.search_commands', 'Pesquisar widgets, templates...')}
           </span>
           <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
             <Command size={9} />K
@@ -432,25 +486,25 @@ export function EditorToolbar() {
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" id="tour-export-buttons">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
+          title={t('editor.toolbar.tour', 'Ver Tutorial')}
+          className="p-1.5 rounded-[4px] text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+        >
+          <Info size={14} />
+        </button>
         <button
           onClick={handleExport}
           data-testid="export-layout-btn"
+          title={t('editor.toolbar.export_json', 'Exportar Layout (JSON)')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
         >
           <Download size={14} />
-          <span className="hidden sm:inline">{t('common.export_layout', 'Export Layout')}</span>
+          <span className="hidden sm:inline">{t('editor.toolbar.export', 'Export Layout')}</span>
         </button>
         {renderUpdateReadmeButton()}
       </div>
-
-      <ExportGuideModal
-        isOpen={showExportGuide}
-        onClose={() => setShowExportGuide(false)}
-        username={username}
-        onDownload={handleExport}
-        embedCode={embedCode}
-      />
 
       <CommandPalette
         open={commandPaletteOpen}
@@ -458,6 +512,28 @@ export function EditorToolbar() {
         onCommit={handleCommitToGithub}
         onExport={handleExport}
         commitStatus={commitStatus}
+      />
+      <ExportGuideModal
+        isOpen={showExportGuide}
+        onClose={() => setShowExportGuide(false)}
+        username={username}
+        profileSlug={profileSlug}
+        onDownload={handleExport}
+        embedCode={embedCode}
+        onFinished={handleExportFinished}
+      />
+      <GuestLoginModal
+        isOpen={showGuestModal}
+        onClose={() => {
+          setShowGuestModal(false)
+          triggerStarPromptIfNeeded('export')
+        }}
+        username={username}
+      />
+      <StarPromptModal
+        isOpen={showStarPrompt}
+        onClose={() => setShowStarPrompt(false)}
+        source={starPromptSource}
       />
     </header>
   )

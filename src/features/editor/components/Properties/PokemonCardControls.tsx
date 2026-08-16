@@ -3,6 +3,7 @@ import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { renderPokemonCard } from '../../../widgets/renderers/PokemonCardRenderer'
 import { useEditorStore } from '../../store/editorStore'
@@ -47,6 +48,8 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
   const [shineX, setShineX] = useState(Number(config.shineX) || 50)
   const [shineY, setShineY] = useState(Number(config.shineY) || 50)
 
+  const [error, setError] = useState<string | null>(null)
+
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,12 +60,16 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
         (!config.searchCards || config.searchCards.length === 0)
       ) {
         try {
+          setError(null)
           const randomName = SUGGESTED_POKEMON[Math.floor(Math.random() * SUGGESTED_POKEMON.length)]
           setSearchQuery(randomName)
 
-          const res = await fetch(
-            `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(randomName)}`
-          )
+          const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(randomName), {
+            signal: AbortSignal.timeout(6000),
+          })
+          if (!res.ok) {
+            throw new Error(`API error: ${res.status}`)
+          }
           const json = await res.json()
           if (Array.isArray(json)) {
             const validCards = json.filter((c: any) => c.image)
@@ -80,31 +87,50 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
             }
           }
         } catch (err) {
-          console.error('Error fetching random card:', err)
+          console.warn('Unable to load initial random Pokemon card:', err)
+          setError(
+            t(
+              'errors.pokemon_service_unavailable',
+              'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
+            )
+          )
         }
       }
     }
     fetchRandom()
-  }, [config.imageUrl, config.searchQuery, config.searchCards, instanceId, updateWidgetConfig])
+  }, [config.imageUrl, config.searchQuery, config.searchCards, instanceId, updateWidgetConfig, t])
 
   const handleSearch = async (queryToSearch?: string) => {
     const query = typeof queryToSearch === 'string' ? queryToSearch : searchQuery
     if (!query) return
     setLoading(true)
+    setError(null)
     try {
-      const res = await fetch(
-        `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(query)}`
-      )
+      const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(query), {
+        signal: AbortSignal.timeout(6000),
+      })
+      if (!res.ok) {
+        throw new Error(`API error: ${res.status}`)
+      }
       const json = await res.json()
       if (Array.isArray(json)) {
         const newCards = json.filter((c: any) => c.image).slice(0, 20)
         setCards(newCards)
         updateWidgetConfig(instanceId, { searchQuery: query, searchCards: newCards })
+        if (newCards.length === 0) {
+          setError(t('errors.pokemon_no_cards', 'Nenhuma carta encontrada para esta busca.'))
+        }
       } else {
         setCards([])
       }
     } catch (err) {
-      console.error(err)
+      console.warn('Error fetching Pokemon cards:', err)
+      setError(
+        t(
+          'errors.pokemon_service_unavailable',
+          'Serviço de cartas indisponível no momento. Tente novamente mais tarde.'
+        )
+      )
     } finally {
       setLoading(false)
     }
@@ -241,12 +267,18 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
                 handleSearch(name)
               }
             }}
-            className="shrink-0 px-2 py-1 text-[11px] bg-graphite border border-graphite text-ash rounded-xs hover:border-signal-lime hover:text-signal-lime transition-colors"
+            className="shrink-0 px-2 py-1 text-eyebrow bg-graphite border border-graphite text-ash rounded-xs hover:border-signal-lime hover:text-signal-lime transition-colors"
           >
             {name}
           </button>
         ))}
       </div>
+
+      {error && (
+        <div className="text-note text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xs font-inter-tight">
+          {error}
+        </div>
+      )}
 
       {cards.length > 0 && (
         <div
@@ -312,7 +344,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               onClick={saveVisualState}
-              className="relative w-[250px] h-[350px] cursor-crosshair"
+              className="relative w-62.5 h-87.5 cursor-crosshair"
             >
               <svg
                 width="250"
@@ -362,7 +394,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           </div>
 
           <div className="flex justify-center">
-            <div className="relative w-[250px] h-[350px]">
+            <div className="relative w-62.5 h-87.5">
               <svg
                 width="250"
                 height="350"

@@ -4,6 +4,7 @@ import { AlignLeft, BarChart2, Code2, LayoutGrid, PieChart, X } from 'lucide-rea
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { COMMON_LANGUAGES } from '@/constants'
 import type { WidgetConfig } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
@@ -13,29 +14,6 @@ interface TopLanguagesControlsProps {
   instanceId: string
   config: WidgetConfig
 }
-
-const COMMON_LANGUAGES = [
-  'TypeScript',
-  'JavaScript',
-  'Python',
-  'Rust',
-  'Go',
-  'Java',
-  'CSS',
-  'HTML',
-  'C++',
-  'C#',
-  'Ruby',
-  'PHP',
-  'Swift',
-  'Kotlin',
-  'Dart',
-  'Shell',
-  'Dockerfile',
-  'MDX',
-  'Vue',
-  'Svelte',
-]
 
 function computeHeight(layout: string, langsCount: number): number {
   switch (layout) {
@@ -222,7 +200,7 @@ export function TopLanguagesControls({ instanceId, config }: TopLanguagesControl
           {t('editor.langs.hide_langs', 'Linguagens Ocultas')}
         </label>
 
-        <div className="min-h-[40px] max-h-[72px] overflow-y-auto">
+        <div className="min-h-10 max-h-18 overflow-y-auto">
           {hideLangs.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {hideLangs.map((lang) => (

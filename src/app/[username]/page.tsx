@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,19 +104,21 @@ export default async function DefaultEditorPage({
       '@type': 'Person',
       name: username,
       identifier: username,
-      sameAs: `https://github.com/${username}`,
+      sameAs: API_ENDPOINTS.GITHUB.USER_PROFILE(username),
     },
   }
+
+  const safeJsonLd = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c')
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(profileLd) }}
       />
       <EditorLayout username={username} profileSlug="default" autoGenerate={autoGenerate} />
     </>

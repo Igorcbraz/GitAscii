@@ -43,24 +43,22 @@ const ICON_MAP: Record<string, React.ElementType> = {
 
 export function LayersPanel() {
   const { t } = useI18n()
-  const {
-    config,
-    selectedInstanceId,
-    selectWidget,
-    toggleWidgetVisibility,
-    toggleWidgetLock,
-    removeWidget,
-    renameWidget,
-    reorderWidgets,
-  } = useEditorStore()
+  const widgets = useEditorStore((state) => state.config?.widgets)
+  const selectedInstanceId = useEditorStore((state) => state.selectedInstanceId)
+  const selectWidget = useEditorStore((state) => state.selectWidget)
+  const toggleWidgetVisibility = useEditorStore((state) => state.toggleWidgetVisibility)
+  const toggleWidgetLock = useEditorStore((state) => state.toggleWidgetLock)
+  const removeWidget = useEditorStore((state) => state.removeWidget)
+  const renameWidget = useEditorStore((state) => state.renameWidget)
+  const reorderWidgets = useEditorStore((state) => state.reorderWidgets)
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
 
-  if (!config) return null
+  if (!widgets) return null
 
-  const widgetsDisplayOrder = [...config.widgets].reverse()
+  const widgetsDisplayOrder = [...widgets].reverse()
 
   const handleStartRename = (widget: WidgetInstance) => {
     setEditingId(widget.instanceId)
@@ -88,7 +86,7 @@ export function LayersPanel() {
     e.preventDefault()
     if (draggedIndex === null || draggedIndex === targetIndex) return
 
-    const total = config.widgets.length
+    const total = widgets.length
     const actualFrom = total - 1 - draggedIndex
     const actualTo = total - 1 - targetIndex
 
@@ -104,7 +102,7 @@ export function LayersPanel() {
         </div>
         <span className="text-eyebrow font-jetbrains-mono text-ash">
           {t('editor.canvas.layers_count', '{count} items', {
-            count: String(config.widgets.length),
+            count: String(widgets.length),
           })}
         </span>
       </div>
@@ -116,7 +114,7 @@ export function LayersPanel() {
         )}
       </p>
 
-      {config.widgets.length === 0 ? (
+      {widgets.length === 0 ? (
         <div className="p-8 text-center border border-dashed border-graphite rounded-sm text-ash text-note">
           {t('editor.canvas.no_layers', 'Nenhuma camada. Adicione widgets da biblioteca.')}
         </div>

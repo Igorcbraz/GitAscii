@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
+import { useI18n } from '@/i18n'
 import { clearConsentChoice, getConsentChoice, saveConsentChoice } from '@/lib/consent'
 
 interface ConsentBannerProps {
@@ -10,6 +11,7 @@ interface ConsentBannerProps {
 }
 
 export function ConsentBanner({ onConsent }: ConsentBannerProps) {
+  const { t } = useI18n()
   const [state, setState] = useState<'pending' | 'visible' | 'hidden'>('hidden')
   const acceptRef = useRef<HTMLButtonElement>(null)
   const scrollListenerRef = useRef<(() => void) | null>(null)
@@ -72,7 +74,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
         <div className="flex items-center gap-2 mb-3">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-signal-lime shadow-[0_0_6px_rgba(197,255,74,0.8)]" />
           <span className="font-inter-tight font-medium text-eyebrow uppercase tracking-[0.22em] text-ash">
-            Privacy
+            {t('consent.eyebrow', 'Privacy')}
           </span>
         </div>
 
@@ -80,23 +82,27 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
           id="consent-description"
           className="font-inter-tight text-note text-bone leading-body text-justify mb-4"
         >
-          GitAscii uses <span className="text-chalk font-medium">Google Analytics</span> &amp;{' '}
-          <span className="text-chalk font-medium">Microsoft Clarity</span> to understand how the
-          product is used and improve it. No personal data is sold. See our{' '}
+          {t('consent.description_prefix', 'GitAscii uses')}{' '}
+          <span className="text-chalk font-medium">Google Analytics</span> &amp;{' '}
+          <span className="text-chalk font-medium">Microsoft Clarity</span>{' '}
+          {t(
+            'consent.description_body',
+            'to understand how the product is used and improve it. No personal data is sold. See our'
+          )}{' '}
           <Link
             href="/privacy"
             target="_blank"
             className="underline underline-offset-2 text-ash hover:text-signal-lime transition-colors"
           >
-            Privacy Policy
+            {t('consent.privacy_policy', 'Privacy Policy')}
           </Link>{' '}
-          and{' '}
+          {t('consent.and', 'and')}{' '}
           <Link
             href="/terms"
             target="_blank"
             className="underline underline-offset-2 text-ash hover:text-signal-lime transition-colors"
           >
-            Terms of Use
+            {t('consent.terms_of_use', 'Terms of Use')}
           </Link>
           .
         </p>
@@ -107,7 +113,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
             className="flex-1 font-inter-tight font-medium text-eyebrow text-ash border border-graphite hover:border-smoke hover:text-pearl py-2 px-3 rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal-lime uppercase tracking-wide cursor-pointer"
             aria-label="Decline analytics tracking"
           >
-            Decline
+            {t('consent.decline', 'Decline')}
           </button>
           <button
             ref={acceptRef}
@@ -115,7 +121,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
             className="flex-1 font-inter-tight font-medium text-eyebrow text-black bg-signal-lime hover:brightness-110 py-2 px-3 rounded-sm transition-all shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_16px_rgba(197,255,74,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-lime focus-visible:ring-offset-2 focus-visible:ring-offset-carbon uppercase tracking-wide cursor-pointer"
             aria-label="Accept analytics tracking"
           >
-            Accept
+            {t('consent.accept', 'Accept')}
           </button>
         </div>
       </div>
@@ -127,6 +133,8 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
  * Privacy Settings button — placed in the footer so users can revisit their choice.
  */
 export function PrivacySettingsButton() {
+  const { t } = useI18n()
+
   function handleClick() {
     clearConsentChoice()
     window.location.reload()
@@ -137,7 +145,7 @@ export function PrivacySettingsButton() {
       onClick={handleClick}
       className="font-inter-tight text-body text-ash transition-colors hover:text-signal-lime focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal-lime rounded-sm"
     >
-      Privacy Settings
+      {t('consent.privacy_settings', 'Privacy Settings')}
     </button>
   )
 }

@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import LanguageSelector from '@/components/ui/LanguageSelector'
+import { EXTERNAL_LINKS, NAVBAR_MENU_ITEMS } from '@/constants'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
   username: string
@@ -21,16 +23,14 @@ export default function Navbar() {
   const { t } = useI18n()
   const pathname = usePathname()
 
-  const menuItems = [
-    { label: t('landing.navbar.templates', 'TEMPLATES'), href: '/templates' },
-    { label: t('landing.navbar.widgets', 'WIDGETS'), href: '/widgets' },
-    { label: t('landing.navbar.explore', 'EXPLORE'), href: '/explore' },
-    { label: t('landing.navbar.guides', 'GUIDES'), href: '/guides' },
-  ]
+  const menuItems = NAVBAR_MENU_ITEMS.map((item) => ({
+    label: t(item.key, item.defaultLabel),
+    href: item.href,
+  }))
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/Igorcbraz/GitAscii')
-      .then((res) => res.json())
+    fetch(API_ENDPOINTS.GITHUB.GITASCII_REPO)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && typeof data.stargazers_count === 'number') {
           setStars(data.stargazers_count)
@@ -38,8 +38,8 @@ export default function Navbar() {
       })
       .catch(() => {})
 
-    fetch('/api/auth/session')
-      .then((res) => res.json())
+    fetch(API_ENDPOINTS.AUTH.SESSION)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.session) {
           setSession(data.session)
@@ -50,13 +50,15 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' })
+      const res = await fetch(API_ENDPOINTS.AUTH.LOGOUT, { method: 'POST' })
       if (res.ok) {
         setSession(null)
         window.location.reload()
+      } else {
+        console.warn('Logout endpoint returned non-ok status:', res.status)
       }
     } catch (e) {
-      console.error(e)
+      console.error('Failed to log out:', e)
     }
   }
 
@@ -125,7 +127,7 @@ export default function Navbar() {
           )}
 
           <a
-            href="https://github.com/Igorcbraz/GitAscii"
+            href={EXTERNAL_LINKS.GITHUB_REPO}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2.5 rounded-sm border border-graphite bg-onyx px-4 py-2 font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:border-signal-lime hover:bg-onyx/80 hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] group cursor-pointer"
@@ -212,7 +214,7 @@ export default function Navbar() {
             </div>
 
             <a
-              href="https://github.com/Igorcbraz/GitAscii"
+              href={EXTERNAL_LINKS.GITHUB_REPO}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2.5 rounded-sm border border-graphite bg-onyx px-5 py-2.5 font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:scale-[1.02] active:scale-[0.98] hover:border-signal-lime hover:bg-onyx/80 hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] w-full text-center cursor-pointer group"

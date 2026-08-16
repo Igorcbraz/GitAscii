@@ -3,8 +3,10 @@ import { create } from 'zustand'
 import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
+import { safeStorage } from '@/utils/storage'
 
 import { WIDGET_CATALOG } from '../config/widgets'
+import { detectSocialsFromProfile, detectTechStackFromProfile } from '../utils/profileAutoDetection'
 
 interface HistoryState {
   past: SavedConfiguration[]
@@ -14,14 +16,7 @@ interface HistoryState {
 const MAX_HISTORY_STEPS = 50
 
 function saveToLocalStorage(config: SavedConfiguration) {
-  try {
-    localStorage.setItem(
-      `gitascii_${config.githubId}_${config.profileSlug || 'default'}`,
-      JSON.stringify(config)
-    )
-  } catch (e) {
-    console.warn('Auto-save failed:', e)
-  }
+  safeStorage.setJSON(`gitascii_${config.githubId}_${config.profileSlug || 'default'}`, config)
 }
 
 export interface EditorStore {
@@ -431,7 +426,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     },
 
     addWidget: (widgetId) => {
-      const { config } = get()
+      const { config, githubData } = get()
       if (!config) return
 
       const defaultSizeMap: Record<string, { width: number; height: number }> = {
@@ -465,6 +460,15 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         defaultSizeMap[widgetId] || { width: 800, height: 120 }
       const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0)
 
+      const detectedSocials =
+        widgetId === 'social-media' || widgetId === 'codeweb-social-badge'
+          ? detectSocialsFromProfile(githubData)
+          : null
+      const detectedTechs =
+        widgetId === 'tech-stack' || widgetId === 'codeweb-retro-grid'
+          ? detectTechStackFromProfile(githubData)
+          : null
+
       const newInstance: WidgetInstance = {
         instanceId: `widget_${Date.now()}`,
         widgetId,
@@ -472,6 +476,19 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         position: { x: 0, y: maxY > 0 ? maxY + 16 : 0 },
         size: widgetSize,
         config: {
+          ...(widgetId === 'social-media' && detectedSocials
+            ? {
+                selectedSocials: detectedSocials.selectedSocials,
+                socialUrls: detectedSocials.socialUrls,
+              }
+            : {}),
+          ...(widgetId === 'codeweb-social-badge' && detectedSocials
+            ? { platforms: detectedSocials.selectedSocials }
+            : {}),
+          ...(widgetId === 'tech-stack' && detectedTechs ? { selectedTechs: detectedTechs } : {}),
+          ...(widgetId === 'codeweb-retro-grid' && detectedTechs
+            ? { selectedTechs: detectedTechs }
+            : {}),
           ...(widgetId === 'avatar' || widgetId === 'ascii-art' ? { lockAspectRatio: true } : {}),
           ...(catalogItem?.category === 'controlplane'
             ? { layoutType: 'hero', accentColor: '#00A7D1' }
@@ -502,10 +519,12 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }
 
       applyConfigChange(newConfig, true)
-      set({
+      set((state) => ({
         selectedInstanceId: newInstance.instanceId,
         selectedInstanceIds: [newInstance.instanceId],
-      })
+        activeMobilePanel:
+          state.activeMobilePanel === 'widgets' ? 'canvas' : state.activeMobilePanel,
+      }))
     },
 
     duplicateWidget: (instanceId) => {
@@ -593,7 +612,8 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         config.username,
         templateId,
         config.profileSlug || 'default',
-        config.profileName
+        config.profileName,
+        githubData
       )
 
       applyConfigChange(newConfig, true)

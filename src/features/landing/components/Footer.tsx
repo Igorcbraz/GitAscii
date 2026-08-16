@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
+import { EXTERNAL_LINKS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { PrivacySettingsButton } from '@/lib/consent/ConsentBanner'
 
@@ -149,7 +150,7 @@ export function Footer() {
               <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
                 <li>
                   <a
-                    href="https://github.com/Igorcbraz/GitAscii"
+                    href={EXTERNAL_LINKS.GITHUB_REPO}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="transition-colors hover:text-signal-lime"
@@ -159,7 +160,7 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href="https://github.com/Igorcbraz/GitAscii/fork"
+                    href={EXTERNAL_LINKS.GITHUB_FORK}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="transition-colors hover:text-signal-lime"
@@ -169,7 +170,7 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href="https://github.com/Igorcbraz/GitAscii/issues"
+                    href={EXTERNAL_LINKS.GITHUB_ISSUES}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="transition-colors hover:text-signal-lime"

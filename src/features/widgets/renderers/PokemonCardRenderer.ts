@@ -1,4 +1,6 @@
-import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../../../engine/types'
+import { escapeXml } from '@/engine/core/xmlUtils'
+import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { sanitizeId, sanitizeSafeHref } from '@/utils/svgSanitizer'
 
 export function renderPokemonCard(
   widget: WidgetInstance,
@@ -8,7 +10,8 @@ export function renderPokemonCard(
   height: number
 ): string {
   const cfg = widget.config
-  const imageUrl = (cfg.imageUrl as string) || ''
+  const rawImageUrl = (cfg.imageUrl as string) || ''
+  const imageUrl = escapeXml(sanitizeSafeHref(rawImageUrl, ''))
   const isLoading = cfg.isLoading === true
 
   if (!imageUrl && !isLoading) {
@@ -19,7 +22,7 @@ export function renderPokemonCard(
   const cy = height / 2
 
   if (isLoading) {
-    const id = widget.instanceId.replace(/[^a-zA-Z0-9]/g, '') + 'load'
+    const id = sanitizeId(widget.instanceId, 'pkmn') + 'load'
     return `
       <defs>
         <filter id="neon-glow-${id}" x="-50%" y="-50%" width="200%" height="200%">
@@ -152,7 +155,7 @@ export function renderPokemonCard(
   const cardX = (width - cardWidth) / 2
   const cardY = (height - cardHeight) / 2
 
-  const id = widget.instanceId.replace(/[^a-zA-Z0-9]/g, '')
+  const id = sanitizeId(widget.instanceId, 'pkmn')
 
   return `
     <defs>

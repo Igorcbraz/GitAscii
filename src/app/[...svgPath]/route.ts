@@ -1,8 +1,9 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
 import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 import { loadProfileConfig } from '@/lib/profileStorage'
 
 export const dynamic = 'force-dynamic'
@@ -73,7 +74,14 @@ export async function GET(
 
     let config = await loadProfileConfig(username, profileSlug)
     if (!config) {
-      config = createConfiguration(data.user.id, data.user.login, 'terminal', profileSlug)
+      config = createConfiguration(
+        data.user.id,
+        data.user.login,
+        'terminal',
+        profileSlug,
+        'Default',
+        data
+      )
     }
 
     const rawSvgContent = renderSvg(config, data, { theme, widgets })
@@ -83,12 +91,21 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'image/svg+xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400',
+        'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400',
         'X-Content-Type-Options': 'nosniff',
         'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:;",
       },
     })
   } catch (error: unknown) {
+    const isNotFound =
+      error instanceof GitHubUserNotFoundError ||
+      (error instanceof Error && error.message.toLowerCase().includes('not found'))
+
+    if (!isNotFound) {
+      Sentry.captureException(error)
+    }
+
     const message = error instanceof Error ? error.message : 'Error rendering SVG'
     const escapedMessage = message
       .replace(/&/g, '&amp;')
@@ -99,7 +116,7 @@ export async function GET(
     return new NextResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${escapedMessage}</text></svg>`,
       {
-        status: 500,
+        status: isNotFound ? 404 : 500,
         headers: { 'Content-Type': 'image/svg+xml' },
       }
     )

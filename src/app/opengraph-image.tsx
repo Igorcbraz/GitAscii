@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 
 import { APP_DOMAIN } from '@/constants'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export const alt = 'GitAscii — Turn your GitHub profile into ASCII art'
 export const size = {

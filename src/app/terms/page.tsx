@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { APP_DOMAIN, APP_URL } from '@/constants'
+import {
+  APP_DOMAIN,
+  APP_URL,
+  EXTERNAL_LINKS,
+  LEGAL_LAST_UPDATED,
+  TERMS_ACCEPTABLE_USE_RULES,
+} from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 
@@ -12,8 +18,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   alternates: { canonical: `${APP_URL}/terms` },
 }
-
-const LAST_UPDATED = '2026-08-09'
 
 export default function TermsPage() {
   return (
@@ -30,8 +34,8 @@ export default function TermsPage() {
           </h1>
           <p className="font-inter-tight text-body text-ash">
             Last updated:{' '}
-            <time dateTime={LAST_UPDATED}>
-              {new Date(LAST_UPDATED).toLocaleDateString('en-US', {
+            <time dateTime={LEGAL_LAST_UPDATED}>
+              {new Date(LEGAL_LAST_UPDATED).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -85,7 +89,7 @@ export default function TermsPage() {
             <p className="mt-3">
               The Service is provided free of charge. The source code is released under the{' '}
               <a
-                href="https://github.com/Igorcbraz/GitAscii/blob/main/LICENSE"
+                href={EXTERNAL_LINKS.GITHUB_LICENSE}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"
@@ -102,14 +106,7 @@ export default function TermsPage() {
             </h2>
             <p>You agree not to use the Service to:</p>
             <ul className="list-none mt-4 space-y-3">
-              {[
-                'Generate content that is illegal, defamatory, harassing, or violates the rights of others.',
-                'Attempt to reverse-engineer, scrape, or overload our API endpoints or third-party services we depend on.',
-                'Circumvent any rate limits or access controls.',
-                'Impersonate another person or entity, including other GitHub users.',
-                'Introduce malware, viruses, or harmful code through any input field.',
-                'Use the Service for automated bulk generation that disrupts availability for other users.',
-              ].map((item, i) => (
+              {TERMS_ACCEPTABLE_USE_RULES.map((item, i) => (
                 <li key={i} className="flex gap-3 items-start">
                   <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
                   <span>{item}</span>
@@ -161,7 +158,7 @@ export default function TermsPage() {
             <p className="mt-3 text-ash text-note">
               GitHub Terms:{' '}
               <a
-                href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
+                href={EXTERNAL_LINKS.GITHUB_TERMS}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110"

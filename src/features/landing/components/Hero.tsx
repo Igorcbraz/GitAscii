@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import AsciiHands from '@/components/ui/ascii-hands'
 import { useToast } from '@/components/ui/toast'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
   username: string
@@ -27,8 +28,8 @@ export default function Hero() {
   useEffect(() => {
     setMounted(true)
 
-    fetch('/api/auth/session')
-      .then((res) => res.json())
+    fetch(API_ENDPOINTS.AUTH.SESSION)
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.session) {
           setSession(data.session)
@@ -56,10 +57,14 @@ export default function Hero() {
     const handle = username.trim() || 'Igorcbraz'
     if (username.trim() && !validateUsername(handle)) {
       error(
-        'Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).'
+        t(
+          'errors.invalid_github_username',
+          'Por favor, insira um nome de usuário válido do GitHub (sem links ou caracteres especiais).'
+        )
       )
       return
     }
+
     setIsLoading(true)
     router.push(`/${handle}`)
   }
@@ -107,7 +112,7 @@ export default function Hero() {
               </Link>
             ) : (
               <Link
-                href="/api/auth/login"
+                href={API_ENDPOINTS.AUTH.LOGIN()}
                 prefetch={false}
                 onClick={() => setIsGithubLoading(true)}
                 className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"

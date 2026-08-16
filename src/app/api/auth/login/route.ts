@@ -1,4 +1,8 @@
+import crypto from 'crypto'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function GET(request: Request) {
   const clientId = process.env.GITHUB_CLIENT_ID
@@ -10,9 +14,27 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
-  const redirectTo = searchParams.get('redirect_to') || '/'
+  const rawRedirect = searchParams.get('redirect_to') || '/'
+  const safeRedirect =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//') && !rawRedirect.includes('\\')
+      ? rawRedirect
+      : '/'
 
-  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=read:user&state=${encodeURIComponent(redirectTo)}`
+  const nonce = crypto.randomBytes(24).toString('hex')
+  const statePayload = `${nonce}:${Buffer.from(safeRedirect, 'utf8').toString('base64url')}`
+
+  const cookieStore = await cookies()
+  cookieStore.set({
+    name: 'oauth_state',
+    value: nonce,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 600, // 10 minutes
+  })
+
+  const githubAuthUrl = API_ENDPOINTS.GITHUB.OAUTH_AUTHORIZE(clientId, statePayload)
 
   return NextResponse.redirect(githubAuthUrl)
 }

@@ -852,7 +852,7 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
 
           <div className="bg-[#1a1a1a] p-3 rounded-md border border-[#333] flex items-start gap-2 mt-4">
             <AlertCircle size={16} className="text-signal-lime mt-0.5 shrink-0" />
-            <div className="text-[11px] text-ash font-inter-tight leading-relaxed">
+            <div className="text-eyebrow text-ash font-inter-tight leading-relaxed">
               Este widget exige que você configure o GitHub Action <strong>platane/snk</strong> no
               seu repositório. O GitAscii irá buscar a imagem gerada na branch e caminho informados
               acima.
@@ -1107,7 +1107,7 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
               value={(config.terminalCommands as string) || ''}
               onChange={(e) => handleUpdate({ terminalCommands: e.target.value })}
               placeholder="Ex: npm run dev\nStarting server..."
-              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-[80px]"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-20"
             />
           </div>
         </div>
@@ -1140,7 +1140,7 @@ export function IntegrationsControls({ instanceId, widgetId, config }: Integrati
               value={(config.neuralTechs as string) || ''}
               onChange={(e) => handleUpdate({ neuralTechs: e.target.value })}
               placeholder="Ex: react:frontend, node:backend"
-              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-[80px]"
+              className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none min-h-20"
             />
           </div>
         </div>

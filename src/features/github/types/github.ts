@@ -26,6 +26,8 @@ export interface GitHubRepo {
   stargazers_count: number
   forks_count: number
   language: string | null
+  topics?: string[]
+  languages?: string[]
   fork: boolean
   updated_at: string
 }
@@ -37,6 +39,7 @@ export interface NormalizedGitHubData {
   totalStars: number
   totalForks: number
   readmeContent?: string | null
+  socialAccounts?: Array<{ provider: string; url: string }>
   contributions?: {
     totalContributions: number
     weeks: Array<{

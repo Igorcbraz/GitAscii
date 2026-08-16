@@ -3,6 +3,8 @@
 import Script from 'next/script'
 import { createElement } from 'react'
 
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 declare global {
   interface Window {
     clarity?: (...args: any[]) => void
@@ -26,7 +28,7 @@ export function MicrosoftClarity({ consentGranted }: MicrosoftClarityProps) {
       __html: `
         (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            t=l.createElement(r);t.async=1;t.src="${API_ENDPOINTS.CLARITY.TAG(projectId)}";
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "${projectId}");
         window.clarity("consent");

@@ -18,7 +18,7 @@ export function Switch({ checked, onChange, className = '' }: SwitchProps) {
       }}
     >
       <span
-        className={`absolute left-[2px] w-4 h-4 rounded-full transition-transform ${checked ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
+        className={`absolute left-0.5 w-4 h-4 rounded-full transition-transform ${checked ? 'bg-graphite translate-x-4' : 'bg-chalk translate-x-0'}`}
       />
     </button>
   )

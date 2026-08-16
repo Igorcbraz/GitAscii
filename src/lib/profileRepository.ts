@@ -136,7 +136,9 @@ export class BlobProfileRepository implements ProfileRepository {
         if (isCompressed) {
           const arrayBuffer = await response.arrayBuffer()
           const buffer = Buffer.from(arrayBuffer)
-          const decompressed = zlib.gunzipSync(buffer).toString('utf-8')
+          const decompressed = zlib
+            .gunzipSync(buffer, { maxOutputLength: 2 * 1024 * 1024 })
+            .toString('utf-8')
           return JSON.parse(decompressed) as SavedConfiguration
         } else {
           return (await response.json()) as SavedConfiguration
@@ -248,7 +250,9 @@ export class BlobProfileRepository implements ProfileRepository {
           if (isCompressed) {
             const arrayBuffer = await response.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
-            const decompressed = zlib.gunzipSync(buffer).toString('utf-8')
+            const decompressed = zlib
+              .gunzipSync(buffer, { maxOutputLength: 2 * 1024 * 1024 })
+              .toString('utf-8')
             configs.push(JSON.parse(decompressed) as SavedConfiguration)
           } else {
             configs.push((await response.json()) as SavedConfiguration)
@@ -265,4 +269,6 @@ export class BlobProfileRepository implements ProfileRepository {
 }
 
 export const profileRepository: ProfileRepository =
-  process.env.NODE_ENV === 'production' ? new BlobProfileRepository() : new LocalProfileRepository()
+  process.env.NODE_ENV === 'production' && process.env.BLOB_READ_WRITE_TOKEN
+    ? new BlobProfileRepository()
+    : new LocalProfileRepository()

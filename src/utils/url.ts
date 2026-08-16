@@ -1,3 +1,5 @@
+import { EXTERNAL_LINKS } from '@/constants'
+
 export function normalizeUrl(rawUrl: string): string {
   if (!rawUrl || typeof rawUrl !== 'string') return ''
   let trimmed = rawUrl.trim()
@@ -11,7 +13,7 @@ export function normalizeUrl(rawUrl: string): string {
     if (parsed.hostname.toLowerCase() === 'github.com' && parsed.pathname.includes('/blob/')) {
       trimmed = trimmed.replace(
         /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/i,
-        'https://raw.githubusercontent.com/$1/$2/$3'
+        `${EXTERNAL_LINKS.GITHUB_RAW_BASE}/$1/$2/$3`
       )
     }
   } catch {}
@@ -62,6 +64,14 @@ export function normalizeUrl(rawUrl: string): string {
   }
 }
 
+function safeDecode(val: string): string {
+  try {
+    return decodeURIComponent(val)
+  } catch {
+    return val
+  }
+}
+
 export function extractUrlParams(url: string): Record<string, string> {
   const params: Record<string, string> = {}
   try {
@@ -75,7 +85,7 @@ export function extractUrlParams(url: string): Record<string, string> {
       const pairs = match[1].split('&')
       for (const pair of pairs) {
         const [k, v] = pair.split('=')
-        if (k) params[decodeURIComponent(k)] = v ? decodeURIComponent(v) : ''
+        if (k) params[safeDecode(k)] = v ? safeDecode(v) : ''
       }
     }
   }

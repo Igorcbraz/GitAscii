@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
+import { useI18n } from '@/i18n'
 
 export type LoadStep = {
   id: string
@@ -50,7 +51,7 @@ function StepRow({ step, index }: { step: LoadStep; index: number }) {
       }}
     >
       <span
-        className="font-jetbrains-mono text-[13px] leading-none mt-px shrink-0 w-4 text-center"
+        className="font-jetbrains-mono text-label leading-none mt-px shrink-0 w-4 text-center"
         style={{
           color: isDone
             ? '#c5ff4a'
@@ -66,7 +67,7 @@ function StepRow({ step, index }: { step: LoadStep; index: number }) {
 
       <div className="flex-1 min-w-0">
         <span
-          className="font-inter-tight text-[12px] font-medium uppercase tracking-[0.16em] leading-none"
+          className="font-inter-tight text-note font-medium uppercase tracking-[0.16em] leading-none"
           style={{
             color: isDone ? '#c5ff4a' : isError ? '#ff6b6b' : isActive ? '#ffffff' : '#525252',
           }}
@@ -133,6 +134,7 @@ function ScanLine() {
 }
 
 export function EditorLoadingScreen({ username, steps }: EditorLoadingScreenProps) {
+  const { t } = useI18n()
   const typedUser = useTyped(`@${username}`, 32)
 
   const doneCount = steps.filter((s) => s.status === 'done').length
@@ -205,7 +207,7 @@ export function EditorLoadingScreen({ username, steps }: EditorLoadingScreenProp
                   className="font-jetbrains-mono text-caption ml-2"
                   style={{ color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}
                 >
-                  gitascii — loading profile
+                  {t('editor.loading.header_badge', 'gitascii — loading profile')}
                 </span>
               </div>
 
@@ -215,13 +217,13 @@ export function EditorLoadingScreen({ username, steps }: EditorLoadingScreenProp
                   style={{ animation: 'fade-up 0.4s ease-out 0.1s both' }}
                 >
                   <span
-                    className="font-jetbrains-mono text-[11px]"
+                    className="font-jetbrains-mono text-eyebrow"
                     style={{ color: 'rgba(197,255,74,0.6)', letterSpacing: '0.04em' }}
                   >
                     $
                   </span>
                   <span
-                    className="font-jetbrains-mono text-[13px] font-medium"
+                    className="font-jetbrains-mono text-label font-medium"
                     style={{ color: '#c5ff4a', letterSpacing: '0.04em' }}
                   >
                     {typedUser}
@@ -269,18 +271,18 @@ export function EditorLoadingScreen({ username, steps }: EditorLoadingScreenProp
             </div>
 
             <p
-              className="mt-4 text-center font-inter-tight text-[11px] uppercase tracking-[0.18em]"
+              className="mt-4 text-center font-inter-tight text-eyebrow uppercase tracking-[0.18em]"
               style={{
                 color: 'rgba(255,255,255,0.15)',
                 animation: 'fade-up 0.5s ease-out 0.4s both',
               }}
             >
-              Connecting to GitHub API
+              {t('editor.loading.connecting_api', 'Connecting to GitHub API')}
             </p>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full h-[2px] bg-signal-lime shadow-[0_0_12px_rgba(197,255,74,0.5)] z-20" />
+        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-signal-lime shadow-[0_0_12px_rgba(197,255,74,0.5)] z-20" />
       </div>
     </>
   )

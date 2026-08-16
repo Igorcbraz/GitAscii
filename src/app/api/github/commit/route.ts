@@ -1,50 +1,63 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
+import { saveProfileConfig } from '@/lib/profileStorage'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { embedCode, exportData, installation_id } = await request.json()
     if (!embedCode && !installation_id) {
       return NextResponse.json({ error: 'Missing embedCode' }, { status: 400 })
     }
 
-    let username = ''
+    const username = session.username
     let appToken = null
     let finalEmbedCode = embedCode
 
     if (installation_id) {
       const { token, username: instUsername } = await getInstallationTokenById(installation_id)
-      if (!token || !instUsername) {
-        return NextResponse.json({ error: 'Invalid installation' }, { status: 403 })
+      if (
+        !token ||
+        !instUsername ||
+        instUsername.toLowerCase() !== session.username.toLowerCase()
+      ) {
+        return NextResponse.json(
+          { error: 'Forbidden: Installation does not belong to the authenticated user' },
+          { status: 403 }
+        )
       }
-      username = instUsername
       appToken = token
 
       const host = request.headers.get('host') || 'localhost:3000'
-      const protocol = request.headers.get('x-forwarded-proto') || 'http'
+      const protocol = request.headers.get('x-forwarded-proto') || 'https'
       const v = Date.now()
-      const profileSlug = exportData?.profileSlug || exportData?.templateId || 'default'
+      const rawSlug = exportData?.profileSlug || exportData?.templateId || 'default'
+      const profileSlug =
+        typeof rawSlug === 'string'
+          ? rawSlug.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'default'
+          : 'default'
       const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
       finalEmbedCode = `<a href="${protocol}://${host}">
   <img
-    src="${protocol}://${host}/api/${username}${slugPath}?v=${v}"
+    src="${protocol}://${host}/api/${encodeURIComponent(username)}${slugPath}?v=${v}"
     alt="GitAscii Widget"
     width="100%"
   />
 </a>`
 
-      if (exportData) {
+      if (exportData && typeof exportData === 'object') {
         exportData.username = username
+        exportData.profileSlug = profileSlug
       }
     } else {
-      const session = await getSession()
-      if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-      username = session.username
-
       const { token, installUrl } = await getInstallationTokenForUser(username)
       if (!token) {
         if (installUrl) {
@@ -63,13 +76,13 @@ export async function POST(request: Request) {
       'User-Agent': 'GitAscii-App',
     }
 
-    const repoRes = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
+    const repoRes = await fetch(API_ENDPOINTS.GITHUB.REPO_INFO(username, repoName), {
       headers,
     })
 
     if (repoRes.status === 200) {
     } else if (repoRes.status === 404) {
-      const createRes = await fetch('https://api.github.com/user/repos', {
+      const createRes = await fetch(API_ENDPOINTS.GITHUB.USER_REPOS, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -101,7 +114,7 @@ export async function POST(request: Request) {
 
     if (exportData) {
       const jsonRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
         { headers }
       )
       if (jsonRes.status === 200) {
@@ -119,7 +132,7 @@ export async function POST(request: Request) {
     }
 
     const readmeRes = await fetch(
-      `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
+      API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
       { headers }
     )
 
@@ -145,7 +158,7 @@ export async function POST(request: Request) {
       }
 
       const updateRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/README.md`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
         {
           method: 'PUT',
           headers,
@@ -167,7 +180,7 @@ export async function POST(request: Request) {
 
     if (exportData && hasJsonChanged) {
       const updateJsonRes = await fetch(
-        `https://api.github.com/repos/${username}/${repoName}/contents/gitascii.json`,
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
         {
           method: 'PUT',
           headers,
@@ -188,46 +201,68 @@ export async function POST(request: Request) {
 
       if (hasSnakeWidget) {
         try {
-          // Busca o workflow dinamicamente do repositório de exemplo do Platane
-          const yamlRes = await fetch(
-            'https://raw.githubusercontent.com/Platane/Platane/master/.github/workflows/main.yml'
+          const snakeYaml = `name: Generate Snake Animation
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  generate:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: generate-snake-game-from-github-contribution-grid
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: \${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+
+      - name: push github-contribution-grid-snake.svg to the output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+`
+
+          const actionRes = await fetch(
+            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
+            { headers, signal: AbortSignal.timeout(6000) }
           )
-          if (yamlRes.ok) {
-            let snakeYaml = await yamlRes.text()
+          let actionSha = undefined
+          if (actionRes.status === 200) {
+            const actionData = await actionRes.json()
+            actionSha = actionData.sha
+          }
 
-            // Substitui o usuário fixo 'platane' pela variável dinâmica do GitHub, se houver,
-            // tomando cuidado para não alterar a action 'Platane/snk'
-            snakeYaml = snakeYaml.replace(
-              /github_user_name:\s*\w+/g,
-              'github_user_name: ${{ github.repository_owner }}'
-            )
-
-            const actionRes = await fetch(
-              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
-              { headers }
-            )
-            let actionSha = undefined
-            if (actionRes.status === 200) {
-              const actionData = await actionRes.json()
-              actionSha = actionData.sha
+          const updateActionRes = await fetch(
+            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
+            {
+              method: 'PUT',
+              headers,
+              body: JSON.stringify({
+                message: 'Configura GitHub Action do Contribution Snake',
+                content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
+                sha: actionSha,
+              }),
+              signal: AbortSignal.timeout(6000),
             }
+          )
 
-            const updateActionRes = await fetch(
-              `https://api.github.com/repos/${username}/${repoName}/contents/.github/workflows/snake.yml`,
-              {
-                method: 'PUT',
-                headers,
-                body: JSON.stringify({
-                  message: 'Configura GitHub Action do Contribution Snake',
-                  content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
-                  sha: actionSha,
-                }),
-              }
-            )
-
-            if (!updateActionRes.ok) {
-              console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
-            }
+          if (!updateActionRes.ok) {
+            console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
           }
         } catch (err) {
           console.error('Erro ao configurar o workflow da snake:', err)
@@ -235,9 +270,19 @@ export async function POST(request: Request) {
       }
     }
 
+    if (exportData && typeof exportData === 'object') {
+      try {
+        await saveProfileConfig(exportData)
+      } catch (saveErr) {
+        console.error('Failed to sync profile configuration locally:', saveErr)
+      }
+    }
+
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    Sentry.captureException(error)
     console.error('Commit error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -2,8 +2,9 @@
 import { ImageResponse } from 'next/og'
 
 import { APP_URL } from '@/constants'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export const alt = 'GitAscii — Named Profile Layout Card'
 export const size = {
@@ -20,7 +21,7 @@ export default async function Image({
   const { username, profile } = await params
   const cleanUsername = username || 'Developer'
   const cleanProfile = profile || 'Layout'
-  const avatarUrl = `https://github.com/${cleanUsername}.png`
+  const avatarUrl = API_ENDPOINTS.GITHUB.AVATAR(cleanUsername)
 
   return new ImageResponse(
     <div

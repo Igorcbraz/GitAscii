@@ -138,8 +138,7 @@ test.describe('GitAscii Visual Editor E2E Tests', () => {
     const download = await downloadPromise
 
     // Verify download occurs and check name
-    expect(download.suggestedFilename()).toContain('gitascii_layout_')
-    expect(download.suggestedFilename()).toContain('.json')
+    expect(download.suggestedFilename()).toBe('gitascii.json')
   })
 
   test('8. Accessibility Audit: visual editor layout semantic and ARIA compliance', async ({
