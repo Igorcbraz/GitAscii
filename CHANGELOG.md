@@ -1,33 +1,55 @@
 # Changelog
 
-## [1.9.0](https://github.com/Igorcbraz/GitAscii/compare/v1.8.0...v1.9.0) (2026-08-17)
-
-
-### Features
-
-* **i18n:** internationalize routes, legal pages, templates, widgets and VS matrix ([d8ce5b8](https://github.com/Igorcbraz/GitAscii/commit/d8ce5b8429a766911f051542914acc4e2fb0451d))
-
-## [1.8.0](https://github.com/Igorcbraz/GitAscii/compare/v1.7.1...v1.8.0) (2026-08-16)
-
+## [1.10.0](https://github.com/Igorcbraz/GitAscii/compare/v1.9.0...v1.10.0) (2026-08-17)
 
 ### Features
 
-* **editor:** add guest automation prompt and repository star hooks ([772171f](https://github.com/Igorcbraz/GitAscii/commit/772171f73ecd1420d86ed0a8a4a56b63a7ae9c7f))
-* **editor:** implement smart guides, spacing snapping and drag performance optimization ([dfdcee4](https://github.com/Igorcbraz/GitAscii/commit/dfdcee4fe02a9f39e19e1471bdef563bc8578e9c))
-* **editor:** improve auto-detection for social media and tech stack widgets ([2fd1363](https://github.com/Igorcbraz/GitAscii/commit/2fd1363114199612fa5bcede7f6b0dfcf34573a7))
-* **editor:** improve manual export guide modal and cache bust rule ([96b51b0](https://github.com/Igorcbraz/GitAscii/commit/96b51b0908652fa646532b311113d6f02204885b))
-* **editor:** improve responsiveness with adaptive fit-to-screen zoom and mobile UX ([27c772c](https://github.com/Igorcbraz/GitAscii/commit/27c772c0d9a3c17933dd7d5b8ac1f0c853fdd312))
-
+- **ui:** redesign editor tour and cookie consent banner with full i18n support ([d235092](https://github.com/Igorcbraz/GitAscii/commit/d235092e1504a2ded2bb6145f0b9931a0db91291)), closes [#77](https://github.com/Igorcbraz/GitAscii/issues/77)
+- **footer:** synchronize display version with package.json version ([5a13096](https://github.com/Igorcbraz/GitAscii/commit/5a13096b6aecd817de27cc0d8ab874bcd7c369b1)), closes [#81](https://github.com/Igorcbraz/GitAscii/issues/81)
 
 ### Bug Fixes
 
-* **api:** handle reserved route collisions and safely parse profile responses ([838def0](https://github.com/Igorcbraz/GitAscii/commit/838def032fa3eaf99b10e2d2c4892e8adddfa9df))
-* **cache:** resolve profile configuration caching and sync on commit ([21d1b56](https://github.com/Igorcbraz/GitAscii/commit/21d1b567d0b9e98f6c8ce34f801ba9b48ed8a4cb))
-* **resilience:** harden error handling, storage access, clipboard and API timeouts ([69eda3a](https://github.com/Igorcbraz/GitAscii/commit/69eda3a4857ac000b3a48dbf30bbbe49c7f3a027))
-* **security:** eliminate dynamic method dispatch in widget rendering ([8a0c173](https://github.com/Igorcbraz/GitAscii/commit/8a0c173f427dd20f845391f23c185abe2251b36f))
-* **security:** resolve GHAS code scanning alerts for dynamic method calls and URL sanitization ([d8e509a](https://github.com/Igorcbraz/GitAscii/commit/d8e509a004b1acbbb5ae904059d14b1aa5d1ebe7))
-* **security:** resolve SSRF, SVG/XSS, supply chain and auth vulnerabilities ([3222023](https://github.com/Igorcbraz/GitAscii/commit/3222023d5991bce646d1b1e73a6bbd1cefd7d782))
-* **server:** increase EventEmitter defaultMaxListeners and fix image aspect ratio ([369a850](https://github.com/Igorcbraz/GitAscii/commit/369a850410897c401cd3a94bd0c538b3a4a3b6ff))
+- **engine:** harden profile SVG rendering and widget error boundaries ([c363242](https://github.com/Igorcbraz/GitAscii/commit/c363242c007bce5d46e272db7e4a9b271503aa82)), closes [#75](https://github.com/Igorcbraz/GitAscii/issues/75)
+- **engine:** fix SSRF dispatcher DNS lookup and ignore benign stream errors in Sentry ([9a8441a](https://github.com/Igorcbraz/GitAscii/commit/9a8441a7ea14074474650c91642509c64924170b)), closes [#76](https://github.com/Igorcbraz/GitAscii/issues/76)
+- **security:** resolve CodeQL regex ReDoS and format string alerts ([662f729](https://github.com/Igorcbraz/GitAscii/commit/662f729e9cd083a33a5b5f9ae9d519cb85bd9738))
+
+### Performance Improvements
+
+- **landing:** optimize hero rendering and idle canvas animation loops ([b21028a](https://github.com/Igorcbraz/GitAscii/commit/b21028a3f2f2fa69013cb77266dcda3753be03bc)), closes [#79](https://github.com/Igorcbraz/GitAscii/issues/79)
+
+### Code Refactoring
+
+- **editor:** extract widget category helpers and standardize catalog filtering ([cffb46c](https://github.com/Igorcbraz/GitAscii/commit/cffb46c828793317cee7d6c405604eabc3e4ee13)), closes [#78](https://github.com/Igorcbraz/GitAscii/issues/78)
+
+### Documentation
+
+- **design:** document standard modal, dialog, and banner patterns in design.md ([160b2ea](https://github.com/Igorcbraz/GitAscii/commit/160b2ead8276925b6c40ba64951e850b386d5711)), closes [#80](https://github.com/Igorcbraz/GitAscii/issues/80)
+
+## [1.9.0](https://github.com/Igorcbraz/GitAscii/compare/v1.8.0...v1.9.0) (2026-08-17)
+
+### Features
+
+- **i18n:** internationalize routes, legal pages, templates, widgets and VS matrix ([d8ce5b8](https://github.com/Igorcbraz/GitAscii/commit/d8ce5b8429a766911f051542914acc4e2fb0451d))
+
+## [1.8.0](https://github.com/Igorcbraz/GitAscii/compare/v1.7.1...v1.8.0) (2026-08-16)
+
+### Features
+
+- **editor:** add guest automation prompt and repository star hooks ([772171f](https://github.com/Igorcbraz/GitAscii/commit/772171f73ecd1420d86ed0a8a4a56b63a7ae9c7f))
+- **editor:** implement smart guides, spacing snapping and drag performance optimization ([dfdcee4](https://github.com/Igorcbraz/GitAscii/commit/dfdcee4fe02a9f39e19e1471bdef563bc8578e9c))
+- **editor:** improve auto-detection for social media and tech stack widgets ([2fd1363](https://github.com/Igorcbraz/GitAscii/commit/2fd1363114199612fa5bcede7f6b0dfcf34573a7))
+- **editor:** improve manual export guide modal and cache bust rule ([96b51b0](https://github.com/Igorcbraz/GitAscii/commit/96b51b0908652fa646532b311113d6f02204885b))
+- **editor:** improve responsiveness with adaptive fit-to-screen zoom and mobile UX ([27c772c](https://github.com/Igorcbraz/GitAscii/commit/27c772c0d9a3c17933dd7d5b8ac1f0c853fdd312))
+
+### Bug Fixes
+
+- **api:** handle reserved route collisions and safely parse profile responses ([838def0](https://github.com/Igorcbraz/GitAscii/commit/838def032fa3eaf99b10e2d2c4892e8adddfa9df))
+- **cache:** resolve profile configuration caching and sync on commit ([21d1b56](https://github.com/Igorcbraz/GitAscii/commit/21d1b567d0b9e98f6c8ce34f801ba9b48ed8a4cb))
+- **resilience:** harden error handling, storage access, clipboard and API timeouts ([69eda3a](https://github.com/Igorcbraz/GitAscii/commit/69eda3a4857ac000b3a48dbf30bbbe49c7f3a027))
+- **security:** eliminate dynamic method dispatch in widget rendering ([8a0c173](https://github.com/Igorcbraz/GitAscii/commit/8a0c173f427dd20f845391f23c185abe2251b36f))
+- **security:** resolve GHAS code scanning alerts for dynamic method calls and URL sanitization ([d8e509a](https://github.com/Igorcbraz/GitAscii/commit/d8e509a004b1acbbb5ae904059d14b1aa5d1ebe7))
+- **security:** resolve SSRF, SVG/XSS, supply chain and auth vulnerabilities ([3222023](https://github.com/Igorcbraz/GitAscii/commit/3222023d5991bce646d1b1e73a6bbd1cefd7d782))
+- **server:** increase EventEmitter defaultMaxListeners and fix image aspect ratio ([369a850](https://github.com/Igorcbraz/GitAscii/commit/369a850410897c401cd3a94bd0c538b3a4a3b6ff))
 
 ## [1.7.1](https://github.com/Igorcbraz/GitAscii/compare/v1.7.0...v1.7.1) (2026-08-15)
 

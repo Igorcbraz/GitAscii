@@ -1,0 +1,17 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "perf", "section": "Performance Improvements" },
+        { "type": "refactor", "section": "Code Refactoring" },
+        { "type": "docs", "section": "Documentation" },
+        { "type": "security", "section": "Security Hardening" },
+        { "type": "test", "section": "Tests" },
+        { "type": "chore", "section": "Miscellaneous Chores" }
+      ]
+    }
+  }
+}
