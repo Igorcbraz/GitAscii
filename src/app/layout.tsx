@@ -116,6 +116,7 @@ export const metadata: Metadata = {
       'en-US': APP_URL,
       'pt-BR': `${APP_URL}?lang=pt`,
       'es-ES': `${APP_URL}?lang=es`,
+      'zh-CN': `${APP_URL}?lang=zh`,
       'x-default': APP_URL,
     },
   },

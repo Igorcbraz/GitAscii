@@ -1,4 +1,4 @@
-export type AppLanguageCode = 'en' | 'pt' | 'es'
+export type AppLanguageCode = 'en' | 'pt' | 'es' | 'zh'
 
 export interface LanguageOption {
   code: AppLanguageCode
@@ -11,4 +11,5 @@ export const AVAILABLE_LANGUAGES: LanguageOption[] = [
   { code: 'en', labelKey: 'common.english', defaultLabel: 'English', flag: '🇬🇧' },
   { code: 'pt', labelKey: 'common.portuguese', defaultLabel: 'Português', flag: '🇧🇷' },
   { code: 'es', labelKey: 'common.spanish', defaultLabel: 'Español', flag: '🇪🇸' },
+  { code: 'zh', labelKey: 'common.chinese', defaultLabel: '中文', flag: '🇨🇳' },
 ]

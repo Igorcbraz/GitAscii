@@ -123,10 +123,7 @@ const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   ['custom-image', (w, d, g) => renderExternalWidgets(w, d, g)],
 ])
 
-export function renderFallbackWidget(
-  widget: WidgetInstance,
-  globalStyles: GlobalStyles
-): string {
+export function renderFallbackWidget(widget: WidgetInstance, globalStyles: GlobalStyles): string {
   const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
   return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(String(widget.widgetId || '').toUpperCase())}</text>`
 }

@@ -60,7 +60,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
     <div
       role="dialog"
       aria-modal="false"
-      aria-label="Analytics consent"
+      aria-label={t('consent.dialog_aria', 'Analytics consent')}
       aria-describedby="consent-description"
       className={[
         'fixed bottom-6 right-6 z-9999 w-[min(360px,calc(100vw-3rem))]',
@@ -111,7 +111,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
           <button
             onClick={() => handleChoice('denied')}
             className="flex-1 font-inter-tight font-medium text-eyebrow text-ash border border-graphite hover:border-smoke hover:text-pearl py-2 px-3 rounded-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-signal-lime uppercase tracking-wide cursor-pointer"
-            aria-label="Decline analytics tracking"
+            aria-label={t('consent.decline_aria', 'Decline analytics tracking')}
           >
             {t('consent.decline', 'Decline')}
           </button>
@@ -119,7 +119,7 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
             ref={acceptRef}
             onClick={() => handleChoice('granted')}
             className="flex-1 font-inter-tight font-medium text-eyebrow text-black bg-signal-lime hover:brightness-110 py-2 px-3 rounded-sm transition-all shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_16px_rgba(197,255,74,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-lime focus-visible:ring-offset-2 focus-visible:ring-offset-carbon uppercase tracking-wide cursor-pointer"
-            aria-label="Accept analytics tracking"
+            aria-label={t('consent.accept_aria', 'Accept analytics tracking')}
           >
             {t('consent.accept', 'Accept')}
           </button>
