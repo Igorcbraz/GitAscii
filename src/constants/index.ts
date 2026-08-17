@@ -1,5 +1,8 @@
+import packageJson from '../../package.json'
+
 export const APP_URL = 'https://gitascii.com'
 export const APP_DOMAIN = 'gitascii.com'
+export const APP_VERSION = packageJson.version
 
 export const WIDGET_IDS = {
   HEADER: 'header',
