@@ -152,13 +152,14 @@ export default function KineticGrid({
       ctx.fillRect(0, 0, W, H)
 
       ctx.fillStyle = 'rgba(255,255,255,0.05)'
+      ctx.beginPath()
       for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
         for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
-          ctx.beginPath()
+          ctx.moveTo(x + 0.7, y)
           ctx.arc(x, y, 0.7, 0, Math.PI * 2)
-          ctx.fill()
         }
       }
+      ctx.fill()
 
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i]
@@ -253,19 +254,42 @@ export default function KineticGrid({
     [getWarpedPoint, globalColor]
   )
 
-  const animate = useCallback(
-    (now: number) => {
+  const isRunningRef = useRef<boolean>(false)
+
+  const startAnimation = useCallback(() => {
+    if (isRunningRef.current) return
+    isRunningRef.current = true
+
+    const loop = (now: number) => {
       const m = mouseRef.current
       const t = targetMouseRef.current
 
-      m.x = lerpN(m.x, t.x, LERP_SPEED)
-      m.y = lerpN(m.y, t.y, LERP_SPEED)
+      const dx = t.x - m.x
+      const dy = t.y - m.y
+      const distSq = dx * dx + dy * dy
+
+      if (distSq < 0.04) {
+        m.x = t.x
+        m.y = t.y
+      } else {
+        m.x = lerpN(m.x, t.x, LERP_SPEED)
+        m.y = lerpN(m.y, t.y, LERP_SPEED)
+      }
 
       draw(now)
-      rafRef.current = requestAnimationFrame(animate)
-    },
-    [draw]
-  )
+
+      const isMoving = distSq >= 0.04
+      const hasRipples = ripplesRef.current.length > 0
+
+      if (isMoving || hasRipples) {
+        rafRef.current = requestAnimationFrame(loop)
+      } else {
+        isRunningRef.current = false
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(loop)
+  }, [draw])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -277,10 +301,7 @@ export default function KineticGrid({
       canvas.width = w
       canvas.height = h
       sizeRef.current = { w, h }
-      if (mouseRef.current.x === -9999) {
-        mouseRef.current = { x: -9999, y: -9999 }
-        targetMouseRef.current = { x: -9999, y: -9999 }
-      }
+      draw(performance.now())
     }
 
     setSize()
@@ -288,6 +309,12 @@ export default function KineticGrid({
 
     const onMouseMove = (e: MouseEvent) => {
       targetMouseRef.current = { x: e.clientX, y: e.clientY }
+      startAnimation()
+    }
+
+    const onMouseLeave = () => {
+      targetMouseRef.current = { x: -9999, y: -9999 }
+      startAnimation()
     }
 
     const onClick = (e: MouseEvent) => {
@@ -298,21 +325,25 @@ export default function KineticGrid({
         opacity: 1,
         born: performance.now(),
       })
+      startAnimation()
     }
 
     window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseleave', onMouseLeave)
     window.addEventListener('click', onClick)
-    rafRef.current = requestAnimationFrame(animate)
+    startAnimation()
 
     return () => {
       window.removeEventListener('resize', setSize)
       window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseleave', onMouseLeave)
       window.removeEventListener('click', onClick)
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
       }
+      isRunningRef.current = false
     }
-  }, [animate])
+  }, [draw, startAnimation])
 
   return (
     <div
