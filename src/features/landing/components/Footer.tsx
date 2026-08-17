@@ -76,7 +76,7 @@ export function Footer() {
               </p>
               <div className="inline-flex items-center justify-center px-3 py-1 rounded-full border border-signal-lime bg-transparent">
                 <span className="font-inter-tight text-signal-lime text-eyebrow uppercase tracking-[0.22em]">
-                  ● OPEN SOURCE
+                  ● {t('common.open_source', 'OPEN SOURCE')}
                 </span>
               </div>
             </div>
@@ -183,17 +183,17 @@ export function Footer() {
 
             <div className="md:col-span-2 flex flex-col">
               <span className="font-inter-tight text-eyebrow uppercase tracking-[0.22em] text-ash mb-6">
-                [ LEGAL ]
+                {t('landing.footer.legal', '[ LEGAL ]')}
               </span>
               <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
                 <li>
                   <Link href="/privacy" className="transition-colors hover:text-signal-lime">
-                    Privacy Policy
+                    {t('landing.footer.item.privacy_policy', 'Privacy Policy')}
                   </Link>
                 </li>
                 <li>
                   <Link href="/terms" className="transition-colors hover:text-signal-lime">
-                    Terms of Use
+                    {t('landing.footer.item.terms_of_use', 'Terms of Use')}
                   </Link>
                 </li>
                 <li>

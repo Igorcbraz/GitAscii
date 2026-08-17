@@ -8,10 +8,10 @@ import { SUMMARY_FEATURES_RAW, SUMMARY_VS_MATRIX_RAW } from '@/constants'
 import { useI18n } from '@/i18n'
 
 export function SummarySection() {
-  const { language } = useI18n()
+  const { t } = useI18n()
 
-  const tc = (key: string, enVal: string, ptVal: string) => {
-    return language === 'pt' ? ptVal : enVal
+  const tc = (key: string, enVal: string, _ptVal: string) => {
+    return t(key, enVal)
   }
 
   const features = SUMMARY_FEATURES_RAW.map((f) => ({

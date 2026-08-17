@@ -18,7 +18,7 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 import { copyToClipboard } from '@/utils/clipboard'
 
 export default function InteractiveShowcase() {
-  const { language } = useI18n()
+  const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<'templates' | 'widgets' | 'profiles' | 'guides'>(
     'templates'
   )
@@ -42,8 +42,8 @@ export default function InteractiveShowcase() {
     }
   }
 
-  const tc = (key: string, enVal: string, ptVal: string) => {
-    return language === 'pt' ? ptVal : enVal
+  const tc = (key: string, enVal: string, _ptVal: string) => {
+    return t(key, enVal)
   }
 
   const tabs = SHOWCASE_TABS.map((tab) => ({

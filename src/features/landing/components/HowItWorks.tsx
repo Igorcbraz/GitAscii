@@ -5,10 +5,10 @@ import { Copy } from 'lucide-react'
 import { useI18n } from '@/i18n'
 
 export function HowItWorks() {
-  const { t, language } = useI18n()
+  const { t } = useI18n()
 
-  const tc = (key: string, enVal: string, ptVal: string) => {
-    return language === 'pt' ? ptVal : enVal
+  const tc = (key: string, enVal: string, _ptVal: string) => {
+    return t(key, enVal)
   }
 
   const howToLd = {

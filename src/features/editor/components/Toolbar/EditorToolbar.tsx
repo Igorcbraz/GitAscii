@@ -15,6 +15,7 @@ import {
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
@@ -473,12 +474,12 @@ export function EditorToolbar() {
           onClick={() => setCommandPaletteOpen(true)}
           data-testid="command-palette-btn"
           id="tour-global-search"
-          title="Busca Global (Ctrl+K)"
+          title={t('editor.toolbar.search_shortcut', 'Global Search (Ctrl+K)')}
           className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
         >
           <Search size={13} className="shrink-0 text-fog" />
           <span className="font-inter-tight text-note text-fog flex-1 text-left">
-            {t('editor.toolbar.search_commands', 'Pesquisar widgets, templates...')}
+            {t('editor.toolbar.search_commands', 'Search widgets, templates...')}
           </span>
           <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
             <Command size={9} />K
@@ -487,9 +488,10 @@ export function EditorToolbar() {
       </div>
 
       <div className="flex items-center gap-3" id="tour-export-buttons">
+        <LanguageSelector align="right" />
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
-          title={t('editor.toolbar.tour', 'Ver Tutorial')}
+          title={t('editor.toolbar.tour', 'Take Tour')}
           className="p-1.5 rounded-[4px] text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
         >
           <Info size={14} />
@@ -497,7 +499,7 @@ export function EditorToolbar() {
         <button
           onClick={handleExport}
           data-testid="export-layout-btn"
-          title={t('editor.toolbar.export_json', 'Exportar Layout (JSON)')}
+          title={t('editor.toolbar.export_json', 'Export Layout (JSON)')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
         >
           <Download size={14} />

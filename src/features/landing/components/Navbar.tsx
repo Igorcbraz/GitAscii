@@ -98,7 +98,7 @@ export default function Navbar() {
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
-                title="Sair"
+                title={t('editor.toolbar.logout', 'Sign Out')}
               >
                 <LogOut className="size-4" />
               </button>
@@ -122,7 +122,7 @@ export default function Navbar() {
               ) : (
                 <LogIn className="size-4" />
               )}
-              <span>LOGIN</span>
+              <span>{t('common.login', 'LOGIN')}</span>
             </Link>
           )}
 
@@ -146,7 +146,7 @@ export default function Navbar() {
         <button
           className="md:hidden text-white cursor-pointer transition-colors duration-300 ease-in-out hover:text-signal-lime"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
+          aria-label={t('common.toggle_menu', 'Toggle menu')}
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -187,7 +187,7 @@ export default function Navbar() {
                   className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite bg-red-500/10 px-5 py-2.5 font-inter-tight text-label font-medium text-red-400 hover:bg-red-500/20 transition-all duration-300 w-full cursor-pointer"
                 >
                   <LogOut className="size-3.5" />
-                  <span>Logout</span>
+                  <span>{t('editor.toolbar.logout', 'Sign Out')}</span>
                 </button>
               </div>
             ) : (
@@ -202,7 +202,7 @@ export default function Navbar() {
                 ) : (
                   <LogIn className="size-4" />
                 )}
-                <span>LOGIN COM GITHUB</span>
+                <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
               </Link>
             )}
 

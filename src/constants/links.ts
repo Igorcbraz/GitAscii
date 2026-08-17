@@ -4,6 +4,7 @@ export interface ExternalLinksDef {
   readonly GITHUB_ISSUES: string
   readonly GITHUB_LICENSE: string
   readonly GITHUB_TERMS: string
+  readonly GITHUB_PRIVACY: string
   readonly GITHUB_RAW_BASE: string
   readonly DEFAULT_GITHUB_AVATAR: string
   readonly DEFAULT_GHOST_AVATAR: string
@@ -41,6 +42,8 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
   GITHUB_ISSUES: 'https://github.com/Igorcbraz/GitAscii/issues',
   GITHUB_LICENSE: 'https://github.com/Igorcbraz/GitAscii/blob/main/LICENSE',
   GITHUB_TERMS: 'https://docs.github.com/en/site-policy/github-terms/github-terms-of-service',
+  GITHUB_PRIVACY:
+    'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement',
   GITHUB_RAW_BASE: 'https://raw.githubusercontent.com',
   DEFAULT_GITHUB_AVATAR: 'https://github.com/github.png',
   DEFAULT_GHOST_AVATAR: 'https://github.com/ghost.png',

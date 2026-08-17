@@ -21,7 +21,7 @@ export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
 
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={t('common.breadcrumbs_aria', 'Breadcrumbs')}
       className={`flex items-center space-x-2 text-note font-inter-tight text-ash ${className}`}
     >
       <Link

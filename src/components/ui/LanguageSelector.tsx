@@ -82,3 +82,5 @@ export default function LanguageSelector({
     </div>
   )
 }
+
+export { LanguageSelector }
