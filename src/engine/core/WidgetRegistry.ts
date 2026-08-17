@@ -162,7 +162,7 @@ export function renderWidgetContent(
     try {
       return renderer(widget, data, globalStyles, forceStatic)
     } catch (err) {
-      console.warn(`[GitAscii Engine] Error rendering widget "${wid}":`, err)
+      console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
       return renderErrorWidget(widget, globalStyles, err)
     }
   }
@@ -177,12 +177,12 @@ export function getRenderer(widgetId: string): WidgetRendererFn {
       try {
         return renderer(widget, data, globalStyles, forceStatic)
       } catch (err) {
-        console.warn(`[GitAscii Engine] Error rendering widget "${wid}":`, err)
+        console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
         return renderErrorWidget(widget, globalStyles, err)
       }
     }
   }
-  return (widget, _data, globalStyles) => renderFallbackWidget(widget, globalStyles)
+  return (widget, _, globalStyles) => renderFallbackWidget(widget, globalStyles)
 }
 
 export function registerWidget(widgetId: string, renderer: WidgetRendererFn): void {

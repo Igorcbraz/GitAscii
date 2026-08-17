@@ -366,30 +366,45 @@ async function fetchAndProcessExternalImage(
   }
 }
 
+function unescapeXmlContent(str: string): string {
+  // Unescape specific entities safely
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+
 export async function embedExternalImages(svgContent: string): Promise<string> {
-  const jsonRegex = /<!-- EXTERNAL_WIDGET_JSON:([\s\S]*?)-->[\s\S]*?<!-- EXTERNAL_WIDGET_END -->/g
-  const legacyRegex =
-    /<!-- EXTERNAL_WIDGET_START:([\s\S]*?)-->([\s\S]*?)<!-- EXTERNAL_WIDGET_END -->/g
+  const JSON_START_TOKEN = '<!-- EXTERNAL_WIDGET_JSON:'
+  const LEGACY_START_TOKEN = '<!-- EXTERNAL_WIDGET_START:'
+  const COMMENT_END_TOKEN = '-->'
+  const BLOCK_END_TOKEN = '<!-- EXTERNAL_WIDGET_END -->'
 
   let finalSvg = svgContent
 
-  // 1. Process new robust JSON format first
-  const jsonMatches = [...finalSvg.matchAll(jsonRegex)]
-  for (const m of jsonMatches) {
-    const fullMatch = m[0]
+  // 1. Process robust JSON format first using safe index scanning (immune to ReDoS)
+  while (true) {
+    const startIdx = finalSvg.indexOf(JSON_START_TOKEN)
+    if (startIdx === -1) break
+
+    const commentEndIdx = finalSvg.indexOf(COMMENT_END_TOKEN, startIdx + JSON_START_TOKEN.length)
+    if (commentEndIdx === -1) break
+
+    const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
+    if (blockEndIdx === -1) break
+
+    const fullMatch = finalSvg.slice(startIdx, blockEndIdx + BLOCK_END_TOKEN.length)
+    const rawJsonSection = finalSvg.slice(startIdx + JSON_START_TOKEN.length, commentEndIdx)
+
+    let replacement = ''
     try {
-      const rawJson = m[1]
-        .trim()
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-      const parsed = JSON.parse(rawJson)
+      const parsed = JSON.parse(unescapeXmlContent(rawJsonSection.trim()))
       const { url, x, y, width, height, mode, fallbackUrl } = parsed
       const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
 
       try {
-        const replacement = await fetchAndProcessExternalImage(
+        replacement = await fetchAndProcessExternalImage(
           url,
           String(x),
           String(y),
@@ -397,11 +412,10 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           String(height),
           preserve
         )
-        finalSvg = finalSvg.replace(fullMatch, () => replacement)
       } catch (err) {
         if (fallbackUrl) {
           try {
-            const replacement = await fetchAndProcessExternalImage(
+            replacement = await fetchAndProcessExternalImage(
               fallbackUrl,
               String(x),
               String(y),
@@ -409,90 +423,95 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
               String(height),
               preserve
             )
-            finalSvg = finalSvg.replace(fullMatch, () => replacement)
-            continue
           } catch {}
         }
-        finalSvg = finalSvg.replace(
-          fullMatch,
-          () =>
-            `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
-        )
+        if (!replacement) {
+          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+        }
       }
     } catch (e) {
       console.warn('Failed to parse JSON external widget marker:', e)
+      replacement = ''
     }
+
+    finalSvg =
+      finalSvg.slice(0, startIdx) +
+      replacement +
+      finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
-  // 2. Process legacy format for any remaining widgets
-  const legacyMatches = [...finalSvg.matchAll(legacyRegex)]
-  for (const m of legacyMatches) {
-    const fullMatch = m[0]
-    const startData = m[1].trim()
+  // 2. Process legacy format for any remaining widgets using safe index scanning
+  while (true) {
+    const startIdx = finalSvg.indexOf(LEGACY_START_TOKEN)
+    if (startIdx === -1) break
+
+    const commentEndIdx = finalSvg.indexOf(COMMENT_END_TOKEN, startIdx + LEGACY_START_TOKEN.length)
+    if (commentEndIdx === -1) break
+
+    const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
+    if (blockEndIdx === -1) break
+
+    const startData = finalSvg.slice(startIdx + LEGACY_START_TOKEN.length, commentEndIdx).trim()
     const parts = startData.split('|').map((s) => s.trim())
-    if (parts.length < 6) continue
 
-    let urlPart: string
-    let xPart: string
-    let yPart: string
-    let widthPart: string
-    let heightPart: string
-    let modePart: string
-    let fallbackUrlPart: string = ''
+    let replacement = ''
+    if (parts.length >= 6) {
+      let urlPart: string
+      let xPart: string
+      let yPart: string
+      let widthPart: string
+      let heightPart: string
+      let modePart: string
+      let fallbackUrlPart: string = ''
 
-    if (parts.length === 7) {
-      ;[urlPart, xPart, yPart, widthPart, heightPart, modePart, fallbackUrlPart] = parts
-    } else if (parts.length === 6) {
-      ;[urlPart, xPart, yPart, widthPart, heightPart, modePart] = parts
-    } else {
-      // Reassemble URLs that contained pipe characters
-      fallbackUrlPart = parts[parts.length - 1]
-      modePart = parts[parts.length - 2]
-      heightPart = parts[parts.length - 3]
-      widthPart = parts[parts.length - 4]
-      yPart = parts[parts.length - 5]
-      xPart = parts[parts.length - 6]
-      urlPart = parts.slice(0, parts.length - 6).join('|')
-    }
-
-    const url = urlPart.replace(/&amp;/g, '&')
-    const x = xPart
-    const y = yPart
-    const width = widthPart
-    const height = heightPart
-    const mode = modePart
-    const fallbackUrl = fallbackUrlPart.replace(/&amp;/g, '&')
-    const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
-
-    try {
-      const replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
-      finalSvg = finalSvg.replace(fullMatch, () => replacement)
-    } catch (err) {
-      console.error('Failed to fetch external widget:', url, err)
-
-      if (fallbackUrl) {
-        try {
-          const replacement = await fetchAndProcessExternalImage(
-            fallbackUrl,
-            x,
-            y,
-            width,
-            height,
-            preserve
-          )
-          finalSvg = finalSvg.replace(fullMatch, () => replacement)
-          continue
-        } catch (fbErr) {
-          console.error('Failed to fetch fallback widget:', fallbackUrl, fbErr)
-        }
+      if (parts.length === 7) {
+        ;[urlPart, xPart, yPart, widthPart, heightPart, modePart, fallbackUrlPart] = parts
+      } else if (parts.length === 6) {
+        ;[urlPart, xPart, yPart, widthPart, heightPart, modePart] = parts
+      } else {
+        fallbackUrlPart = parts[parts.length - 1]
+        modePart = parts[parts.length - 2]
+        heightPart = parts[parts.length - 3]
+        widthPart = parts[parts.length - 4]
+        yPart = parts[parts.length - 5]
+        xPart = parts[parts.length - 6]
+        urlPart = parts.slice(0, parts.length - 6).join('|')
       }
 
-      finalSvg = finalSvg.replace(
-        fullMatch,
-        () =>
-          `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
-      )
+      const url = unescapeXmlContent(urlPart)
+      const x = xPart
+      const y = yPart
+      const width = widthPart
+      const height = heightPart
+      const mode = modePart
+      const fallbackUrl = unescapeXmlContent(fallbackUrlPart)
+      const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
+
+      try {
+        replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
+      } catch (err) {
+        if (fallbackUrl) {
+          try {
+            replacement = await fetchAndProcessExternalImage(
+              fallbackUrl,
+              x,
+              y,
+              width,
+              height,
+              preserve
+            )
+          } catch {}
+        }
+        if (!replacement) {
+          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+        }
+      }
     }
+
+    finalSvg =
+      finalSvg.slice(0, startIdx) +
+      replacement +
+      finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
   const imageRegex = /<image\s+[^>]*>/gi
