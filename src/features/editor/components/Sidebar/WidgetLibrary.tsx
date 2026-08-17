@@ -7,7 +7,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { EXTERNAL_LINKS, WIDGET_CATEGORIES, WIDGET_IDS } from '@/constants'
 import { useI18n } from '@/i18n'
 
-import { WIDGET_CATALOG, WIDGET_FILTERS, type WidgetCatalogItem } from '../../config/widgets'
+import {
+  isExternalWidget,
+  isNativeWidget,
+  WIDGET_CATALOG,
+  WIDGET_FILTERS,
+  type WidgetCatalogItem,
+} from '../../config/widgets'
 import { useEditorStore } from '../../store/editorStore'
 import { AsciiProfileCardItem } from './WidgetLibrary/AsciiProfileCardItem'
 import { ControlPlaneCardItem } from './WidgetLibrary/ControlPlaneCardItem'
@@ -241,32 +247,12 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.native_category', 'GitAscii Native')}
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash/50">
-                      {
-                        filteredWidgets.filter(
-                          (w) =>
-                            !w.isExternal &&
-                            w.id !== 'gitfest-lineup' &&
-                            w.id !== WIDGET_IDS.POKEMON_CARD &&
-                            w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
-                            w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-                            w.category !== WIDGET_CATEGORIES.GODPROFILE &&
-                            w.category !== WIDGET_CATEGORIES.CONTROLPLANE
-                        ).length
-                      }
+                      {filteredWidgets.filter(isNativeWidget).length}
                     </span>
                   </div>
                   <div className="space-y-1.5">
                     {(() => {
-                      const items = filteredWidgets.filter(
-                        (w) =>
-                          !w.isExternal &&
-                          w.id !== 'gitfest-lineup' &&
-                          w.id !== WIDGET_IDS.POKEMON_CARD &&
-                          w.category !== WIDGET_CATEGORIES.CODEWEB_DEV &&
-                          w.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-                          w.category !== WIDGET_CATEGORIES.GODPROFILE &&
-                          w.category !== WIDGET_CATEGORIES.CONTROLPLANE
-                      )
+                      const items = filteredWidgets.filter(isNativeWidget)
                       const baseItems = items.slice(0, 5)
                       const extraItems = items.slice(5)
                       return (
@@ -437,7 +423,10 @@ export function WidgetLibrary() {
                       <ExternalLink size={10} />
                     </a>
                     <span className="ml-auto font-inter-tight text-caption text-ash">
-                      {filteredWidgets.filter((w) => w.category === 'godprofile').length}
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.GODPROFILE)
+                          .length
+                      }
                     </span>
                     <ChevronDown
                       size={12}
@@ -447,7 +436,9 @@ export function WidgetLibrary() {
                   {!collapsedSections['godprofile'] && (
                     <div className="space-y-1.5">
                       {(() => {
-                        const items = filteredWidgets.filter((w) => w.category === 'godprofile')
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.GODPROFILE
+                        )
                         const baseItems = items.slice(0, 3)
                         const extraItems = items.slice(3)
                         return (
@@ -533,7 +524,10 @@ export function WidgetLibrary() {
                       <ExternalLink size={10} />
                     </a>
                     <span className="ml-auto font-mono text-caption text-[#4A6B8C]">
-                      {filteredWidgets.filter((w) => w.category === 'controlplane').length}
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.CONTROLPLANE)
+                          .length
+                      }
                     </span>
                     <ChevronDown
                       size={12}
@@ -543,7 +537,9 @@ export function WidgetLibrary() {
                   {!collapsedSections['controlplane'] && (
                     <div className="space-y-2">
                       {(() => {
-                        const items = filteredWidgets.filter((w) => w.category === 'controlplane')
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.CONTROLPLANE
+                        )
                         const baseItems = items.slice(0, 3)
                         const extraItems = items.slice(3)
                         return (
@@ -712,12 +708,12 @@ export function WidgetLibrary() {
                       {t('editor.sidebar.community_category', 'Community & External')}
                     </span>
                     <span className="ml-auto font-inter-tight text-caption text-ash/50">
-                      {filteredWidgets.filter((w) => w.isExternal).length}
+                      {filteredWidgets.filter(isExternalWidget).length}
                     </span>
                   </div>
                   <div className="space-y-1.5">
                     {(() => {
-                      const items = filteredWidgets.filter((w) => w.isExternal)
+                      const items = filteredWidgets.filter(isExternalWidget)
                       const baseItems = items.slice(0, 5)
                       const extraItems = items.slice(5)
                       return (
