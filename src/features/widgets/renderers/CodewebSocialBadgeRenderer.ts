@@ -241,9 +241,10 @@ function renderPillSvg(
   isStatic: boolean,
   animSpeed: string
 ): { svg: string; defs: string; width: number } {
-  const p = SOCIAL_PLATFORMS[platformKey.toLowerCase()] || SOCIAL_PLATFORMS.github
-  const label = customLabel || p.label
-  const uniqueId = `pill-${p.name.toLowerCase()}-${Math.floor(x)}-${Math.floor(y)}`
+  const cleanKey = typeof platformKey === 'string' ? platformKey.toLowerCase() : 'github'
+  const p = SOCIAL_PLATFORMS[cleanKey] || SOCIAL_PLATFORMS.github
+  const label = customLabel || p.label || 'GitHub'
+  const uniqueId = `pill-${(p.name || 'social').toLowerCase()}-${Math.floor(x)}-${Math.floor(y)}`
 
   // Calculate pill width based on content
   const charWidth = 8

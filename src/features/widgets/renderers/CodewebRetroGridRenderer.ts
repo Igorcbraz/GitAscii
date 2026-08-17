@@ -28,7 +28,7 @@ export function renderCodewebRetroGrid(
   const displayMode = (cfg.displayMode as 'both' | 'logo' | 'name') || 'both'
 
   const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
-  let avatarUrl = data.user.avatar_url || EXTERNAL_LINKS.DEFAULT_GHOST_AVATAR
+  let avatarUrl = data?.user?.avatar_url || EXTERNAL_LINKS.DEFAULT_GHOST_AVATAR
   if (sourceType === 'upload' && cfg.uploadedImageData) {
     avatarUrl = cfg.uploadedImageData as string
   } else if (sourceType === 'url' && cfg.imageUrl) {
@@ -41,16 +41,16 @@ export function renderCodewebRetroGrid(
   const rawCardLink =
     (cfg.link as string) ||
     (cfg.devCardLink as string) ||
-    (data.user.login
+    (data?.user?.login
       ? API_ENDPOINTS.GITHUB.USER_PROFILE(data.user.login)
       : EXTERNAL_LINKS.GITHUB_REPO)
   const cardLink = sanitizeSafeHref(rawCardLink, EXTERNAL_LINKS.GITHUB_REPO)
 
-  const userName = (cfg.userName as string) || data.user.name || data.user.login || 'Developer'
-  const userHandle = (cfg.userHandle as string) || `@${data.user.login || 'developer'}`
+  const userName = (cfg.userName as string) || data?.user?.name || data?.user?.login || 'Developer'
+  const userHandle = (cfg.userHandle as string) || `@${data?.user?.login || 'developer'}`
 
   const userLanguages =
-    data.languages && typeof data.languages === 'object'
+    data?.languages && typeof data.languages === 'object'
       ? Object.keys(data.languages).slice(0, 12)
       : []
 

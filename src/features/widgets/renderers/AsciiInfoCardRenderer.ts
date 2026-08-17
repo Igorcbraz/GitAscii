@@ -18,13 +18,14 @@ export function renderAsciiInfoCard(
   globalStyles: GlobalStyles,
   isStaticOverride?: boolean
 ): string {
-  const { width, height } = widget.size
+  const width = Math.max(100, Number(widget?.size?.width) || 370)
+  const height = Math.max(100, Number(widget?.size?.height) || 400)
   // Use fixed internal coordinate space so content scales on resize
   const IW = INTERNAL_W
   const IH = INTERNAL_H
-  const cfg = widget.config
+  const cfg = widget?.config || {}
 
-  const username = data.user.login
+  const username = data?.user?.login || 'user'
   const host = (cfg.infoHost as string) || username
 
   const rows: Array<[string, string] | [string, string, string]> = []
@@ -32,21 +33,21 @@ export function renderAsciiInfoCard(
   rows.push(['host', ''])
 
   if (cfg.showNow !== false) {
-    rows.push(['kv', 'Now', (cfg.customNow as string) || data.user.bio || 'Software Engineer'])
+    rows.push(['kv', 'Now', (cfg.customNow as string) || data?.user?.bio || 'Software Engineer'])
   }
   if (cfg.showAlso !== false) {
     rows.push([
       'kv',
       'Also',
       (cfg.customAlso as string) ||
-        (data.user.company ? `@${data.user.company.replace(/^@/, '')}` : 'Developer'),
+        (data?.user?.company ? `@${data.user.company.replace(/^@/, '')}` : 'Developer'),
     ])
   }
   if (cfg.showLoc !== false) {
-    rows.push(['kv', 'Loc', (cfg.customLoc as string) || data.user.location || 'Brazil'])
+    rows.push(['kv', 'Loc', (cfg.customLoc as string) || data?.user?.location || 'Brazil'])
   }
   if (cfg.showSite !== false) {
-    rows.push(['kv', 'Site', (cfg.customSite as string) || data.user.blog || 'github.com'])
+    rows.push(['kv', 'Site', (cfg.customSite as string) || data?.user?.blog || 'github.com'])
   }
 
   const showLangs = cfg.showLangs !== false
@@ -57,7 +58,9 @@ export function renderAsciiInfoCard(
     rows.push(['gap', ''])
     rows.push(['sec', 'Stack'])
     if (showLangs) {
-      const topLangs = Object.keys(data.languages).slice(0, 3).join(', ')
+      const langEntries =
+        data?.languages && typeof data.languages === 'object' ? Object.keys(data.languages) : []
+      const topLangs = langEntries.slice(0, 3).join(', ')
       rows.push([
         'kv',
         'Langs',
@@ -82,13 +85,14 @@ export function renderAsciiInfoCard(
       rows.push([
         'bul',
         (cfg.customBullet1 as string) ||
-          `${data.user.public_repos} public repos, ${data.user.followers} followers`,
+          `${Number(data?.user?.public_repos) || 0} public repos, ${Number(data?.user?.followers) || 0} followers`,
       ])
     }
     if (showBullet2) {
       rows.push([
         'bul',
-        (cfg.customBullet2 as string) || `Active developer with ${data.totalStars} total stars`,
+        (cfg.customBullet2 as string) ||
+          `Active developer with ${Number(data?.totalStars) || 0} total stars`,
       ])
     }
   }

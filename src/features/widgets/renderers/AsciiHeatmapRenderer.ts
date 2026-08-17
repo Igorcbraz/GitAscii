@@ -38,12 +38,14 @@ interface StreakStats {
 }
 
 function calculateStreaks(weeks: any[]): StreakStats {
-  const days = weeks
-    .flatMap((w) => w.contributionDays || [])
+  const safeWeeks = Array.isArray(weeks) ? weeks : []
+  const days = safeWeeks
+    .flatMap((w) => (w && Array.isArray(w.contributionDays) ? w.contributionDays : []))
     .map((d) => ({
-      date: d.date,
-      count: d.contributionCount,
+      date: typeof d?.date === 'string' ? d.date : '',
+      count: Number(d?.contributionCount) || 0,
     }))
+    .filter((d) => Boolean(d.date))
     .sort((a, b) => a.date.localeCompare(b.date))
 
   let totalContributions = 0
@@ -117,40 +119,27 @@ export function renderAsciiHeatmap(
   globalStyles: GlobalStyles,
   isStaticOverride?: boolean
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const height = Math.max(100, Number(widget?.size?.height) || 280)
+  const cfg = widget?.config || {}
 
-  const username = data.user.login
+  const username = data?.user?.login || 'user'
 
   // GitHub contribution weeks or mock fallback
-  const weeks = data.contributions?.weeks || []
+  const weeks = Array.isArray(data?.contributions?.weeks) ? data.contributions.weeks : []
 
   // Calculate stats
   const stats = calculateStreaks(weeks)
 
   // Layout parameters dynamically scaled based on width
-  // Total horizontal space for grid = width - PAD - LEFT_LABEL_W - PAD
-  // We have N columns (weeks.length).
-  // Total horizontal space needed = N * CELL + (N - 1) * GAP
-  // Let GAP = CELL * 0.25 (or about 3px/12px).
-  // So: Space = N * CELL + (N - 1) * CELL * 0.25 = CELL * (N + (N - 1) * 0.25)
-  // CELL = Space / (N + 0.25 * N - 0.25)
   const PAD = 22
   const LEFT_LABEL_W = 30
   const TOP_LABEL_H = 20
   const TITLEBAR_H = 30
 
-  const availableGridWidth = width - PAD * 2 - LEFT_LABEL_W
+  const availableGridWidth = Math.max(100, width - PAD * 2 - LEFT_LABEL_W)
   const numWeeks = Math.max(weeks.length, 53) // default to 53 weeks
 
-  // Calculate dynamic CELL and GAP so that the rightmost column aligns exactly at width - PAD.
-  // We want: gridLeft + (numWeeks - 1) * STEP + CELL = width - PAD
-  // We know: gridLeft = PAD + LEFT_LABEL_W
-  // So: PAD + LEFT_LABEL_W + (numWeeks - 1) * (CELL + GAP) + CELL = width - PAD
-  // (numWeeks - 1) * (CELL + GAP) + CELL = width - 2 * PAD - LEFT_LABEL_W = availableGridWidth
-  // Let GAP = CELL * 0.25 => (numWeeks - 1) * 1.25 * CELL + CELL = availableGridWidth
-  // CELL * (1.25 * (numWeeks - 1) + 1) = availableGridWidth
-  // CELL = availableGridWidth / (1.25 * (numWeeks - 1) + 1)
   const CELL = availableGridWidth / (1.25 * (numWeeks - 1) + 1)
   const GAP = CELL * 0.25
   const STEP = CELL + GAP
@@ -165,10 +154,10 @@ export function renderAsciiHeatmap(
     '#69f0a0',
   ]
   const bg1 = '#0d1420'
-  const bg2 = (cfg.backgroundColor as string) || globalStyles.backgroundColor || '#0a0e14'
-  const frameColor = (cfg.borderColor as string) || globalStyles.borderColor || '#1f6feb'
+  const bg2 = (cfg.backgroundColor as string) || globalStyles?.backgroundColor || '#0a0e14'
+  const frameColor = (cfg.borderColor as string) || globalStyles?.borderColor || '#1f6feb'
   const mutedColor = '#7d8590'
-  const accentColor = (cfg.accentColor as string) || globalStyles.accentColor || '#22d3ee'
+  const accentColor = (cfg.accentColor as string) || globalStyles?.accentColor || '#22d3ee'
   const greenColor = '#39d353'
   const goldColor = '#f2cc60'
 
@@ -184,13 +173,15 @@ export function renderAsciiHeatmap(
       const col: Array<{ date: string; count: number; level: number } | null> = new Array(7).fill(
         null
       )
-      week.contributionDays.forEach((day) => {
+      const daysList = Array.isArray(week?.contributionDays) ? week.contributionDays : []
+      daysList.forEach((day: any) => {
+        if (!day?.date) return
         const date = new Date(day.date + 'T00:00:00')
-        const weekday = date.getDay() // 0 is Sunday
+        const weekday = isNaN(date.getTime()) ? 0 : date.getDay() // 0 is Sunday
         col[weekday] = {
           date: day.date,
-          count: day.contributionCount,
-          level: levelFor(day.contributionCount),
+          count: Number(day.contributionCount) || 0,
+          level: levelFor(Number(day.contributionCount) || 0),
         }
       })
       return col

@@ -8,24 +8,28 @@ export function renderTechStack(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const height = Math.max(60, Number(widget?.size?.height) || 140)
+  const cfg = widget?.config || {}
 
   const defaultTechs = detectTechStackFromProfile(data)
 
-  const selectedTechs =
+  const rawTechs =
     Array.isArray(cfg.selectedTechs) && cfg.selectedTechs.length > 0
       ? (cfg.selectedTechs as string[])
       : defaultTechs
 
+  const selectedTechs = Array.isArray(rawTechs)
+    ? rawTechs.filter((t) => typeof t === 'string' && t.trim())
+    : []
   const theme = (cfg.theme as string) || 'dark'
-  const perLine = Number(cfg.perLine) || 12
+  const perLine = Math.max(1, Number(cfg.perLine) || 12)
   const showTitle = cfg.showTitle !== false
   const customTitle = (cfg.customTitle as string) || '[ TECHNOLOGIES & SKILLS ]'
 
-  const mappedTechs = selectedTechs.map((t) => (t === 'reactnative' ? 'react' : t))
+  const mappedTechs = selectedTechs.map((t) => (t === 'reactnative' ? 'react' : t.toLowerCase()))
   const uniqueTechs = Array.from(new Set(mappedTechs))
-  const techString = uniqueTechs.join(',')
+  const techString = uniqueTechs.length > 0 ? uniqueTechs.join(',') : 'js,ts,react,nodejs'
   const skillIconsUrl = API_ENDPOINTS.SKILL_ICONS.GET(techString, theme, perLine)
 
   const titleY = 32

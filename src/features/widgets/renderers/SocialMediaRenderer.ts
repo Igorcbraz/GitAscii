@@ -10,17 +10,26 @@ export function renderSocialMedia(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const height = Math.max(60, Number(widget?.size?.height) || 120)
+  const cfg = widget?.config || {}
 
   const detected = detectSocialsFromProfile(data)
 
-  const selectedSocials =
+  const rawSocials =
     Array.isArray(cfg.selectedSocials) && cfg.selectedSocials.length > 0
       ? (cfg.selectedSocials as string[])
       : detected.selectedSocials
 
-  const socialUrls = (cfg.socialUrls as Record<string, string>) || detected.socialUrls
+  const selectedSocials = Array.isArray(rawSocials)
+    ? rawSocials.filter((s) => typeof s === 'string' && s.trim())
+    : []
+
+  const socialUrls =
+    (cfg.socialUrls && typeof cfg.socialUrls === 'object'
+      ? (cfg.socialUrls as Record<string, string>)
+      : detected.socialUrls) || {}
+
   const badgeStyle = (cfg.badgeStyle as string) || 'for-the-badge'
   const showTitle = cfg.showTitle !== false
   const customTitle = (cfg.customTitle as string) || '[ SOCIAL MEDIA ]'
@@ -77,7 +86,7 @@ export function renderSocialMedia(
 
       const badgeUrl = API_ENDPOINTS.SHIELDS_IO.CUSTOM_BADGE(label, p.color, badgeStyle, p.logo)
       const rawTargetUrl =
-        socialUrls[platformId] || p.defaultUrl.replace('{username}', data.user.login)
+        socialUrls[platformId] || p.defaultUrl.replace('{username}', data?.user?.login || 'user')
       const targetUrl = sanitizeSafeHref(rawTargetUrl, '#')
 
       return `

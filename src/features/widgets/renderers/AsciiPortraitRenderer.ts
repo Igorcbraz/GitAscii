@@ -19,14 +19,15 @@ export function renderAsciiPortrait(
   globalStyles: GlobalStyles,
   isStaticOverride?: boolean
 ): string {
-  const { width, height } = widget.size
+  const width = Math.max(100, Number(widget?.size?.width) || 370)
+  const height = Math.max(100, Number(widget?.size?.height) || 400)
   // Use fixed internal coordinate space so content scales on resize
   const IW = INTERNAL_W
   const IH = INTERNAL_H
-  const cfg = widget.config
+  const cfg = widget?.config || {}
 
-  const username = data.user.login
-  const name = data.user.name || username
+  const username = data?.user?.login || 'user'
+  const name = data?.user?.name || username
 
   const COLS = Number(cfg.cols) || 100
   const RAMP = (cfg.customCharset as string) || (cfg.charset as string) || ' .`:-=+*cs#%@'

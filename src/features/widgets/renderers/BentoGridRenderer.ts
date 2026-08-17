@@ -20,21 +20,27 @@ function getSortedRepos(
   sortBy: string,
   maxCount: number
 ): GitHubRepo[] {
-  const all = data.repos || []
+  const all = Array.isArray(data?.repos) ? data.repos.filter(Boolean) : []
   let filtered = [...all]
 
   if (selectedRepos && selectedRepos.length > 0) {
-    filtered = all.filter((r) => selectedRepos.includes(r.name))
+    filtered = all.filter((r) => r && selectedRepos.includes(r.name))
     filtered.sort((a, b) => selectedRepos.indexOf(a.name) - selectedRepos.indexOf(b.name))
   } else {
     if (sortBy === 'stars') {
-      filtered.sort((a, b) => b.stargazers_count - a.stargazers_count)
+      filtered.sort((a, b) => (Number(b.stargazers_count) || 0) - (Number(a.stargazers_count) || 0))
     } else if (sortBy === 'forks') {
-      filtered.sort((a, b) => b.forks_count - a.forks_count)
+      filtered.sort((a, b) => (Number(b.forks_count) || 0) - (Number(a.forks_count) || 0))
     } else if (sortBy === 'updated') {
-      filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      filtered.sort((a, b) => {
+        const tb = b.updated_at ? new Date(b.updated_at).getTime() : 0
+        const ta = a.updated_at ? new Date(a.updated_at).getTime() : 0
+        return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta)
+      })
     } else if (sortBy === 'name') {
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
+      filtered.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+    } else {
+      filtered.sort((a, b) => (Number(b.stargazers_count) || 0) - (Number(a.stargazers_count) || 0))
     }
   }
 
@@ -46,8 +52,9 @@ export function renderBentoGrid(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const height = Math.max(100, Number(widget?.size?.height) || 400)
+  const cfg = widget?.config || {}
 
   // Palette from examples-output bento-grid-output
   const bg = '#080B0D'
@@ -58,15 +65,11 @@ export function renderBentoGrid(
   const muted = '#8BA19F'
   const trace = '#30494C'
 
-  const primary = (cfg.accentColor as string) || globalStyles.accentColor || '#00A7D1'
+  const primary = (cfg.accentColor as string) || globalStyles?.accentColor || '#00A7D1'
   const secondary = (cfg.secondaryColor as string) || '#E84A8A'
 
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
-  const customTitle =
-    (cfg.customTitle as string) ||
-    (cfg.customTitle ? String(cfg.customTitle) : data.user.name) ||
-    (cfg.customTitle ? String(cfg.customTitle) : data.user.login) ||
-    'USER'
+  const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
   // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
@@ -79,7 +82,7 @@ export function renderBentoGrid(
     const userTitle = escapeXml(customTitle).toUpperCase()
     const bioText = escapeXml(
       shorten(
-        (cfg.customBio ? String(cfg.customBio) : data.user.bio) ||
+        (cfg.customBio ? String(cfg.customBio) : data?.user?.bio) ||
           'Building the systems around coding agents — from skills and trust to memory a…',
         75
       )
