@@ -57,6 +57,30 @@ export interface WidgetFilterItem {
   match: (item: WidgetCatalogItem) => boolean
 }
 
+export const FEATURED_WIDGET_IDS = new Set<WidgetId>([
+  WIDGET_IDS.GITFEST_LINEUP,
+  WIDGET_IDS.POKEMON_CARD,
+])
+
+export const NATIVE_WIDGET_CATEGORIES = new Set<WidgetCategory>([
+  WIDGET_CATEGORIES.ESSENTIAL,
+  WIDGET_CATEGORIES.INTERACTIVE,
+  WIDGET_CATEGORIES.STATS,
+  WIDGET_CATEGORIES.MISC,
+])
+
+export const isFeaturedWidget = (item: Pick<WidgetCatalogItem, 'id'>): boolean =>
+  FEATURED_WIDGET_IDS.has(item.id)
+
+export const isNativeWidget = (
+  item: Pick<WidgetCatalogItem, 'id' | 'category' | 'isExternal'>
+): boolean =>
+  !FEATURED_WIDGET_IDS.has(item.id) &&
+  (item.category ? NATIVE_WIDGET_CATEGORIES.has(item.category) : !item.isExternal)
+
+export const isExternalWidget = (item: Pick<WidgetCatalogItem, 'id' | 'category'>): boolean =>
+  !FEATURED_WIDGET_IDS.has(item.id) && item.category === WIDGET_CATEGORIES.EXTERNAL
+
 export const WIDGET_CATALOG: WidgetCatalogItem[] = [
   {
     id: WIDGET_IDS.HEADER,
@@ -237,8 +261,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     name: 'GitFest',
     icon: Sparkles,
     desc: 'Festival lineup of your repos',
-    isExternal: true,
-    category: WIDGET_CATEGORIES.EXTERNAL,
+    category: WIDGET_CATEGORIES.INTERACTIVE,
     badge: { text: 'New', type: 'highlight' },
   },
 
@@ -565,12 +588,7 @@ export const WIDGET_FILTERS: WidgetFilterItem[] = [
     labelKey: 'editor.sidebar.filter.external',
     defaultLabel: 'Externos',
     icon: Globe,
-    match: (item) =>
-      !!item.isExternal &&
-      item.category !== WIDGET_CATEGORIES.GODPROFILE &&
-      item.category !== WIDGET_CATEGORIES.ASCIIPROFILE &&
-      item.category !== WIDGET_CATEGORIES.CONTROLPLANE &&
-      item.category !== WIDGET_CATEGORIES.CODEWEB_DEV,
+    match: (item) => isExternalWidget(item),
   },
   {
     id: 'codeweb-dev',

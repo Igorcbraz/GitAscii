@@ -203,6 +203,43 @@ Background #000000, 1px bottom border #252525, height 64px, max-width 1280px cen
 
 Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter Tight 11px weight 500, 0.22em tracking, color #7a7a8a. Period-separator between phrases. Right-aligned: 'B 01' / 'B 02' style section index in same treatment.
 
+### Modal & Dialog Window (StarPromptModal / GuestLoginModal)
+
+**Role:** Focused overlay dialogs for user actions, automation prompts, and confirmations
+
+- **Backdrop:** `fixed inset-0 z-110 bg-black/80 backdrop-blur-xs transition-opacity duration-200`
+- **Dialog Container:** `fixed z-111 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[480px] p-4 transition-all duration-200`
+- **Card Shell:** `bg-carbon border border-graphite rounded-sm overflow-hidden shadow-2xl flex flex-col text-chalk`
+- **Zone 1 (Header Bar):** `px-5 py-3.5 border-b border-graphite flex items-center justify-between bg-onyx/40`
+  - Tag Eyebrow: `text-caption font-jetbrains-mono font-bold text-signal-lime uppercase tracking-wider` with `[ BRAND/SECTION · BADGE ]` bracket syntax
+  - Close Button: `p-1 rounded text-ash hover:text-white hover:bg-graphite transition-colors cursor-pointer`
+- **Zone 2 (Body Content):** `p-5 space-y-4`
+  - Headline: `font-pt-serif font-light text-white text-2xl tracking-tight leading-snug` with `<span className="italic text-signal-lime font-pt-serif">highlight</span>`
+  - Body: `font-inter-tight text-note text-pearl leading-relaxed mt-1`
+  - Context / Feature Card: `p-3.5 rounded-sm bg-onyx/80 border border-graphite`
+- **Zone 3 (Footer Action Bar):** `px-5 py-3.5 border-t border-graphite bg-onyx/40 flex items-center justify-between gap-3`
+  - Dismiss: `px-3.5 py-1.5 rounded-sm text-note font-inter-tight text-ash hover:text-white hover:bg-graphite transition-colors cursor-pointer`
+  - Primary CTA: `inline-flex items-center gap-2 px-4 py-1.5 rounded-sm bg-signal-lime text-black font-inter-tight font-semibold text-note hover:brightness-110 transition-all cursor-pointer shadow-[0_0_8px_rgba(197,255,74,0.45)] disabled:opacity-60`
+
+### Guided Tour & Spotlight Walkthrough (EditorTour)
+
+**Role:** Multi-step interactive feature tour with target spotlighting
+
+- **Spotlight Mask:** SVG mask cutout with smooth cutout around target bounding rect.
+- **Spotlight Pulse Box:** `fixed z-115 pointer-events-none rounded-md border-2 border-signal-lime shadow-[0_0_24px_rgba(197,255,74,0.65)] transition-all duration-300 animate-pulse` with tag `[ FOCO DO TOUR ]`.
+- **Step Dots Indicator:** `h-1 rounded-full transition-all duration-200` (`w-6 bg-signal-lime` for active step, `w-2 bg-graphite hover:bg-ash` for inactive).
+- **Navigation:** Back button (`ArrowLeft`), Skip button, and Next/Finish CTA (`ArrowRight` / `Check`).
+
+### Floating Corner Banner (ConsentBanner)
+
+**Role:** Non-blocking persistent floating notifications (analytics consent, system updates)
+
+- **Container:** `fixed bottom-6 right-6 z-9999 w-[min(440px,calc(100vw-2rem))] transition-all duration-300 ease-out`
+- **Transitions:** `translate-y-0 opacity-100 scale-100` (visible) vs `translate-y-6 opacity-0 scale-95 pointer-events-none` (hidden).
+- **Structure:** Same 3-zone standard (`bg-carbon border border-graphite rounded-sm overflow-hidden shadow-2xl`).
+
+
+
 ## Do's and Don'ts
 
 ### Do

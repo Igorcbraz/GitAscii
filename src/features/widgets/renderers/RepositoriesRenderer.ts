@@ -6,9 +6,9 @@ export function renderRepositories(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width } = widget.size
-  const cfg = widget.config
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const cfg = widget?.config || {}
+  const accent = (cfg.accentColor as string) || globalStyles?.accentColor || '#c5ff4a'
 
   const selectedRepos: string[] = Array.isArray(cfg.selectedRepos)
     ? (cfg.selectedRepos as string[])
@@ -19,7 +19,8 @@ export function renderRepositories(
   const showRepoLanguage = cfg.showRepoLanguage !== false
   const showRepoForks = Boolean(cfg.showRepoForks)
 
-  let repoList = [...data.repos].filter((r) => !r.fork)
+  const allRepos = Array.isArray(data?.repos) ? data.repos.filter(Boolean) : []
+  let repoList = allRepos.filter((r) => !r.fork)
 
   if (selectedRepos.length > 0) {
     const ordered = selectedRepos
@@ -29,13 +30,17 @@ export function renderRepositories(
     repoList = [...ordered, ...rest]
   } else {
     if (repoSortBy === 'updated') {
-      repoList.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      repoList.sort((a, b) => {
+        const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0
+        const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0
+        return (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA)
+      })
     } else if (repoSortBy === 'forks') {
-      repoList.sort((a, b) => b.forks_count - a.forks_count)
+      repoList.sort((a, b) => (Number(b.forks_count) || 0) - (Number(a.forks_count) || 0))
     } else if (repoSortBy === 'name') {
-      repoList.sort((a, b) => a.name.localeCompare(b.name))
+      repoList.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
     } else {
-      repoList.sort((a, b) => b.stargazers_count - a.stargazers_count)
+      repoList.sort((a, b) => (Number(b.stargazers_count) || 0) - (Number(a.stargazers_count) || 0))
     }
   }
 

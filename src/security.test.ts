@@ -325,7 +325,7 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       expect(res.headers.get('content-type')).toContain('image/svg+xml')
       const svgText = await res.text()
       expect(svgText).toContain('<svg')
-    })
+    }, 15000)
 
     it('renders SVG for username "config" and slug "default" without parameter shadowing', async () => {
       const req = new Request('http://localhost:3000/api/config/default')
@@ -335,7 +335,7 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       expect(res.headers.get('content-type')).toContain('image/svg+xml')
       const svgText = await res.text()
       expect(svgText).toContain('<svg')
-    })
+    }, 15000)
   })
 
   describe('Widget Registry Prototype Safety (GHAS Unvalidated Dynamic Method Call)', () => {

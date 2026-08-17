@@ -6,20 +6,22 @@ export function renderAvatar(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
-  const rx = cfg.borderRadius !== undefined ? cfg.borderRadius : globalStyles.borderRadius || 0
+  const width = Math.max(48, Number(widget?.size?.width) || 160)
+  const height = Math.max(48, Number(widget?.size?.height) || 160)
+  const cfg = widget?.config || {}
+  const accent = (cfg.accentColor as string) || globalStyles?.accentColor || '#c5ff4a'
+  const rx =
+    cfg.borderRadius !== undefined ? Number(cfg.borderRadius) || 0 : globalStyles?.borderRadius || 0
 
   const sourceType = (cfg.sourceType as 'avatar' | 'url' | 'upload') || 'avatar'
-  let avatarUrl = data.user.avatar_url
+  let avatarUrl = data?.user?.avatar_url || ''
 
   if (sourceType === 'upload' && cfg.uploadedImageData) {
-    avatarUrl = cfg.uploadedImageData as string
+    avatarUrl = String(cfg.uploadedImageData)
   } else if (sourceType === 'url' && cfg.imageUrl) {
-    avatarUrl = cfg.imageUrl as string
+    avatarUrl = String(cfg.imageUrl)
   } else if (cfg.avatarUrl && !cfg.sourceType) {
-    avatarUrl = cfg.avatarUrl as string
+    avatarUrl = String(cfg.avatarUrl)
   }
 
   return `

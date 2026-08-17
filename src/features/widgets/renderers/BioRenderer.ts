@@ -7,17 +7,17 @@ export function renderBio(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width, height } = widget.size
-  const cfg = widget.config
-  const textClr = (cfg.textColor as string) || globalStyles.textColor || '#ffffff'
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const height = Math.max(60, Number(widget?.size?.height) || 120)
+  const cfg = widget?.config || {}
+  const textClr = (cfg.textColor as string) || globalStyles?.textColor || '#ffffff'
+  const accent = (cfg.accentColor as string) || globalStyles?.accentColor || '#c5ff4a'
 
   const customBio =
-    cfg.customBio !== undefined ? (cfg.customBio as string) : data.user.bio || 'No bio provided.'
+    cfg.customBio !== undefined ? String(cfg.customBio) : data?.user?.bio || 'No bio provided.'
   const customLocation =
-    cfg.customLocation !== undefined ? (cfg.customLocation as string) : data.user.location || ''
-  const customBlog =
-    cfg.customBlog !== undefined ? (cfg.customBlog as string) : data.user.blog || ''
+    cfg.customLocation !== undefined ? String(cfg.customLocation) : data?.user?.location || ''
+  const customBlog = cfg.customBlog !== undefined ? String(cfg.customBlog) : data?.user?.blog || ''
 
   const maxCharsPerLine = Math.max(20, Math.floor((width - 72) / 8.5))
   const wrappedLines: string[] = []

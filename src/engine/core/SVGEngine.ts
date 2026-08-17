@@ -1,44 +1,178 @@
 import { safeFetch, validateSafeExternalUrl } from '@/utils/ssrfValidator'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
-import type { NormalizedGitHubData, RenderOptions, SavedConfiguration } from '../types'
+import type {
+  GlobalStyles,
+  NormalizedGitHubData,
+  RenderOptions,
+  SavedConfiguration,
+  WidgetInstance,
+} from '../types'
 import { renderWidgetSvg } from './WidgetRenderer'
+
+export function normalizeProfileData(
+  data: NormalizedGitHubData | null | undefined
+): NormalizedGitHubData {
+  const user = data?.user || ({} as any)
+
+  return {
+    user: {
+      id: Number(user.id) || 0,
+      login: typeof user.login === 'string' && user.login ? user.login : 'user',
+      name: typeof user.name === 'string' ? user.name : user.login || 'User',
+      avatar_url: typeof user.avatar_url === 'string' ? user.avatar_url : '',
+      bio: typeof user.bio === 'string' ? user.bio : '',
+      company: typeof user.company === 'string' ? user.company : null,
+      blog: typeof user.blog === 'string' ? user.blog : '',
+      location: typeof user.location === 'string' ? user.location : null,
+      email: typeof user.email === 'string' ? user.email : null,
+      twitter_username: typeof user.twitter_username === 'string' ? user.twitter_username : null,
+      public_repos: Number(user.public_repos) || 0,
+      public_gists: Number(user.public_gists) || 0,
+      followers: Number(user.followers) || 0,
+      following: Number(user.following) || 0,
+      created_at: user.created_at || new Date().toISOString(),
+      updated_at: user.updated_at || new Date().toISOString(),
+    },
+
+    repos: Array.isArray(data?.repos) ? data!.repos.filter(Boolean) : [],
+    languages: data?.languages && typeof data.languages === 'object' ? data.languages : {},
+    totalStars: Number(data?.totalStars) || 0,
+    totalForks: Number(data?.totalForks) || 0,
+    readmeContent: typeof data?.readmeContent === 'string' ? data.readmeContent : null,
+    socialAccounts: Array.isArray(data?.socialAccounts) ? data!.socialAccounts.filter(Boolean) : [],
+    contributions: data?.contributions || {
+      totalContributions: 0,
+      weeks: [],
+    },
+  }
+}
+
+const WIDGET_ALIASES: Record<string, string[]> = {
+  streak: ['streak-stats', 'ascii-heatmap', 'godprofile-trophies'],
+  languages: ['languages', 'tech-stack'],
+  stack: ['tech-stack', 'codeweb-retro-grid', 'godprofile-neural'],
+  ascii: ['ascii-art', 'ascii-text', 'ascii-portrait', 'ascii-info'],
+  stats: ['stats', 'github-readme-stats', 'metrics-card', 'terminal-info'],
+  trophies: ['godprofile-trophies', 'profile-trophy'],
+  snake: ['contribution-snake'],
+  views: ['views-counter'],
+  quotes: ['readme-quotes'],
+  quote: ['readme-quotes'],
+  terminal: ['terminal-info', 'terminal-card', 'godprofile-terminal'],
+  avatar: ['avatar', 'ascii-portrait'],
+  bio: ['bio', 'terminal-info'],
+}
+
+function resolveTargetWidgetIds(targetWidgetIds?: string[]): string[] | undefined {
+  if (!targetWidgetIds || targetWidgetIds.length === 0) return undefined
+  const resolved = new Set<string>()
+  for (const id of targetWidgetIds) {
+    const cleanId = id.trim().toLowerCase()
+    if (!cleanId) continue
+    resolved.add(cleanId)
+    const aliases = WIDGET_ALIASES[cleanId]
+    if (aliases) {
+      aliases.forEach((a) => resolved.add(a))
+    }
+  }
+  return resolved.size > 0 ? Array.from(resolved) : undefined
+}
 
 export function renderSvg(
   config: SavedConfiguration,
   data: NormalizedGitHubData,
   options: RenderOptions = {}
 ): string {
+  const safeData = normalizeProfileData(data)
   const isLight = options.theme === 'light'
 
-  const bg = isLight ? '#ffffff' : config.globalStyles.backgroundColor || '#060606'
-  const isTransparent = Boolean(config.globalStyles.transparentBackground)
+  const safeConfig: SavedConfiguration = config || {
+    version: 1,
+    githubId: safeData.user.id,
+    username: safeData.user.login,
+    profileSlug: 'default',
+    profileName: 'Default',
+    templateId: 'terminal',
+    widgets: [],
+    globalStyles: {
+      backgroundColor: '#060606',
+      textColor: '#ffffff',
+      accentColor: '#c5ff4a',
+      borderColor: '#252525',
+      fontFamily: "'JetBrains Mono', monospace",
+      borderRadius: 0,
+      padding: 24,
+      themeMode: 'dark',
+      templateStyle: 'terminal',
+    },
+    metadata: {
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      schemaVersion: 1,
+    },
+  }
 
-  const targetWidgetIds = options.widgets
-  let visibleWidgets = config.widgets.filter(
+  const globalStyles = safeConfig.globalStyles || ({} as GlobalStyles)
+  const bg = isLight ? '#ffffff' : globalStyles.backgroundColor || '#060606'
+  const isTransparent = Boolean(globalStyles.transparentBackground)
+
+  const rawTargetWidgetIds = options.widgets
+  const targetWidgetIds = resolveTargetWidgetIds(rawTargetWidgetIds)
+  const allWidgets = Array.isArray(safeConfig.widgets) ? safeConfig.widgets : []
+
+  let visibleWidgets = allWidgets.filter(
     (w) =>
+      w &&
       w.visible &&
       (!targetWidgetIds ||
         targetWidgetIds.includes(w.instanceId) ||
-        targetWidgetIds.includes(w.widgetId))
+        targetWidgetIds.includes(w.widgetId?.toLowerCase()))
   )
 
   if (targetWidgetIds && visibleWidgets.length === 0) {
-    visibleWidgets = config.widgets.filter((w) => w.visible)
+    // Check if target was a requested standalone widget not in user's layout
+    const primaryTarget = rawTargetWidgetIds?.[0]?.toLowerCase()
+    if (primaryTarget) {
+      const aliasTarget = (WIDGET_ALIASES[primaryTarget] || [primaryTarget])[0]
+      const synthesizedWidget: WidgetInstance = {
+        widgetId: aliasTarget,
+        instanceId: `standalone_${primaryTarget}`,
+        name: primaryTarget,
+        position: { x: 0, y: 0 },
+        size: { width: 800, height: 240 },
+        config: {},
+        locked: false,
+        visible: true,
+        zIndex: 1,
+      }
+      visibleWidgets = [synthesizedWidget]
+    } else {
+      visibleWidgets = allWidgets.filter((w) => w && w.visible)
+    }
   }
 
   const shrinkWrap = Boolean(targetWidgetIds && visibleWidgets.length > 0)
 
-  const minX = shrinkWrap ? Math.min(...visibleWidgets.map((w) => w.position.x)) : 0
+  const minX =
+    shrinkWrap && visibleWidgets.length > 0
+      ? Math.min(...visibleWidgets.map((w) => Number(w?.position?.x) || 0))
+      : 0
 
-  const minY = shrinkWrap ? Math.min(...visibleWidgets.map((w) => w.position.y)) : 0
+  const minY =
+    shrinkWrap && visibleWidgets.length > 0
+      ? Math.min(...visibleWidgets.map((w) => Number(w?.position?.y) || 0))
+      : 0
 
   const adjustedWidgets = visibleWidgets.map((w) => ({
     ...w,
     position: {
-      ...w.position,
-      x: w.position.x - minX,
-      y: w.position.y - minY,
+      x: (Number(w?.position?.x) || 0) - minX,
+      y: (Number(w?.position?.y) || 0) - minY,
+    },
+    size: {
+      width: Math.max(1, Number(w?.size?.width) || 800),
+      height: Math.max(1, Number(w?.size?.height) || 100),
     },
   }))
 
@@ -56,8 +190,8 @@ export function renderSvg(
   const height = options.height || (shrinkWrap ? Math.max(maxY, 1) : maxY + 16)
 
   const widgetsSvg = adjustedWidgets
-    .sort((a, b) => a.zIndex - b.zIndex)
-    .map((widget) => renderWidgetSvg(widget, data, config.globalStyles))
+    .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+    .map((widget) => renderWidgetSvg(widget, safeData, globalStyles))
     .join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -74,7 +208,7 @@ export function renderSvg(
     }
   </style>
 
-  ${!isTransparent ? `<rect width="${width}" height="${height}" fill="${bg}" rx="${config.globalStyles.borderRadius || 0}" />` : ''}
+  ${!isTransparent ? `<rect width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
 
   ${widgetsSvg}
 </svg>`
@@ -232,57 +366,152 @@ async function fetchAndProcessExternalImage(
   }
 }
 
+function unescapeXmlContent(str: string): string {
+  // Unescape specific entities safely
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+
 export async function embedExternalImages(svgContent: string): Promise<string> {
-  const regex = /<!-- EXTERNAL_WIDGET_START:([\s\S]*?)-->([\s\S]*?)<!-- EXTERNAL_WIDGET_END -->/g
+  const JSON_START_TOKEN = '<!-- EXTERNAL_WIDGET_JSON:'
+  const LEGACY_START_TOKEN = '<!-- EXTERNAL_WIDGET_START:'
+  const COMMENT_END_TOKEN = '-->'
+  const BLOCK_END_TOKEN = '<!-- EXTERNAL_WIDGET_END -->'
 
   let finalSvg = svgContent
-  const matches = [...svgContent.matchAll(regex)]
 
-  for (const m of matches) {
-    const fullMatch = m[0]
-    const startData = m[1].trim()
-    const parts = startData.split('|').map((s) => s.trim())
-    if (parts.length !== 7) continue
-    const [urlPart, xPart, yPart, widthPart, heightPart, modePart, fallbackUrlPart] = parts
-    const url = urlPart.replace(/&amp;/g, '&')
-    const x = xPart
-    const y = yPart
-    const width = widthPart
-    const height = heightPart
-    const mode = modePart
-    const fallbackUrl = fallbackUrlPart.replace(/&amp;/g, '&')
+  // 1. Process robust JSON format first using safe index scanning (immune to ReDoS)
+  while (true) {
+    const startIdx = finalSvg.indexOf(JSON_START_TOKEN)
+    if (startIdx === -1) break
 
-    const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
+    const commentEndIdx = finalSvg.indexOf(COMMENT_END_TOKEN, startIdx + JSON_START_TOKEN.length)
+    if (commentEndIdx === -1) break
 
+    const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
+    if (blockEndIdx === -1) break
+
+    const fullMatch = finalSvg.slice(startIdx, blockEndIdx + BLOCK_END_TOKEN.length)
+    const rawJsonSection = finalSvg.slice(startIdx + JSON_START_TOKEN.length, commentEndIdx)
+
+    let replacement = ''
     try {
-      const replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
-      finalSvg = finalSvg.replace(fullMatch, () => replacement)
-    } catch (err) {
-      console.error('Failed to fetch external widget:', url, err)
+      const parsed = JSON.parse(unescapeXmlContent(rawJsonSection.trim()))
+      const { url, x, y, width, height, mode, fallbackUrl } = parsed
+      const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
 
-      if (fallbackUrl) {
-        try {
-          const replacement = await fetchAndProcessExternalImage(
-            fallbackUrl,
-            x,
-            y,
-            width,
-            height,
-            preserve
-          )
-          finalSvg = finalSvg.replace(fullMatch, () => replacement)
-          continue
-        } catch (fbErr) {
-          console.error('Failed to fetch fallback widget:', fallbackUrl, fbErr)
+      try {
+        replacement = await fetchAndProcessExternalImage(
+          url,
+          String(x),
+          String(y),
+          String(width),
+          String(height),
+          preserve
+        )
+      } catch (err) {
+        if (fallbackUrl) {
+          try {
+            replacement = await fetchAndProcessExternalImage(
+              fallbackUrl,
+              String(x),
+              String(y),
+              String(width),
+              String(height),
+              preserve
+            )
+          } catch {}
+        }
+        if (!replacement) {
+          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
         }
       }
-
-      finalSvg = finalSvg.replace(
-        fullMatch,
-        () =>
-          `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
-      )
+    } catch (e) {
+      console.warn('Failed to parse JSON external widget marker:', e)
+      replacement = ''
     }
+
+    finalSvg =
+      finalSvg.slice(0, startIdx) +
+      replacement +
+      finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
+  }
+
+  // 2. Process legacy format for any remaining widgets using safe index scanning
+  while (true) {
+    const startIdx = finalSvg.indexOf(LEGACY_START_TOKEN)
+    if (startIdx === -1) break
+
+    const commentEndIdx = finalSvg.indexOf(COMMENT_END_TOKEN, startIdx + LEGACY_START_TOKEN.length)
+    if (commentEndIdx === -1) break
+
+    const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
+    if (blockEndIdx === -1) break
+
+    const startData = finalSvg.slice(startIdx + LEGACY_START_TOKEN.length, commentEndIdx).trim()
+    const parts = startData.split('|').map((s) => s.trim())
+
+    let replacement = ''
+    if (parts.length >= 6) {
+      let urlPart: string
+      let xPart: string
+      let yPart: string
+      let widthPart: string
+      let heightPart: string
+      let modePart: string
+      let fallbackUrlPart: string = ''
+
+      if (parts.length === 7) {
+        ;[urlPart, xPart, yPart, widthPart, heightPart, modePart, fallbackUrlPart] = parts
+      } else if (parts.length === 6) {
+        ;[urlPart, xPart, yPart, widthPart, heightPart, modePart] = parts
+      } else {
+        fallbackUrlPart = parts[parts.length - 1]
+        modePart = parts[parts.length - 2]
+        heightPart = parts[parts.length - 3]
+        widthPart = parts[parts.length - 4]
+        yPart = parts[parts.length - 5]
+        xPart = parts[parts.length - 6]
+        urlPart = parts.slice(0, parts.length - 6).join('|')
+      }
+
+      const url = unescapeXmlContent(urlPart)
+      const x = xPart
+      const y = yPart
+      const width = widthPart
+      const height = heightPart
+      const mode = modePart
+      const fallbackUrl = unescapeXmlContent(fallbackUrlPart)
+      const preserve = mode === 'badge' ? 'xMinYMid meet' : 'xMinYMin meet'
+
+      try {
+        replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
+      } catch (err) {
+        if (fallbackUrl) {
+          try {
+            replacement = await fetchAndProcessExternalImage(
+              fallbackUrl,
+              x,
+              y,
+              width,
+              height,
+              preserve
+            )
+          } catch {}
+        }
+        if (!replacement) {
+          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+        }
+      }
+    }
+
+    finalSvg =
+      finalSvg.slice(0, startIdx) +
+      replacement +
+      finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
   const imageRegex = /<image\s+[^>]*>/gi

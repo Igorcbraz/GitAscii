@@ -10,6 +10,16 @@ Sentry.init({
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 0.05,
 
+  ignoreErrors: [
+    'The destination stream closed early',
+    'failed to pipe response',
+    'Dynamic server usage',
+    'Router action dispatched before initialization',
+    'The router state header was sent but could not be parsed',
+    'ECONNRESET',
+    'EPIPE',
+  ],
+
   dataCollection: {
     // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#dataCollection

@@ -5,20 +5,27 @@ export function renderStats(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width } = widget.size
-  const cfg = widget.config
-  const textClr = (cfg.textColor as string) || globalStyles.textColor || '#ffffff'
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const cfg = widget?.config || {}
+  const textClr = (cfg.textColor as string) || globalStyles?.textColor || '#ffffff'
+  const accent = (cfg.accentColor as string) || globalStyles?.accentColor || '#c5ff4a'
 
   const hideMetrics: string[] = Array.isArray(cfg.hideMetrics) ? (cfg.hideMetrics as string[]) : []
 
+  const totalStars = Number(data?.totalStars) || 0
+  const publicRepos = Number(data?.user?.public_repos) || 0
+  const followers = Number(data?.user?.followers) || 0
+  const following = Number(data?.user?.following) || 0
+  const totalForks = Number(data?.totalForks) || 0
+  const publicGists = Number(data?.user?.public_gists) || 0
+
   const allMetrics = [
-    { id: 'stars', label: 'STARS', val: data.totalStars.toLocaleString() },
-    { id: 'repos', label: 'REPOS', val: data.user.public_repos.toLocaleString() },
-    { id: 'followers', label: 'FOLLOWERS', val: data.user.followers.toLocaleString() },
-    { id: 'following', label: 'FOLLOWING', val: data.user.following.toLocaleString() },
-    { id: 'forks', label: 'FORKS', val: data.totalForks.toLocaleString() },
-    { id: 'gists', label: 'GISTS', val: data.user.public_gists.toLocaleString() },
+    { id: 'stars', label: 'STARS', val: totalStars.toLocaleString() },
+    { id: 'repos', label: 'REPOS', val: publicRepos.toLocaleString() },
+    { id: 'followers', label: 'FOLLOWERS', val: followers.toLocaleString() },
+    { id: 'following', label: 'FOLLOWING', val: following.toLocaleString() },
+    { id: 'forks', label: 'FORKS', val: totalForks.toLocaleString() },
+    { id: 'gists', label: 'GISTS', val: publicGists.toLocaleString() },
   ]
 
   const statItems = allMetrics.filter((m) => !hideMetrics.includes(m.id))

@@ -134,29 +134,10 @@ export default function AsciiHands({ className }: { className?: string }) {
   return (
     <div
       className={`relative flex items-center justify-center overflow-hidden pointer-events-none select-none ${className}`}
+      style={{ transform: 'translateZ(0)' }}
     >
-      <canvas ref={canvasRef} className="w-full h-full mix-blend-screen opacity-90" />
-      {/* Animated shimmer overlay to replace JS canvas animation */}
-      <div
-        className="absolute inset-0 mix-blend-color-dodge pointer-events-none opacity-40"
-        style={{
-          background:
-            'radial-gradient(ellipse 55% 55% at 50% 50%, rgba(197,255,74,0.18) 0%, transparent 100%)',
-          animation: 'shimmer-pulse 3s ease-in-out infinite alternate',
-        }}
-      />
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes shimmer-pulse {
-          0% { transform: scale(0.95); opacity: 0.3; }
-          50% { transform: scale(1.05); opacity: 0.5; }
-          100% { transform: scale(1); opacity: 0.4; }
-        }
-      `,
-        }}
-      />
+      <canvas ref={canvasRef} className="w-full h-full opacity-90" />
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(197,255,74,0.12)_0%,transparent_100%)] opacity-70" />
     </div>
   )
 }

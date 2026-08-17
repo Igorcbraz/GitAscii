@@ -67,17 +67,32 @@ export async function GET(
       }
     }
 
-    const widgetsParam = searchParams.get('widgets')
-    const widgets = widgetsParam ? widgetsParam.split(',') : undefined
+    const widgetsParam = searchParams.get('widgets') || searchParams.get('widget')
+    const widgets = widgetsParam
+      ? widgetsParam
+          .split(',')
+          .map((w) => w.trim())
+          .filter(Boolean)
+      : undefined
+
+    const templateParam =
+      searchParams.get('template') ||
+      (queryTheme && queryTheme !== 'light' && queryTheme !== 'dark' ? queryTheme : null)
 
     const data = await fetchGitHubProfile(username)
 
     let config = await loadProfileConfig(username, profileSlug)
     if (!config) {
+      const cleanTemplate = templateParam
+        ? templateParam
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '')
+            .replace(/-/g, '')
+        : 'terminal'
       config = createConfiguration(
         data.user.id,
         data.user.login,
-        'terminal',
+        cleanTemplate,
         profileSlug,
         'Default',
         data

@@ -5,11 +5,12 @@ export function getWidgetMinSize(
   widget: WidgetInstance,
   data: NormalizedGitHubData
 ): { width: number; height: number } | null {
+  if (!widget) return null
   if (widget.widgetId === 'bio') {
-    const width = widget.size.width
-    const cfg = widget.config
+    const width = Math.max(100, Number(widget.size?.width) || 800)
+    const cfg = widget.config || {}
     const customBio =
-      cfg.customBio !== undefined ? (cfg.customBio as string) : data.user.bio || 'No bio provided.'
+      cfg.customBio !== undefined ? String(cfg.customBio) : data?.user?.bio || 'No bio provided.'
     const maxCharsPerLine = Math.max(20, Math.floor((width - 72) / 8.5))
     const wrappedLines: string[] = []
     for (const p of customBio.split('\n')) {
@@ -44,19 +45,25 @@ export function renderWidgetSvg(
   includeWrapper: boolean = true,
   forceStatic: boolean = false
 ): string {
-  if (!widget.visible) return ''
+  if (!widget || !widget.visible) return ''
 
-  const { x, y } = widget.position
-  const { width, height } = widget.size
-  const cfg = widget.config
+  const x = Number(widget.position?.x) || 0
+  const y = Number(widget.position?.y) || 0
+  const width = Math.max(1, Number(widget.size?.width) || 800)
+  const height = Math.max(1, Number(widget.size?.height) || 100)
+  const cfg = widget.config || {}
+  const globalStylesSafe = globalStyles || ({} as GlobalStyles)
 
-  const bg = (cfg.backgroundColor as string) || globalStyles.backgroundColor || '#1f1f1f'
-  const border = (cfg.borderColor as string) || globalStyles.borderColor || '#252525'
-  const textClr = (cfg.textColor as string) || globalStyles.textColor || '#ffffff'
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
-  const rx = cfg.borderRadius !== undefined ? cfg.borderRadius : globalStyles.borderRadius || 0
+  const bg = (cfg.backgroundColor as string) || globalStylesSafe.backgroundColor || '#1f1f1f'
+  const border = (cfg.borderColor as string) || globalStylesSafe.borderColor || '#252525'
+  const textClr = (cfg.textColor as string) || globalStylesSafe.textColor || '#ffffff'
+  const accent = (cfg.accentColor as string) || globalStylesSafe.accentColor || '#c5ff4a'
+  const rx =
+    cfg.borderRadius !== undefined
+      ? Number(cfg.borderRadius) || 0
+      : globalStylesSafe.borderRadius || 0
 
-  let contentSvg = renderWidgetContent(widget, data, globalStyles, forceStatic)
+  let contentSvg = renderWidgetContent(widget, data, globalStylesSafe, forceStatic)
 
   let templateDecorationSvg = ''
   const tmplStyle = globalStyles.templateStyle || 'terminal'

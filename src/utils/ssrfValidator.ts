@@ -273,29 +273,45 @@ function getSsrfSafeDispatcher(): Agent | undefined {
             family?: number
           ) => void
         ) => {
+          let callback = cb
+          let options: { all?: boolean; family?: number; hints?: number } = {}
+
+          if (typeof opts === 'function') {
+            callback = opts as typeof cb
+          } else if (opts && typeof opts === 'object') {
+            options = opts as { all?: boolean; family?: number; hints?: number }
+          }
+
           dns.lookup(
             hostname,
             { all: true },
             (err: NodeJS.ErrnoException | null, addresses: dns.LookupAddress[]) => {
-              if (err) return cb(err, [])
+              if (err) return callback(err, options.all ? [] : ('' as any))
               if (!addresses || addresses.length === 0) {
-                return cb(new Error(`DNS lookup yielded no addresses for ${hostname}`), [])
+                return callback(
+                  new Error(`DNS lookup yielded no addresses for ${hostname}`),
+                  options.all ? [] : ('' as any)
+                )
               }
               for (const addr of addresses) {
                 if (addr.family === 4 && isPrivateIPv4(addr.address)) {
-                  return cb(
+                  return callback(
                     new Error(`SSRF blocked: ${hostname} resolved to private IPv4 ${addr.address}`),
-                    []
+                    options.all ? [] : ('' as any)
                   )
                 }
                 if (addr.family === 6 && isPrivateIPv6(addr.address)) {
-                  return cb(
+                  return callback(
                     new Error(`SSRF blocked: ${hostname} resolved to private IPv6 ${addr.address}`),
-                    []
+                    options.all ? [] : ('' as any)
                   )
                 }
               }
-              cb(null, addresses[0].address, addresses[0].family)
+              if (options.all) {
+                callback(null, addresses)
+              } else {
+                callback(null, addresses[0].address, addresses[0].family)
+              }
             }
           )
         },

@@ -53,7 +53,7 @@ export type WidgetRendererFn = (
   forceStatic?: boolean
 ) => string
 
-const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
+export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   // Core Profile Widgets
   ['header', (w, d, g) => renderHeader(w, d, g)],
   ['avatar', (w, d, g) => renderAvatar(w, d, g)],
@@ -124,8 +124,29 @@ const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
 ])
 
 export function renderFallbackWidget(widget: WidgetInstance, globalStyles: GlobalStyles): string {
-  const textClr = (widget.config.textColor as string) || globalStyles.textColor || '#ffffff'
-  return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(String(widget.widgetId || '').toUpperCase())}</text>`
+  const cfg = widget?.config || {}
+  const textClr = (cfg.textColor as string) || globalStyles?.textColor || '#ffffff'
+  const wid = String(widget?.widgetId || 'WIDGET').toUpperCase()
+  return `<text x="24" y="36" font-family="'Inter Tight', sans-serif" font-size="14" fill="${textClr}">${escapeXml(wid)}</text>`
+}
+
+export function renderErrorWidget(
+  widget: WidgetInstance,
+  globalStyles: GlobalStyles,
+  error?: unknown
+): string {
+  const cfg = widget?.config || {}
+  const textClr = (cfg.textColor as string) || globalStyles?.textColor || '#ff7b72'
+  const wid = String(widget?.widgetId || 'widget')
+  const width = Math.max(100, Number(widget?.size?.width) || 200)
+  const height = Math.max(40, Number(widget?.size?.height) || 60)
+  const errMessage = error instanceof Error ? error.message : 'Render failed'
+
+  return `
+    <rect x="0" y="0" width="${width}" height="${height}" fill="#161b22" rx="4" stroke="#f85149" stroke-width="1" stroke-dasharray="4 4" opacity="0.85" />
+    <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="${textClr}">[ WIDGET ERROR: ${escapeXml(wid)} ]</text>
+    <text x="16" y="42" font-family="'JetBrains Mono', monospace" font-size="9" fill="#8b949e">${escapeXml(errMessage.slice(0, 60))}</text>
+  `
 }
 
 export function renderWidgetContent(
@@ -134,10 +155,16 @@ export function renderWidgetContent(
   globalStyles: GlobalStyles,
   forceStatic?: boolean
 ): string {
+  if (!widget) return ''
   const wid = typeof widget.widgetId === 'string' ? widget.widgetId : ''
   const renderer = REGISTRY_MAP.get(wid)
   if (typeof renderer === 'function') {
-    return renderer(widget, data, globalStyles, forceStatic)
+    try {
+      return renderer(widget, data, globalStyles, forceStatic)
+    } catch (err) {
+      console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
+      return renderErrorWidget(widget, globalStyles, err)
+    }
   }
   return renderFallbackWidget(widget, globalStyles)
 }
@@ -146,9 +173,16 @@ export function getRenderer(widgetId: string): WidgetRendererFn {
   const wid = typeof widgetId === 'string' ? widgetId : ''
   const renderer = REGISTRY_MAP.get(wid)
   if (typeof renderer === 'function') {
-    return renderer
+    return (widget, data, globalStyles, forceStatic) => {
+      try {
+        return renderer(widget, data, globalStyles, forceStatic)
+      } catch (err) {
+        console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
+        return renderErrorWidget(widget, globalStyles, err)
+      }
+    }
   }
-  return (widget, _data, globalStyles) => renderFallbackWidget(widget, globalStyles)
+  return (widget, _, globalStyles) => renderFallbackWidget(widget, globalStyles)
 }
 
 export function registerWidget(widgetId: string, renderer: WidgetRendererFn): void {

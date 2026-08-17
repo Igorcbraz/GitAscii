@@ -56,7 +56,8 @@ export function renderTerminalInfo(
   let currentY = 28
 
   if (showMainSection) {
-    const titleStr = (cfg.customTitle as string) || `${data.user.login}@github`
+    const username = data?.user?.login || 'user'
+    const titleStr = (cfg.customTitle as string) || `${username}@github`
     const dashesCount = Math.max(2, totalChars - 1 - (titleStr.length + 2))
     const dashesStr = '─'.repeat(dashesCount)
 
@@ -68,29 +69,31 @@ export function renderTerminalInfo(
     const mainItems: Array<{ label: string; val: string }> = []
 
     if (showUptime) {
-      const uptimeVal = (cfg.customUptime as string) || formatUptime(data.user.created_at)
+      const uptimeVal =
+        (cfg.customUptime as string) ||
+        (data?.user?.created_at ? formatUptime(data.user.created_at) : '')
       if (uptimeVal) mainItems.push({ label: '. Uptime: ', val: ` ${uptimeVal}` })
     }
     if (showLocation) {
-      const locVal = (cfg.customLocation as string) || data.user.location
+      const locVal = (cfg.customLocation as string) || data?.user?.location
       if (locVal) mainItems.push({ label: '. Location: ', val: ` ${locVal}` })
     }
     if (showCompany) {
-      const compVal = (cfg.customCompany as string) || data.user.company
+      const compVal = (cfg.customCompany as string) || data?.user?.company
       if (compVal) mainItems.push({ label: '. Company: ', val: ` ${compVal}` })
     }
     if (showLanguages) {
+      const langEntries =
+        data?.languages && typeof data.languages === 'object' ? Object.keys(data.languages) : []
       const topLangs =
         (cfg.customLanguages as string) ||
-        (Object.keys(data.languages).length > 0
-          ? Object.keys(data.languages).slice(0, 5).join(', ')
-          : '')
+        (langEntries.length > 0 ? langEntries.slice(0, 5).join(', ') : '')
       if (topLangs) mainItems.push({ label: '. Languages: ', val: ` ${topLangs}` })
     }
     if (showJoined) {
       const joinedVal =
         (cfg.customJoined as string) ||
-        (data.user.created_at
+        (data?.user?.created_at
           ? new Date(data.user.created_at).toLocaleDateString('en-US', {
               month: 'short',
               year: 'numeric',
@@ -98,6 +101,7 @@ export function renderTerminalInfo(
           : '')
       if (joinedVal) mainItems.push({ label: '. Joined: ', val: ` ${joinedVal}` })
     }
+
     if (showStatus) {
       const statusVal = cfg.customStatus as string
       if (statusVal) mainItems.push({ label: '. Status: ', val: ` ${statusVal}` })
@@ -146,21 +150,21 @@ export function renderTerminalInfo(
     const contactItems: Array<{ label: string; val: string }> = []
 
     if (showWebsite) {
-      const webVal = (cfg.customWebsite as string) || data.user.blog
+      const webVal = (cfg.customWebsite as string) || data?.user?.blog
       if (webVal) contactItems.push({ label: '. Website: ', val: ` ${webVal}` })
     }
     if (showGithub) {
-      const ghVal = (cfg.customGithub as string) || `github.com/${data.user.login}`
+      const ghVal = (cfg.customGithub as string) || `github.com/${data?.user?.login || 'user'}`
       if (ghVal) contactItems.push({ label: '. GitHub: ', val: ` ${ghVal}` })
     }
     if (showTwitter) {
       const twVal =
         (cfg.customTwitter as string) ||
-        (data.user.twitter_username ? `@${data.user.twitter_username}` : '')
+        (data?.user?.twitter_username ? `@${data.user.twitter_username}` : '')
       if (twVal) contactItems.push({ label: '. Twitter: ', val: ` ${twVal}` })
     }
     if (showEmail) {
-      const emVal = (cfg.customEmail as string) || data.user.email
+      const emVal = (cfg.customEmail as string) || data?.user?.email
       if (emVal) contactItems.push({ label: '. Email: ', val: ` ${emVal}` })
     }
     if (showOrgs) {
@@ -195,30 +199,36 @@ export function renderTerminalInfo(
     const statFields: Array<{ label: string; val: string }> = []
 
     if (showRepos) {
-      statFields.push({ label: '. Repos: ', val: ` ${data.user.public_repos}` })
+      statFields.push({ label: '. Repos: ', val: ` ${Number(data?.user?.public_repos) || 0}` })
     }
     if (showStars) {
-      statFields.push({ label: '. Stars: ', val: ` ${data.totalStars}` })
+      statFields.push({ label: '. Stars: ', val: ` ${Number(data?.totalStars) || 0}` })
     }
     if (showCommits) {
       const commitCount =
         (cfg.customCommits as string) ||
-        (data.contributions ? data.contributions.totalContributions.toLocaleString() : '')
+        (data?.contributions
+          ? Number(data.contributions.totalContributions || 0).toLocaleString()
+          : '')
       if (commitCount) statFields.push({ label: '. Commits: ', val: ` ${commitCount}` })
     }
     if (showFollowers) {
-      statFields.push({ label: '. Followers: ', val: ` ${data.user.followers}` })
+      statFields.push({ label: '. Followers: ', val: ` ${Number(data?.user?.followers) || 0}` })
     }
     if (showFollowing) {
       const followingCount =
         (cfg.customFollowing as string) ||
-        (data.user.following !== undefined ? data.user.following.toLocaleString() : '')
+        (data?.user?.following !== undefined
+          ? Number(data.user.following || 0).toLocaleString()
+          : '')
       if (followingCount) statFields.push({ label: '. Following: ', val: ` ${followingCount}` })
     }
     if (showGists) {
       const gistsCount =
         (cfg.customGists as string) ||
-        (data.user.public_gists !== undefined ? data.user.public_gists.toLocaleString() : '')
+        (data?.user?.public_gists !== undefined
+          ? Number(data.user.public_gists || 0).toLocaleString()
+          : '')
       if (gistsCount) statFields.push({ label: '. Gists: ', val: ` ${gistsCount}` })
     }
 

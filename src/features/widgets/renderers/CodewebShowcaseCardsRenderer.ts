@@ -34,7 +34,8 @@ function getLucideSvg(iconName: string, size = 28, color = '#ffffff'): string {
 
     const childrenStr = iconNode
       .map(([tag, attrs]: [string, any]) => {
-        const attrStr = Object.entries(attrs)
+        const attrEntries = attrs && typeof attrs === 'object' ? Object.entries(attrs) : []
+        const attrStr = attrEntries
           .filter(([k]) => k !== 'key')
           .map(([k, v]) => `${k}="${v}"`)
           .join(' ')
@@ -44,7 +45,7 @@ function getLucideSvg(iconName: string, size = 28, color = '#ffffff'): string {
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${cleaned.toLowerCase()}">${childrenStr}</svg>`
   } catch (err) {
-    console.error('Error generating svg', err)
+    console.warn('Error generating svg in getLucideSvg:', err)
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`
   }
 }

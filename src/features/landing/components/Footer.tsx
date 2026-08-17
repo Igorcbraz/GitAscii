@@ -3,7 +3,7 @@
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-import { EXTERNAL_LINKS } from '@/constants'
+import { APP_VERSION, EXTERNAL_LINKS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { PrivacySettingsButton } from '@/lib/consent/ConsentBanner'
 
@@ -209,7 +209,7 @@ export function Footer() {
               {new Date().getFullYear()} {t('landing.footer.copyright', 'GitAscii. MIT License.')}
             </p>
             <p className="font-jetbrains-mono text-caption text-fog uppercase tracking-[0.18em]">
-              {t('landing.footer.version', 'v1.0.0 · BUILD 2026.07')}
+              {`v${APP_VERSION} · BUILD 2026.08`}
             </p>
           </div>
         </div>

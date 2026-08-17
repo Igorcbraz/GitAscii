@@ -27,10 +27,10 @@ export function renderLanguages(
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles
 ): string {
-  const { width } = widget.size
-  const cfg = widget.config
-  const textClr = (cfg.textColor as string) || globalStyles.textColor || '#ffffff'
-  const accent = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+  const width = Math.max(100, Number(widget?.size?.width) || 800)
+  const cfg = widget?.config || {}
+  const textClr = (cfg.textColor as string) || globalStyles?.textColor || '#ffffff'
+  const accent = (cfg.accentColor as string) || globalStyles?.accentColor || '#c5ff4a'
 
   const hideLangsArr: string[] = Array.isArray(cfg.hideLangsArr)
     ? (cfg.hideLangsArr as string[])
@@ -44,14 +44,16 @@ export function renderLanguages(
       : []
   const hideLangs = [...hideLangsArr.map((l) => l.toLowerCase()), ...hideLangsStr]
 
-  let filteredLangs = Object.entries(data.languages)
+  let filteredLangs = Object.entries(
+    data?.languages && typeof data.languages === 'object' ? data.languages : {}
+  )
   if (hideLangs.length > 0) {
     filteredLangs = filteredLangs.filter(([lang]) => !hideLangs.includes(lang.toLowerCase()))
   }
 
   const maxLangs = Number(cfg.langsCount) || 5
   const topLangs = filteredLangs.slice(0, maxLangs)
-  const totalCount = topLangs.reduce((sum, [_, count]) => sum + count, 0) || 1
+  const totalCount = topLangs.reduce((sum, [_, count]) => sum + (Number(count) || 0), 0) || 1
   const showPercentage = cfg.showPercentage !== false
   const langsLayout = (cfg.langsLayout as string) || 'bars'
 
@@ -64,7 +66,7 @@ export function renderLanguages(
     const barWidth = width - 48
     const barSvg = topLangs
       .map(([lang, count]) => {
-        const w = (count / totalCount) * barWidth
+        const w = ((Number(count) || 0) / totalCount) * barWidth
         const rect = `<rect x="${currentX}" y="52" width="${w}" height="8" fill="${getColor(lang)}" rx="2" />`
         currentX += w
         return rect
@@ -73,11 +75,11 @@ export function renderLanguages(
 
     const legendSvg = topLangs
       .map(([lang, count], i) => {
-        const pct = Math.round((count / totalCount) * 100)
+        const pct = Math.round(((Number(count) || 0) / totalCount) * 100)
         return `
       <g transform="translate(${24 + (i % 2) * (barWidth / 2)}, ${80 + Math.floor(i / 2) * 24})">
         <circle cx="6" cy="-4" r="4" fill="${getColor(lang)}" />
-        <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="12" fill="${textClr}">${lang} ${showPercentage ? `<tspan fill="#7a7a7a">${pct}%</tspan>` : ''}</text>
+        <text x="16" y="0" font-family="'Inter Tight', sans-serif" font-size="12" fill="${textClr}">${escapeXml(lang)} ${showPercentage ? `<tspan fill="#7a7a7a">${pct}%</tspan>` : ''}</text>
       </g>
     `
       })
@@ -88,8 +90,8 @@ export function renderLanguages(
     const barW = width - 48
     langsSvg = topLangs
       .map(([lang, count], i) => {
-        const pct = Math.round((count / totalCount) * 100)
-        const fillW = (count / totalCount) * (barW - 100)
+        const pct = Math.round(((Number(count) || 0) / totalCount) * 100)
+        const fillW = ((Number(count) || 0) / totalCount) * (barW - 100)
         return `
       <g transform="translate(24, ${48 + i * 26})">
         <circle cx="6" cy="8" r="4" fill="${getColor(lang)}" />
@@ -102,10 +104,11 @@ export function renderLanguages(
       })
       .join('')
   } else if (langsLayout === 'compact') {
-    const itemW = (width - 48) / Math.min(topLangs.length, 3)
+    const denom = Math.max(1, Math.min(topLangs.length, 3))
+    const itemW = (width - 48) / denom
     langsSvg = topLangs
       .map(([lang, count], i) => {
-        const pct = Math.round((count / totalCount) * 100)
+        const pct = Math.round(((Number(count) || 0) / totalCount) * 100)
         return `
       <g transform="translate(${24 + (i % 3) * itemW}, ${48 + Math.floor(i / 3) * 52})">
         <circle cx="6" cy="8" r="5" fill="${getColor(lang)}" />

@@ -47,7 +47,9 @@ export function renderNeural(
 
   const categories = Object.entries(neuralTechs).map(([cat, list]) => ({
     cat,
-    techs: list.map((id) => techNameMap[id] || id.toUpperCase()),
+    techs: Array.isArray(list)
+      ? list.map((id) => (typeof id === 'string' ? techNameMap[id] || id.toUpperCase() : 'TECH'))
+      : [],
   }))
 
   const bg1 = '#0b0f14'
