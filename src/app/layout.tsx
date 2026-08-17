@@ -279,14 +279,6 @@ export default function RootLayout({
           </ToastProvider>
         </I18nProvider>
         <ConsentControlledScripts />
-        {process.env.NODE_ENV === 'development' && (
-          <>
-            {/* impeccable-live-start */}
-            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-            <script src="http://localhost:8400/live.js?token=58a45599-d30d-4e10-8d20-a21967b6483b"></script>
-            {/* impeccable-live-end */}
-          </>
-        )}
       </body>
     </html>
   )
