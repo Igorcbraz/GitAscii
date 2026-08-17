@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { APP_URL } from '@/constants'
 
 export const metadata: Metadata = {
-  title: 'Explore Community GitHub Profiles & Portfolios (2026)',
+  title: 'Explore Community GitHub Profiles',
   description:
     'Discover real developer profiles, custom GitHub README layouts, and live SVG portfolios created with GitAscii.',
   keywords: [

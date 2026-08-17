@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import { notFound, redirect } from 'next/navigation'
 
 import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
+import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,8 +15,21 @@ export async function generateMetadata({
   const { username, profile } = await params
   const cleanUsername = username.trim()
   const cleanProfile = profile.trim()
-  const title = `@${cleanUsername} - ${cleanProfile} Profile Layout`
-  const description = `Customize, preview, and generate the custom ${cleanProfile} GitHub Profile README SVG layout for @${cleanUsername} using GitAscii.`
+
+  if (
+    cleanUsername === 'index.html' ||
+    cleanUsername === 'index.php' ||
+    cleanUsername === 'index'
+  ) {
+    redirect('/')
+  }
+
+  if (!isValidGitHubUsername(cleanUsername) || !cleanProfile || cleanProfile.includes('.')) {
+    notFound()
+  }
+
+  const title = `@${cleanUsername} - ${cleanProfile} Layout`
+  const description = `Customize and preview the ${cleanProfile} GitHub Profile README layout for @${cleanUsername}.`
   const url = `${APP_URL}/${cleanUsername}/${cleanProfile}`
 
   return {
@@ -63,6 +78,20 @@ export default async function NamedProfileEditorPage({
   params: Promise<{ username: string; profile: string }>
 }) {
   const { username, profile } = await params
+  const cleanUsername = username.trim()
+  const cleanProfile = profile.trim()
+
+  if (
+    cleanUsername === 'index.html' ||
+    cleanUsername === 'index.php' ||
+    cleanUsername === 'index'
+  ) {
+    redirect('/')
+  }
+
+  if (!isValidGitHubUsername(cleanUsername) || !cleanProfile || cleanProfile.includes('.')) {
+    notFound()
+  }
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',

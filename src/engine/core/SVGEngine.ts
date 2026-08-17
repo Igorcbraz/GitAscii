@@ -394,7 +394,6 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
     if (blockEndIdx === -1) break
 
-    const fullMatch = finalSvg.slice(startIdx, blockEndIdx + BLOCK_END_TOKEN.length)
     const rawJsonSection = finalSvg.slice(startIdx + JSON_START_TOKEN.length, commentEndIdx)
 
     let replacement = ''
@@ -412,7 +411,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           String(height),
           preserve
         )
-      } catch (err) {
+      } catch {
         if (fallbackUrl) {
           try {
             replacement = await fetchAndProcessExternalImage(
@@ -489,7 +488,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
 
       try {
         replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
-      } catch (err) {
+      } catch {
         if (fallbackUrl) {
           try {
             replacement = await fetchAndProcessExternalImage(

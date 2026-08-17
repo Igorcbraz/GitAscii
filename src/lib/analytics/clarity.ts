@@ -23,7 +23,7 @@ export function MicrosoftClarity({ consentGranted }: MicrosoftClarityProps) {
 
   return createElement(Script, {
     id: 'microsoft-clarity',
-    strategy: 'afterInteractive',
+    strategy: 'lazyOnload',
     dangerouslySetInnerHTML: {
       __html: `
         (function(c,l,a,r,i,t,y){

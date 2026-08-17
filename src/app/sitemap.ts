@@ -51,8 +51,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ? {
             languages: {
               en: `${baseUrl}`,
-              pt: `${baseUrl}?lang=pt`,
-              es: `${baseUrl}?lang=es`,
+              'pt-BR': `${baseUrl}?lang=pt`,
+              'es-ES': `${baseUrl}?lang=es`,
+              'zh-CN': `${baseUrl}?lang=zh`,
+              'x-default': `${baseUrl}`,
             },
           }
         : undefined,

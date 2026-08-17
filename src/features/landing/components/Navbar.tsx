@@ -114,8 +114,9 @@ export default function Navbar() {
             <Link
               href="/api/auth/login"
               prefetch={false}
+              rel="nofollow"
               onClick={() => setIsLoginLoading(true)}
-              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-2 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-2 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer min-h-[38px]"
             >
               {isLoginLoading ? (
                 <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -130,7 +131,7 @@ export default function Navbar() {
             href={EXTERNAL_LINKS.GITHUB_REPO}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 rounded-sm border border-graphite bg-onyx px-4 py-2 font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:border-signal-lime hover:bg-onyx/80 hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] group cursor-pointer"
+            className="inline-flex items-center gap-2.5 rounded-sm border border-graphite bg-onyx px-4 py-2 font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:border-signal-lime hover:bg-onyx/80 hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] group cursor-pointer min-h-[38px]"
           >
             <Github className="size-4 text-ash group-hover:text-white transition-colors duration-300 ease-in-out" />
             <span className="transition-colors duration-300 ease-in-out text-white group-hover:text-white">
@@ -144,7 +145,7 @@ export default function Navbar() {
           </a>
         </div>
         <button
-          className="md:hidden text-white cursor-pointer transition-colors duration-300 ease-in-out hover:text-signal-lime"
+          className="md:hidden text-white cursor-pointer transition-colors duration-300 ease-in-out hover:text-signal-lime min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-sm"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label={t('common.toggle_menu', 'Toggle menu')}
         >
@@ -159,7 +160,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-colors duration-300 ease-in-out hover:text-signal-lime block py-2 ${
+                className={`font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-colors duration-300 ease-in-out hover:text-signal-lime block py-2.5 ${
                   isActive ? 'text-signal-lime' : 'text-white'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -174,7 +175,7 @@ export default function Navbar() {
                 <Link
                   href={`/${session.username}`}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-5 py-2.5 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 w-full"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-5 py-3 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 w-full min-h-[44px]"
                 >
                   <User className="size-3.5" />
                   <span>@{session.username}</span>
@@ -184,7 +185,7 @@ export default function Navbar() {
                     setIsMobileMenuOpen(false)
                     handleLogout()
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite bg-red-500/10 px-5 py-2.5 font-inter-tight text-label font-medium text-red-400 hover:bg-red-500/20 transition-all duration-300 w-full cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite bg-red-500/10 px-5 py-3 font-inter-tight text-label font-medium text-red-400 hover:bg-red-500/20 transition-all duration-300 w-full cursor-pointer min-h-[44px]"
                 >
                   <LogOut className="size-3.5" />
                   <span>{t('editor.toolbar.logout', 'Sign Out')}</span>
@@ -194,8 +195,9 @@ export default function Navbar() {
               <Link
                 href="/api/auth/login"
                 prefetch={false}
+                rel="nofollow"
                 onClick={() => setIsLoginLoading(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-sm bg-signal-lime px-5 py-2.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:brightness-110 w-full text-center cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 rounded-sm bg-signal-lime px-5 py-3 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:brightness-110 w-full text-center cursor-pointer min-h-[44px]"
               >
                 {isLoginLoading ? (
                   <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />

@@ -2,6 +2,7 @@ import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
 import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
+import { headers } from 'next/headers'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS } from '@/constants'
@@ -41,11 +42,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
+    default: 'GitAscii — GitHub Profile README & ASCII Generator',
     template: '%s | GitAscii',
   },
   description:
-    'Build stunning GitHub Profile READMEs with live SVG stats, custom ASCII art engine, 13+ themes, and drag-and-drop visual editor. Free, open source, and instant auto-generation.',
+    'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.',
   keywords: [
     'GitHub profile README generator',
     'GitHub ASCII art generator',
@@ -67,9 +68,9 @@ export const metadata: Metadata = {
   classification: 'Software Development & Developer Tools',
   applicationName: 'GitAscii',
   openGraph: {
-    title: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
+    title: 'GitAscii — GitHub Profile README & ASCII Generator',
     description:
-      'Build stunning GitHub Profile READMEs with live SVG stats, custom ASCII art engine, and a drag-and-drop visual editor. 100% Free & Open Source.',
+      'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.',
     url: APP_URL,
     siteName: 'GitAscii',
     locale: 'en_US',
@@ -79,23 +80,23 @@ export const metadata: Metadata = {
         url: `${APP_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator',
+        alt: 'GitAscii — GitHub Profile README & ASCII Generator',
         type: 'image/png',
       },
       {
         url: `${APP_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: 'GitAscii — Premium GitHub Profile README & ASCII Art Generator (Dynamic)',
+        alt: 'GitAscii — GitHub Profile README & ASCII Generator (Dynamic)',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GitAscii — Premium GitHub Profile README Generator',
+    title: 'GitAscii — GitHub Profile README & ASCII Generator',
     description:
-      'Create stunning GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
+      'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
     images: [`${APP_URL}/og-image.png`],
     creator: '@git_ascii',
   },
@@ -113,7 +114,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: APP_URL,
     languages: {
-      'en-US': APP_URL,
+      en: APP_URL,
       'pt-BR': `${APP_URL}?lang=pt`,
       'es-ES': `${APP_URL}?lang=es`,
       'zh-CN': `${APP_URL}?lang=zh`,
@@ -122,12 +123,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon-16.png', sizes: '16x16', type: 'image/png' },
       { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
+    shortcut: ['/favicon.ico'],
     apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/manifest.webmanifest',
@@ -225,27 +228,52 @@ const faqLd = {
   ],
 }
 
-const breadcrumbLd = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: 'Home',
-      item: APP_URL,
-    },
-  ],
-}
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const queryLang = headersList.get('x-lang')
+  const cookieHeader = headersList.get('cookie') || ''
+  const acceptLanguage = headersList.get('accept-language') || ''
+
+  // Priorização rigorosa:
+  // 1. ?lang= explícito na URL
+  // 2. Preferência salva em cookie (gitascii_lang)
+  // 3. Cabeçalho Accept-Language do navegador
+  let ssrLang = 'en'
+  if (queryLang === 'pt') {
+    ssrLang = 'pt-BR'
+  } else if (queryLang === 'es') {
+    ssrLang = 'es-ES'
+  } else if (queryLang === 'zh') {
+    ssrLang = 'zh-CN'
+  } else if (queryLang === 'en') {
+    ssrLang = 'en'
+  } else if (cookieHeader.includes('gitascii_lang=pt')) {
+    ssrLang = 'pt-BR'
+  } else if (cookieHeader.includes('gitascii_lang=es')) {
+    ssrLang = 'es-ES'
+  } else if (cookieHeader.includes('gitascii_lang=zh')) {
+    ssrLang = 'zh-CN'
+  } else if (cookieHeader.includes('gitascii_lang=en')) {
+    ssrLang = 'en'
+  } else if (
+    acceptLanguage.startsWith('pt') ||
+    acceptLanguage.includes('pt-BR') ||
+    acceptLanguage.includes('pt-PT')
+  ) {
+    ssrLang = 'pt-BR'
+  } else if (acceptLanguage.startsWith('es')) {
+    ssrLang = 'es-ES'
+  } else if (acceptLanguage.startsWith('zh')) {
+    ssrLang = 'zh-CN'
+  }
+
   return (
     <html
-      lang="en"
+      lang={ssrLang}
       suppressHydrationWarning
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
@@ -269,10 +297,6 @@ export default function RootLayout({
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-              />
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
               />
               {children}
             </AutoAnalyticsTracker>
