@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/Igorcbraz/GitAscii/compare/v1.8.0...v1.9.0) (2026-08-17)
+
+
+### Features
+
+* **i18n:** internationalize routes, legal pages, templates, widgets and VS matrix ([d8ce5b8](https://github.com/Igorcbraz/GitAscii/commit/d8ce5b8429a766911f051542914acc4e2fb0451d))
+
 ## [1.8.0](https://github.com/Igorcbraz/GitAscii/compare/v1.7.1...v1.8.0) (2026-08-16)
 
 
