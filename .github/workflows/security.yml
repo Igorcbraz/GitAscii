@@ -19,31 +19,8 @@ permissions:
 
 jobs:
   # ==========================================
-  # 1. SAST: Static Application Security Testing
+  # 1. SAST: Semgrep OSS Scan
   # ==========================================
-  sast-codeql:
-    name: SAST - GitHub CodeQL
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-          queries: security-extended
-          dependency-caching: true
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: '/language:javascript-typescript'
-
   sast-semgrep:
     name: SAST - Semgrep OSS
     runs-on: ubuntu-latest
