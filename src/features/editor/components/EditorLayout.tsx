@@ -1,7 +1,6 @@
 'use client'
 
 import { AlertCircle, ArrowRight, Grid, Monitor, Sliders, Sparkles, Terminal } from 'lucide-react'
-import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
@@ -17,6 +16,7 @@ import { calculateFitZoom, getCanvasContainerWidth } from '../utils/canvasZoom'
 import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
 import { SVGCanvas } from './Canvas/SVGCanvas'
 import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
+import { ProfileErrorScreen } from './ProfileErrorScreen'
 import { PropertiesPanel } from './Properties/PropertiesPanel'
 import { WidgetLibrary } from './Sidebar/WidgetLibrary'
 import { EditorToolbar } from './Toolbar/EditorToolbar'
@@ -42,6 +42,8 @@ export function EditorLayout({
   const setActiveMobilePanel = useEditorStore((state) => state.setActiveMobilePanel)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isNotFound, setIsNotFound] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [githubData, setGithubData] = useState<NormalizedGitHubData | null>(null)
 
@@ -158,7 +160,16 @@ export function EditorLayout({
           } catch (textErr) {
             console.debug('Failed to read error response text:', textErr)
           }
-          setStep('github', 'error', errMsg)
+
+          const notFoundStatus =
+            res.status === 404 ||
+            errMsg.toLowerCase().includes('not found') ||
+            errMsg.toLowerCase().includes('não encontrado')
+
+          if (isMounted) {
+            setIsNotFound(notFoundStatus)
+            setStep('github', 'error', errMsg)
+          }
           throw new Error(errMsg)
         }
 
@@ -262,7 +273,47 @@ export function EditorLayout({
     return () => {
       isMounted = false
     }
-  }, [username, profileSlug, autoGenerate, initEditor, setSession, setStep, t])
+  }, [username, profileSlug, autoGenerate, reloadKey, initEditor, setSession, setStep, t])
+
+  const handleStartBlank = useCallback(() => {
+    const fallbackData: NormalizedGitHubData = {
+      user: {
+        id: 0,
+        login: username,
+        name: username,
+        avatar_url: `https://github.com/${username}.png`,
+        bio: '',
+        public_repos: 0,
+        public_gists: 0,
+        followers: 0,
+        following: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        location: null,
+        company: null,
+        blog: null,
+        twitter_username: null,
+      },
+      repos: [],
+      languages: {},
+      totalStars: 0,
+      totalForks: 0,
+    }
+
+    const blankConfig = createConfiguration(
+      0,
+      username,
+      'blank',
+      profileSlug,
+      profileSlug === 'default' ? 'Default' : profileSlug.toUpperCase(),
+      fallbackData
+    )
+
+    initEditor(blankConfig, fallbackData)
+    setError(null)
+    setIsNotFound(false)
+    setShowOnboarding(false)
+  }, [username, profileSlug, initEditor])
 
   useEffect(() => {
     const handleZoomKeyboard = (e: KeyboardEvent) => {
@@ -410,20 +461,19 @@ export function EditorLayout({
     )
   }
 
-  if (error || !hasConfig) {
+  if (error || (!hasConfig && !showOnboarding)) {
     return (
-      <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-chalk font-inter-tight">
-        <span className="text-label uppercase tracking-[0.2em] text-red-400 mb-2">
-          {t('editor.error_fetching', '[ ERROR ]')}
-        </span>
-        <h2 className="text-subheading font-pt-serif font-light text-chalk mb-4">{error}</h2>
-        <Link
-          href="/"
-          className="px-4 py-2 bg-signal-lime text-black font-medium text-label rounded-sm glow-lime"
-        >
-          {t('editor.return_home', 'Return to Home')}
-        </Link>
-      </div>
+      <ProfileErrorScreen
+        username={username}
+        errorMessage={error}
+        isNotFound={isNotFound}
+        onRetry={() => {
+          setError(null)
+          setIsNotFound(false)
+          setReloadKey((k) => k + 1)
+        }}
+        onStartBlank={handleStartBlank}
+      />
     )
   }
 

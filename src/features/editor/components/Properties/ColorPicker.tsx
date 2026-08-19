@@ -41,8 +41,10 @@ export function ColorPicker({
   const popoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setHexInput(value)
-  }, [value])
+    if (value.toLowerCase() !== hexInput.toLowerCase()) {
+      setHexInput(value)
+    }
+  }, [value, hexInput])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -61,7 +63,10 @@ export function ColorPicker({
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setHexInput(val)
-    if (/^#([0-9A-F]{3}){1,2}$/i.test(val) || val === 'transparent') {
+    if (
+      (/^#([0-9A-F]{3}){1,2}$/i.test(val) || val === 'transparent') &&
+      val.toLowerCase() !== value.toLowerCase()
+    ) {
       onChange(val)
     }
   }
@@ -145,7 +150,9 @@ export function ColorPicker({
                 key={color}
                 type="button"
                 onClick={() => {
-                  onChange(color)
+                  if (color.toLowerCase() !== value.toLowerCase()) {
+                    onChange(color)
+                  }
                   setHexInput(color)
                 }}
                 className={`w-6 h-6 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer relative overflow-hidden ${
@@ -183,8 +190,11 @@ export function ColorPicker({
                 type="color"
                 value={value.startsWith('#') && value.length === 7 ? value : '#1f1f1f'}
                 onChange={(e) => {
-                  onChange(e.target.value)
-                  setHexInput(e.target.value)
+                  const val = e.target.value
+                  if (val.toLowerCase() !== value.toLowerCase()) {
+                    onChange(val)
+                  }
+                  setHexInput(val)
                 }}
                 className="absolute -inset-2.5 w-[200%] h-[200%] cursor-pointer opacity-0"
               />
