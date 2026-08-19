@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     template: '%s | GitAscii',
   },
   description:
-    'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.',
+    'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.',
   keywords: [
     'GitHub profile README generator',
     'GitHub ASCII art generator',
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GitAscii — GitHub Profile README & ASCII Generator',
     description:
-      'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.',
+      'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.',
     url: APP_URL,
     siteName: 'GitAscii',
     locale: 'en_US',
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'GitAscii — GitHub Profile README & ASCII Generator',
     description:
-      'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor.',
+      'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.',
     images: [`${APP_URL}/og-image.png`],
     creator: '@git_ascii',
   },
@@ -277,6 +277,15 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
+      <head>
+        <link
+          rel="preconnect"
+          href="https://avatars.githubusercontent.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="preconnect" href="https://img.shields.io" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.github.com" />
+      </head>
       <body>
         <I18nProvider>
           <ToastProvider>

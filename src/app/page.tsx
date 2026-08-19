@@ -29,23 +29,23 @@ export async function generateMetadata({
 
   let title = 'GitAscii — GitHub Profile README & ASCII Generator'
   let description =
-    'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.'
+    'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.'
   let canonicalUrl = APP_URL
 
   if (isPt) {
     title = 'GitAscii — Gerador de README & Arte ASCII'
     description =
-      'Crie READMEs para GitHub com SVGs dinâmicos, arte ASCII e editor visual. Grátis e open source.'
+      'Crie READMEs impressionantes para seu perfil do GitHub com SVGs dinâmicos, conversor de arte ASCII e editor visual interativo. Totalmente grátis e de código aberto.'
     canonicalUrl = `${APP_URL}?lang=pt`
   } else if (isEs) {
     title = 'GitAscii — Generador de README y Arte ASCII'
     description =
-      'Crea READMEs para GitHub con SVGs dinámicos, arte ASCII y editor visual. Gratis y open source.'
+      'Crea impresionantes READMEs para tu perfil de GitHub con SVGs dinámicos, motor de arte ASCII y editor visual interactivo. Rápido, gratis y de código abierto para desarrolladores.'
     canonicalUrl = `${APP_URL}?lang=es`
   } else if (isZh) {
     title = 'GitAscii — GitHub 个人主页 README 与 ASCII 艺术生成器'
     description =
-      '使用动态 SVG 徽章、实时统计卡片、ASCII 艺术引擎和可视化编辑器打造惊艳的 GitHub 主页。'
+      '使用动态 SVG 徽章、实时统计卡片、ASCII 艺术引擎和可视化编辑器打造惊艳的 GitHub 主页。完全免费且开源。'
     canonicalUrl = `${APP_URL}?lang=zh`
   }
 
