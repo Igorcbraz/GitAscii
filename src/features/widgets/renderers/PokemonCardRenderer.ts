@@ -70,7 +70,7 @@ export function renderPokemonCard(
         }
       </style>
 
-      <rect width="${width}" height="${height}" fill="#060606" />
+      <rect width="${width}" height="${height}" fill="#00000000" />
 
       <g class="bg-grid-${id}">
         <rect width="${width}" height="${height}" fill="url(#crosses-${id})" />
