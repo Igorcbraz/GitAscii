@@ -31,8 +31,10 @@
 next-env.d.ts
 /src/data/profiles
 
-# agy
-.agents/skills
+# python
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Playwright
 playwright-report/
