@@ -1,1 +1,6 @@
 * text=auto eol=lf
+
+# Ignore AI agents/skills scripts and assets from GitHub language stats (Linguist)
+.agents/** linguist-vendored
+.impeccable/** linguist-vendored
+seo-workspace/** linguist-vendored
