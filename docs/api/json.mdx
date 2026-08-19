@@ -1,0 +1,166 @@
+---
+title: "JSON Schema & Storage"
+description: "How to export, import, programmatically generate, and consume GitAscii configurations"
+---
+
+# JSON Schema & Storage
+
+The visual editor and the API communicate via JSON configurations. When you download a configuration file from the editor (or when the editor commits to your special GitHub repository), it outputs a `.gitascii.json` file structured according to the `SavedConfiguration` interface.
+
+## Complete Real JSON Example
+
+Below is a complete, production-valid configuration representing a Terminal layout:
+
+```json
+{
+  "version": 1,
+  "githubId": 583231,
+  "username": "octocat",
+  "profileSlug": "default",
+  "profileName": "Default",
+  "templateId": "terminal",
+  "globalStyles": {
+    "backgroundColor": "#060606",
+    "transparentBackground": false,
+    "textColor": "#ffffff",
+    "accentColor": "#c5ff4a",
+    "borderColor": "#252525",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "widgets": [
+    {
+      "instanceId": "widget_header_0",
+      "widgetId": "header",
+      "name": "Header Widget",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 800, "height": 90 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_ascii_art_1",
+      "widgetId": "ascii-art",
+      "name": "ASCII Art Widget",
+      "position": { "x": 0, "y": 106 },
+      "size": { "width": 280, "height": 280 },
+      "config": {
+        "detail": "medium",
+        "cols": 150,
+        "charset": "dense",
+        "edgeEnhance": true,
+        "lockAspectRatio": true,
+        "accentColor": "#c5ff4a",
+        "fontSize": 9
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_terminal_info_2",
+      "widgetId": "terminal-info",
+      "name": "Terminal Info Widget",
+      "position": { "x": 296, "y": 106 },
+      "size": { "width": 504, "height": 280 },
+      "config": {
+        "headerColor": "#58a6ff",
+        "labelColor": "#ffa657",
+        "valueColor": "#c9d1d9",
+        "dotLeaders": true,
+        "showUptime": true,
+        "showLocation": true,
+        "showLanguages": true,
+        "showStars": true,
+        "showRepos": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_languages_3",
+      "widgetId": "languages",
+      "name": "Top Languages Widget",
+      "position": { "x": 0, "y": 402 },
+      "size": { "width": 800, "height": 140 },
+      "config": {
+        "langsLayout": "bars",
+        "langsCount": 5,
+        "showPercentage": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    },
+    {
+      "instanceId": "widget_repositories_4",
+      "widgetId": "repositories",
+      "name": "Featured Repos Widget",
+      "position": { "x": 0, "y": 558 },
+      "size": { "width": 800, "height": 300 },
+      "config": {
+        "repoViewMode": "list",
+        "repoSortBy": "stars",
+        "maxRepos": 3,
+        "showRepoLanguage": true,
+        "showRepoStars": true,
+        "showRepoDesc": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 5
+    },
+    {
+      "instanceId": "widget_footer_5",
+      "widgetId": "footer",
+      "name": "Footer Widget",
+      "position": { "x": 0, "y": 874 },
+      "size": { "width": 800, "height": 50 },
+      "config": {
+        "accentColor": "#c5ff4a"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-02-18T10:00:00.000Z",
+    "updatedAt": "2026-02-18T10:00:00.000Z",
+    "schemaVersion": 1,
+    "generatedBy": "manual"
+  }
+}
+```
+
+---
+
+## Consuming JSON via Node.js / Server
+
+You can load this JSON file from disk or an API response and feed it straight to `renderSvg`:
+
+```typescript
+import fs from 'node:fs'
+import { renderSvg, embedExternalImages, SavedConfiguration } from '@/engine'
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+
+async function generateSvgFromJson(configPath: string): Promise<string> {
+  const fileContent = fs.readFileSync(configPath, 'utf-8')
+  const config: SavedConfiguration = JSON.parse(fileContent)
+
+  // Fetch real-time GitHub profile metrics
+  const profileData = await fetchGitHubProfile(config.username)
+
+  // Render SVG composition
+  const rawSvg = renderSvg(config, profileData)
+  const { svg } = await embedExternalImages(rawSvg)
+
+  return svg
+}
+```

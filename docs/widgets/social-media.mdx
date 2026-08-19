@@ -1,0 +1,68 @@
+---
+title: "Social Media Widget"
+description: "Interactive badge strip and shields linking to developer social platforms"
+---
+
+# Social Media Widget (`social-media`)
+
+The Social Media widget generates clickable badges for GitHub, LinkedIn, X/Twitter, Discord, YouTube, Instagram, Twitch, Dev.to, Medium, Email, Bluesky, Mastodon, Telegram, and more.
+
+## Configuration Schema
+
+```typescript
+export interface SocialMediaConfig {
+  selectedSocials?: string[]               // Array of platform keys
+  socialUrls?: Record<string, string>      // Custom URLs keyed by platform ID
+  badgeStyle?: 'for-the-badge' | 'flat-square' | 'social' | 'skillicons' // Default: 'for-the-badge'
+  showTitle?: boolean                      // Default: true
+  customTitle?: string                     // Default: '[ SOCIAL MEDIA ]'
+  theme?: 'dark' | 'light'                 // Default: 'dark'
+}
+```
+
+<ParamField body="selectedSocials" type="string[]" default="Auto-detected">
+  Platform IDs to render. Supported platforms: `github`, `linkedin`, `twitter`, `discord`, `youtube`, `instagram`, `twitch`, `devto`, `medium`, `email`, `website`, `stackoverflow`, `bluesky`, `mastodon`, `reddit`, `spotify`, `telegram`, `tiktok`, `steam`, `hashnode`.
+</ParamField>
+
+<ParamField body="badgeStyle" type="'for-the-badge' | 'flat-square' | 'social' | 'skillicons'" default="for-the-badge">
+  * `for-the-badge`: Bold, uppercase Shields.io badges.
+  * `flat-square`: Clean rectangular flat badges.
+  * `social`: Minimalist social counter badges.
+  * `skillicons`: Circular dark/light skill icon strip.
+</ParamField>
+
+<ParamField body="socialUrls" type="Record<string, string>" optional>
+  Mapping of custom target links (e.g. `{"linkedin": "https://linkedin.com/in/octocat"}`).
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const socialWidget: WidgetInstance = {
+  instanceId: 'social_01',
+  widgetId: 'social-media',
+  name: 'Social Media',
+  position: { x: 0, y: 720 },
+  size: { width: 800, height: 120 },
+  config: {
+    selectedSocials: ['github', 'linkedin', 'twitter', 'discord', 'email'],
+    badgeStyle: 'for-the-badge',
+    socialUrls: {
+      github: 'https://github.com/octocat',
+      linkedin: 'https://linkedin.com/in/octocat',
+      twitter: 'https://x.com/octocat',
+      email: 'mailto:octocat@github.com',
+    },
+    showTitle: true,
+  },
+  locked: false,
+  visible: true,
+  zIndex: 6,
+}
+
+const svgOutput = renderWidgetSvg(socialWidget, profileData, globalStyles)
+```

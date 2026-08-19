@@ -1,0 +1,160 @@
+---
+title: "Quickstart"
+description: "Start rendering standalone and composite widgets programmatically"
+---
+
+# Quickstart
+
+Get up and running with GitAscii in under 5 minutes. You can either call the live HTTP endpoint or run the core TypeScript rendering engine directly inside your Node.js or edge application.
+
+## 1. HTTP Endpoint Rendering
+
+GitAscii exposes dynamic SVG endpoints that can be embedded directly in your GitHub `README.md`.
+
+<CodeGroup>
+
+```markdown GitHub Markdown (Full Profile)
+<!-- Embed Full Profile SVG -->
+![GitAscii Profile](https://gitascii.com/api/YOUR_USERNAME?theme=dark)
+```
+
+```markdown GitHub Markdown (Standalone Widget)
+<!-- Embed Specific Standalone Widget (e.g. Stats, Streak, or Languages) -->
+![GitHub Live Stats](https://gitascii.com/api/YOUR_USERNAME?widgets=stats)
+![Language Breakdown](https://gitascii.com/api/YOUR_USERNAME?widgets=languages)
+![Neofetch Terminal Card](https://gitascii.com/api/YOUR_USERNAME?widgets=terminal-info)
+```
+
+```markdown GitHub Markdown (HTML Picture Theme Switching)
+<!-- Automatic Light/Dark Mode Rendering with GitHub Camo -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/YOUR_USERNAME?theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/YOUR_USERNAME?theme=light" />
+  <img src="https://gitascii.com/api/YOUR_USERNAME" alt="GitAscii Profile" />
+</picture>
+```
+
+</CodeGroup>
+
+---
+
+## 2. Programmatic Engine Rendering (TypeScript)
+
+If you are building custom tools, CLI banners, or Next.js edge routes, import the core engine from `@/engine`:
+
+```typescript
+import {
+  renderSvg,
+  embedExternalImages,
+  createConfiguration,
+  NormalizedGitHubData,
+  SavedConfiguration,
+  WidgetInstance,
+} from '@/engine'
+
+// 1. Prepare Mock or Live GitHub Data
+const profileData: NormalizedGitHubData = {
+  user: {
+    id: 123456,
+    login: 'octocat',
+    name: 'The Octocat',
+    avatar_url: 'https://github.com/images/error/octocat_happy.gif',
+    bio: 'Building open source developer tools.',
+    company: 'GitHub',
+    blog: 'https://github.blog',
+    location: 'San Francisco, CA',
+    email: null,
+    twitter_username: 'github',
+    public_repos: 8,
+    public_gists: 1,
+    followers: 1200,
+    following: 0,
+    created_at: '2011-01-25T18:44:36Z',
+    updated_at: '2026-01-01T00:00:00Z',
+  },
+  repos: [
+    {
+      id: 1,
+      name: 'git-ascii',
+      description: 'Aesthetic SVG generator for developer profiles',
+      stargazers_count: 340,
+      forks_count: 24,
+      language: 'TypeScript',
+      html_url: 'https://github.com/octocat/git-ascii',
+      fork: false,
+      updated_at: '2026-02-18T10:00:00Z',
+    },
+  ],
+  languages: {
+    TypeScript: 84500,
+    JavaScript: 12400,
+    CSS: 5600,
+  },
+  totalStars: 340,
+  totalForks: 24,
+  readmeContent: null,
+  socialAccounts: [],
+  contributions: {
+    totalContributions: 1420,
+    weeks: [],
+  },
+}
+
+// 2. Generate a Configuration Preset
+const config: SavedConfiguration = createConfiguration(
+  profileData.user.id,
+  profileData.user.login,
+  'terminal', // 'terminal' | 'minimal' | 'dracula' | 'synthwave' | etc.
+  'default',
+  'Default Profile',
+  profileData
+)
+
+// 3. Render Pure SVG
+const rawSvg = renderSvg(config, profileData, { theme: 'dark' })
+
+// 4. Inline External Images (for shields and remote avatars)
+const { svg: finalSvg, hasErrors } = await embedExternalImages(rawSvg)
+
+console.log(finalSvg) // Standard XML/SVG string
+```
+
+---
+
+## 3. Rendering an Individual Widget Standalone
+
+To isolate and render a single widget without creating a full multi-widget layout:
+
+```typescript
+import { renderWidgetSvg, NormalizedGitHubData, GlobalStyles, WidgetInstance } from '@/engine'
+
+const globalStyles: GlobalStyles = {
+  backgroundColor: '#060606',
+  textColor: '#ffffff',
+  accentColor: '#c5ff4a',
+  borderColor: '#252525',
+  fontFamily: "'JetBrains Mono', monospace",
+  borderRadius: 4,
+  padding: 24,
+  themeMode: 'dark',
+}
+
+const widget: WidgetInstance = {
+  instanceId: 'stats_widget_01',
+  widgetId: 'stats',
+  name: 'GitHub Stats',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 120 },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+  config: {
+    statsStyle: 'terminal',
+    statsLayout: 'horizontal',
+    accentColor: '#c5ff4a',
+    valueFontSize: 28,
+  },
+}
+
+const widgetSvgSnippet = renderWidgetSvg(widget, profileData, globalStyles)
+```

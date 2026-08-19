@@ -1,0 +1,51 @@
+---
+title: "Control Plane Loop Widget"
+description: "Animated closed-loop architecture map connecting repository execution nodes"
+---
+
+# Control Plane Loop Widget (`controlplane-system-loop`)
+
+The Control Plane Loop widget represents projects as an interconnected circuit loop with rotating central reactor hubs, live flow pulses (`@keyframes flow`), and node metrics.
+
+## Configuration Schema
+
+```typescript
+export interface ControlplaneSystemLoopConfig {
+  layoutType?: 'hero' | 'closed-loop' // Default: 'closed-loop'
+  customTitle?: string                // Header identity label
+  customBio?: string                  // Subtitle copy
+  accentColor?: string                // Primary highlight (default: '#00A7D1')
+  secondaryColor?: string             // Secondary signal color (default: '#E84A8A')
+}
+```
+
+<ParamField body="layoutType" type="'hero' | 'closed-loop'" default="closed-loop">
+  * `closed-loop`: Elliptical circuit loop with orbiting core reactor and 6 satellite nodes.
+  * `hero`: Full-bleed 1200x360 mission console with active execution path layers.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const loopWidget: WidgetInstance = {
+  instanceId: 'loop_01',
+  widgetId: 'controlplane-system-loop',
+  name: 'Control Plane Loop',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 360 },
+  config: {
+    layoutType: 'closed-loop',
+    accentColor: '#00A7D1',
+    secondaryColor: '#E84A8A',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(loopWidget, profileData, globalStyles)
+```

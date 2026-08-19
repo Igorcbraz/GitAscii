@@ -1,0 +1,62 @@
+---
+title: "Header Widget"
+description: "Profile title header with display typography, @handle, and company badge"
+---
+
+# Header Widget (`header`)
+
+The Header widget renders the developer's full name in lightweight display typography (PT Serif / Inter Tight), the `@handle` in monospace accent coloring, and an optional right-aligned `[ COMPANY ]` metadata stamp.
+
+## Configuration Schema
+
+```typescript
+export interface HeaderConfig {
+  textColor?: string       // Default: globalStyles.textColor || '#ffffff'
+  accentColor?: string     // Default: globalStyles.accentColor || '#c5ff4a'
+  hideBorder?: boolean     // Default: false
+}
+```
+
+<ParamField body="textColor" type="string" default="globalStyles.textColor">
+  Color applied to the user's name.
+</ParamField>
+
+<ParamField body="accentColor" type="string" default="globalStyles.accentColor">
+  Color applied to the `@username` handle.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance, NormalizedGitHubData, GlobalStyles } from '@/engine'
+
+const headerWidget: WidgetInstance = {
+  instanceId: 'header_01',
+  widgetId: 'header',
+  name: 'Header',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 90 },
+  config: {
+    accentColor: '#c5ff4a',
+    textColor: '#ffffff',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(headerWidget, profileData, globalStyles)
+```
+
+### Expected Output
+
+```xml
+<g transform="translate(0, 0)" id="widget-header_01">
+  <rect x="0" y="0" width="800" height="90" fill="#1f1f1f" stroke="#252525" stroke-width="1" rx="0" />
+  <text x="24" y="44" font-family="'Inter Tight', sans-serif" font-size="28" font-weight="300" fill="#ffffff">The Octocat</text>
+  <text x="24" y="72" font-family="'JetBrains Mono', monospace" font-size="14" fill="#c5ff4a">@octocat</text>
+  <text x="776" y="44" text-anchor="end" font-family="'Inter Tight', sans-serif" font-size="12" fill="#7a7a7a">[ GitHub ]</text>
+</g>
+```

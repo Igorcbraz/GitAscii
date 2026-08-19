@@ -1,0 +1,62 @@
+---
+title: "Top Languages Widget"
+description: "Language breakdown visualization with horizontal progress bars, compact grids, and donut charts"
+---
+
+# Top Languages Widget (`languages`)
+
+The Languages widget computes byte distributions from public repositories and renders visual percentage breakdowns using official language brand colors.
+
+## Configuration Schema
+
+```typescript
+export interface LanguagesConfig {
+  langsLayout?: 'bars' | 'list' | 'compact' | 'donut' // Default: 'bars'
+  langsCount?: number                                 // Default: 5 (max languages to show)
+  showPercentage?: boolean                            // Default: true
+  hideLangsArr?: string[]                             // Excluded languages array
+  hideLangs?: string                                  // Comma-separated excluded languages
+  donutLegendPos?: 'bottom' | 'side'                  // Default: 'bottom' (donut mode only)
+  donutShowPct?: boolean                              // Default: true (donut mode only)
+  donutCenterLabel?: boolean                          // Default: false (donut mode only)
+}
+```
+
+<ParamField body="langsLayout" type="'bars' | 'list' | 'compact' | 'donut'" default="bars">
+  * `bars`: Continuous stacked horizontal progress bar with two-column legend below.
+  * `list`: Vertical list with individual percentage progress bars.
+  * `compact`: Dense badge pills with color dots.
+  * `donut`: Trigonometric SVG donut arc chart with legend and optional center label.
+</ParamField>
+
+<ParamField body="langsCount" type="number" default="5">
+  Limits how many top languages are displayed.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const languagesWidget: WidgetInstance = {
+  instanceId: 'languages_01',
+  widgetId: 'languages',
+  name: 'Top Languages',
+  position: { x: 0, y: 402 },
+  size: { width: 800, height: 140 },
+  config: {
+    langsLayout: 'donut',
+    langsCount: 6,
+    donutLegendPos: 'side',
+    donutCenterLabel: true,
+    showPercentage: true,
+  },
+  locked: false,
+  visible: true,
+  zIndex: 4,
+}
+
+const svgOutput = renderWidgetSvg(languagesWidget, profileData, globalStyles)
+```

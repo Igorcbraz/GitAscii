@@ -1,0 +1,68 @@
+---
+title: "ASCII Art Widget"
+description: "Image-to-ASCII character art converter with luminance matrix dithering and multi-color support"
+---
+
+# ASCII Art Widget (`ascii-art`)
+
+The ASCII Art widget converts avatars or custom images into character-based text art. It supports dense grayscale gradients, true braille matrices, edge enhancement, gamma correction, and full-color `<tspan>` matrices.
+
+## Configuration Schema
+
+```typescript
+export interface AsciiArtConfig {
+  charset?: 'dense' | 'standard' | 'blocks' | 'dots' | 'braille' | 'matrix' | 'minimal' | 'ascii' | 'binary' | 'slash' | 'retro' | 'custom'
+  customCharset?: string
+  colorMode?: 'monochrome' | 'color'  // Default: 'monochrome'
+  fontSize?: number                   // Default: 9
+  cols?: number                       // Default: 150
+  rows?: number                       // Default: Math.round(cols * 0.5)
+  invert?: boolean                    // Inverts character luminance ramp
+  edgeEnhance?: boolean               // Sobel-style edge detection boost
+  dithering?: boolean                 // Floyd-Steinberg error diffusion
+  accentColor?: string                // Tint applied in monochrome mode
+  asciiText?: string[]                // Inlined pre-calculated ASCII text lines
+  asciiColors?: string[][]            // Inlined color matrix (rows x cols)
+}
+```
+
+<ParamField body="charset" type="string" default="dense">
+  Selects the character set for brightness mapping:
+  * `dense`: 70-character gradient for maximum photographic precision.
+  * `standard`: Classic ` .:-=+*#%@` ramp.
+  * `blocks`: Shading blocks ` ░▒▓█`.
+  * `braille`: True unicode Braille patterns (`⡿⣟⣯⣷`).
+  * `matrix`: Hexadecimal characters ` 0123456789ABCDEF`.
+</ParamField>
+
+<ParamField body="colorMode" type="'monochrome' | 'color'" default="monochrome">
+  When set to `color`, uses `asciiColors` to tint individual characters matching the original image pixels.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const asciiArtWidget: WidgetInstance = {
+  instanceId: 'ascii_art_01',
+  widgetId: 'ascii-art',
+  name: 'ASCII Art',
+  position: { x: 0, y: 106 },
+  size: { width: 280, height: 280 },
+  config: {
+    charset: 'dense',
+    colorMode: 'monochrome',
+    accentColor: '#c5ff4a',
+    fontSize: 9,
+    edgeEnhance: true,
+  },
+  locked: false,
+  visible: true,
+  zIndex: 2,
+}
+
+const svgOutput = renderWidgetSvg(asciiArtWidget, profileData, globalStyles)
+```

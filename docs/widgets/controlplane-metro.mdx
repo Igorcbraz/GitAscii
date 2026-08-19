@@ -1,0 +1,45 @@
+---
+title: "Metro Transit Map Widget"
+description: "Repositories represented as an interconnected network of transit train lines"
+---
+
+# Metro Transit Map Widget (`controlplane-metro`)
+
+The Metro Transit Map widget visualizes software repositories and dependencies as colorful, intersecting public transit subway lines with station nodes and transfer hubs.
+
+## Configuration Schema
+
+```typescript
+export interface MetroMapConfig {
+  selectedRepos?: string[]
+  repoSortBy?: 'stars' | 'forks' | 'updated' | 'name'
+  maxRepos?: number
+  accentColor?: string
+  secondaryColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const metroWidget: WidgetInstance = {
+  instanceId: 'metro_01',
+  widgetId: 'controlplane-metro',
+  name: 'Metro Transit Map',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 350 },
+  config: {
+    accentColor: '#00A7D1',
+    secondaryColor: '#E84A8A',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(metroWidget, profileData, globalStyles)
+```

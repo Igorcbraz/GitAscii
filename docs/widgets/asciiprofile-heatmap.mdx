@@ -1,0 +1,49 @@
+---
+title: "ASCII Heatmap Widget"
+description: "Animated contribution heatmap calendar with streak statistics and day records"
+---
+
+# ASCII Heatmap Widget (`asciiprofile-heatmap`)
+
+The ASCII Heatmap widget renders a full 52-week contribution graph with GitHub dark greens, month labels, weekday ticks, custom palette support, animated cell drop-in cascades (`@keyframes cell`), and calculated streak metrics (current streak, longest streak, best day).
+
+## Configuration Schema
+
+```typescript
+export interface AsciiHeatmapConfig {
+  palette?: string[]       // Array of 6 color hexes (Level 0 through Level 5)
+  staticMode?: boolean     // Disables cascade drop-in animation
+  accentColor?: string     // Default: '#22d3ee'
+  backgroundColor?: string // Default: '#0a0e14'
+  borderColor?: string     // Default: '#1f6feb'
+}
+```
+
+<ParamField body="palette" type="string[]" default="['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353', '#69f0a0']">
+  Color mapping from zero commits to maximum activity.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const heatmapWidget: WidgetInstance = {
+  instanceId: 'ascii_heatmap_01',
+  widgetId: 'asciiprofile-heatmap',
+  name: 'ASCII Heatmap',
+  position: { x: 0, y: 0 },
+  size: { width: 780, height: 240 },
+  config: {
+    accentColor: '#c5ff4a',
+    palette: ['#161b22', '#1b4b27', '#216e39', '#30a14e', '#40c463', '#c5ff4a'],
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(heatmapWidget, profileData, globalStyles)
+```

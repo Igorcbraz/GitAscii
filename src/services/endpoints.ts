@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
     RAW_PROFILE_FILE: (username: string, branch: string, path: string) =>
       `https://raw.githubusercontent.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/${encodeURIComponent(branch)}/${path}`,
     APP_INFO: 'https://api.github.com/app',
+    APP_INSTALLATIONS: 'https://api.github.com/app/installations?per_page=100',
     USER_INSTALLATION: (username: string) =>
       `https://api.github.com/users/${encodeURIComponent(username)}/installation`,
     INSTALLATION_DETAILS: (installationId: string | number) =>

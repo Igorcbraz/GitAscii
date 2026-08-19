@@ -18,13 +18,13 @@
     "build-storybook": "storybook build",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "docs": "cd docs && mintlify dev"
   },
   "dependencies": {
     "@next/third-parties": "^16.3.0",
     "@sentry/nextjs": "^10.69.0",
     "@tcgdex/sdk": "^2.9.0",
-    "@vercel/blob": "^2.6.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "motion": "^12.43.0",
@@ -33,6 +33,7 @@
     "react-dom": "^19.0.0",
     "react-joyride": "^3.2.0",
     "tailwind-merge": "^3.6.0",
+    "undici": "^8.10.0",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
@@ -55,6 +56,8 @@
     "@types/react-dom": "^19.0.0",
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.0",
     "eslint-config-prettier": "^10.1.8",

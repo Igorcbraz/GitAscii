@@ -1,0 +1,67 @@
+---
+title: "ASCII Info Card Widget"
+description: "Neofetch-style system info card with developer metadata, stack, and highlights"
+---
+
+# ASCII Info Card Widget (`asciiprofile-info`)
+
+The ASCII Info Card widget renders a GitHub Dark-themed system summary card with staggered rising key-value pairs, categorized tech stack listings, and metric bullet points.
+
+## Configuration Schema
+
+```typescript
+export interface AsciiInfoCardConfig {
+  infoHost?: string        // Custom host header (default: username)
+  showNow?: boolean        // Default: true (current focus / bio)
+  customNow?: string       // Override for Now
+  showAlso?: boolean       // Default: true (company / secondary role)
+  customAlso?: string      // Override for Also
+  showLoc?: boolean        // Default: true (location)
+  customLoc?: string       // Override for Loc
+  showSite?: boolean       // Default: true (website)
+  customSite?: string      // Override for Site
+  showLangs?: boolean      // Default: true (primary languages)
+  customLangs?: string     // Override for Langs
+  showFrontend?: boolean   // Default: true
+  customFrontend?: string  // Override for Frontend
+  showBackend?: boolean    // Default: true
+  customBackend?: string   // Override for Backend
+  showBullet1?: boolean    // Default: true
+  customBullet1?: string   // Override for Highlight 1
+  showBullet2?: boolean    // Default: true
+  customBullet2?: string   // Override for Highlight 2
+  staticMode?: boolean     // Disables entrance rise animation
+  accentColor?: string     // Orange key highlight color (default: '#ffa657')
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const infoCardWidget: WidgetInstance = {
+  instanceId: 'ascii_info_01',
+  widgetId: 'asciiprofile-info',
+  name: 'ASCII Info Card',
+  position: { x: 0, y: 0 },
+  size: { width: 490, height: 400 },
+  config: {
+    showNow: true,
+    showAlso: true,
+    showLangs: true,
+    showFrontend: true,
+    showBackend: true,
+    customFrontend: 'React, Next.js, Tailwind CSS',
+    customBackend: 'Node.js, PostgreSQL, Docker',
+    accentColor: '#ffa657',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(infoCardWidget, profileData, globalStyles)
+```

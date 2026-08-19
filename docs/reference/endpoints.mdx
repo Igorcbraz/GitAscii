@@ -1,0 +1,85 @@
+---
+title: "HTTP Endpoints Reference"
+description: "Detailed specification of routes, query parameters, cache headers, and error codes"
+---
+
+# HTTP Endpoints Reference
+
+GitAscii exposes edge API route handlers powered by Next.js App Router in `src/app/`.
+
+## 1. Catch-all Profile SVG Route
+
+```http
+GET /:username.svg
+GET /api/:username
+GET /api/:username/:profileSlug
+GET /api/svg/:username
+```
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `username` | `string` | **Yes** | GitHub username handle |
+| `profileSlug` | `string` | No | Stored profile slug (`default`, `work`, etc.) |
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `theme` | `'dark' \| 'light'` | `'dark'` | Force light or dark mode palette |
+| `template` | `string` | `'terminal'` | Fallback template preset ID |
+| `widgets` | `string` | `undefined` | Comma-separated widget IDs / aliases to shrink-wrap |
+
+### Response Headers
+
+```http
+Content-Type: image/svg+xml; charset=utf-8
+Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=7200
+CDN-Cache-Control: public, s-maxage=3600, stale-while-revalidate=7200
+ETag: W/"gitascii-1a2b3c4d"
+X-Content-Type-Options: nosniff
+Access-Control-Allow-Origin: *
+```
+
+---
+
+## 2. Configuration JSON Route
+
+```http
+GET /api/config/:username/:profileSlug
+```
+
+### Success Response (`200 OK`)
+
+Returns the `SavedConfiguration` JSON object.
+
+### Error Response (`404 Not Found`)
+
+```json
+{
+  "error": "Configuration not found for user octocat and slug default"
+}
+```
+
+---
+
+## 3. Auto-Generate Profile Analysis
+
+```http
+POST /api/generate
+Content-Type: application/json
+
+{
+  "username": "octocat"
+}
+```
+
+### Success Response (`200 OK`)
+
+```json
+{
+  "config": { /* Complete SavedConfiguration object tailored to user's tech stack */ },
+  "data": { /* NormalizedGitHubData */ }
+}
+```

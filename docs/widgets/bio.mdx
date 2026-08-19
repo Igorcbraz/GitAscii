@@ -1,0 +1,60 @@
+---
+title: "Bio & Links Widget"
+description: "Word-wrapped biography text, location pin, and clickable portfolio links"
+---
+
+# Bio & Links Widget (`bio`)
+
+The Bio widget renders formatted developer bio text with automatic word-wrapping based on widget width, an optional location pin (`📍`), and a clickable portfolio/website link (`🌐`).
+
+## Configuration Schema
+
+```typescript
+export interface BioConfig {
+  customBio?: string       // Custom bio text (defaults to data.user.bio)
+  customLocation?: string  // Custom location string (defaults to data.user.location)
+  customBlog?: string      // Custom website link (defaults to data.user.blog)
+  textColor?: string       // Default: globalStyles.textColor
+  accentColor?: string     // Default: globalStyles.accentColor
+}
+```
+
+<ParamField body="customBio" type="string" optional>
+  Overrides the bio text fetched from GitHub. Supports multiline paragraphs.
+</ParamField>
+
+<ParamField body="customLocation" type="string" optional>
+  Displays a location tag with a pin emoji in the bottom footer row.
+</ParamField>
+
+<ParamField body="customBlog" type="string" optional>
+  Clickable website URL wrapped in an SVG `<a>` tag with `target="_blank"`.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const bioWidget: WidgetInstance = {
+  instanceId: 'bio_01',
+  widgetId: 'bio',
+  name: 'Bio & Links',
+  position: { x: 0, y: 106 },
+  size: { width: 800, height: 140 },
+  config: {
+    customBio: 'Full-stack engineer crafting high-performance developer tooling and CLI applications.\nPassionate about cryptography, compilers, and typography.',
+    customLocation: 'San Francisco, CA',
+    customBlog: 'https://octocat.dev',
+    textColor: '#e5e5e5',
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 2,
+}
+
+const svgOutput = renderWidgetSvg(bioWidget, profileData, globalStyles)
+```

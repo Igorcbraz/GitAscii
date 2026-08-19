@@ -261,19 +261,19 @@ export function EditorTour() {
     }, 200)
   }, [])
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1)
     } else {
       handleClose()
     }
-  }
+  }, [currentStep, steps.length, handleClose])
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1)
     }
-  }
+  }, [currentStep])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -288,7 +288,7 @@ export function EditorTour() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, currentStep, handleClose])
+  }, [isOpen, handleClose, handleNext, handlePrev])
 
   if (!mounted || !isOpen) return null
 

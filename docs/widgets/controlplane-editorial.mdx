@@ -1,0 +1,42 @@
+---
+title: "Editorial Portfolio Widget"
+description: "Restrained, typographic selected work index and project archive"
+---
+
+# Editorial Portfolio Widget (`controlplane-editorial`)
+
+The Editorial Portfolio widget renders a classified, broadsheet-inspired typographic index of selected repositories with serial numbers, monospace language tags, and high-contrast headlines.
+
+## Configuration Schema
+
+```typescript
+export interface EditorialConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const editorialWidget: WidgetInstance = {
+  instanceId: 'editorial_01',
+  widgetId: 'controlplane-editorial',
+  name: 'Editorial Portfolio',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(editorialWidget, profileData, globalStyles)
+```

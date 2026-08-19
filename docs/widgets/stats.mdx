@@ -1,0 +1,65 @@
+---
+title: "GitHub Live Stats Widget"
+description: "Real-time statistics card showing stars, repos, followers, following, forks, and gists"
+---
+
+# GitHub Live Stats Widget (`stats`)
+
+The Stats widget aggregates real-time GitHub metrics into clean, typography-driven stat blocks. It supports multiple presentation styles (Big Numbers, Terminal, Minimalist, Raised Cards) and layout arrangements (Horizontal, Vertical, 2-Column Grid).
+
+## Configuration Schema
+
+```typescript
+export interface StatsConfig {
+  statsStyle?: 'default' | 'terminal' | 'minimal' | 'cards' // Default: 'default'
+  statsLayout?: 'horizontal' | 'vertical' | 'grid'           // Default: 'horizontal'
+  labelStyle?: 'label' | 'none'                              // Default: 'label'
+  valueFontSize?: number                                     // Default: 28
+  hideMetrics?: Array<'stars' | 'repos' | 'followers' | 'following' | 'forks' | 'gists'>
+  accentColor?: string                                       // Default: globalStyles.accentColor
+  textColor?: string                                         // Default: globalStyles.textColor
+}
+```
+
+<ParamField body="statsStyle" type="'default' | 'terminal' | 'minimal' | 'cards'" default="default">
+  * `default`: Large 28px values with uppercase tracking labels below.
+  * `terminal`: Monospace bracketed formatting (`[ 42 ]`).
+  * `minimal`: Pure lightweight typography with no sublabels.
+  * `cards`: Raised card rectangles (`#1e1e1e`) with colored vertical accent stripes.
+</ParamField>
+
+<ParamField body="statsLayout" type="'horizontal' | 'vertical' | 'grid'" default="horizontal">
+  Layout distribution mode across the widget width.
+</ParamField>
+
+<ParamField body="hideMetrics" type="string[]" default="[]">
+  Array of metric IDs to hide. Available keys: `stars`, `repos`, `followers`, `following`, `forks`, `gists`.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const statsWidget: WidgetInstance = {
+  instanceId: 'stats_01',
+  widgetId: 'stats',
+  name: 'GitHub Stats',
+  position: { x: 0, y: 300 },
+  size: { width: 800, height: 115 },
+  config: {
+    statsStyle: 'terminal',
+    statsLayout: 'horizontal',
+    hideMetrics: ['following', 'gists'],
+    accentColor: '#c5ff4a',
+    valueFontSize: 28,
+  },
+  locked: false,
+  visible: true,
+  zIndex: 3,
+}
+
+const svgOutput = renderWidgetSvg(statsWidget, profileData, globalStyles)
+```

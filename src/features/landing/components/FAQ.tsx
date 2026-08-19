@@ -1,7 +1,6 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
 import { LANDING_FAQS } from '@/constants'
@@ -44,49 +43,45 @@ export function FAQ() {
             const isOpen = openIndex === index
             const qNumber = `Q ${(index + 1).toString().padStart(2, '0')}`
             return (
-              <div
+              <article
                 key={index}
                 className={`border border-graphite transition-all duration-300 ${isOpen ? 'bg-onyx' : 'bg-transparent hover:bg-onyx/50'}`}
               >
                 <button
                   onClick={() => toggleOpen(index)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${index}`}
                   className="w-full py-6 px-6 flex items-center justify-between text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-6">
                     <span className="font-jetbrains-mono text-label text-ash group-hover:text-chalk transition-colors">
                       {qNumber}
                     </span>
-                    <span
+                    <h3
                       className={`font-inter-tight font-medium text-[16px] transition-colors duration-200 ${isOpen ? 'text-signal-lime' : 'text-chalk group-hover:text-chalk'}`}
                     >
                       {faq.question}
-                    </span>
+                    </h3>
                   </div>
                   <ChevronDown
                     className={`w-5 h-5 transition-all duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : 'text-ash group-hover:text-chalk'}`}
                   />
                 </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      key="content"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 pb-6">
-                        <div className="pl-14">
-                          <p className="font-inter-tight font-normal text-body text-bone leading-body">
-                            {faq.answer}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                <div
+                  id={`faq-answer-${index}`}
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="px-6 pb-6 pl-14">
+                      <p className="font-inter-tight font-normal text-body text-bone leading-body">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
             )
           })}
         </div>

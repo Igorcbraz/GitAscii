@@ -1,0 +1,42 @@
+---
+title: "Monolith Strata Index Widget"
+description: "Stark internationalist poster strata index list layout"
+---
+
+# Monolith Strata Index Widget (`controlplane-monolith`)
+
+The Monolith Strata Index widget formats repositories using Swiss/Internationalist typography principles, featuring stark horizontal strata lines, large index numbers, and high-contrast typography.
+
+## Configuration Schema
+
+```typescript
+export interface MonolithConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const monolithWidget: WidgetInstance = {
+  instanceId: 'monolith_01',
+  widgetId: 'controlplane-monolith',
+  name: 'Monolith Strata Index',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#ffffff',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(monolithWidget, profileData, globalStyles)
+```

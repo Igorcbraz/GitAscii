@@ -1,0 +1,42 @@
+---
+title: "Field Specimen Catalog Widget"
+description: "Exploratory dichotomous key and taxonomy specimen plate"
+---
+
+# Field Specimen Catalog Widget (`controlplane-specimen`)
+
+The Field Specimen Catalog widget categorizes software projects as botanical/scientific specimen slides with specimen labels, classification indices, and dissection pins.
+
+## Configuration Schema
+
+```typescript
+export interface SpecimenConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const specimenWidget: WidgetInstance = {
+  instanceId: 'specimen_01',
+  widgetId: 'controlplane-specimen',
+  name: 'Field Specimen Catalog',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(specimenWidget, profileData, globalStyles)
+```

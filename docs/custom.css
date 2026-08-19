@@ -1,0 +1,55 @@
+/* GitAscii Docs Custom Theme Overrides */
+
+/* Ensure Open Editor CTA button has dark/black readable text on lime background */
+header a[href*='editor'],
+header a[href*='editor'] *,
+a[href='https://gitascii.com/editor'],
+a[href='https://gitascii.com/editor'] *,
+[class*='ctaButton'],
+[class*='ctaButton'] *,
+[class*='topbarCta'],
+[class*='topbarCta'] * {
+  color: #060606 !important;
+  font-weight: 700 !important;
+}
+
+header a[href*='editor'],
+a[href='https://gitascii.com/editor'],
+[class*='ctaButton'],
+[class*='topbarCta'] {
+  background-color: #c5ff4a !important;
+  border: 1px solid #c5ff4a !important;
+  transition: opacity 0.2s ease;
+}
+
+header a[href*='editor']:hover,
+a[href='https://gitascii.com/editor']:hover,
+[class*='ctaButton']:hover,
+[class*='topbarCta']:hover {
+  opacity: 0.88;
+}
+
+/* Ensure Search bar/button maintains clean styling without green background */
+#search-bar-entry,
+header button[aria-label*='Search' i],
+button[aria-label*='Search' i],
+header [id*='search'] button {
+  background-color: transparent !important;
+}
+
+/* Theme Toggle Button Clean Contrast */
+header button[aria-label*='theme' i],
+header button[aria-label*='mode' i],
+header button[aria-label*='dark' i],
+header button[aria-label*='light' i] {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Sidebar active page highlight */
+[data-active='true'],
+.active-nav-item,
+nav a[aria-current='page'] {
+  color: #c5ff4a !important;
+  font-weight: 600 !important;
+}

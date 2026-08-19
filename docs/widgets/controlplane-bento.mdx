@@ -1,0 +1,42 @@
+---
+title: "Bento Grid Workbench Widget"
+description: "Modular bento grid displaying project metrics, component cards, and live telemetry"
+---
+
+# Bento Grid Workbench Widget (`controlplane-bento`)
+
+The Bento Grid Workbench widget arranges projects, stargazers, commit records, and active stacks into asymmetrical rectangular bento compartments with fine hairline grid borders.
+
+## Configuration Schema
+
+```typescript
+export interface BentoGridWorkbenchConfig {
+  selectedRepos?: string[]
+  accentColor?: string
+  textColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const bentoWidget: WidgetInstance = {
+  instanceId: 'bento_01',
+  widgetId: 'controlplane-bento',
+  name: 'Bento Grid Workbench',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 340 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(bentoWidget, profileData, globalStyles)
+```

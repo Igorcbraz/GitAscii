@@ -419,7 +419,7 @@ export function EditorToolbar() {
 
   return (
     <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
             G
@@ -429,24 +429,29 @@ export function EditorToolbar() {
           </span>
         </Link>
 
+        {/* Language Selector to the left, beside logo */}
+        <LanguageSelector align="left" />
+
         <div className="h-4 w-px bg-graphite hidden sm:block" />
 
         <div className="flex items-center gap-3 z-10">
           {session ? (
-            <div className="flex items-center gap-2">
+            <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
               <Link
                 href={`/${session.username}`}
-                className="inline-flex items-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-3.5 py-2 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 hover:border-signal-lime hover:shadow-[0_0_8px_rgba(197,255,74,0.2)] hover:bg-onyx/80"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-label font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
+                title={`Profile @${session.username}`}
               >
-                <User className="size-3.5" />
-                <span className="hidden sm:inline">@{session.username}</span>
+                <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
+                <span className="truncate max-w-[65px] font-inter-tight">@{session.username}</span>
               </Link>
+              <span className="h-4 w-px bg-graphite/80 shrink-0" />
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-sm border border-graphite hover:border-red-500/50 hover:bg-red-500/10 text-ash hover:text-red-400 transition-all duration-300 cursor-pointer"
+                className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
                 title={t('editor.toolbar.logout', 'Sair da conta')}
               >
-                <LogOut className="size-4" />
+                <LogOut className="size-3.5" />
               </button>
             </div>
           ) : (
@@ -456,20 +461,26 @@ export function EditorToolbar() {
                 window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
               }}
               disabled={isLoginLoading}
-              className="inline-flex items-center gap-2 rounded-sm bg-signal-lime px-4 py-1.5 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:scale-[1.03] active:scale-[0.98] hover:shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:brightness-110 cursor-pointer disabled:opacity-60 disabled:hover:scale-100"
+              className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/70 bg-gradient-to-r from-onyx via-carbon to-onyx px-3 h-[32px] w-[130px] font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:border-graphite hover:bg-carbon hover:shadow-[0_0_14px_rgba(197,255,74,0.15)] active:scale-[0.98] group cursor-pointer disabled:opacity-60 disabled:hover:scale-100 overflow-hidden relative"
             >
+              <div className="absolute inset-0 bg-signal-lime/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               {isLoginLoading ? (
-                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <span className="w-3.5 h-3.5 border-2 border-signal-lime border-t-transparent rounded-full animate-spin shrink-0" />
               ) : (
-                <LogIn className="size-4" />
+                <LogIn className="size-3.5 text-signal-lime group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
               )}
-              <span>{t('editor.toolbar.login_github', 'LOGIN')}</span>
+              <span className="font-inter-tight font-medium text-white tracking-wide z-10">
+                Log
+                <span className="font-pt-serif italic text-signal-lime ml-0.5 font-light text-[14px]">
+                  in
+                </span>
+              </span>
             </button>
           )}
         </div>
       </div>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-2">
         <button
           onClick={() => setCommandPaletteOpen(true)}
           data-testid="command-palette-btn"
@@ -485,17 +496,17 @@ export function EditorToolbar() {
             <Command size={9} />K
           </kbd>
         </button>
-      </div>
 
-      <div className="flex items-center gap-3" id="tour-export-buttons">
-        <LanguageSelector align="right" />
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
           title={t('editor.toolbar.tour', 'Take Tour')}
-          className="p-1.5 rounded-[4px] text-ash hover:bg-graphite hover:text-chalk transition-colors cursor-pointer"
+          className="p-1.5 h-[32px] w-[32px] flex items-center justify-center text-ash hover:text-signal-lime transition-colors cursor-pointer"
         >
           <Info size={14} />
         </button>
+      </div>
+
+      <div className="flex items-center gap-3" id="tour-export-buttons">
         <button
           onClick={handleExport}
           data-testid="export-layout-btn"

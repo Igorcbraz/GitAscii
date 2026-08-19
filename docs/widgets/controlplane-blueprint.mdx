@@ -1,0 +1,42 @@
+---
+title: "Blueprint Assemblies Widget"
+description: "Engineering drawing assembly parts index with CAD blueprint aesthetic"
+---
+
+# Blueprint Assemblies Widget (`controlplane-blueprint`)
+
+The Blueprint Assemblies widget renders repositories as technical CAD engineering parts with cross-hair registration marks, technical dimension lines, part callouts, and blueprint dark cyan styling.
+
+## Configuration Schema
+
+```typescript
+export interface BlueprintConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const blueprintWidget: WidgetInstance = {
+  instanceId: 'blueprint_01',
+  widgetId: 'controlplane-blueprint',
+  name: 'Blueprint Assemblies',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#00ADD8',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(blueprintWidget, profileData, globalStyles)
+```

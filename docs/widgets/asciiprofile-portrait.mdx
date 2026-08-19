@@ -1,0 +1,54 @@
+---
+title: "ASCII Portrait Widget"
+description: "Monochrome ASCII portrait with line-by-line typing animation and riding cursor"
+---
+
+# ASCII Portrait Widget (`asciiprofile-portrait`)
+
+The ASCII Portrait widget renders a dark-mode terminal window containing an animated ASCII avatar with SMIL typewriter clip paths (`<clipPath>`) and a blinking green cursor that rides each scan line as it reveals.
+
+## Configuration Schema
+
+```typescript
+export interface AsciiPortraitConfig {
+  cols?: number            // Default: 100
+  charset?: string         // Character ramp (default: ' .`:-=+*cs#%@')
+  customCharset?: string   // Custom character ramp
+  rowDur?: number          // Duration per row in seconds (default: 0.11)
+  stagger?: number         // Delay between row triggers (default: 0.11)
+  staticMode?: boolean     // Disables animation for clean static SVG
+  customTitle?: string     // Terminal header title
+  customWhoami?: string    // Terminal footer status handle
+  asciiText?: string[]     // Pre-calculated ASCII lines
+  accentColor?: string     // Default: '#c9d1d9'
+  backgroundColor?: string // Default: '#111722'
+  borderColor?: string     // Default: '#30363d'
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const portraitWidget: WidgetInstance = {
+  instanceId: 'ascii_portrait_01',
+  widgetId: 'asciiprofile-portrait',
+  name: 'ASCII Portrait',
+  position: { x: 0, y: 0 },
+  size: { width: 370, height: 400 },
+  config: {
+    cols: 100,
+    accentColor: '#c5ff4a',
+    customTitle: 'octocat@github: ~$ ./portrait.sh',
+    customWhoami: 'The Octocat',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(portraitWidget, profileData, globalStyles)
+```

@@ -66,7 +66,7 @@ export default function ExploreClientPage({ profiles }: ExploreClientPageProps) 
 
       <Navbar />
 
-      <div className="border-b border-graphite bg-void-black/80 backdrop-blur-md px-6 py-3">
+      <div className="pt-20 md:pt-24 border-b border-graphite bg-void-black/80 backdrop-blur-md px-6 py-3">
         <div className="max-w-7xl mx-auto">
           <Breadcrumbs items={[{ label: t('explore.breadcrumb', 'Community Profiles Gallery') }]} />
         </div>

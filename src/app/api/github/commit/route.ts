@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
-import { saveProfileConfig } from '@/lib/profileStorage'
+import { cacheProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
@@ -80,8 +80,14 @@ export async function POST(request: Request) {
       headers,
     })
 
-    if (repoRes.status === 200) {
-    } else if (repoRes.status === 404) {
+    if (repoRes.status !== 200 && repoRes.status !== 404) {
+      return NextResponse.json(
+        { error: 'Failed to access repository', details: await repoRes.text() },
+        { status: 500 }
+      )
+    }
+
+    if (repoRes.status === 404) {
       const createRes = await fetch(API_ENDPOINTS.GITHUB.USER_REPOS, {
         method: 'POST',
         headers,
@@ -101,11 +107,6 @@ export async function POST(request: Request) {
       }
 
       await new Promise((resolve) => setTimeout(resolve, 1000))
-    } else {
-      return NextResponse.json(
-        { error: 'Failed to access repository', details: await repoRes.text() },
-        { status: 500 }
-      )
     }
 
     let jsonSha = undefined
@@ -196,7 +197,6 @@ export async function POST(request: Request) {
         console.error('Failed to upload JSON:', await updateJsonRes.text())
       }
 
-      // Verifica se o layout contém o widget da snake
       const hasSnakeWidget = exportData?.widgets?.some((w: any) => w.id === 'contribution-snake')
 
       if (hasSnakeWidget) {
@@ -272,9 +272,9 @@ jobs:
 
     if (exportData && typeof exportData === 'object') {
       try {
-        await saveProfileConfig(exportData)
+        cacheProfileConfig(exportData)
       } catch (saveErr) {
-        console.error('Failed to sync profile configuration locally:', saveErr)
+        console.error('Failed to cache profile configuration in memory:', saveErr)
       }
     }
 

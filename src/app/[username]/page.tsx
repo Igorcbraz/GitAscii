@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import { notFound, redirect } from 'next/navigation'
 
 import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,8 +15,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params
   const cleanUsername = username.trim()
-  const title = `@${cleanUsername} GitHub Profile README Generator`
-  const description = `Create, edit, and preview custom GitHub Profile README SVGs, stats widgets, and ASCII art for @${cleanUsername} using GitAscii visual editor.`
+
+  if (
+    cleanUsername === 'index.html' ||
+    cleanUsername === 'index.php' ||
+    cleanUsername === 'index'
+  ) {
+    redirect('/')
+  }
+
+  if (!isValidGitHubUsername(cleanUsername)) {
+    notFound()
+  }
+
+  const title = `@${cleanUsername} GitHub README Generator`
+  const description = `Create and preview custom GitHub Profile README SVGs and ASCII art for @${cleanUsername}.`
   const url = `${APP_URL}/${cleanUsername}`
 
   return {
@@ -66,8 +81,21 @@ export default async function DefaultEditorPage({
   searchParams: Promise<{ generate?: string }>
 }) {
   const { username } = await params
-  const { generate } = await searchParams
+  const cleanUsername = username.trim()
 
+  if (
+    cleanUsername === 'index.html' ||
+    cleanUsername === 'index.php' ||
+    cleanUsername === 'index'
+  ) {
+    redirect('/')
+  }
+
+  if (!isValidGitHubUsername(cleanUsername)) {
+    notFound()
+  }
+
+  const { generate } = await searchParams
   const autoGenerate = generate === 'true'
 
   const breadcrumbLd = {

@@ -375,13 +375,19 @@ function unescapeXmlContent(str: string): string {
     .replace(/&amp;/g, '&')
 }
 
-export async function embedExternalImages(svgContent: string): Promise<string> {
+export interface ProcessedSvgResult {
+  svg: string
+  hasErrors: boolean
+}
+
+export async function embedExternalImages(svgContent: string): Promise<ProcessedSvgResult> {
   const JSON_START_TOKEN = '<!-- EXTERNAL_WIDGET_JSON:'
   const LEGACY_START_TOKEN = '<!-- EXTERNAL_WIDGET_START:'
   const COMMENT_END_TOKEN = '-->'
   const BLOCK_END_TOKEN = '<!-- EXTERNAL_WIDGET_END -->'
 
   let finalSvg = svgContent
+  let hasErrors = false
 
   // 1. Process robust JSON format first using safe index scanning (immune to ReDoS)
   while (true) {
@@ -394,7 +400,6 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
     const blockEndIdx = finalSvg.indexOf(BLOCK_END_TOKEN, commentEndIdx + COMMENT_END_TOKEN.length)
     if (blockEndIdx === -1) break
 
-    const fullMatch = finalSvg.slice(startIdx, blockEndIdx + BLOCK_END_TOKEN.length)
     const rawJsonSection = finalSvg.slice(startIdx + JSON_START_TOKEN.length, commentEndIdx)
 
     let replacement = ''
@@ -412,7 +417,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           String(height),
           preserve
         )
-      } catch (err) {
+      } catch {
         if (fallbackUrl) {
           try {
             replacement = await fetchAndProcessExternalImage(
@@ -426,11 +431,13 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           } catch {}
         }
         if (!replacement) {
+          hasErrors = true
           replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
         }
       }
     } catch (e) {
       console.warn('Failed to parse JSON external widget marker:', e)
+      hasErrors = true
       replacement = ''
     }
 
@@ -489,7 +496,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
 
       try {
         replacement = await fetchAndProcessExternalImage(url, x, y, width, height, preserve)
-      } catch (err) {
+      } catch {
         if (fallbackUrl) {
           try {
             replacement = await fetchAndProcessExternalImage(
@@ -503,6 +510,7 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
           } catch {}
         }
         if (!replacement) {
+          hasErrors = true
           replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
         }
       }
@@ -528,7 +536,10 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
         headers: { accept: 'image/*, */*' },
         signal: AbortSignal.timeout(4000),
       })
-      if (!response.ok) continue
+      if (!response.ok) {
+        hasErrors = true
+        continue
+      }
       const buffer = await response.arrayBuffer()
       if (buffer.byteLength > 5 * 1024 * 1024) continue
 
@@ -539,9 +550,10 @@ export async function embedExternalImages(svgContent: string): Promise<string> {
       const replacement = fullMatch.replace(hrefMatch[0], `href="${dataUri}"`)
       finalSvg = finalSvg.replace(fullMatch, () => replacement)
     } catch (err) {
+      hasErrors = true
       console.error('Failed to embed inline image:', url, err)
     }
   }
 
-  return finalSvg
+  return { svg: finalSvg, hasErrors }
 }

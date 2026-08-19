@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { APP_URL } from '@/constants'
 
 export const metadata: Metadata = {
-  title: 'GitHub Profile README Guides & Resource Articles (2026)',
+  title: 'GitHub Profile README Guides',
   description:
-    'Curated collection of authoritative guides, Medium articles, official GitHub documentation, and tutorials on building professional GitHub Profile READMEs.',
+    'Authoritative guides, documentation, and markdown tutorials on building professional GitHub Profile READMEs.',
   keywords: [
     'How to create GitHub profile README',
     'GitHub README markdown guide',

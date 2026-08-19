@@ -1,0 +1,48 @@
+---
+title: "Icon Marquee Widget"
+description: "Infinite CSS-scrolling horizontal marquee of glowing skill badge pills"
+---
+
+# Icon Marquee Widget (`godprofile-marquee`)
+
+The Icon Marquee widget renders an infinitely scrolling horizontal ribbon of technology pills using SVG CSS animations (`@keyframes mqScroll`).
+
+## Configuration Schema
+
+```typescript
+export interface GodprofileMarqueeConfig {
+  marqueeLangs?: string[]  // Array of tech keys (e.g. ['react', 'ts', 'nodejs', 'docker'])
+  accentColor?: string     // Default: globalStyles.accentColor || '#b6a891'
+  textColor?: string       // Default: globalStyles.textColor || '#eceff4'
+}
+```
+
+<ParamField body="marqueeLangs" type="string[]" default="['react', 'ts', 'js', 'html', 'css', 'nodejs', 'python', 'git', 'docker', 'linux']">
+  Technology keys to loop. Supported keys include: `js`, `ts`, `react`, `nextjs`, `vue`, `svelte`, `tailwind`, `nodejs`, `python`, `rust`, `go`, `docker`, `kubernetes`, `aws`, `postgres`, `mongodb`, `redis`, `git`, `linux`, etc.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const marqueeWidget: WidgetInstance = {
+  instanceId: 'marquee_01',
+  widgetId: 'godprofile-marquee',
+  name: 'Icon Marquee',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 120 },
+  config: {
+    marqueeLangs: ['react', 'nextjs', 'ts', 'tailwind', 'nodejs', 'postgres', 'docker', 'graphql'],
+    accentColor: '#c5ff4a',
+    textColor: '#ffffff',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(marqueeWidget, profileData, globalStyles)
+```

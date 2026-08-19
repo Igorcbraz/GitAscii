@@ -1,0 +1,94 @@
+---
+title: "Custom Widget Development"
+description: "How to create, type, and register custom widget renderers in the GitAscii engine"
+---
+
+# Custom Widget Development
+
+You can extend GitAscii with your own widget renderers by implementing the `WidgetRendererFn` signature and registering it in `WidgetRegistry`.
+
+## 1. Implement the Renderer Function
+
+Create a file `src/features/widgets/renderers/CustomStatusRenderer.ts`:
+
+```typescript
+import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+export function renderCustomStatus(
+  widget: WidgetInstance,
+  data: NormalizedGitHubData,
+  globalStyles: GlobalStyles,
+  _forceStatic = false
+): string {
+  const width = widget.size.width || 800
+  const height = widget.size.height || 100
+  const cfg = widget.config || {}
+
+  const statusMessage = (cfg.status as string) || 'Building systems in public'
+  const accentColor = (cfg.accentColor as string) || globalStyles.accentColor || '#c5ff4a'
+
+  return `
+    <g>
+      <!-- Background Card -->
+      <rect x="0" y="0" width="${width}" height="${height}" fill="#111722" stroke="${accentColor}" stroke-width="1" rx="4" />
+      
+      <!-- Pulsing Online Indicator -->
+      <circle cx="28" cy="${height / 2}" r="6" fill="${accentColor}">
+        <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
+      </circle>
+      
+      <!-- Label -->
+      <text x="48" y="${height / 2 + 4}" font-family="'JetBrains Mono', monospace" font-size="14" fill="#ffffff">
+        STATUS: <tspan fill="${accentColor}" font-weight="bold">${escapeXml(statusMessage)}</tspan>
+      </text>
+    </g>
+  `
+}
+```
+
+---
+
+## 2. Register in `WidgetRegistry.ts`
+
+Add your widget identifier and renderer function to `REGISTRY_MAP`:
+
+```typescript
+// src/engine/core/WidgetRegistry.ts
+import { renderCustomStatus } from '@/features/widgets/renderers/CustomStatusRenderer'
+
+const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
+  // ... existing widgets
+  ['custom-status', renderCustomStatus],
+])
+```
+
+---
+
+## 3. Render via Engine
+
+```typescript
+const myWidget: WidgetInstance = {
+  instanceId: 'custom_01',
+  widgetId: 'custom-status',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 100 },
+  config: {
+    status: 'Exploring Zero-Knowledge Proofs',
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svg = renderWidgetSvg(myWidget, profileData, globalStyles)
+```

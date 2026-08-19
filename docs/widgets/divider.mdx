@@ -1,0 +1,44 @@
+---
+title: "Divider Widget"
+description: "Neon horizontal divider line for visual separation between sections"
+---
+
+# Divider Widget (`divider`)
+
+The Divider widget renders a sharp horizontal stroke across the width of the canvas, functioning as a section divider in the style of classified editorial documents.
+
+## Configuration Schema
+
+```typescript
+export interface DividerConfig {
+  accentColor?: string // Default: globalStyles.accentColor || '#c5ff4a'
+}
+```
+
+<ParamField body="accentColor" type="string" default="globalStyles.accentColor">
+  Stroke color for the 4px horizontal line.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const dividerWidget: WidgetInstance = {
+  instanceId: 'divider_01',
+  widgetId: 'divider',
+  name: 'Neon Divider',
+  position: { x: 0, y: 390 },
+  size: { width: 800, height: 24 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 5,
+}
+
+const svgOutput = renderWidgetSvg(dividerWidget, profileData, globalStyles)
+```

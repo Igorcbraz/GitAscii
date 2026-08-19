@@ -256,6 +256,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const { config } = get()
       if (!config) return
 
+      const targetWidget = config.widgets.find((w) => w.instanceId === instanceId)
+      if (!targetWidget) return
+
+      const hasChanged = Object.entries(patch).some(
+        ([key, val]) => (targetWidget.config as Record<string, unknown>)[key] !== val
+      )
+      if (!hasChanged) return
+
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, config: { ...w.config, ...patch } } : w
       )
@@ -272,6 +280,11 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     updateGlobalStyles: (patch) => {
       const { config } = get()
       if (!config) return
+
+      const hasChanged = Object.entries(patch).some(
+        ([key, val]) => config.globalStyles[key as keyof typeof config.globalStyles] !== val
+      )
+      if (!hasChanged) return
 
       const newConfig = {
         ...config,

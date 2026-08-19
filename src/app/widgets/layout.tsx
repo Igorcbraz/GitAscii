@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { APP_URL } from '@/constants'
 
 export const metadata: Metadata = {
-  title: 'Free GitHub Profile Widgets & Dynamic SVGs Showcase (2026)',
+  title: 'GitHub Profile Widgets & SVGs',
   description:
-    'Discover dynamic SVG widgets for GitHub profile READMEs: real-time commit stats, contribution streak counters, top programming languages, ASCII art converters, and tech stack badges.',
+    'Dynamic SVG widgets for GitHub profile READMEs: live stats, streak counters, top languages, and ASCII art banners.',
   keywords: [
     'GitHub profile widgets',
     'GitHub stats widget SVG',

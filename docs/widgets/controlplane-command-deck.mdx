@@ -1,0 +1,52 @@
+---
+title: "Command Deck Console Widget"
+description: "Mission dashboard showing active deployment status, flagship channels, and hardware meters"
+---
+
+# Command Deck Console Widget (`controlplane-command-deck`)
+
+The Command Deck Console widget renders an industrial aerospace-grade mission dashboard with active channel meters, status dials, radar crosshairs, and repository telemetry.
+
+## Configuration Schema
+
+```typescript
+export interface CommandDeckConfig {
+  layoutType?: 'hero' | 'closed-loop'  // Default: 'closed-loop'
+  customTitle?: string                 // Header operator title
+  customBio?: string                   // Subtitle copy
+  selectedRepos?: string[]             // Manual priority repository list
+  repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
+  maxRepos?: number                    // Default: 8
+  repoLanguages?: Record<string, string> // Custom language label mapping
+  accentColor?: string                 // Primary telemetry tint (default: '#00A7D1')
+  secondaryColor?: string              // Secondary signal tint (default: '#E84A8A')
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const commandDeckWidget: WidgetInstance = {
+  instanceId: 'deck_01',
+  widgetId: 'controlplane-command-deck',
+  name: 'Command Deck Console',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 300 },
+  config: {
+    layoutType: 'closed-loop',
+    repoSortBy: 'stars',
+    maxRepos: 6,
+    accentColor: '#00A7D1',
+    secondaryColor: '#E84A8A',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(commandDeckWidget, profileData, globalStyles)
+```

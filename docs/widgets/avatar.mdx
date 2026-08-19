@@ -1,0 +1,59 @@
+---
+title: "Avatar Widget"
+description: "Profile picture frame with support for GitHub avatars, custom URLs, and base64 uploads"
+---
+
+# Avatar Widget (`avatar`)
+
+The Avatar widget renders a framed developer photo clipped with configurable corner radius and a signature neon accent border.
+
+## Configuration Schema
+
+```typescript
+export interface AvatarConfig {
+  sourceType?: 'avatar' | 'url' | 'upload' // Default: 'avatar'
+  avatarUrl?: string                       // Direct image URL fallback
+  imageUrl?: string                        // When sourceType === 'url'
+  uploadedImageData?: string               // Base64 data URI when sourceType === 'upload'
+  borderRadius?: number                    // Default: globalStyles.borderRadius || 0
+  accentColor?: string                     // Default: globalStyles.accentColor || '#c5ff4a'
+}
+```
+
+<ParamField body="sourceType" type="'avatar' | 'url' | 'upload'" default="avatar">
+  Selects whether to use the GitHub account avatar (`avatar`), a custom image URL (`url`), or an uploaded base64 data string (`upload`).
+</ParamField>
+
+<ParamField body="imageUrl" type="string" optional>
+  Remote HTTPS image URL when `sourceType` is set to `url`.
+</ParamField>
+
+<ParamField body="uploadedImageData" type="string" optional>
+  Base64 image string (`data:image/png;base64,...`) when `sourceType` is set to `upload`.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const avatarWidget: WidgetInstance = {
+  instanceId: 'avatar_01',
+  widgetId: 'avatar',
+  name: 'Avatar',
+  position: { x: 0, y: 106 },
+  size: { width: 160, height: 160 },
+  config: {
+    sourceType: 'avatar',
+    borderRadius: 8,
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 2,
+}
+
+const svgOutput = renderWidgetSvg(avatarWidget, profileData, globalStyles)
+```
