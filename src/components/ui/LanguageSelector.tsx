@@ -39,14 +39,20 @@ export default function LanguageSelector({
     <div ref={containerRef} className={`relative inline-block text-left z-50 ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={t('common.select_language', 'Select language')}
+        aria-expanded={isOpen}
         className="inline-flex items-center justify-center gap-1.5 px-2 h-[32px] font-inter-tight text-label font-medium text-ash transition-all duration-200 hover:text-white active:scale-[0.98] cursor-pointer group"
       >
-        <Globe className="size-3.5 text-ash group-hover:text-signal-lime transition-colors duration-200" />
+        <Globe
+          className="size-3.5 text-ash group-hover:text-signal-lime transition-colors duration-200"
+          aria-hidden="true"
+        />
         <span className="uppercase tracking-wider font-jetbrains-mono text-[11px] group-hover:text-white transition-colors">
           {language}
         </span>
         <ChevronDown
           className={`size-3 text-ash transition-transform duration-200 ${isOpen ? 'rotate-180 text-signal-lime' : 'group-hover:text-signal-lime'}`}
+          aria-hidden="true"
         />
       </button>
 

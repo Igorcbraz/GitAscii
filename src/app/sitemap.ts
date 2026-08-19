@@ -86,6 +86,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/llms-full.txt`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
   ]
 
   return [...sitemapEntries, ...profileEntries, ...feedEntries]

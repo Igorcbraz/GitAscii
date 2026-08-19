@@ -195,7 +195,7 @@ export default function InteractiveShowcase() {
                         <div
                           className={`border ${tInfo.border} ${tInfo.bg} p-6 transition-all duration-300 min-h-60 relative overflow-hidden flex flex-col justify-between`}
                         >
-                          <div className="absolute top-2 right-2 text-ash/30 font-jetbrains-mono text-[9px] uppercase">
+                          <div className="absolute top-2 right-2 text-ash font-jetbrains-mono text-[9px] uppercase">
                             Preset: {tInfo.name}
                           </div>
 
@@ -330,10 +330,10 @@ export default function InteractiveShowcase() {
                       return (
                         <div className="border border-graphite bg-carbon p-6 space-y-6">
                           <div>
-                            <h4 className="font-inter-tight font-medium text-subheading text-chalk flex items-center gap-2">
+                            <h3 className="font-inter-tight font-medium text-subheading text-chalk flex items-center gap-2">
                               <Zap size={16} className="text-signal-lime" />
                               {wInfo.name}
-                            </h4>
+                            </h3>
                             <p className="font-inter-tight text-body text-ash mt-1">{wInfo.desc}</p>
                           </div>
 
@@ -452,7 +452,8 @@ export default function InteractiveShowcase() {
                             </code>
                             <button
                               onClick={() => handleCopy(wInfo.snippet)}
-                              className="absolute top-1/2 right-2 -translate-y-1/2 px-2.5 py-1 bg-onyx hover:bg-graphite border border-graphite text-ash hover:text-signal-lime transition-all flex items-center gap-1.5 cursor-pointer rounded-sm"
+                              aria-label="Copy snippet code to clipboard"
+                              className="absolute top-1/2 right-2 -translate-y-1/2 px-2.5 py-1 min-h-[36px] bg-onyx hover:bg-graphite border border-graphite text-ash hover:text-signal-lime transition-all flex items-center gap-1.5 cursor-pointer rounded-sm"
                             >
                               {copied && copiedText === wInfo.snippet ? (
                                 <>
@@ -545,12 +546,12 @@ export default function InteractiveShowcase() {
                                 className="w-14 h-14 rounded-full border border-graphite bg-onyx shrink-0"
                               />
                               <div>
-                                <h4 className="font-inter-tight font-medium text-subheading text-chalk flex items-center gap-2">
+                                <h3 className="font-inter-tight font-medium text-subheading text-chalk flex items-center gap-2">
                                   {pInfo.name}
                                   <span className="text-[9px] border border-signal-lime text-signal-lime px-2 py-0.5 rounded-full font-jetbrains-mono">
                                     ● STORED
                                   </span>
-                                </h4>
+                                </h3>
                                 <span className="font-jetbrains-mono text-caption text-ash">
                                   @{pInfo.username} · {pInfo.role}
                                 </span>
@@ -561,7 +562,8 @@ export default function InteractiveShowcase() {
                               href={API_ENDPOINTS.GITHUB.USER_PROFILE(pInfo.username)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center p-2 border border-graphite hover:border-signal-lime text-ash hover:text-white transition-colors bg-onyx cursor-pointer"
+                              aria-label={`View ${pInfo.name} GitHub Profile`}
+                              className="inline-flex items-center justify-center p-2 min-w-[40px] min-h-[40px] border border-graphite hover:border-signal-lime text-ash hover:text-white transition-colors bg-onyx cursor-pointer"
                               title="View GitHub"
                             >
                               <Github size={16} />
@@ -694,9 +696,9 @@ export default function InteractiveShowcase() {
                                 {gInfo.readTime}
                               </span>
                             </div>
-                            <h4 className="font-pt-serif font-light text-xl text-chalk leading-snug">
+                            <h3 className="font-pt-serif font-light text-xl text-chalk leading-snug">
                               {gInfo.title}
-                            </h4>
+                            </h3>
                           </div>
 
                           <p className="font-inter-tight text-body text-bone leading-relaxed">
@@ -708,6 +710,7 @@ export default function InteractiveShowcase() {
                               href={gInfo.url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              aria-label={`Read article: ${gInfo.title}`}
                               className="inline-flex items-center gap-2 bg-onyx hover:bg-graphite border border-graphite hover:border-signal-lime/50 text-bone hover:text-white font-inter-tight font-medium text-body px-5 py-3 transition-all uppercase tracking-wider cursor-pointer w-full justify-center"
                             >
                               <span>

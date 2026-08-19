@@ -47,26 +47,28 @@ export function FAQ() {
                 key={index}
                 className={`border border-graphite transition-all duration-300 ${isOpen ? 'bg-onyx' : 'bg-transparent hover:bg-onyx/50'}`}
               >
-                <button
-                  onClick={() => toggleOpen(index)}
-                  aria-expanded={isOpen}
-                  aria-controls={`faq-answer-${index}`}
-                  className="w-full py-6 px-6 flex items-center justify-between text-left group cursor-pointer"
-                >
-                  <div className="flex items-center gap-6">
-                    <span className="font-jetbrains-mono text-label text-ash group-hover:text-chalk transition-colors">
-                      {qNumber}
-                    </span>
-                    <h3
-                      className={`font-inter-tight font-medium text-[16px] transition-colors duration-200 ${isOpen ? 'text-signal-lime' : 'text-chalk group-hover:text-chalk'}`}
-                    >
-                      {faq.question}
-                    </h3>
-                  </div>
-                  <ChevronDown
-                    className={`w-5 h-5 transition-all duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : 'text-ash group-hover:text-chalk'}`}
-                  />
-                </button>
+                <h3 className="m-0 text-[16px] font-normal">
+                  <button
+                    onClick={() => toggleOpen(index)}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${index}`}
+                    className="w-full py-6 px-6 flex items-center justify-between text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-6">
+                      <span className="font-jetbrains-mono text-label text-ash group-hover:text-chalk transition-colors">
+                        {qNumber}
+                      </span>
+                      <span
+                        className={`font-inter-tight font-medium text-[16px] transition-colors duration-200 ${isOpen ? 'text-signal-lime' : 'text-chalk group-hover:text-chalk'}`}
+                      >
+                        {faq.question}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 transition-all duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : 'text-ash group-hover:text-chalk'}`}
+                    />
+                  </button>
+                </h3>
                 <div
                   id={`faq-answer-${index}`}
                   className={`grid transition-all duration-300 ease-in-out ${

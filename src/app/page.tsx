@@ -1,16 +1,26 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
 import { APP_URL, EXTERNAL_LINKS } from '@/constants'
-import DemoSection from '@/features/landing/components/DemoSection'
-import { FAQ } from '@/features/landing/components/FAQ'
-import { FeaturesGrid } from '@/features/landing/components/FeaturesGrid'
-import { Footer } from '@/features/landing/components/Footer'
 import Hero from '@/features/landing/components/Hero'
-import { HowItWorks } from '@/features/landing/components/HowItWorks'
-import InteractiveShowcase from '@/features/landing/components/InteractiveShowcase'
 import Navbar from '@/features/landing/components/Navbar'
 import { SummarySection } from '@/features/landing/components/SummarySection'
+
+const DemoSection = dynamic(() => import('@/features/landing/components/DemoSection'))
+const InteractiveShowcase = dynamic(
+  () => import('@/features/landing/components/InteractiveShowcase')
+)
+const FeaturesGrid = dynamic(() =>
+  import('@/features/landing/components/FeaturesGrid').then((mod) => mod.FeaturesGrid)
+)
+const HowItWorks = dynamic(() =>
+  import('@/features/landing/components/HowItWorks').then((mod) => mod.HowItWorks)
+)
+const FAQ = dynamic(() => import('@/features/landing/components/FAQ').then((mod) => mod.FAQ))
+const Footer = dynamic(() =>
+  import('@/features/landing/components/Footer').then((mod) => mod.Footer)
+)
 
 export async function generateMetadata({
   searchParams,
@@ -29,23 +39,23 @@ export async function generateMetadata({
 
   let title = 'GitAscii — GitHub Profile README & ASCII Generator'
   let description =
-    'Create custom GitHub Profile READMEs with live SVGs, ASCII art engine, and visual editor. Free & open source.'
+    'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.'
   let canonicalUrl = APP_URL
 
   if (isPt) {
     title = 'GitAscii — Gerador de README & Arte ASCII'
     description =
-      'Crie READMEs para GitHub com SVGs dinâmicos, arte ASCII e editor visual. Grátis e open source.'
+      'Crie READMEs impressionantes para seu perfil do GitHub com SVGs dinâmicos, conversor de arte ASCII e editor visual interativo. Totalmente grátis e de código aberto.'
     canonicalUrl = `${APP_URL}?lang=pt`
   } else if (isEs) {
     title = 'GitAscii — Generador de README y Arte ASCII'
     description =
-      'Crea READMEs para GitHub con SVGs dinámicos, arte ASCII y editor visual. Gratis y open source.'
+      'Crea impresionantes READMEs para tu perfil de GitHub con SVGs dinámicos, motor de arte ASCII y editor visual interactivo. Rápido, gratis y de código abierto para desarrolladores.'
     canonicalUrl = `${APP_URL}?lang=es`
   } else if (isZh) {
     title = 'GitAscii — GitHub 个人主页 README 与 ASCII 艺术生成器'
     description =
-      '使用动态 SVG 徽章、实时统计卡片、ASCII 艺术引擎和可视化编辑器打造惊艳的 GitHub 主页。'
+      '使用动态 SVG 徽章、实时统计卡片、ASCII 艺术引擎和可视化编辑器打造惊艳的 GitHub 主页。完全免费且开源。'
     canonicalUrl = `${APP_URL}?lang=zh`
   }
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 const ASCII_RAMP = ' .`\'^",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
-const HANDS_SRC = '/ascii-hands.png'
+const HANDS_SRC = '/ascii-hands.webp'
 
 interface AsciiHandsProps {
   className?: string
@@ -155,8 +155,9 @@ export default function AsciiHands({ className = '' }: AsciiHandsProps) {
     <div
       className={`relative flex items-center justify-center overflow-hidden pointer-events-none select-none ${className}`}
       style={{ transform: 'translateZ(0)' }}
+      aria-hidden="true"
     >
-      <canvas ref={canvasRef} className="w-full h-full opacity-90" />
+      <canvas ref={canvasRef} aria-hidden="true" className="w-full h-full opacity-90" />
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(197,255,74,0.12)_0%,transparent_100%)] opacity-70" />
     </div>
   )

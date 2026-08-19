@@ -129,7 +129,7 @@ export default function Hero() {
 
             <div className="flex items-center gap-3 w-full">
               <span className="flex-1 h-px bg-graphite/60" />
-              <span className="uppercase text-caption tracking-widest text-fog font-inter-tight">
+              <span className="uppercase text-caption tracking-widest text-ash font-inter-tight">
                 {t('common.or', 'or')}
               </span>
               <span className="flex-1 h-px bg-graphite/60" />
@@ -137,7 +137,10 @@ export default function Hero() {
 
             <form onSubmit={handleOpenEditor} className="flex w-full group">
               <div className="relative grow flex items-center">
-                <Github className="absolute left-4 w-5 h-5 text-ash z-10" />
+                <label htmlFor="hero-username-input" className="sr-only">
+                  {t('landing.hero.placeholder', 'Enter your GitHub username')}
+                </label>
+                <Github className="absolute left-4 w-5 h-5 text-ash z-10" aria-hidden="true" />
                 <input
                   id="hero-username-input"
                   type="text"
