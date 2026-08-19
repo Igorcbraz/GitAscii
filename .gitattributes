@@ -2,5 +2,8 @@
 
 # Ignore AI agents/skills scripts and assets from GitHub language stats (Linguist)
 .agents/** linguist-vendored
+.agents/** linguist-documentation
 .impeccable/** linguist-vendored
+.impeccable/** linguist-documentation
 seo-workspace/** linguist-vendored
+seo-workspace/** linguist-documentation
