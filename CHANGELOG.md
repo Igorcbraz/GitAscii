@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/Igorcbraz/GitAscii/compare/v1.10.0...v1.11.0) (2026-08-19)
+
+
+### Features
+
+* Comprehensive Documentation, Dynamic SVG Caching, SEO & Editor Error Enhancements ([#84](https://github.com/Igorcbraz/GitAscii/issues/84)) ([ab6e80d](https://github.com/Igorcbraz/GitAscii/commit/ab6e80d93c67b0eac2f344f6bedc9a13d100e39c))
+
 ## [1.10.0](https://github.com/Igorcbraz/GitAscii/compare/v1.9.0...v1.10.0) (2026-08-17)
 
 ### Features
