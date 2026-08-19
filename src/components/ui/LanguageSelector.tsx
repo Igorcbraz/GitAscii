@@ -39,12 +39,14 @@ export default function LanguageSelector({
     <div ref={containerRef} className={`relative inline-block text-left z-50 ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-1.5 rounded-sm border border-graphite bg-onyx px-2 py-1 font-inter-tight text-eyebrow font-medium text-white transition-all duration-300 ease-in-out hover:border-signal-lime hover:bg-onyx/80 active:scale-[0.98] cursor-pointer group"
+        className="inline-flex items-center justify-center gap-1.5 px-2 h-[32px] font-inter-tight text-label font-medium text-ash transition-all duration-200 hover:text-white active:scale-[0.98] cursor-pointer group"
       >
-        <Globe className="size-3 text-ash group-hover:text-signal-lime transition-colors duration-300" />
-        <span className="uppercase tracking-wider">{language}</span>
+        <Globe className="size-3.5 text-ash group-hover:text-signal-lime transition-colors duration-200" />
+        <span className="uppercase tracking-wider font-jetbrains-mono text-[11px] group-hover:text-white transition-colors">
+          {language}
+        </span>
         <ChevronDown
-          className={`size-3 text-ash transition-transform duration-300 ${isOpen ? 'rotate-180 text-signal-lime' : ''}`}
+          className={`size-3 text-ash transition-transform duration-200 ${isOpen ? 'rotate-180 text-signal-lime' : 'group-hover:text-signal-lime'}`}
         />
       </button>
 

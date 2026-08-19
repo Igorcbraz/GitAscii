@@ -1,0 +1,42 @@
+---
+title: "Interlace Loom Weave Widget"
+description: "Quiet project loom thread archive weave layout"
+---
+
+# Interlace Loom Weave Widget (`controlplane-interlace`)
+
+The Interlace Loom Weave widget represents active repositories and dependency channels as intersecting woven threads with subtle tension lines and status markers.
+
+## Configuration Schema
+
+```typescript
+export interface InterlaceConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const interlaceWidget: WidgetInstance = {
+  instanceId: 'interlace_01',
+  widgetId: 'controlplane-interlace',
+  name: 'Interlace Loom Weave',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(interlaceWidget, profileData, globalStyles)
+```

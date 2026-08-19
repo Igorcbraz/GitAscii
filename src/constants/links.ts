@@ -1,4 +1,5 @@
 export interface ExternalLinksDef {
+  readonly DOCS: string
   readonly GITHUB_REPO: string
   readonly GITHUB_FORK: string
   readonly GITHUB_ISSUES: string
@@ -37,6 +38,7 @@ export interface ExternalLinksDef {
 export const APP_URL = 'https://gitascii.com'
 
 export const EXTERNAL_LINKS: ExternalLinksDef = {
+  DOCS: 'https://docs.gitascii.com',
   GITHUB_REPO: 'https://github.com/Igorcbraz/GitAscii',
   GITHUB_FORK: 'https://github.com/Igorcbraz/GitAscii/fork',
   GITHUB_ISSUES: 'https://github.com/Igorcbraz/GitAscii/issues',

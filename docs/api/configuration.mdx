@@ -1,0 +1,154 @@
+---
+title: "Configuration"
+description: "Specification of SavedConfiguration, WidgetInstance, and GlobalStyles"
+---
+
+# Configuration Specification
+
+Every layout in GitAscii is represented by the `SavedConfiguration` interface. This structure defines the canvas dimensions, color tokens, font stack, and the full tree of positioned widgets.
+
+## `SavedConfiguration`
+
+```typescript
+export interface SavedConfiguration {
+  version: number
+  githubId: number
+  username: string
+  profileSlug: string
+  profileName: string
+  templateId: string
+  widgets: WidgetInstance[]
+  globalStyles: GlobalStyles
+  metadata: {
+    createdAt: string
+    updatedAt: string
+    schemaVersion: number
+    generatedBy?: 'manual' | 'auto'
+  }
+}
+```
+
+<ResponseField name="version" type="number" required>
+  Schema version identifier (currently `1`).
+</ResponseField>
+
+<ResponseField name="githubId" type="number" required>
+  Numeric GitHub user ID (e.g. `583231`).
+</ResponseField>
+
+<ResponseField name="username" type="string" required>
+  GitHub username handle.
+</ResponseField>
+
+<ResponseField name="profileSlug" type="string" required>
+  URL slug for the profile (e.g. `default`, `light`, `work`).
+</ResponseField>
+
+<ResponseField name="templateId" type="string" required>
+  Active template preset identifier (`terminal`, `minimal`, `dracula`, etc.).
+</ResponseField>
+
+<ResponseField name="widgets" type="WidgetInstance[]" required>
+  Ordered array of widget instances placed on the canvas.
+</ResponseField>
+
+<ResponseField name="globalStyles" type="GlobalStyles" required>
+  Theme tokens applied globally to the canvas and inherited by widgets.
+</ResponseField>
+
+---
+
+## `GlobalStyles`
+
+Defines the master design tokens for the canvas.
+
+```typescript
+export interface GlobalStyles {
+  backgroundColor: string
+  transparentBackground?: boolean
+  textColor: string
+  accentColor: string
+  borderColor: string
+  fontFamily: string
+  borderRadius: number
+  padding: number
+  themeMode: 'dark' | 'light' | 'auto'
+  templateStyle?: string
+}
+```
+
+<ResponseField name="backgroundColor" type="string" default="#060606">
+  Hex or RGB color code for the root SVG canvas background.
+</ResponseField>
+
+<ResponseField name="transparentBackground" type="boolean" default="false">
+  When `true`, omits the background `<rect>` tag, allowing the SVG to be transparent.
+</ResponseField>
+
+<ResponseField name="textColor" type="string" default="#ffffff">
+  Primary text color token.
+</ResponseField>
+
+<ResponseField name="accentColor" type="string" default="#c5ff4a">
+  Signature highlight color (zkPass Signal Lime `#c5ff4a` by default).
+</ResponseField>
+
+<ResponseField name="borderColor" type="string" default="#252525">
+  Hairline border color token.
+</ResponseField>
+
+<ResponseField name="fontFamily" type="string" default="'JetBrains Mono', monospace">
+  Primary font-family definition string.
+</ResponseField>
+
+<ResponseField name="borderRadius" type="number" default="0">
+  Corner radius in pixels applied to cards and canvas.
+</ResponseField>
+
+---
+
+## `WidgetInstance`
+
+Represents an individual widget node positioned on the 2D SVG canvas.
+
+```typescript
+export interface WidgetInstance {
+  instanceId: string
+  widgetId: string
+  name?: string
+  position: { x: number; y: number }
+  size: { width: number; height: number }
+  config: WidgetConfig
+  locked: boolean
+  visible: boolean
+  zIndex: number
+}
+```
+
+<ResponseField name="instanceId" type="string" required>
+  Unique ID for the widget on the canvas (e.g. `widget_1708281000000_1`).
+</ResponseField>
+
+<ResponseField name="widgetId" type="string" required>
+  Identifier matching a registered renderer in `WidgetRegistry` (e.g. `header`, `stats`, `ascii-art`).
+</ResponseField>
+
+<ResponseField name="position" type="{ x: number, y: number }" required>
+  Top-left coordinate in SVG pixels.
+</ResponseField>
+
+<ResponseField name="size" type="{ width: number, height: number }" required>
+  Explicit dimensions in SVG pixels.
+</ResponseField>
+
+<ResponseField name="config" type="Record<string, unknown>" required>
+  Key-value map containing widget-specific properties and options.
+</ResponseField>
+
+<ResponseField name="visible" type="boolean" default="true">
+  Controls whether this widget is rendered into the final SVG.
+</ResponseField>
+
+<ResponseField name="zIndex" type="number" default="1">
+  Determines layer ordering during render loop (lower values render underneath higher values).
+</ResponseField>

@@ -1,0 +1,55 @@
+---
+title: "GitHub README Integration"
+description: "Best practices for embedding SVGs in GitHub profiles, Camo CDN proxy handling, and theme switching"
+---
+
+# GitHub README Integration
+
+Embedding dynamic SVGs in GitHub profile `README.md` files requires understanding GitHub's **Camo CDN Proxy**, caching headers, and dark/light mode switching.
+
+## 1. Embedding with Automatic Dark/Light Mode
+
+GitHub's Markdown renderer natively supports the HTML `<picture>` element with `prefers-color-scheme` media queries:
+
+```markdown
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/octocat?theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/octocat?theme=light" />
+    <img src="https://gitascii.com/api/octocat" alt="GitAscii Profile Banner" width="800" />
+  </picture>
+</div>
+```
+
+---
+
+## 2. Embedding Standalone Widgets
+
+You can embed multiple individual widgets side-by-side or stacked:
+
+```markdown
+<!-- Left: GitHub Live Stats | Right: Top Languages -->
+<p align="center">
+  <img src="https://gitascii.com/api/octocat?widgets=stats" width="390" />
+  <img src="https://gitascii.com/api/octocat?widgets=languages" width="390" />
+</p>
+```
+
+---
+
+## 3. GitHub Camo CDN Proxy Considerations
+
+GitHub proxies all images through its Camo CDN (`https://camo.githubusercontent.com/...`).
+
+<Note>
+  **How Camo Handles SVGs**:
+  * Camo caches responses based on standard HTTP `Cache-Control` and `ETag` headers.
+  * GitAscii returns `s-maxage=3600, stale-while-revalidate=7200` to ensure GitHub caches the image for 1 hour while updating seamlessly in the background.
+  * Camo strips external network requests within SVGs (e.g. `<image href="http://...">`), which is why GitAscii's `embedExternalImages` converts all remote assets to base64 `data:` URIs or directly inlines SVG code.
+</Note>
+
+---
+
+## 4. One-Click Sync with Special Repository
+
+When logged in via GitHub OAuth on GitAscii, the **Sync Profile** button directly creates or updates `.gitascii.json` and your `README.md` inside your special profile repository (`github.com/:username/:username`).

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "GitAscii API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#c5ff4a",
+    "light": "#c5ff4a",
+    "dark": "#c5ff4a",
+    "background": {
+      "dark": "#060606",
+      "light": "#ffffff"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "App",
+      "url": "https://gitascii.com"
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com/Igorcbraz/GitAscii"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Open Editor",
+    "url": "https://gitascii.com/editor"
+  },
+  "tabs": [
+    {
+      "name": "Documentation",
+      "url": "introduction"
+    },
+    {
+      "name": "API Reference",
+      "url": "api/overview"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["introduction", "quickstart"]
+    },
+    {
+      "group": "API",
+      "pages": ["api/overview", "api/rendering", "api/configuration", "api/json"]
+    },
+    {
+      "group": "Widgets Overview",
+      "pages": ["widgets/overview"]
+    },
+    {
+      "group": "Essential Widgets",
+      "pages": [
+        "widgets/header",
+        "widgets/avatar",
+        "widgets/bio",
+        "widgets/terminal-info",
+        "widgets/divider",
+        "widgets/footer"
+      ]
+    },
+    {
+      "group": "Interactive & ASCII",
+      "pages": [
+        "widgets/ascii-art",
+        "widgets/ascii-text",
+        "widgets/tech-stack",
+        "widgets/pokemon-card"
+      ]
+    },
+    {
+      "group": "Stats & Metrics",
+      "pages": [
+        "widgets/stats",
+        "widgets/languages",
+        "widgets/repositories",
+        "widgets/social-media"
+      ]
+    },
+    {
+      "group": "GodProfile Suite",
+      "pages": [
+        "widgets/godprofile-terminal",
+        "widgets/godprofile-marquee",
+        "widgets/godprofile-neural",
+        "widgets/godprofile-trophies",
+        "widgets/godprofile-wakatime",
+        "widgets/godprofile-globe"
+      ]
+    },
+    {
+      "group": "ASCII Profile Suite",
+      "pages": [
+        "widgets/asciiprofile-portrait",
+        "widgets/asciiprofile-info",
+        "widgets/asciiprofile-heatmap"
+      ]
+    },
+    {
+      "group": "Control Plane Suite",
+      "pages": [
+        "widgets/controlplane-system-loop",
+        "widgets/controlplane-command-deck",
+        "widgets/controlplane-signal-grid",
+        "widgets/controlplane-metro",
+        "widgets/controlplane-bento",
+        "widgets/controlplane-editorial",
+        "widgets/controlplane-blueprint",
+        "widgets/controlplane-constellation",
+        "widgets/controlplane-monolith",
+        "widgets/controlplane-interlace",
+        "widgets/controlplane-cipher",
+        "widgets/controlplane-specimen",
+        "widgets/controlplane-patchbay",
+        "widgets/controlplane-cartograph",
+        "widgets/controlplane-foundry"
+      ]
+    },
+    {
+      "group": "Codeweb Aura Suite",
+      "pages": [
+        "widgets/codeweb-hero-orbit",
+        "widgets/codeweb-showcase-cards",
+        "widgets/codeweb-retro-grid",
+        "widgets/codeweb-social-badge",
+        "widgets/codeweb-minimal-badge"
+      ]
+    },
+    {
+      "group": "External Integrations",
+      "pages": ["widgets/external-widgets"]
+    },
+    {
+      "group": "Templates",
+      "pages": [
+        "templates/overview",
+        "templates/terminal",
+        "templates/minimal",
+        "templates/dark-themes"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/reproduce-editor",
+        "guides/github-readme-integration",
+        "guides/custom-widgets",
+        "guides/ascii-pipeline"
+      ]
+    },
+    {
+      "group": "Reference",
+      "pages": [
+        "reference/types",
+        "reference/endpoints",
+        "reference/animations",
+        "reference/design-tokens"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/Igorcbraz/GitAscii"
+  }
+}

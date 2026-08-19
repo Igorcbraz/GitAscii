@@ -1,0 +1,169 @@
+---
+title: "External Integrations"
+description: "Documentation for GitHub Readme Stats, Streak, Trophy, Snake, Metrics, Quotes, GitFest, and Custom Image widgets"
+---
+
+# External Integrations
+
+GitAscii provides seamless integration for popular ecosystem widgets. When rendered, GitAscii generates the proper upstream API request markers (`<!-- EXTERNAL_WIDGET_JSON: ... -->`) and automatically resolves, sanitizes, and inlines the generated SVGs using `embedExternalImages`.
+
+---
+
+## 1. GitHub Readme Stats (`github-readme-stats`)
+
+Renders Anurag Hazra's official [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) card.
+
+```typescript
+export interface GitHubReadmeStatsConfig {
+  showIcons?: boolean          // Default: true
+  includeAllCommits?: boolean  // Default: true
+  countPrivate?: boolean       // Default: true
+  theme?: string               // Default: 'tokyonight'
+  hideTitle?: boolean          // Default: false
+  hideRank?: boolean           // Default: false
+  showLifetimeCommits?: boolean// Default: false
+}
+```
+
+---
+
+## 2. GitHub Streak Stats (`streak-stats`)
+
+Renders DenverCoder1's [github-readme-streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) tracking current and longest commit streaks.
+
+```typescript
+export interface StreakStatsConfig {
+  theme?: string               // Default: 'tokyonight'
+  hideBorder?: boolean         // Default: true
+  borderRadius?: number        // Default: 0
+  cardSection?: 'all' | 'current' | 'total' // Default: 'all'
+}
+```
+
+---
+
+## 3. GitHub Profile Trophy (`profile-trophy`)
+
+Renders RyotaK's [github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) trophy showcase.
+
+```typescript
+export interface ProfileTrophyConfig {
+  theme?: string               // Default: 'onedark'
+  column?: number              // Default: 6
+  row?: number                 // Default: 1
+  noBg?: boolean               // Default: true
+  noFrame?: boolean            // Default: true
+  marginW?: number             // Default: 0
+}
+```
+
+---
+
+## 4. Contribution Activity Graph (`activity-graph`)
+
+Renders Ashutosh00710's [github-readme-activity-graph](https://github.com/Ashutosh00710/github-readme-activity-graph).
+
+```typescript
+export interface ActivityGraphConfig {
+  theme?: string               // Default: 'tokyo-night'
+  area?: boolean               // Default: true
+  hideTitle?: boolean          // Default: false
+  hideBorder?: boolean         // Default: true
+  radius?: number              // Default: 0
+}
+```
+
+---
+
+## 5. Contribution Snake (`contribution-snake`)
+
+Renders Platane's [snk](https://github.com/Platane/snk) animated contribution eating game.
+
+```typescript
+export interface ContributionSnakeConfig {
+  variant?: 'dark' | 'light' | 'ocean' // Default: 'dark'
+}
+```
+
+---
+
+## 6. GitHub Metrics Card (`metrics-card`)
+
+Renders Lowlighter's [metrics](https://github.com/lowlighter/metrics) infocard.
+
+```typescript
+export interface MetricsCardConfig {
+  theme?: string               // Default: 'dark'
+}
+```
+
+---
+
+## 7. Profile Views Counter (`views-counter`)
+
+Renders a dynamic visit counter badge via Komarev's visitor badge service.
+
+```typescript
+export interface ViewsCounterConfig {
+  style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' // Default: 'for-the-badge'
+  color?: string               // Hex without '#' (default: 'c5ff4a')
+  labelColor?: string          // Default: '000000'
+  label?: string               // Default: 'PROFILE VIEWS'
+}
+```
+
+---
+
+## 8. Random Readme Quotes (`readme-quotes`)
+
+Renders inspirational developer quotes from the Quotes API.
+
+```typescript
+export interface ReadmeQuotesConfig {
+  theme?: string               // Default: 'tokyonight'
+  animation?: boolean          // Default: true
+  layout?: 'default' | 'horizontal'
+}
+```
+
+---
+
+## 9. GitFest Lineup (`gitfest-lineup`)
+
+Renders a festival lineup poster where top starred repositories headline the event.
+
+```typescript
+export interface GitFestConfig {
+  festivalName?: string        // Default: 'GITFEST 2026'
+  headlinerCount?: number      // Default: 3
+  accentColor?: string         // Default: '#c5ff4a'
+}
+```
+
+---
+
+## 10. Custom Image & GIFs (`custom-image`)
+
+Embeds remote PNGs, WebPs, SVGs, or animated GIFs.
+
+```typescript
+export interface CustomImageConfig {
+  url?: string                 // Image URL
+  objectFit?: 'contain' | 'cover' | 'fill' // Default: 'contain'
+  borderRadius?: number        // Corner radius in px
+  opacity?: number             // Default: 1
+}
+```
+
+---
+
+## 11. GHStats Card (`ghstats`)
+
+Alternative GitHub stats card with clean minimalist layout and commit totals.
+
+```typescript
+export interface GHStatsConfig {
+  accentColor?: string
+  showPrivate?: boolean
+}
+```

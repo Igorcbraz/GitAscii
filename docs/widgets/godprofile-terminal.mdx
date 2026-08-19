@@ -1,0 +1,50 @@
+---
+title: "Terminal Emulator Widget"
+description: "Animated typewriter terminal SVG simulating tree projects/ with whoami prompts"
+---
+
+# Terminal Emulator Widget (`godprofile-terminal`)
+
+The Terminal Emulator widget renders a macOS/Linux terminal window with window controls (`🔴🟡🟢`), prompt commands (`$ whoami`, `$ tree projects/`), animated line reveals (`@keyframes reveal`), and a blinking cursor.
+
+## Configuration Schema
+
+```typescript
+export interface GodprofileTerminalConfig {
+  accentColor?: string    // Default: '#b6a891' (primary highlight)
+  secondaryColor?: string // Default: '#E84A8A' (project folder highlight)
+}
+```
+
+<ParamField body="accentColor" type="string" default="#b6a891">
+  Color applied to command prompts, language badges, and cursor block.
+</ParamField>
+
+<ParamField body="secondaryColor" type="string" default="#E84A8A">
+  Color applied to folder names and branch directory markers.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const terminalWidget: WidgetInstance = {
+  instanceId: 'god_term_01',
+  widgetId: 'godprofile-terminal',
+  name: 'Terminal Emulator',
+  position: { x: 0, y: 0 },
+  size: { width: 450, height: 300 },
+  config: {
+    accentColor: '#c5ff4a',
+    secondaryColor: '#E84A8A',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(terminalWidget, profileData, globalStyles)
+```

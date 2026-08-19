@@ -1,0 +1,48 @@
+---
+title: "Aura Minimalist Banner Widget"
+description: "Sleek glassmorphism attribution banner and subtle signature ribbon"
+---
+
+# Aura Minimalist Banner Widget (`codeweb-minimal-badge`)
+
+The Aura Minimalist Banner widget renders a dark glassmorphic banner containing prefix copy, a bold developer highlight name, and subtle suffix branding.
+
+## Configuration Schema
+
+```typescript
+export interface CodewebMinimalBadgeConfig {
+  prefix?: string           // Default: 'crafted with precision by'
+  highlight?: string        // Default: data.user.name || data.user.login
+  suffix?: string           // Default: '• powered by readme-aura'
+  align?: 'left' | 'center' | 'right' // Default: 'center'
+  showBorder?: boolean      // Default: true
+  bgColor?: string          // Default: 'rgba(8,8,13,0.6)'
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const minimalBannerWidget: WidgetInstance = {
+  instanceId: 'minimal_banner_01',
+  widgetId: 'codeweb-minimal-badge',
+  name: 'Aura Minimal Banner',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 44 },
+  config: {
+    prefix: 'built with passion by',
+    highlight: 'The Octocat',
+    suffix: '• open source contributor',
+    align: 'center',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(minimalBannerWidget, profileData, globalStyles)
+```

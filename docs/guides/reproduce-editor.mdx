@@ -1,0 +1,83 @@
+---
+title: "Reproducing Editor Layouts in Code"
+description: "How to export JSON from the visual editor and execute it programmatically via SDK"
+---
+
+# Reproducing Editor Layouts in Code
+
+One of the core architectural goals of GitAscii is exact parity between the visual web editor and the programmatic rendering engine.
+
+```
+GitAscii Web Editor
+        ↓ (Click "Download JSON" or "Sync to Repo")
+  SavedConfiguration (.gitascii.json)
+        ↓ (Load in Node / Edge Function)
+  renderSvg(config, profileData)
+        ↓
+  Pure SVG Stream
+```
+
+## Step 1: Export JSON from the Editor
+
+1. Open [gitascii.com/editor](https://gitascii.com/editor).
+2. Arrange, resize, and configure your widgets.
+3. Click the **Export** or **Download Config** button to obtain your `gitascii.json` file.
+
+---
+
+## Step 2: Load and Render Programmatically
+
+Place your `gitascii.json` into your project and execute:
+
+```typescript
+import fs from 'node:fs'
+import path from 'node:path'
+import {
+  renderSvg,
+  embedExternalImages,
+  SavedConfiguration,
+  NormalizedGitHubData,
+} from '@/engine'
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+
+export async function generateReadmeBanner(username: string): Promise<string> {
+  // 1. Read exported JSON configuration
+  const configPath = path.join(process.cwd(), 'gitascii.json')
+  const rawConfig = fs.readFileSync(configPath, 'utf-8')
+  const config: SavedConfiguration = JSON.parse(rawConfig)
+
+  // 2. Fetch live metrics for the user
+  const githubData: NormalizedGitHubData = await fetchGitHubProfile(username)
+
+  // 3. Render pure SVG composition
+  const rawSvg = renderSvg(config, githubData)
+
+  // 4. Inline remote external assets (avatars, badges, external widgets)
+  const { svg: finalSvg } = await embedExternalImages(rawSvg)
+
+  return finalSvg
+}
+```
+
+---
+
+## Step 3: Serving via Edge Function or Next.js Route Handler
+
+You can serve this dynamically on any serverless platform:
+
+```typescript
+// app/api/my-profile/route.ts
+import { NextResponse } from 'next/server'
+import { generateReadmeBanner } from '@/lib/generateBanner'
+
+export async function GET() {
+  const svgContent = await generateReadmeBanner('octocat')
+
+  return new NextResponse(svgContent, {
+    headers: {
+      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200',
+    },
+  })
+}
+```

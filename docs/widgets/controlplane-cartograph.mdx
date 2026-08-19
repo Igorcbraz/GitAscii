@@ -1,0 +1,42 @@
+---
+title: "Cartograph Contour Survey Widget"
+description: "Contour topographic survey datums gazetteer map"
+---
+
+# Cartograph Contour Survey Widget (`controlplane-cartograph`)
+
+The Cartograph Contour Survey widget visualizes repository depths, star altitudes, and commit activity as topographic elevation contour lines and surveyor datum coordinates.
+
+## Configuration Schema
+
+```typescript
+export interface CartographConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const cartographWidget: WidgetInstance = {
+  instanceId: 'cartograph_01',
+  widgetId: 'controlplane-cartograph',
+  name: 'Cartograph Contour Survey',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#3fb950',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(cartographWidget, profileData, globalStyles)
+```

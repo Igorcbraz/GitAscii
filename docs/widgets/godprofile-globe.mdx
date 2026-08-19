@@ -1,0 +1,41 @@
+---
+title: "3D Contribution Globe Widget"
+description: "Isometric 3D rotating globe SVG calculated via spherical trigonometry"
+---
+
+# 3D Contribution Globe Widget (`godprofile-globe`)
+
+The 3D Contribution Globe widget renders an isometric globe with latitude/longitude wireframe paths computed through spherical trigonometry equations and animated with continuous 360° SVG rotation (`<animateTransform type="rotate">`).
+
+## Configuration Schema
+
+```typescript
+export interface GodprofileGlobeConfig {
+  accentColor?: string // Default: globalStyles.accentColor || '#b6a891'
+  textColor?: string   // Default: globalStyles.textColor || '#eceff4'
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const globeWidget: WidgetInstance = {
+  instanceId: 'globe_01',
+  widgetId: 'godprofile-globe',
+  name: '3D Contribution Globe',
+  position: { x: 0, y: 0 },
+  size: { width: 320, height: 350 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(globeWidget, profileData, globalStyles)
+```

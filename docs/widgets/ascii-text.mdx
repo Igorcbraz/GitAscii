@@ -1,0 +1,62 @@
+---
+title: "ASCII Text Widget"
+description: "Custom headline text rendered using stylized ASCII art fonts"
+---
+
+# ASCII Text Widget (`ascii-text`)
+
+The ASCII Text widget renders custom alphanumeric text strings using FIGlet-style character matrices (`block`, `slant`, and `thin` fonts).
+
+## Configuration Schema
+
+```typescript
+export interface AsciiTextConfig {
+  customText?: string       // Text string to convert (e.g. 'HACK THE PLANET')
+  asciiFont?: 'block' | 'slant' | 'thin' // Default: 'block'
+  charSpacing?: number      // Default: 1 (spaces between characters)
+  fontSize?: number         // Default: 12
+  charset?: string          // Character substitution ramp
+  customCharset?: string    // Custom replacement character set
+  accentColor?: string      // Default: globalStyles.accentColor || '#c5ff4a'
+  asciiLines?: string[]     // Pre-calculated ASCII lines override
+}
+```
+
+<ParamField body="customText" type="string" default="GitAscii">
+  The input text string converted to ASCII glyphs.
+</ParamField>
+
+<ParamField body="asciiFont" type="'block' | 'slant' | 'thin'" default="block">
+  Selects the ASCII letterform matrix:
+  * `block`: Solid geometric blocks.
+  * `slant`: Angled, forward-leaning italic aesthetic.
+  * `thin`: Lightweight minimalist stroke font.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const asciiTextWidget: WidgetInstance = {
+  instanceId: 'ascii_text_01',
+  widgetId: 'ascii-text',
+  name: 'ASCII Text',
+  position: { x: 0, y: 106 },
+  size: { width: 800, height: 120 },
+  config: {
+    customText: 'DEVELOPER',
+    asciiFont: 'slant',
+    charSpacing: 1,
+    fontSize: 12,
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 2,
+}
+
+const svgOutput = renderWidgetSvg(asciiTextWidget, profileData, globalStyles)
+```

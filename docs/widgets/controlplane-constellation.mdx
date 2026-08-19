@@ -1,0 +1,42 @@
+---
+title: "Constellation Star Chart Widget"
+description: "Connected star chart constellation map of projects and repositories"
+---
+
+# Constellation Star Chart Widget (`controlplane-constellation`)
+
+The Constellation Star Chart widget plots repositories as celestial star nodes connected by constellation lines against a deep astronomical night sky with star magnitude indicators.
+
+## Configuration Schema
+
+```typescript
+export interface ConstellationConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const constellationWidget: WidgetInstance = {
+  instanceId: 'constellation_01',
+  widgetId: 'controlplane-constellation',
+  name: 'Constellation Star Chart',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#c084fc',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(constellationWidget, profileData, globalStyles)
+```

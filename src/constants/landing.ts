@@ -220,17 +220,131 @@ export const SUMMARY_VS_MATRIX_RAW: readonly VsMatrixRowRaw[] = [
   },
 ]
 
-export interface NavbarMenuItemRaw {
+export interface NavbarDropdownItemRaw {
   key: string
-  defaultLabel: string
+  defaultTitle: string
+  defaultDesc: string
   href: string
+  isExternal?: boolean
+  badge?: string
+  featured?: boolean
+  titleNormal?: string
+  titleHighlight?: string
+  titleEnd?: string
 }
 
-export const NAVBAR_MENU_ITEMS: readonly NavbarMenuItemRaw[] = [
-  { key: 'landing.navbar.templates', defaultLabel: 'TEMPLATES', href: '/templates' },
-  { key: 'landing.navbar.widgets', defaultLabel: 'WIDGETS', href: '/widgets' },
-  { key: 'landing.navbar.explore', defaultLabel: 'EXPLORE', href: '/explore' },
-  { key: 'landing.navbar.guides', defaultLabel: 'GUIDES', href: '/guides' },
+export interface NavbarMenuSectionRaw {
+  key: string
+  defaultLabel: string
+  items: readonly NavbarDropdownItemRaw[]
+  footerLink?: {
+    key: string
+    defaultLabel: string
+    href: string
+    isExternal?: boolean
+  }
+}
+
+export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
+  {
+    key: 'landing.navbar.platform',
+    defaultLabel: 'PLATFORM',
+    items: [
+      {
+        key: 'templates',
+        defaultTitle: 'Templates Catalog',
+        titleNormal: 'Explore ',
+        titleHighlight: 'Templates',
+        titleEnd: ' Catalog',
+        defaultDesc: '13+ battle-tested layout presets ready to clone & customize.',
+        href: '/templates',
+        badge: 'FEATURED',
+        featured: true,
+      },
+      {
+        key: 'widgets',
+        defaultTitle: 'Dynamic Widgets',
+        titleNormal: 'Dynamic ',
+        titleHighlight: 'Widgets',
+        defaultDesc: '30+ live SVG widgets mapping GitHub stats & ASCII art.',
+        href: '/widgets',
+        badge: '30+ SVG',
+      },
+      {
+        key: 'explore',
+        defaultTitle: 'Explore Profiles',
+        titleNormal: 'Community ',
+        titleHighlight: 'Portfolios',
+        defaultDesc: 'Browse developer setups and clone real READMEs.',
+        href: '/explore',
+        badge: 'COMMUNITY',
+      },
+      {
+        key: 'guides',
+        defaultTitle: 'Guides & Tutorials',
+        titleNormal: 'README ',
+        titleHighlight: 'Guides',
+        defaultDesc: 'Curated articles on GitHub markdown, SVG badges & themes.',
+        href: '/guides',
+      },
+    ],
+    footerLink: {
+      key: 'landing.navbar.platform_compare',
+      defaultLabel: 'Compare GitAscii vs Alternatives',
+      href: '/vs',
+    },
+  },
+  {
+    key: 'landing.navbar.developers',
+    defaultLabel: 'DEVELOPERS',
+    items: [
+      {
+        key: 'api_rendering',
+        defaultTitle: 'Edge Rendering API',
+        titleNormal: 'Real-Time ',
+        titleHighlight: 'Edge API',
+        titleEnd: ' Engine',
+        defaultDesc: 'Dynamic SVGs served from global edge caches in milliseconds.',
+        href: 'https://docs.gitascii.com/api/rendering',
+        isExternal: true,
+        badge: 'HIGH SPEED',
+        featured: true,
+      },
+      {
+        key: 'quickstart',
+        defaultTitle: 'Quickstart Guide',
+        titleNormal: 'Quickstart ',
+        titleHighlight: 'Guide',
+        defaultDesc: 'Get your dynamic README running in less than 2 minutes.',
+        href: 'https://docs.gitascii.com/quickstart',
+        isExternal: true,
+      },
+      {
+        key: 'ascii_pipeline',
+        defaultTitle: 'ASCII Architecture',
+        titleNormal: 'ASCII ',
+        titleHighlight: 'Pipeline',
+        defaultDesc: 'Deep dive into FIGlet font rasterization & luminance mapping.',
+        href: 'https://docs.gitascii.com/guides/ascii-pipeline',
+        isExternal: true,
+      },
+      {
+        key: 'design_tokens',
+        defaultTitle: 'Design Tokens & Themes',
+        titleNormal: 'Design ',
+        titleHighlight: 'Tokens',
+        defaultDesc: 'Dark/Light specifications and theme color palettes.',
+        href: 'https://docs.gitascii.com/reference/design-tokens',
+        isExternal: true,
+      },
+    ],
+    footerLink: {
+      key: 'landing.navbar.docs_full',
+      defaultLabel: 'Visit Full Documentation (docs.gitascii.com)',
+      href: 'https://docs.gitascii.com',
+      isExternal: true,
+    },
+  },
 ]
 
 export type ShowcaseTabType = 'templates' | 'widgets' | 'profiles' | 'guides'

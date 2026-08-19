@@ -1,0 +1,93 @@
+---
+title: "Rendering"
+description: "Core rendering functions: SVGEngine, WidgetRenderer, and External Asset Inlining"
+---
+
+# Rendering Engine
+
+The GitAscii rendering engine lives in `src/engine/` and transforms JSON configuration models and normalized GitHub data into standards-compliant SVG strings.
+
+## `renderSvg(config, data, options)`
+
+The main orchestration function that computes bounds, sorts layers by `zIndex`, renders individual widget nodes, and produces the root `<svg>` container.
+
+```typescript
+import { renderSvg, SavedConfiguration, NormalizedGitHubData, RenderOptions } from '@/engine'
+
+export function renderSvg(
+  config: SavedConfiguration,
+  data: NormalizedGitHubData,
+  options: RenderOptions = {}
+): string
+```
+
+### Parameters
+
+<ParamField body="config" type="SavedConfiguration" required>
+  The profile configuration containing `globalStyles` and the `widgets` list.
+</ParamField>
+
+<ParamField body="data" type="NormalizedGitHubData" required>
+  Normalized data containing `user`, `repos`, `languages`, `totalStars`, and `contributions`.
+</ParamField>
+
+<ParamField body="options" type="RenderOptions" optional>
+  Optional rendering overrides:
+  * `theme?: 'dark' | 'light'` - Forces dark or light palette.
+  * `width?: number` - Explicit output canvas width (defaults to bounding max or 800px).
+  * `height?: number` - Explicit output canvas height.
+  * `widgets?: string[]` - Target widget instance IDs or widget IDs to isolate with automatic shrink-wrap.
+</ParamField>
+
+### Shrink-Wrap Calculation
+
+When `options.widgets` is provided, `renderSvg` recalculates the coordinate system:
+
+1. Finds the bounding box minimum: `minX = Math.min(...widget.position.x)`, `minY = Math.min(...widget.position.y)`.
+2. Translates each widget position: `x' = x - minX`, `y' = y - minY`.
+3. Sets `<svg viewBox="0 0 maxX maxY">` precisely around the selected elements.
+
+---
+
+## `renderWidgetSvg(widget, data, globalStyles, includeWrapper, forceStatic)`
+
+Renders an individual widget instance, applying frame borders, background rectangles, template decorations, entrance animations, and transforms.
+
+```typescript
+import { renderWidgetSvg } from '@/engine'
+
+export function renderWidgetSvg(
+  widget: WidgetInstance,
+  data: NormalizedGitHubData,
+  globalStyles: GlobalStyles,
+  includeWrapper: boolean = true,
+  forceStatic: boolean = false
+): string
+```
+
+### Execution Steps
+
+1. **Card Frame**: If the widget is not self-contained, a background `<rect>` is created using `config.backgroundColor || globalStyles.backgroundColor`, `stroke-width`, and `borderRadius`.
+2. **Template Decorations**: Injects signature template accents (e.g. Dracula dots `🔴🟡🟢`, Cyberpunk corner cuts, Terminal `+` corner marks, Nord header accent lines, Neo-brutalism offset drop shadow).
+3. **Animations**: Injects `<style>` keyframes (`fade-in`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `zoom-in`, `zoom-out`, `flip-x`, `flip-y`, `typewriter`, `glitch`, `scan-lines`) with staggered `animation-delay` attributes across text and rect nodes.
+4. **Transform Wrapper**: If `includeWrapper` is `true`, encapsulates the node in `<g transform="translate(x, y)" id="widget-${instanceId}">`.
+
+---
+
+## `embedExternalImages(svgContent)`
+
+External widgets (such as Shields badges, GitHub Readme Stats, and avatars) are initially rendered with boundary markers or remote `<image>` tags. `embedExternalImages` fetches, sanitizes, and inlines these external assets to avoid CORS issues and Camo proxy blocks.
+
+```typescript
+import { embedExternalImages, ProcessedSvgResult } from '@/engine'
+
+export async function embedExternalImages(svgContent: string): Promise<ProcessedSvgResult> {
+  // Returns: { svg: string, hasErrors: boolean }
+}
+```
+
+### Security & Inlining Mechanisms
+
+* **SSRF Validator**: Every external URL is pre-validated against private IP ranges (e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254`) before making network calls.
+* **SVG Inlining (`inlineSvg`)**: Parses remote SVGs, extracts `<style>` blocks to prevent namespace collisions, normalizes the `viewBox`, and replaces external image tags with direct `<svg x="..." y="...">` structures.
+* **Binary Fallback**: Non-SVG images (PNG, WebP, GIF) are converted to `data:image/png;base64,...` data URIs.

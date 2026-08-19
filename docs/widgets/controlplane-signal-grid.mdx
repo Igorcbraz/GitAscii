@@ -1,0 +1,49 @@
+---
+title: "Signal Grid Mesh Widget"
+description: "Wired signal topology map and connected telemetry grid structure"
+---
+
+# Signal Grid Mesh Widget (`controlplane-signal-grid`)
+
+The Signal Grid Mesh widget maps repositories across a wired coordinate grid with carrier frequency markings, radar sweep lines, and animated pulse nodes.
+
+## Configuration Schema
+
+```typescript
+export interface SignalGridConfig {
+  layoutType?: 'hero' | 'closed-loop'  // Default: 'closed-loop'
+  customTitle?: string                 // Station identity title
+  customBio?: string                   // Subtitle copy
+  selectedRepos?: string[]             // Pinned node list
+  repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
+  maxRepos?: number                    // Default: 8
+  accentColor?: string                 // Carrier line tint (default: '#00A7D1')
+  secondaryColor?: string              // Sensor pulse tint (default: '#E84A8A')
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const signalWidget: WidgetInstance = {
+  instanceId: 'signal_01',
+  widgetId: 'controlplane-signal-grid',
+  name: 'Signal Grid Mesh',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 320 },
+  config: {
+    layoutType: 'closed-loop',
+    maxRepos: 8,
+    accentColor: '#00A7D1',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(signalWidget, profileData, globalStyles)
+```

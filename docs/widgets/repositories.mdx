@@ -1,0 +1,68 @@
+---
+title: "Featured Repositories Widget"
+description: "Showcase highlighted repositories in list or two-column grid cards"
+---
+
+# Featured Repositories Widget (`repositories`)
+
+The Repositories widget highlights pinned or top-starred repositories with repository descriptions, star counts (`★`), fork counts (`⑂`), primary languages, and update timestamps.
+
+## Configuration Schema
+
+```typescript
+export interface RepositoriesConfig {
+  repoViewMode?: 'list' | 'grid'              // Default: 'list'
+  repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
+  maxRepos?: number                           // Default: 3
+  selectedRepos?: string[]                    // Specific repository names in display order
+  showRepoStars?: boolean                     // Default: true
+  showRepoLanguage?: boolean                  // Default: true
+  showRepoForks?: boolean                     // Default: false
+  showRepoDesc?: boolean                      // Default: true
+  showRepoUpdated?: boolean                   // Default: false
+  accentColor?: string                        // Default: globalStyles.accentColor
+}
+```
+
+<ParamField body="repoViewMode" type="'list' | 'grid'" default="list">
+  * `list`: Full-width stacked cards with left vertical accent stripe.
+  * `grid`: Two-column responsive card matrix.
+</ParamField>
+
+<ParamField body="repoSortBy" type="'stars' | 'forks' | 'updated' | 'name'" default="stars">
+  Sort order applied to public repositories when `selectedRepos` is not provided.
+</ParamField>
+
+<ParamField body="selectedRepos" type="string[]" optional>
+  Manual list of repository names (e.g. `['GitAscii', 'next-starter']`) taking precedence over automatic sorting.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const reposWidget: WidgetInstance = {
+  instanceId: 'repos_01',
+  widgetId: 'repositories',
+  name: 'Featured Repos',
+  position: { x: 0, y: 558 },
+  size: { width: 800, height: 300 },
+  config: {
+    repoViewMode: 'grid',
+    repoSortBy: 'stars',
+    maxRepos: 4,
+    showRepoLanguage: true,
+    showRepoStars: true,
+    showRepoForks: true,
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 5,
+}
+
+const svgOutput = renderWidgetSvg(reposWidget, profileData, globalStyles)
+```

@@ -1,0 +1,58 @@
+---
+title: "Aura Showcase Cards Widget"
+description: "Aura dual card showcase with cosmic glow, animated GIF backgrounds, Lucide icons, and terminal prompts"
+---
+
+# Aura Showcase Cards Widget (`codeweb-showcase-cards`)
+
+The Aura Showcase Cards widget pairs a large hero about card (with background GIF textures and terminal command prompt) with two stacked side cards featuring vector Lucide icons.
+
+## Configuration Schema
+
+```typescript
+export interface CodewebShowcaseCardsConfig {
+  aboutTag?: string       // Eyebrow tag (default: 'ABOUT')
+  titleLine1?: string     // Headline Line 1 (default: 'Building things')
+  titleLine2?: string     // Headline Line 2 (default: 'that matter.')
+  terminalText?: string   // Terminal prompt copy (default: '> open to collaborations')
+  leftGifUrl?: string     // Background GIF URL for hero card
+  card1GifUrl?: string    // Background GIF URL for top right card
+  card2GifUrl?: string    // Background GIF URL for bottom right card
+  card1Icon?: string      // Lucide icon name (e.g. 'Target', 'Zap', 'Code2')
+  card1Text?: string      // Top card label (default: 'ALWAYS LEARNING')
+  card2Icon?: string      // Lucide icon name (e.g. 'Star', 'Flame', 'Sparkles')
+  card2Text?: string      // Bottom card label (default: 'CRAFT MATTERS')
+  staticMode?: boolean    // Disables CSS animations
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const showcaseWidget: WidgetInstance = {
+  instanceId: 'showcase_01',
+  widgetId: 'codeweb-showcase-cards',
+  name: 'Aura Showcase Cards',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 220 },
+  config: {
+    aboutTag: 'ENGINEERING',
+    titleLine1: 'Crafting high-scale',
+    titleLine2: 'developer experiences.',
+    terminalText: '> pnpm build --filter core',
+    card1Icon: 'Cpu',
+    card1Text: 'SYSTEM ARCHITECTURE',
+    card2Icon: 'Sparkles',
+    card2Text: 'CLEAN INTERFACES',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(showcaseWidget, profileData, globalStyles)
+```

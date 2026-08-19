@@ -1,0 +1,42 @@
+---
+title: "Foundry Casting Yard Widget"
+description: "Casting floor alloys smelted master mold ingot ledger"
+---
+
+# Foundry Casting Yard Widget (`controlplane-foundry`)
+
+The Foundry Casting Yard widget represents projects as cast metallic ingots, stamped foundry serial numbers, alloy grade percentages, and smelting registry ledgers.
+
+## Configuration Schema
+
+```typescript
+export interface FoundryConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const foundryWidget: WidgetInstance = {
+  instanceId: 'foundry_01',
+  widgetId: 'controlplane-foundry',
+  name: 'Foundry Casting Yard',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#fe8019',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(foundryWidget, profileData, globalStyles)
+```

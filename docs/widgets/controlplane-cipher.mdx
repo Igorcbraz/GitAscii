@@ -1,0 +1,42 @@
+---
+title: "Cipher Print Rosette Widget"
+description: "Engraved rosette index and edition ledger register folio"
+---
+
+# Cipher Print Rosette Widget (`controlplane-cipher`)
+
+The Cipher Print Rosette widget renders repositories inside a banknote-grade guilloché rosette engraving with hexadecimal ledger registers and cryptographic stamp borders.
+
+## Configuration Schema
+
+```typescript
+export interface CipherConfig {
+  selectedRepos?: string[]
+  maxRepos?: number
+  accentColor?: string
+}
+```
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const cipherWidget: WidgetInstance = {
+  instanceId: 'cipher_01',
+  widgetId: 'controlplane-cipher',
+  name: 'Cipher Print Rosette',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 330 },
+  config: {
+    accentColor: '#c5ff4a',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(cipherWidget, profileData, globalStyles)
+```

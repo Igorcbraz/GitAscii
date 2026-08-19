@@ -1,0 +1,60 @@
+---
+title: "Aura Social Badge Widget"
+description: "Glowing animated rotating gradient badges with single, multi-strip, and grid modes"
+---
+
+# Aura Social Badge Widget (`codeweb-social-badge`)
+
+The Aura Social Badge widget generates rounded pill badges surrounded by rotating gradient borders (`<animateTransform type="rotate">`) with vector brand icons and platform labels.
+
+## Configuration Schema
+
+```typescript
+export interface CodewebSocialBadgeConfig {
+  renderMode?: 'single' | 'multi' | 'grid' // Default: 'multi'
+  platforms?: string[]                     // Array of platform keys
+  platform?: string                        // Platform key for single mode (default: 'github')
+  customLabel?: string                     // Custom label override
+  gridColumns?: number                     // Default: 2 (grid mode only)
+  showIcons?: boolean                      // Default: true
+  showText?: boolean                       // Default: true
+  animSpeed?: string                       // Default: '8s'
+  staticMode?: boolean                     // Disables gradient rotation
+}
+```
+
+<ParamField body="renderMode" type="'single' | 'multi' | 'grid'" default="multi">
+  * `single`: Renders one centered badge pill with isolated viewBox.
+  * `multi`: Horizontal centered strip of multiple badges.
+  * `grid`: 2, 3, or 4 column balanced card grid.
+</ParamField>
+
+<ParamField body="platforms" type="string[]" default="['github', 'instagram', 'facebook', 'gmail']">
+  Supported keys: `github`, `instagram`, `facebook`, `gmail`, `x`, `linkedin`, `discord`, `youtube`, `twitch`, `portfolio`, `repositories`, `stars`, `followers`.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const socialBadgeWidget: WidgetInstance = {
+  instanceId: 'aura_social_01',
+  widgetId: 'codeweb-social-badge',
+  name: 'Aura Social Badge',
+  position: { x: 0, y: 0 },
+  size: { width: 800, height: 44 },
+  config: {
+    renderMode: 'multi',
+    platforms: ['github', 'linkedin', 'x', 'discord'],
+    animSpeed: '6s',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 1,
+}
+
+const svgOutput = renderWidgetSvg(socialBadgeWidget, profileData, globalStyles)
+```

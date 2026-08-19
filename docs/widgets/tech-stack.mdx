@@ -1,0 +1,55 @@
+---
+title: "Tech Stack Widget"
+description: "Interactive skill icons gallery powered by skillicons.dev integration"
+---
+
+# Tech Stack Widget (`tech-stack`)
+
+The Tech Stack widget automatically detects or lets you specify developer skills, programming languages, and frameworks, rendering official vector brand logos in dark or light mode.
+
+## Configuration Schema
+
+```typescript
+export interface TechStackConfig {
+  selectedTechs?: string[]   // Array of technology IDs (e.g. ['ts', 'react', 'nextjs'])
+  theme?: 'dark' | 'light'   // Default: 'dark'
+  perLine?: number           // Default: 12 (maximum icons per row)
+  showTitle?: boolean        // Default: true
+  customTitle?: string       // Default: '[ TECHNOLOGIES & SKILLS ]'
+}
+```
+
+<ParamField body="selectedTechs" type="string[]" default="Auto-detected from profile">
+  List of technology keys. Common values: `ts`, `js`, `react`, `nextjs`, `nodejs`, `python`, `rust`, `go`, `docker`, `postgres`, `tailwind`, `git`, `linux`, `aws`, `graphql`.
+</ParamField>
+
+<ParamField body="perLine" type="number" default="12">
+  Determines how many icons are laid out horizontally before wrapping to the next line.
+</ParamField>
+
+---
+
+## Real Code Example
+
+```typescript
+import { renderWidgetSvg, WidgetInstance } from '@/engine'
+
+const techStackWidget: WidgetInstance = {
+  instanceId: 'tech_stack_01',
+  widgetId: 'tech-stack',
+  name: 'Tech Stack',
+  position: { x: 0, y: 248 },
+  size: { width: 800, height: 140 },
+  config: {
+    selectedTechs: ['ts', 'react', 'nextjs', 'nodejs', 'tailwind', 'postgres', 'docker', 'git'],
+    perLine: 8,
+    showTitle: true,
+    customTitle: '[ CORE TECH STACK ]',
+  },
+  locked: false,
+  visible: true,
+  zIndex: 3,
+}
+
+const svgOutput = renderWidgetSvg(techStackWidget, profileData, globalStyles)
+```

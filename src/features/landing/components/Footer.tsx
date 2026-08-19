@@ -118,6 +118,16 @@ export function Footer() {
               </span>
               <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
                 <li>
+                  <a
+                    href={EXTERNAL_LINKS.DOCS}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-signal-lime"
+                  >
+                    {t('landing.footer.item.documentation', 'Documentation')}
+                  </a>
+                </li>
+                <li>
                   <Link href="/guides" className="transition-colors hover:text-signal-lime">
                     {t('landing.footer.item.guides', 'Guides & Tutorials')}
                   </Link>
