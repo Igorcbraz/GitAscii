@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 const ASCII_RAMP = ' .`\'^",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
-const HANDS_SRC = '/ascii-hands.png'
+const HANDS_SRC = '/ascii-hands.webp'
 
 interface AsciiHandsProps {
   className?: string
