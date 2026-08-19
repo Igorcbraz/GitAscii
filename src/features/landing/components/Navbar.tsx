@@ -209,7 +209,7 @@ export default function Navbar() {
                                 {`// ${t(section.key, section.defaultLabel)}`}
                               </span>
                             </div>
-                            <span className="font-jetbrains-mono text-[9px] text-graphite uppercase tracking-widest">
+                            <span className="font-jetbrains-mono text-[9px] text-ash uppercase tracking-widest">
                               GITASCII
                             </span>
                           </div>
@@ -284,20 +284,20 @@ export default function Navbar() {
                                         </span>
                                       )}
                                       {item.badge && (
-                                        <span className="font-jetbrains-mono text-[9px] text-ash/60 uppercase">
+                                        <span className="font-jetbrains-mono text-[9px] text-ash uppercase">
                                           · {item.badge}
                                         </span>
                                       )}
                                     </div>
-                                    <p className="font-inter-tight text-[12px] text-ash/80 mt-0.5 leading-snug line-clamp-1 group-hover:text-bone transition-colors">
+                                    <p className="font-inter-tight text-[12px] text-ash mt-0.5 leading-snug line-clamp-1 group-hover:text-bone transition-colors">
                                       {item.defaultDesc}
                                     </p>
                                   </div>
 
                                   {item.isExternal ? (
-                                    <ExternalLink className="size-3 text-ash/40 group-hover:text-signal-lime transition-colors shrink-0" />
+                                    <ExternalLink className="size-3 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
                                   ) : (
-                                    <ArrowRight className="size-3 text-ash/30 group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-150 shrink-0" />
+                                    <ArrowRight className="size-3 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-150 shrink-0" />
                                   )}
                                 </motion.div>
                               )
@@ -372,6 +372,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-1.5 px-2.5 h-[32px] font-inter-tight text-label font-medium text-ash transition-all duration-200 hover:text-white active:scale-[0.98] cursor-pointer group"
               title="Star on GitHub"
+              aria-label={t('common.star_github', 'Star on GitHub')}
             >
               <Github className="size-3.5 text-ash group-hover:text-white transition-colors" />
               <span className="text-ash group-hover:text-white transition-colors font-medium">

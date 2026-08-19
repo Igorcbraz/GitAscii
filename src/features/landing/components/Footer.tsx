@@ -13,7 +13,10 @@ export function Footer() {
   return (
     <footer className="relative w-full bg-void-black border-t border-graphite">
       <div className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+          aria-hidden="true"
+        >
           <pre className="font-jetbrains-mono text-caption sm:text-body leading-tight text-graphite/30 whitespace-pre">
             {`
      ██████╗ ██╗████████╗ █████╗ ███████╗ ██████╗██╗██╗
@@ -215,10 +218,10 @@ export function Footer() {
 
           <div className="mt-12 pt-8 border-t border-graphite flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="font-inter-tight text-note text-ash flex items-center gap-2">
-              <span className="font-jetbrains-mono text-caption text-graphite">{'// '}</span>©{' '}
+              <span className="font-jetbrains-mono text-caption text-ash">{'// '}</span>©{' '}
               {new Date().getFullYear()} {t('landing.footer.copyright', 'GitAscii. MIT License.')}
             </p>
-            <p className="font-jetbrains-mono text-caption text-fog uppercase tracking-[0.18em]">
+            <p className="font-jetbrains-mono text-caption text-ash uppercase tracking-[0.18em]">
               {`v${APP_VERSION} · BUILD 2026.08`}
             </p>
           </div>

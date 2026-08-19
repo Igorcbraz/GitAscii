@@ -108,24 +108,45 @@ export function SummarySection() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto border-t border-b border-graphite overflow-x-auto">
+          <div
+            className="max-w-4xl mx-auto border-t border-b border-graphite overflow-x-auto"
+            role="region"
+            aria-label={tc(
+              'landing.summary.compare_title',
+              'GitAscii vs Alternatives',
+              'GitAscii vs Alternativas'
+            )}
+            tabIndex={0}
+          >
             <table className="w-full text-left font-inter-tight text-note min-w-125">
               <thead>
                 <tr className="border-b border-graphite bg-carbon/40 text-ash uppercase tracking-wider text-caption">
-                  <th className="py-4 px-4 font-jetbrains-mono font-medium">
+                  <th scope="col" className="py-4 px-4 font-jetbrains-mono font-medium">
                     {tc('vs.th_feature', 'Feature', 'Recurso')}
                   </th>
-                  <th className="py-4 px-4 font-jetbrains-mono font-medium text-signal-lime">
+                  <th
+                    scope="col"
+                    className="py-4 px-4 font-jetbrains-mono font-medium text-signal-lime"
+                  >
                     GitAscii
                   </th>
-                  <th className="py-4 px-4 font-jetbrains-mono font-medium">Readme.so</th>
-                  <th className="py-4 px-4 font-jetbrains-mono font-medium">GPRM</th>
+                  <th scope="col" className="py-4 px-4 font-jetbrains-mono font-medium">
+                    Readme.so
+                  </th>
+                  <th scope="col" className="py-4 px-4 font-jetbrains-mono font-medium">
+                    GPRM
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-graphite/40 text-bone">
                 {vsMatrix.map((row, idx) => (
                   <tr key={idx} className="hover:bg-onyx/20 transition-colors">
-                    <td className="py-4 px-4 font-medium text-chalk">{row.feature}</td>
+                    <th
+                      scope="row"
+                      className="py-4 px-4 font-medium text-chalk text-left font-normal"
+                    >
+                      {row.feature}
+                    </th>
 
                     <td className="py-4 px-4 text-signal-lime font-bold font-jetbrains-mono text-label bg-signal-lime/5">
                       {row.gitascii === 'included'

@@ -1,16 +1,26 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 
 import KineticGrid from '@/components/ui/kinetic-grid'
 import { APP_URL, EXTERNAL_LINKS } from '@/constants'
-import DemoSection from '@/features/landing/components/DemoSection'
-import { FAQ } from '@/features/landing/components/FAQ'
-import { FeaturesGrid } from '@/features/landing/components/FeaturesGrid'
-import { Footer } from '@/features/landing/components/Footer'
 import Hero from '@/features/landing/components/Hero'
-import { HowItWorks } from '@/features/landing/components/HowItWorks'
-import InteractiveShowcase from '@/features/landing/components/InteractiveShowcase'
 import Navbar from '@/features/landing/components/Navbar'
 import { SummarySection } from '@/features/landing/components/SummarySection'
+
+const DemoSection = dynamic(() => import('@/features/landing/components/DemoSection'))
+const InteractiveShowcase = dynamic(
+  () => import('@/features/landing/components/InteractiveShowcase')
+)
+const FeaturesGrid = dynamic(() =>
+  import('@/features/landing/components/FeaturesGrid').then((mod) => mod.FeaturesGrid)
+)
+const HowItWorks = dynamic(() =>
+  import('@/features/landing/components/HowItWorks').then((mod) => mod.HowItWorks)
+)
+const FAQ = dynamic(() => import('@/features/landing/components/FAQ').then((mod) => mod.FAQ))
+const Footer = dynamic(() =>
+  import('@/features/landing/components/Footer').then((mod) => mod.Footer)
+)
 
 export async function generateMetadata({
   searchParams,

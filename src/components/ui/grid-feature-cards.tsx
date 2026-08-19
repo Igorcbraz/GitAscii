@@ -88,7 +88,7 @@ export function FeatureCard({ feature, index, className, ...props }: FeatureCard
                 aria-hidden
               />
             </div>
-            <span className="font-mono text-caption text-ash/30 group-hover:text-signal-lime/50 transition-colors duration-300 mt-1">
+            <span className="font-mono text-caption text-ash group-hover:text-signal-lime/70 transition-colors duration-300 mt-1">
               {formattedIndex}
             </span>
           </div>
