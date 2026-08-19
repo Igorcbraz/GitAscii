@@ -154,6 +154,37 @@ export async function getInstallationTokenById(
   }
 }
 
+export async function getAppInstallations(): Promise<string[]> {
+  try {
+    const jwt = generateGitHubAppJWT()
+    const res = await fetch(API_ENDPOINTS.GITHUB.APP_INSTALLATIONS, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'GitAscii-App',
+      },
+      next: { revalidate: 1800 },
+      signal: AbortSignal.timeout(5000),
+    })
+
+    if (!res.ok) {
+      return []
+    }
+
+    const data = await res.json()
+    if (!Array.isArray(data)) {
+      return []
+    }
+
+    return data
+      .map((inst: { account?: { login?: string } }) => inst.account?.login)
+      .filter((login): login is string => typeof login === 'string')
+  } catch (error) {
+    console.warn('Failed to fetch App installations for Explore:', error)
+    return []
+  }
+}
+
 export async function getAppInstallUrl(): Promise<string> {
   try {
     const jwt = generateGitHubAppJWT()

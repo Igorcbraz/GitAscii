@@ -1,8 +1,6 @@
 import type { SavedConfiguration } from '@/engine/types'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-import { profileRepository } from './profileRepository'
-
 interface CacheEntry {
   config: SavedConfiguration
   expiresAt: number
@@ -17,17 +15,19 @@ export function invalidateProfileConfig(username: string, slug: string = 'defaul
   memoryCache.delete(`${usernameLower}_${slugLower}`)
 }
 
-export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
+export function cacheProfileConfig(config: SavedConfiguration): void {
   const username = config.username.toLowerCase()
   const slug = (config.profileSlug || 'default').toLowerCase()
   const cacheKey = `${username}_${slug}`
-
-  await profileRepository.save(config)
 
   memoryCache.set(cacheKey, {
     config,
     expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
   })
+}
+
+export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
+  cacheProfileConfig(config)
 }
 
 async function fetchConfigFromGitHub(
@@ -53,19 +53,20 @@ async function fetchConfigFromGitHub(
         cache: 'no-store',
         signal: AbortSignal.timeout(3000),
       })
-      if (res.ok) {
-        const text = await res.text()
-        try {
-          const config = JSON.parse(text)
-          if (config && typeof config === 'object' && Array.isArray(config.widgets)) {
-            return config as SavedConfiguration
-          }
-        } catch {
-          // Response is not valid JSON (e.g. XML/HTML error or 404 payload)
-        }
+      if (!res.ok) {
+        continue
       }
-    } catch {
-      // Continue to next URL
+      const text = await res.text()
+      try {
+        const config = JSON.parse(text)
+        if (config && typeof config === 'object' && Array.isArray(config.widgets)) {
+          return config as SavedConfiguration
+        }
+      } catch (parseError) {
+        console.warn(`Failed to parse profile JSON from ${url}:`, parseError)
+      }
+    } catch (fetchError) {
+      console.warn(`Failed to fetch profile configuration from ${url}:`, fetchError)
     }
   }
   return null
@@ -84,13 +85,7 @@ export async function loadProfileConfig(
     return cached.config
   }
 
-  let config = await fetchConfigFromGitHub(username, slugLower)
-
-  if (!config) {
-    config = await profileRepository.get(usernameLower, slugLower)
-  } else {
-    void profileRepository.save(config).catch(() => {})
-  }
+  const config = await fetchConfigFromGitHub(username, slugLower)
 
   if (config) {
     memoryCache.set(cacheKey, {
