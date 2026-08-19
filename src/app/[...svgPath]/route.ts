@@ -100,14 +100,24 @@ export async function GET(
     }
 
     const rawSvgContent = renderSvg(config, data, { theme, widgets })
-    const svgContent = await embedExternalImages(rawSvgContent)
+    const { svg: svgContent, hasErrors } = await embedExternalImages(rawSvgContent)
+
+    // Healthy cache: 1 hour fresh, 2 hours stale-while-revalidate
+    // Degraded/error cache: 5 minutes fresh, 10 minutes stale-while-revalidate
+    const cacheControl = hasErrors
+      ? 'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
+      : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200'
+
+    const cdnCacheControl = hasErrors
+      ? 'public, s-maxage=300, stale-while-revalidate=600'
+      : 'public, s-maxage=3600, stale-while-revalidate=7200'
 
     return new NextResponse(svgContent, {
       status: 200,
       headers: {
         'Content-Type': 'image/svg+xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=86400',
-        'CDN-Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400',
+        'Cache-Control': cacheControl,
+        'CDN-Cache-Control': cdnCacheControl,
         'X-Content-Type-Options': 'nosniff',
         'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:;",
       },
