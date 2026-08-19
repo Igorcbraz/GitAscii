@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/Igorcbraz/GitAscii/compare/v1.11.0...v1.11.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **svg-canvas:** support full transparency for footer widget rendering ([#93](https://github.com/Igorcbraz/GitAscii/issues/93)) ([674fa6e](https://github.com/Igorcbraz/GitAscii/commit/674fa6e8d509f9b5a0dc3235d0c2c7331e2436e6))
+
 ## [1.11.0](https://github.com/Igorcbraz/GitAscii/compare/v1.10.0...v1.11.0) (2026-08-19)
 
 ### Features
