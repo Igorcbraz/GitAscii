@@ -165,17 +165,21 @@ export default function Navbar() {
                 >
                   <button
                     onClick={() => setActiveDropdown(isOpened ? null : section.key)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-all duration-200 cursor-pointer ${
+                    className={`group inline-flex items-center gap-1.5 px-3 py-1.5 font-inter-tight text-label font-medium uppercase tracking-[0.18em] transition-colors duration-200 cursor-pointer ${
                       isOpened || hasActiveChild
-                        ? 'text-signal-lime bg-onyx/50 border border-signal-lime/20'
-                        : 'text-white hover:text-signal-lime border border-transparent'
+                        ? 'text-signal-lime'
+                        : 'text-white hover:text-signal-lime'
                     }`}
                     aria-expanded={isOpened}
                   >
                     <span>{t(section.key, section.defaultLabel)}</span>
                     <ChevronDown
-                      className={`size-3.5 transition-transform duration-200 ${
-                        isOpened ? 'rotate-180 text-signal-lime' : 'text-ash'
+                      className={`size-3.5 transition-all duration-200 ${
+                        isOpened
+                          ? 'rotate-180 text-signal-lime'
+                          : hasActiveChild
+                            ? 'text-signal-lime'
+                            : 'text-ash group-hover:text-signal-lime'
                       }`}
                     />
                   </button>
