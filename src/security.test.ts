@@ -34,7 +34,9 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       const encrypted = encryptSession(payload)
       const parts = encrypted.split('.')
 
-      const tamperedTag = parts[1].substring(0, parts[1].length - 2) + 'AA'
+      const tagBuf = Buffer.from(parts[1], 'base64url')
+      tagBuf[0] ^= 0xff
+      const tamperedTag = tagBuf.toString('base64url')
       const tamperedPacked = `${parts[0]}.${tamperedTag}.${parts[2]}`
 
       expect(decryptSession(tamperedPacked)).toBeNull()
