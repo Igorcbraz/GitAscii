@@ -2,10 +2,23 @@
 
 ## [1.11.0](https://github.com/Igorcbraz/GitAscii/compare/v1.10.0...v1.11.0) (2026-08-19)
 
-
 ### Features
 
-* Comprehensive Documentation, Dynamic SVG Caching, SEO & Editor Error Enhancements ([#84](https://github.com/Igorcbraz/GitAscii/issues/84)) ([ab6e80d](https://github.com/Igorcbraz/GitAscii/commit/ab6e80d93c67b0eac2f344f6bedc9a13d100e39c))
+- **docs:** comprehensive documentation portal, Mintlify architecture, and navigation hierarchy ([#87](https://github.com/Igorcbraz/GitAscii/issues/87))
+
+### Bug Fixes
+
+- **cache:** adjust cache-control headers and error TTL on external widget errors ([#86](https://github.com/Igorcbraz/GitAscii/issues/86))
+- **editor:** add ProfileErrorScreen fallback, prevent render loops and enrich error i18n ([#90](https://github.com/Igorcbraz/GitAscii/issues/90))
+
+### Performance & SEO
+
+- **seo:** optimize metadata, canonicals, SSR i18n, soft 404s and asset performance ([#85](https://github.com/Igorcbraz/GitAscii/issues/85))
+
+### Code Refactoring & Styles
+
+- **storage:** streamline profile config fetching and enforce coding standards ([#88](https://github.com/Igorcbraz/GitAscii/issues/88))
+- **navbar:** simplify active/hover styles and align page top padding ([#89](https://github.com/Igorcbraz/GitAscii/issues/89))
 
 ## [1.10.0](https://github.com/Igorcbraz/GitAscii/compare/v1.9.0...v1.10.0) (2026-08-17)
 
