@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/Igorcbraz/GitAscii/compare/v1.11.1...v1.12.0) (2026-08-19)
+
+
+### Features
+
+* AEO/GEO Discovery, 404 Redesign, WebP Optimizations & Core Web Vitals ([#95](https://github.com/Igorcbraz/GitAscii/issues/95)) ([13132a0](https://github.com/Igorcbraz/GitAscii/commit/13132a06f93f33ff1314235b6e5a2f8cee1db1c0))
+
 ## [1.11.1](https://github.com/Igorcbraz/GitAscii/compare/v1.11.0...v1.11.1) (2026-08-19)
 
 
