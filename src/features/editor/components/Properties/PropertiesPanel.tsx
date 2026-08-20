@@ -21,6 +21,7 @@ import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
 import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
+import { MultiPropertiesPanel } from './MultiPropertiesPanel'
 import { PokemonCardControls } from './PokemonCardControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { SurveillanceControls } from './SurveillanceControls'
@@ -81,12 +82,16 @@ const WIDTH_PRESETS = [
 
 export function PropertiesPanel() {
   const { t } = useI18n()
-  const selectedInstanceId = useEditorStore((state) => state.selectedInstanceId)
-  const selectedWidget = useEditorStore((state) =>
-    state.selectedInstanceId
-      ? state.config?.widgets.find((w) => w.instanceId === state.selectedInstanceId)
-      : null
-  )
+  const selectedInstanceIds = useEditorStore((state) => state.selectedInstanceIds)
+  const widgets = useEditorStore((state) => state.config?.widgets)
+
+  const selectedWidgets = React.useMemo(() => {
+    if (!widgets || selectedInstanceIds.length === 0) return []
+    const idSet = new Set(selectedInstanceIds)
+    return widgets.filter((w) => idSet.has(w.instanceId))
+  }, [widgets, selectedInstanceIds])
+
+  const selectedWidget = selectedWidgets.length === 1 ? selectedWidgets[0] : null
   const globalStyles = useEditorStore((state) => state.config?.globalStyles)
   const hasConfig = useEditorStore((state) => Boolean(state.config))
 
@@ -99,7 +104,11 @@ export function PropertiesPanel() {
 
   if (!hasConfig || !globalStyles) return null
 
-  if (!selectedInstanceId || !selectedWidget) {
+  if (selectedWidgets.length > 1) {
+    return <MultiPropertiesPanel selectedWidgets={selectedWidgets} />
+  }
+
+  if (!selectedWidget) {
     return (
       <aside
         id="tour-properties-sidebar"

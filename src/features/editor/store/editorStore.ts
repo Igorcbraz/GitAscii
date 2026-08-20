@@ -41,6 +41,7 @@ export interface EditorStore {
   pasteWidgets: () => void
   cutWidgets: () => void
   updateWidgetConfig: (instanceId: string, patch: Record<string, unknown>) => void
+  updateWidgetsConfig: (instanceIds: string[], patch: Record<string, unknown>) => void
   updateGlobalStyles: (patch: Partial<SavedConfiguration['globalStyles']>) => void
   updateWidgetPositions: (
     deltas: { instanceId: string; position: { x: number; y: number } }[],
@@ -56,8 +57,20 @@ export interface EditorStore {
     size: { width: number; height: number },
     recordHistory?: boolean
   ) => void
+  updateWidgetsSize: (
+    instanceIds: string[],
+    size: Partial<{ width: number; height: number }>,
+    recordHistory?: boolean
+  ) => void
   toggleWidgetVisibility: (instanceId: string) => void
+  toggleWidgetsVisibility: (instanceIds: string[]) => void
   toggleWidgetLock: (instanceId: string) => void
+  toggleWidgetsLock: (instanceIds: string[]) => void
+  alignWidgets: (
+    instanceIds: string[],
+    alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'
+  ) => void
+  distributeWidgets: (instanceIds: string[], direction: 'horizontal' | 'vertical') => void
   renameWidget: (instanceId: string, name: string) => void
   removeWidget: (instanceId: string) => void
   removeWidgets: (instanceIds: string[]) => void
@@ -277,6 +290,32 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       applyConfigChange(newConfig, true)
     },
 
+    updateWidgetsConfig: (instanceIds, patch) => {
+      const { config } = get()
+      if (!config || instanceIds.length === 0) return
+
+      const targetSet = new Set(instanceIds)
+      const hasChanged = config.widgets.some((w) => {
+        if (!targetSet.has(w.instanceId)) return false
+        return Object.entries(patch).some(
+          ([key, val]) => (w.config as Record<string, unknown>)[key] !== val
+        )
+      })
+      if (!hasChanged) return
+
+      const newWidgets = config.widgets.map((w) =>
+        targetSet.has(w.instanceId) ? { ...w, config: { ...w.config, ...patch } } : w
+      )
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
     updateGlobalStyles: (patch) => {
       const { config } = get()
       if (!config) return
@@ -349,12 +388,67 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       applyConfigChange(newConfig, recordHistory)
     },
 
+    updateWidgetsSize: (instanceIds, size, recordHistory = true) => {
+      const { config } = get()
+      if (!config || instanceIds.length === 0) return
+
+      const targetSet = new Set(instanceIds)
+      const newWidgets = config.widgets.map((w) => {
+        if (!targetSet.has(w.instanceId) || w.locked) return w
+        const isAspectLocked =
+          w.config.lockAspectRatio !== undefined
+            ? Boolean(w.config.lockAspectRatio)
+            : w.widgetId === 'avatar' || w.widgetId === 'ascii-art'
+
+        const newWidth = size.width !== undefined ? size.width : w.size.width
+        let newHeight = size.height !== undefined ? size.height : w.size.height
+
+        if (isAspectLocked && size.width !== undefined && size.height === undefined) {
+          newHeight = size.width
+        } else if (isAspectLocked && size.height !== undefined && size.width === undefined) {
+          newHeight = size.height
+        }
+
+        return { ...w, size: { width: newWidth, height: newHeight } }
+      })
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, recordHistory)
+    },
+
     toggleWidgetVisibility: (instanceId) => {
       const { config } = get()
       if (!config) return
 
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, visible: !w.visible } : w
+      )
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
+    toggleWidgetsVisibility: (instanceIds) => {
+      const { config } = get()
+      if (!config || instanceIds.length === 0) return
+
+      const targetSet = new Set(instanceIds)
+      const selected = config.widgets.filter((w) => targetSet.has(w.instanceId))
+      const allVisible = selected.every((w) => w.visible)
+      const nextVisible = !allVisible
+
+      const newWidgets = config.widgets.map((w) =>
+        targetSet.has(w.instanceId) ? { ...w, visible: nextVisible } : w
       )
 
       const newConfig = {
@@ -381,6 +475,163 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }
 
       applyConfigChange(newConfig, true)
+    },
+
+    toggleWidgetsLock: (instanceIds) => {
+      const { config } = get()
+      if (!config || instanceIds.length === 0) return
+
+      const targetSet = new Set(instanceIds)
+      const selected = config.widgets.filter((w) => targetSet.has(w.instanceId))
+      const allLocked = selected.every((w) => w.locked)
+      const nextLocked = !allLocked
+
+      const newWidgets = config.widgets.map((w) =>
+        targetSet.has(w.instanceId) ? { ...w, locked: nextLocked } : w
+      )
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
+    alignWidgets: (instanceIds, alignment) => {
+      const { config } = get()
+      if (!config || instanceIds.length <= 1) return
+
+      const targetWidgets = config.widgets.filter(
+        (w) => instanceIds.includes(w.instanceId) && !w.locked
+      )
+      if (targetWidgets.length <= 1) return
+
+      const minX = Math.min(...targetWidgets.map((w) => w.position.x))
+      const maxX = Math.max(...targetWidgets.map((w) => w.position.x + w.size.width))
+      const minY = Math.min(...targetWidgets.map((w) => w.position.y))
+      const maxY = Math.max(...targetWidgets.map((w) => w.position.y + w.size.height))
+      const centerX = Math.round(minX + (maxX - minX) / 2)
+      const centerY = Math.round(minY + (maxY - minY) / 2)
+
+      const targetSet = new Set(instanceIds)
+      const newWidgets = config.widgets.map((w) => {
+        if (!targetSet.has(w.instanceId) || w.locked) return w
+        let newX = w.position.x
+        let newY = w.position.y
+
+        if (alignment === 'left') {
+          newX = minX
+        } else if (alignment === 'center') {
+          newX = Math.max(0, Math.min(800 - w.size.width, Math.round(centerX - w.size.width / 2)))
+        } else if (alignment === 'right') {
+          newX = Math.max(0, maxX - w.size.width)
+        } else if (alignment === 'top') {
+          newY = minY
+        } else if (alignment === 'middle') {
+          newY = Math.max(0, Math.round(centerY - w.size.height / 2))
+        } else if (alignment === 'bottom') {
+          newY = Math.max(0, maxY - w.size.height)
+        }
+
+        return { ...w, position: { x: newX, y: newY } }
+      })
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, true)
+    },
+
+    distributeWidgets: (instanceIds, direction) => {
+      const { config } = get()
+      if (!config || instanceIds.length <= 2) return
+
+      const targetWidgets = config.widgets.filter(
+        (w) => instanceIds.includes(w.instanceId) && !w.locked
+      )
+      if (targetWidgets.length <= 2) return
+
+      if (direction === 'vertical') {
+        const sorted = [...targetWidgets].sort((a, b) => a.position.y - b.position.y)
+        const first = sorted[0]
+        const last = sorted[sorted.length - 1]
+        const totalSpan = last.position.y - first.position.y
+        const totalHeightOfMiddles = sorted
+          .slice(0, sorted.length - 1)
+          .reduce((sum, w) => sum + w.size.height, 0)
+        const availableGap =
+          (totalSpan - (totalHeightOfMiddles - first.size.height)) / (sorted.length - 1)
+
+        let currentY = first.position.y
+        const posMap = new Map<string, number>()
+        sorted.forEach((w, idx) => {
+          if (idx === 0) {
+            posMap.set(w.instanceId, w.position.y)
+            currentY = w.position.y + w.size.height + availableGap
+          } else if (idx === sorted.length - 1) {
+            posMap.set(w.instanceId, w.position.y)
+          } else {
+            posMap.set(w.instanceId, Math.max(0, Math.round(currentY)))
+            currentY += w.size.height + availableGap
+          }
+        })
+
+        const newWidgets = config.widgets.map((w) => {
+          const newY = posMap.get(w.instanceId)
+          return newY !== undefined ? { ...w, position: { ...w.position, y: newY } } : w
+        })
+
+        const newConfig = {
+          ...config,
+          widgets: newWidgets,
+          metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+        }
+        applyConfigChange(newConfig, true)
+      } else {
+        const sorted = [...targetWidgets].sort((a, b) => a.position.x - b.position.x)
+        const first = sorted[0]
+        const last = sorted[sorted.length - 1]
+        const totalSpan = last.position.x - first.position.x
+        const totalWidthOfMiddles = sorted
+          .slice(0, sorted.length - 1)
+          .reduce((sum, w) => sum + w.size.width, 0)
+        const availableGap =
+          (totalSpan - (totalWidthOfMiddles - first.size.width)) / (sorted.length - 1)
+
+        let currentX = first.position.x
+        const posMap = new Map<string, number>()
+        sorted.forEach((w, idx) => {
+          if (idx === 0) {
+            posMap.set(w.instanceId, w.position.x)
+            currentX = w.position.x + w.size.width + availableGap
+          } else if (idx === sorted.length - 1) {
+            posMap.set(w.instanceId, w.position.x)
+          } else {
+            posMap.set(
+              w.instanceId,
+              Math.max(0, Math.min(800 - w.size.width, Math.round(currentX)))
+            )
+            currentX += w.size.width + availableGap
+          }
+        })
+
+        const newWidgets = config.widgets.map((w) => {
+          const newX = posMap.get(w.instanceId)
+          return newX !== undefined ? { ...w, position: { ...w.position, x: newX } } : w
+        })
+
+        const newConfig = {
+          ...config,
+          widgets: newWidgets,
+          metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+        }
+        applyConfigChange(newConfig, true)
+      }
     },
 
     renameWidget: (instanceId, name) => {
