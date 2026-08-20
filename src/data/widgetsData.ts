@@ -112,4 +112,11 @@ export const attributions = [
     url: 'https://github.com/simple-icons/simple-icons',
     license: 'CC0-1.0',
   },
+  {
+    name: 'Surveillance Console (rugbedbugg)',
+    description:
+      'Retro 198X animated surveillance console telemetry panels, CRT scanlines, and CCTV feeds.',
+    url: 'https://github.com/rugbedbugg/rugbedbugg',
+    license: 'MIT License',
+  },
 ]

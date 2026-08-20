@@ -60,6 +60,14 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
   [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
   [WIDGET_IDS.POKEMON_CARD]: { width: 300, height: 418 },
+  [WIDGET_IDS.SURVEILLANCE_HEADER]: { width: 780, height: 417 },
+  [WIDGET_IDS.SURVEILLANCE_DOSSIER]: { width: 780, height: 260 },
+  [WIDGET_IDS.SURVEILLANCE_LOADOUT]: { width: 780, height: 200 },
+  [WIDGET_IDS.SURVEILLANCE_TELEMETRY]: { width: 780, height: 420 },
+  [WIDGET_IDS.SURVEILLANCE_TRANSMISSION]: { width: 780, height: 160 },
+  [WIDGET_IDS.SURVEILLANCE_FIELD]: { width: 780, height: 438 },
+  [WIDGET_IDS.SURVEILLANCE_FEEDS]: { width: 780, height: 190 },
+  [WIDGET_IDS.SURVEILLANCE_TITLE]: { width: 780, height: 30 },
 }
 
 export function WidgetPreviewTooltip({

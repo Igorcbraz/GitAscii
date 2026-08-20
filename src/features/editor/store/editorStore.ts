@@ -508,6 +508,12 @@ export const useEditorStore = create<EditorStore>((set, get) => {
             : {}),
           ...(catalogItem?.category === 'godprofile' ? { accentColor: '#b6a891' } : {}),
           ...(catalogItem?.category === 'asciiprofile' ? { accentColor: '#ffa657' } : {}),
+          ...(catalogItem?.category === 'surveillance'
+            ? {
+                accentColor: '#55ffff',
+                customTitle: catalogItem.name,
+              }
+            : {}),
           ...(widgetId === 'ascii-text'
             ? {
                 customText: 'GitAscii',

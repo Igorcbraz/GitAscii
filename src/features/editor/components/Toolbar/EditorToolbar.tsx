@@ -429,7 +429,6 @@ export function EditorToolbar() {
           </span>
         </Link>
 
-        {/* Language Selector to the left, beside logo */}
         <LanguageSelector align="left" />
 
         <div className="h-4 w-px bg-graphite hidden sm:block" />

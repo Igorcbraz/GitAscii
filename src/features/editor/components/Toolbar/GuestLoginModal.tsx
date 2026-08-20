@@ -73,7 +73,6 @@ export function GuestLoginModal({ isOpen, onClose, username }: GuestLoginModalPr
         }`}
       >
         <div className="bg-carbon border border-graphite rounded-sm overflow-hidden shadow-2xl flex flex-col text-chalk">
-          {/* Header */}
           <div className="px-5 py-3.5 border-b border-graphite flex items-center justify-between bg-onyx/40">
             <div className="flex items-center gap-2">
               <span className="text-caption font-jetbrains-mono font-bold text-signal-lime uppercase tracking-wider">
@@ -89,7 +88,6 @@ export function GuestLoginModal({ isOpen, onClose, username }: GuestLoginModalPr
             </button>
           </div>
 
-          {/* Body */}
           <div className="p-5 space-y-4">
             <div>
               <h3 className="font-pt-serif font-light text-white text-2xl tracking-tight leading-snug">
@@ -101,7 +99,6 @@ export function GuestLoginModal({ isOpen, onClose, username }: GuestLoginModalPr
               </h3>
             </div>
 
-            {/* Modularized Feature Cards */}
             <div className="space-y-2.5">
               {GUEST_BENEFIT_ITEMS.map((item) => {
                 const ItemIcon = item.icon
@@ -132,7 +129,6 @@ export function GuestLoginModal({ isOpen, onClose, username }: GuestLoginModalPr
             </div>
           </div>
 
-          {/* Footer Actions */}
           <div className="px-5 py-3.5 border-t border-graphite bg-onyx/40 flex items-center justify-between gap-3">
             <button
               onClick={handleClose}
