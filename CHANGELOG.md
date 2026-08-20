@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/Igorcbraz/GitAscii/compare/v1.12.0...v1.12.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **widgets:** embed pokemon cards as lightweight data uri and improve svg image fallback ([ec4c765](https://github.com/Igorcbraz/GitAscii/commit/ec4c765f59b626a16ad503ad0c7538e58037aaf1))
+
 ## [1.12.0](https://github.com/Igorcbraz/GitAscii/compare/v1.11.1...v1.12.0) (2026-08-19)
 
 
