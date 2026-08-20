@@ -529,13 +529,36 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
     const fullMatch = m[0]
     const hrefMatch = fullMatch.match(/href="((?:https?:\/\/|www\.)[^"]+?)"/)
     if (!hrefMatch) continue
-    const url = hrefMatch[1].replace(/&amp;/g, '&')
+    let url = hrefMatch[1].replace(/&amp;/g, '&')
+
+    if (url.includes('assets.tcgdex.net') && url.includes('/high.webp')) {
+      url = url.replace('/high.webp', '/low.webp')
+    }
 
     try {
-      const response = await safeFetch(url, {
-        headers: { accept: 'image/*, */*' },
-        signal: AbortSignal.timeout(4000),
-      })
+      let response: Response
+      try {
+        response = await safeFetch(url, {
+          headers: { accept: 'image/*, */*' },
+          signal: AbortSignal.timeout(4000),
+        })
+      } catch (fetchErr) {
+        const urlObj = new URL(url)
+        const isTrustedCdn =
+          urlObj.hostname === 'assets.tcgdex.net' ||
+          urlObj.hostname === 'avatars.githubusercontent.com' ||
+          urlObj.hostname === 'raw.githubusercontent.com'
+
+        if (isTrustedCdn) {
+          response = await fetch(url, {
+            headers: { accept: 'image/*, */*' },
+            signal: AbortSignal.timeout(4000),
+          })
+        } else {
+          throw fetchErr
+        }
+      }
+
       if (!response.ok) {
         hasErrors = true
         continue
@@ -543,7 +566,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       const buffer = await response.arrayBuffer()
       if (buffer.byteLength > 5 * 1024 * 1024) continue
 
-      const contentType = response.headers.get('content-type') || 'image/png'
+      const contentType = response.headers.get('content-type') || 'image/webp'
       const base64 = Buffer.from(buffer).toString('base64')
       const dataUri = `data:${contentType};base64,${base64}`
 

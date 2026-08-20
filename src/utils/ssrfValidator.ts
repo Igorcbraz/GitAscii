@@ -348,7 +348,19 @@ export async function safeFetch(
       ...(dispatcher ? { dispatcher } : {}),
     }
 
-    const response = await fetch(currentUrl, fetchOptions)
+    let response: Response
+    try {
+      response = await fetch(currentUrl, fetchOptions)
+    } catch (dispatcherErr) {
+      if (dispatcher) {
+        response = await fetch(currentUrl, {
+          ...options,
+          redirect: 'manual',
+        })
+      } else {
+        throw dispatcherErr
+      }
+    }
 
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       redirectsCount++
