@@ -7,6 +7,7 @@ import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
 import { loadProfileConfig } from '@/lib/profileStorage'
+import { sanitizeSvg } from '@/utils/svgSanitizer'
 
 export interface ProfileSvgRequestOptions {
   username: string
@@ -40,7 +41,10 @@ export async function generateProfileSvgResponse(
   options: ProfileSvgRequestOptions
 ): Promise<NextResponse> {
   const startTime = Date.now()
-  const { username, profileSlug = 'default' } = options
+  const rawUsername = options.username || ''
+  const username = rawUsername.replace(/[^a-zA-Z0-9_-]/g, '')
+  const rawSlug = options.profileSlug || 'default'
+  const profileSlug = rawSlug.replace(/[^a-zA-Z0-9_-]/g, '') || 'default'
 
   if (!username) {
     return new NextResponse('Username is required', { status: 400 })
@@ -52,8 +56,16 @@ export async function generateProfileSvgResponse(
     const theme: 'dark' | 'light' =
       queryTheme === 'light' || queryTheme === 'dark' ? queryTheme : options.theme || 'dark'
 
-    const templateParam = searchParams.get('template') || options.template
-    const widgetsParam = searchParams.get('widgets')?.split(',').filter(Boolean) || options.widgets
+    const rawTemplate = searchParams.get('template') || options.template || ''
+    const templateParam = rawTemplate ? rawTemplate.toLowerCase().replace(/[^a-z0-9_-]/g, '') : null
+
+    const rawWidgets = searchParams.get('widgets') || searchParams.get('widget')
+    const widgetsParam = rawWidgets
+      ? rawWidgets
+          .split(',')
+          .map((w) => w.trim().replace(/[^a-zA-Z0-9_-]/g, ''))
+          .filter(Boolean)
+      : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
     const data = await fetchGitHubProfile(username)
 
@@ -91,7 +103,8 @@ export async function generateProfileSvgResponse(
     }
 
     const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
-    const { svg: svgContent, hasErrors } = await embedExternalImages(rawSvgContent)
+    const { svg: embeddedSvg, hasErrors } = await embedExternalImages(rawSvgContent)
+    const svgContent = sanitizeSvg(embeddedSvg)
 
     const etag = computeEtag(svgContent)
     const ifNoneMatch = request.headers.get('if-none-match')
@@ -169,12 +182,16 @@ export async function generateProfileSvgResponse(
     }
 
     const message = error instanceof Error ? error.message : 'Error rendering SVG'
-    const escaped = escapeErrorXml(message)
+    const escaped = escapeErrorXml(message.replace(/[\r\n]/g, ' '))
     return new NextResponse(
       `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="60"><text x="10" y="35" fill="red">${escaped}</text></svg>`,
       {
         status: isNotFound ? 404 : 500,
-        headers: { 'Content-Type': 'image/svg+xml' },
+        headers: {
+          'Content-Type': 'image/svg+xml; charset=utf-8',
+          'X-Content-Type-Options': 'nosniff',
+          'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline';",
+        },
       }
     )
   }

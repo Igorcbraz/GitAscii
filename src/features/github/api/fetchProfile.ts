@@ -106,7 +106,11 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
         }
       }
     } catch (socialErr) {
-      console.warn('Failed to fetch social accounts for', username, socialErr)
+      console.warn(
+        'Failed to fetch social accounts for',
+        username.replace(/[\r\n]/g, ''),
+        socialErr
+      )
     }
 
     if (token) {
@@ -237,7 +241,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
         }
       }
     } catch (e) {
-      console.warn('Failed to fetch README for', username, e)
+      console.warn('Failed to fetch README for', username.replace(/[\r\n]/g, ''), e)
     }
 
     profileCache.set(cacheKey, {
@@ -250,7 +254,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
     if (error instanceof GitHubUserNotFoundError) {
       throw error
     }
-    console.warn("Falling back to mock data for user '%s':", username, error)
+    console.warn("Falling back to mock data for user '%s':", username.replace(/[\r\n]/g, ''), error)
     return getMockGitHubData(username)
   }
 }

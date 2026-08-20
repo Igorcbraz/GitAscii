@@ -309,7 +309,9 @@ async function fetchAndProcessExternalImage(
 ): Promise<string> {
   const urlCheck = await validateSafeExternalUrl(url)
   if (!urlCheck.safe) {
-    console.warn(`SSRF protection blocked external request: ${url} (${urlCheck.error})`)
+    console.warn(
+      `SSRF protection blocked external request: ${url.replace(/[\r\n]/g, '')} (${(urlCheck.error || '').replace(/[\r\n]/g, '')})`
+    )
     return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
       <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Blocked URL</text>
@@ -322,7 +324,9 @@ async function fetchAndProcessExternalImage(
       signal: AbortSignal.timeout(5000),
     })
     if (!response.ok) {
-      console.warn(`Failed to fetch external SVG: ${url} (HTTP ${response.status})`)
+      console.warn(
+        `Failed to fetch external SVG: ${url.replace(/[\r\n]/g, '')} (HTTP ${response.status})`
+      )
       return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
         <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
@@ -358,7 +362,9 @@ async function fetchAndProcessExternalImage(
     }
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-    console.warn(`Failed to fetch external SVG: ${url} (${errorMsg})`)
+    console.warn(
+      `Failed to fetch external SVG: ${url.replace(/[\r\n]/g, '')} (${errorMsg.replace(/[\r\n]/g, '')})`
+    )
     return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
       <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
@@ -522,7 +528,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
-  const imageRegex = /<image\s+[^>]*>/gi
+  const imageRegex = /<image\b[^<>]*>/gi
   const imageMatches = [...finalSvg.matchAll(imageRegex)]
 
   for (const m of imageMatches) {
@@ -531,8 +537,18 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
     if (!hrefMatch) continue
     let url = hrefMatch[1].replace(/&amp;/g, '&')
 
-    if (url.includes('assets.tcgdex.net') && url.includes('/high.webp')) {
-      url = url.replace('/high.webp', '/low.webp')
+    try {
+      const parsedUrl = new URL(url)
+      if (
+        (parsedUrl.hostname === 'assets.tcgdex.net' ||
+          parsedUrl.hostname.endsWith('.tcgdex.net')) &&
+        parsedUrl.pathname.endsWith('/high.webp')
+      ) {
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/high\.webp$/, '/low.webp')
+        url = parsedUrl.toString()
+      }
+    } catch {
+      // Keep original URL if unparseable
     }
 
     try {
@@ -574,9 +590,9 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg = finalSvg.replace(fullMatch, () => replacement)
     } catch (err) {
       hasErrors = true
-      console.error('Failed to embed inline image:', url, err)
+      console.error('Failed to embed inline image:', url.replace(/[\r\n]/g, ''), err)
     }
   }
 
-  return { svg: finalSvg, hasErrors }
+  return { svg: sanitizeSvg(finalSvg), hasErrors }
 }

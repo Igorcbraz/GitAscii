@@ -150,7 +150,7 @@ export function renderWidgetSvg(
         let rectAnimations = ''
 
         if (widget.widgetId.startsWith('terminal-')) {
-          const yMatches = [...contentSvg.matchAll(/<text[^>]*y="([0-9.]+)"/g)]
+          const yMatches = [...contentSvg.matchAll(/<text\b[^<>]*?\by="([0-9.]+)"/gi)]
           const yValues = yMatches.map((m) => parseFloat(m[1]))
           const linesCount = yValues.length
           const lineTime = animDuration / Math.max(1, linesCount)
@@ -297,7 +297,7 @@ export function renderWidgetSvg(
 
       const tagsToMatch = 'text|tspan|rect|path|image|circle|line|polygon|polyline'
       const matchRegex = new RegExp(`<(${tagsToMatch})\\b`, 'gi')
-      const replaceRegex = new RegExp(`<(${tagsToMatch})\\b([^>]*)`, 'gi')
+      const replaceRegex = new RegExp(`<(${tagsToMatch})\\b([^<>]*)`, 'gi')
 
       const elementCount = (contentSvg.match(matchRegex) || []).length
       const staggerDelay = elementCount > 1 ? totalStaggerBudget / elementCount : 0

@@ -62,12 +62,11 @@ export function sanitizeSvg(svgContent: string): string {
       .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '')
       .toLowerCase()
 
+    const isSafeDataImage = /^data:image\/(?:png|jpeg|jpg|gif|webp);base64,/i.test(decoded)
     if (
       decoded.startsWith('javascript:') ||
       decoded.startsWith('vbscript:') ||
-      decoded.startsWith('data:text/html') ||
-      decoded.startsWith('data:image/svg+xml') ||
-      decoded.startsWith('data:text/javascript') ||
+      (decoded.startsWith('data:') && !isSafeDataImage) ||
       decoded.startsWith('//')
     ) {
       return ' href="#"'
