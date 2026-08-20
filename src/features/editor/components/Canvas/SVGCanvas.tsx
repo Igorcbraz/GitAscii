@@ -225,7 +225,7 @@ export function SVGCanvas() {
         console.warn('Background ASCII Conversion Warning:', err)
       }
     })
-  }, [asciiParamsStr, githubData, updateWidgetConfig, config])
+  }, [asciiParamsStr, githubData, updateWidgetConfig])
 
   useEffect(() => {
     if (!isLayersOpen) return

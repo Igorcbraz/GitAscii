@@ -15,7 +15,50 @@ Sentry.init({
     'failed to pipe response',
     'Router action dispatched before initialization',
     'The router state header was sent but could not be parsed',
+    // DOM errors caused by Google Translate or browser extension DOM manipulations
+    "NotFoundError: Failed to execute 'removeChild' on 'Node'",
+    "Failed to execute 'removeChild' on 'Node'",
+    'The node to be removed is not a child of this node',
+    "NotFoundError: Failed to execute 'insertBefore' on 'Node'",
+    "Failed to execute 'insertBefore' on 'Node'",
+    // Browser extensions / injected scripts
+    /tronlinkParams/i,
+    /'set' on proxy: trap returned falsish/i,
+    /ResizeObserver loop completed with undelivered notifications/,
+    /ResizeObserver loop limit exceeded/,
   ],
+
+  beforeSend(event, hint) {
+    const error = hint?.originalException
+    const message =
+      (typeof error === 'string' ? error : error instanceof Error ? error.message : '') ||
+      event.message ||
+      ''
+
+    if (
+      message.includes('tronlinkParams') ||
+      message.includes('removeChild') ||
+      message.includes('The node to be removed is not a child of this node')
+    ) {
+      return null
+    }
+
+    if (
+      event.exception?.values?.some((val) =>
+        val.stacktrace?.frames?.some(
+          (frame) =>
+            frame.filename?.includes('chrome-extension://') ||
+            frame.filename?.includes('moz-extension://') ||
+            frame.filename?.includes('safari-web-extension://') ||
+            frame.filename?.includes('injected')
+        )
+      )
+    ) {
+      return null
+    }
+
+    return event
+  },
 
   dataCollection: {
     // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:

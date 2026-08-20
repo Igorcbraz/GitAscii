@@ -32,7 +32,8 @@ const CHARSET_OPTIONS = ASCII_ART_CHARSET_OPTIONS
 
 export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) {
   const { t } = useI18n()
-  const { githubData, updateWidgetConfig } = useEditorStore()
+  const githubData = useEditorStore((state) => state.githubData)
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -75,7 +76,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
       return customImageUrl
     }
     return githubData?.user.avatar_url || 'https://github.com/github.png'
-  }, [sourceType, uploadedImageData, customImageUrl, githubData])
+  }, [sourceType, uploadedImageData, customImageUrl, githubData?.user.avatar_url])
 
   const processImageToAscii = useCallback(async () => {
     const imgSrc = getActiveImageSource()
@@ -134,6 +135,11 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     t,
   ])
 
+  const processRef = useRef(processImageToAscii)
+  useEffect(() => {
+    processRef.current = processImageToAscii
+  }, [processImageToAscii])
+
   const isInitialMount = useRef(true)
   const asciiTextRef = useRef(config.asciiText)
 
@@ -145,13 +151,13 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     if (isInitialMount.current) {
       isInitialMount.current = false
       if (!asciiTextRef.current) {
-        processImageToAscii()
+        processRef.current()
       }
       return
     }
 
     const timer = setTimeout(() => {
-      processImageToAscii()
+      processRef.current()
     }, 150)
 
     return () => clearTimeout(timer)
@@ -170,7 +176,6 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
     autoContrast,
     dithering,
     colorMode,
-    processImageToAscii,
   ])
 
   const fileInputRef = useRef<HTMLInputElement>(null)

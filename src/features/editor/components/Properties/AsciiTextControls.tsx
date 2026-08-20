@@ -18,7 +18,7 @@ const CHARSET_OPTIONS = ASCII_TEXT_CHARSET_OPTIONS
 
 export function AsciiTextControls({ instanceId, config }: AsciiTextControlsProps) {
   const { t } = useI18n()
-  const { updateWidgetConfig } = useEditorStore()
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
   const [isCharsetMenuOpen, setIsCharsetMenuOpen] = useState(false)
 

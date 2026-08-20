@@ -336,9 +336,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
     updateWidgetPositions: (deltas, recordHistory = true) => {
       const { config } = get()
-      if (!config) return
+      if (!config || deltas.length === 0) return
 
       const deltaMap = new Map(deltas.map((d) => [d.instanceId, d.position]))
+      const hasAnyChange = config.widgets.some((w) => {
+        const newPos = deltaMap.get(w.instanceId)
+        return newPos && (newPos.x !== w.position.x || newPos.y !== w.position.y)
+      })
+      if (!hasAnyChange) return
 
       const newWidgets = config.widgets.map((w) => {
         const newPos = deltaMap.get(w.instanceId)
@@ -358,6 +363,11 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const { config } = get()
       if (!config) return
 
+      const target = config.widgets.find((w) => w.instanceId === instanceId)
+      if (!target || (target.position.x === position.x && target.position.y === position.y)) {
+        return
+      }
+
       const newWidgets = config.widgets.map((w) =>
         w.instanceId === instanceId ? { ...w, position } : w
       )
@@ -375,8 +385,25 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       const { config } = get()
       if (!config) return
 
+      const target = config.widgets.find((w) => w.instanceId === instanceId)
+      if (
+        !target ||
+        ((size.width === undefined || target.size.width === size.width) &&
+          (size.height === undefined || target.size.height === size.height))
+      ) {
+        return
+      }
+
       const newWidgets = config.widgets.map((w) =>
-        w.instanceId === instanceId ? { ...w, size } : w
+        w.instanceId === instanceId
+          ? {
+              ...w,
+              size: {
+                width: size.width !== undefined ? size.width : w.size.width,
+                height: size.height !== undefined ? size.height : w.size.height,
+              },
+            }
+          : w
       )
 
       const newConfig = {
@@ -393,6 +420,8 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       if (!config || instanceIds.length === 0) return
 
       const targetSet = new Set(instanceIds)
+      let hasAnyChange = false
+
       const newWidgets = config.widgets.map((w) => {
         if (!targetSet.has(w.instanceId) || w.locked) return w
         const isAspectLocked =
@@ -409,8 +438,14 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           newHeight = size.height
         }
 
+        if (newWidth !== w.size.width || newHeight !== w.size.height) {
+          hasAnyChange = true
+        }
+
         return { ...w, size: { width: newWidth, height: newHeight } }
       })
+
+      if (!hasAnyChange) return
 
       const newConfig = {
         ...config,
