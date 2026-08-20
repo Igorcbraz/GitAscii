@@ -23,6 +23,30 @@ const SUGGESTED_POKEMON = [
   'Lucario',
 ]
 
+async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
+  const lowUrl = `${cardImageUrl}/low.webp`
+  try {
+    const res = await fetch(lowUrl)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const blob = await res.blob()
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result)
+        } else {
+          reject(new Error('Failed to read blob as data URL'))
+        }
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  } catch (err) {
+    console.warn('Could not convert Pokemon card image to data URI:', err)
+    return `${cardImageUrl}/low.webp`
+  }
+}
+
 export function PokemonCardControls({ instanceId, config }: { instanceId: string; config: any }) {
   const { t } = useI18n()
   const { updateWidgetConfig } = useEditorStore()
@@ -79,10 +103,12 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
 
               const newCards = validCards.slice(0, 20)
               setCards(newCards)
+              const cardDataUri = await fetchCardAsDataUri(card.image)
               updateWidgetConfig(instanceId, {
                 searchQuery: randomName,
                 searchCards: newCards,
-                imageUrl: `${card.image}/high.webp`,
+                imageUrl: cardDataUri,
+                cardRawUrl: `${card.image}/low.webp`,
               })
             }
           }
@@ -136,9 +162,16 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
     }
   }
 
-  const selectCard = (card: any) => {
+  const selectCard = async (card: any) => {
     if (card.image) {
-      updateWidgetConfig(instanceId, { imageUrl: `${card.image}/high.webp` })
+      updateWidgetConfig(instanceId, {
+        imageUrl: `${card.image}/low.webp`,
+        cardRawUrl: `${card.image}/low.webp`,
+      })
+      const dataUri = await fetchCardAsDataUri(card.image)
+      if (dataUri) {
+        updateWidgetConfig(instanceId, { imageUrl: dataUri, cardRawUrl: `${card.image}/low.webp` })
+      }
     }
   }
 
