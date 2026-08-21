@@ -322,6 +322,14 @@ Quando o widget renderizar linguagens de programação, ferramentas de workflow 
 > **Nunca use `<input type="checkbox">` nativo na interface.**  
 > Utilize sempre o componente padrão `<Switch checked={value} onChange={(checked) => handleUpdate({ key: checked })} />` de `@/components/ui/Switch` com label clicável para todas as opções de alternância booleana (ex: `showTitle`, `showLed`, `showRef`, `hideBorder`).
 
+### 5.9. Bloqueio ao Perfil do Usuário Ativo (Sem Seleção de Nome de Terceiros)
+
+> [!IMPORTANT]
+> **Regra de Identidade do Perfil:**  
+> O usuário **NUNCA** pode selecionar outro nome de usuário do GitHub para renderizar nos widgets do seu perfil.  
+> Todo widget deve obrigatoriamente utilizar `data.user.login` como identificador padrão do desenvolvedor.  
+> **Não inclua** inputs para digitação de nome de usuário alternativo ou listas de sugestões de terceiros no painel de propriedades (`MeuWidgetControls.tsx`).
+
 ---
 
 ## 6. Estilização Única por Categoria na Library
@@ -389,6 +397,7 @@ Antes de considerar um novo widget ou categoria concluído, execute esta verific
 - [ ] **Cores Centralizadas no Topo**: Controles de cor (primária, secundária, fundo, borda, texto e presets de temas) residem no topo em `PropertiesPanel.tsx`, sem duplicações em `MeuWidgetControls.tsx`.
 - [ ] **Tinting Dinâmico de Fotos**: Imagens/avatares usam matriz de filtro SVG dinâmica derivada de `${rNorm}, ${gNorm}, ${bNorm}` (sem `hue-rotate` estático).
 - [ ] **Tech Stack & Badges**: Widgets de ferramentas/skills suportam `displayMode` (`both`, `logo`, `name`) e ícones de `skillicons.dev`.
+- [ ] **Identidade do Perfil Travada**: O widget consome exclusivamente `data.user.login` do perfil ativo sem permitir seleção de terceiros.
 - [ ] **Switches Vetoriais**: Todas as opções booleanas usam o componente `<Switch />` em vez de `<input type="checkbox">`.
 - [ ] **Filtros Granulares**: O usuário pode ligar/desligar elementos e campos específicos.
 - [ ] **Auto-Resize sem History Pollution**: Mudanças estruturais ajustam a altura com `recordHistory: false`.

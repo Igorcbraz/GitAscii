@@ -1,4 +1,9 @@
-import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
+import {
+  GITHUB_THEME_KEYS,
+  isGitHubAdaptiveTheme,
+  isTrustedCdnHostname,
+  WIDGET_ALIASES,
+} from '@/constants'
 import { safeFetch, validateSafeExternalUrl } from '@/utils/ssrfValidator'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
@@ -47,22 +52,6 @@ export function normalizeProfileData(
       weeks: [],
     },
   }
-}
-
-const WIDGET_ALIASES: Record<string, string[]> = {
-  streak: ['streak-stats', 'ascii-heatmap', 'godprofile-trophies'],
-  languages: ['languages', 'tech-stack'],
-  stack: ['tech-stack', 'codeweb-retro-grid', 'godprofile-neural'],
-  ascii: ['ascii-art', 'ascii-text', 'ascii-portrait', 'ascii-info'],
-  stats: ['stats', 'github-readme-stats', 'metrics-card', 'terminal-info'],
-  trophies: ['godprofile-trophies', 'profile-trophy'],
-  snake: ['contribution-snake'],
-  views: ['views-counter'],
-  quotes: ['readme-quotes'],
-  quote: ['readme-quotes'],
-  terminal: ['terminal-info', 'terminal-card', 'godprofile-terminal'],
-  avatar: ['avatar', 'ascii-portrait'],
-  bio: ['bio', 'terminal-info'],
 }
 
 function resolveTargetWidgetIds(targetWidgetIds?: string[]): string[] | undefined {
@@ -140,7 +129,6 @@ export function renderSvg(
   )
 
   if (targetWidgetIds && visibleWidgets.length === 0) {
-    // Check if target was a requested standalone widget not in user's layout
     const primaryTarget = rawTargetWidgetIds?.[0]?.toLowerCase()
     if (primaryTarget) {
       const aliasTarget = (WIDGET_ALIASES[primaryTarget] || [primaryTarget])[0]
@@ -595,10 +583,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         })
       } catch (fetchErr) {
         const urlObj = new URL(url)
-        const isTrustedCdn =
-          urlObj.hostname === 'assets.tcgdex.net' ||
-          urlObj.hostname === 'avatars.githubusercontent.com' ||
-          urlObj.hostname === 'raw.githubusercontent.com'
+        const isTrustedCdn = isTrustedCdnHostname(urlObj.hostname)
 
         if (isTrustedCdn) {
           response = await fetch(url, {

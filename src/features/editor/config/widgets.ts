@@ -63,6 +63,7 @@ export interface WidgetFilterItem {
 export const FEATURED_WIDGET_IDS = new Set<WidgetId>([
   WIDGET_IDS.GITFEST_LINEUP,
   WIDGET_IDS.POKEMON_CARD,
+  WIDGET_IDS.GITFUT_CARD,
 ])
 
 export const NATIVE_WIDGET_CATEGORIES = new Set<WidgetCategory>([
@@ -154,6 +155,15 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.INTERACTIVE,
     badge: { text: 'Novo', type: 'highlight' },
     defaultSize: { width: 300, height: 418 },
+  },
+  {
+    id: WIDGET_IDS.GITFUT_CARD,
+    name: 'GitFut Card',
+    icon: Trophy,
+    desc: 'GitHub profile rated out of 99 in FIFA FUT card style',
+    category: WIDGET_CATEGORIES.INTERACTIVE,
+    badge: { text: 'SCOUT 99', type: 'highlight' },
+    defaultSize: { width: 300, height: 420 },
   },
   {
     id: WIDGET_IDS.STATS,

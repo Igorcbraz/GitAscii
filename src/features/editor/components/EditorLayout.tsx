@@ -546,9 +546,7 @@ export function EditorLayout({
         </div>
       )}
 
-      {/* Main content area with animated mode transition */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* GitHub Preview mode */}
         <div
           className={`absolute inset-0 flex flex-col transition-all duration-300 ease-out ${
             viewMode === 'github'
@@ -559,7 +557,6 @@ export function EditorLayout({
           <GitHubModeLayout />
         </div>
 
-        {/* Editor mode */}
         <div
           className={`absolute inset-0 flex flex-col transition-all duration-300 ease-out ${
             viewMode === 'gitascii'

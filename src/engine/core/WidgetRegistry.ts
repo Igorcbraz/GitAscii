@@ -23,6 +23,7 @@ import { renderEditorial } from '@/features/widgets/renderers/EditorialRenderer'
 import { renderExternalWidgets } from '@/features/widgets/renderers/ExternalWidgetsRenderer'
 import { renderFieldSpecimen } from '@/features/widgets/renderers/FieldSpecimenRenderer'
 import { renderFoundry } from '@/features/widgets/renderers/FoundryRenderer'
+import { renderGitFutCard } from '@/features/widgets/renderers/GitFutCardRenderer'
 import { renderGlobe } from '@/features/widgets/renderers/GlobeRenderer'
 import { renderHeader } from '@/features/widgets/renderers/HeaderRenderer'
 import { renderInterlace } from '@/features/widgets/renderers/InterlaceRenderer'
@@ -65,27 +66,28 @@ export type WidgetRendererFn = (
 
 export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   // Core Profile Widgets
-  ['header', (w, d, g) => renderHeader(w, d, g)],
-  ['avatar', (w, d, g) => renderAvatar(w, d, g)],
-  ['ascii-art', (w, d, g) => renderAsciiArt(w, d, g)],
-  ['ascii-text', (w, d, g) => renderAsciiText(w, d, g)],
-  ['bio', (w, d, g) => renderBio(w, d, g)],
-  ['stats', (w, d, g) => renderStats(w, d, g)],
-  ['languages', (w, d, g) => renderLanguages(w, d, g)],
-  ['repositories', (w, d, g) => renderRepositories(w, d, g)],
-  ['divider', (w, d, g) => renderDivider(w, d, g)],
-  ['footer', (w, d, g) => renderFooter(w, d, g)],
-  ['tech-stack', (w, d, g) => renderTechStack(w, d, g)],
-  ['social-media', (w, d, g) => renderSocialMedia(w, d, g)],
-  ['terminal-info', (w, d, g) => renderTerminalInfo(w, d, g)],
+  [WIDGET_IDS.HEADER, (w, d, g) => renderHeader(w, d, g)],
+  [WIDGET_IDS.AVATAR, (w, d, g) => renderAvatar(w, d, g)],
+  [WIDGET_IDS.ASCII_ART, (w, d, g) => renderAsciiArt(w, d, g)],
+  [WIDGET_IDS.ASCII_TEXT, (w, d, g) => renderAsciiText(w, d, g)],
+  [WIDGET_IDS.BIO, (w, d, g) => renderBio(w, d, g)],
+  [WIDGET_IDS.STATS, (w, d, g) => renderStats(w, d, g)],
+  [WIDGET_IDS.LANGUAGES, (w, d, g) => renderLanguages(w, d, g)],
+  [WIDGET_IDS.REPOSITORIES, (w, d, g) => renderRepositories(w, d, g)],
+  [WIDGET_IDS.DIVIDER, (w, d, g) => renderDivider(w, d, g)],
+  [WIDGET_IDS.FOOTER, (w, d, g) => renderFooter(w, d, g)],
+  [WIDGET_IDS.TECH_STACK, (w, d, g) => renderTechStack(w, d, g)],
+  [WIDGET_IDS.SOCIAL_MEDIA, (w, d, g) => renderSocialMedia(w, d, g)],
+  [WIDGET_IDS.TERMINAL_INFO, (w, d, g) => renderTerminalInfo(w, d, g)],
   ['terminal-card', (w, d, g) => renderTerminalInfo(w, d, g)],
-  ['pokemon-card', (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
+  [WIDGET_IDS.POKEMON_CARD, (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
+  [WIDGET_IDS.GITFUT_CARD, (w, d, g) => renderGitFutCard(w, d, g, w.size.width, w.size.height)],
 
   // GodProfile & Specialized
-  ['godprofile-terminal', (w, d, g) => renderTerminal(w, d, g)],
-  ['godprofile-marquee', (w, d, g) => renderMarquee(w, d, g)],
-  ['godprofile-neural', (w, d, g) => renderNeural(w, d, g)],
-  ['godprofile-trophies', (w, d, g) => renderTrophies(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_TERMINAL, (w, d, g) => renderTerminal(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_MARQUEE, (w, d, g) => renderMarquee(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_NEURAL, (w, d, g) => renderNeural(w, d, g)],
+  [WIDGET_IDS.GODPROFILE_TROPHIES, (w, d, g) => renderTrophies(w, d, g)],
   [WIDGET_IDS.GODPROFILE_WAKATIME, (w, d, g) => renderWakaTime(w, d, g)],
   [WIDGET_IDS.GODPROFILE_GLOBE, (w, d, g) => renderGlobe(w, d, g)],
 
@@ -132,18 +134,18 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.SURVEILLANCE_TITLE, (w, d, g, s) => renderSurveillanceTitle(w, d, g, s)],
 
   // External Integration Widgets
-  ['gitfest-lineup', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['github-readme-stats', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['ghstats', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['streak-stats', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['profile-trophy', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['activity-graph', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['contribution-snake', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['metrics-card', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['views-counter', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['readme-quotes', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['awesome-badge', (w, d, g) => renderExternalWidgets(w, d, g)],
-  ['custom-image', (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.GITFEST_LINEUP, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.GITHUB_README_STATS, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.GHSTATS, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.STREAK_STATS, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.PROFILE_TROPHY, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.ACTIVITY_GRAPH, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.CONTRIBUTION_SNAKE, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.METRICS_CARD, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.VIEWS_COUNTER, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.README_QUOTES, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.AWESOME_BADGE, (w, d, g) => renderExternalWidgets(w, d, g)],
+  [WIDGET_IDS.CUSTOM_IMAGE, (w, d, g) => renderExternalWidgets(w, d, g)],
 ])
 
 export function renderFallbackWidget(widget: WidgetInstance, globalStyles: GlobalStyles): string {

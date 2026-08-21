@@ -303,7 +303,6 @@ export function TemplateLibrarySection({
         )}
       </p>
 
-      {/* Group templates by widgetCategory and render them with category-specific cards */}
       {(() => {
         const allPresets = Object.values(TEMPLATE_PRESETS)
         const nativePresets = allPresets.filter(
@@ -331,7 +330,6 @@ export function TemplateLibrarySection({
 
         return (
           <div className="space-y-5">
-            {/* GitAscii Native Templates */}
             {nativePresets.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2 px-0.5">
@@ -387,7 +385,6 @@ export function TemplateLibrarySection({
               </div>
             )}
 
-            {/* ASCII Profile Kit Templates */}
             {asciiPresets.length > 0 && (
               <div>
                 <div className="border-t border-graphite/50 my-3" />
@@ -452,7 +449,6 @@ export function TemplateLibrarySection({
               </div>
             )}
 
-            {/* Codeweb Studio Templates */}
             {codewebPresets.length > 0 && (
               <div>
                 <div className="border-t border-graphite/50 my-3" />
@@ -513,7 +509,6 @@ export function TemplateLibrarySection({
               </div>
             )}
 
-            {/* Surveillance Console Templates */}
             {surveillancePresets.length > 0 && (
               <div>
                 <div className="border-t border-graphite/50 my-3" />
@@ -574,7 +569,6 @@ export function TemplateLibrarySection({
               </div>
             )}
 
-            {/* GodProfile Templates */}
             {godprofilePresets.length > 0 && (
               <div>
                 <div className="border-t border-graphite/50 my-3" />
@@ -630,7 +624,6 @@ export function TemplateLibrarySection({
               </div>
             )}
 
-            {/* Control Plane Templates */}
             {controlplanePresets.length > 0 && (
               <div>
                 <div className="border-t border-graphite/50 my-3" />

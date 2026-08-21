@@ -25,6 +25,9 @@
     'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-ui-monospace:
     'ui-monospace', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-barlow-condensed:
+    'Barlow Condensed', var(--font-barlow-condensed), 'Inter Tight', sans-serif;
+  --font-teko: 'Teko', var(--font-teko), 'Inter Tight', sans-serif;
 
   --text-caption: 10px;
   --leading-caption: 1.2;

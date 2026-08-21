@@ -186,10 +186,10 @@ export function WidgetLibrary() {
                 <div className="label-stamp text-signal-lime/80 mb-3">
                   {t('editor.sidebar.featured_widgets', '[ FEATURED WIDGETS ]')}
                 </div>
-                {translatedCatalog.find((w) => w.id === 'gitfest-lineup') && (
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFEST_LINEUP) && (
                   <WidgetCardItem
-                    key="gitfest-lineup"
-                    item={translatedCatalog.find((w) => w.id === 'gitfest-lineup')!}
+                    key={WIDGET_IDS.GITFEST_LINEUP}
+                    item={translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFEST_LINEUP)!}
                     onAdd={addWidget}
                     onHover={handleHover}
                     onLeave={handleLeave}
@@ -200,6 +200,16 @@ export function WidgetLibrary() {
                   <WidgetCardItem
                     key={WIDGET_IDS.POKEMON_CARD}
                     item={translatedCatalog.find((w) => w.id === WIDGET_IDS.POKEMON_CARD)!}
+                    onAdd={addWidget}
+                    onHover={handleHover}
+                    onLeave={handleLeave}
+                  />
+                )}
+
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFUT_CARD) && (
+                  <WidgetCardItem
+                    key={WIDGET_IDS.GITFUT_CARD}
+                    item={translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFUT_CARD)!}
                     onAdd={addWidget}
                     onHover={handleHover}
                     onLeave={handleLeave}

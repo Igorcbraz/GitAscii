@@ -754,6 +754,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
         'pokemon-card': { width: 300, height: 418 },
+        'gitfut-card': { width: 300, height: 420 },
       }
       const catalogItem = WIDGET_CATALOG.find((item) => item.id === widgetId)
       const widgetSize = catalogItem?.defaultSize ||
@@ -799,6 +800,15 @@ export const useEditorStore = create<EditorStore>((set, get) => {
             ? {
                 accentColor: '#55ffff',
                 customTitle: catalogItem.name,
+              }
+            : {}),
+          ...(widgetId === 'gitfut-card'
+            ? {
+                transparentBackground: true,
+                hideBorder: true,
+                hideDecorations: true,
+                showTitle: false,
+                enableHolo: false,
               }
             : {}),
           ...(widgetId === 'ascii-text'

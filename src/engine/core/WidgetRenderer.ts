@@ -1,4 +1,4 @@
-import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
+import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_IDS } from '@/constants'
 
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
 import { renderWidgetContent } from './WidgetRegistry'
@@ -8,7 +8,7 @@ export function getWidgetMinSize(
   data: NormalizedGitHubData
 ): { width: number; height: number } | null {
   if (!widget) return null
-  if (widget.widgetId === 'bio') {
+  if (widget.widgetId === WIDGET_IDS.BIO) {
     const width = Math.max(100, Number(widget.size?.width) || 800)
     const cfg = widget.config || {}
     const customBio =
@@ -146,8 +146,8 @@ export function renderWidgetSvg(
 
     if (animType === 'typewriter') {
       if (
-        widget.widgetId === 'ascii-art' ||
-        widget.widgetId === 'ascii-text' ||
+        widget.widgetId === WIDGET_IDS.ASCII_ART ||
+        widget.widgetId === WIDGET_IDS.ASCII_TEXT ||
         widget.widgetId.startsWith('terminal-')
       ) {
         let rectsHtml = ''
@@ -167,14 +167,15 @@ export function renderWidgetSvg(
             }`
           })
         } else {
-          const fontSize = Number(cfg.fontSize) || (widget.widgetId === 'ascii-text' ? 12 : 9)
+          const fontSize =
+            Number(cfg.fontSize) || (widget.widgetId === WIDGET_IDS.ASCII_TEXT ? 12 : 9)
           const lineHeight =
-            widget.widgetId === 'ascii-text'
+            widget.widgetId === WIDGET_IDS.ASCII_TEXT
               ? fontSize * 1.2
               : Math.max(7, Math.round(fontSize * 1.12))
 
           let linesCount = 1
-          if (widget.widgetId === 'ascii-art') {
+          if (widget.widgetId === WIDGET_IDS.ASCII_ART) {
             linesCount = Array.isArray(cfg.asciiText)
               ? cfg.asciiText.length
               : Math.floor(height / lineHeight)
@@ -296,7 +297,8 @@ export function renderWidgetSvg(
       `
 
       let animIndex = 0
-      const isAscii = widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text'
+      const isAscii =
+        widget.widgetId === WIDGET_IDS.ASCII_ART || widget.widgetId === WIDGET_IDS.ASCII_TEXT
       const totalStaggerBudget = Math.min(animDuration * 0.6, isAscii ? 1200 : 600)
 
       const tagsToMatch = 'text|tspan|rect|path|image|circle|line|polygon|polyline'
@@ -334,7 +336,10 @@ export function renderWidgetSvg(
   const isSelfContained =
     contentSvg.trim().startsWith('<svg') ||
     widget.widgetId.startsWith('controlplane-') ||
-    widget.widgetId.startsWith('codeweb-')
+    widget.widgetId.startsWith('codeweb-') ||
+    widget.widgetId === WIDGET_IDS.GITFUT_CARD ||
+    widget.widgetId === WIDGET_IDS.POKEMON_CARD ||
+    Boolean(cfg.transparentBackground)
 
   const baseBackgroundRect = isSelfContained
     ? ''

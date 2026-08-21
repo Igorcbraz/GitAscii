@@ -1,16 +1,115 @@
 import { APP_URL, EXTERNAL_LINKS } from './links'
+import { WIDGET_IDS } from './widgetIds'
 
 export const RECOMMENDED_PROFILE_WIDGETS: string[] = [
-  'header',
-  'ascii-art',
-  'bio',
-  'stats',
-  'languages',
-  'repositories',
-  'footer',
+  WIDGET_IDS.HEADER,
+  WIDGET_IDS.ASCII_ART,
+  WIDGET_IDS.BIO,
+  WIDGET_IDS.STATS,
+  WIDGET_IDS.LANGUAGES,
+  WIDGET_IDS.REPOSITORIES,
+  WIDGET_IDS.FOOTER,
 ]
 
 export const DEFAULT_POKEMON_CARD_IMAGE = 'https://assets.tcgdex.net/en/base/base1/4/high.webp'
+export const DEFAULT_GITFUT_BASE_URL = 'https://gitfut.com'
+export const DEFAULT_GITFUT_FALLBACK_IMAGE = 'https://gitfut.com/user.png'
+
+export interface CountryFlagDef {
+  readonly code: string
+  readonly name: string
+}
+
+export const ALL_COUNTRY_FLAGS: readonly CountryFlagDef[] = [
+  { code: '', name: 'Auto (GitHub)' },
+  { code: 'BR', name: 'Brasil' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'US', name: 'USA' },
+  { code: 'CA', name: 'Canadá' },
+  { code: 'MX', name: 'México' },
+  { code: 'CO', name: 'Colômbia' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'UY', name: 'Uruguai' },
+  { code: 'PE', name: 'Peru' },
+  { code: 'PY', name: 'Paraguai' },
+  { code: 'EC', name: 'Equador' },
+  { code: 'VE', name: 'Venezuela' },
+  { code: 'BO', name: 'Bolívia' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'ES', name: 'Espanha' },
+  { code: 'FR', name: 'França' },
+  { code: 'DE', name: 'Alemanha' },
+  { code: 'GB', name: 'Reino Unido' },
+  { code: 'IT', name: 'Itália' },
+  { code: 'NL', name: 'Holanda' },
+  { code: 'BE', name: 'Bélgica' },
+  { code: 'HR', name: 'Croácia' },
+  { code: 'SE', name: 'Suécia' },
+  { code: 'NO', name: 'Noruega' },
+  { code: 'DK', name: 'Dinamarca' },
+  { code: 'PL', name: 'Polônia' },
+  { code: 'UA', name: 'Ucrânia' },
+  { code: 'CH', name: 'Suíça' },
+  { code: 'AT', name: 'Áustria' },
+  { code: 'TR', name: 'Turquia' },
+  { code: 'GR', name: 'Grécia' },
+  { code: 'IE', name: 'Irlanda' },
+  { code: 'DZ', name: 'Argélia' },
+  { code: 'MA', name: 'Marrocos' },
+  { code: 'SN', name: 'Senegal' },
+  { code: 'NG', name: 'Nigéria' },
+  { code: 'GH', name: 'Gana' },
+  { code: 'EG', name: 'Egito' },
+  { code: 'ZA', name: 'África do Sul' },
+  { code: 'CM', name: 'Camarões' },
+  { code: 'CI', name: 'Costa do Marfim' },
+  { code: 'JP', name: 'Japão' },
+  { code: 'KR', name: 'Coreia do Sul' },
+  { code: 'CN', name: 'China' },
+  { code: 'IN', name: 'Índia' },
+  { code: 'SA', name: 'Arábia Saudita' },
+  { code: 'AU', name: 'Austrália' },
+] as const
+
+export const TRUSTED_CDN_HOSTNAMES: readonly string[] = [
+  'gitfut.com',
+  'assets.tcgdex.net',
+  'avatars.githubusercontent.com',
+  'raw.githubusercontent.com',
+] as const
+
+export function isTrustedCdnHostname(hostname: string): boolean {
+  return TRUSTED_CDN_HOSTNAMES.includes(hostname)
+}
+
+export const WIDGET_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  streak: [WIDGET_IDS.STREAK_STATS, WIDGET_IDS.ASCII_HEATMAP, WIDGET_IDS.GODPROFILE_TROPHIES],
+  languages: [WIDGET_IDS.LANGUAGES, WIDGET_IDS.TECH_STACK],
+  stack: [WIDGET_IDS.TECH_STACK, WIDGET_IDS.CODEWEB_RETRO_GRID, WIDGET_IDS.GODPROFILE_NEURAL],
+  ascii: [
+    WIDGET_IDS.ASCII_ART,
+    WIDGET_IDS.ASCII_TEXT,
+    WIDGET_IDS.ASCII_PORTRAIT,
+    WIDGET_IDS.ASCII_INFO,
+  ],
+  stats: [
+    WIDGET_IDS.STATS,
+    WIDGET_IDS.GITHUB_README_STATS,
+    WIDGET_IDS.METRICS_CARD,
+    WIDGET_IDS.TERMINAL_INFO,
+  ],
+  trophies: [WIDGET_IDS.GODPROFILE_TROPHIES, WIDGET_IDS.PROFILE_TROPHY],
+  snake: [WIDGET_IDS.CONTRIBUTION_SNAKE],
+  views: [WIDGET_IDS.VIEWS_COUNTER],
+  quotes: [WIDGET_IDS.README_QUOTES],
+  quote: [WIDGET_IDS.README_QUOTES],
+  terminal: [WIDGET_IDS.TERMINAL_INFO, 'terminal-card', WIDGET_IDS.GODPROFILE_TERMINAL],
+  avatar: [WIDGET_IDS.AVATAR, WIDGET_IDS.ASCII_PORTRAIT],
+  bio: [WIDGET_IDS.BIO, WIDGET_IDS.TERMINAL_INFO],
+  gitfut: [WIDGET_IDS.GITFUT_CARD],
+  pokemon: [WIDGET_IDS.POKEMON_CARD],
+  gitfest: [WIDGET_IDS.GITFEST_LINEUP],
+} as const
 
 export interface WidgetDocParam {
   name: string
