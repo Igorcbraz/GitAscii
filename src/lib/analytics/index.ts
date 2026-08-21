@@ -186,8 +186,6 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   )
 
   useEffect(() => {
-    if (!consentGranted) return
-
     const isFirstVisit = !safeStorage.getItem('gitascii_visited')
     if (isFirstVisit) {
       analytics.track('first_visit')
@@ -272,7 +270,7 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
       window.removeEventListener('error', handleGlobalError)
       window.removeEventListener('unhandledrejection', handleUnhandledRejection)
     }
-  }, [consentGranted])
+  }, [])
 
   return React.createElement(
     React.Fragment,
