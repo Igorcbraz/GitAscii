@@ -3,7 +3,7 @@
 import { ArrowRight, Github, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { memo, useMemo, useState } from 'react'
 
 import { EXPLORE_GALLERY_FILTERS } from '@/constants'
 import { useI18n } from '@/i18n'
@@ -15,6 +15,135 @@ interface ExploreCommunityGalleryProps {
   initialProfiles: CommunityProfileItem[]
 }
 
+interface CommunityProfileCardProps {
+  profile: CommunityProfileItem
+  isLoading: boolean
+  onInspect: (username: string) => void
+}
+
+const CommunityProfileCard = memo(function CommunityProfileCard({
+  profile: p,
+  isLoading,
+  onInspect,
+}: CommunityProfileCardProps) {
+  const { t } = useI18n()
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  return (
+    <article className="bg-onyx border border-graphite rounded-none flex flex-col justify-between p-6 hover:border-signal-lime/50 transition-all duration-300 group hover:shadow-[0_0_16px_rgba(0,0,0,0.6)] [content-visibility:auto] [contain-intrinsic-size:auto_380px]">
+      <div>
+        <div className="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-graphite/60">
+          <div className="flex items-center gap-3">
+            <Image
+              src={API_ENDPOINTS.GITHUB.AVATAR(p.username, 80)}
+              alt={`@${p.username}`}
+              width={44}
+              height={44}
+              loading="lazy"
+              unoptimized
+              className="size-11 rounded-full border border-graphite bg-carbon object-cover shrink-0"
+              onError={(e) => {
+                const target = e.currentTarget
+                target.style.display = 'none'
+              }}
+            />
+            <div>
+              <h2 className="text-subheading font-medium text-chalk group-hover:text-signal-lime transition-colors">
+                @{p.username}
+              </h2>
+              <span className="font-jetbrains-mono text-caption text-signal-lime uppercase tracking-wider block">
+                {t('explore.gallery.template', 'Template:')} {p.templateId}
+              </span>
+            </div>
+          </div>
+
+          <a
+            href={API_ENDPOINTS.GITHUB.USER_PROFILE(p.username)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 border border-graphite bg-carbon hover:border-signal-lime text-ash hover:text-white transition-colors cursor-pointer"
+            title={t('explore.gallery.view_github', 'View GitHub Profile')}
+          >
+            <Github size={16} />
+          </a>
+        </div>
+
+        <div className="bg-carbon border border-graphite p-3 mb-5 rounded-none overflow-hidden min-h-30 flex items-center justify-center relative">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-graphite/20 animate-pulse flex items-center justify-center">
+              <span className="font-jetbrains-mono text-caption text-ash/40">
+                {t('explore.gallery.loading_preview', 'Loading preview...')}
+              </span>
+            </div>
+          )}
+
+          {!imageError ? (
+            <Image
+              src={`/api/${p.username}?template=${p.templateId}`}
+              alt={`GitAscii Card for @${p.username}`}
+              width={800}
+              height={144}
+              loading="lazy"
+              unoptimized
+              className={`max-w-full max-h-36 object-contain transition-opacity duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="py-6 text-center">
+              <span className="font-jetbrains-mono text-caption text-ash/60">
+                {t('explore.gallery.preview_unavailable', 'Preview unavailable')}
+              </span>
+            </div>
+          )}
+
+          <span className="font-jetbrains-mono text-caption text-ash/60 absolute bottom-1 right-2">
+            {t('explore.gallery.live_preview', 'Live Card Preview')}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 mb-6 flex-wrap">
+          {p.isStored && (
+            <span className="px-2 py-0.5 bg-signal-lime/10 border border-signal-lime/30 font-jetbrains-mono text-caption text-signal-lime uppercase tracking-wider">
+              ● {t('explore.gallery.stored_profile', 'Stored Profile')}
+            </span>
+          )}
+          {p.tags.map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 border border-graphite bg-carbon font-jetbrains-mono text-caption text-ash uppercase tracking-wider"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-4 border-t border-graphite/60">
+        <button
+          onClick={() => onInspect(p.username)}
+          disabled={isLoading}
+          className="w-full inline-flex items-center justify-center gap-2 bg-signal-lime text-black font-medium text-label py-3 transition-all uppercase tracking-wider hover:brightness-110 shadow-[0_0_8px_rgba(197,255,74,0.25)] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+        >
+          <span>
+            {isLoading
+              ? t('explore.gallery.loading', 'Loading...')
+              : t('explore.gallery.inspect', 'Inspect & Customize Profile')}
+          </span>
+          {isLoading ? (
+            <span className="size-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <ArrowRight size={14} />
+          )}
+        </button>
+      </div>
+    </article>
+  )
+})
+
 export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGalleryProps) {
   const router = useRouter()
   const { t } = useI18n()
@@ -22,16 +151,26 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('all')
 
-  const filteredProfiles = initialProfiles.filter((p) => {
-    const matchesSearch =
-      p.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredProfiles = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    const template = selectedTemplate.toLowerCase()
 
-    const matchesTemplate =
-      selectedTemplate === 'all' || p.templateId.toLowerCase() === selectedTemplate.toLowerCase()
+    return initialProfiles.filter((p) => {
+      const matchesSearch =
+        !query ||
+        p.username.toLowerCase().includes(query) ||
+        p.tags.some((tag) => tag.toLowerCase().includes(query))
 
-    return matchesSearch && matchesTemplate
-  })
+      const matchesTemplate = template === 'all' || p.templateId.toLowerCase() === template
+
+      return matchesSearch && matchesTemplate
+    })
+  }, [initialProfiles, searchQuery, selectedTemplate])
+
+  const handleInspect = (username: string) => {
+    setLoadingProfile(username)
+    router.push(`/${username}`)
+  }
 
   return (
     <div className="space-y-10">
@@ -69,103 +208,12 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredProfiles.map((p) => (
-          <article
+          <CommunityProfileCard
             key={p.username}
-            className="bg-onyx border border-graphite rounded-none flex flex-col justify-between p-6 hover:border-signal-lime/50 transition-all duration-300 group hover:shadow-[0_0_16px_rgba(0,0,0,0.6)]"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-graphite/60">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={API_ENDPOINTS.GITHUB.AVATAR(p.username, 80)}
-                    alt={`@${p.username}`}
-                    width={44}
-                    height={44}
-                    unoptimized
-                    className="size-11 rounded-full border border-graphite bg-carbon object-cover shrink-0"
-                    onError={(e) => {
-                      const target = e.currentTarget
-                      target.style.display = 'none'
-                    }}
-                  />
-                  <div>
-                    <h2 className="text-subheading font-medium text-chalk group-hover:text-signal-lime transition-colors">
-                      @{p.username}
-                    </h2>
-                    <span className="font-jetbrains-mono text-caption text-signal-lime uppercase tracking-wider block">
-                      {t('explore.gallery.template', 'Template:')} {p.templateId}
-                    </span>
-                  </div>
-                </div>
-
-                <a
-                  href={API_ENDPOINTS.GITHUB.USER_PROFILE(p.username)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 border border-graphite bg-carbon hover:border-signal-lime text-ash hover:text-white transition-colors cursor-pointer"
-                  title={t('explore.gallery.view_github', 'View GitHub Profile')}
-                >
-                  <Github size={16} />
-                </a>
-              </div>
-
-              <div className="bg-carbon border border-graphite p-3 mb-5 rounded-none overflow-hidden min-h-30 flex items-center justify-center relative">
-                <Image
-                  src={`/api/${p.username}?template=${p.templateId}`}
-                  alt={`GitAscii Card for @${p.username}`}
-                  width={800}
-                  height={144}
-                  unoptimized
-                  className="max-w-full max-h-36 object-contain"
-                  onError={(e) => {
-                    const target = e.currentTarget
-                    target.style.display = 'none'
-                  }}
-                />
-                <span className="font-jetbrains-mono text-caption text-ash/60 absolute bottom-1 right-2">
-                  {t('explore.gallery.live_preview', 'Live Card Preview')}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 mb-6 flex-wrap">
-                {p.isStored && (
-                  <span className="px-2 py-0.5 bg-signal-lime/10 border border-signal-lime/30 font-jetbrains-mono text-caption text-signal-lime uppercase tracking-wider">
-                    ● {t('explore.gallery.stored_profile', 'Stored Profile')}
-                  </span>
-                )}
-                {p.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 border border-graphite bg-carbon font-jetbrains-mono text-caption text-ash uppercase tracking-wider"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2 pt-4 border-t border-graphite/60">
-              <button
-                onClick={() => {
-                  setLoadingProfile(p.username)
-                  router.push(`/${p.username}`)
-                }}
-                disabled={loadingProfile === p.username}
-                className="w-full inline-flex items-center justify-center gap-2 bg-signal-lime text-black font-medium text-label py-3 transition-all uppercase tracking-wider hover:brightness-110 shadow-[0_0_8px_rgba(197,255,74,0.25)] disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <span>
-                  {loadingProfile === p.username
-                    ? t('explore.gallery.loading', 'Loading...')
-                    : t('explore.gallery.inspect', 'Inspect & Customize Profile')}
-                </span>
-                {loadingProfile === p.username ? (
-                  <span className="size-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <ArrowRight size={14} />
-                )}
-              </button>
-            </div>
-          </article>
+            profile={p}
+            isLoading={loadingProfile === p.username}
+            onInspect={handleInspect}
+          />
         ))}
       </div>
 

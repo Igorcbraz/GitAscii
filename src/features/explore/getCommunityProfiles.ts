@@ -47,6 +47,24 @@ function parseConfigToProfileItem(config: SavedConfiguration): CommunityProfileI
   }
 }
 
+async function fetchConfigFromUrl(url: string): Promise<SavedConfiguration | null> {
+  try {
+    const res = await fetch(url, {
+      next: { revalidate: 1800 },
+      signal: AbortSignal.timeout(3000),
+    })
+    if (!res.ok) return null
+    const text = await res.text()
+    const config = JSON.parse(text)
+    if (config && typeof config === 'object' && Array.isArray(config.widgets)) {
+      return config as SavedConfiguration
+    }
+  } catch {
+    // Non-blocking fetch error
+  }
+  return null
+}
+
 async function fetchUserGitAscii(username: string): Promise<SavedConfiguration | null> {
   const urls = [
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', 'gitascii.json'),
@@ -55,29 +73,24 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', '.github/gitascii.json'),
   ]
 
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, {
-        next: { revalidate: 1800 },
-        signal: AbortSignal.timeout(3000),
-      })
-      if (!res.ok) {
-        continue
-      }
-      const text = await res.text()
-      const config = JSON.parse(text)
-      if (config && typeof config === 'object' && Array.isArray(config.widgets)) {
-        return config as SavedConfiguration
-      }
-    } catch (error) {
-      console.warn(`Failed to fetch or parse profile at ${url}:`, error)
+  const results = await Promise.allSettled(urls.map((url) => fetchConfigFromUrl(url)))
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) {
+      return r.value
     }
   }
 
   return null
 }
 
+let cachedProfiles: { data: CommunityProfileItem[]; timestamp: number } | null = null
+const PROFILES_CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
+
 export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
+  if (cachedProfiles && Date.now() - cachedProfiles.timestamp < PROFILES_CACHE_TTL_MS) {
+    return cachedProfiles.data
+  }
+
   const profileMap = new Map<string, CommunityProfileItem>()
 
   const installedUsers = await getAppInstallations()
@@ -98,5 +111,8 @@ export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
 
   await Promise.allSettled(fetchPromises)
 
-  return Array.from(profileMap.values())
+  const result = Array.from(profileMap.values())
+  cachedProfiles = { data: result, timestamp: Date.now() }
+
+  return result
 }
