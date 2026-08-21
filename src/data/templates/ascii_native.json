@@ -1,0 +1,80 @@
+{
+  "id": "ascii_native",
+  "name": "ASCII Native",
+  "description": "Foco em arte ASCII portrait e informações essenciais do perfil com estética nativa.",
+  "category": "ASCII",
+  "widgetCategory": "asciiprofile",
+  "widgets": [
+    {
+      "instanceId": "widget_1787332613522",
+      "widgetId": "asciiprofile-portrait",
+      "name": "Asciiprofile-portrait Widget",
+      "position": {
+        "x": 48,
+        "y": 40
+      },
+      "size": {
+        "width": 288,
+        "height": 312
+      },
+      "config": {
+        "accentColor": "#ffa657",
+        "cols": 150,
+        "rows": 75
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_1787332615403",
+      "widgetId": "asciiprofile-info",
+      "name": "Asciiprofile-info Widget",
+      "position": {
+        "x": 330,
+        "y": 42
+      },
+      "size": {
+        "width": 456,
+        "height": 312
+      },
+      "config": {
+        "accentColor": "#ffa657"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_1787332691060",
+      "widgetId": "asciiprofile-heatmap",
+      "name": "Asciiprofile-heatmap Widget",
+      "position": {
+        "x": 48,
+        "y": 368
+      },
+      "size": {
+        "width": 704,
+        "height": 240
+      },
+      "config": {
+        "accentColor": "#ffa657"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#0d1117",
+    "textColor": "#e6edf3",
+    "accentColor": "#ffa657",
+    "borderColor": "#30363d",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "templateId": "ascii_native"
+}

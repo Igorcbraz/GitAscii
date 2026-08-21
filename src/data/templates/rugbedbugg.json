@@ -1,0 +1,101 @@
+{
+  "id": "rugbedbugg",
+  "name": "Surveillance Console",
+  "description": "Tema surveillance de alta tecnologia com telemetria, feeds e loadout diário.",
+  "category": "Cyberpunk",
+  "widgetCategory": "surveillance",
+  "widgets": [
+    {
+      "instanceId": "widget_1787333190708",
+      "widgetId": "surveillance-header",
+      "name": "Surveillance-header Widget",
+      "position": {
+        "x": 10,
+        "y": 0
+      },
+      "size": {
+        "width": 780,
+        "height": 417
+      },
+      "config": {
+        "accentColor": "#55ffff",
+        "customTitle": "Surveillance Header"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_1787333210669",
+      "widgetId": "surveillance-telemetry",
+      "name": "Surveillance-telemetry Widget",
+      "position": {
+        "x": 10,
+        "y": 417
+      },
+      "size": {
+        "width": 780,
+        "height": 420
+      },
+      "config": {
+        "accentColor": "#55ffff",
+        "customTitle": "Terminal Telemetry"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_1787333224850",
+      "widgetId": "surveillance-feeds",
+      "name": "Surveillance-feeds Widget",
+      "position": {
+        "x": 10,
+        "y": 845
+      },
+      "size": {
+        "width": 780,
+        "height": 190
+      },
+      "config": {
+        "accentColor": "#55ffff",
+        "customTitle": "Surveillance Social Feeds"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_1787333239691",
+      "widgetId": "surveillance-loadout",
+      "name": "Surveillance-loadout Widget",
+      "position": {
+        "x": 10,
+        "y": 1051
+      },
+      "size": {
+        "width": 780,
+        "height": 200
+      },
+      "config": {
+        "accentColor": "#55ffff",
+        "customTitle": "Daily Loadout"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#050308",
+    "textColor": "#e5e5e5",
+    "accentColor": "#55ffff",
+    "borderColor": "#1a1424",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "templateId": "rugbedbugg"
+}

@@ -1,0 +1,145 @@
+{
+  "id": "minimal_luxe",
+  "name": "Minimal Luxe",
+  "description": "Design editorial limpo, elegante e refinado para perfis minimalistas.",
+  "category": "Minimal",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 96
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787333494781_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "bio",
+      "position": {
+        "x": 0,
+        "y": 112
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787333494781_1",
+      "name": "Bio Widget"
+    },
+    {
+      "widgetId": "tech-stack",
+      "position": {
+        "x": 0,
+        "y": 248
+      },
+      "size": {
+        "width": 800,
+        "height": 140
+      },
+      "config": {
+        "selectedTechs": [
+          "ts",
+          "js",
+          "html",
+          "css",
+          "sass",
+          "bash",
+          "vue",
+          "cs",
+          "php",
+          "py",
+          "java",
+          "ruby",
+          "c",
+          "cpp",
+          "docker",
+          "github",
+          "nextjs",
+          "mysql"
+        ]
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3,
+      "instanceId": "widget_1787333494781_2",
+      "name": "Tech-stack Widget"
+    },
+    {
+      "widgetId": "repositories",
+      "position": {
+        "x": 0,
+        "y": 404
+      },
+      "size": {
+        "width": 800,
+        "height": 300
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 4,
+      "instanceId": "widget_1787333494781_3",
+      "name": "Repositories Widget"
+    },
+    {
+      "widgetId": "social-media",
+      "position": {
+        "x": 0,
+        "y": 720
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {
+        "selectedSocials": ["github", "linkedin", "medium", "email", "website"]
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 5,
+      "instanceId": "widget_1787333494781_4",
+      "name": "Social-media Widget"
+    },
+    {
+      "widgetId": "footer",
+      "position": {
+        "x": 0,
+        "y": 856
+      },
+      "size": {
+        "width": 800,
+        "height": 48
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6,
+      "instanceId": "widget_1787333494781_5",
+      "name": "Footer Widget"
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#080808",
+    "textColor": "#ffffff",
+    "accentColor": "#f3f4f6",
+    "borderColor": "#222222",
+    "fontFamily": "'Inter Tight', sans-serif",
+    "borderRadius": 8,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "minimal"
+  },
+  "templateId": "minimal_luxe"
+}

@@ -1,0 +1,134 @@
+{
+  "id": "native",
+  "name": "Native Terminal",
+  "description": "Terminal clássico GitAscii completo com portrait ASCII, bio, linguagens e repositórios.",
+  "category": "Terminal",
+  "widgetCategory": "essential",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 90
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787331623342_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "ascii-art",
+      "position": {
+        "x": 0,
+        "y": 106
+      },
+      "size": {
+        "width": 280,
+        "height": 280
+      },
+      "config": {
+        "detail": "medium",
+        "cols": 150,
+        "charset": "dense",
+        "edgeEnhance": true,
+        "lockAspectRatio": true,
+        "rows": 75
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787331623342_1",
+      "name": "Ascii-art Widget"
+    },
+    {
+      "widgetId": "terminal-info",
+      "position": {
+        "x": 296,
+        "y": 106
+      },
+      "size": {
+        "width": 504,
+        "height": 280
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 3,
+      "instanceId": "widget_1787331623342_2",
+      "name": "Terminal-info Widget"
+    },
+    {
+      "widgetId": "languages",
+      "position": {
+        "x": 0,
+        "y": 402
+      },
+      "size": {
+        "width": 536,
+        "height": 160
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 4,
+      "instanceId": "widget_1787331623342_3",
+      "name": "Languages Widget"
+    },
+    {
+      "widgetId": "footer",
+      "position": {
+        "x": 0,
+        "y": 578
+      },
+      "size": {
+        "width": 800,
+        "height": 50
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6,
+      "instanceId": "widget_1787331623342_5",
+      "name": "Footer Widget"
+    },
+    {
+      "instanceId": "widget_1787331656810",
+      "widgetId": "tech-stack",
+      "name": "Tech-stack Widget",
+      "position": {
+        "x": 544,
+        "y": 402
+      },
+      "size": {
+        "width": 240,
+        "height": 160
+      },
+      "config": {
+        "selectedTechs": ["js", "ts", "html", "css", "py", "rust", "go", "cpp"],
+        "theme": "dark",
+        "perLine": 4
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#060606",
+    "textColor": "#e5e5e5",
+    "accentColor": "#c5ff4a",
+    "borderColor": "#252525",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "templateId": "native"
+}
