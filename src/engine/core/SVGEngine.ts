@@ -590,7 +590,12 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg = finalSvg.replace(fullMatch, () => replacement)
     } catch (err) {
       hasErrors = true
-      console.error('Failed to embed inline image:', url.replace(/[\r\n]/g, ''), err)
+      const errorMessage = (err instanceof Error ? err.message : String(err)).replace(/[\r\n]/g, '')
+      console.error(
+        'Failed to embed inline image:',
+        url.replace(/[\r\n]/g, ''),
+        `error=${errorMessage}`
+      )
     }
   }
 
