@@ -24,10 +24,6 @@ export function sanitizeSvg(svgContent: string): string {
     'base',
     'link',
     'meta',
-    'set',
-    'animate',
-    'animatetransform',
-    'animatemotion',
     'handler',
     'listener',
   ]
@@ -42,6 +38,36 @@ export function sanitizeSvg(svgContent: string): string {
       cleaned = cleaned.replace(tagRegex, '')
     }
   }
+
+  const smilRegex =
+    /<(?:[a-zA-Z0-9_-]+:)?(?:animate|set|animatetransform|animatemotion)\b([^>]*)\/?>/gi
+  cleaned = cleaned.replace(smilRegex, (match, attrs) => {
+    const decodedAttrs = decodeXmlEntities(attrs)
+      .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, ' ')
+      .toLowerCase()
+
+    if (/attributename\s*=\s*["']?\s*on[a-z0-9_-]+/i.test(decodedAttrs)) {
+      return ''
+    }
+
+    if (
+      /(?:values|to|from|by)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:text\/|data:application\/)/i.test(
+        decodedAttrs
+      )
+    ) {
+      return ''
+    }
+
+    if (
+      /(?:href|xlink:href)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:text\/|data:application\/)/i.test(
+        decodedAttrs
+      )
+    ) {
+      return ''
+    }
+
+    return match
+  })
 
   let prevEventClean = ''
   while (prevEventClean !== cleaned) {
@@ -62,7 +88,8 @@ export function sanitizeSvg(svgContent: string): string {
       .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '')
       .toLowerCase()
 
-    const isSafeDataImage = /^data:image\/(?:png|jpeg|jpg|gif|webp);base64,/i.test(decoded)
+    const isSafeDataImage =
+      /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml)(?:;[a-z0-9._=-]+)*;base64,/i.test(decoded)
     if (
       decoded.startsWith('javascript:') ||
       decoded.startsWith('vbscript:') ||
@@ -75,10 +102,12 @@ export function sanitizeSvg(svgContent: string): string {
     return match
   })
 
-  // Sanitize style blocks against @import and CSS expression/behavior execution
   cleaned = cleaned.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_, cssContent) => {
     const safeCss = cssContent
-      .replace(/@import\b[^\n;]*;?/gi, '')
+      .replace(
+        /@import\s+(?:url\(['"]?(?!https:\/\/fonts\.googleapis\.com\/)[^'")]*['"]?\)|'(?!https:\/\/fonts\.googleapis\.com\/)[^']*'|"(?!https:\/\/fonts\.googleapis\.com\/)[^"]*")[^;]*;?/gi,
+        ''
+      )
       .replace(/expression\s*\([^)]*\)/gi, '')
       .replace(/behavior\s*:\s*url\([^)]*\)/gi, '')
       .replace(/-moz-binding\s*:\s*url\([^)]*\)/gi, '')
@@ -116,7 +145,8 @@ export function sanitizeSafeHref(url?: string | null, fallback = ''): string {
       (trimmed.startsWith('data:image/png') ||
         trimmed.startsWith('data:image/jpeg') ||
         trimmed.startsWith('data:image/gif') ||
-        trimmed.startsWith('data:image/webp'))
+        trimmed.startsWith('data:image/webp') ||
+        trimmed.startsWith('data:image/svg+xml'))
     ) {
       return trimmed
     }

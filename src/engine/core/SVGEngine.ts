@@ -312,63 +312,46 @@ async function fetchAndProcessExternalImage(
     console.warn(
       `SSRF protection blocked external request: ${url.replace(/[\r\n]/g, '')} (${(urlCheck.error || '').replace(/[\r\n]/g, '')})`
     )
-    return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
-      <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Blocked URL</text>
-    </svg>`
+    throw new Error(`Blocked URL: ${urlCheck.error}`)
   }
 
-  try {
-    const response = await safeFetch(url, {
-      headers: { accept: 'image/svg+xml, image/*;q=0.9, */*;q=0.1' },
-      signal: AbortSignal.timeout(5000),
-    })
-    if (!response.ok) {
-      console.warn(
-        `Failed to fetch external SVG: ${url.replace(/[\r\n]/g, '')} (HTTP ${response.status})`
-      )
-      return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
-        <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
-      </svg>`
-    }
-
-    const contentType = response.headers.get('content-type') || ''
-    const buffer = await response.arrayBuffer()
-
-    if (buffer.byteLength > 5 * 1024 * 1024) {
-      throw new Error('Image response too large')
-    }
-
-    const isSvg =
-      contentType.includes('image/svg+xml') ||
-      contentType.includes('xml') ||
-      url.toLowerCase().split('?')[0].endsWith('.svg')
-
-    if (isSvg) {
-      try {
-        const text = Buffer.from(buffer).toString('utf-8')
-        return inlineSvg(text, x, y, width, height, preserve)
-      } catch (inlineErr) {
-        console.error('Failed to inline SVG, falling back to base64 image tag:', inlineErr)
-        const base64 = Buffer.from(buffer).toString('base64')
-        return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
-      }
-    } else {
-      const base64 = Buffer.from(buffer).toString('base64')
-      let mimeType = contentType.split(';')[0].trim()
-      if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
-      return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
-    }
-  } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+  const response = await safeFetch(url, {
+    headers: { accept: 'image/svg+xml, image/*;q=0.9, */*;q=0.1' },
+    signal: AbortSignal.timeout(6000),
+  })
+  if (!response.ok) {
     console.warn(
-      `Failed to fetch external SVG: ${url.replace(/[\r\n]/g, '')} (${errorMsg.replace(/[\r\n]/g, '')})`
+      `Failed to fetch external SVG: ${url.replace(/[\r\n]/g, '')} (HTTP ${response.status})`
     )
-    return `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#2A2A2A" rx="4" ry="4" stroke="#e06c75" stroke-dasharray="4" />
-      <text x="50%" y="50%" fill="#e06c75" font-family="monospace" font-size="12" text-anchor="middle" dominant-baseline="middle">Failed to load widget</text>
-    </svg>`
+    throw new Error(`HTTP ${response.status}`)
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  const buffer = await response.arrayBuffer()
+
+  if (buffer.byteLength > 5 * 1024 * 1024) {
+    throw new Error('Image response too large')
+  }
+
+  const isSvg =
+    contentType.includes('image/svg+xml') ||
+    contentType.includes('xml') ||
+    url.toLowerCase().split('?')[0].endsWith('.svg')
+
+  if (isSvg) {
+    try {
+      const text = Buffer.from(buffer).toString('utf-8')
+      return inlineSvg(text, x, y, width, height, preserve)
+    } catch (inlineErr) {
+      console.error('Failed to inline SVG, falling back to base64 image tag:', inlineErr)
+      const base64 = Buffer.from(buffer).toString('base64')
+      return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
+    }
+  } else {
+    const base64 = Buffer.from(buffer).toString('base64')
+    let mimeType = contentType.split(';')[0].trim()
+    if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
+    return `<image href="data:${mimeType};base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
   }
 }
 
@@ -438,7 +421,20 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         }
         if (!replacement) {
           hasErrors = true
-          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+          const isSnake = url.includes('contribution-grid-snake') || url.includes('platane')
+          const isStreak = url.includes('streak-stats')
+
+          let errorMsg = 'Failed to load widget'
+          if (isSnake) {
+            errorMsg = 'Snake not generated yet (run GitHub Action)'
+          } else if (isStreak) {
+            errorMsg = 'Streak stats temporarily unavailable'
+          }
+
+          replacement = `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#141414" rx="6" ry="6" stroke="#333" stroke-dasharray="4" />
+            <text x="50%" y="50%" fill="#888888" font-family="monospace" font-size="11" text-anchor="middle" dominant-baseline="middle">${errorMsg}</text>
+          </svg>`
         }
       }
     } catch (e) {
@@ -517,7 +513,20 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         }
         if (!replacement) {
           hasErrors = true
-          replacement = `<text x="${x}" y="${Number(y) + 12}" font-family="monospace" font-size="10" fill="red">Failed to load external widget</text>`
+          const isSnake = url.includes('contribution-grid-snake') || url.includes('platane')
+          const isStreak = url.includes('streak-stats')
+
+          let errorMsg = 'Failed to load widget'
+          if (isSnake) {
+            errorMsg = 'Snake not generated yet (run GitHub Action)'
+          } else if (isStreak) {
+            errorMsg = 'Streak stats temporarily unavailable'
+          }
+
+          replacement = `<svg width="${width}" height="${height}" x="${x}" y="${y}" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="#141414" rx="6" ry="6" stroke="#333" stroke-dasharray="4" />
+            <text x="50%" y="50%" fill="#888888" font-family="monospace" font-size="11" text-anchor="middle" dominant-baseline="middle">${errorMsg}</text>
+          </svg>`
         }
       }
     }
@@ -582,9 +591,10 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       const buffer = await response.arrayBuffer()
       if (buffer.byteLength > 5 * 1024 * 1024) continue
 
-      const contentType = response.headers.get('content-type') || 'image/webp'
+      let mimeType = (response.headers.get('content-type') || 'image/webp').split(';')[0].trim()
+      if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
       const base64 = Buffer.from(buffer).toString('base64')
-      const dataUri = `data:${contentType};base64,${base64}`
+      const dataUri = `data:${mimeType};base64,${base64}`
 
       const replacement = fullMatch.replace(hrefMatch[0], `href="${dataUri}"`)
       finalSvg = finalSvg.replace(fullMatch, () => replacement)
