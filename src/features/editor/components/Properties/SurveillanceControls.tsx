@@ -186,7 +186,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Subject Name</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.surveillance.subject_name', 'Subject Name')}
+            </label>
             <input
               type="text"
               value={displayName}
@@ -195,7 +197,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
             />
           </div>
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Handle</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.surveillance.handle', 'Handle')}
+            </label>
             <input
               type="text"
               value={username}
@@ -206,7 +210,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Class / Specialty</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.class_role', 'Class / Specialty')}
+          </label>
           <input
             type="text"
             value={classRole}
@@ -217,7 +223,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Rig / Hardware / OS</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.rig_hardware', 'Rig / Hardware / OS')}
+          </label>
           <input
             type="text"
             value={rigInfo}
@@ -228,7 +236,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Habit</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.habit', 'Habit')}
+          </label>
           <input
             type="text"
             value={habitInfo}
@@ -240,7 +250,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Status</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.surveillance.status', 'Status')}
+            </label>
             <input
               type="text"
               value={statusInfo}
@@ -249,7 +261,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
             />
           </div>
           <div>
-            <label className="text-eyebrow text-ash block mb-1">Location</label>
+            <label className="text-eyebrow text-ash block mb-1">
+              {t('editor.surveillance.location', 'Location')}
+            </label>
             <input
               type="text"
               value={location}
@@ -380,7 +394,7 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
                 onClick={() => handleUpdate({ workflow: [] })}
                 className="text-[10px] text-red-400 hover:underline cursor-pointer"
               >
-                Limpar
+                {t('editor.surveillance.clear', 'Limpar')}
               </button>
             )}
           </div>
@@ -418,7 +432,10 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
               value={newWorkflowInput}
               onChange={(e) => setNewWorkflowInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addWorkflowTool(newWorkflowInput)}
-              placeholder="Adicionar ferramenta personalizada..."
+              placeholder={t(
+                'editor.surveillance.add_custom_tool',
+                'Adicionar ferramenta personalizada...'
+              )}
               className="flex-1 bg-graphite border border-graphite text-chalk text-note px-2 py-1 rounded-xs focus:border-[#55ffff] focus:outline-none"
             />
             <button
@@ -442,7 +459,7 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
                 onClick={() => handleUpdate({ languages: [] })}
                 className="text-[10px] text-red-400 hover:underline cursor-pointer"
               >
-                Limpar
+                {t('editor.surveillance.clear', 'Limpar')}
               </button>
             )}
           </div>
@@ -480,7 +497,10 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
               value={newLangInput}
               onChange={(e) => setNewLangInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addLanguage(newLangInput)}
-              placeholder="Adicionar linguagem personalizada..."
+              placeholder={t(
+                'editor.surveillance.add_custom_lang',
+                'Adicionar linguagem personalizada...'
+              )}
               className="flex-1 bg-graphite border border-graphite text-chalk text-note px-2 py-1 rounded-xs focus:border-[#c084fc] focus:outline-none"
             />
             <button
@@ -495,17 +515,21 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
 
         <div className="pt-2 border-t border-graphite space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-eyebrow text-ash font-medium">Catálogo de Tecnologias</label>
-            <span className="text-[10px] text-ash">Clique para adicionar</span>
+            <label className="text-eyebrow text-ash font-medium">
+              {t('editor.surveillance.tech_catalog', 'Catálogo de Tecnologias')}
+            </label>
+            <span className="text-[10px] text-ash">
+              {t('editor.surveillance.click_to_add', 'Clique para adicionar')}
+            </span>
           </div>
 
           <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { id: 'all', label: 'Todas' },
-              { id: 'languages', label: 'Linguagens' },
-              { id: 'frontend', label: 'Frontend' },
-              { id: 'backend', label: 'Backend' },
-              { id: 'devops', label: 'DevOps' },
+              { id: 'all', label: t('editor.surveillance.cat_all', 'Todas') },
+              { id: 'languages', label: t('editor.surveillance.cat_languages', 'Linguagens') },
+              { id: 'frontend', label: t('editor.surveillance.cat_frontend', 'Frontend') },
+              { id: 'backend', label: t('editor.surveillance.cat_backend', 'Backend') },
+              { id: 'devops', label: t('editor.surveillance.cat_devops', 'DevOps') },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -528,7 +552,10 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
               type="text"
               value={techSearchTerm}
               onChange={(e) => setTechSearchTerm(e.target.value)}
-              placeholder="Buscar no catálogo (ex: React, Rust, Docker)..."
+              placeholder={t(
+                'editor.surveillance.search_catalog',
+                'Buscar no catálogo (ex: React, Rust, Docker)...'
+              )}
               className="w-full bg-graphite border border-graphite text-chalk text-[11px] pl-8 pr-2 py-1.5 rounded-xs focus:border-[#55ffff] focus:outline-none"
             />
           </div>
@@ -641,7 +668,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Panel Title</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.panel_title', 'Panel Title')}
+          </label>
           <input
             type="text"
             value={customTitle}
@@ -651,7 +680,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Incoming Subtitle</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.incoming_subtitle', 'Incoming Subtitle')}
+          </label>
           <input
             type="text"
             value={customSubtitle}
@@ -662,13 +693,15 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
 
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-eyebrow text-ash">Transmission Quote</label>
+            <label className="text-eyebrow text-ash">
+              {t('editor.surveillance.tx_quote', 'Transmission Quote')}
+            </label>
             <button
               type="button"
               onClick={setRandomQuote}
               className="text-[10px] text-[#55ffff] hover:underline cursor-pointer"
             >
-              🎲 Random Quote
+              {t('editor.surveillance.random_quote', '🎲 Random Quote')}
             </button>
           </div>
           <textarea
@@ -695,7 +728,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Top Quote / Slogan</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.top_quote', 'Top Quote / Slogan')}
+          </label>
           <input
             type="text"
             value={quoteText}
@@ -705,7 +740,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1">Bottom Workspace Tag</label>
+          <label className="text-eyebrow text-ash block mb-1">
+            {t('editor.surveillance.bottom_workspace_tag', 'Bottom Workspace Tag')}
+          </label>
           <input
             type="text"
             value={workspaceTag}
@@ -739,7 +776,9 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
         </div>
 
         <div>
-          <label className="text-eyebrow text-ash block mb-1.5">Display Layout Mode</label>
+          <label className="text-eyebrow text-ash block mb-1.5">
+            {t('editor.surveillance.layout_mode', 'Display Layout Mode')}
+          </label>
           <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"
@@ -750,7 +789,7 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Grid (3 Feeds Row)
+              {t('editor.surveillance.grid_mode', 'Grid (3 Feeds Row)')}
             </button>
             <button
               type="button"
@@ -761,14 +800,16 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
                   : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
               }`}
             >
-              Single Tile (4:3)
+              {t('editor.surveillance.single_mode', 'Single Tile (4:3)')}
             </button>
           </div>
         </div>
 
         {renderMode === 'single' && (
           <div>
-            <label className="text-eyebrow text-ash block mb-1.5">Active Feed Channel</label>
+            <label className="text-eyebrow text-ash block mb-1.5">
+              {t('editor.surveillance.active_feed_channel', 'Active Feed Channel')}
+            </label>
             <div className="grid grid-cols-3 gap-1.5">
               {[
                 { id: 'linkedin', label: 'LinkedIn' },

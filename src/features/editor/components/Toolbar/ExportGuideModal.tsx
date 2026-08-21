@@ -237,13 +237,19 @@ export function ExportGuideModal({
                       <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
                       <div className="text-caption text-amber-200/90 leading-relaxed font-inter-tight">
                         <strong className="font-semibold text-amber-300">
-                          NÃO altere o nome do arquivo:
+                          {t('editor.export.file_warning_title', 'NÃO altere o nome do arquivo:')}
                         </strong>{' '}
-                        Mantenha o arquivo com o nome exato{' '}
+                        {t(
+                          'editor.export.file_warning_desc_1',
+                          'Mantenha o arquivo com o nome exato'
+                        )}{' '}
                         <code className="bg-amber-950/70 border border-amber-500/30 px-1.5 py-0.5 rounded text-amber-200 font-jetbrains-mono text-eyebrow font-semibold">
                           {fileName}
                         </code>
-                        . O GitAscii busca estritamente por este nome na raiz do repositório.
+                        {t(
+                          'editor.export.file_warning_desc_2',
+                          '. O GitAscii busca estritamente por este nome na raiz do repositório.'
+                        )}
                       </div>
                     </div>
 

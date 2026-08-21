@@ -1063,7 +1063,10 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title="Arraste para ajustar largura (Width)"
+                      title={t(
+                        'editor.canvas.resize_width',
+                        'Arraste para ajustar largura (Width)'
+                      )}
                     >
                       <div className="w-1 h-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>
@@ -1099,7 +1102,10 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title="Arraste para ajustar altura (Height)"
+                      title={t(
+                        'editor.canvas.resize_height',
+                        'Arraste para ajustar altura (Height)'
+                      )}
                     >
                       <div className="h-1 w-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>

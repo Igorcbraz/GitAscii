@@ -316,7 +316,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             {openAccordion === 'profile' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Uptime</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_uptime', 'Custom Uptime')}
+                  </label>
                   <input
                     type="text"
                     value={customUptime}
@@ -332,7 +334,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Location</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_location', 'Custom Location')}
+                  </label>
                   <input
                     type="text"
                     value={customLocation}
@@ -345,7 +349,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Company</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_company', 'Custom Company')}
+                  </label>
                   <input
                     type="text"
                     value={customCompany}
@@ -358,7 +364,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Languages</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_languages', 'Custom Languages')}
+                  </label>
                   <input
                     type="text"
                     value={customLanguages}
@@ -371,7 +379,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Status</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_status', 'Custom Status')}
+                  </label>
                   <input
                     type="text"
                     value={customStatus}
@@ -384,7 +394,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Achievements</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_achievements', 'Custom Achievements')}
+                  </label>
                   <input
                     type="text"
                     value={customAchievements}
@@ -397,7 +409,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Highlights</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_highlights', 'Custom Highlights')}
+                  </label>
                   <input
                     type="text"
                     value={customHighlights}
@@ -448,7 +462,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Website</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_website', 'Custom Website')}
+                  </label>
                   <input
                     type="text"
                     value={customWebsite}
@@ -461,7 +477,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom GitHub</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_github', 'Custom GitHub')}
+                  </label>
                   <input
                     type="text"
                     value={customGithub}
@@ -474,7 +492,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Twitter / X</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_twitter', 'Custom Twitter / X')}
+                  </label>
                   <input
                     type="text"
                     value={customTwitter}
@@ -487,7 +507,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Email</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_email', 'Custom Email')}
+                  </label>
                   <input
                     type="text"
                     value={customEmail}
@@ -500,7 +522,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Orgs</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_orgs', 'Custom Orgs')}
+                  </label>
                   <input
                     type="text"
                     value={customOrgs}
@@ -547,7 +571,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Commits</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_commits', 'Custom Commits')}
+                  </label>
                   <input
                     type="text"
                     value={customCommits}
@@ -560,7 +586,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Following</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_following', 'Custom Following')}
+                  </label>
                   <input
                     type="text"
                     value={customFollowing}
@@ -573,7 +601,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Gists</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_gists', 'Custom Gists')}
+                  </label>
                   <input
                     type="text"
                     value={customGists}

@@ -452,18 +452,23 @@ export default function InteractiveShowcase() {
                             </code>
                             <button
                               onClick={() => handleCopy(wInfo.snippet)}
-                              aria-label="Copy snippet code to clipboard"
+                              aria-label={t(
+                                'landing.showcase.widgets.copy_aria',
+                                'Copy snippet code to clipboard'
+                              )}
                               className="absolute top-1/2 right-2 -translate-y-1/2 px-2.5 py-1 min-h-[36px] bg-onyx hover:bg-graphite border border-graphite text-ash hover:text-signal-lime transition-all flex items-center gap-1.5 cursor-pointer rounded-sm"
                             >
                               {copied && copiedText === wInfo.snippet ? (
                                 <>
                                   <Check size={11} className="text-signal-lime" />
-                                  <span className="text-caption text-signal-lime">Copiado</span>
+                                  <span className="text-caption text-signal-lime">
+                                    {t('common.copied', 'Copiado')}
+                                  </span>
                                 </>
                               ) : (
                                 <>
                                   <Copy size={11} />
-                                  <span className="text-caption">Copiar</span>
+                                  <span className="text-caption">{t('common.copy', 'Copiar')}</span>
                                 </>
                               )}
                             </button>
@@ -564,7 +569,7 @@ export default function InteractiveShowcase() {
                               rel="noopener noreferrer"
                               aria-label={`View ${pInfo.name} GitHub Profile`}
                               className="inline-flex items-center justify-center p-2 min-w-[40px] min-h-[40px] border border-graphite hover:border-signal-lime text-ash hover:text-white transition-colors bg-onyx cursor-pointer"
-                              title="View GitHub"
+                              title={t('common.view_github', 'View GitHub')}
                             >
                               <Github size={16} />
                             </a>

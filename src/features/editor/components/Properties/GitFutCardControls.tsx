@@ -268,32 +268,35 @@ export function GitFutCardControls({ instanceId, config }: { instanceId: string;
           <div className="mt-2 p-2.5 rounded-xs bg-[#05140b] border border-emerald-500/20 space-y-2 text-[11px] font-jetbrains-mono text-ash/90">
             <div className="grid grid-cols-2 gap-2">
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">PAC (Pace):</span> Commits no último
-                ano
+                <span className="text-emerald-400 font-bold">PAC (Pace):</span>{' '}
+                {t('editor.gitfut.pac_desc', 'Commits no último ano')}
               </div>
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">SHO (Shooting):</span> Estrelas em
-                repos
+                <span className="text-emerald-400 font-bold">SHO (Shooting):</span>{' '}
+                {t('editor.gitfut.sho_desc', 'Estrelas em repos')}
               </div>
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">PAS (Passing):</span> PRs + Seguidores
+                <span className="text-emerald-400 font-bold">PAS (Passing):</span>{' '}
+                {t('editor.gitfut.pas_desc', 'PRs + Seguidores')}
               </div>
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">DRI (Dribbling):</span> Diversidade de
-                linguagens
+                <span className="text-emerald-400 font-bold">DRI (Dribbling):</span>{' '}
+                {t('editor.gitfut.dri_desc', 'Diversidade de linguagens')}
               </div>
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">DEF (Defending):</span> Reviews +
-                Issues
+                <span className="text-emerald-400 font-bold">DEF (Defending):</span>{' '}
+                {t('editor.gitfut.def_desc', 'Reviews + Issues')}
               </div>
               <div className="p-1.5 rounded bg-black/40 border border-emerald-500/10">
-                <span className="text-emerald-400 font-bold">PHY (Physical):</span> Contribuições
-                vitalícias
+                <span className="text-emerald-400 font-bold">PHY (Physical):</span>{' '}
+                {t('editor.gitfut.phy_desc', 'Contribuições vitalícias')}
               </div>
             </div>
             <p className="text-[10px] text-emerald-300/80 pt-1 border-t border-emerald-500/10">
-              * Cartas especiais: Bronze (≤64), Silver (65–74), Gold (75–84), TOTY (85–89), Icon
-              (90+).
+              {t(
+                'editor.gitfut.special_cards',
+                '* Cartas especiais: Bronze (≤64), Silver (65–74), Gold (75–84), TOTY (85–89), Icon (90+).'
+              )}
             </p>
           </div>
         )}
