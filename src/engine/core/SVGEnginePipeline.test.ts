@@ -88,6 +88,11 @@ describe('SVG Engine Pipeline & Animation Integrity Suite', () => {
           themeMode: 'dark',
           templateStyle: 'terminal',
         },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schemaVersion: 1,
+        },
       }
 
       const rawSvg = renderSvg(config, mockProfileData)
@@ -136,6 +141,11 @@ describe('SVG Engine Pipeline & Animation Integrity Suite', () => {
           padding: 24,
           themeMode: 'dark',
           templateStyle: 'terminal',
+        },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schemaVersion: 1,
         },
       }
 

@@ -1,5 +1,6 @@
 import type { SavedConfiguration } from '@/engine/types'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import { invalidateSvgCache } from '@/services/profileSvgService'
 
 interface CacheEntry {
   config: SavedConfiguration
@@ -13,6 +14,7 @@ export function invalidateProfileConfig(username: string, slug: string = 'defaul
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   memoryCache.delete(`${usernameLower}_${slugLower}`)
+  invalidateSvgCache(usernameLower)
 }
 
 export function cacheProfileConfig(config: SavedConfiguration): void {
@@ -24,6 +26,7 @@ export function cacheProfileConfig(config: SavedConfiguration): void {
     config,
     expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
   })
+  invalidateSvgCache(username)
 }
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {

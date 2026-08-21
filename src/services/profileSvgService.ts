@@ -17,6 +17,48 @@ export interface ProfileSvgRequestOptions {
   widgets?: string[] | null
 }
 
+interface SvgCacheEntry {
+  svgContent: string
+  etag: string
+  hasErrors: boolean
+  timestamp: number
+}
+
+const svgResponseCache = new Map<string, SvgCacheEntry>()
+const SVG_CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache
+const MAX_CACHE_ENTRIES = 300
+
+function getCachedSvg(key: string): SvgCacheEntry | null {
+  const entry = svgResponseCache.get(key)
+  if (!entry) return null
+  if (Date.now() - entry.timestamp > SVG_CACHE_TTL_MS) {
+    svgResponseCache.delete(key)
+    return null
+  }
+  return entry
+}
+
+function setCachedSvg(key: string, entry: SvgCacheEntry): void {
+  if (svgResponseCache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = svgResponseCache.keys().next().value
+    if (oldestKey) svgResponseCache.delete(oldestKey)
+  }
+  svgResponseCache.set(key, entry)
+}
+
+export function invalidateSvgCache(username?: string): void {
+  if (!username) {
+    svgResponseCache.clear()
+    return
+  }
+  const prefix = `${username.toLowerCase()}:`
+  for (const key of svgResponseCache.keys()) {
+    if (key.startsWith(prefix)) {
+      svgResponseCache.delete(key)
+    }
+  }
+}
+
 function computeEtag(content: string): string {
   let hash = 0
   for (let i = 0; i < content.length; i++) {
@@ -67,46 +109,67 @@ export async function generateProfileSvgResponse(
           .filter(Boolean)
       : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
-    const data = await fetchGitHubProfile(username)
+    const vParam = searchParams.get('v') || searchParams.get('t') || ''
+    const cacheKey = `${username.toLowerCase()}:${profileSlug}:${theme}:${templateParam || 'default'}:${(widgetsParam || []).sort().join(',')}:${vParam}`
 
-    let config = await loadProfileConfig(username, profileSlug)
+    let svgContent: string
+    let etag: string
+    let hasErrors: boolean
 
-    if (!config) {
-      const templateId = templateParam || 'terminal'
-      config = createConfiguration(
-        data.user.id,
-        data.user.login,
-        templateId,
-        profileSlug,
-        'Default',
-        data
-      )
-    }
+    const cachedEntry = getCachedSvg(cacheKey)
+    if (cachedEntry) {
+      svgContent = cachedEntry.svgContent
+      etag = cachedEntry.etag
+      hasErrors = cachedEntry.hasErrors
+    } else {
+      const data = await fetchGitHubProfile(username)
 
-    if (widgetsParam && widgetsParam.length > 0) {
-      for (const widgetId of widgetsParam) {
-        const hasWidget = config.widgets.some((w: any) => w.widgetId === widgetId)
-        if (!hasWidget) {
-          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
-          config.widgets.push({
-            instanceId: `${widgetId}-query-${Date.now()}`,
-            widgetId,
-            position: { x: 20, y: 20 },
-            size: item?.defaultSize || { width: 400, height: 200 },
-            config: {},
-            locked: false,
-            visible: true,
-            zIndex: 99,
-          })
+      let config = await loadProfileConfig(username, profileSlug)
+
+      if (!config) {
+        const templateId = templateParam || 'terminal'
+        config = createConfiguration(
+          data.user.id,
+          data.user.login,
+          templateId,
+          profileSlug,
+          'Default',
+          data
+        )
+      }
+
+      if (widgetsParam && widgetsParam.length > 0) {
+        for (const widgetId of widgetsParam) {
+          const hasWidget = config.widgets.some((w: any) => w.widgetId === widgetId)
+          if (!hasWidget) {
+            const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
+            config.widgets.push({
+              instanceId: `${widgetId}-query-${Date.now()}`,
+              widgetId,
+              position: { x: 20, y: 20 },
+              size: item?.defaultSize || { width: 400, height: 200 },
+              config: {},
+              locked: false,
+              visible: true,
+              zIndex: 99,
+            })
+          }
         }
       }
+
+      const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
+      const embedResult = await embedExternalImages(rawSvgContent)
+      svgContent = sanitizeSvg(embedResult.svg)
+      etag = computeEtag(svgContent)
+      hasErrors = embedResult.hasErrors
+
+      setCachedSvg(cacheKey, {
+        svgContent,
+        etag,
+        hasErrors,
+        timestamp: Date.now(),
+      })
     }
-
-    const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
-    const { svg: embeddedSvg, hasErrors } = await embedExternalImages(rawSvgContent)
-    const svgContent = sanitizeSvg(embeddedSvg)
-
-    const etag = computeEtag(svgContent)
     const ifNoneMatch = request.headers.get('if-none-match')
 
     // Healthy cache: 1 hour fresh, 2 hours stale-while-revalidate
