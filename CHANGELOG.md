@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1](https://github.com/Igorcbraz/GitAscii/compare/v1.14.0...v1.14.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **analytics:** enable essential product telemetry by default while preserving privacy consent ([63c8d78](https://github.com/Igorcbraz/GitAscii/commit/63c8d783fc24f47af6772ea6bafd8b3f589af967))
+
 ## [1.14.0](https://github.com/Igorcbraz/GitAscii/compare/v1.13.2...v1.14.0) (2026-08-21)
 
 
