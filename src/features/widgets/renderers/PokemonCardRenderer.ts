@@ -1,3 +1,4 @@
+import { DEFAULT_POKEMON_CARD_IMAGE } from '@/constants'
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { sanitizeId, sanitizeSafeHref } from '@/utils/svgSanitizer'
@@ -10,8 +11,8 @@ export function renderPokemonCard(
   height: number
 ): string {
   const cfg = widget.config
-  const rawImageUrl = (cfg.imageUrl as string) || ''
-  const imageUrl = escapeXml(sanitizeSafeHref(rawImageUrl, ''))
+  const rawImageUrl = (cfg.imageUrl as string) || DEFAULT_POKEMON_CARD_IMAGE
+  const imageUrl = escapeXml(sanitizeSafeHref(rawImageUrl, DEFAULT_POKEMON_CARD_IMAGE))
   const isLoading = cfg.isLoading === true
 
   if (!imageUrl && !isLoading) {

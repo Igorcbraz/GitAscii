@@ -1,3 +1,9 @@
+import {
+  GITHUB_THEME_KEYS,
+  isGitHubAdaptiveTheme,
+  isTrustedCdnHostname,
+  WIDGET_ALIASES,
+} from '@/constants'
 import { safeFetch, validateSafeExternalUrl } from '@/utils/ssrfValidator'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
@@ -46,22 +52,6 @@ export function normalizeProfileData(
       weeks: [],
     },
   }
-}
-
-const WIDGET_ALIASES: Record<string, string[]> = {
-  streak: ['streak-stats', 'ascii-heatmap', 'godprofile-trophies'],
-  languages: ['languages', 'tech-stack'],
-  stack: ['tech-stack', 'codeweb-retro-grid', 'godprofile-neural'],
-  ascii: ['ascii-art', 'ascii-text', 'ascii-portrait', 'ascii-info'],
-  stats: ['stats', 'github-readme-stats', 'metrics-card', 'terminal-info'],
-  trophies: ['godprofile-trophies', 'profile-trophy'],
-  snake: ['contribution-snake'],
-  views: ['views-counter'],
-  quotes: ['readme-quotes'],
-  quote: ['readme-quotes'],
-  terminal: ['terminal-info', 'terminal-card', 'godprofile-terminal'],
-  avatar: ['avatar', 'ascii-portrait'],
-  bio: ['bio', 'terminal-info'],
 }
 
 function resolveTargetWidgetIds(targetWidgetIds?: string[]): string[] | undefined {
@@ -114,7 +104,15 @@ export function renderSvg(
   }
 
   const globalStyles = safeConfig.globalStyles || ({} as GlobalStyles)
-  const bg = isLight ? '#ffffff' : globalStyles.backgroundColor || '#060606'
+  const isAdaptiveBg =
+    isGitHubAdaptiveTheme(globalStyles.backgroundColor) || globalStyles.themeMode === 'auto'
+  const bg = isAdaptiveBg
+    ? isLight
+      ? GITHUB_THEME_KEYS.LIGHT
+      : GITHUB_THEME_KEYS.DARK
+    : isLight
+      ? GITHUB_THEME_KEYS.LIGHT
+      : globalStyles.backgroundColor || '#060606'
   const isTransparent = Boolean(globalStyles.transparentBackground)
 
   const rawTargetWidgetIds = options.widgets
@@ -131,7 +129,6 @@ export function renderSvg(
   )
 
   if (targetWidgetIds && visibleWidgets.length === 0) {
-    // Check if target was a requested standalone widget not in user's layout
     const primaryTarget = rawTargetWidgetIds?.[0]?.toLowerCase()
     if (primaryTarget) {
       const aliasTarget = (WIDGET_ALIASES[primaryTarget] || [primaryTarget])[0]
@@ -206,9 +203,26 @@ export function renderSvg(
     text {
       user-select: none;
     }
+
+    .gitascii-canvas-bg {
+      fill: #0d1117;
+      transition: fill 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .gitascii-canvas-bg {
+        fill: #ffffff !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gitascii-canvas-bg {
+        fill: #0d1117 !important;
+      }
+    }
   </style>
 
-  ${!isTransparent ? `<rect width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
+  ${!isTransparent ? `<rect class="${isAdaptiveBg ? 'gitascii-canvas-bg' : ''}" width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
 
   ${widgetsSvg}
 </svg>`
@@ -569,10 +583,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         })
       } catch (fetchErr) {
         const urlObj = new URL(url)
-        const isTrustedCdn =
-          urlObj.hostname === 'assets.tcgdex.net' ||
-          urlObj.hostname === 'avatars.githubusercontent.com' ||
-          urlObj.hostname === 'raw.githubusercontent.com'
+        const isTrustedCdn = isTrustedCdnHostname(urlObj.hostname)
 
         if (isTrustedCdn) {
           response = await fetch(url, {

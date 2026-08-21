@@ -66,7 +66,7 @@ export function CompetitorDetailClient({ data, allCompetitors }: CompetitorDetai
 
       <section className="py-16 px-6 max-w-4xl mx-auto text-center">
         <span className="font-jetbrains-mono text-caption uppercase tracking-[0.22em] text-ash mb-4 block">
-          [ DETAILED COMPARISON ]
+          {t('vs_detail.detailed_comparison_badge', '[ DETAILED COMPARISON ]')}
         </span>
         <h1 className="font-pt-serif font-light text-4xl md:text-5xl leading-tight mb-6">
           GitAscii vs <span className="italic text-signal-lime">{data.name}</span>

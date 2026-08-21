@@ -1,0 +1,130 @@
+{
+  "id": "native_simple",
+  "name": "Native Simple",
+  "description": "Versão enxuta do terminal com foco no portrait ASCII e links de redes sociais.",
+  "category": "Terminal",
+  "widgetCategory": "essential",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 90
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787331623342_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "ascii-art",
+      "position": {
+        "x": 0,
+        "y": 106
+      },
+      "size": {
+        "width": 280,
+        "height": 280
+      },
+      "config": {
+        "detail": "medium",
+        "cols": 150,
+        "charset": "dense",
+        "edgeEnhance": true,
+        "lockAspectRatio": true,
+        "rows": 75
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787331623342_1",
+      "name": "Ascii-art Widget"
+    },
+    {
+      "widgetId": "terminal-info",
+      "position": {
+        "x": 296,
+        "y": 106
+      },
+      "size": {
+        "width": 504,
+        "height": 280
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 3,
+      "instanceId": "widget_1787331623342_2",
+      "name": "Terminal-info Widget"
+    },
+    {
+      "instanceId": "widget_1787331854559",
+      "widgetId": "ascii-text",
+      "name": "Ascii-text Widget",
+      "position": {
+        "x": 0,
+        "y": 506
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {
+        "customText": "GitAscii",
+        "asciiFont": "block",
+        "charSpacing": 1,
+        "fontSize": 12,
+        "charset": "default",
+        "customCharset": "",
+        "asciiLines": [
+          " ▄████▄  ████████ ████████  ▄████▄   ▄█████   ▄████▄  ████████ ████████",
+          "██    ▀▀    ██       ██    ██    ██ ██       ██    ▀▀    ██       ██   ",
+          "██  ████    ██       ██    ████████  ▀████▄  ██          ██       ██   ",
+          "██    ██    ██       ██    ██    ██       ██ ██    ▄▄    ██       ██   ",
+          " ▀████▀  ████████    ██    ██    ██ ██████▀   ▀████▀  ████████ ████████"
+        ]
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 7
+    },
+    {
+      "instanceId": "widget_1787331871887",
+      "widgetId": "social-media",
+      "name": "Social-media Widget",
+      "position": {
+        "x": 0,
+        "y": 402
+      },
+      "size": {
+        "width": 800,
+        "height": 88
+      },
+      "config": {
+        "selectedSocials": ["github", "linkedin", "medium", "email", "website", "discord"],
+        "badgeStyle": "for-the-badge"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 8
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#060606",
+    "textColor": "#e5e5e5",
+    "accentColor": "#c5ff4a",
+    "borderColor": "#252525",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "templateId": "native_simple"
+}

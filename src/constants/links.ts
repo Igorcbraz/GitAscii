@@ -28,6 +28,7 @@ export interface ExternalLinksDef {
     readonly PROFILE_CONTROL_PLANE: string
     readonly CODEWEB_DEV: string
     readonly SURVEILLANCE_CONSOLE: string
+    readonly GITFUT: string
   }
   readonly CODEWEB_DEFAULT_GIFS: {
     readonly LEFT: string
@@ -70,6 +71,7 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
     PROFILE_CONTROL_PLANE: 'https://github.com/majiayu000/profile-control-plane',
     CODEWEB_DEV: 'https://github.com/codeweb-dev/codeweb-dev',
     SURVEILLANCE_CONSOLE: 'https://github.com/rugbedbugg/rugbedbugg',
+    GITFUT: 'https://gitfut.com',
   },
   CODEWEB_DEFAULT_GIFS: {
     LEFT: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif',

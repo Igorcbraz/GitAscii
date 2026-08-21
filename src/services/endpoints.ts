@@ -70,6 +70,12 @@ export const API_ENDPOINTS = {
     CARDS_BY_NAME: (name: string) =>
       `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(name)}`,
   },
+  GITFUT: {
+    CARD_IMAGE: (username: string, country?: string) =>
+      `https://gitfut.com/${encodeURIComponent(username)}.png${country ? `?country=${encodeURIComponent(country)}` : ''}`,
+    SCOUT_REPORT: (username: string, country?: string) =>
+      `https://gitfut.com/${encodeURIComponent(username)}${country ? `?country=${encodeURIComponent(country)}` : ''}`,
+  },
   SKILL_ICONS: {
     GET: (icons: string, theme?: string, perline?: number) =>
       `https://skillicons.dev/icons?i=${encodeURIComponent(icons)}${theme ? `&theme=${encodeURIComponent(theme)}` : ''}${perline ? `&perline=${perline}` : ''}`,

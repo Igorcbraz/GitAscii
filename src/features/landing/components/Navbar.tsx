@@ -363,7 +363,7 @@ export default function Navbar() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-1.5 px-2.5 h-[32px] font-inter-tight text-label font-medium text-ash transition-all duration-200 hover:text-white active:scale-[0.98] cursor-pointer group"
-              title="Star on GitHub"
+              title={t('common.star_github', 'Star on GitHub')}
               aria-label={t('common.star_github', 'Star on GitHub')}
             >
               <Github className="size-3.5 text-ash group-hover:text-white transition-colors" />

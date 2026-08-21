@@ -988,7 +988,7 @@ function CodewebBentoControls({
               onClick={() => handleUpdate({ uploadedImageData: '', sourceType: 'avatar' })}
               className="text-ash hover:text-chalk cursor-pointer"
             >
-              Remover
+              {t('common.delete', 'Remover')}
             </button>
           </div>
         )}

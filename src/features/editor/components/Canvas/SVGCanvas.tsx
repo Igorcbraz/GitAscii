@@ -3,7 +3,7 @@
 import { Layers, Lock, Move, X } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { EXTERNAL_LINKS } from '@/constants'
+import { EXTERNAL_LINKS, GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { getWidgetMinSize } from '@/engine/core/WidgetRenderer'
 import { useI18n } from '@/i18n'
@@ -13,9 +13,9 @@ import {
   type AlignmentGuide,
   CANVAS_WIDTH,
   clamp,
+  computeResizeSmartGuides,
   computeSmartGuides,
   DEFAULT_SNAP_THRESHOLD as SNAP_THRESHOLD,
-  GRID_SIZE,
   type SpacingGuide,
 } from '../../utils/smartGuides'
 import { LayersPanel } from '../Sidebar/LayersPanel'
@@ -457,20 +457,42 @@ export function SVGCanvas() {
       }
 
       const maxWidth = CANVAS_WIDTH - activeDrag.initialPos.x
-      const roundedWidth = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
-      const roundedHeight = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
-      let width = activeDrag.initialSize.width
-      let height = activeDrag.initialSize.height
+      const rawWidth =
+        activeDrag.type === 'resize-r' || activeDrag.type === 'resize-br'
+          ? activeDrag.initialSize.width + deltaX
+          : activeDrag.initialSize.width
+      const rawHeight =
+        activeDrag.type === 'resize-b' || activeDrag.type === 'resize-br'
+          ? activeDrag.initialSize.height + deltaY
+          : activeDrag.initialSize.height
 
-      if (activeDrag.type === 'resize-r' || activeDrag.type === 'resize-br') {
-        width = Math.max(
-          40,
-          Math.min(maxWidth, roundedWidth(activeDrag.initialSize.width + deltaX))
-        )
-      }
-      if (activeDrag.type === 'resize-b' || activeDrag.type === 'resize-br') {
-        height = Math.max(40, roundedHeight(activeDrag.initialSize.height + deltaY))
-      }
+      const otherRects = currentConfig.widgets
+        .filter((w) => w.visible && w.instanceId !== activeDrag.instanceId)
+        .map((w) => ({
+          id: w.instanceId,
+          rect: {
+            x: w.position.x,
+            y: w.position.y,
+            width: w.size.width,
+            height: w.size.height,
+          },
+        }))
+
+      const resizeResult = computeResizeSmartGuides({
+        activePos: activeDrag.initialPos,
+        rawWidth,
+        rawHeight,
+        resizeType: activeDrag.type as 'resize-r' | 'resize-b' | 'resize-br',
+        otherRects,
+        minWidth: 40,
+        maxWidth,
+        minHeight: 40,
+        snapThreshold: SNAP_THRESHOLD,
+        canvasWidth: CANVAS_WIDTH,
+      })
+
+      let width = resizeResult.snappedWidth
+      let height = resizeResult.snappedHeight
 
       if (isAspectLocked) {
         const side =
@@ -495,7 +517,7 @@ export function SVGCanvas() {
       scheduleDragPreview({
         positions: { [activeDrag.instanceId]: activeDrag.initialPos },
         sizes: { [activeDrag.instanceId]: { width, height } },
-        guides: [],
+        guides: resizeResult.alignmentGuides,
         spacingGuides: [],
       })
     }
@@ -816,13 +838,40 @@ export function SVGCanvas() {
                     animation: none !important;
                     transition: none !important;
                   }
+
+                  .gitascii-canvas-bg {
+                    fill: #0d1117;
+                    transition: fill 0.3s ease;
+                  }
+
+                  @media (prefers-color-scheme: light) {
+                    .gitascii-canvas-bg {
+                      fill: #ffffff !important;
+                    }
+                  }
+
+                  @media (prefers-color-scheme: dark) {
+                    .gitascii-canvas-bg {
+                      fill: #0d1117 !important;
+                    }
+                  }
                 `}
               </style>
               {!config.globalStyles.transparentBackground && (
                 <rect
+                  className={
+                    isGitHubAdaptiveTheme(config.globalStyles.backgroundColor) ||
+                    config.globalStyles.themeMode === 'auto'
+                      ? 'gitascii-canvas-bg'
+                      : undefined
+                  }
                   width="800"
                   height={canvasHeight}
-                  fill={config.globalStyles.backgroundColor || '#060606'}
+                  fill={
+                    isGitHubAdaptiveTheme(config.globalStyles.backgroundColor)
+                      ? GITHUB_THEME_KEYS.DARK
+                      : config.globalStyles.backgroundColor || '#060606'
+                  }
                   rx={config.globalStyles.borderRadius || 0}
                 />
               )}
@@ -1036,7 +1085,10 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title="Arraste para ajustar largura (Width)"
+                      title={t(
+                        'editor.canvas.resize_width',
+                        'Arraste para ajustar largura (Width)'
+                      )}
                     >
                       <div className="w-1 h-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>
@@ -1072,7 +1124,10 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title="Arraste para ajustar altura (Height)"
+                      title={t(
+                        'editor.canvas.resize_height',
+                        'Arraste para ajustar altura (Height)'
+                      )}
                     >
                       <div className="h-1 w-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>

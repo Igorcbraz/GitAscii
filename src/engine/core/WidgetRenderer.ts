@@ -1,3 +1,5 @@
+import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_IDS } from '@/constants'
+
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
 import { renderWidgetContent } from './WidgetRegistry'
 
@@ -6,7 +8,7 @@ export function getWidgetMinSize(
   data: NormalizedGitHubData
 ): { width: number; height: number } | null {
   if (!widget) return null
-  if (widget.widgetId === 'bio') {
+  if (widget.widgetId === WIDGET_IDS.BIO) {
     const width = Math.max(100, Number(widget.size?.width) || 800)
     const cfg = widget.config || {}
     const customBio =
@@ -35,6 +37,29 @@ export function getWidgetMinSize(
     const requiredHeight = 60 + (Math.max(1, wrappedLines.length) - 1) * 20 + 48
     return { width, height: requiredHeight }
   }
+  if (widget.widgetId === WIDGET_IDS.REPOSITORIES) {
+    const width = Math.max(100, Number(widget.size?.width) || 800)
+    const cfg = widget.config || {}
+    const maxRepos = Number(cfg.maxRepos) || 3
+    const repoViewMode = (cfg.repoViewMode as string) || 'list'
+    const showRepoDesc = cfg.showRepoDesc !== false
+    const showRepoLanguage = cfg.showRepoLanguage !== false
+    const showRepoForks = Boolean(cfg.showRepoForks)
+    const showRepoStars = cfg.showRepoStars !== false
+    const showRepoUpdated = Boolean(cfg.showRepoUpdated)
+
+    if (repoViewMode === 'grid') {
+      const rows = Math.ceil(maxRepos / 2)
+      const requiredHeight = 50 + rows * (80 + 12) + 16
+      return { width, height: requiredHeight }
+    }
+
+    const metaLineNeeded = showRepoLanguage || showRepoForks || showRepoStars || showRepoUpdated
+    const cardH = 24 + (showRepoDesc ? 18 : 0) + (metaLineNeeded ? 18 : 0) + 8
+    const rowSpacing = cardH + 8
+    const requiredHeight = 50 + maxRepos * rowSpacing + 16
+    return { width, height: requiredHeight }
+  }
   return null
 }
 
@@ -54,7 +79,9 @@ export function renderWidgetSvg(
   const cfg = widget.config || {}
   const globalStylesSafe = globalStyles || ({} as GlobalStyles)
 
-  const bg = (cfg.backgroundColor as string) || globalStylesSafe.backgroundColor || '#1f1f1f'
+  const rawBg = (cfg.backgroundColor as string) || globalStylesSafe.backgroundColor || '#1f1f1f'
+  const isAdaptiveWidgetBg = isGitHubAdaptiveTheme(rawBg)
+  const bg = isAdaptiveWidgetBg ? GITHUB_THEME_KEYS.DARK : rawBg
   const border = (cfg.borderColor as string) || globalStylesSafe.borderColor || '#252525'
   const textClr = (cfg.textColor as string) || globalStylesSafe.textColor || '#ffffff'
   const accent = (cfg.accentColor as string) || globalStylesSafe.accentColor || '#c5ff4a'
@@ -142,8 +169,8 @@ export function renderWidgetSvg(
 
     if (animType === 'typewriter') {
       if (
-        widget.widgetId === 'ascii-art' ||
-        widget.widgetId === 'ascii-text' ||
+        widget.widgetId === WIDGET_IDS.ASCII_ART ||
+        widget.widgetId === WIDGET_IDS.ASCII_TEXT ||
         widget.widgetId.startsWith('terminal-')
       ) {
         let rectsHtml = ''
@@ -163,14 +190,15 @@ export function renderWidgetSvg(
             }`
           })
         } else {
-          const fontSize = Number(cfg.fontSize) || (widget.widgetId === 'ascii-text' ? 12 : 9)
+          const fontSize =
+            Number(cfg.fontSize) || (widget.widgetId === WIDGET_IDS.ASCII_TEXT ? 12 : 9)
           const lineHeight =
-            widget.widgetId === 'ascii-text'
+            widget.widgetId === WIDGET_IDS.ASCII_TEXT
               ? fontSize * 1.2
               : Math.max(7, Math.round(fontSize * 1.12))
 
           let linesCount = 1
-          if (widget.widgetId === 'ascii-art') {
+          if (widget.widgetId === WIDGET_IDS.ASCII_ART) {
             linesCount = Array.isArray(cfg.asciiText)
               ? cfg.asciiText.length
               : Math.floor(height / lineHeight)
@@ -292,7 +320,8 @@ export function renderWidgetSvg(
       `
 
       let animIndex = 0
-      const isAscii = widget.widgetId === 'ascii-art' || widget.widgetId === 'ascii-text'
+      const isAscii =
+        widget.widgetId === WIDGET_IDS.ASCII_ART || widget.widgetId === WIDGET_IDS.ASCII_TEXT
       const totalStaggerBudget = Math.min(animDuration * 0.6, isAscii ? 1200 : 600)
 
       const tagsToMatch = 'text|tspan|rect|path|image|circle|line|polygon|polyline'
@@ -330,11 +359,14 @@ export function renderWidgetSvg(
   const isSelfContained =
     contentSvg.trim().startsWith('<svg') ||
     widget.widgetId.startsWith('controlplane-') ||
-    widget.widgetId.startsWith('codeweb-')
+    widget.widgetId.startsWith('codeweb-') ||
+    widget.widgetId === WIDGET_IDS.GITFUT_CARD ||
+    widget.widgetId === WIDGET_IDS.POKEMON_CARD ||
+    Boolean(cfg.transparentBackground)
 
   const baseBackgroundRect = isSelfContained
     ? ''
-    : `<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
+    : `<rect class="${isAdaptiveWidgetBg ? 'gitascii-canvas-bg' : ''}" x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
 
   const innerHtml = `
       ${styleBlock}

@@ -319,7 +319,7 @@ export function AsciiArtControls({ instanceId, config }: AsciiArtControlsProps) 
 
       <div className="space-y-2 pt-2 border-t border-graphite/50 relative">
         <label className="text-eyebrow text-ash font-medium block">
-          Conjunto de Caracteres (Base)
+          {t('editor.ascii.charset_base', 'Conjunto de Caracteres (Base)')}
         </label>
 
         <button

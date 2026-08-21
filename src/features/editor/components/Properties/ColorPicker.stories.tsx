@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
+import { GITHUB_THEME_KEYS } from '@/constants'
+
 import { useEditorStore } from '../../store/editorStore'
 import { mockConfig, mockGithubData } from '../stories/mockData'
 import { ColorPicker } from './ColorPicker'
@@ -21,7 +23,7 @@ const meta: Meta<typeof ColorPicker> = {
   ],
   argTypes: {
     label: { control: 'text' },
-    value: { control: 'color' },
+    value: { control: 'text' },
   },
 }
 
@@ -31,7 +33,39 @@ type Story = StoryObj<typeof ColorPicker>
 export const Default: Story = {
   args: {
     label: 'Background',
-    value: '#123456',
+    value: '#1f1f1f',
+    onChange: () => {},
+  },
+}
+
+export const GitHubAuto: Story = {
+  args: {
+    label: 'Background (Adaptive)',
+    value: GITHUB_THEME_KEYS.AUTO,
+    onChange: () => {},
+  },
+}
+
+export const GitHubDark: Story = {
+  args: {
+    label: 'GitHub Dark (#0D1117)',
+    value: GITHUB_THEME_KEYS.DARK,
+    onChange: () => {},
+  },
+}
+
+export const GitHubDarkDimmed: Story = {
+  args: {
+    label: 'GitHub Dark Dimmed (#212830)',
+    value: GITHUB_THEME_KEYS.DARK_DIMMED,
+    onChange: () => {},
+  },
+}
+
+export const GitHubLight: Story = {
+  args: {
+    label: 'GitHub Light (#FFFFFF)',
+    value: GITHUB_THEME_KEYS.LIGHT,
     onChange: () => {},
   },
 }

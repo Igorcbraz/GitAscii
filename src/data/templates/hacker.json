@@ -1,0 +1,125 @@
+{
+  "id": "hacker",
+  "name": "Hacker",
+  "description": "Tema clássico estilo terminal matrix com verde neon e prompt de comando.",
+  "category": "Retro",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 90
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787333464128_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "ascii-text",
+      "position": {
+        "x": 0,
+        "y": 106
+      },
+      "size": {
+        "width": 800,
+        "height": 120
+      },
+      "config": {
+        "customText": "HACK THE PLANET",
+        "fontSize": 14
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787333464128_1",
+      "name": "Ascii-text Widget"
+    },
+    {
+      "widgetId": "terminal-info",
+      "position": {
+        "x": 0,
+        "y": 242
+      },
+      "size": {
+        "width": 800,
+        "height": 280
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 3,
+      "instanceId": "widget_1787333464128_2",
+      "name": "Terminal-info Widget"
+    },
+    {
+      "widgetId": "languages",
+      "position": {
+        "x": 0,
+        "y": 538
+      },
+      "size": {
+        "width": 800,
+        "height": 140
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 4,
+      "instanceId": "widget_1787333464128_3",
+      "name": "Languages Widget"
+    },
+    {
+      "widgetId": "divider",
+      "position": {
+        "x": 0,
+        "y": 694
+      },
+      "size": {
+        "width": 800,
+        "height": 24
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 5,
+      "instanceId": "widget_1787333464128_4",
+      "name": "Divider Widget"
+    },
+    {
+      "widgetId": "footer",
+      "position": {
+        "x": 0,
+        "y": 734
+      },
+      "size": {
+        "width": 800,
+        "height": 48
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 7,
+      "instanceId": "widget_1787333464128_6",
+      "name": "Footer Widget"
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#0a0f0a",
+    "textColor": "#00ff41",
+    "accentColor": "#00ff41",
+    "borderColor": "#1a3a1a",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "hackerspace"
+  },
+  "templateId": "hacker"
+}

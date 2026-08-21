@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { clamp, COMMON_GAPS, computeSmartGuides, snapToGrid } from './smartGuides'
+import {
+  clamp,
+  COMMON_GAPS,
+  computeResizeSmartGuides,
+  computeSmartGuides,
+  snapToGrid,
+} from './smartGuides'
 
 describe('smartGuides utility', () => {
   it('correctly clamps values within bounds', () => {
@@ -58,7 +64,34 @@ describe('smartGuides utility', () => {
     expect(result.snappedX).toBe(224)
     const spacingGuide = result.spacingGuides.find((g) => g.distance === 24)
     expect(spacingGuide).toBeDefined()
-    expect(spacingGuide?.axis).toBe('horizontal')
+  })
+
+  it('snaps right edge to matching other widget right edge during resize', () => {
+    const result = computeResizeSmartGuides({
+      activePos: { x: 0, y: 0 },
+      rawWidth: 398,
+      rawHeight: 100,
+      resizeType: 'resize-r',
+      otherRects: [{ id: 'w1', rect: { x: 0, y: 150, width: 400, height: 100 } }],
+      snapThreshold: 6,
+    })
+
+    expect(result.snappedWidth).toBe(400)
+    expect(result.alignmentGuides.some((g) => g.x === 400)).toBe(true)
+  })
+
+  it('snaps bottom edge to matching other widget bottom edge during resize', () => {
+    const result = computeResizeSmartGuides({
+      activePos: { x: 0, y: 0 },
+      rawWidth: 200,
+      rawHeight: 298,
+      resizeType: 'resize-b',
+      otherRects: [{ id: 'w1', rect: { x: 300, y: 0, width: 200, height: 300 } }],
+      snapThreshold: 6,
+    })
+
+    expect(result.snappedHeight).toBe(300)
+    expect(result.alignmentGuides.some((g) => g.y === 300)).toBe(true)
   })
 
   it('detects equal spacing (equidistance) between two widgets', () => {

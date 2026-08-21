@@ -1,0 +1,160 @@
+{
+  "id": "bento_grid",
+  "name": "Bento Grid",
+  "description": "Layout moderno estilo Bento Grid com cards modulares organizados e métricas completas.",
+  "category": "Modern",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 90
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787333478283_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "avatar",
+      "position": {
+        "x": 0,
+        "y": 106
+      },
+      "size": {
+        "width": 150,
+        "height": 150
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787333478283_1",
+      "name": "Avatar Widget"
+    },
+    {
+      "widgetId": "bio",
+      "position": {
+        "x": 166,
+        "y": 106
+      },
+      "size": {
+        "width": 634,
+        "height": 150
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 3,
+      "instanceId": "widget_1787333478283_2",
+      "name": "Bio Widget"
+    },
+    {
+      "widgetId": "tech-stack",
+      "position": {
+        "x": 0,
+        "y": 272
+      },
+      "size": {
+        "width": 800,
+        "height": 140
+      },
+      "config": {
+        "selectedTechs": [
+          "ts",
+          "js",
+          "html",
+          "css",
+          "sass",
+          "bash",
+          "vue",
+          "cs",
+          "php",
+          "py",
+          "java",
+          "ruby",
+          "c",
+          "cpp",
+          "docker",
+          "github",
+          "nextjs",
+          "mysql"
+        ]
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4,
+      "instanceId": "widget_1787333478283_3",
+      "name": "Tech-stack Widget"
+    },
+    {
+      "widgetId": "github-readme-stats",
+      "position": {
+        "x": 0,
+        "y": 428
+      },
+      "size": {
+        "width": 390,
+        "height": 210
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 5,
+      "instanceId": "widget_1787333478283_4",
+      "name": "Github-readme-stats Widget"
+    },
+    {
+      "widgetId": "streak-stats",
+      "position": {
+        "x": 410,
+        "y": 428
+      },
+      "size": {
+        "width": 390,
+        "height": 210
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6,
+      "instanceId": "widget_1787333478283_5",
+      "name": "Streak-stats Widget"
+    },
+    {
+      "widgetId": "footer",
+      "position": {
+        "x": 0,
+        "y": 654
+      },
+      "size": {
+        "width": 800,
+        "height": 48
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 7,
+      "instanceId": "widget_1787333478283_6",
+      "name": "Footer Widget"
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#09090b",
+    "textColor": "#f4f4f5",
+    "accentColor": "#a1a1aa",
+    "borderColor": "#27272a",
+    "fontFamily": "'Inter Tight', sans-serif",
+    "borderRadius": 12,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "bento"
+  },
+  "templateId": "bento_grid"
+}

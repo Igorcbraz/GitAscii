@@ -3,7 +3,7 @@
 import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-import { EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
+import { DEFAULT_POKEMON_CARD_IMAGE, EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
@@ -60,6 +60,7 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.CODEWEB_SOCIAL_BADGE]: { width: 800, height: 44 },
   [WIDGET_IDS.CODEWEB_MINIMAL_BADGE]: { width: 800, height: 44 },
   [WIDGET_IDS.POKEMON_CARD]: { width: 300, height: 418 },
+  [WIDGET_IDS.GITFUT_CARD]: { width: 300, height: 420 },
   [WIDGET_IDS.SURVEILLANCE_HEADER]: { width: 780, height: 417 },
   [WIDGET_IDS.SURVEILLANCE_DOSSIER]: { width: 780, height: 260 },
   [WIDGET_IDS.SURVEILLANCE_LOADOUT]: { width: 780, height: 200 },
@@ -88,7 +89,7 @@ export function WidgetPreviewTooltip({
   const data = githubData || getMockGitHubData('Igorcbraz')
 
   useEffect(() => {
-    if (widgetItem?.id !== 'ascii-art' || asciiArtCache) return
+    if (widgetItem?.id !== WIDGET_IDS.ASCII_ART || asciiArtCache) return
 
     let isCurrent = true
     async function loadPreviewAscii() {
@@ -144,6 +145,26 @@ export function WidgetPreviewTooltip({
         ? {
             asciiText: asciiArtCache.lines,
             asciiColors: asciiArtCache.colors,
+          }
+        : {}),
+      ...(widgetItem.id === WIDGET_IDS.POKEMON_CARD
+        ? {
+            imageUrl: DEFAULT_POKEMON_CARD_IMAGE,
+            rotateX: -8,
+            rotateY: 12,
+            glareX: 45,
+            glareY: 35,
+            intensity: 1.2,
+          }
+        : {}),
+      ...(widgetItem.id === WIDGET_IDS.GITFUT_CARD
+        ? {
+            username: data?.user?.login || 'torvalds',
+            rotateX: -6,
+            rotateY: 10,
+            glareX: 45,
+            glareY: 35,
+            intensity: 1.1,
           }
         : {}),
     },

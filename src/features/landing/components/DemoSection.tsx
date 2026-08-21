@@ -112,9 +112,12 @@ export default function DemoSection() {
             <div className="relative group/embed flex-1 bg-graphite border border-iron rounded-none p-6 font-jetbrains-mono text-eyebrow sm:text-note flex flex-col justify-center min-w-0 min-h-55">
               <button
                 onClick={handleCopy}
-                aria-label="Copy embed markdown code snippet to clipboard"
+                aria-label={t(
+                  'landing.demo.copy_aria',
+                  'Copy embed markdown code snippet to clipboard'
+                )}
                 className="absolute top-4 right-4 p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center bg-onyx hover:bg-iron border border-graphite text-ash hover:text-signal-lime transition-all duration-200 cursor-pointer rounded-none hover:shadow-[0_0_8px_rgba(197,255,74,0.3)]"
-                title="Copy code"
+                title={t('common.copy_code', 'Copy code')}
               >
                 {copied ? <Check size={14} className="text-signal-lime" /> : <Copy size={14} />}
               </button>

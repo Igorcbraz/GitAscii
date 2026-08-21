@@ -1,0 +1,186 @@
+{
+  "id": "native_advanced",
+  "name": "Native Advanced",
+  "description": "Layout terminal avançado com estatísticas detalhadas, linguagens e cards de métricas.",
+  "category": "Terminal",
+  "widgetCategory": "essential",
+  "widgets": [
+    {
+      "widgetId": "header",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "size": {
+        "width": 800,
+        "height": 90
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1,
+      "instanceId": "widget_1787331623342_0",
+      "name": "Header Widget"
+    },
+    {
+      "widgetId": "terminal-info",
+      "position": {
+        "x": 288,
+        "y": 106
+      },
+      "size": {
+        "width": 504,
+        "height": 280
+      },
+      "config": {
+        "showContactSection": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2,
+      "instanceId": "widget_1787331623342_2",
+      "name": "Terminal-info Widget"
+    },
+    {
+      "instanceId": "widget_1787331964463",
+      "widgetId": "repositories",
+      "name": "Repositories Widget",
+      "position": {
+        "x": 16,
+        "y": 402
+      },
+      "size": {
+        "width": 368,
+        "height": 256
+      },
+      "config": {
+        "repoCardHeight": 66,
+        "repoViewMode": "list",
+        "maxRepos": 3,
+        "showRepoForks": true,
+        "showRepoUpdated": true,
+        "hideBorder": true,
+        "hideDecorations": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_1787332024739",
+      "widgetId": "avatar",
+      "name": "Avatar Widget",
+      "position": {
+        "x": 8,
+        "y": 106
+      },
+      "size": {
+        "width": 280,
+        "height": 280
+      },
+      "config": {
+        "lockAspectRatio": true,
+        "showTitle": false,
+        "hideDecorations": true,
+        "hideBorder": true,
+        "accentColor": "transparent"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    },
+    {
+      "instanceId": "widget_1787332338554",
+      "widgetId": "footer",
+      "name": "Footer Widget",
+      "position": {
+        "x": 0,
+        "y": 698
+      },
+      "size": {
+        "width": 800,
+        "height": 50
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 5
+    },
+    {
+      "instanceId": "widget_1787332518517",
+      "widgetId": "stats",
+      "name": "Stats Widget",
+      "position": {
+        "x": 392,
+        "y": 578
+      },
+      "size": {
+        "width": 392,
+        "height": 120
+      },
+      "config": {
+        "hideMetrics": ["forks", "gists", "repos"],
+        "hideDecorations": true,
+        "hideBorder": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    },
+    {
+      "instanceId": "widget_1787332478149",
+      "widgetId": "languages",
+      "name": "Languages Widget",
+      "position": {
+        "x": 392,
+        "y": 418
+      },
+      "size": {
+        "width": 392,
+        "height": 160
+      },
+      "config": {
+        "hideDecorations": true,
+        "hideBorder": true,
+        "hideLangsArr": [],
+        "hideLangs": ""
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 7
+    },
+    {
+      "instanceId": "widget_1787332420730",
+      "widgetId": "custom-image",
+      "name": "Custom-image Widget",
+      "position": {
+        "x": 608,
+        "y": 5
+      },
+      "size": {
+        "width": 88,
+        "height": 80
+      },
+      "config": {
+        "hideDecorations": true,
+        "hideBorder": true,
+        "backgroundColor": "transparent"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 8
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#060606",
+    "textColor": "#e5e5e5",
+    "accentColor": "#c5ff4a",
+    "borderColor": "#252525",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "templateId": "native_advanced"
+}

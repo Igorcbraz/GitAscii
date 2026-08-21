@@ -31,7 +31,7 @@ export const Default: Story = {
 
 export const AltImage: Story = {
   args: {
-    imageSrc: '/gitfest.png',
+    imageSrc: '/gitfest.webp',
     className: 'w-full h-full',
   },
 }

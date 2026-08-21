@@ -36,7 +36,7 @@ export function renderExternalWidgetSvg(
   const imgStyle =
     mode === 'badge'
       ? 'height:32px; width:auto; max-width:100%; object-fit:contain; object-position:left center;'
-      : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:left top;'
+      : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center center;'
 
   const imgHtml = safeFallbackUrl
     ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(safeFallbackUrl)}';" />`

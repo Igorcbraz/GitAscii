@@ -560,3 +560,141 @@ export function computeSmartGuides({
     spacingGuides,
   }
 }
+
+export interface ComputeResizeSmartGuidesOptions {
+  activePos: { x: number; y: number }
+  rawWidth: number
+  rawHeight: number
+  resizeType: 'resize-r' | 'resize-b' | 'resize-br'
+  otherRects: { id: string; rect: Rect }[]
+  minWidth?: number
+  maxWidth?: number
+  minHeight?: number
+  maxHeight?: number
+  snapThreshold?: number
+  canvasWidth?: number
+}
+
+export interface ResizeSmartGuidesResult {
+  snappedWidth: number
+  snappedHeight: number
+  alignmentGuides: AlignmentGuide[]
+}
+
+export function computeResizeSmartGuides({
+  activePos,
+  rawWidth,
+  rawHeight,
+  resizeType,
+  otherRects,
+  minWidth = 40,
+  maxWidth = CANVAS_WIDTH - activePos.x,
+  minHeight = 40,
+  maxHeight = 3000,
+  snapThreshold = DEFAULT_SNAP_THRESHOLD,
+  canvasWidth = CANVAS_WIDTH,
+}: ComputeResizeSmartGuidesOptions): ResizeSmartGuidesResult {
+  const currentRight = activePos.x + rawWidth
+  const currentBottom = activePos.y + rawHeight
+
+  interface SnapCandidate {
+    size: number
+    guide: number
+    distance: number
+  }
+
+  const widthCandidates: SnapCandidate[] = []
+  const heightCandidates: SnapCandidate[] = []
+
+  const considerWidth = (targetRight: number) => {
+    const targetWidth = targetRight - activePos.x
+    if (targetWidth < minWidth || targetWidth > maxWidth) return
+    const distance = Math.abs(targetRight - currentRight)
+    if (distance <= snapThreshold) {
+      widthCandidates.push({ size: targetWidth, guide: targetRight, distance })
+    }
+  }
+
+  const considerHeight = (targetBottom: number) => {
+    const targetHeight = targetBottom - activePos.y
+    if (targetHeight < minHeight || targetHeight > maxHeight) return
+    const distance = Math.abs(targetBottom - currentBottom)
+    if (distance <= snapThreshold) {
+      heightCandidates.push({ size: targetHeight, guide: targetBottom, distance })
+    }
+  }
+
+  if (resizeType === 'resize-r' || resizeType === 'resize-br') {
+    // Canvas bounds
+    considerWidth(canvasWidth)
+    considerWidth(canvasWidth / 2)
+
+    // Other rects
+    for (let i = 0; i < otherRects.length; i++) {
+      const other = otherRects[i].rect
+      const otherLeft = other.x
+      const otherRight = other.x + other.width
+      const otherCenterX = otherLeft + other.width / 2
+
+      considerWidth(otherLeft)
+      considerWidth(otherRight)
+      considerWidth(otherCenterX)
+
+      // Common gaps to the right
+      for (let g = 0; g < COMMON_GAPS.length; g++) {
+        considerWidth(otherLeft - COMMON_GAPS[g])
+      }
+    }
+  }
+
+  if (resizeType === 'resize-b' || resizeType === 'resize-br') {
+    for (let i = 0; i < otherRects.length; i++) {
+      const other = otherRects[i].rect
+      const otherTop = other.y
+      const otherBottom = other.y + other.height
+      const otherCenterY = otherTop + other.height / 2
+
+      considerHeight(otherTop)
+      considerHeight(otherBottom)
+      considerHeight(otherCenterY)
+
+      // Common gaps below
+      for (let g = 0; g < COMMON_GAPS.length; g++) {
+        considerHeight(otherTop - COMMON_GAPS[g])
+      }
+    }
+  }
+
+  const alignmentGuides: AlignmentGuide[] = []
+  let snappedWidth = rawWidth
+  let snappedHeight = rawHeight
+
+  if (resizeType === 'resize-r' || resizeType === 'resize-br') {
+    const bestWidth = widthCandidates.sort((a, b) => a.distance - b.distance)[0]
+    if (bestWidth) {
+      snappedWidth = bestWidth.size
+      alignmentGuides.push({ x: bestWidth.guide })
+    } else {
+      snappedWidth = Math.max(
+        minWidth,
+        Math.min(maxWidth, Math.round(rawWidth / GRID_SIZE) * GRID_SIZE)
+      )
+    }
+  }
+
+  if (resizeType === 'resize-b' || resizeType === 'resize-br') {
+    const bestHeight = heightCandidates.sort((a, b) => a.distance - b.distance)[0]
+    if (bestHeight) {
+      snappedHeight = bestHeight.size
+      alignmentGuides.push({ y: bestHeight.guide })
+    } else {
+      snappedHeight = Math.max(minHeight, Math.round(rawHeight / GRID_SIZE) * GRID_SIZE)
+    }
+  }
+
+  return {
+    snappedWidth,
+    snappedHeight,
+    alignmentGuides,
+  }
+}

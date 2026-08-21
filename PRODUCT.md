@@ -42,7 +42,7 @@ Beyond single-purpose ASCII generators or static badge tools, GitAscii provides 
 
 - **Live Platform:** `https://gitascii.com/`
 - **Output Preview:** [`public/example.svg`](file:///C:/Repos/GitAscii/public/example.svg)
-- **Interface Previews:** [`public/hero.png`](file:///C:/Repos/GitAscii/public/hero.png), [`public/editor.png`](file:///C:/Repos/GitAscii/public/editor.png)
+- **Interface Previews:** [`public/hero.webp`](file:///C:/Repos/GitAscii/public/hero.webp), [`public/editor.webp`](file:///C:/Repos/GitAscii/public/editor.webp)
 
 ## Product Principles
 

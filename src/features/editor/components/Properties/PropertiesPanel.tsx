@@ -18,6 +18,7 @@ import { ColorPicker } from './ColorPicker'
 import { ControlPlaneControls } from './ControlPlaneControls'
 import { CustomImageControls } from './CustomImageControls'
 import { FeaturedReposControls } from './FeaturedReposControls'
+import { GitFutCardControls } from './GitFutCardControls'
 import { GithubStatsControls } from './GithubStatsControls'
 import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
@@ -656,6 +657,10 @@ export function PropertiesPanel() {
 
         {selectedWidget.widgetId === WIDGET_IDS.POKEMON_CARD && (
           <PokemonCardControls instanceId={selectedWidget.instanceId} config={cfg} />
+        )}
+
+        {selectedWidget.widgetId === WIDGET_IDS.GITFUT_CARD && (
+          <GitFutCardControls instanceId={selectedWidget.instanceId} config={cfg} />
         )}
 
         {selectedWidget.widgetId === WIDGET_IDS.STATS && (

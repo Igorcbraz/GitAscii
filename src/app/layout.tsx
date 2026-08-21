@@ -1,7 +1,7 @@
 import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
-import { Inter_Tight, JetBrains_Mono, PT_Serif } from 'next/font/google'
+import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'next/font/google'
 import { headers } from 'next/headers'
 
 import { ToastProvider } from '@/components/ui/toast'
@@ -29,6 +29,20 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '600'],
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
+
+const barlowCondensed = Barlow_Condensed({
+  weight: ['600', '700', '800'],
+  subsets: ['latin'],
+  variable: '--font-barlow-condensed',
+  display: 'swap',
+})
+
+const teko = Teko({
+  weight: ['500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-teko',
   display: 'swap',
 })
 
@@ -275,7 +289,7 @@ export default async function RootLayout({
     <html
       lang={ssrLang}
       suppressHydrationWarning
-      className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
+      className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable} ${teko.variable}`}
     >
       <head>
         <link
@@ -286,7 +300,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://img.shields.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.github.com" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <I18nProvider>
           <ToastProvider>
             <AutoAnalyticsTracker>

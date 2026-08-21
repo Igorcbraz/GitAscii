@@ -90,10 +90,26 @@ export function renderRepositories(
         if (showRepoStars) metaParts.push(`\u2605 ${repo.stargazers_count}`)
         if (showRepoForks) metaParts.push(`\u2442 ${repo.forks_count}`)
         if (showRepoUpdated) {
-          const d = new Date(repo.updated_at)
-          metaParts.push(
-            `Updated ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-          )
+          const rawDate = repo.updated_at
+          let dateStr = ''
+          if (rawDate) {
+            const d = new Date(rawDate)
+            if (!isNaN(d.getTime())) {
+              dateStr = d.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            }
+          }
+          if (!dateStr) {
+            dateStr = new Date().toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          }
+          metaParts.push(`Updated ${dateStr}`)
         }
         const metaStr = escapeXml(metaParts.join('  '))
 
@@ -110,7 +126,7 @@ export function renderRepositories(
 
         return `
       <g transform="translate(24, ${gy})">
-        <rect x="0" y="0" width="${width - 48}" height="${cardH}" fill="#1e1e1e" rx="4" />
+        <rect x="0" y="0" width="${Math.max(10, width - 48)}" height="${cardH}" fill="#1e1e1e" rx="4" />
         <rect x="0" y="0" width="3" height="${cardH}" fill="${accent}" rx="1" />
         ${nameRow}${descRow}${metaRow}
       </g>`

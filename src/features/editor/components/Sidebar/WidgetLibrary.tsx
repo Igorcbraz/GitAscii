@@ -16,6 +16,8 @@ import {
 } from '../../config/widgets'
 import { useEditorStore } from '../../store/editorStore'
 import { AsciiProfileCardItem } from './WidgetLibrary/AsciiProfileCardItem'
+import { ContributeCommunityWidgetModal } from './WidgetLibrary/ContributeCommunityWidgetModal'
+import { ContributeFeaturedWidgetModal } from './WidgetLibrary/ContributeFeaturedWidgetModal'
 import { ControlPlaneCardItem } from './WidgetLibrary/ControlPlaneCardItem'
 import { GodProfileCardItem } from './WidgetLibrary/GodProfileCardItem'
 import { SurveillanceCardItem } from './WidgetLibrary/SurveillanceCardItem'
@@ -39,6 +41,8 @@ export function WidgetLibrary() {
     rect: DOMRect
   } | null>(null)
 
+  const [isFeaturedWidgetModalOpen, setIsFeaturedWidgetModalOpen] = useState(false)
+  const [isCommunityWidgetModalOpen, setIsCommunityWidgetModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({})
@@ -186,10 +190,10 @@ export function WidgetLibrary() {
                 <div className="label-stamp text-signal-lime/80 mb-3">
                   {t('editor.sidebar.featured_widgets', '[ FEATURED WIDGETS ]')}
                 </div>
-                {translatedCatalog.find((w) => w.id === 'gitfest-lineup') && (
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFEST_LINEUP) && (
                   <WidgetCardItem
-                    key="gitfest-lineup"
-                    item={translatedCatalog.find((w) => w.id === 'gitfest-lineup')!}
+                    key={WIDGET_IDS.GITFEST_LINEUP}
+                    item={translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFEST_LINEUP)!}
                     onAdd={addWidget}
                     onHover={handleHover}
                     onLeave={handleLeave}
@@ -206,7 +210,20 @@ export function WidgetLibrary() {
                   />
                 )}
 
-                <div className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300">
+                {translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFUT_CARD) && (
+                  <WidgetCardItem
+                    key={WIDGET_IDS.GITFUT_CARD}
+                    item={translatedCatalog.find((w) => w.id === WIDGET_IDS.GITFUT_CARD)!}
+                    onAdd={addWidget}
+                    onHover={handleHover}
+                    onLeave={handleLeave}
+                  />
+                )}
+
+                <div
+                  onClick={() => setIsFeaturedWidgetModalOpen(true)}
+                  className="group relative p-3 border border-dashed border-graphite hover:border-signal-lime bg-void-black/30 hover:bg-signal-lime/5 rounded-xs flex items-center justify-between cursor-pointer transition-all duration-300"
+                >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xs bg-graphite/50 group-hover:bg-signal-lime/10 text-ash group-hover:text-signal-lime transition-colors shrink-0">
                       <Plus size={16} />
@@ -709,7 +726,7 @@ export function WidgetLibrary() {
                       className="font-mono text-[11px] font-semibold text-[#55ffff] uppercase tracking-[0.16em] group-hover:text-[#e6fbfb] transition-colors"
                       style={{ textShadow: '0 0 8px rgba(85,255,255,0.4)' }}
                     >
-                      {t('editor.sidebar.surveillance_category', 'Surveillance Console (198X)')}
+                      {t('editor.sidebar.surveillance_category', 'rugbedbugg')}
                     </span>
                     <a
                       href={EXTERNAL_LINKS.COMMUNITY_REPOS.SURVEILLANCE_CONSOLE}
@@ -881,11 +898,10 @@ export function WidgetLibrary() {
 
             {filteredWidgets.length > 0 && (
               <div className="pt-2">
-                <a
-                  href={EXTERNAL_LINKS.GITHUB_FORK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
+                <button
+                  type="button"
+                  onClick={() => setIsCommunityWidgetModalOpen(true)}
+                  className="w-full text-left group relative p-2.5 border border-graphite bg-void-black/60 hover:bg-onyx hover:border-pearl transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center gap-2.5 hover:-translate-y-0.5"
                 >
                   <div className="p-1.5 rounded-xs bg-graphite group-hover:bg-slate text-pearl group-hover:text-chalk transition-colors duration-300 shrink-0">
                     <GitFork size={14} />
@@ -901,7 +917,7 @@ export function WidgetLibrary() {
                       )}
                     </p>
                   </div>
-                </a>
+                </button>
               </div>
             )}
           </>
@@ -915,6 +931,16 @@ export function WidgetLibrary() {
           />
         )}
       </div>
+
+      <ContributeFeaturedWidgetModal
+        isOpen={isFeaturedWidgetModalOpen}
+        onClose={() => setIsFeaturedWidgetModalOpen(false)}
+      />
+
+      <ContributeCommunityWidgetModal
+        isOpen={isCommunityWidgetModalOpen}
+        onClose={() => setIsCommunityWidgetModalOpen(false)}
+      />
 
       {hoveredWidget && sidebarTab === 'widgets' && (
         <WidgetPreviewTooltip

@@ -6,13 +6,14 @@ import {
   ChevronDown,
   Edit3,
   Globe,
-  Palette,
+  Sparkles,
   Terminal,
   User,
 } from 'lucide-react'
 import React, { useState } from 'react'
 
 import { Switch } from '@/components/ui/Switch'
+import { GLOBAL_COLOR_THEMES } from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -26,8 +27,9 @@ interface TerminalInfoControlsProps {
 export function TerminalInfoControls({ instanceId, config }: TerminalInfoControlsProps) {
   const { t } = useI18n()
   const { githubData, updateWidgetConfig } = useEditorStore()
-  const [activeTab, setActiveTab] = useState<'toggles' | 'custom' | 'style'>('toggles')
+  const [activeTab, setActiveTab] = useState<'toggles' | 'custom'>('toggles')
   const [openAccordion, setOpenAccordion] = useState<'profile' | 'contact' | 'stats'>('profile')
+  const [selectedThemeCategory, setSelectedThemeCategory] = useState<string>('all')
 
   const user = githubData?.user
 
@@ -89,20 +91,36 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
   const statsValColor = (config.statsValColor as string) || '#79c0ff'
   const dividerColor = (config.dividerColor as string) || '#3d444d'
 
+  const filteredThemes =
+    selectedThemeCategory === 'all'
+      ? GLOBAL_COLOR_THEMES
+      : GLOBAL_COLOR_THEMES.filter((thm) => thm.category === selectedThemeCategory)
+
+  const applyColorTheme = (theme: (typeof GLOBAL_COLOR_THEMES)[number]) => {
+    updateWidgetConfig(instanceId, {
+      headerColor: theme.headerColor || theme.accent,
+      labelColor: theme.labelColor || theme.secondary,
+      dotColor: theme.dotColor || '#484f58',
+      valueColor: theme.valueColor || theme.text,
+      statsValColor: theme.statsValColor || theme.accent,
+      dividerColor: theme.dividerColor || theme.border,
+    })
+  }
+
   const renderToggleChip = (key: string, label: string, isActive: boolean) => (
     <button
       key={key}
       type="button"
       onClick={() => updateWidgetConfig(instanceId, { [key]: !isActive })}
-      className={`px-2.5 py-1.5 rounded-sm border text-eyebrow font-medium flex items-center justify-between transition-all cursor-pointer ${
+      className={`px-2.5 py-1.5 rounded-xs border text-eyebrow font-medium flex items-center justify-between transition-all cursor-pointer ${
         isActive
-          ? 'bg-signal-lime/10 border-signal-lime text-signal-lime font-semibold'
-          : 'bg-graphite/60 border-graphite text-ash hover:text-chalk hover:border-slate'
+          ? 'bg-signal-lime/15 border-signal-lime text-signal-lime font-semibold shadow-xs'
+          : 'bg-graphite/40 border-graphite/80 text-ash hover:text-chalk hover:border-slate'
       }`}
     >
       <span className="truncate mr-1">{label}</span>
       <div
-        className={`w-3.5 h-3.5 rounded flex items-center justify-center text-caption ${
+        className={`w-3.5 h-3.5 rounded-[2px] flex items-center justify-center text-[10px] ${
           isActive
             ? 'bg-signal-lime text-black font-bold'
             : 'border border-graphite text-transparent'
@@ -114,12 +132,13 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
   )
 
   const flatInputClass =
-    'w-full bg-graphite border border-graphite text-chalk text-[11px] px-2 py-1 rounded focus:border-signal-lime focus:outline-none shadow-none focus:shadow-none focus:ring-0 font-jetbrains-mono'
+    'w-full bg-graphite border border-graphite text-chalk text-[11px] px-2.5 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none shadow-none font-jetbrains-mono'
   const flatInputClassText =
-    'w-full bg-graphite border border-graphite text-ash text-[10px] px-2 py-1 rounded focus:border-signal-lime focus:outline-none shadow-none focus:shadow-none focus:ring-0'
+    'w-full bg-graphite border border-graphite text-ash text-[10px] px-2.5 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none shadow-none'
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
+      {/* Title */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Terminal size={14} />
@@ -127,13 +146,140 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-1 bg-carbon p-1 rounded border border-graphite">
+      {/* 1. TOP: STYLE & COLOR PRESETS */}
+      <div className="p-3 bg-carbon rounded-sm border border-graphite space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-signal-lime text-eyebrow font-semibold uppercase tracking-wider">
+            <Sparkles size={13} />
+            <span>{t('editor.terminal.color_presets', 'Presets de Cores & Estilo')}</span>
+          </div>
+          <div className="flex gap-1">
+            {['all', 'terminal', 'dracula', 'cyberpunk', 'synthwave'].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedThemeCategory(cat)}
+                className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-xs font-semibold cursor-pointer border ${
+                  selectedThemeCategory === cat
+                    ? 'bg-signal-lime text-black border-signal-lime'
+                    : 'bg-graphite text-ash border-graphite hover:text-chalk'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-1.5">
+          {filteredThemes.map((thm) => {
+            const isMatch =
+              thm.headerColor === headerColor &&
+              thm.labelColor === labelColor &&
+              thm.valueColor === valueColor
+            return (
+              <button
+                key={thm.name}
+                type="button"
+                onClick={() => applyColorTheme(thm)}
+                className={`p-2 rounded-xs border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                  isMatch
+                    ? 'bg-signal-lime/10 border-signal-lime shadow-xs'
+                    : 'bg-graphite/50 border-graphite hover:border-ash/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-[11px] font-semibold truncate ${
+                      isMatch ? 'text-signal-lime' : 'text-chalk'
+                    }`}
+                  >
+                    {thm.name}
+                  </span>
+                  <div className="flex items-center gap-0.5">
+                    <span
+                      className="w-2 h-2 rounded-full border border-black/40"
+                      style={{ backgroundColor: thm.accent }}
+                    />
+                    <span
+                      className="w-2 h-2 rounded-full border border-black/40"
+                      style={{ backgroundColor: thm.secondary }}
+                    />
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Custom individual color pickers & dot leader switch */}
+        <div className="pt-2 border-t border-graphite/60 space-y-2.5">
+          <div className="grid grid-cols-2 gap-2">
+            <ColorPicker
+              label={t('editor.terminal.color_headers', 'Títulos')}
+              align="left"
+              value={headerColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { headerColor: c })}
+            />
+            <ColorPicker
+              label={t('editor.terminal.color_labels', 'Rótulos (. Key)')}
+              align="right"
+              value={labelColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { labelColor: c })}
+            />
+            <ColorPicker
+              label={t('editor.terminal.color_dots', 'Pontos (...)')}
+              align="left"
+              value={dotColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { dotColor: c })}
+            />
+            <ColorPicker
+              label={t('editor.terminal.color_values', 'Valores')}
+              align="right"
+              value={valueColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { valueColor: c })}
+            />
+            <ColorPicker
+              label={t('editor.terminal.color_metrics', 'Métricas')}
+              align="left"
+              value={statsValColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { statsValColor: c })}
+            />
+            <ColorPicker
+              label={t('editor.terminal.color_dividers', 'Divisores')}
+              align="right"
+              value={dividerColor}
+              onChange={(c) => updateWidgetConfig(instanceId, { dividerColor: c })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-1 border-t border-graphite/40">
+            <div>
+              <span className="text-eyebrow text-chalk font-medium block">
+                {t('editor.terminal.dot_leaders', 'Preencher Espaços com Pontos')}
+              </span>
+              <span className="text-[10px] text-ash block">
+                {t('editor.terminal.dot_leaders_desc', 'Ajusta pontilhado automático (...)')}
+              </span>
+            </div>
+            <Switch
+              checked={dotLeaders}
+              onChange={(checkedValue) =>
+                updateWidgetConfig(instanceId, { dotLeaders: checkedValue })
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 2. TAB SELECTION */}
+      <div className="grid grid-cols-2 gap-1 bg-carbon p-1 rounded-sm border border-graphite">
         <button
           type="button"
           onClick={() => setActiveTab('toggles')}
-          className={`py-1.5 text-caption font-medium rounded transition-all text-center flex items-center justify-center gap-1.5 ${
+          className={`py-1.5 text-caption font-medium rounded-xs transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'toggles'
-              ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold'
+              ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold shadow-xs'
               : 'text-ash hover:text-chalk'
           }`}
         >
@@ -144,33 +290,21 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         <button
           type="button"
           onClick={() => setActiveTab('custom')}
-          className={`py-1.5 text-caption font-medium rounded transition-all text-center flex items-center justify-center gap-1.5 ${
+          className={`py-1.5 text-caption font-medium rounded-xs transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'custom'
-              ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold'
+              ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold shadow-xs'
               : 'text-ash hover:text-chalk'
           }`}
         >
           <Edit3 size={12} className="shrink-0" />
           <span>{t('editor.terminal.tab_texts', 'Textos/Valores')}</span>
         </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('style')}
-          className={`py-1.5 text-caption font-medium rounded transition-all text-center flex items-center justify-center gap-1.5 ${
-            activeTab === 'style'
-              ? 'bg-graphite text-signal-lime border border-signal-lime/40 font-semibold'
-              : 'text-ash hover:text-chalk'
-          }`}
-        >
-          <Palette size={12} className="shrink-0" />
-          <span>{t('editor.terminal.tab_style', 'Estilo & Cores')}</span>
-        </button>
       </div>
 
+      {/* 3. TAB: TOGGLES */}
       {activeTab === 'toggles' && (
         <div className="space-y-4">
-          <div className="space-y-1.5 bg-carbon p-2.5 rounded border border-graphite">
+          <div className="space-y-1.5 bg-carbon p-2.5 rounded-sm border border-graphite">
             <div className="label-stamp text-caption text-ash mb-1">
               {t('editor.terminal.sections_displayed', '[ SEÇÕES EXIBIDAS ]')}
             </div>
@@ -180,7 +314,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 onClick={() =>
                   updateWidgetConfig(instanceId, { showMainSection: !showMainSection })
                 }
-                className={`py-1 px-2 rounded text-caption border transition-all text-center ${
+                className={`py-1 px-2 rounded-xs text-caption border transition-all text-center cursor-pointer ${
                   showMainSection
                     ? 'bg-signal-lime/15 border-signal-lime text-signal-lime font-semibold'
                     : 'bg-graphite text-ash border-graphite line-through opacity-60'
@@ -193,7 +327,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 onClick={() =>
                   updateWidgetConfig(instanceId, { showContactSection: !showContactSection })
                 }
-                className={`py-1 px-2 rounded text-caption border transition-all text-center ${
+                className={`py-1 px-2 rounded-xs text-caption border transition-all text-center cursor-pointer ${
                   showContactSection
                     ? 'bg-signal-lime/15 border-signal-lime text-signal-lime font-semibold'
                     : 'bg-graphite text-ash border-graphite line-through opacity-60'
@@ -206,7 +340,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 onClick={() =>
                   updateWidgetConfig(instanceId, { showStatsSection: !showStatsSection })
                 }
-                className={`py-1 px-2 rounded text-caption border transition-all text-center ${
+                className={`py-1 px-2 rounded-xs text-caption border transition-all text-center cursor-pointer ${
                   showStatsSection
                     ? 'bg-signal-lime/15 border-signal-lime text-signal-lime font-semibold'
                     : 'bg-graphite text-ash border-graphite line-through opacity-60'
@@ -286,6 +420,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </div>
       )}
 
+      {/* 4. TAB: CUSTOM */}
       {activeTab === 'custom' && (
         <div className="space-y-3">
           <p className="text-eyebrow text-ash">
@@ -295,13 +430,13 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             )}
           </p>
 
-          <div className="bg-carbon border border-graphite rounded overflow-hidden">
+          <div className="bg-carbon border border-graphite rounded-sm overflow-hidden">
             <button
               type="button"
               onClick={() =>
                 setOpenAccordion(openAccordion === 'profile' ? ('' as any) : 'profile')
               }
-              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors"
+              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors cursor-pointer"
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <User size={13} className="text-signal-lime" />
@@ -316,7 +451,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             {openAccordion === 'profile' && (
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Uptime</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_uptime', 'Custom Uptime')}
+                  </label>
                   <input
                     type="text"
                     value={customUptime}
@@ -332,7 +469,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Location</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_location', 'Custom Location')}
+                  </label>
                   <input
                     type="text"
                     value={customLocation}
@@ -345,7 +484,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Company</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_company', 'Custom Company')}
+                  </label>
                   <input
                     type="text"
                     value={customCompany}
@@ -358,7 +499,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Languages</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_languages', 'Custom Languages')}
+                  </label>
                   <input
                     type="text"
                     value={customLanguages}
@@ -371,7 +514,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Status</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_status', 'Custom Status')}
+                  </label>
                   <input
                     type="text"
                     value={customStatus}
@@ -384,7 +529,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Achievements</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_achievements', 'Custom Achievements')}
+                  </label>
                   <input
                     type="text"
                     value={customAchievements}
@@ -397,7 +544,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Highlights</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_highlights', 'Custom Highlights')}
+                  </label>
                   <input
                     type="text"
                     value={customHighlights}
@@ -412,13 +561,13 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             )}
           </div>
 
-          <div className="bg-carbon border border-graphite rounded overflow-hidden">
+          <div className="bg-carbon border border-graphite rounded-sm overflow-hidden">
             <button
               type="button"
               onClick={() =>
                 setOpenAccordion(openAccordion === 'contact' ? ('' as any) : 'contact')
               }
-              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors"
+              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors cursor-pointer"
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <Globe size={13} className="text-signal-lime" />
@@ -434,7 +583,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
                   <label className="text-caption text-ash block mb-0.5">
-                    {t('editor.terminal.section_contact_title', 'Título da Seção Contato')}
+                    {t('editor.terminal.contact_title', 'Título da Seção de Contatos')}
                   </label>
                   <input
                     type="text"
@@ -442,39 +591,47 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customContactTitle: e.target.value })
                     }
-                    placeholder="Contact"
+                    placeholder="contact"
                     className={flatInputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Website</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_website', 'Custom Website')}
+                  </label>
                   <input
                     type="text"
                     value={customWebsite}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customWebsite: e.target.value })
                     }
-                    placeholder={user?.blog || 'https://seu-site.com'}
+                    placeholder={user?.blog || 'https://meusite.com'}
                     className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom GitHub</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_github', 'Custom GitHub')}
+                  </label>
                   <input
                     type="text"
                     value={customGithub}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customGithub: e.target.value })
                     }
-                    placeholder={user ? `github.com/${user.login}` : 'github.com/user'}
+                    placeholder={
+                      user?.login ? `https://github.com/${user.login}` : 'https://github.com/user'
+                    }
                     className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Twitter / X</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_twitter', 'Custom Twitter')}
+                  </label>
                   <input
                     type="text"
                     value={customTwitter}
@@ -482,30 +639,34 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                       updateWidgetConfig(instanceId, { customTwitter: e.target.value })
                     }
                     placeholder={user?.twitter_username ? `@${user.twitter_username}` : '@user'}
-                    className={flatInputClass}
+                    className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Email</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_email', 'Custom Email')}
+                  </label>
                   <input
                     type="text"
                     value={customEmail}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customEmail: e.target.value })
                     }
-                    placeholder="contato@empresa.com"
+                    placeholder={user?.email || 'user@domain.com'}
                     className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Orgs</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_orgs', 'Custom Organizations')}
+                  </label>
                   <input
                     type="text"
                     value={customOrgs}
                     onChange={(e) => updateWidgetConfig(instanceId, { customOrgs: e.target.value })}
-                    placeholder="@github, @vercel"
+                    placeholder="@org1, @org2"
                     className={flatInputClassText}
                   />
                 </div>
@@ -513,15 +674,15 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
             )}
           </div>
 
-          <div className="bg-carbon border border-graphite rounded overflow-hidden">
+          <div className="bg-carbon border border-graphite rounded-sm overflow-hidden">
             <button
               type="button"
               onClick={() => setOpenAccordion(openAccordion === 'stats' ? ('' as any) : 'stats')}
-              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors"
+              className="w-full p-2.5 flex items-center justify-between text-left hover:bg-graphite/40 transition-colors cursor-pointer"
             >
               <span className="text-eyebrow font-semibold text-chalk flex items-center gap-2">
                 <BarChart2 size={13} className="text-signal-lime" />
-                <span>{t('editor.terminal.stats_texts', 'Textos de Métricas & Stats')}</span>
+                <span>{t('editor.terminal.stats_texts', 'Textos de Métricas / Stats')}</span>
               </span>
               <ChevronDown
                 size={14}
@@ -533,7 +694,7 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
               <div className="p-3 border-t border-graphite/60 space-y-2.5 bg-void-black/40">
                 <div>
                   <label className="text-caption text-ash block mb-0.5">
-                    {t('editor.terminal.section_stats_title', 'Título da Seção Stats')}
+                    {t('editor.terminal.stats_title', 'Título da Seção de Métricas')}
                   </label>
                   <input
                     type="text"
@@ -541,120 +702,57 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customStatsTitle: e.target.value })
                     }
-                    placeholder="GitHub Stats"
+                    placeholder="stats"
                     className={flatInputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Commits</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_commits', 'Custom Commits Count')}
+                  </label>
                   <input
                     type="text"
                     value={customCommits}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customCommits: e.target.value })
                     }
-                    placeholder="Ex: 1,280"
-                    className={flatInputClass}
+                    placeholder="1,420"
+                    className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Following</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_following', 'Custom Following Count')}
+                  </label>
                   <input
                     type="text"
                     value={customFollowing}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customFollowing: e.target.value })
                     }
-                    placeholder="Ex: 42"
-                    className={flatInputClass}
+                    placeholder="42"
+                    className={flatInputClassText}
                   />
                 </div>
 
                 <div>
-                  <label className="text-caption text-ash block mb-0.5">Custom Gists</label>
+                  <label className="text-caption text-ash block mb-0.5">
+                    {t('editor.terminal.custom_gists', 'Custom Gists Count')}
+                  </label>
                   <input
                     type="text"
                     value={customGists}
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customGists: e.target.value })
                     }
-                    placeholder="Ex: 12"
-                    className={flatInputClass}
+                    placeholder="12"
+                    className={flatInputClassText}
                   />
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'style' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-2.5 bg-carbon rounded border border-graphite">
-            <div>
-              <span className="text-eyebrow text-chalk font-semibold block">
-                {t('editor.terminal.dot_leaders', 'Preencher Espaços com Pontos')}
-              </span>
-              <span className="text-caption text-ash block">
-                {t('editor.terminal.dot_leaders_desc', 'Ajusta pontilhado automático (...)')}
-              </span>
-            </div>
-            <Switch
-              checked={dotLeaders}
-              onChange={(checkedValue) =>
-                updateWidgetConfig(instanceId, { dotLeaders: checkedValue })
-              }
-            />
-          </div>
-
-          <div className="space-y-3 pt-2 border-t border-graphite/50">
-            <div className="flex items-center gap-1.5 text-ash text-eyebrow font-medium">
-              <Palette size={13} />
-              <span>
-                {t('editor.terminal.custom_colors', 'Cores Customizadas das Linhas Terminal')}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <ColorPicker
-                label={t('editor.terminal.color_headers', 'Cor dos Títulos')}
-                align="left"
-                value={headerColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { headerColor: c })}
-              />
-              <ColorPicker
-                label={t('editor.terminal.color_labels', 'Cor dos Rótulos (. Key)')}
-                align="right"
-                value={labelColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { labelColor: c })}
-              />
-              <ColorPicker
-                label={t('editor.terminal.color_dots', 'Cor dos Pontos (....)')}
-                align="left"
-                value={dotColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { dotColor: c })}
-              />
-              <ColorPicker
-                label={t('editor.terminal.color_values', 'Cor dos Valores')}
-                align="right"
-                value={valueColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { valueColor: c })}
-              />
-              <ColorPicker
-                label={t('editor.terminal.color_metrics', 'Cor das Métricas')}
-                align="left"
-                value={statsValColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { statsValColor: c })}
-              />
-              <ColorPicker
-                label={t('editor.terminal.color_dividers', 'Cor dos Divisores')}
-                align="right"
-                value={dividerColor}
-                onChange={(c) => updateWidgetConfig(instanceId, { dividerColor: c })}
-              />
-            </div>
           </div>
         </div>
       )}
