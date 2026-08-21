@@ -64,7 +64,7 @@ Standard GitHub profiles are limited by standard Markdown. Maintaining an attrac
 ### Platform
 
 <div align="center">
-  <img src="public/hero.png" alt="GitAscii Platform UI" width="100%" />
+  <img src="public/hero.webp" alt="GitAscii Platform UI" width="100%" />
   <br/>
   <sup><i>GitAscii Landing Page and Dashboard</i></sup>
 </div>
@@ -72,7 +72,7 @@ Standard GitHub profiles are limited by standard Markdown. Maintaining an attrac
 ### Live Editor
 
 <div align="center">
-  <img src="public/editor.png" alt="GitAscii Visual Editor" width="100%" />
+  <img src="public/editor.webp" alt="GitAscii Visual Editor" width="100%" />
   <br/>
   <sup><i>The intuitive Drag-and-Drop Builder Interface</i></sup>
 </div>

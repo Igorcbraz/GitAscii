@@ -72,7 +72,7 @@ export function WidgetCardItem({ item, onAdd, onHover, onLeave }: WidgetCardItem
 
               <div className="flex items-center min-w-0">
                 <Image
-                  src="/gitfest.png"
+                  src="/gitfest.webp"
                   alt="GitFest"
                   width={140}
                   height={36}
