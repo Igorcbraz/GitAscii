@@ -21,7 +21,7 @@ interface TemplateLibrarySectionProps {
 /** Map of widgetCategory value → human-readable label shown in the picker */
 const WIDGET_CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'Nenhuma (GitAscii Native)' },
-  { value: WIDGET_CATEGORIES.SURVEILLANCE, label: 'Surveillance Console' },
+  { value: WIDGET_CATEGORIES.SURVEILLANCE, label: 'rugbedbugg' },
   { value: WIDGET_CATEGORIES.ASCIIPROFILE, label: 'ASCII Profile Kit' },
   { value: WIDGET_CATEGORIES.GODPROFILE, label: 'GodProfile' },
   { value: WIDGET_CATEGORIES.CONTROLPLANE, label: 'Control Plane' },
@@ -517,7 +517,7 @@ export function TemplateLibrarySection({
                     className="font-mono text-caption font-semibold text-[#55ffff] uppercase tracking-[0.16em]"
                     style={{ textShadow: '0 0 8px rgba(85,255,255,0.4)' }}
                   >
-                    {t('editor.sidebar.surveillance_category', 'Surveillance Console (198X)')}
+                    {t('editor.sidebar.surveillance_category', 'rugbedbugg')}
                   </span>
                   <span className="ml-auto font-mono text-caption text-[#6f6478]">
                     {surveillancePresets.length}

@@ -722,7 +722,7 @@ export const pt: Record<string, string> = {
   'editor.sidebar.preview': 'PREVISÃO',
   'editor.sidebar.search_placeholder': 'Buscar widget...',
   'editor.sidebar.show_less': 'Mostrar menos',
-  'editor.sidebar.surveillance_category': 'Surveillance Console (198X)',
+  'editor.sidebar.surveillance_category': 'rugbedbugg',
   'editor.sidebar.templates': 'Templates',
   'editor.sidebar.templates_desc':
     'Alterar templates atualiza as cores e layout preservando seus dados do GitHub.',

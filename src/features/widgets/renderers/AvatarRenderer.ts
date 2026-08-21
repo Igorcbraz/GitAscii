@@ -24,11 +24,17 @@ export function renderAvatar(
     avatarUrl = String(cfg.avatarUrl)
   }
 
+  const hideBorder = Boolean(cfg.hideBorder)
+  const borderWidth = hideBorder ? 0 : 1.5
+  const borderElement = hideBorder
+    ? ''
+    : `<rect x="0" y="0" width="${width}" height="${height}" rx="${rx}" fill="none" stroke="${accent}" stroke-width="${borderWidth}" />`
+
   return `
     <clipPath id="avatar-clip-${widget.instanceId}">
-      <rect class="no-anim" x="16" y="16" width="${width - 32}" height="${height - 32}" rx="${Math.max(4, rx)}" />
+      <rect class="no-anim" x="0" y="0" width="${width}" height="${height}" rx="${rx}" />
     </clipPath>
-    <rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="${Math.max(4, rx)}" fill="#00000000" stroke="${accent}" stroke-width="1.5" />
-    <image href="${escapeXml(avatarUrl)}" x="16" y="16" width="${width - 32}" height="${height - 32}" preserveAspectRatio="xMidYMid meet" clip-path="url(#avatar-clip-${widget.instanceId})" />
+    ${borderElement}
+    <image href="${escapeXml(avatarUrl)}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatar-clip-${widget.instanceId})" />
   `
 }

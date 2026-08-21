@@ -722,6 +722,131 @@ export const SURVEILLANCE_COLOR_THEMES: readonly SurveillanceColorTheme[] = [
   },
 ]
 
+export interface GlobalColorTheme {
+  name: string
+  category: 'cyberpunk' | 'terminal' | 'dracula' | 'monochrome' | 'synthwave'
+  accent: string
+  background: string
+  secondary: string
+  text: string
+  border: string
+  // terminal specific fields
+  headerColor?: string
+  labelColor?: string
+  dotColor?: string
+  valueColor?: string
+  statsValColor?: string
+  dividerColor?: string
+}
+
+export const GLOBAL_COLOR_THEMES: readonly GlobalColorTheme[] = [
+  {
+    name: 'Signal Lime (Default)',
+    category: 'terminal',
+    accent: '#c5ff4a',
+    background: '#0d1117',
+    secondary: '#55ffff',
+    text: '#f0f6fc',
+    border: '#30363d',
+    headerColor: '#c5ff4a',
+    labelColor: '#ffa657',
+    dotColor: '#484f58',
+    valueColor: '#f0f6fc',
+    statsValColor: '#79c0ff',
+    dividerColor: '#30363d',
+  },
+  {
+    name: 'Matrix Terminal',
+    category: 'terminal',
+    accent: '#00ff88',
+    background: '#0a0f0d',
+    secondary: '#55ffff',
+    text: '#c9d1d9',
+    border: '#1a2e22',
+    headerColor: '#00ff88',
+    labelColor: '#55ffff',
+    dotColor: '#2e4c38',
+    valueColor: '#e6edf3',
+    statsValColor: '#00ff88',
+    dividerColor: '#1a2e22',
+  },
+  {
+    name: 'Amber CRT',
+    category: 'terminal',
+    accent: '#ffb454',
+    background: '#0f0c08',
+    secondary: '#ff5555',
+    text: '#ffd580',
+    border: '#332211',
+    headerColor: '#ffb454',
+    labelColor: '#ff9933',
+    dotColor: '#553311',
+    valueColor: '#ffe6b3',
+    statsValColor: '#ffb454',
+    dividerColor: '#332211',
+  },
+  {
+    name: 'Dracula Purple',
+    category: 'dracula',
+    accent: '#bd93f9',
+    background: '#282a36',
+    secondary: '#ff79c6',
+    text: '#f8f8f2',
+    border: '#44475a',
+    headerColor: '#bd93f9',
+    labelColor: '#ff79c6',
+    dotColor: '#6272a4',
+    valueColor: '#f8f8f2',
+    statsValColor: '#8be9fd',
+    dividerColor: '#44475a',
+  },
+  {
+    name: 'Cyber Cyan',
+    category: 'cyberpunk',
+    accent: '#55ffff',
+    background: '#050308',
+    secondary: '#ff3366',
+    text: '#e6fbfb',
+    border: '#1a1424',
+    headerColor: '#55ffff',
+    labelColor: '#ff3366',
+    dotColor: '#4d3a66',
+    valueColor: '#e6fbfb',
+    statsValColor: '#55ffff',
+    dividerColor: '#2d1f3f',
+  },
+  {
+    name: 'Synthwave 84',
+    category: 'synthwave',
+    accent: '#ff71ce',
+    background: '#1a102f',
+    secondary: '#01cdfe',
+    text: '#ffffff',
+    border: '#3d1e6d',
+    headerColor: '#ff71ce',
+    labelColor: '#01cdfe',
+    dotColor: '#6b3ba7',
+    valueColor: '#fffb96',
+    statsValColor: '#05ffa1',
+    dividerColor: '#3d1e6d',
+  },
+  {
+    name: 'Monochrome Luxe',
+    category: 'monochrome',
+    accent: '#e4e4e7',
+    background: '#09090b',
+    secondary: '#a1a1aa',
+    text: '#f4f4f5',
+    border: '#27272a',
+    headerColor: '#ffffff',
+    labelColor: '#d4d4d8',
+    dotColor: '#3f3f46',
+    valueColor: '#fafafa',
+    statsValColor: '#e4e4e7',
+    dividerColor: '#27272a',
+  },
+]
+
 export const PRESET_QUOTES: readonly string[] = [
   '“Once I told the computer to do something and it did it exactly how I told it to.”',
   '“Talk is cheap. Show me the code.”',

@@ -13,9 +13,9 @@ import {
   type AlignmentGuide,
   CANVAS_WIDTH,
   clamp,
+  computeResizeSmartGuides,
   computeSmartGuides,
   DEFAULT_SNAP_THRESHOLD as SNAP_THRESHOLD,
-  GRID_SIZE,
   type SpacingGuide,
 } from '../../utils/smartGuides'
 import { LayersPanel } from '../Sidebar/LayersPanel'
@@ -457,20 +457,42 @@ export function SVGCanvas() {
       }
 
       const maxWidth = CANVAS_WIDTH - activeDrag.initialPos.x
-      const roundedWidth = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
-      const roundedHeight = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE
-      let width = activeDrag.initialSize.width
-      let height = activeDrag.initialSize.height
+      const rawWidth =
+        activeDrag.type === 'resize-r' || activeDrag.type === 'resize-br'
+          ? activeDrag.initialSize.width + deltaX
+          : activeDrag.initialSize.width
+      const rawHeight =
+        activeDrag.type === 'resize-b' || activeDrag.type === 'resize-br'
+          ? activeDrag.initialSize.height + deltaY
+          : activeDrag.initialSize.height
 
-      if (activeDrag.type === 'resize-r' || activeDrag.type === 'resize-br') {
-        width = Math.max(
-          40,
-          Math.min(maxWidth, roundedWidth(activeDrag.initialSize.width + deltaX))
-        )
-      }
-      if (activeDrag.type === 'resize-b' || activeDrag.type === 'resize-br') {
-        height = Math.max(40, roundedHeight(activeDrag.initialSize.height + deltaY))
-      }
+      const otherRects = currentConfig.widgets
+        .filter((w) => w.visible && w.instanceId !== activeDrag.instanceId)
+        .map((w) => ({
+          id: w.instanceId,
+          rect: {
+            x: w.position.x,
+            y: w.position.y,
+            width: w.size.width,
+            height: w.size.height,
+          },
+        }))
+
+      const resizeResult = computeResizeSmartGuides({
+        activePos: activeDrag.initialPos,
+        rawWidth,
+        rawHeight,
+        resizeType: activeDrag.type as 'resize-r' | 'resize-b' | 'resize-br',
+        otherRects,
+        minWidth: 40,
+        maxWidth,
+        minHeight: 40,
+        snapThreshold: SNAP_THRESHOLD,
+        canvasWidth: CANVAS_WIDTH,
+      })
+
+      let width = resizeResult.snappedWidth
+      let height = resizeResult.snappedHeight
 
       if (isAspectLocked) {
         const side =
@@ -495,7 +517,7 @@ export function SVGCanvas() {
       scheduleDragPreview({
         positions: { [activeDrag.instanceId]: activeDrag.initialPos },
         sizes: { [activeDrag.instanceId]: { width, height } },
-        guides: [],
+        guides: resizeResult.alignmentGuides,
         spacingGuides: [],
       })
     }

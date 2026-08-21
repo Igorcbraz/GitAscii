@@ -37,6 +37,29 @@ export function getWidgetMinSize(
     const requiredHeight = 60 + (Math.max(1, wrappedLines.length) - 1) * 20 + 48
     return { width, height: requiredHeight }
   }
+  if (widget.widgetId === WIDGET_IDS.REPOSITORIES) {
+    const width = Math.max(100, Number(widget.size?.width) || 800)
+    const cfg = widget.config || {}
+    const maxRepos = Number(cfg.maxRepos) || 3
+    const repoViewMode = (cfg.repoViewMode as string) || 'list'
+    const showRepoDesc = cfg.showRepoDesc !== false
+    const showRepoLanguage = cfg.showRepoLanguage !== false
+    const showRepoForks = Boolean(cfg.showRepoForks)
+    const showRepoStars = cfg.showRepoStars !== false
+    const showRepoUpdated = Boolean(cfg.showRepoUpdated)
+
+    if (repoViewMode === 'grid') {
+      const rows = Math.ceil(maxRepos / 2)
+      const requiredHeight = 50 + rows * (80 + 12) + 16
+      return { width, height: requiredHeight }
+    }
+
+    const metaLineNeeded = showRepoLanguage || showRepoForks || showRepoStars || showRepoUpdated
+    const cardH = 24 + (showRepoDesc ? 18 : 0) + (metaLineNeeded ? 18 : 0) + 8
+    const rowSpacing = cardH + 8
+    const requiredHeight = 50 + maxRepos * rowSpacing + 16
+    return { width, height: requiredHeight }
+  }
   return null
 }
 

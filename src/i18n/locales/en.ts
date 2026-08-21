@@ -717,7 +717,7 @@ export const en: Record<string, string> = {
   'editor.sidebar.preview': 'PREVIEW',
   'editor.sidebar.search_placeholder': 'Search widgets...',
   'editor.sidebar.show_less': 'Show Less',
-  'editor.sidebar.surveillance_category': 'Surveillance Console (198X)',
+  'editor.sidebar.surveillance_category': 'rugbedbugg',
   'editor.sidebar.templates': 'Templates',
   'editor.sidebar.templates_desc':
     'Switching templates updates colors and layout while preserving your GitHub data.',

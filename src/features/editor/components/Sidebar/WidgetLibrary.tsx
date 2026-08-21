@@ -726,7 +726,7 @@ export function WidgetLibrary() {
                       className="font-mono text-[11px] font-semibold text-[#55ffff] uppercase tracking-[0.16em] group-hover:text-[#e6fbfb] transition-colors"
                       style={{ textShadow: '0 0 8px rgba(85,255,255,0.4)' }}
                     >
-                      {t('editor.sidebar.surveillance_category', 'Surveillance Console (198X)')}
+                      {t('editor.sidebar.surveillance_category', 'rugbedbugg')}
                     </span>
                     <a
                       href={EXTERNAL_LINKS.COMMUNITY_REPOS.SURVEILLANCE_CONSOLE}

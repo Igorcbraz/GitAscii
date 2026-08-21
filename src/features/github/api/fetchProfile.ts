@@ -84,7 +84,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
 
     const result: NormalizedGitHubData = {
       user,
-      repos: repos.filter((r) => !r.fork).slice(0, 6),
+      repos: repos.filter((r) => !r.fork),
       languages,
       totalStars,
       totalForks,

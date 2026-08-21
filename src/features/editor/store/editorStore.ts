@@ -62,6 +62,7 @@ export interface EditorStore {
     size: Partial<{ width: number; height: number }>,
     recordHistory?: boolean
   ) => void
+  scaleWidgets: (instanceIds: string[], factor: number, recordHistory?: boolean) => void
   toggleWidgetVisibility: (instanceId: string) => void
   toggleWidgetsVisibility: (instanceIds: string[]) => void
   toggleWidgetLock: (instanceId: string) => void
@@ -456,6 +457,39 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       applyConfigChange(newConfig, recordHistory)
     },
 
+    scaleWidgets: (instanceIds, factor, recordHistory = true) => {
+      const { config } = get()
+      if (!config || instanceIds.length === 0 || factor <= 0) return
+
+      const targetSet = new Set(instanceIds)
+      let hasAnyChange = false
+
+      const newWidgets = config.widgets.map((w) => {
+        if (!targetSet.has(w.instanceId) || w.locked) return w
+        const newWidth = Math.max(
+          40,
+          Math.min(800 - w.position.x, Math.round((w.size.width * factor) / 8) * 8)
+        )
+        const newHeight = Math.max(40, Math.round((w.size.height * factor) / 8) * 8)
+
+        if (newWidth !== w.size.width || newHeight !== w.size.height) {
+          hasAnyChange = true
+        }
+
+        return { ...w, size: { width: newWidth, height: newHeight } }
+      })
+
+      if (!hasAnyChange) return
+
+      const newConfig = {
+        ...config,
+        widgets: newWidgets,
+        metadata: { ...config.metadata, updatedAt: new Date().toISOString() },
+      }
+
+      applyConfigChange(newConfig, recordHistory)
+    },
+
     toggleWidgetVisibility: (instanceId) => {
       const { config } = get()
       if (!config) return
@@ -784,7 +818,21 @@ export const useEditorStore = create<EditorStore>((set, get) => {
               }
             : {}),
           ...(widgetId === 'codeweb-social-badge' && detectedSocials
-            ? { platforms: detectedSocials.selectedSocials }
+            ? {
+                platforms: Array.from(
+                  new Set(
+                    detectedSocials.selectedSocials.map((s) =>
+                      s === 'twitter'
+                        ? 'x'
+                        : s === 'email'
+                          ? 'gmail'
+                          : s === 'website'
+                            ? 'portfolio'
+                            : s
+                    )
+                  )
+                ),
+              }
             : {}),
           ...(widgetId === 'tech-stack' && detectedTechs ? { selectedTechs: detectedTechs } : {}),
           ...(widgetId === 'codeweb-retro-grid' && detectedTechs

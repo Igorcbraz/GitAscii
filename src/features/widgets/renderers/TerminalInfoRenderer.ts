@@ -48,12 +48,12 @@ export function renderTerminalInfo(
 
   const fontSize = 14
   const fontCharWidth = fontSize * 0.6
-  const paddingX = 24
+  const paddingX = 12
   const totalChars = Math.max(26, Math.floor((width - paddingX * 2) / fontCharWidth))
   const lineHeight = Math.max(18, Math.floor(fontSize * 1.35))
 
   const lines: string[] = []
-  let currentY = 28
+  let currentY = 20
 
   if (showMainSection) {
     const username = data?.user?.login || 'user'

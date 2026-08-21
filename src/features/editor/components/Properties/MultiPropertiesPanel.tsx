@@ -104,6 +104,7 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
 
   const updateWidgetsConfig = useEditorStore((state) => state.updateWidgetsConfig)
   const updateWidgetsSize = useEditorStore((state) => state.updateWidgetsSize)
+  const scaleWidgets = useEditorStore((state) => state.scaleWidgets)
   const toggleWidgetsVisibility = useEditorStore((state) => state.toggleWidgetsVisibility)
   const toggleWidgetsLock = useEditorStore((state) => state.toggleWidgetsLock)
   const alignWidgets = useEditorStore((state) => state.alignWidgets)
@@ -683,75 +684,61 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
+            <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-semibold">
               <Maximize2 size={14} />
-              <span>{t('editor.properties.size_title', 'Largura & Dimensões')}</span>
+              <span>
+                {t('editor.properties.proportional_resize', 'Redimensionamento Proporcional')}
+              </span>
             </div>
             <span className="text-caption text-signal-lime font-jetbrains-mono">
-              [ RESIZE ALL ]
+              [ 1x UNIFIED ]
             </span>
           </div>
 
-          <div>
-            <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">
-              {t('editor.properties.size_shortcuts', 'Atalhos de Largura (Width)')}
-            </label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {WIDTH_PRESETS.map((preset) => {
-                const isAllSameWidth = selectedWidgets.every((w) => w.size.width === preset.val)
-                return (
-                  <button
-                    key={preset.val}
-                    type="button"
-                    onClick={() => updateWidgetsSize(instanceIds, { width: preset.val })}
-                    className={`py-1 rounded-xs text-eyebrow font-jetbrains-mono transition-all cursor-pointer border ${
-                      isAllSameWidth
-                        ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                        : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
-                    }`}
-                  >
-                    {preset.label}
-                  </button>
-                )
-              })}
-            </div>
+          <p className="text-[11px] text-ash font-inter-tight leading-relaxed">
+            {t(
+              'editor.properties.proportional_resize_desc',
+              'Altera a escala de todos os widgets selecionados simultaneamente na mesma proporção.'
+            )}
+          </p>
+
+          <div className="grid grid-cols-4 gap-1.5">
+            {[
+              { label: '-20%', factor: 0.8 },
+              { label: '-10%', factor: 0.9 },
+              { label: '+10%', factor: 1.1 },
+              { label: '+20%', factor: 1.2 },
+            ].map((btn) => (
+              <button
+                key={btn.label}
+                type="button"
+                onClick={() => {
+                  scaleWidgets(instanceIds, btn.factor, true)
+                }}
+                className="py-1.5 rounded-xs text-eyebrow font-jetbrains-mono transition-all cursor-pointer border bg-graphite text-chalk border-graphite hover:border-signal-lime hover:text-signal-lime text-center font-bold"
+              >
+                {btn.label}
+              </button>
+            ))}
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 pt-1">
             <div className="flex justify-between text-eyebrow">
-              <span className="text-ash font-inter-tight">Width</span>
-              <span className="text-chalk font-jetbrains-mono">{averageWidth}px</span>
+              <span className="text-ash font-inter-tight">
+                {t('editor.properties.scale_slider', 'Escala Proporcional')}
+              </span>
+              <span className="text-chalk font-jetbrains-mono">100%</span>
             </div>
             <input
               type="range"
-              min="40"
-              max="800"
-              step="4"
-              value={averageWidth}
+              min="50"
+              max="150"
+              step="5"
+              defaultValue="100"
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10)
-                updateWidgetsSize(instanceIds, { width: val }, false)
-              }}
-              onMouseUp={() => recordHistorySnapshot()}
-              onTouchEnd={() => recordHistorySnapshot()}
-              className="w-full accent-signal-lime h-1 bg-graphite rounded cursor-pointer"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-eyebrow">
-              <span className="text-ash font-inter-tight">Height</span>
-              <span className="text-chalk font-jetbrains-mono">{averageHeight}px</span>
-            </div>
-            <input
-              type="range"
-              min="40"
-              max="800"
-              step="4"
-              value={averageHeight}
-              onChange={(e) => {
-                const val = parseInt(e.target.value, 10)
-                updateWidgetsSize(instanceIds, { height: val }, false)
+                const factor = val / 100
+                scaleWidgets(instanceIds, factor, false)
               }}
               onMouseUp={() => recordHistorySnapshot()}
               onTouchEnd={() => recordHistorySnapshot()}
