@@ -48,7 +48,7 @@
     "@storybook/addon-docs": "^10.5.7",
     "@storybook/addon-mcp": "^0.7.0",
     "@storybook/addon-vitest": "^10.5.6",
-    "@storybook/nextjs-vite": "^10.5.6",
+    "@storybook/nextjs-vite": "^10.5.9",
     "@storybook/test": "*",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^24.13.3",
