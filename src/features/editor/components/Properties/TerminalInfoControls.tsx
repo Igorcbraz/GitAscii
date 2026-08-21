@@ -621,7 +621,9 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
                     onChange={(e) =>
                       updateWidgetConfig(instanceId, { customGithub: e.target.value })
                     }
-                    placeholder={user?.html_url || 'https://github.com/user'}
+                    placeholder={
+                      user?.login ? `https://github.com/${user.login}` : 'https://github.com/user'
+                    }
                     className={flatInputClassText}
                   />
                 </div>
