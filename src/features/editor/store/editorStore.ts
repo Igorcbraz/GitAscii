@@ -753,6 +753,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         ghstats: { width: 390, height: 350 },
         divider: { width: 800, height: 30 },
         footer: { width: 800, height: 50 },
+        'pokemon-card': { width: 300, height: 418 },
       }
       const catalogItem = WIDGET_CATALOG.find((item) => item.id === widgetId)
       const widgetSize = catalogItem?.defaultSize ||

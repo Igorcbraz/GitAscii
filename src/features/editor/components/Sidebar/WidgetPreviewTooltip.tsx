@@ -3,7 +3,7 @@
 import { Plus } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
-import { EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
+import { DEFAULT_POKEMON_CARD_IMAGE, EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
@@ -144,6 +144,16 @@ export function WidgetPreviewTooltip({
         ? {
             asciiText: asciiArtCache.lines,
             asciiColors: asciiArtCache.colors,
+          }
+        : {}),
+      ...(widgetItem.id === WIDGET_IDS.POKEMON_CARD
+        ? {
+            imageUrl: DEFAULT_POKEMON_CARD_IMAGE,
+            rotateX: -8,
+            rotateY: 12,
+            glareX: 45,
+            glareY: 35,
+            intensity: 1.2,
           }
         : {}),
     },

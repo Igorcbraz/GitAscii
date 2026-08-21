@@ -10,6 +10,8 @@ export const RECOMMENDED_PROFILE_WIDGETS: string[] = [
   'footer',
 ]
 
+export const DEFAULT_POKEMON_CARD_IMAGE = 'https://assets.tcgdex.net/en/base/base1/4/high.webp'
+
 export interface WidgetDocParam {
   name: string
   type: string
