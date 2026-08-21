@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.2](https://github.com/Igorcbraz/GitAscii/compare/v1.13.1...v1.13.2) (2026-08-21)
+
+
+### Performance Improvements
+
+* **explore:** optimize gallery rendering, SVG response caching, and profile fetching ([f18470a](https://github.com/Igorcbraz/GitAscii/commit/f18470a85f1c7297374def8aa7e977654a6b6e19))
+
 ## [1.13.1](https://github.com/Igorcbraz/GitAscii/compare/v1.13.0...v1.13.1) (2026-08-21)
 
 
