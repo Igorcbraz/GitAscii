@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.13.0](https://github.com/Igorcbraz/GitAscii/compare/v1.12.1...v1.13.0) (2026-08-21)
+
+
+### Features
+
+* **editor:** add simultaneous multi-widget editing with category-aware controls ([7d6cf44](https://github.com/Igorcbraz/GitAscii/commit/7d6cf443cd298c726728222118007953034b6784))
+* **widgets:** add surveillance widgets suite and centralize constants ([6b7cfa7](https://github.com/Igorcbraz/GitAscii/commit/6b7cfa7fb7e8315457ee4a8fff6b81e6c9d99907))
+
+
+### Bug Fixes
+
+* **editor:** fix re-render loops and filter extension/DOM noise ([cef75ea](https://github.com/Igorcbraz/GitAscii/commit/cef75eaf4169bae899f92cec836450ef6e28e89d))
+* **security:** resolve all 16 GHAS CodeQL code-scanning alerts ([127738a](https://github.com/Igorcbraz/GitAscii/commit/127738acea761b3a9ee135ad0c187aaf7a11aed0))
+
 ## [1.12.1](https://github.com/Igorcbraz/GitAscii/compare/v1.12.0...v1.12.1) (2026-08-20)
 
 
