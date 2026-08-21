@@ -373,6 +373,40 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.guide.export.step3_title': 'Add to your README.md',
     'editor.guide.export.subtitle': 'Follow these steps to configure your profile manually',
     'editor.guide.export.title': 'Export Layout Guide',
+    'editor.guide.community_widget.fork_repo_btn': 'Fork on GitHub',
+    'editor.guide.community_widget.step1_desc':
+      'If adding a single widget, place it in the "External" tab. If contributing a kit with 2 or more widgets, create a dedicated category.',
+    'editor.guide.community_widget.step1_kit_desc':
+      'Create a dedicated category section named after your project.',
+    'editor.guide.community_widget.step1_kit_title': 'Kit with 2+ Widgets:',
+    'editor.guide.community_widget.step1_single_desc':
+      'Listed under the Community & External category.',
+    'editor.guide.community_widget.step1_single_title': 'Single Widget:',
+    'editor.guide.community_widget.step1_title': '1. Where to Add Your Widget?',
+    'editor.guide.community_widget.step2_title': '2. How to add via Pull Request',
+    'editor.guide.community_widget.subtitle':
+      'Contribute new widgets to the community via Pull Request',
+    'editor.guide.community_widget.title': 'How to Add Your Own Widget',
+    'editor.guide.featured_widget.fork_repo_btn': 'Fork on GitHub',
+    'editor.guide.featured_widget.step1_desc':
+      'Reserved for widgets with distinct visual themes and custom styles (such as GitFest, Pokémon Card, GitFut, or Surveillance) that offer a unique profile experience.',
+    'editor.guide.featured_widget.step1_tip_desc':
+      'Widgets with standalone themes, custom typography, or unique graphic rendering.',
+    'editor.guide.featured_widget.step1_tip_title': 'Custom Design:',
+    'editor.guide.featured_widget.step1_title': '1. What is the Featured Space?',
+    'editor.guide.featured_widget.step2_code_config':
+      'Catalog in src/features/editor/config/widgets.ts',
+    'editor.guide.featured_widget.step2_code_controls':
+      'Controls in src/features/editor/components/Properties/',
+    'editor.guide.featured_widget.step2_code_renderer':
+      'Renderer in src/features/widgets/renderers/',
+    'editor.guide.featured_widget.step2_desc':
+      'Fork GitAscii, implement your widget in the directories below, and submit a PR:',
+    'editor.guide.featured_widget.step2_title': '2. How to add via Pull Request',
+    'editor.guide.featured_widget.subtitle':
+      'Highlight uniquely styled widgets and contribute via Pull Request',
+    'editor.guide.featured_widget.title': 'How to Add a Featured Widget',
+    'editor.guide.featured_widget.view_widgets_dir_btn': 'View Widgets Folder',
     'editor.guide.template.fork_repo_btn': 'Fork on GitHub',
     'editor.guide.template.step1_desc':
       'Click the button below to download the clean JSON template file. All your personal information (social links, custom bio, portrait matrices) will be automatically stripped, preserving only layout structure and visual styling.',
@@ -1697,6 +1731,40 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.guide.export.step3_title': 'Adicione ao seu README.md',
     'editor.guide.export.subtitle': 'Siga os passos para configurar o seu perfil manualmente',
     'editor.guide.export.title': 'Guia de Exportação Manual',
+    'editor.guide.community_widget.fork_repo_btn': 'Fazer Fork no GitHub',
+    'editor.guide.community_widget.step1_desc':
+      'Se for apenas 1 widget, adicione na aba "Externos". Se for um kit com 2 ou mais widgets, crie uma categoria própria no catálogo.',
+    'editor.guide.community_widget.step1_kit_desc':
+      'Criação de uma aba/categoria própria com o nome do projeto.',
+    'editor.guide.community_widget.step1_kit_title': 'Kit com 2+ Widgets:',
+    'editor.guide.community_widget.step1_single_desc':
+      'Fica listado na categoria de Externos & Comunidade.',
+    'editor.guide.community_widget.step1_single_title': 'Apenas 1 Widget:',
+    'editor.guide.community_widget.step1_title': '1. Onde adicionar seu Widget?',
+    'editor.guide.community_widget.step2_title': '2. Como adicionar via Pull Request',
+    'editor.guide.community_widget.subtitle':
+      'Contribua com novos widgets para a comunidade via Pull Request',
+    'editor.guide.community_widget.title': 'Como Adicionar seu Próprio Widget',
+    'editor.guide.featured_widget.fork_repo_btn': 'Fazer Fork no GitHub',
+    'editor.guide.featured_widget.step1_desc':
+      'Reservado para widgets com identidade visual e estilo próprios (como GitFest, Pokémon Card, GitFut ou Surveillance), que trazem uma experiência diferenciada ao perfil.',
+    'editor.guide.featured_widget.step1_tip_desc':
+      'Widgets com temas próprios, tipografia ou renderização gráfica exclusiva.',
+    'editor.guide.featured_widget.step1_tip_title': 'Estilo Autoral:',
+    'editor.guide.featured_widget.step1_title': '1. O que é o Espaço em Destaque?',
+    'editor.guide.featured_widget.step2_code_config':
+      'Catálogo em src/features/editor/config/widgets.ts',
+    'editor.guide.featured_widget.step2_code_controls':
+      'Controles em src/features/editor/components/Properties/',
+    'editor.guide.featured_widget.step2_code_renderer':
+      'Renderizador em src/features/widgets/renderers/',
+    'editor.guide.featured_widget.step2_desc':
+      'Faça um fork do GitAscii, implemente seu widget nas pastas abaixo e envie uma PR:',
+    'editor.guide.featured_widget.step2_title': '2. Como adicionar via Pull Request',
+    'editor.guide.featured_widget.subtitle':
+      'Destaque widgets com estilo próprio e contribua via Pull Request',
+    'editor.guide.featured_widget.title': 'Como Adicionar um Widget em Destaque',
+    'editor.guide.featured_widget.view_widgets_dir_btn': 'Ver Pasta de Widgets',
     'editor.guide.template.fork_repo_btn': 'Fazer Fork no GitHub',
     'editor.guide.template.step1_desc':
       'Clique no botão abaixo para baixar o arquivo JSON limpo. Todos os seus dados pessoais (links sociais, bio, fotos/ASCII) serão automaticamente removidos, preservando apenas a diagramação e configurações visuais.',
@@ -3014,6 +3082,40 @@ export const translations: Record<Language, Record<string, string>> = {
       'El archivo de configuración contiene toda la estructura de diseño y widgets de tu perfil.',
     'editor.guide.export.step1_download_btn': 'Descargar {fileName}',
     'editor.guide.export.step1_title': 'Descarga el Archivo de Configuración',
+    'editor.guide.community_widget.fork_repo_btn': 'Hacer Fork en GitHub',
+    'editor.guide.community_widget.step1_desc':
+      'Si es solo 1 widget, agrégalo en la pestaña "Externos". Si es un kit con 2 o más widgets, crea una categoría propia en el catálogo.',
+    'editor.guide.community_widget.step1_kit_desc':
+      'Crea una sección y categoría propia con el nombre del proyecto.',
+    'editor.guide.community_widget.step1_kit_title': 'Kit con 2+ Widgets:',
+    'editor.guide.community_widget.step1_single_desc':
+      'Se incluye en la categoría de Externos y Comunidad.',
+    'editor.guide.community_widget.step1_single_title': 'Solo 1 Widget:',
+    'editor.guide.community_widget.step1_title': '1. ¿Dónde agregar tu Widget?',
+    'editor.guide.community_widget.step2_title': '2. Cómo agregar mediante Pull Request',
+    'editor.guide.community_widget.subtitle':
+      'Contribuye con nuevos widgets a la comunidad mediante Pull Request',
+    'editor.guide.community_widget.title': 'Cómo Agregar tu Propio Widget',
+    'editor.guide.featured_widget.fork_repo_btn': 'Hacer Fork en GitHub',
+    'editor.guide.featured_widget.step1_desc':
+      'Reservado para widgets con identidad visual y estilo propios (como GitFest, Pokémon Card, GitFut o Surveillance), que aportan una experiencia única al perfil.',
+    'editor.guide.featured_widget.step1_tip_desc':
+      'Widgets con temas propios, tipografía o renderizado gráfico exclusivo.',
+    'editor.guide.featured_widget.step1_tip_title': 'Estilo Propio:',
+    'editor.guide.featured_widget.step1_title': '1. ¿Qué es el Espacio Destacado?',
+    'editor.guide.featured_widget.step2_code_config':
+      'Catálogo en src/features/editor/config/widgets.ts',
+    'editor.guide.featured_widget.step2_code_controls':
+      'Controles en src/features/editor/components/Properties/',
+    'editor.guide.featured_widget.step2_code_renderer':
+      'Renderizador en src/features/widgets/renderers/',
+    'editor.guide.featured_widget.step2_desc':
+      'Haz un fork de GitAscii, implementa tu widget en las carpetas a continuación y envía una PR:',
+    'editor.guide.featured_widget.step2_title': '2. Cómo agregar mediante Pull Request',
+    'editor.guide.featured_widget.subtitle':
+      'Destaca widgets con estilo propio y contribuye mediante Pull Request',
+    'editor.guide.featured_widget.title': 'Cómo Agregar un Widget Destacado',
+    'editor.guide.featured_widget.view_widgets_dir_btn': 'Ver Carpeta de Widgets',
     'editor.guide.export.step1_warning':
       'NO cambies el nombre del archivo. Mantenlo estrictamente como {fileName}, ya que GitAscii busca exactamente este nombre en la raíz de tu repositorio.',
     'editor.guide.export.step2_desc':
@@ -4350,6 +4452,35 @@ export const translations: Record<Language, Record<string, string>> = {
     'editor.guide.export.step3_title': '添加到你的 README.md',
     'editor.guide.export.subtitle': '按照以下步骤手动配置你的个人资料',
     'editor.guide.export.title': '导出布局指南',
+    'editor.guide.community_widget.fork_repo_btn': '在 GitHub 上 Fork',
+    'editor.guide.community_widget.step1_desc':
+      '如果仅添加 1 个组件，请放入「外部」分类；如果贡献包含 2 个或更多组件的套件，请创建专属分类。',
+    'editor.guide.community_widget.step1_kit_desc': '以你的项目名称创建专属分类区块。',
+    'editor.guide.community_widget.step1_kit_title': '2个以上组件的套件:',
+    'editor.guide.community_widget.step1_single_desc': '归入社区与外部组件分类。',
+    'editor.guide.community_widget.step1_single_title': '单个组件:',
+    'editor.guide.community_widget.step1_title': '1. 组件应该放在哪里？',
+    'editor.guide.community_widget.step2_title': '2. 如何通过 Pull Request 添加',
+    'editor.guide.community_widget.subtitle': '通过 Pull Request 向社区贡献新组件',
+    'editor.guide.community_widget.title': '如何添加你自己的组件',
+    'editor.guide.featured_widget.fork_repo_btn': '在 GitHub 上 Fork',
+    'editor.guide.featured_widget.step1_desc':
+      '专用于具有专属视觉风格和主题的组件（例如 GitFest、Pokémon Card、GitFut 或 Surveillance），为个人主页带来独特体验。',
+    'editor.guide.featured_widget.step1_tip_desc': '拥有专属主题、定制排版或特色图形渲染的组件。',
+    'editor.guide.featured_widget.step1_tip_title': '独立风格:',
+    'editor.guide.featured_widget.step1_title': '1. 什么是特色专区？',
+    'editor.guide.featured_widget.step2_code_config':
+      '目录注册位于 src/features/editor/config/widgets.ts',
+    'editor.guide.featured_widget.step2_code_controls':
+      '控制面板位于 src/features/editor/components/Properties/',
+    'editor.guide.featured_widget.step2_code_renderer':
+      '渲染器位于 src/features/widgets/renderers/',
+    'editor.guide.featured_widget.step2_desc':
+      'Fork GitAscii 仓库，在以下目录中实现你的组件并提交 PR：',
+    'editor.guide.featured_widget.step2_title': '2. 如何通过 Pull Request 添加',
+    'editor.guide.featured_widget.subtitle': '展示独特风格的组件并通过 Pull Request 贡献',
+    'editor.guide.featured_widget.title': '如何添加特色组件',
+    'editor.guide.featured_widget.view_widgets_dir_btn': '查看 Widgets 目录',
     'editor.guide.template.fork_repo_btn': '在 GitHub 上 Fork',
     'editor.guide.template.step1_desc':
       '点击下方按钮下载纯净的 JSON 模板文件。你的所有个人隐私数据（社交链接、个人简介、ASCII 图片等）将被自动清除，仅保留模板结构与视觉样式。',
