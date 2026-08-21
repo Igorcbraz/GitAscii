@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/Igorcbraz/GitAscii/compare/v1.13.0...v1.13.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **svg:** restore animations and fix svg data URIs ([2794907](https://github.com/Igorcbraz/GitAscii/commit/2794907e6dbcb023dfd25e7c098148e62c7e806c))
+
 ## [1.13.0](https://github.com/Igorcbraz/GitAscii/compare/v1.12.1...v1.13.0) (2026-08-21)
 
 
