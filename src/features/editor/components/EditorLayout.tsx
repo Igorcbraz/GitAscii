@@ -12,10 +12,12 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
 
 import { useEditorStore } from '../store/editorStore'
+import { useViewModeStore } from '../store/viewModeStore'
 import { calculateFitZoom, getCanvasContainerWidth } from '../utils/canvasZoom'
 import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
 import { SVGCanvas } from './Canvas/SVGCanvas'
 import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
+import { GitHubModeLayout } from './GitHubMode'
 import { ProfileErrorScreen } from './ProfileErrorScreen'
 import { PropertiesPanel } from './Properties/PropertiesPanel'
 import { WidgetLibrary } from './Sidebar/WidgetLibrary'
@@ -40,12 +42,22 @@ export function EditorLayout({
   const session = useEditorStore((state) => state.session)
   const activeMobilePanel = useEditorStore((state) => state.activeMobilePanel)
   const setActiveMobilePanel = useEditorStore((state) => state.setActiveMobilePanel)
+  const viewMode = useViewModeStore((state) => state.viewMode)
+  const showPreviewNudge = useViewModeStore((state) => state.showPreviewNudge)
+  const dismissPreviewNudge = useViewModeStore((state) => state.dismissPreviewNudge)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isNotFound, setIsNotFound] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [githubData, setGithubData] = useState<NormalizedGitHubData | null>(null)
+
+  // Auto-dismiss the preview nudge callout after 10 seconds
+  useEffect(() => {
+    if (!showPreviewNudge) return
+    const timer = setTimeout(() => dismissPreviewNudge(), 10000)
+    return () => clearTimeout(timer)
+  }, [showPreviewNudge, dismissPreviewNudge])
 
   const initialSteps: LoadStep[] = [
     {
@@ -533,55 +545,78 @@ export function EditorLayout({
           </div>
         </div>
       )}
+
+      {/* Main content area with animated mode transition */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-          <div
-            className={`${activeMobilePanel === 'widgets' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
-          >
-            <WidgetLibrary />
-          </div>
-          <div
-            className={`${activeMobilePanel === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-col flex-1 h-full relative overflow-hidden`}
-          >
-            <SVGCanvas />
-            <CanvasStatusBar />
-          </div>
-          <div
-            className={`${activeMobilePanel === 'properties' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
-          >
-            <PropertiesPanel />
-          </div>
+        {/* GitHub Preview mode */}
+        <div
+          className={`absolute inset-0 flex flex-col transition-all duration-300 ease-out ${
+            viewMode === 'github'
+              ? 'opacity-100 translate-y-0 pointer-events-auto z-10'
+              : 'opacity-0 translate-y-2 pointer-events-none z-0'
+          }`}
+        >
+          <GitHubModeLayout />
         </div>
-        <div className="lg:hidden flex border-t border-graphite bg-void-black shrink-0 pb-safe z-50">
-          <button
-            onClick={() => setActiveMobilePanel('widgets')}
-            className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
-              activeMobilePanel === 'widgets' ? 'text-signal-lime' : 'text-ash'
-            }`}
-          >
-            <Grid size={20} className="mb-1" />
-            {t('editor.mobile.widgets', 'Widgets')}
-          </button>
-          <button
-            onClick={() => setActiveMobilePanel('canvas')}
-            className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
-              activeMobilePanel === 'canvas' ? 'text-signal-lime' : 'text-ash'
-            }`}
-          >
-            <Monitor size={20} className="mb-1" />
-            {t('editor.mobile.canvas', 'Canvas')}
-          </button>
-          <button
-            onClick={() => setActiveMobilePanel('properties')}
-            className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
-              activeMobilePanel === 'properties' ? 'text-signal-lime' : 'text-ash'
-            }`}
-          >
-            <Sliders size={20} className="mb-1" />
-            {t('editor.mobile.props', 'Props')}
-          </button>
+
+        {/* Editor mode */}
+        <div
+          className={`absolute inset-0 flex flex-col transition-all duration-300 ease-out ${
+            viewMode === 'gitascii'
+              ? 'opacity-100 translate-y-0 pointer-events-auto z-10'
+              : 'opacity-0 -translate-y-2 pointer-events-none z-0'
+          }`}
+        >
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+            <div
+              className={`${activeMobilePanel === 'widgets' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
+            >
+              <WidgetLibrary />
+            </div>
+            <div
+              className={`${activeMobilePanel === 'canvas' ? 'flex' : 'hidden'} lg:flex flex-col flex-1 h-full relative overflow-hidden`}
+            >
+              <SVGCanvas />
+              <CanvasStatusBar />
+            </div>
+            <div
+              className={`${activeMobilePanel === 'properties' ? 'flex' : 'hidden'} lg:flex w-full lg:w-auto h-full`}
+            >
+              <PropertiesPanel />
+            </div>
+          </div>
+          <div className="lg:hidden flex border-t border-graphite bg-void-black shrink-0 pb-safe z-50">
+            <button
+              onClick={() => setActiveMobilePanel('widgets')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
+                activeMobilePanel === 'widgets' ? 'text-signal-lime' : 'text-ash'
+              }`}
+            >
+              <Grid size={20} className="mb-1" />
+              {t('editor.mobile.widgets', 'Widgets')}
+            </button>
+            <button
+              onClick={() => setActiveMobilePanel('canvas')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
+                activeMobilePanel === 'canvas' ? 'text-signal-lime' : 'text-ash'
+              }`}
+            >
+              <Monitor size={20} className="mb-1" />
+              {t('editor.mobile.canvas', 'Canvas')}
+            </button>
+            <button
+              onClick={() => setActiveMobilePanel('properties')}
+              className={`flex-1 flex flex-col items-center justify-center py-2 text-caption font-medium uppercase tracking-wider transition-colors ${
+                activeMobilePanel === 'properties' ? 'text-signal-lime' : 'text-ash'
+              }`}
+            >
+              <Sliders size={20} className="mb-1" />
+              {t('editor.mobile.props', 'Props')}
+            </button>
+          </div>
         </div>
       </div>
+
       <EditorTour />
     </div>
   )

@@ -2,6 +2,7 @@
 
 import {
   Check,
+  ChevronDown,
   Command,
   Download,
   Github,
@@ -22,10 +23,12 @@ import { safeStorage } from '@/utils/storage'
 
 import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
+import { useViewModeStore } from '../../store/viewModeStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { ExportGuideModal } from './ExportGuideModal'
 import { GuestLoginModal } from './GuestLoginModal'
 import { StarPromptModal } from './StarPromptModal'
+import { ViewModeToggle } from './ViewModeToggle'
 
 export function EditorToolbar() {
   const { t } = useI18n()
@@ -34,6 +37,8 @@ export function EditorToolbar() {
   const profileSlug = useEditorStore((state) => state.config?.profileSlug || 'default')
   const hasData = useEditorStore((state) => Boolean(state.config && state.githubData))
   const session = useEditorStore((state) => state.session)
+  const triggerPreviewNudge = useViewModeStore((state) => state.triggerPreviewNudge)
+  const showPreviewNudge = useViewModeStore((state) => state.showPreviewNudge)
 
   const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
   const [showExportGuide, setShowExportGuide] = useState(false)
@@ -45,6 +50,18 @@ export function EditorToolbar() {
     'idle'
   )
   const [isLoginLoading, setIsLoginLoading] = useState(false)
+  const [showDevDropdown, setShowDevDropdown] = useState(false)
+  const isDev = process.env.NODE_ENV === 'development'
+
+  const handleFakeCommit = useCallback(() => {
+    setShowDevDropdown(false)
+    setCommitStatus('committing')
+    setTimeout(() => {
+      setCommitStatus('success')
+      setTimeout(() => setCommitStatus('idle'), 2500)
+      setTimeout(() => triggerPreviewNudge(), 800)
+    }, 1200)
+  }, [triggerPreviewNudge])
 
   const triggerStarPromptIfNeeded = useCallback((source: 'export' | 'commit') => {
     const hasStarred = safeStorage.getItem('gitascii_has_starred') === 'true'
@@ -80,7 +97,7 @@ export function EditorToolbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' })
+      const res = await fetch(API_ENDPOINTS.AUTH.LOGOUT, { method: 'POST' })
       if (res.ok) {
         window.location.reload()
       } else {
@@ -355,7 +372,7 @@ export function EditorToolbar() {
     }
 
     try {
-      const res = await fetch('/api/github/commit', {
+      const res = await fetch(API_ENDPOINTS.GITHUB.COMMIT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ embedCode: finalEmbedCode, exportData }),
@@ -374,7 +391,10 @@ export function EditorToolbar() {
       }
 
       setCommitStatus('success')
-      setTimeout(() => setCommitStatus('idle'), 2000)
+      setTimeout(() => setCommitStatus('idle'), 2500)
+      setTimeout(() => {
+        triggerPreviewNudge()
+      }, 800)
       setTimeout(() => {
         triggerStarPromptIfNeeded('commit')
       }, 600)
@@ -385,40 +405,130 @@ export function EditorToolbar() {
     }
   }
 
-  const renderUpdateReadmeButton = () => (
-    <button
-      onClick={handleCommitToGithub}
-      data-testid="commit-github-btn"
-      disabled={commitStatus === 'committing'}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
-        commitStatus === 'success'
-          ? 'bg-signal-lime text-black glow-lime'
+  const renderUpdateReadmeButton = () => {
+    const baseLabel =
+      commitStatus === 'committing'
+        ? t('editor.toolbar.updating', 'Atualizando...')
+        : commitStatus === 'success'
+          ? t('editor.toolbar.updated', 'Atualizado!')
           : commitStatus === 'error'
-            ? 'bg-red-500 text-white'
-            : 'bg-signal-lime text-black glow-lime hover:brightness-110'
-      }`}
-    >
-      {commitStatus === 'committing' ? (
+            ? t('editor.toolbar.error', 'Erro ao salvar')
+            : t('editor.toolbar.update_readme', 'Update README')
+
+    const baseIcon =
+      commitStatus === 'committing' ? (
         <Loader2 size={14} className="animate-spin" />
       ) : commitStatus === 'success' ? (
         <Check size={14} />
       ) : (
         <Github size={14} />
-      )}
-      <span className="hidden sm:inline">
-        {commitStatus === 'committing'
-          ? t('editor.toolbar.updating', 'Atualizando...')
-          : commitStatus === 'success'
-            ? t('editor.toolbar.updated', 'Atualizado!')
-            : commitStatus === 'error'
-              ? t('editor.toolbar.error', 'Erro ao salvar')
-              : t('editor.toolbar.update_readme', 'Update README')}
-      </span>
-    </button>
-  )
+      )
+
+    const btnClass = `flex items-center gap-1.5 px-3 py-1.5 font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
+      commitStatus === 'success'
+        ? 'bg-signal-lime text-black glow-lime'
+        : commitStatus === 'error'
+          ? 'bg-red-500 text-white'
+          : 'bg-signal-lime text-black glow-lime hover:brightness-110'
+    }`
+
+    if (!isDev) {
+      return (
+        <button
+          onClick={handleCommitToGithub}
+          data-testid="commit-github-btn"
+          disabled={commitStatus === 'committing'}
+          className={`${btnClass} rounded-sm`}
+        >
+          {baseIcon}
+          <span className="hidden sm:inline">{baseLabel}</span>
+        </button>
+      )
+    }
+
+    return (
+      <div className="relative flex items-stretch" data-testid="commit-github-btn">
+        <button
+          onClick={handleCommitToGithub}
+          disabled={commitStatus === 'committing'}
+          className={`${btnClass} rounded-l-sm border-r border-black/20`}
+          title={t('editor.toolbar.dev_commit_real_title', 'Commit real no GitHub')}
+        >
+          {baseIcon}
+          <span className="hidden sm:inline">{baseLabel}</span>
+        </button>
+
+        <button
+          onClick={() => setShowDevDropdown((v) => !v)}
+          disabled={commitStatus === 'committing'}
+          className={`${btnClass} px-1.5 rounded-r-sm`}
+          title={t('editor.toolbar.dev_options_title', 'Opções de dev')}
+        >
+          <ChevronDown
+            size={12}
+            className={`transition-transform duration-150 ${showDevDropdown ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {showDevDropdown && (
+          <div className="absolute top-full right-0 mt-1.5 z-[400] min-w-[200px] bg-carbon border border-graphite rounded-sm shadow-[0_8px_24px_rgba(0,0,0,0.6)] overflow-hidden">
+            <div className="px-3 py-1.5 border-b border-graphite flex items-center gap-1.5">
+              <span className="text-[9px] font-mono font-bold text-signal-lime uppercase tracking-widest">
+                {t('editor.toolbar.dev_mode_badge', 'DEV MODE')}
+              </span>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowDevDropdown(false)
+                handleCommitToGithub()
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-note font-inter-tight text-white hover:bg-graphite transition-colors cursor-pointer"
+            >
+              <Github size={13} className="text-ash shrink-0" />
+              <div>
+                <div className="font-medium leading-tight">
+                  {t('editor.toolbar.dev_real_commit', 'Commit real')}
+                </div>
+                <div className="text-caption text-ash leading-tight">
+                  {t('editor.toolbar.dev_real_commit_desc', 'Envia para o GitHub')}
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={handleFakeCommit}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-note font-inter-tight text-white hover:bg-graphite transition-colors cursor-pointer border-t border-graphite/50"
+            >
+              <Check size={13} className="text-signal-lime shrink-0" />
+              <div>
+                <div className="font-medium leading-tight">
+                  {t('editor.toolbar.dev_fake_commit', 'Commit fictício')}
+                </div>
+                <div className="text-caption text-ash leading-tight">
+                  {t(
+                    'editor.toolbar.dev_fake_commit_desc',
+                    'Simula sucesso · testa o Preview nudge'
+                  )}
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {showDevDropdown && (
+          <div className="fixed inset-0 z-[399]" onClick={() => setShowDevDropdown(false)} />
+        )}
+      </div>
+    )
+  }
 
   return (
-    <header className="relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 z-60">
+    <header
+      className={`relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 transition-[z-index] ${
+        showPreviewNudge ? 'z-[9995]' : 'z-60'
+      }`}
+    >
       <div className="flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
@@ -430,6 +540,8 @@ export function EditorToolbar() {
         </Link>
 
         <LanguageSelector align="left" />
+
+        <ViewModeToggle />
 
         <div className="h-4 w-px bg-graphite hidden sm:block" />
 

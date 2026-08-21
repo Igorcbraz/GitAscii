@@ -793,6 +793,48 @@ export const GITHUB_THEME_SWATCHES: readonly GitHubThemeSwatch[] = [
   },
 ] as const
 
+export const LANGUAGE_COLORS: Readonly<Record<string, string>> = {
+  TypeScript: '#3178c6',
+  JavaScript: '#f1e05a',
+  Python: '#3572A5',
+  Java: '#b07219',
+  'C#': '#178600',
+  CSS: '#563d7c',
+  HTML: '#e34c26',
+  Ruby: '#701516',
+  Go: '#00ADD8',
+  Rust: '#dea584',
+  PHP: '#4F5D95',
+  Vue: '#41b883',
+  Shell: '#89e051',
+  Swift: '#F05138',
+  Kotlin: '#A97BFF',
+  Dart: '#00B4AB',
+} as const
+
+export const MONTH_NAMES: readonly string[] = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] as const
+
+export const GITHUB_CONTRIBUTION_COLORS = {
+  LEVEL_0: '#161b22',
+  LEVEL_1: '#0e4429',
+  LEVEL_2: '#006d32',
+  LEVEL_3: '#26a641',
+  LEVEL_4: '#39d353',
+} as const
+
 export function isGitHubAdaptiveTheme(color?: string): boolean {
   if (!color) return false
   const normalized = color.trim().toLowerCase()
