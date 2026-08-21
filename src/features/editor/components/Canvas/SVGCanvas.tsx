@@ -3,7 +3,7 @@
 import { Layers, Lock, Move, X } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { EXTERNAL_LINKS } from '@/constants'
+import { EXTERNAL_LINKS, GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
 import { getWidgetMinSize } from '@/engine/core/WidgetRenderer'
 import { useI18n } from '@/i18n'
@@ -816,13 +816,40 @@ export function SVGCanvas() {
                     animation: none !important;
                     transition: none !important;
                   }
+
+                  .gitascii-canvas-bg {
+                    fill: #0d1117;
+                    transition: fill 0.3s ease;
+                  }
+
+                  @media (prefers-color-scheme: light) {
+                    .gitascii-canvas-bg {
+                      fill: #ffffff !important;
+                    }
+                  }
+
+                  @media (prefers-color-scheme: dark) {
+                    .gitascii-canvas-bg {
+                      fill: #0d1117 !important;
+                    }
+                  }
                 `}
               </style>
               {!config.globalStyles.transparentBackground && (
                 <rect
+                  className={
+                    isGitHubAdaptiveTheme(config.globalStyles.backgroundColor) ||
+                    config.globalStyles.themeMode === 'auto'
+                      ? 'gitascii-canvas-bg'
+                      : undefined
+                  }
                   width="800"
                   height={canvasHeight}
-                  fill={config.globalStyles.backgroundColor || '#060606'}
+                  fill={
+                    isGitHubAdaptiveTheme(config.globalStyles.backgroundColor)
+                      ? GITHUB_THEME_KEYS.DARK
+                      : config.globalStyles.backgroundColor || '#060606'
+                  }
                   rx={config.globalStyles.borderRadius || 0}
                 />
               )}

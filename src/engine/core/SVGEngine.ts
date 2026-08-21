@@ -1,3 +1,4 @@
+import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
 import { safeFetch, validateSafeExternalUrl } from '@/utils/ssrfValidator'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
@@ -114,7 +115,15 @@ export function renderSvg(
   }
 
   const globalStyles = safeConfig.globalStyles || ({} as GlobalStyles)
-  const bg = isLight ? '#ffffff' : globalStyles.backgroundColor || '#060606'
+  const isAdaptiveBg =
+    isGitHubAdaptiveTheme(globalStyles.backgroundColor) || globalStyles.themeMode === 'auto'
+  const bg = isAdaptiveBg
+    ? isLight
+      ? GITHUB_THEME_KEYS.LIGHT
+      : GITHUB_THEME_KEYS.DARK
+    : isLight
+      ? GITHUB_THEME_KEYS.LIGHT
+      : globalStyles.backgroundColor || '#060606'
   const isTransparent = Boolean(globalStyles.transparentBackground)
 
   const rawTargetWidgetIds = options.widgets
@@ -206,9 +215,26 @@ export function renderSvg(
     text {
       user-select: none;
     }
+
+    .gitascii-canvas-bg {
+      fill: #0d1117;
+      transition: fill 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .gitascii-canvas-bg {
+        fill: #ffffff !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gitascii-canvas-bg {
+        fill: #0d1117 !important;
+      }
+    }
   </style>
 
-  ${!isTransparent ? `<rect width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
+  ${!isTransparent ? `<rect class="${isAdaptiveBg ? 'gitascii-canvas-bg' : ''}" width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
 
   ${widgetsSvg}
 </svg>`

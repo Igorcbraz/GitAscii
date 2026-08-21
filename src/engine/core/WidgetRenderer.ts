@@ -1,3 +1,5 @@
+import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
+
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
 import { renderWidgetContent } from './WidgetRegistry'
 
@@ -54,7 +56,9 @@ export function renderWidgetSvg(
   const cfg = widget.config || {}
   const globalStylesSafe = globalStyles || ({} as GlobalStyles)
 
-  const bg = (cfg.backgroundColor as string) || globalStylesSafe.backgroundColor || '#1f1f1f'
+  const rawBg = (cfg.backgroundColor as string) || globalStylesSafe.backgroundColor || '#1f1f1f'
+  const isAdaptiveWidgetBg = isGitHubAdaptiveTheme(rawBg)
+  const bg = isAdaptiveWidgetBg ? GITHUB_THEME_KEYS.DARK : rawBg
   const border = (cfg.borderColor as string) || globalStylesSafe.borderColor || '#252525'
   const textClr = (cfg.textColor as string) || globalStylesSafe.textColor || '#ffffff'
   const accent = (cfg.accentColor as string) || globalStylesSafe.accentColor || '#c5ff4a'
@@ -334,7 +338,7 @@ export function renderWidgetSvg(
 
   const baseBackgroundRect = isSelfContained
     ? ''
-    : `<rect x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
+    : `<rect class="${isAdaptiveWidgetBg ? 'gitascii-canvas-bg' : ''}" x="0" y="0" width="${width}" height="${height}" fill="${bg}" stroke="${border}" stroke-width="${strokeWidth}" rx="${rx}" />`
 
   const innerHtml = `
       ${styleBlock}

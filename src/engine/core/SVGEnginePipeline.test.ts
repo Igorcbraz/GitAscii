@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { GITHUB_THEME_KEYS } from '@/constants'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
@@ -244,6 +245,105 @@ describe('SVG Engine Pipeline & Animation Integrity Suite', () => {
       // Should have successfully fetched fallbackUrl rather than failing
       expect(processedSvg).toContain('<svg')
       expect(processedSvg).not.toContain('Failed to load external widget')
+    })
+  })
+
+  describe('GitHub Profile Themes & Adaptive Background Behavior', () => {
+    it('generates responsive media queries and canvas background class when backgroundColor is github-auto', () => {
+      const config: SavedConfiguration = {
+        version: 1,
+        githubId: 99999,
+        username: 'testdev',
+        profileSlug: 'default',
+        profileName: 'Default',
+        templateId: 'terminal',
+        widgets: [],
+        globalStyles: {
+          backgroundColor: GITHUB_THEME_KEYS.AUTO,
+          textColor: '#e5e5e5',
+          accentColor: '#c5ff4a',
+          borderColor: '#252525',
+          fontFamily: "'JetBrains Mono', monospace",
+          borderRadius: 6,
+          padding: 24,
+          themeMode: 'dark',
+          templateStyle: 'terminal',
+        },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schemaVersion: 1,
+        },
+      }
+
+      const svg = renderSvg(config, mockProfileData)
+      expect(svg).toContain('.gitascii-canvas-bg')
+      expect(svg).toContain('@media (prefers-color-scheme: light)')
+      expect(svg).toContain('@media (prefers-color-scheme: dark)')
+      expect(svg).toContain('class="gitascii-canvas-bg"')
+      expect(svg).toContain(`fill="${GITHUB_THEME_KEYS.DARK}"`)
+    })
+
+    it('renders exact GitHub Dark Dimmed background (#212830)', () => {
+      const config: SavedConfiguration = {
+        version: 1,
+        githubId: 99999,
+        username: 'testdev',
+        profileSlug: 'default',
+        profileName: 'Default',
+        templateId: 'terminal',
+        widgets: [],
+        globalStyles: {
+          backgroundColor: GITHUB_THEME_KEYS.DARK_DIMMED,
+          textColor: '#c9d1d9',
+          accentColor: '#58a6ff',
+          borderColor: '#30363d',
+          fontFamily: "'Inter Tight', sans-serif",
+          borderRadius: 6,
+          padding: 24,
+          themeMode: 'dark',
+          templateStyle: 'terminal',
+        },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schemaVersion: 1,
+        },
+      }
+
+      const svg = renderSvg(config, mockProfileData)
+      expect(svg).toContain(`fill="${GITHUB_THEME_KEYS.DARK_DIMMED}"`)
+    })
+
+    it('renders exact GitHub Dark background (#0d1117)', () => {
+      const config: SavedConfiguration = {
+        version: 1,
+        githubId: 99999,
+        username: 'testdev',
+        profileSlug: 'default',
+        profileName: 'Default',
+        templateId: 'terminal',
+        widgets: [],
+        globalStyles: {
+          backgroundColor: GITHUB_THEME_KEYS.DARK,
+          textColor: '#c9d1d9',
+          accentColor: '#58a6ff',
+          borderColor: '#30363d',
+          fontFamily: "'Inter Tight', sans-serif",
+          borderRadius: 6,
+          padding: 24,
+          themeMode: 'dark',
+          templateStyle: 'terminal',
+        },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schemaVersion: 1,
+        },
+      }
+
+      const svg = renderSvg(config, mockProfileData)
+      expect(svg).toContain(`fill="${GITHUB_THEME_KEYS.DARK}"`)
     })
   })
 })

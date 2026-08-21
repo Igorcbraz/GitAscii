@@ -1,8 +1,9 @@
 'use client'
 
-import { Check, ChevronDown, Copy, Pipette } from 'lucide-react'
+import { Check, ChevronDown, Copy, Pipette, Sparkles } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { GITHUB_THEME_KEYS, GITHUB_THEME_SWATCHES, isGitHubAdaptiveTheme } from '@/constants'
 import { useI18n } from '@/i18n'
 import { copyToClipboard } from '@/utils/clipboard'
 
@@ -40,6 +41,9 @@ export function ColorPicker({
   const [copied, setCopied] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
 
+  const isAuto = isGitHubAdaptiveTheme(value)
+  const isTransparent = value.toLowerCase() === 'transparent'
+
   useEffect(() => {
     if (value.toLowerCase() !== hexInput.toLowerCase()) {
       setHexInput(value)
@@ -63,22 +67,27 @@ export function ColorPicker({
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     setHexInput(val)
+    const normalized = val.trim().toLowerCase()
+    const isAdaptive = isGitHubAdaptiveTheme(normalized)
     if (
-      (/^#([0-9A-F]{3}){1,2}$/i.test(val) || val === 'transparent') &&
-      val.toLowerCase() !== value.toLowerCase()
+      (/^#([0-9A-F]{3}){1,2}$/i.test(val) || normalized === 'transparent' || isAdaptive) &&
+      normalized !== value.toLowerCase()
     ) {
-      onChange(val)
+      onChange(isAdaptive ? GITHUB_THEME_KEYS.AUTO : val)
     }
   }
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    const success = await copyToClipboard(value)
+    const textToCopy = isAuto ? GITHUB_THEME_KEYS.DARK : value
+    const success = await copyToClipboard(textToCopy)
     if (success) {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     }
   }
+
+  const displayLabel = isAuto ? 'GITHUB AUTO' : isTransparent ? 'TRANSPARENT' : value
 
   return (
     <div className="relative" ref={popoverRef}>
@@ -93,32 +102,41 @@ export function ColorPicker({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between gap-2 bg-graphite border border-graphite hover:border-slate p-1.5 rounded-sm transition-all cursor-pointer group"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <div
             className="w-5 h-5 rounded-[3px] border border-white/20 shadow-inner flex items-center justify-center shrink-0 relative overflow-hidden"
             style={
-              value === 'transparent'
+              isAuto
                 ? {
-                    backgroundImage:
-                      'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
-                    backgroundSize: '8px 8px',
+                    background: `linear-gradient(135deg, ${GITHUB_THEME_KEYS.DARK} 50%, ${GITHUB_THEME_KEYS.LIGHT} 50%)`,
                   }
-                : { backgroundColor: value }
+                : isTransparent
+                  ? {
+                      backgroundImage:
+                        'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
+                      backgroundSize: '8px 8px',
+                    }
+                  : { backgroundColor: value }
             }
           >
-            {value === 'transparent' && (
+            {isTransparent && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-[140%] h-[1.5px] bg-red-500/80 -rotate-45" />
               </div>
             )}
+            {isAuto && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles size={10} className="text-signal-lime drop-shadow-xs" />
+              </div>
+            )}
           </div>
-          <span className="font-jetbrains-mono text-eyebrow text-chalk uppercase tracking-wider">
-            {value}
+          <span className="font-jetbrains-mono text-eyebrow text-chalk uppercase tracking-wider truncate">
+            {displayLabel}
           </span>
         </div>
         <ChevronDown
           size={14}
-          className={`text-ash transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-ash transition-transform shrink-0 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -126,10 +144,12 @@ export function ColorPicker({
         <div
           className={`absolute ${
             align === 'left' ? 'left-0' : 'right-0'
-          } top-full mt-1 w-55 bg-onyx border border-slate p-3 rounded-md shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100`}
+          } top-full mt-1 w-64 bg-onyx border border-slate p-3 rounded-md shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100`}
         >
           <div className="text-caption uppercase font-inter-tight font-semibold tracking-wider text-ash mb-2 flex items-center justify-between">
-            <span>{t('editor.properties.color_picker.swatches', 'Color Swatches')}</span>
+            <span>
+              {t('editor.properties.color_picker.github_themes', 'GitHub Profile Themes')}
+            </span>
             <button
               onClick={handleCopy}
               className="text-ash hover:text-signal-lime transition-colors flex items-center gap-1 cursor-pointer"
@@ -142,6 +162,79 @@ export function ColorPicker({
                   : t('editor.properties.color_picker.copy', 'Copy')}
               </span>
             </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              onChange(GITHUB_THEME_KEYS.AUTO)
+              setHexInput(GITHUB_THEME_KEYS.AUTO)
+            }}
+            className={`w-full p-2 mb-2.5 rounded-sm border transition-all flex items-center justify-between text-left cursor-pointer group ${
+              isAuto
+                ? 'border-signal-lime bg-signal-lime/10 ring-1 ring-signal-lime/40'
+                : 'border-graphite bg-graphite/60 hover:border-slate hover:bg-graphite'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className="w-6 h-6 rounded-[3px] border border-white/20 shadow-inner flex items-center justify-center shrink-0 relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${GITHUB_THEME_KEYS.DARK} 50%, ${GITHUB_THEME_KEYS.LIGHT} 50%)`,
+                }}
+              >
+                <Sparkles size={11} className="text-signal-lime" />
+              </div>
+              <div>
+                <div className="font-inter-tight font-semibold text-eyebrow text-chalk leading-none flex items-center gap-1.5">
+                  <span>
+                    {t('editor.properties.color_picker.github_auto', 'Auto (Viewer Theme)')}
+                  </span>
+                </div>
+                <div className="font-jetbrains-mono text-[10px] text-ash mt-0.5 leading-tight">
+                  #0D1117 / #FFFFFF
+                </div>
+              </div>
+            </div>
+            {isAuto && <Check size={14} className="text-signal-lime shrink-0" />}
+          </button>
+
+          <div className="space-y-1 mb-3">
+            <div className="grid grid-cols-3 gap-1.5">
+              {GITHUB_THEME_SWATCHES.map((th) => {
+                const isActive = value.toLowerCase() === th.hex.toLowerCase()
+                return (
+                  <button
+                    key={th.id}
+                    type="button"
+                    onClick={() => {
+                      if (th.hex.toLowerCase() !== value.toLowerCase()) {
+                        onChange(th.hex)
+                      }
+                      setHexInput(th.hex)
+                    }}
+                    className={`py-1.5 px-1 rounded-sm border transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                      isActive
+                        ? 'border-signal-lime ring-1 ring-signal-lime/40 bg-signal-lime/10'
+                        : 'border-graphite bg-graphite/40 hover:border-slate hover:bg-graphite'
+                    }`}
+                    title={t(th.labelKey, th.fallback)}
+                  >
+                    <div
+                      className="w-4 h-4 rounded-[2px] border border-white/20 shrink-0"
+                      style={{ backgroundColor: th.hex }}
+                    />
+                    <span className="font-jetbrains-mono text-[9px] uppercase text-chalk leading-none truncate w-full text-center">
+                      {th.hex}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="text-caption uppercase font-inter-tight font-semibold tracking-wider text-ash mb-1.5 pt-2 border-t border-graphite">
+            <span>{t('editor.properties.color_picker.swatches', 'Palette Presets')}</span>
           </div>
 
           <div className="grid grid-cols-6 gap-1.5 mb-3">
@@ -200,7 +293,19 @@ export function ColorPicker({
               />
               <div
                 className="w-full h-full flex items-center justify-center"
-                style={{ backgroundColor: value }}
+                style={
+                  isAuto
+                    ? {
+                        background: `linear-gradient(135deg, ${GITHUB_THEME_KEYS.DARK} 50%, ${GITHUB_THEME_KEYS.LIGHT} 50%)`,
+                      }
+                    : isTransparent
+                      ? {
+                          backgroundImage:
+                            'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
+                          backgroundSize: '8px 8px',
+                        }
+                      : { backgroundColor: value }
+                }
               >
                 <Pipette
                   size={12}

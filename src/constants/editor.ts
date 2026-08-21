@@ -757,3 +757,44 @@ export const LED_COLORS: readonly SurveillanceLedColor[] = [
   { color: '#ffff55', name: 'Yellow' },
   { color: '#55ffff', name: 'Cyan' },
 ]
+
+export const GITHUB_THEME_KEYS = {
+  AUTO: 'github-auto',
+  DARK: '#0d1117',
+  DARK_DIMMED: '#212830',
+  LIGHT: '#ffffff',
+} as const
+
+export interface GitHubThemeSwatch {
+  id: string
+  hex: string
+  labelKey: string
+  fallback: string
+}
+
+export const GITHUB_THEME_SWATCHES: readonly GitHubThemeSwatch[] = [
+  {
+    id: 'dark',
+    hex: GITHUB_THEME_KEYS.DARK,
+    labelKey: 'editor.properties.color_picker.github_dark',
+    fallback: 'GitHub Dark (#0D1117)',
+  },
+  {
+    id: 'dimmed',
+    hex: GITHUB_THEME_KEYS.DARK_DIMMED,
+    labelKey: 'editor.properties.color_picker.github_dimmed',
+    fallback: 'GitHub Dark Dimmed (#212830)',
+  },
+  {
+    id: 'light',
+    hex: GITHUB_THEME_KEYS.LIGHT,
+    labelKey: 'editor.properties.color_picker.github_light',
+    fallback: 'GitHub Light (#FFFFFF)',
+  },
+] as const
+
+export function isGitHubAdaptiveTheme(color?: string): boolean {
+  if (!color) return false
+  const normalized = color.trim().toLowerCase()
+  return normalized === GITHUB_THEME_KEYS.AUTO || normalized === 'auto'
+}
