@@ -60,6 +60,14 @@ export const WIDGET_IDS = {
   CODEWEB_SOCIAL_BADGE: 'codeweb-social-badge',
   CODEWEB_MINIMAL_BADGE: 'codeweb-minimal-badge',
   POKEMON_CARD: 'pokemon-card',
+  SURVEILLANCE_HEADER: 'surveillance-header',
+  SURVEILLANCE_DOSSIER: 'surveillance-dossier',
+  SURVEILLANCE_LOADOUT: 'surveillance-loadout',
+  SURVEILLANCE_TELEMETRY: 'surveillance-telemetry',
+  SURVEILLANCE_TRANSMISSION: 'surveillance-transmission',
+  SURVEILLANCE_FIELD: 'surveillance-field',
+  SURVEILLANCE_FEEDS: 'surveillance-feeds',
+  SURVEILLANCE_TITLE: 'surveillance-title',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -74,6 +82,7 @@ export const WIDGET_CATEGORIES = {
   ASCIIPROFILE: 'asciiprofile',
   CONTROLPLANE: 'controlplane',
   CODEWEB_DEV: 'codeweb-dev',
+  SURVEILLANCE: 'surveillance',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

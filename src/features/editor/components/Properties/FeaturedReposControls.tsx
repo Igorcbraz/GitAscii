@@ -41,7 +41,12 @@ function computeRepoCardHeight(showUpdated: boolean): number {
 
 export function FeaturedReposControls({ instanceId, config }: FeaturedReposControlsProps) {
   const { t } = useI18n()
-  const { updateWidgetConfig, updateWidgetSize, config: savedConfig, githubData } = useEditorStore()
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const updateWidgetSize = useEditorStore((state) => state.updateWidgetSize)
+  const githubData = useEditorStore((state) => state.githubData)
+  const widget = useEditorStore((state) =>
+    state.config?.widgets?.find((w) => w.instanceId === instanceId)
+  )
 
   const [searchQuery, setSearchQuery] = React.useState('')
 
@@ -64,7 +69,7 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
     return [...githubData.repos]
       .filter((r) => !r.fork)
       .sort((a, b) => b.stargazers_count - a.stargazers_count)
-  }, [githubData])
+  }, [githubData?.repos])
 
   const displayedRepos = React.useMemo(() => {
     const base =
@@ -80,12 +85,9 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
     return base.filter((r) => r.name.toLowerCase().includes(q))
   }, [allRepos, selectedRepos, searchQuery])
 
-  const widget = React.useMemo(() => {
-    return savedConfig?.widgets?.find((w) => w.instanceId === instanceId)
-  }, [savedConfig, instanceId])
-
   const widgetId = widget?.widgetId
   const currentWidth = widget?.size?.width ?? 320
+  const currentHeight = widget?.size?.height
 
   const isControlPlane = widgetId?.startsWith('controlplane-')
   const showViewMode = !isControlPlane
@@ -111,14 +113,18 @@ export function FeaturedReposControls({ instanceId, config }: FeaturedReposContr
   React.useEffect(() => {
     if (widgetId?.startsWith('controlplane-')) return
     const height = computeWidgetHeight(maxRepos, viewMode)
-    updateWidgetSize(instanceId, { width: currentWidth, height }, false)
-  }, [maxRepos, viewMode, instanceId, currentWidth, updateWidgetSize, widgetId])
+    if (currentHeight !== height) {
+      updateWidgetSize(instanceId, { width: currentWidth, height }, false)
+    }
+  }, [maxRepos, viewMode, instanceId, currentWidth, currentHeight, updateWidgetSize, widgetId])
 
   React.useEffect(() => {
     if (widgetId?.startsWith('controlplane-')) return
     const cardHeight = computeRepoCardHeight(showUpdated)
-    updateWidgetConfig(instanceId, { repoCardHeight: cardHeight })
-  }, [showUpdated, instanceId, updateWidgetConfig, widgetId])
+    if (config.repoCardHeight !== cardHeight) {
+      updateWidgetConfig(instanceId, { repoCardHeight: cardHeight })
+    }
+  }, [showUpdated, instanceId, config.repoCardHeight, updateWidgetConfig, widgetId])
 
   const repoLanguages = (config.repoLanguages as Record<string, string>) || {}
   const handleUpdateLanguage = (repoName: string, lang: string) => {

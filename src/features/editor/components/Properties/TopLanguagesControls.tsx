@@ -39,9 +39,14 @@ const LAYOUT_OPTIONS = [
 
 export function TopLanguagesControls({ instanceId, config }: TopLanguagesControlsProps) {
   const { t } = useI18n()
-  const { updateWidgetConfig, updateWidgetSize, config: storeConfig } = useEditorStore()
-
-  const currentWidget = storeConfig?.widgets.find((w) => w.instanceId === instanceId)
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
+  const updateWidgetSize = useEditorStore((state) => state.updateWidgetSize)
+  const currentWidgetWidth = useEditorStore(
+    (state) => state.config?.widgets.find((w) => w.instanceId === instanceId)?.size?.width
+  )
+  const currentWidgetHeight = useEditorStore(
+    (state) => state.config?.widgets.find((w) => w.instanceId === instanceId)?.size?.height
+  )
 
   const langsCount = Number(config.langsCount) || 5
   const layout = (config.langsLayout as string) || 'bars'
@@ -52,16 +57,15 @@ export function TopLanguagesControls({ instanceId, config }: TopLanguagesControl
   const donutCenterLabel = config.donutCenterLabel === true
 
   React.useEffect(() => {
-    if (!currentWidget) return
     const newHeight = computeHeight(layout, langsCount)
-    const currentWidth = currentWidget.size?.width ?? 300
+    const currentWidth = currentWidgetWidth ?? 300
 
-    if (currentWidget.size?.height === newHeight && currentWidget.size?.width === currentWidth) {
+    if (currentWidgetHeight === newHeight && currentWidgetWidth === currentWidth) {
       return
     }
 
     updateWidgetSize(instanceId, { width: currentWidth, height: newHeight }, false)
-  }, [layout, langsCount, currentWidget, updateWidgetSize, instanceId])
+  }, [layout, langsCount, currentWidgetWidth, currentWidgetHeight, updateWidgetSize, instanceId])
 
   const hideLangs: string[] = React.useMemo(() => {
     if (Array.isArray(config.hideLangsArr)) return config.hideLangsArr as string[]

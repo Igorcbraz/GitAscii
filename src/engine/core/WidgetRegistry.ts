@@ -37,6 +37,16 @@ import { renderRepositories } from '@/features/widgets/renderers/RepositoriesRen
 import { renderSignalGrid } from '@/features/widgets/renderers/SignalGridRenderer'
 import { renderSocialMedia } from '@/features/widgets/renderers/SocialMediaRenderer'
 import { renderStats } from '@/features/widgets/renderers/StatsRenderer'
+import {
+  renderSurveillanceDossier,
+  renderSurveillanceFeeds,
+  renderSurveillanceField,
+  renderSurveillanceHeader,
+  renderSurveillanceLoadout,
+  renderSurveillanceTelemetry,
+  renderSurveillanceTitle,
+  renderSurveillanceTransmission,
+} from '@/features/widgets/renderers/SurveillanceRenderers'
 import { renderSystemLoop } from '@/features/widgets/renderers/SystemLoopRenderer'
 import { renderTechStack } from '@/features/widgets/renderers/TechStackRenderer'
 import { renderTerminalInfo } from '@/features/widgets/renderers/TerminalInfoRenderer'
@@ -108,6 +118,19 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.CODEWEB_SOCIAL_BADGE, (w, d, g, s) => renderCodewebSocialBadge(w, d, g, s)],
   [WIDGET_IDS.CODEWEB_MINIMAL_BADGE, (w, d, g, s) => renderCodewebMinimalBadge(w, d, g, s)],
 
+  // Surveillance (198X / Oxide) Variants
+  [WIDGET_IDS.SURVEILLANCE_HEADER, (w, d, g, s) => renderSurveillanceHeader(w, d, g, s)],
+  [WIDGET_IDS.SURVEILLANCE_DOSSIER, (w, d, g, s) => renderSurveillanceDossier(w, d, g, s)],
+  [WIDGET_IDS.SURVEILLANCE_LOADOUT, (w, d, g, s) => renderSurveillanceLoadout(w, d, g, s)],
+  [WIDGET_IDS.SURVEILLANCE_TELEMETRY, (w, d, g, s) => renderSurveillanceTelemetry(w, d, g, s)],
+  [
+    WIDGET_IDS.SURVEILLANCE_TRANSMISSION,
+    (w, d, g, s) => renderSurveillanceTransmission(w, d, g, s),
+  ],
+  [WIDGET_IDS.SURVEILLANCE_FIELD, (w, d, g, s) => renderSurveillanceField(w, d, g, s)],
+  [WIDGET_IDS.SURVEILLANCE_FEEDS, (w, d, g, s) => renderSurveillanceFeeds(w, d, g, s)],
+  [WIDGET_IDS.SURVEILLANCE_TITLE, (w, d, g, s) => renderSurveillanceTitle(w, d, g, s)],
+
   // External Integration Widgets
   ['gitfest-lineup', (w, d, g) => renderExternalWidgets(w, d, g)],
   ['github-readme-stats', (w, d, g) => renderExternalWidgets(w, d, g)],
@@ -162,7 +185,7 @@ export function renderWidgetContent(
     try {
       return renderer(widget, data, globalStyles, forceStatic)
     } catch (err) {
-      console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
+      console.warn('[GitAscii Engine] Error rendering widget:', wid.replace(/[\r\n]/g, ''), err)
       return renderErrorWidget(widget, globalStyles, err)
     }
   }
@@ -177,7 +200,7 @@ export function getRenderer(widgetId: string): WidgetRendererFn {
       try {
         return renderer(widget, data, globalStyles, forceStatic)
       } catch (err) {
-        console.warn('[GitAscii Engine] Error rendering widget:', wid, err)
+        console.warn('[GitAscii Engine] Error rendering widget:', wid.replace(/[\r\n]/g, ''), err)
         return renderErrorWidget(widget, globalStyles, err)
       }
     }

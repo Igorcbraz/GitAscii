@@ -316,7 +316,6 @@ export function EditorTour() {
 
   return createPortal(
     <>
-      {/* Dynamic Backdrop with Transparent Cutout over Target Element */}
       {targetRect ? (
         <svg
           className={`fixed inset-0 z-110 pointer-events-auto w-full h-full transition-opacity duration-200 ${
@@ -326,9 +325,7 @@ export function EditorTour() {
         >
           <defs>
             <mask id="tour-spotlight-mask">
-              {/* White background: mask shows the dark backdrop */}
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
-              {/* Black hole: mask cuts out transparent window for target element */}
               <rect
                 x={Math.max(0, targetRect.left - 6)}
                 y={Math.max(0, targetRect.top - 6)}
@@ -357,7 +354,6 @@ export function EditorTour() {
         />
       )}
 
-      {/* Target Element Highlight / Spotlight Box (pure bright border & badge around the cutout) */}
       {targetRect && (
         <div
           style={{
@@ -374,14 +370,12 @@ export function EditorTour() {
         </div>
       )}
 
-      {/* Tour Dialog Modal */}
       <div
         className={`fixed z-120 ${getDialogPositionClasses()} w-full max-w-[480px] p-4 transition-all duration-200 ${
           isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
         }`}
       >
         <div className="bg-carbon border border-graphite rounded-sm overflow-hidden shadow-2xl flex flex-col text-chalk">
-          {/* Header Bar */}
           <div className="px-5 py-3.5 border-b border-graphite flex items-center justify-between bg-onyx/40">
             <div className="flex items-center gap-2">
               <span className="text-caption font-jetbrains-mono font-bold text-signal-lime uppercase tracking-wider">
@@ -397,7 +391,6 @@ export function EditorTour() {
             </button>
           </div>
 
-          {/* Body Content */}
           <div className="p-5 space-y-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -417,7 +410,6 @@ export function EditorTour() {
               </p>
             </div>
 
-            {/* Context / Tip Box */}
             <div className="p-3.5 rounded-sm bg-onyx/80 border border-graphite flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <div className="font-jetbrains-mono text-caption text-signal-lime font-semibold uppercase tracking-wider mb-1">
@@ -429,7 +421,6 @@ export function EditorTour() {
               </div>
             </div>
 
-            {/* Step Indicators */}
             <div className="flex items-center justify-center gap-1.5 pt-1">
               {steps.map((_, idx) => (
                 <button
@@ -444,7 +435,6 @@ export function EditorTour() {
             </div>
           </div>
 
-          {/* Footer Action Bar */}
           <div className="px-5 py-3.5 border-t border-graphite bg-onyx/40 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {currentStep > 0 ? (

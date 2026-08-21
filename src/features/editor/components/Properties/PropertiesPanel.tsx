@@ -4,7 +4,7 @@ import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'luc
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { WIDGET_IDS } from '@/constants'
+import { SURVEILLANCE_COLOR_THEMES, WIDGET_IDS } from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -21,8 +21,10 @@ import { FeaturedReposControls } from './FeaturedReposControls'
 import { GithubStatsControls } from './GithubStatsControls'
 import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
+import { MultiPropertiesPanel } from './MultiPropertiesPanel'
 import { PokemonCardControls } from './PokemonCardControls'
 import { SocialMediaControls } from './SocialMediaControls'
+import { SurveillanceControls } from './SurveillanceControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
 import { TopLanguagesControls } from './TopLanguagesControls'
@@ -80,12 +82,16 @@ const WIDTH_PRESETS = [
 
 export function PropertiesPanel() {
   const { t } = useI18n()
-  const selectedInstanceId = useEditorStore((state) => state.selectedInstanceId)
-  const selectedWidget = useEditorStore((state) =>
-    state.selectedInstanceId
-      ? state.config?.widgets.find((w) => w.instanceId === state.selectedInstanceId)
-      : null
-  )
+  const selectedInstanceIds = useEditorStore((state) => state.selectedInstanceIds)
+  const widgets = useEditorStore((state) => state.config?.widgets)
+
+  const selectedWidgets = React.useMemo(() => {
+    if (!widgets || selectedInstanceIds.length === 0) return []
+    const idSet = new Set(selectedInstanceIds)
+    return widgets.filter((w) => idSet.has(w.instanceId))
+  }, [widgets, selectedInstanceIds])
+
+  const selectedWidget = selectedWidgets.length === 1 ? selectedWidgets[0] : null
   const globalStyles = useEditorStore((state) => state.config?.globalStyles)
   const hasConfig = useEditorStore((state) => Boolean(state.config))
 
@@ -98,7 +104,11 @@ export function PropertiesPanel() {
 
   if (!hasConfig || !globalStyles) return null
 
-  if (!selectedInstanceId || !selectedWidget) {
+  if (selectedWidgets.length > 1) {
+    return <MultiPropertiesPanel selectedWidgets={selectedWidgets} />
+  }
+
+  if (!selectedWidget) {
     return (
       <aside
         id="tour-properties-sidebar"
@@ -276,6 +286,12 @@ export function PropertiesPanel() {
   const cfg = selectedWidget.config
   const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
 
+  const supportsSecondaryColor =
+    selectedWidget.widgetId.startsWith('surveillance-') ||
+    selectedWidget.widgetId.startsWith('controlplane-') ||
+    selectedWidget.widgetId === 'codeweb-retro-grid' ||
+    'secondaryColor' in cfg
+
   return (
     <aside
       id="tour-properties-sidebar"
@@ -355,9 +371,20 @@ export function PropertiesPanel() {
               }
             />
 
+            {supportsSecondaryColor && (
+              <ColorPicker
+                label={t('editor.properties.color_secundaria', 'Cor Secundária')}
+                align="left"
+                value={(cfg.secondaryColor as string) || '#c084fc'}
+                onChange={(color) =>
+                  updateWidgetConfig(selectedWidget.instanceId, { secondaryColor: color })
+                }
+              />
+            )}
+
             <ColorPicker
               label={t('editor.properties.color_texto', 'Cor do Texto')}
-              align="left"
+              align={supportsSecondaryColor ? 'right' : 'left'}
               value={(cfg.textColor as string) || globalStyles.textColor || '#ffffff'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { textColor: color })
@@ -366,13 +393,67 @@ export function PropertiesPanel() {
 
             <ColorPicker
               label={t('editor.properties.color_borda', 'Cor da Borda')}
-              align="right"
+              align={supportsSecondaryColor ? 'left' : 'right'}
               value={(cfg.borderColor as string) || globalStyles.borderColor || '#252525'}
               onChange={(color) =>
                 updateWidgetConfig(selectedWidget.instanceId, { borderColor: color })
               }
             />
           </div>
+
+          {supportsSecondaryColor && (
+            <div className="space-y-1.5 pt-1">
+              <label className="text-eyebrow text-ash font-inter-tight block font-mono">
+                {t('editor.surveillance.color_presets', 'Surveillance Theme Presets')}
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {SURVEILLANCE_COLOR_THEMES.map((th) => {
+                  const currentAccent =
+                    (cfg.accentColor as string) || globalStyles.accentColor || '#55ffff'
+                  const currentSecondary = (cfg.secondaryColor as string) || '#c084fc'
+                  const isActive =
+                    currentAccent.toLowerCase() === th.primary.toLowerCase() &&
+                    currentSecondary.toLowerCase() === th.secondary.toLowerCase()
+
+                  return (
+                    <button
+                      key={th.name}
+                      type="button"
+                      onClick={() =>
+                        updateWidgetConfig(selectedWidget.instanceId, {
+                          accentColor: th.primary,
+                          secondaryColor: th.secondary,
+                          ...(selectedWidget.widgetId.startsWith('surveillance-')
+                            ? { ledColor: th.led }
+                            : {}),
+                        })
+                      }
+                      className={`py-1.5 px-1 rounded-xs text-[10px] font-mono transition-all cursor-pointer border text-center truncate flex items-center justify-center gap-1.5 ${
+                        isActive
+                          ? 'border-chalk font-bold shadow-xs'
+                          : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+                      }`}
+                      style={
+                        isActive
+                          ? {
+                              backgroundColor: `${th.primary}20`,
+                              color: th.primary,
+                              borderColor: th.primary,
+                            }
+                          : {}
+                      }
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full inline-block shrink-0 border border-black/40"
+                        style={{ backgroundColor: th.primary }}
+                      />
+                      <span className="truncate">{th.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between p-2 bg-graphite rounded-sm border border-graphite mt-3">
             <label
@@ -669,6 +750,23 @@ export function PropertiesPanel() {
           WIDGET_IDS.CODEWEB_MINIMAL_BADGE as string,
         ].includes(selectedWidget.widgetId) && (
           <CodewebDevControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.SURVEILLANCE_HEADER as string,
+          WIDGET_IDS.SURVEILLANCE_DOSSIER as string,
+          WIDGET_IDS.SURVEILLANCE_LOADOUT as string,
+          WIDGET_IDS.SURVEILLANCE_TELEMETRY as string,
+          WIDGET_IDS.SURVEILLANCE_TRANSMISSION as string,
+          WIDGET_IDS.SURVEILLANCE_FIELD as string,
+          WIDGET_IDS.SURVEILLANCE_FEEDS as string,
+          WIDGET_IDS.SURVEILLANCE_TITLE as string,
+        ].includes(selectedWidget.widgetId) && (
+          <SurveillanceControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

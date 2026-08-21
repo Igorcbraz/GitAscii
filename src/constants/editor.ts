@@ -675,3 +675,85 @@ export const GUEST_BENEFIT_ITEMS: readonly GuestBenefitItem[] = [
     defaultDesc: 'Seus widgets e SVGs funcionam com máxima qualidade e atualização em tempo real.',
   },
 ]
+
+export interface SurveillanceColorTheme {
+  name: string
+  primary: string
+  secondary: string
+  led: string
+}
+
+export const SURVEILLANCE_COLOR_THEMES: readonly SurveillanceColorTheme[] = [
+  {
+    name: 'Cyan Oxide',
+    primary: '#55ffff',
+    secondary: '#c084fc',
+    led: '#ff5555',
+  },
+  {
+    name: 'Matrix Green',
+    primary: '#00ff88',
+    secondary: '#55ffff',
+    led: '#00ff88',
+  },
+  {
+    name: 'Cyber Crimson',
+    primary: '#ff3366',
+    secondary: '#ffff55',
+    led: '#ff3366',
+  },
+  {
+    name: 'Amber Terminal',
+    primary: '#ffb454',
+    secondary: '#ff5555',
+    led: '#ffb454',
+  },
+  {
+    name: 'Synthwave Violet',
+    primary: '#c084fc',
+    secondary: '#55ffff',
+    led: '#ff55ff',
+  },
+  {
+    name: 'Monochrome Ice',
+    primary: '#e6fbfb',
+    secondary: '#8a8a8a',
+    led: '#ffffff',
+  },
+]
+
+export const PRESET_QUOTES: readonly string[] = [
+  '“Once I told the computer to do something and it did it exactly how I told it to.”',
+  '“Talk is cheap. Show me the code.”',
+  '“Programs must be written for people to read, and only incidentally for machines to execute.”',
+  '“Simplicity is prerequisite for reliability.”',
+  '“Linux is not an OS, it’s a lifestyle: best lived in the terminal.”',
+  '“First, solve the problem. Then, write the code.”',
+  '“Given enough eyeballs, all bugs are shallow.”',
+]
+
+export interface SurveillanceTitlePreset {
+  label: string
+  ref: string
+}
+
+export const TITLE_PRESETS: readonly SurveillanceTitlePreset[] = [
+  { label: 'ESTABLISH UPLINK', ref: 'REF://CONTACT.SYS' },
+  { label: 'ABOUT // DOSSIER', ref: 'REF://PROFILE.DAT' },
+  { label: 'TACTICAL LOADOUT', ref: 'REF://STACK.CFG' },
+  { label: 'SYSTEM TELEMETRY', ref: 'REF://METRICS.SYS' },
+  { label: 'PROJECTS // VAULT', ref: 'REF://REPOS.DIR' },
+  { label: 'COMMUNICATION CHANNELS', ref: 'REF://SOCIAL.NET' },
+]
+
+export interface SurveillanceLedColor {
+  color: string
+  name: string
+}
+
+export const LED_COLORS: readonly SurveillanceLedColor[] = [
+  { color: '#ff5555', name: 'Red' },
+  { color: '#55ff55', name: 'Green' },
+  { color: '#ffff55', name: 'Yellow' },
+  { color: '#55ffff', name: 'Cyan' },
+]

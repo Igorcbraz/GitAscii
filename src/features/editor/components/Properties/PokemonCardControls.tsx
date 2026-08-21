@@ -49,7 +49,7 @@ async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
 
 export function PokemonCardControls({ instanceId, config }: { instanceId: string; config: any }) {
   const { t } = useI18n()
-  const { updateWidgetConfig } = useEditorStore()
+  const updateWidgetConfig = useEditorStore((state) => state.updateWidgetConfig)
 
   const [searchQuery, setSearchQuery] = useState((config.searchQuery as string) || '')
   const [loading, setLoading] = useState(false)

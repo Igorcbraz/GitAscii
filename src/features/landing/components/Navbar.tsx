@@ -135,7 +135,6 @@ export default function Navbar() {
         className="pointer-events-auto relative border transition-all"
       >
         <div className="relative mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-          {/* Left: Brand Logo & Language */}
           <div className="flex items-center gap-3 z-10">
             <Link href="/" className="flex items-center gap-0 group">
               <span className="font-inter-tight text-subheading font-medium text-white tracking-tight group-hover:text-chalk transition-colors">
@@ -148,7 +147,6 @@ export default function Navbar() {
             <LanguageSelector align="left" className="ml-1" />
           </div>
 
-          {/* Desktop Navigation with Dropdowns */}
           <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 h-full">
             {NAVBAR_DROPDOWN_SECTIONS.map((section) => {
               const isOpened = activeDropdown === section.key
@@ -184,7 +182,6 @@ export default function Navbar() {
                     />
                   </button>
 
-                  {/* Dropdown Modal Container */}
                   <AnimatePresence mode="wait">
                     {isOpened && (
                       <motion.div
@@ -202,7 +199,6 @@ export default function Navbar() {
                         className="absolute top-14 left-1/2 -translate-x-1/2 w-[480px] z-50 origin-top pt-2"
                       >
                         <div className="rounded-sm border border-graphite/80 bg-onyx/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] overflow-hidden">
-                          {/* Modal Header Strip */}
                           <div className="flex items-center justify-between px-4 py-2 bg-void-black border-b border-graphite/70 select-none">
                             <div className="flex items-center gap-2">
                               <span className="font-jetbrains-mono text-[10px] uppercase text-ash tracking-widest">
@@ -214,7 +210,6 @@ export default function Navbar() {
                             </span>
                           </div>
 
-                          {/* Items Layout */}
                           <div className="p-2.5 flex flex-col gap-1.5">
                             {section.items.map((item) => {
                               const isItemActive =
@@ -328,7 +323,6 @@ export default function Navbar() {
                             })}
                           </div>
 
-                          {/* Modal Footer Link */}
                           {section.footerLink && (
                             <div className="px-4 py-2.5 bg-void-black border-t border-graphite/60 flex items-center justify-between">
                               {section.footerLink.isExternal ? (
@@ -363,9 +357,7 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right Actions: GitHub Star (Secondary Flat) + Session/Login (Primary) */}
           <div className="hidden md:flex items-center gap-2 z-10">
-            {/* GitHub Stars Badge (Pure Flat - No border, No background) */}
             <a
               href={EXTERNAL_LINKS.GITHUB_REPO}
               target="_blank"
@@ -387,7 +379,6 @@ export default function Navbar() {
               </div>
             </a>
 
-            {/* Session (Integrated Profile + Logout) / Login CTA */}
             {session ? (
               <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
                 <Link
@@ -433,7 +424,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Hamburger Toggle */}
           <button
             className="md:hidden text-white cursor-pointer transition-colors duration-300 ease-in-out hover:text-signal-lime min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-sm"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -443,7 +433,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="absolute left-0 top-16 w-full bg-void-black/95 backdrop-blur-xl border-b border-graphite px-6 py-4 md:hidden flex flex-col gap-5 animate-in slide-in-from-top-2 duration-300 ease-in-out shadow-2xl z-40 max-h-[85vh] overflow-y-auto">
             {NAVBAR_DROPDOWN_SECTIONS.map((section) => (

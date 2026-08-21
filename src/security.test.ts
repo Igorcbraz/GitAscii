@@ -406,4 +406,68 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       expect(result.socialUrls.instagram).toBeUndefined()
     })
   })
+
+  describe('GHAS Security Scanning Fixes Verification', () => {
+    it('sanitizes dangerous data: schemes while preserving base64 images (js/incomplete-url-scheme-check)', () => {
+      const dangerousPayloads = [
+        '<svg><a href="data:text/javascript,alert(1)">Link</a></svg>',
+        '<svg><a href="data:text/html,<script>alert(1)</script>">Link</a></svg>',
+        '<svg><a href="data:application/xhtml+xml,<svg xmlns=\'http://www.w3.org/2000/svg\'></svg>">Link</a></svg>',
+      ]
+      for (const p of dangerousPayloads) {
+        const sanitized = sanitizeSvg(p)
+        expect(sanitized).toContain('href="#"')
+        expect(sanitized).not.toContain('data:text')
+        expect(sanitized).not.toContain('data:application')
+      }
+
+      const safePayload =
+        '<svg><image href="data:image/png;base64,iVBORw0KGgo=" width="10" height="10" /></svg>'
+      const safeSanitized = sanitizeSvg(safePayload)
+      expect(safeSanitized).toContain('data:image/png;base64,iVBORw0KGgo=')
+    })
+
+    it('correctly identifies Camo proxy user agents without vulnerable substring matching (js/incomplete-url-substring-sanitization)', async () => {
+      const { parseViewerMetadata } = await import('./lib/analytics/profileMetrics')
+
+      const camoReq1 = new Request('https://gitascii.dev/user.svg', {
+        headers: { 'user-agent': 'GitHub-Camo/1.0.0' },
+      })
+      expect(parseViewerMetadata(camoReq1).isCamoProxy).toBe(true)
+
+      const camoReq2 = new Request('https://gitascii.dev/user.svg', {
+        headers: { 'user-agent': 'Mozilla/5.0 (compatible; camo.githubusercontent.com)' },
+      })
+      expect(parseViewerMetadata(camoReq2).isCamoProxy).toBe(true)
+
+      const spoofedReq = new Request('https://gitascii.dev/user.svg', {
+        headers: { 'user-agent': 'Mozilla/5.0 (attacker-camo.githubusercontent.com.evil.org)' },
+      })
+      expect(parseViewerMetadata(spoofedReq).isCamoProxy).toBe(false)
+    })
+
+    it('prevents polynomial ReDoS on repeated malformed SVG tags (js/polynomial-redos)', async () => {
+      const { renderWidgetSvg } = await import('./engine/core/WidgetRenderer')
+      const pathologicalText = '<text '.repeat(500)
+      const pathologicalImage = '<image '.repeat(500)
+
+      const widget: any = {
+        instanceId: 'test',
+        widgetId: 'terminal-info',
+        position: { x: 0, y: 0 },
+        size: { width: 400, height: 200 },
+        visible: true,
+        config: {
+          animationType: 'typewriter',
+          animationDuration: 1000,
+        },
+      }
+
+      const start = Date.now()
+      const rendered = renderWidgetSvg(widget, {} as any, {} as any)
+      const elapsed = Date.now() - start
+      expect(elapsed).toBeLessThan(1000)
+      expect(typeof rendered).toBe('string')
+    })
+  })
 })

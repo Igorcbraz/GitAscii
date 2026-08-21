@@ -18,6 +18,7 @@ import { useEditorStore } from '../../store/editorStore'
 import { AsciiProfileCardItem } from './WidgetLibrary/AsciiProfileCardItem'
 import { ControlPlaneCardItem } from './WidgetLibrary/ControlPlaneCardItem'
 import { GodProfileCardItem } from './WidgetLibrary/GodProfileCardItem'
+import { SurveillanceCardItem } from './WidgetLibrary/SurveillanceCardItem'
 import { TemplateLibrarySection } from './WidgetLibrary/TemplateLibrarySection'
 import { WidgetCardItem } from './WidgetLibrary/WidgetCardItem'
 import { WidgetFilterBar } from './WidgetLibrary/WidgetFilterBar'
@@ -239,7 +240,6 @@ export function WidgetLibrary() {
               </div>
             ) : categoryFilter === 'all' && !searchQuery ? (
               <div className="space-y-5">
-                {/* Native Section */}
                 <div id="tour-normal-widgets">
                   <div className="flex items-center gap-1.5 mb-2 px-0.5">
                     <Zap size={10} className="text-signal-lime shrink-0" />
@@ -308,7 +308,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* ASCII Profile Section */}
                 <div>
                   <button
                     onClick={() => toggleSection('asciiprofile')}
@@ -403,7 +402,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* GodProfile Section */}
                 <div>
                   <button
                     onClick={() => toggleSection('godprofile')}
@@ -498,7 +496,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* Control Plane Section */}
                 <div>
                   <button
                     onClick={() => toggleSection('controlplane')}
@@ -599,7 +596,6 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* Codeweb Section */}
                 <div>
                   <button
                     onClick={() => toggleSection('codeweb')}
@@ -700,7 +696,106 @@ export function WidgetLibrary() {
 
                 <div className="border-t border-graphite/50" />
 
-                {/* Community Section */}
+                <div>
+                  <button
+                    onClick={() => toggleSection('surveillance')}
+                    className="w-full flex items-center gap-2 mb-2 px-1 py-1.5 bg-[#050308] border border-[#1a1424] hover:border-[#55ffff]/40 rounded-none cursor-pointer group transition-all duration-300 relative overflow-hidden"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-caption text-[#55ffff] font-bold">»</span>
+                      <span className="w-1.5 h-1.5 bg-[#55ffff] group-hover:shadow-[0_0_8px_#55ffff] transition-all rounded-none" />
+                    </div>
+                    <span
+                      className="font-mono text-[11px] font-semibold text-[#55ffff] uppercase tracking-[0.16em] group-hover:text-[#e6fbfb] transition-colors"
+                      style={{ textShadow: '0 0 8px rgba(85,255,255,0.4)' }}
+                    >
+                      {t('editor.sidebar.surveillance_category', 'Surveillance Console (198X)')}
+                    </span>
+                    <a
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.SURVEILLANCE_CONSOLE}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#55ffff]/70 hover:text-[#55ffff] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+                    <span className="ml-auto font-mono text-caption text-[#6f6478]">
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.SURVEILLANCE)
+                          .length
+                      }
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#6f6478] transition-transform duration-200 ${collapsedSections['surveillance'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['surveillance'] && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.SURVEILLANCE
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+                        return (
+                          <>
+                            {baseItems.map((item) => (
+                              <SurveillanceCardItem
+                                key={item.id}
+                                item={item}
+                                onAdd={addWidget}
+                                onHover={handleHover}
+                                onLeave={handleLeave}
+                              />
+                            ))}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['surveillance'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-surveillance"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map((item) => (
+                                    <SurveillanceCardItem
+                                      key={item.id}
+                                      item={item}
+                                      onAdd={addWidget}
+                                      onHover={handleHover}
+                                      onLeave={handleLeave}
+                                    />
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    surveillance: !prev.surveillance,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['surveillance']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
                 <div>
                   <div className="flex items-center gap-1.5 mb-2 px-0.5">
                     <Sparkles size={10} className="text-violet-400 shrink-0" />
