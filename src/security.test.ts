@@ -212,6 +212,26 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
       expect(sanitized).not.toContain('alert')
     })
 
+    it('preserves safe SMIL animations and trusted Google Fonts imports', () => {
+      const safeSvg = `<svg>
+        <style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap');</style>
+        <clipPath id="clip1">
+          <rect x="0" y="0" width="0" height="20">
+            <animate attributeName="width" from="0" to="100" begin="0.1s" dur="0.4s" fill="freeze" />
+          </rect>
+        </clipPath>
+        <rect x="0" y="0" width="10" height="10">
+          <set attributeName="opacity" to="0.85" begin="0.1s" />
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="2s" repeatCount="indefinite" />
+        </rect>
+      </svg>`
+      const sanitized = sanitizeSvg(safeSvg)
+      expect(sanitized).toContain('<animate attributeName="width"')
+      expect(sanitized).toContain('<set attributeName="opacity"')
+      expect(sanitized).toContain('<animateTransform attributeName="transform"')
+      expect(sanitized).toContain('https://fonts.googleapis.com/css2?family=JetBrains+Mono')
+    })
+
     it('sanitizes safe href protocols', () => {
       expect(sanitizeSafeHref('javascript:alert(1)')).toBe('')
       expect(sanitizeSafeHref('data:text/html,<script>alert(1)</script>')).toBe('')
