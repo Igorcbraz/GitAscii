@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.14.0](https://github.com/Igorcbraz/GitAscii/compare/v1.13.2...v1.14.0) (2026-08-21)
+
+
+### Features
+
+* **editor:** add contribution guide modals for featured and community widgets ([b8f6f00](https://github.com/Igorcbraz/GitAscii/commit/b8f6f001c35107db97c2a10a56c9d193e6002a16))
+* **editor:** add GitHub adaptive profile themes and presets to ColorPicker ([58e15f0](https://github.com/Igorcbraz/GitAscii/commit/58e15f0fd8e23f5421bd70963eff730177aaa620))
+* **editor:** add GitHub profile preview mode with toggle and nudge banner ([9d71494](https://github.com/Igorcbraz/GitAscii/commit/9d71494809491d28baa9151a9f7064ba48b811da))
+* **i18n:** add support for ja, de, and fr languages ([2918995](https://github.com/Igorcbraz/GitAscii/commit/29189956e79ed73af77d51f5ed7292802e125d06))
+* **templates:** add widget category support in export and categorize template presets ([1f65bad](https://github.com/Igorcbraz/GitAscii/commit/1f65bad957fde718973642cf7d65380cdd719edc))
+* **widgets:** add GitFut card widget and modularize sidebar cards ([0952c3f](https://github.com/Igorcbraz/GitAscii/commit/0952c3f1ae7217e0096eb3cac71b884acaf419ab))
+
+
+### Bug Fixes
+
+* **editor:** fix github placeholder url typing in TerminalInfoControls ([e902e74](https://github.com/Igorcbraz/GitAscii/commit/e902e747a163c4bec6b1730b2e44930d29a08bac))
+* **editor:** fix pokemon card widget sidebar hover preview ([c59280d](https://github.com/Igorcbraz/GitAscii/commit/c59280db19c7af3d98a9929f2793b592bd18f5e2))
+* **editor:** smart guides on resize, multi scale and widget fixes ([f4641b2](https://github.com/Igorcbraz/GitAscii/commit/f4641b25a8e36c47312394920584e961e44ab6f1))
+
 ## [1.13.2](https://github.com/Igorcbraz/GitAscii/compare/v1.13.1...v1.13.2) (2026-08-21)
 
 
