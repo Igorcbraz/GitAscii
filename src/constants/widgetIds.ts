@@ -63,6 +63,11 @@ export const WIDGET_IDS = {
   SURVEILLANCE_FIELD: 'surveillance-field',
   SURVEILLANCE_FEEDS: 'surveillance-feeds',
   SURVEILLANCE_TITLE: 'surveillance-title',
+  PEDRO_PROFILE_CARD: 'pedro-profile-card',
+  PEDRO_DEV_SCORE: 'pedro-dev-score',
+  PEDRO_INSIGHTS_DOSSIER: 'pedro-insights-dossier',
+  PEDRO_DEVELOPER_DNA: 'pedro-developer-dna',
+  PEDRO_CODING_VELOCITY: 'pedro-coding-velocity',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -78,6 +83,7 @@ export const WIDGET_CATEGORIES = {
   CONTROLPLANE: 'controlplane',
   CODEWEB_DEV: 'codeweb-dev',
   SURVEILLANCE: 'surveillance',
+  PEDRO_FONSECA: 'pedrofnseca',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

@@ -29,6 +29,7 @@ export interface ExternalLinksDef {
     readonly CODEWEB_DEV: string
     readonly SURVEILLANCE_CONSOLE: string
     readonly GITFUT: string
+    readonly PEDRO_FONSECA: string
   }
   readonly CODEWEB_DEFAULT_GIFS: {
     readonly LEFT: string
@@ -72,6 +73,7 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
     CODEWEB_DEV: 'https://github.com/codeweb-dev/codeweb-dev',
     SURVEILLANCE_CONSOLE: 'https://github.com/rugbedbugg/rugbedbugg',
     GITFUT: 'https://gitfut.com',
+    PEDRO_FONSECA: 'https://github.com/PedroFnseca',
   },
   CODEWEB_DEFAULT_GIFS: {
     LEFT: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif',

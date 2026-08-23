@@ -1,3 +1,5 @@
+import { EXTERNAL_LINKS } from '@/constants'
+
 export interface WidgetItem {
   id: string
   name: string
@@ -82,9 +84,86 @@ export const widgetsList: WidgetItem[] = [
     githubSourceUrl:
       'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/renderers/stackRenderer.ts',
   },
+  {
+    id: 'pedro-profile-card',
+    name: 'Profile Terminal Card',
+    type: 'Terminal Card',
+    description:
+      'All-in-one terminal presentation card with developer identity, GitHub metrics, top repositories, language breakdown and terminal prompt.',
+    codeSnippet: '![Profile](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-profile-card)',
+    features: [
+      'Roles, Location, Website & Uptime metadata',
+      'Top Repositories & ASCII Language bars',
+      'Terminal prompt & GitHub stats summary',
+    ],
+    githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+  },
+  {
+    id: 'pedro-dev-score',
+    name: 'Scorecard',
+    type: 'Scorecard',
+    description:
+      'Synthetic 0-100 score engine calculating Activity, Open Source, Consistency, Impact, Community and Master Developer Score.',
+    codeSnippet: '![Score](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-dev-score)',
+    features: [
+      'Deterministic 0-100 rating algorithm',
+      'ASCII progress bars and tier grade',
+      'Master Developer Score summary',
+    ],
+    githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+  },
+  {
+    id: 'pedro-insights-dossier',
+    name: 'Insights & Habits',
+    type: 'Insights Card',
+    description:
+      'Behavioral diagnostics and temporal productivity distribution (Morning, Afternoon, Evening, Night).',
+    codeSnippet: '![Insights](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-insights-dossier)',
+    features: [
+      'Night owl vs early bird diagnostics',
+      'Temporal distribution analysis',
+      'Peak activity day & active month tracking',
+    ],
+    githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+  },
+  {
+    id: 'pedro-developer-dna',
+    name: 'DNA',
+    type: 'DNA Radar',
+    description:
+      'Behavioral developer traits breakdown (Builder, Maintainer, Open Source, Community, Explorer) and primary archetype classification.',
+    codeSnippet: '![DNA](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-developer-dna)',
+    features: [
+      'Archetype classification (> THE BUILDER)',
+      'Behavioral percentages and block bars',
+      'Multi-dimensional developer profile radar',
+    ],
+    githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+  },
+  {
+    id: 'pedro-coding-velocity',
+    name: 'Coding Velocity',
+    type: 'Velocity Card',
+    description:
+      'Monthly coding throughput metrics (Commits/mo, PRs/mo, Issues/mo) and daily average activity.',
+    codeSnippet: '![Coding Velocity](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-coding-velocity)',
+    features: [
+      'Monthly throughput telemetry',
+      'Average daily commit calculations',
+      'Solid block ASCII velocity bars',
+    ],
+    githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+  },
 ]
 
 export const attributions = [
+  {
+    name: 'ASCII Premium Kit (Pedro Fonseca)',
+    description:
+      'Retro ASCII terminal developer profile cards, all-in-one GitHub stats cards, synthetic scores and terminal animations.',
+    url: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
+    license: 'MIT License',
+  },
   {
     name: 'Shields.io',
     description:

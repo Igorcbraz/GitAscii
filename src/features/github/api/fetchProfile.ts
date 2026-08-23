@@ -2,6 +2,16 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { getSession } from '../../../lib/auth'
 import type { GitHubRepo, GitHubUser, NormalizedGitHubData } from '../types/github'
+import {
+  calculateDerivedInsights,
+  calculateLanguageBreakdown,
+  calculateTemporalHabits,
+} from '../utils/insightsCalculator'
+import {
+  calculateCodingVelocity,
+  calculateDeveloperDNA,
+  calculateDeveloperScores,
+} from '../utils/scoreCalculator'
 import { generateMockContributions, getMockGitHubData } from './mockProfile'
 
 interface CacheEntry {
@@ -242,6 +252,49 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       }
     } catch (e) {
       console.warn('Failed to fetch README for', username.replace(/[\r\n]/g, ''), e)
+    }
+
+    try {
+      const languageBreakdown = calculateLanguageBreakdown(result.languages, result.repos)
+      const weeks = result.contributions?.weeks || []
+      const habits = calculateTemporalHabits(weeks)
+      const derivedInsights = calculateDerivedInsights(
+        result.user,
+        result.repos,
+        result.languages,
+        habits,
+        result.totalStars
+      )
+      const developerScores = calculateDeveloperScores(
+        result.user,
+        result.repos,
+        result.contributions?.totalContributions || 0,
+        weeks,
+        result.totalStars,
+        result.totalForks,
+        result.activityMetrics
+      )
+      const developerDna = calculateDeveloperDNA(
+        result.user,
+        result.repos,
+        result.contributions?.totalContributions || 0,
+        result.totalStars,
+        result.languages
+      )
+      const codingVelocity = calculateCodingVelocity(
+        result.activityMetrics,
+        result.contributions?.totalContributions || 0,
+        weeks
+      )
+
+      result.languageBreakdown = languageBreakdown
+      result.habits = habits
+      result.derivedInsights = derivedInsights
+      result.developerScores = developerScores
+      result.developerDna = developerDna
+      result.codingVelocity = codingVelocity
+    } catch (calcErr) {
+      console.warn('Failed to calculate derived insights/scores:', calcErr)
     }
 
     profileCache.set(cacheKey, {

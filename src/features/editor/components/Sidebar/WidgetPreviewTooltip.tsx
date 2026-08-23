@@ -69,6 +69,11 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.SURVEILLANCE_FIELD]: { width: 780, height: 438 },
   [WIDGET_IDS.SURVEILLANCE_FEEDS]: { width: 780, height: 190 },
   [WIDGET_IDS.SURVEILLANCE_TITLE]: { width: 780, height: 30 },
+  [WIDGET_IDS.PEDRO_PROFILE_CARD]: { width: 520, height: 440 },
+  [WIDGET_IDS.PEDRO_DEV_SCORE]: { width: 390, height: 380 },
+  [WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER]: { width: 390, height: 380 },
+  [WIDGET_IDS.PEDRO_DEVELOPER_DNA]: { width: 390, height: 320 },
+  [WIDGET_IDS.PEDRO_CODING_VELOCITY]: { width: 390, height: 260 },
 }
 
 export function WidgetPreviewTooltip({

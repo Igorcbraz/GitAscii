@@ -24,6 +24,7 @@ import { GodProfileControls } from './GodProfileControls'
 import { IntegrationsControls } from './IntegrationsControls'
 import { MultiPropertiesPanel } from './MultiPropertiesPanel'
 import { PokemonCardControls } from './PokemonCardControls'
+import { PremiumAsciiControls } from './PremiumAsciiControls'
 import { SocialMediaControls } from './SocialMediaControls'
 import { SurveillanceControls } from './SurveillanceControls'
 import { TechStackControls } from './TechStackControls'
@@ -772,6 +773,20 @@ export function PropertiesPanel() {
           WIDGET_IDS.SURVEILLANCE_TITLE as string,
         ].includes(selectedWidget.widgetId) && (
           <SurveillanceControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.PEDRO_PROFILE_CARD as string,
+          WIDGET_IDS.PEDRO_DEV_SCORE as string,
+          WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER as string,
+          WIDGET_IDS.PEDRO_DEVELOPER_DNA as string,
+          WIDGET_IDS.PEDRO_CODING_VELOCITY as string,
+        ].includes(selectedWidget.widgetId) && (
+          <PremiumAsciiControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

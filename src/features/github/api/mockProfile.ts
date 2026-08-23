@@ -2,7 +2,7 @@ import { APP_URL } from '../../../constants'
 import type { NormalizedGitHubData } from '../types/github'
 
 export function getMockGitHubData(username: string): NormalizedGitHubData {
-  return {
+  const result: NormalizedGitHubData = {
     user: {
       id: 40432351,
       login: username || 'Igorcbraz',
@@ -60,16 +60,136 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
       },
     ],
     languages: {
-      TypeScript: 14,
-      JavaScript: 8,
-      Rust: 4,
-      CSS: 3,
-      Python: 2,
+      TypeScript: 887796,
+      JavaScript: 509219,
+      Rust: 178925,
+      CSS: 92848,
+      Python: 80274,
     },
     totalStars: 563,
     totalForks: 75,
+    activityMetrics: {
+      totalCommits: 450,
+      totalPullRequests: 28,
+      totalIssues: 14,
+      totalReviews: 9,
+      totalDiscussions: 5,
+      repositoriesCreated: 38,
+      totalForks: 75,
+    },
     contributions: generateMockContributions(),
   }
+
+  const contributions = result.contributions || generateMockContributions()
+  const habits = {
+    peakDayOfWeek: 'Thursday',
+    peakMonth: 'August',
+    peakHour: 21,
+    averageCommitHour: 19,
+    morningPercent: 20,
+    afternoonPercent: 35,
+    eveningPercent: 30,
+    nightPercent: 15,
+    isNightOwl: true,
+    mostProductiveDay: 'Friday (35 commits)',
+    mostProductiveWeek: 'Annual peak week',
+    mostProductiveMonth: 'August',
+  }
+  const languageBreakdown = {
+    ranking: [
+      { name: 'TypeScript', bytes: 887796, percentage: 51, repoCount: 22 },
+      { name: 'JavaScript', bytes: 509219, percentage: 29, repoCount: 10 },
+      { name: 'Rust', bytes: 178925, percentage: 10, repoCount: 4 },
+      { name: 'CSS', bytes: 92848, percentage: 5, repoCount: 3 },
+      { name: 'Python', bytes: 80274, percentage: 5, repoCount: 2 },
+    ],
+    dominantLanguage: 'TypeScript',
+    fastestGrowing: 'Rust',
+    recentLanguage: 'TypeScript',
+  }
+  const derivedInsights = [
+    {
+      id: 'night-owl',
+      title: 'Night Owl Developer Schedule',
+      subtitle: 'Over 65% of commits occur after 6 PM',
+      category: 'behavior' as const,
+      icon: '🌙',
+    },
+    {
+      id: 'top-impact',
+      title: 'Flagship Project: GitAscii',
+      subtitle: 'Concentrates 60% of all repository stars',
+      category: 'impact' as const,
+      icon: '⭐',
+    },
+    {
+      id: 'peak-day',
+      title: 'Peak Coding Cadence: Thursdays',
+      subtitle: 'Highest cumulative weekly commit throughput',
+      category: 'behavior' as const,
+      icon: '⚡',
+    },
+    {
+      id: 'dominant-language',
+      title: 'Core Technology: TypeScript',
+      subtitle: 'Dominates 51% of all public open-source code',
+      category: 'language' as const,
+      icon: '💻',
+    },
+    {
+      id: 'account-longevity',
+      title: '8+ Years Open Source Track Record',
+      subtitle: 'Active public development since 2018',
+      category: 'longevity' as const,
+      icon: '🏆',
+    },
+  ]
+  const developerScores = {
+    activityScore: 87,
+    openSourceScore: 92,
+    communityScore: 71,
+    consistencyScore: 94,
+    impactScore: 83,
+    growthScore: 89,
+    maintenanceScore: 85,
+    projectHealthScore: 90,
+    contributionScore: 88,
+    totalDeveloperScore: 86,
+    tierGrade: 'A+' as const,
+  }
+  const developerDna = {
+    traits: [
+      { name: 'Builder', percentage: 92 },
+      { name: 'Maintainer', percentage: 84 },
+      { name: 'Open Source', percentage: 79 },
+      { name: 'Community', percentage: 61 },
+      { name: 'Explorer', percentage: 88 },
+    ],
+    primaryArchetype: '> THE BUILDER',
+    archetypeDescription:
+      'Specialized in transforming ideas into architecture and production systems.',
+  }
+  const codingVelocity = {
+    commitsPerMonth: 143,
+    prsPerMonth: 37,
+    issuesPerMonth: 18,
+    reviewsPerMonth: 8,
+    avgCommitsPerDay: 4.7,
+    metrics: [
+      { label: 'Commits/month', value: 143, max: 150 },
+      { label: 'PRs/month', value: 37, max: 45 },
+      { label: 'Issues/month', value: 18, max: 25 },
+    ],
+  }
+
+  result.habits = habits
+  result.languageBreakdown = languageBreakdown
+  result.derivedInsights = derivedInsights
+  result.developerScores = developerScores
+  result.developerDna = developerDna
+  result.codingVelocity = codingVelocity
+
+  return result
 }
 
 export function generateMockContributions() {

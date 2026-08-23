@@ -20,6 +20,7 @@ import { ContributeCommunityWidgetModal } from './WidgetLibrary/ContributeCommun
 import { ContributeFeaturedWidgetModal } from './WidgetLibrary/ContributeFeaturedWidgetModal'
 import { ControlPlaneCardItem } from './WidgetLibrary/ControlPlaneCardItem'
 import { GodProfileCardItem } from './WidgetLibrary/GodProfileCardItem'
+import { PremiumAsciiWidgetCardItem } from './WidgetLibrary/PremiumAsciiWidgetCardItem'
 import { SurveillanceCardItem } from './WidgetLibrary/SurveillanceCardItem'
 import { TemplateLibrarySection } from './WidgetLibrary/TemplateLibrarySection'
 import { WidgetCardItem } from './WidgetLibrary/WidgetCardItem'
@@ -321,6 +322,101 @@ export function WidgetLibrary() {
                       )
                     })()}
                   </div>
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    onClick={() => toggleSection('pedrofnseca')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <span className="font-inter-tight text-caption font-medium text-[#3fb950] uppercase tracking-[0.16em]">
+                      {t('editor.sidebar.pedrofnseca_category', 'ASCII Premium Kit')}
+                    </span>
+                    <a
+                      href={EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#3fb950] hover:text-[#58a6ff] transition-colors ml-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink size={10} />
+                    </a>
+
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {
+                        filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.PEDRO_FONSECA
+                        ).length
+                      }
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#3fb950]/60 transition-transform duration-200 ${collapsedSections['pedrofnseca'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['pedrofnseca'] && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.PEDRO_FONSECA
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+                        return (
+                          <>
+                            {baseItems.map((item) => (
+                              <PremiumAsciiWidgetCardItem
+                                key={item.id}
+                                item={item}
+                                onAdd={addWidget}
+                                onHover={handleHover}
+                                onLeave={handleLeave}
+                              />
+                            ))}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['pedrofnseca'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-pedrofnseca"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map((item) => (
+                                    <PremiumAsciiWidgetCardItem
+                                      key={item.id}
+                                      item={item}
+                                      onAdd={addWidget}
+                                      onHover={handleHover}
+                                      onLeave={handleLeave}
+                                    />
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    pedrofnseca: !prev.pedrofnseca,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['pedrofnseca']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-graphite/50" />

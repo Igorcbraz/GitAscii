@@ -61,6 +61,7 @@ function getWidgetCategory(widget: WidgetInstance): string {
   if (widget.widgetId.startsWith('codeweb-')) return WIDGET_CATEGORIES.CODEWEB_DEV
   if (widget.widgetId.startsWith('godprofile-')) return WIDGET_CATEGORIES.GODPROFILE
   if (widget.widgetId.startsWith('asciiprofile-')) return WIDGET_CATEGORIES.ASCIIPROFILE
+  if (widget.widgetId.startsWith('pedro-')) return WIDGET_CATEGORIES.PEDRO_FONSECA
   if (
     [
       WIDGET_IDS.STATS,
@@ -89,6 +90,7 @@ const CATEGORY_NAMES: Record<string, { label: string; icon: React.ElementType }>
   [WIDGET_CATEGORIES.CODEWEB_DEV]: { label: 'Codeweb Aura', icon: Sparkles },
   [WIDGET_CATEGORIES.GODPROFILE]: { label: 'GodProfile', icon: TerminalSquare },
   [WIDGET_CATEGORIES.ASCIIPROFILE]: { label: 'ASCII Profile', icon: Terminal },
+  [WIDGET_CATEGORIES.PEDRO_FONSECA]: { label: 'ASCII Premium Kit', icon: Terminal },
   [WIDGET_CATEGORIES.ESSENTIAL]: { label: 'Essenciais', icon: Flame },
   [WIDGET_CATEGORIES.INTERACTIVE]: { label: 'Interativos', icon: Sparkles },
   stats: { label: 'Estatísticas & Métricas', icon: Flame },

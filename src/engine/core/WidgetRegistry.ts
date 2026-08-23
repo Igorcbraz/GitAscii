@@ -34,6 +34,11 @@ import { renderMonolith } from '@/features/widgets/renderers/MonolithRenderer'
 import { renderNeural } from '@/features/widgets/renderers/NeuralRenderer'
 import { renderPatchbay } from '@/features/widgets/renderers/PatchbayRenderer'
 import { renderPokemonCard } from '@/features/widgets/renderers/PokemonCardRenderer'
+import { renderPremiumAsciiCodingVelocity } from '@/features/widgets/renderers/PremiumAsciiCodingVelocityRenderer'
+import { renderPremiumAsciiDeveloperDna } from '@/features/widgets/renderers/PremiumAsciiDeveloperDnaRenderer'
+import { renderPremiumAsciiDevScore } from '@/features/widgets/renderers/PremiumAsciiDevScoreRenderer'
+import { renderPremiumAsciiInsights } from '@/features/widgets/renderers/PremiumAsciiInsightsRenderer'
+import { renderPremiumAsciiProfileCard } from '@/features/widgets/renderers/PremiumAsciiProfileCardRenderer'
 import { renderRepositories } from '@/features/widgets/renderers/RepositoriesRenderer'
 import { renderSignalGrid } from '@/features/widgets/renderers/SignalGridRenderer'
 import { renderSocialMedia } from '@/features/widgets/renderers/SocialMediaRenderer'
@@ -132,6 +137,13 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.SURVEILLANCE_FIELD, (w, d, g, s) => renderSurveillanceField(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_FEEDS, (w, d, g, s) => renderSurveillanceFeeds(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_TITLE, (w, d, g, s) => renderSurveillanceTitle(w, d, g, s)],
+
+  // ASCII Premium Kit (Pedro Fonseca Collection)
+  [WIDGET_IDS.PEDRO_PROFILE_CARD, (w, d, g, s) => renderPremiumAsciiProfileCard(w, d, g, s)],
+  [WIDGET_IDS.PEDRO_DEV_SCORE, (w, d, g, s) => renderPremiumAsciiDevScore(w, d, g, s)],
+  [WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER, (w, d, g, s) => renderPremiumAsciiInsights(w, d, g, s)],
+  [WIDGET_IDS.PEDRO_DEVELOPER_DNA, (w, d, g, s) => renderPremiumAsciiDeveloperDna(w, d, g, s)],
+  [WIDGET_IDS.PEDRO_CODING_VELOCITY, (w, d, g, s) => renderPremiumAsciiCodingVelocity(w, d, g, s)],
 
   // External Integration Widgets
   [WIDGET_IDS.GITFEST_LINEUP, (w, d, g) => renderExternalWidgets(w, d, g)],
