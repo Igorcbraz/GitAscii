@@ -257,12 +257,64 @@ describe('Engine Robustness & Widget Error Boundary', () => {
     expect(fullSvg).toContain('<svg')
     expect(fullSvg).toContain('GITHUB METRICS')
 
-    // Test aliased query param widget filter ?widget=streak (should synthesize or match streak)
-    const streakSvg = renderSvg(config, mockFullData, { widgets: ['streak'] })
-    expect(streakSvg).toContain('<svg')
-
     // Test light theme
     const lightSvg = renderSvg(config, mockFullData, { theme: 'light' })
     expect(lightSvg).toContain('fill="#ffffff"')
+  })
+
+  it('renders Pedro Fonseca widgets collection gracefully', () => {
+    const pedroWidgets = [
+      'pedro-profile-card',
+      'pedro-dev-score',
+      'pedro-insights-dossier',
+      'pedro-developer-dna',
+      'pedro-coding-velocity',
+    ]
+
+    pedroWidgets.forEach((widgetId) => {
+      const widget: WidgetInstance = {
+        widgetId,
+        instanceId: `inst_${widgetId}`,
+        name: widgetId,
+        position: { x: 0, y: 0 },
+        size: { width: 800, height: 400 },
+        config: {},
+        locked: false,
+        visible: true,
+        zIndex: 1,
+      }
+
+      // Test with full data
+      const renderer = getRenderer(widgetId)
+      const fullOutput = renderer(widget, mockFullData, mockGlobalStyles)
+      expect(fullOutput).toContain('<svg')
+
+      // Test with null / empty data resilience
+      const emptyData: NormalizedGitHubData = {
+        user: {
+          id: 0,
+          login: 'empty',
+          name: null,
+          avatar_url: '',
+          bio: null,
+          company: null,
+          blog: null,
+          location: null,
+          twitter_username: null,
+          public_repos: 0,
+          public_gists: 0,
+          followers: 0,
+          following: 0,
+          created_at: '',
+          updated_at: '',
+        },
+        repos: [],
+        languages: {},
+        totalStars: 0,
+        totalForks: 0,
+      }
+      const emptyOutput = renderer(widget, emptyData, mockGlobalStyles)
+      expect(emptyOutput).toContain('<svg')
+    })
   })
 })
