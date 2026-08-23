@@ -23,7 +23,19 @@ function renderProgressBar(
 }
 
 function vLen(str: string): number {
-  return str.replace(/<[^>]+>/g, '').length
+  let len = 0
+  let inTag = false
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+    if (char === '<') {
+      inTag = true
+    } else if (char === '>') {
+      inTag = false
+    } else if (!inTag) {
+      len++
+    }
+  }
+  return len
 }
 
 function vPad(str: string, targetWidth: number): string {
@@ -61,7 +73,6 @@ export function renderPremiumAsciiDevScore(
     (isDark ? '#0d1117' : '#f6f8fa')
   const borderColor = (cfg.borderColor as string) || (isDark ? '#30363d' : '#d0d7de')
   const textChalk = isDark ? '#c9d1d9' : '#24292f'
-  const textAsh = isDark ? '#8b949e' : '#57606a'
   const accentLime = (cfg.accentColor as string) || globalStyles?.accentColor || '#3fb950'
   const accentCyan = '#39c5cf'
   const accentYellow = '#ffbd2e'
