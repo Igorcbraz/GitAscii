@@ -49,14 +49,14 @@ export function renderPremiumAsciiProfileCard(
   const height = Math.max(200, Number(widget?.size?.height) || 440)
   const cfg = widget?.config || {}
 
-  const username = data?.user?.login || 'PedroFnseca'
+  const username = data?.user?.login || 'developer'
   const displayName = (cfg.customName as string) || data?.user?.name || username
-  const location = (cfg.customLocation as string) || data?.user?.location || 'Brazil'
+  const location = (cfg.customLocation as string) || data?.user?.location || 'San Francisco, CA'
   const website =
     (cfg.customWebsite as string) ||
     (data?.user?.blog
       ? data.user.blog.replace(/^https?:\/\//, '').replace(/\/$/, '')
-      : 'pedrofnseca.me')
+      : 'developer.io')
   const uptime = getAccountUptime(data?.user?.created_at)
 
   const roles = (
@@ -266,5 +266,3 @@ export function renderPremiumAsciiProfileCard(
   ${framesXml}
 </svg>`
 }
-
-export const renderPedroProfileCard = renderPremiumAsciiProfileCard

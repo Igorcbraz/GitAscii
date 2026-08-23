@@ -328,11 +328,11 @@ export function WidgetLibrary() {
 
                 <div>
                   <button
-                    onClick={() => toggleSection('pedrofnseca')}
+                    onClick={() => toggleSection('premiumascii')}
                     className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
                   >
                     <span className="font-inter-tight text-caption font-medium text-[#3fb950] uppercase tracking-[0.16em]">
-                      {t('editor.sidebar.pedrofnseca_category', 'ASCII Premium Kit')}
+                      {t('editor.sidebar.premiumascii_category', 'ASCII Premium Kit')}
                     </span>
                     <a
                       href={EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA}
@@ -347,20 +347,20 @@ export function WidgetLibrary() {
                     <span className="ml-auto font-inter-tight text-caption text-ash">
                       {
                         filteredWidgets.filter(
-                          (w) => w.category === WIDGET_CATEGORIES.PEDRO_FONSECA
+                          (w) => w.category === WIDGET_CATEGORIES.PREMIUM_ASCII
                         ).length
                       }
                     </span>
                     <ChevronDown
                       size={12}
-                      className={`text-[#3fb950]/60 transition-transform duration-200 ${collapsedSections['pedrofnseca'] ? '-rotate-90' : ''}`}
+                      className={`text-[#3fb950]/60 transition-transform duration-200 ${collapsedSections['premiumascii'] ? '-rotate-90' : ''}`}
                     />
                   </button>
-                  {!collapsedSections['pedrofnseca'] && (
+                  {!collapsedSections['premiumascii'] && (
                     <div className="space-y-2">
                       {(() => {
                         const items = filteredWidgets.filter(
-                          (w) => w.category === WIDGET_CATEGORIES.PEDRO_FONSECA
+                          (w) => w.category === WIDGET_CATEGORIES.PREMIUM_ASCII
                         )
                         const baseItems = items.slice(0, 3)
                         const extraItems = items.slice(3)
@@ -376,9 +376,9 @@ export function WidgetLibrary() {
                               />
                             ))}
                             <AnimatePresence initial={false}>
-                              {expandedLists['pedrofnseca'] && extraItems.length > 0 && (
+                              {expandedLists['premiumascii'] && extraItems.length > 0 && (
                                 <motion.div
-                                  key="extra-pedrofnseca"
+                                  key="extra-premiumascii"
                                   initial={{ height: 0, opacity: 0, marginTop: 0 }}
                                   animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
                                   exit={{ height: 0, opacity: 0, marginTop: 0 }}
@@ -402,14 +402,20 @@ export function WidgetLibrary() {
                                 onClick={() =>
                                   setExpandedLists((prev) => ({
                                     ...prev,
-                                    pedrofnseca: !prev.pedrofnseca,
+                                    premiumascii: !prev.premiumascii,
                                   }))
                                 }
                                 className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
                               >
-                                {expandedLists['pedrofnseca']
+                                {expandedLists['premiumascii']
                                   ? t('editor.sidebar.show_less', 'Mostrar menos')
                                   : t('editor.sidebar.load_more', 'Carregar mais')}
+                                <ChevronDown
+                                  size={12}
+                                  className={`text-ash group-hover:text-signal-lime transition-transform duration-300 ${
+                                    expandedLists['premiumascii'] ? 'rotate-180' : ''
+                                  }`}
+                                />
                               </button>
                             )}
                           </>

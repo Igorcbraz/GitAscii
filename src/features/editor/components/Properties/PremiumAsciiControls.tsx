@@ -24,10 +24,10 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
   const customLocation = (config.customLocation as string) || ''
   const customWebsite = (config.customWebsite as string) || ''
 
-  const isProfileCard = widgetId === WIDGET_IDS.PEDRO_PROFILE_CARD
+  const isProfileCard = widgetId === WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD
 
   return (
-    <div className="space-y-4 pt-3 border-t border-graphite" data-testid="pedro-controls">
+    <div className="space-y-4 pt-3 border-t border-graphite" data-testid="premium-ascii-controls">
       {/* Category header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
@@ -51,11 +51,11 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
         <div className="space-y-0.5">
           <div className="flex items-center gap-1.5 text-body-sm font-inter-tight font-medium text-chalk">
             <Sparkles size={13} className="text-signal-lime" />
-            <span>{t('editor.pedro.animatedTitle', 'Animar Números e Barras')}</span>
+            <span>{t('editor.premiumascii.animatedTitle', 'Animar Números e Barras')}</span>
           </div>
           <p className="text-caption text-ash font-jetbrains-mono">
             {t(
-              'editor.pedro.animatedDesc',
+              'editor.premiumascii.animatedDesc',
               'Efeito progressivo de subida de valores e preenchimento'
             )}
           </p>
@@ -81,7 +81,7 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
             <input
               type="text"
               value={customName}
-              placeholder="Pedro Fonseca"
+              placeholder="Developer Name"
               onChange={(e) => updateWidgetConfig(instanceId, { customName: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-xs bg-void-black border border-graphite text-chalk font-jetbrains-mono text-body-sm focus:border-signal-lime focus:outline-none transition-colors"
             />
@@ -94,7 +94,7 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
             <input
               type="text"
               value={customLocation}
-              placeholder="Brazil"
+              placeholder="San Francisco, CA"
               onChange={(e) => updateWidgetConfig(instanceId, { customLocation: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-xs bg-void-black border border-graphite text-chalk font-jetbrains-mono text-body-sm focus:border-signal-lime focus:outline-none transition-colors"
             />
@@ -107,7 +107,7 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
             <input
               type="text"
               value={customWebsite}
-              placeholder="pedrofnseca.me"
+              placeholder="developer.io"
               onChange={(e) => updateWidgetConfig(instanceId, { customWebsite: e.target.value })}
               className="w-full px-2.5 py-1.5 rounded-xs bg-void-black border border-graphite text-chalk font-jetbrains-mono text-body-sm focus:border-signal-lime focus:outline-none transition-colors"
             />
@@ -117,5 +117,3 @@ export function PremiumAsciiControls({ instanceId, widgetId, config }: PremiumAs
     </div>
   )
 }
-
-export const PedroControls = PremiumAsciiControls

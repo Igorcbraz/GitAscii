@@ -138,12 +138,18 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.SURVEILLANCE_FEEDS, (w, d, g, s) => renderSurveillanceFeeds(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_TITLE, (w, d, g, s) => renderSurveillanceTitle(w, d, g, s)],
 
-  // ASCII Premium Kit (Pedro Fonseca Collection)
-  [WIDGET_IDS.PEDRO_PROFILE_CARD, (w, d, g, s) => renderPremiumAsciiProfileCard(w, d, g, s)],
-  [WIDGET_IDS.PEDRO_DEV_SCORE, (w, d, g, s) => renderPremiumAsciiDevScore(w, d, g, s)],
-  [WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER, (w, d, g, s) => renderPremiumAsciiInsights(w, d, g, s)],
-  [WIDGET_IDS.PEDRO_DEVELOPER_DNA, (w, d, g, s) => renderPremiumAsciiDeveloperDna(w, d, g, s)],
-  [WIDGET_IDS.PEDRO_CODING_VELOCITY, (w, d, g, s) => renderPremiumAsciiCodingVelocity(w, d, g, s)],
+  // ASCII Premium Kit
+  [
+    WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD,
+    (w, d, g, s) => renderPremiumAsciiProfileCard(w, d, g, s),
+  ],
+  [WIDGET_IDS.PREMIUM_ASCII_DEV_SCORE, (w, d, g, s) => renderPremiumAsciiDevScore(w, d, g, s)],
+  [WIDGET_IDS.PREMIUM_ASCII_INSIGHTS, (w, d, g, s) => renderPremiumAsciiInsights(w, d, g, s)],
+  [WIDGET_IDS.PREMIUM_ASCII_DNA, (w, d, g, s) => renderPremiumAsciiDeveloperDna(w, d, g, s)],
+  [
+    WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY,
+    (w, d, g, s) => renderPremiumAsciiCodingVelocity(w, d, g, s),
+  ],
 
   // External Integration Widgets
   [WIDGET_IDS.GITFEST_LINEUP, (w, d, g) => renderExternalWidgets(w, d, g)],

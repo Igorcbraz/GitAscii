@@ -194,5 +194,3 @@ export function renderPremiumAsciiDeveloperDna(
   ${framesXml}
 </svg>`
 }
-
-export const renderPedroDeveloperDna = renderPremiumAsciiDeveloperDna

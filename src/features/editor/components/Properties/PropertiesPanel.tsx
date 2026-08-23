@@ -780,11 +780,11 @@ export function PropertiesPanel() {
         )}
 
         {[
-          WIDGET_IDS.PEDRO_PROFILE_CARD as string,
-          WIDGET_IDS.PEDRO_DEV_SCORE as string,
-          WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER as string,
-          WIDGET_IDS.PEDRO_DEVELOPER_DNA as string,
-          WIDGET_IDS.PEDRO_CODING_VELOCITY as string,
+          WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD as string,
+          WIDGET_IDS.PREMIUM_ASCII_DEV_SCORE as string,
+          WIDGET_IDS.PREMIUM_ASCII_INSIGHTS as string,
+          WIDGET_IDS.PREMIUM_ASCII_DNA as string,
+          WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY as string,
         ].includes(selectedWidget.widgetId) && (
           <PremiumAsciiControls
             instanceId={selectedWidget.instanceId}

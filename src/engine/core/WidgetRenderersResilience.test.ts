@@ -262,16 +262,16 @@ describe('Engine Robustness & Widget Error Boundary', () => {
     expect(lightSvg).toContain('fill="#ffffff"')
   })
 
-  it('renders Pedro Fonseca widgets collection gracefully', () => {
-    const pedroWidgets = [
-      'pedro-profile-card',
-      'pedro-dev-score',
-      'pedro-insights-dossier',
-      'pedro-developer-dna',
-      'pedro-coding-velocity',
+  it('renders ASCII Premium Kit widgets collection gracefully', () => {
+    const premiumAsciiWidgets = [
+      'premium-ascii-profile-card',
+      'premium-ascii-dev-score',
+      'premium-ascii-insights',
+      'premium-ascii-dna',
+      'premium-ascii-coding-velocity',
     ]
 
-    pedroWidgets.forEach((widgetId) => {
+    premiumAsciiWidgets.forEach((widgetId) => {
       const widget: WidgetInstance = {
         widgetId,
         instanceId: `inst_${widgetId}`,

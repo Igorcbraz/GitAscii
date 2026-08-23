@@ -226,5 +226,3 @@ export function renderPremiumAsciiDevScore(
   ${framesXml}
 </svg>`
 }
-
-export const renderPedroDevScore = renderPremiumAsciiDevScore

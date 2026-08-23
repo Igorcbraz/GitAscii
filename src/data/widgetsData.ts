@@ -85,12 +85,12 @@ export const widgetsList: WidgetItem[] = [
       'https://github.com/Igorcbraz/GitAscii/blob/main/src/engine/renderers/stackRenderer.ts',
   },
   {
-    id: 'pedro-profile-card',
+    id: 'premium-ascii-profile-card',
     name: 'Profile Terminal Card',
     type: 'Terminal Card',
     description:
       'All-in-one terminal presentation card with developer identity, GitHub metrics, top repositories, language breakdown and terminal prompt.',
-    codeSnippet: '![Profile](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-profile-card)',
+    codeSnippet: '![Profile](${APP_URL}/api/YOUR_USERNAME?widgets=premium-ascii-profile-card)',
     features: [
       'Roles, Location, Website & Uptime metadata',
       'Top Repositories & ASCII Language bars',
@@ -99,12 +99,12 @@ export const widgetsList: WidgetItem[] = [
     githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
   },
   {
-    id: 'pedro-dev-score',
+    id: 'premium-ascii-dev-score',
     name: 'Scorecard',
     type: 'Scorecard',
     description:
       'Synthetic 0-100 score engine calculating Activity, Open Source, Consistency, Impact, Community and Master Developer Score.',
-    codeSnippet: '![Score](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-dev-score)',
+    codeSnippet: '![Score](${APP_URL}/api/YOUR_USERNAME?widgets=premium-ascii-dev-score)',
     features: [
       'Deterministic 0-100 rating algorithm',
       'ASCII progress bars and tier grade',
@@ -113,12 +113,12 @@ export const widgetsList: WidgetItem[] = [
     githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
   },
   {
-    id: 'pedro-insights-dossier',
+    id: 'premium-ascii-insights',
     name: 'Insights & Habits',
     type: 'Insights Card',
     description:
       'Behavioral diagnostics and temporal productivity distribution (Morning, Afternoon, Evening, Night).',
-    codeSnippet: '![Insights](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-insights-dossier)',
+    codeSnippet: '![Insights](${APP_URL}/api/YOUR_USERNAME?widgets=premium-ascii-insights)',
     features: [
       'Night owl vs early bird diagnostics',
       'Temporal distribution analysis',
@@ -127,12 +127,12 @@ export const widgetsList: WidgetItem[] = [
     githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
   },
   {
-    id: 'pedro-developer-dna',
+    id: 'premium-ascii-dna',
     name: 'DNA',
     type: 'DNA Radar',
     description:
       'Behavioral developer traits breakdown (Builder, Maintainer, Open Source, Community, Explorer) and primary archetype classification.',
-    codeSnippet: '![DNA](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-developer-dna)',
+    codeSnippet: '![DNA](${APP_URL}/api/YOUR_USERNAME?widgets=premium-ascii-dna)',
     features: [
       'Archetype classification (> THE BUILDER)',
       'Behavioral percentages and block bars',
@@ -141,12 +141,13 @@ export const widgetsList: WidgetItem[] = [
     githubSourceUrl: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,
   },
   {
-    id: 'pedro-coding-velocity',
+    id: 'premium-ascii-coding-velocity',
     name: 'Coding Velocity',
     type: 'Velocity Card',
     description:
       'Monthly coding throughput metrics (Commits/mo, PRs/mo, Issues/mo) and daily average activity.',
-    codeSnippet: '![Coding Velocity](${APP_URL}/api/YOUR_USERNAME?widgets=pedro-coding-velocity)',
+    codeSnippet:
+      '![Coding Velocity](${APP_URL}/api/YOUR_USERNAME?widgets=premium-ascii-coding-velocity)',
     features: [
       'Monthly throughput telemetry',
       'Average daily commit calculations',
@@ -158,7 +159,7 @@ export const widgetsList: WidgetItem[] = [
 
 export const attributions = [
   {
-    name: 'ASCII Premium Kit (Pedro Fonseca)',
+    name: 'ASCII Premium Kit',
     description:
       'Retro ASCII terminal developer profile cards, all-in-one GitHub stats cards, synthetic scores and terminal animations.',
     url: EXTERNAL_LINKS.COMMUNITY_REPOS.PEDRO_FONSECA,

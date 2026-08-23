@@ -63,11 +63,11 @@ export const WIDGET_IDS = {
   SURVEILLANCE_FIELD: 'surveillance-field',
   SURVEILLANCE_FEEDS: 'surveillance-feeds',
   SURVEILLANCE_TITLE: 'surveillance-title',
-  PEDRO_PROFILE_CARD: 'pedro-profile-card',
-  PEDRO_DEV_SCORE: 'pedro-dev-score',
-  PEDRO_INSIGHTS_DOSSIER: 'pedro-insights-dossier',
-  PEDRO_DEVELOPER_DNA: 'pedro-developer-dna',
-  PEDRO_CODING_VELOCITY: 'pedro-coding-velocity',
+  PREMIUM_ASCII_PROFILE_CARD: 'premium-ascii-profile-card',
+  PREMIUM_ASCII_DEV_SCORE: 'premium-ascii-dev-score',
+  PREMIUM_ASCII_INSIGHTS: 'premium-ascii-insights',
+  PREMIUM_ASCII_DNA: 'premium-ascii-dna',
+  PREMIUM_ASCII_CODING_VELOCITY: 'premium-ascii-coding-velocity',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -83,7 +83,7 @@ export const WIDGET_CATEGORIES = {
   CONTROLPLANE: 'controlplane',
   CODEWEB_DEV: 'codeweb-dev',
   SURVEILLANCE: 'surveillance',
-  PEDRO_FONSECA: 'pedrofnseca',
+  PREMIUM_ASCII: 'premium-ascii',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

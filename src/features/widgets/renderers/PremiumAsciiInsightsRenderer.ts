@@ -217,5 +217,3 @@ export function renderPremiumAsciiInsights(
   ${framesXml}
 </svg>`
 }
-
-export const renderPedroInsights = renderPremiumAsciiInsights

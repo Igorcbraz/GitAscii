@@ -194,5 +194,3 @@ export function renderPremiumAsciiCodingVelocity(
   ${framesXml}
 </svg>`
 }
-
-export const renderPedroCodingVelocity = renderPremiumAsciiCodingVelocity

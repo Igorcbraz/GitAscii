@@ -16,31 +16,31 @@ interface PremiumAsciiWidgetCardItemProps {
 
 function getWidgetMinimalMeta(id: string) {
   switch (id) {
-    case WIDGET_IDS.PEDRO_PROFILE_CARD:
+    case WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD:
       return {
         cmd: '$ profile --card',
         highlight: '@dev:~$ • 340★ • TS 51% • Repos',
         tag: 'Terminal Card',
       }
-    case WIDGET_IDS.PEDRO_DEV_SCORE:
+    case WIDGET_IDS.PREMIUM_ASCII_DEV_SCORE:
       return {
         cmd: '$ score --radar',
         highlight: 'Radar 0-100 • Tier A+ • 8 Metrics',
         tag: 'Scorecard',
       }
-    case WIDGET_IDS.PEDRO_INSIGHTS_DOSSIER:
+    case WIDGET_IDS.PREMIUM_ASCII_INSIGHTS:
       return {
         cmd: '$ insights --habits',
         highlight: '🌙 Night Owl • Peak Day • 4 Shifts',
         tag: 'Insights',
       }
-    case WIDGET_IDS.PEDRO_DEVELOPER_DNA:
+    case WIDGET_IDS.PREMIUM_ASCII_DNA:
       return {
         cmd: '$ dna --archetype',
         highlight: '🧬 > THE BUILDER • 5 Traits',
         tag: 'Archetype',
       }
-    case WIDGET_IDS.PEDRO_CODING_VELOCITY:
+    case WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY:
       return {
         cmd: '$ velocity --cadence',
         highlight: '⚡ 143 commits/mo • 4.7/day',
@@ -134,5 +134,3 @@ export function PremiumAsciiWidgetCardItem({
     </div>
   )
 }
-
-export const PedroWidgetCardItem = PremiumAsciiWidgetCardItem
