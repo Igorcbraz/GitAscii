@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.15.0](https://github.com/Igorcbraz/GitAscii/compare/v1.14.1...v1.15.0) (2026-08-24)
+
+
+### Features
+
+* **editor:** enhance ASCII premium widgets and complete i18n configurations ([d58a0ed](https://github.com/Igorcbraz/GitAscii/commit/d58a0edd19a8d4b542ec22fa86b34bdc5122006c))
+* **editor:** enhance ASCII premium widgets and complete i18n configurations ([1788813](https://github.com/Igorcbraz/GitAscii/commit/17888136aec2876587455d079ba833db77fb7f1c))
+* **widgets:** add ASCII Premium Kit widgets and analytics engine ([da1a4d1](https://github.com/Igorcbraz/GitAscii/commit/da1a4d18c53b61d3a72076e070f715fd1471bdcc))
+
+
+### Bug Fixes
+
+* **security:** resolve CodeQL incomplete sanitization alert in ascii renderers ([8d2530f](https://github.com/Igorcbraz/GitAscii/commit/8d2530f44e95b6474cbc558956706c9e6d135203))
+
 ## [1.14.1](https://github.com/Igorcbraz/GitAscii/compare/v1.14.0...v1.14.1) (2026-08-21)
 
 
