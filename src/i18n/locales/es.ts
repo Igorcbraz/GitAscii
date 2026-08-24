@@ -782,6 +782,7 @@ export const es: Record<string, string> = {
   'editor.streak.mode_total': 'Total de Días & Actual',
   'editor.streak.theme': 'Tema de Racha',
   'editor.streak.title': 'Tarjeta de Racha de Contribuciones',
+  'editor.ascii_premium.color_presets': 'Temas Preconfigurados ASCII Premium',
   'editor.surveillance.add_custom_lang': 'Añadir lenguaje personalizado...',
   'editor.surveillance.add_custom_tool': 'Añadir herramienta personalizada...',
   'editor.surveillance.bio': 'Biografía / Mensaje de Sistema',

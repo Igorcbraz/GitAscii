@@ -10,6 +10,7 @@ import {
   AlignStartVertical,
   AlignVerticalDistributeCenter,
   AlignVerticalJustifyCenter,
+  Ban,
   Cpu,
   Eye,
   EyeOff,
@@ -35,6 +36,7 @@ import {
   ANIMATION_PRESETS,
   type AnimationEasing,
   type AnimationType,
+  ASCII_PREMIUM_COLOR_THEMES,
   SURVEILLANCE_COLOR_THEMES,
   WIDGET_CATEGORIES,
   WIDGET_IDS,
@@ -439,6 +441,58 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
           </div>
         </div>
 
+        {isSameCategory && primaryCategory === WIDGET_CATEGORIES.PREMIUM_ASCII && (
+          <div className="space-y-3 pt-3 border-t border-graphite font-mono">
+            <div className="flex items-center gap-2 text-[#3fb950] text-eyebrow uppercase tracking-wider font-semibold">
+              <Terminal size={14} />
+              <span>{t('editor.ascii_premium.color_presets', 'ASCII Premium Theme Presets')}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {ASCII_PREMIUM_COLOR_THEMES.map((th) => {
+                const isActive =
+                  currentAccent.toLowerCase() === th.primary.toLowerCase() &&
+                  currentSecondary.toLowerCase() === th.secondary.toLowerCase()
+
+                return (
+                  <button
+                    key={th.name}
+                    type="button"
+                    onClick={() =>
+                      updateWidgetsConfig(instanceIds, {
+                        accentColor: th.primary,
+                        secondaryColor: th.secondary,
+                        borderColor: th.border,
+                        backgroundColor: th.background,
+                        transparentBackground: th.background === 'transparent',
+                      })
+                    }
+                    className={`py-1.5 px-1 rounded-xs text-[10px] font-mono transition-all cursor-pointer border text-center truncate flex items-center justify-center gap-1.5 ${
+                      isActive
+                        ? 'border-chalk font-bold shadow-xs'
+                        : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+                    }`}
+                    style={
+                      isActive
+                        ? {
+                            backgroundColor: `${th.primary}20`,
+                            color: th.primary,
+                            borderColor: th.primary,
+                          }
+                        : {}
+                    }
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full inline-block shrink-0 border border-black/40"
+                      style={{ backgroundColor: th.primary }}
+                    />
+                    <span className="truncate">{th.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {isSameCategory && primaryCategory === WIDGET_CATEGORIES.SURVEILLANCE && (
           <div className="space-y-3 pt-3 border-t border-graphite font-mono">
             <div className="flex items-center gap-2 text-[#55ffff] text-eyebrow uppercase tracking-wider font-semibold">
@@ -596,93 +650,140 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
           </div>
         )}
 
-        <div className="space-y-4 pt-3 border-t border-graphite">
-          <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
-            <Zap size={14} />
-            <span>{t('editor.animation.title', 'Animação de Entrada (Múltiplos)')}</span>
-          </div>
+        {isSameCategory && primaryCategory === WIDGET_CATEGORIES.PREMIUM_ASCII && (
+          <div className="space-y-3 pt-3 border-t border-graphite">
+            <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-semibold">
+              <Terminal size={14} />
+              <span>{t('editor.premiumascii.title', 'ASCII Premium Kit')}</span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-1.5">
-            {ANIMATION_PRESETS.map((preset) => {
-              const Icon = preset.icon
-              const isCurrent = currentAnimType === preset.id
-              return (
+            <div className="space-y-2">
+              <div className="text-eyebrow text-ash font-inter-tight">
+                {t('editor.animation.title', 'Animação de Entrada')}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
-                  key={preset.id}
                   type="button"
-                  title={preset.description}
-                  onClick={() =>
-                    updateWidgetsConfig(instanceIds, {
-                      animationType: preset.id,
-                      animationPreviewKey: Date.now(),
-                    })
-                  }
+                  onClick={() => updateWidgetsConfig(instanceIds, { animated: false })}
                   className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xs text-center cursor-pointer transition-all border text-[10px] font-inter-tight leading-tight ${
-                    isCurrent
-                      ? 'bg-signal-lime text-black border-signal-lime font-semibold'
+                    selectedWidgets.every((w) => !w.config.animated)
+                      ? 'bg-signal-lime text-black border-signal-lime font-bold'
                       : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
                   }`}
                 >
-                  <Icon className="w-[18px] h-[18px] mb-1" />
-                  <span className="leading-tight">{preset.label}</span>
+                  <Ban className="w-[18px] h-[18px] mb-1" />
+                  <span>{t('editor.animation.none', 'Sem animação')}</span>
                 </button>
-              )
-            })}
-          </div>
-
-          {currentAnimType !== 'none' && (
-            <div className="space-y-3 pt-1">
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center text-eyebrow">
-                  <span className="text-ash font-inter-tight">
-                    {t('editor.animation.duration', 'Duração')}
-                  </span>
-                  <span className="text-chalk font-jetbrains-mono">{currentAnimDuration}ms</span>
-                </div>
-                <div className="flex gap-1">
-                  {ANIMATION_DURATION_PRESETS.map((dp) => (
-                    <button
-                      key={dp.value}
-                      type="button"
-                      onClick={() =>
-                        updateWidgetsConfig(instanceIds, { animationDuration: dp.value })
-                      }
-                      className={`flex-1 py-1 rounded-xs text-[10px] font-jetbrains-mono cursor-pointer transition-all border ${
-                        currentAnimDuration === dp.value
-                          ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                          : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
-                      }`}
-                    >
-                      {dp.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <span className="text-eyebrow text-ash font-inter-tight block">
-                  {t('editor.animation.easing', 'Curva de aceleração')}
-                </span>
-                <div className="grid grid-cols-3 gap-1">
-                  {ANIMATION_EASING_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => updateWidgetsConfig(instanceIds, { animationEasing: opt.id })}
-                      className={`py-1 rounded-xs text-[10px] font-jetbrains-mono cursor-pointer transition-all border ${
-                        currentAnimEasing === opt.id
-                          ? 'bg-signal-lime text-black border-signal-lime font-bold'
-                          : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => updateWidgetsConfig(instanceIds, { animated: true })}
+                  className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xs text-center cursor-pointer transition-all border text-[10px] font-inter-tight leading-tight ${
+                    selectedWidgets.every((w) => Boolean(w.config.animated))
+                      ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                      : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
+                  }`}
+                >
+                  <Sparkles className="w-[18px] h-[18px] mb-1" />
+                  <span>{t('editor.premiumascii.animatedTitle', 'Animar Números e Barras')}</span>
+                </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {(!isSameCategory ||
+          (primaryCategory !== WIDGET_CATEGORIES.ASCIIPROFILE &&
+            primaryCategory !== WIDGET_CATEGORIES.PREMIUM_ASCII)) && (
+          <div className="space-y-4 pt-3 border-t border-graphite">
+            <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
+              <Zap size={14} />
+              <span>{t('editor.animation.title', 'Animação de Entrada (Múltiplos)')}</span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-1.5">
+              {ANIMATION_PRESETS.map((preset) => {
+                const Icon = preset.icon
+                const isCurrent = currentAnimType === preset.id
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    title={preset.description}
+                    onClick={() =>
+                      updateWidgetsConfig(instanceIds, {
+                        animationType: preset.id,
+                        animationPreviewKey: Date.now(),
+                      })
+                    }
+                    className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xs text-center cursor-pointer transition-all border text-[10px] font-inter-tight leading-tight ${
+                      isCurrent
+                        ? 'bg-signal-lime text-black border-signal-lime font-semibold'
+                        : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
+                    }`}
+                  >
+                    <Icon className="w-[18px] h-[18px] mb-1" />
+                    <span className="leading-tight">{preset.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {currentAnimType !== 'none' && (
+              <div className="space-y-3 pt-1">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-eyebrow">
+                    <span className="text-ash font-inter-tight">
+                      {t('editor.animation.duration', 'Duração')}
+                    </span>
+                    <span className="text-chalk font-jetbrains-mono">{currentAnimDuration}ms</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {ANIMATION_DURATION_PRESETS.map((dp) => (
+                      <button
+                        key={dp.value}
+                        type="button"
+                        onClick={() =>
+                          updateWidgetsConfig(instanceIds, { animationDuration: dp.value })
+                        }
+                        className={`flex-1 py-1 rounded-xs text-[10px] font-jetbrains-mono cursor-pointer transition-all border ${
+                          currentAnimDuration === dp.value
+                            ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                            : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
+                        }`}
+                      >
+                        {dp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="text-eyebrow text-ash font-inter-tight block">
+                    {t('editor.animation.easing', 'Curva de aceleração')}
+                  </span>
+                  <div className="grid grid-cols-3 gap-1">
+                    {ANIMATION_EASING_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() =>
+                          updateWidgetsConfig(instanceIds, { animationEasing: opt.id })
+                        }
+                        className={`py-1 rounded-xs text-[10px] font-jetbrains-mono cursor-pointer transition-all border ${
+                          currentAnimEasing === opt.id
+                            ? 'bg-signal-lime text-black border-signal-lime font-bold'
+                            : 'bg-graphite text-ash border-graphite hover:border-ash hover:text-chalk'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">

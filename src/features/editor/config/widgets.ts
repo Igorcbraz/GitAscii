@@ -666,7 +666,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.PREMIUM_ASCII,
     isExternal: true,
     badge: { text: 'Score 100', type: 'new' },
-    defaultSize: { width: 390, height: 380 },
+    defaultSize: { width: 400, height: 250 },
   },
   {
     id: WIDGET_IDS.PREMIUM_ASCII_INSIGHTS,
@@ -676,7 +676,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.PREMIUM_ASCII,
     isExternal: true,
     badge: { text: 'Insights', type: 'popular' },
-    defaultSize: { width: 390, height: 380 },
+    defaultSize: { width: 400, height: 280 },
   },
   {
     id: WIDGET_IDS.PREMIUM_ASCII_DNA,
@@ -686,7 +686,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.PREMIUM_ASCII,
     isExternal: true,
     badge: { text: 'DNA', type: 'new' },
-    defaultSize: { width: 390, height: 320 },
+    defaultSize: { width: 400, height: 230 },
   },
   {
     id: WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY,
@@ -696,7 +696,7 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.PREMIUM_ASCII,
     isExternal: true,
     badge: { text: 'Velocity', type: 'popular' },
-    defaultSize: { width: 390, height: 260 },
+    defaultSize: { width: 400, height: 160 },
   },
 ]
 

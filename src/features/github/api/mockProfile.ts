@@ -113,35 +113,35 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
       title: 'Night Owl Developer Schedule',
       subtitle: 'Over 65% of commits occur after 6 PM',
       category: 'behavior' as const,
-      icon: '🌙',
+      icon: '▸',
     },
     {
       id: 'top-impact',
       title: 'Flagship Project: GitAscii',
       subtitle: 'Concentrates 60% of all repository stars',
       category: 'impact' as const,
-      icon: '⭐',
+      icon: '★',
     },
     {
       id: 'peak-day',
       title: 'Peak Coding Cadence: Thursdays',
       subtitle: 'Highest cumulative weekly commit throughput',
       category: 'behavior' as const,
-      icon: '⚡',
+      icon: '>',
     },
     {
       id: 'dominant-language',
       title: 'Core Technology: TypeScript',
       subtitle: 'Dominates 51% of all public open-source code',
       category: 'language' as const,
-      icon: '💻',
+      icon: '#',
     },
     {
       id: 'account-longevity',
       title: '8+ Years Open Source Track Record',
       subtitle: 'Active public development since 2018',
       category: 'longevity' as const,
-      icon: '🏆',
+      icon: '★',
     },
   ]
   const developerScores = {
@@ -176,9 +176,9 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
     reviewsPerMonth: 8,
     avgCommitsPerDay: 4.7,
     metrics: [
-      { label: 'Commits/month', value: 143, max: 150 },
-      { label: 'PRs/month', value: 37, max: 45 },
-      { label: 'Issues/month', value: 18, max: 25 },
+      { id: 'commits', label: 'Commits/month', value: 143, max: 150 },
+      { id: 'prs', label: 'PRs/month', value: 37, max: 45 },
+      { id: 'issues', label: 'Issues/month', value: 18, max: 25 },
     ],
   }
 

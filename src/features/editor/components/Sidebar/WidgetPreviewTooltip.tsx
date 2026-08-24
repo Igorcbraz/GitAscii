@@ -70,10 +70,10 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.SURVEILLANCE_FEEDS]: { width: 780, height: 190 },
   [WIDGET_IDS.SURVEILLANCE_TITLE]: { width: 780, height: 30 },
   [WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD]: { width: 520, height: 440 },
-  [WIDGET_IDS.PREMIUM_ASCII_DEV_SCORE]: { width: 390, height: 380 },
-  [WIDGET_IDS.PREMIUM_ASCII_INSIGHTS]: { width: 390, height: 380 },
-  [WIDGET_IDS.PREMIUM_ASCII_DNA]: { width: 390, height: 320 },
-  [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY]: { width: 390, height: 260 },
+  [WIDGET_IDS.PREMIUM_ASCII_DEV_SCORE]: { width: 400, height: 250 },
+  [WIDGET_IDS.PREMIUM_ASCII_INSIGHTS]: { width: 400, height: 280 },
+  [WIDGET_IDS.PREMIUM_ASCII_DNA]: { width: 400, height: 230 },
+  [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY]: { width: 400, height: 160 },
 }
 
 export function WidgetPreviewTooltip({
@@ -142,7 +142,9 @@ export function WidgetPreviewTooltip({
     position: { x: 0, y: 0 },
     size,
     config: {
-      ...(widgetItem.id === 'avatar' || widgetItem.id === 'ascii-art'
+      ...(widgetItem.id === 'avatar' ||
+      widgetItem.id === 'ascii-art' ||
+      widgetItem.id.startsWith('premium-ascii-')
         ? { lockAspectRatio: true }
         : {}),
       ...(widgetItem.category === 'controlplane' ? { layoutType: 'hero' } : {}),

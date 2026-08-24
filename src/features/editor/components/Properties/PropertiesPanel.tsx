@@ -4,7 +4,7 @@ import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'luc
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { SURVEILLANCE_COLOR_THEMES, WIDGET_IDS } from '@/constants'
+import { ASCII_PREMIUM_COLOR_THEMES, SURVEILLANCE_COLOR_THEMES, WIDGET_IDS } from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -288,8 +288,12 @@ export function PropertiesPanel() {
   const cfg = selectedWidget.config
   const displayName = selectedWidget.name || `${selectedWidget.widgetId.toUpperCase()} Widget`
 
+  const isSurveillance = selectedWidget.widgetId.startsWith('surveillance-')
+  const isAsciiPremium = selectedWidget.widgetId.startsWith('premium-ascii-')
+
   const supportsSecondaryColor =
-    selectedWidget.widgetId.startsWith('surveillance-') ||
+    isSurveillance ||
+    isAsciiPremium ||
     selectedWidget.widgetId.startsWith('controlplane-') ||
     selectedWidget.widgetId === 'codeweb-retro-grid' ||
     'secondaryColor' in cfg
@@ -403,7 +407,61 @@ export function PropertiesPanel() {
             />
           </div>
 
-          {supportsSecondaryColor && (
+          {isAsciiPremium && (
+            <div className="space-y-1.5 pt-1">
+              <label className="text-eyebrow text-ash font-inter-tight block font-mono">
+                {t('editor.ascii_premium.color_presets', 'ASCII Premium Theme Presets')}
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {ASCII_PREMIUM_COLOR_THEMES.map((th) => {
+                  const currentAccent =
+                    (cfg.accentColor as string) || globalStyles.accentColor || '#3fb950'
+                  const currentSecondary = (cfg.secondaryColor as string) || '#39c5cf'
+                  const isActive =
+                    currentAccent.toLowerCase() === th.primary.toLowerCase() &&
+                    currentSecondary.toLowerCase() === th.secondary.toLowerCase()
+
+                  return (
+                    <button
+                      key={th.name}
+                      type="button"
+                      onClick={() =>
+                        updateWidgetConfig(selectedWidget.instanceId, {
+                          accentColor: th.primary,
+                          secondaryColor: th.secondary,
+                          borderColor: th.border,
+                          backgroundColor: th.background,
+                          transparentBackground: th.background === 'transparent',
+                        })
+                      }
+                      className={`py-1.5 px-1 rounded-xs text-[10px] font-mono transition-all cursor-pointer border text-center truncate flex items-center justify-center gap-1.5 ${
+                        isActive
+                          ? 'border-chalk font-bold shadow-xs'
+                          : 'bg-graphite text-ash border-graphite hover:border-slate hover:text-chalk'
+                      }`}
+                      style={
+                        isActive
+                          ? {
+                              backgroundColor: `${th.primary}20`,
+                              color: th.primary,
+                              borderColor: th.primary,
+                            }
+                          : {}
+                      }
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full inline-block shrink-0 border border-black/40"
+                        style={{ backgroundColor: th.primary }}
+                      />
+                      <span className="truncate">{th.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {!isAsciiPremium && supportsSecondaryColor && (
             <div className="space-y-1.5 pt-1">
               <label className="text-eyebrow text-ash font-inter-tight block font-mono">
                 {t('editor.surveillance.color_presets', 'Surveillance Theme Presets')}
@@ -793,13 +851,14 @@ export function PropertiesPanel() {
           />
         )}
 
-        {!selectedWidget.widgetId.startsWith('asciiprofile-') && (
-          <AnimationControls
-            instanceId={selectedWidget.instanceId}
-            widgetId={selectedWidget.widgetId}
-            config={cfg}
-          />
-        )}
+        {!selectedWidget.widgetId.startsWith('asciiprofile-') &&
+          !selectedWidget.widgetId.startsWith('premium-ascii-') && (
+            <AnimationControls
+              instanceId={selectedWidget.instanceId}
+              widgetId={selectedWidget.widgetId}
+              config={cfg}
+            />
+          )}
 
         <div className="space-y-4 pt-3 border-t border-graphite">
           <div className="flex items-center justify-between">
