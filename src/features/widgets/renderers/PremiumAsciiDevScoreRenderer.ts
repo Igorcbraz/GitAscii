@@ -37,8 +37,8 @@ export function renderPremiumAsciiDevScore(
   globalStyles: GlobalStyles,
   forceStatic = false
 ): string {
-  const width = Math.max(280, Number(widget?.size?.width) || 390)
-  const height = Math.max(200, Number(widget?.size?.height) || 380)
+  const width = Math.max(280, Number(widget?.size?.width) || 400)
+  const height = Math.max(140, Number(widget?.size?.height) || 250)
   const cfg = widget?.config || {}
 
   const fullScores =
@@ -53,58 +53,93 @@ export function renderPremiumAsciiDevScore(
       data?.activityMetrics
     )
 
-  // Matching card color palette
+  const hideMetrics = Array.isArray(cfg.hideMetrics) ? (cfg.hideMetrics as string[]) : []
+  const showTotalScore = cfg.showTotalScore !== false
+
   const isDark = globalStyles?.themeMode !== 'light'
   const bg =
     (cfg.backgroundColor as string) ||
     globalStyles?.backgroundColor ||
     (isDark ? '#0d1117' : '#f6f8fa')
   const borderColor = (cfg.borderColor as string) || (isDark ? '#30363d' : '#d0d7de')
-  const textChalk = isDark ? '#c9d1d9' : '#24292f'
+  const textChalk =
+    (cfg.textColor as string) || globalStyles?.textColor || (isDark ? '#c9d1d9' : '#24292f')
   const textAsh = isDark ? '#8b949e' : '#57606a'
   const accentLime = (cfg.accentColor as string) || globalStyles?.accentColor || '#3fb950'
-  const accentCyan = '#39c5cf'
+  const accentCyan = (cfg.secondaryColor as string) || '#39c5cf'
   const accentYellow = '#ffbd2e'
 
-  // Calculate inner width based on widget width
+  const isTransparent =
+    !cfg.backgroundColor ||
+    cfg.backgroundColor === 'transparent' ||
+    cfg.backgroundColor === 'none' ||
+    Boolean(cfg.transparentBackground) ||
+    bg === 'transparent' ||
+    bg === 'none'
+
+  const BASE_WIDTH = 400
   const FONT_SIZE = 12
   const CHAR_W = 7.2
-  const maxChars = Math.floor((width - 32) / CHAR_W)
-  const INNER_W = Math.max(38, Math.min(60, maxChars - 2))
-  const BAR_W = INNER_W >= 50 ? 18 : 12
+  const INNER_W = 46
+  const BAR_W = 14
   const LINE_H = 17
 
   function buildCardLines(p: number): string[] {
     const lines: string[] = []
 
-    const metricRows = [
-      { label: 'Activity', score: Math.round(fullScores.activityScore * p), color: accentLime },
+    const allMetricRows = [
       {
+        id: 'activity',
+        label: 'Activity',
+        score: Math.round(fullScores.activityScore * p),
+        color: accentLime,
+      },
+      {
+        id: 'open-source',
         label: 'Open Source',
         score: Math.round(fullScores.openSourceScore * p),
         color: accentCyan,
       },
-      { label: 'Community', score: Math.round(fullScores.communityScore * p), color: accentYellow },
       {
+        id: 'community',
+        label: 'Community',
+        score: Math.round(fullScores.communityScore * p),
+        color: accentYellow,
+      },
+      {
+        id: 'consistency',
         label: 'Consistency',
         score: Math.round(fullScores.consistencyScore * p),
         color: accentLime,
       },
-      { label: 'Impact', score: Math.round(fullScores.impactScore * p), color: '#d2a8ff' },
-      { label: 'Growth', score: Math.round(fullScores.growthScore * p), color: '#58a6ff' },
       {
+        id: 'impact',
+        label: 'Impact',
+        score: Math.round(fullScores.impactScore * p),
+        color: '#d2a8ff',
+      },
+      {
+        id: 'growth',
+        label: 'Growth',
+        score: Math.round(fullScores.growthScore * p),
+        color: '#58a6ff',
+      },
+      {
+        id: 'maintenance',
         label: 'Maintenance',
         score: Math.round(fullScores.maintenanceScore * p),
         color: accentCyan,
       },
       {
+        id: 'project-health',
         label: 'Project Health',
         score: Math.round(fullScores.projectHealthScore * p),
         color: accentLime,
       },
     ]
 
-    // Top header
+    const metricRows = allMetricRows.filter((m) => !hideMetrics.includes(m.id))
+
     const title = 'SCORECARD'
     const padTitle = Math.max(0, Math.floor((INNER_W - title.length) / 2))
     lines.push(
@@ -112,53 +147,70 @@ export function renderPremiumAsciiDevScore(
     )
     lines.push(` <tspan fill="${borderColor}">${'─'.repeat(INNER_W)}</tspan>`)
 
-    // Metrics
-    const labelWidth = INNER_W >= 50 ? 15 : 14
-    metricRows.forEach((m) => {
-      const labelStr = vPad(m.label, labelWidth)
-      const bar = renderProgressBar(m.score, BAR_W, m.color, isDark ? '#30363d' : '#d0d7de')
-      const scoreStr = `${String(m.score).padStart(3)}/100`
+    const labelWidth = 14
+    if (metricRows.length > 0) {
+      metricRows.forEach((m) => {
+        const labelStr = vPad(m.label, labelWidth)
+        const bar = renderProgressBar(m.score, BAR_W, m.color, isDark ? '#30363d' : '#d0d7de')
+        const scoreStr = `${String(m.score).padStart(3)}/100`
+        lines.push(
+          ` <tspan fill="${textChalk}">${escapeXml(labelStr)}</tspan>${bar} <tspan fill="${m.color}" font-weight="bold">${scoreStr}</tspan>`
+        )
+      })
+    } else {
+      lines.push(` <tspan fill="${textAsh}">No visible metrics selected</tspan>`)
+    }
+
+    if (showTotalScore) {
+      lines.push(` <tspan fill="${borderColor}">${'─'.repeat(INNER_W)}</tspan>`)
+      const curScore = Math.round(fullScores.totalDeveloperScore * p)
+      const rankTitle = `${fullScores.tierGrade} RANK`
       lines.push(
-        ` <tspan fill="${textChalk}">${escapeXml(labelStr)}</tspan>${bar} <tspan fill="${m.color}" font-weight="bold">${scoreStr}</tspan>`
+        ` <tspan fill="${accentLime}" font-weight="bold">${vPad(rankTitle, 22)}</tspan> <tspan fill="${textAsh}">TOTAL SCORE:</tspan> <tspan fill="${accentYellow}" font-weight="bold">${curScore}/100</tspan>`
       )
-    })
-
-    // Divider
-    lines.push(` <tspan fill="${borderColor}">${'─'.repeat(INNER_W)}</tspan>`)
-
-    // Master Score
-    const currentMaster = Math.round(fullScores.totalDeveloperScore * p)
-    const tierDisplay = p >= 1 ? `[${fullScores.tierGrade}]` : '[...]'
-    const totalStr = `${currentMaster}/100 ${tierDisplay}`
-    const scoreLabelWidth = INNER_W - totalStr.length - 1
-    const masterLabel = vPad('TOTAL SCORE', Math.max(12, scoreLabelWidth))
-    lines.push(
-      ` <tspan fill="${accentLime}" font-weight="bold">${masterLabel}</tspan><tspan fill="${accentYellow}" font-weight="bold">${totalStr}</tspan>`
-    )
+    }
 
     return lines
   }
 
   const finalLines = buildCardLines(1)
-  const bottomY = 24 + (finalLines.length + 1) * LINE_H
+  const totalContentHeight = (finalLines.length + 2) * LINE_H
+  const BASE_HEIGHT = Math.max(250, totalContentHeight + 24)
+  const startY = Math.max(16, Math.round((BASE_HEIGHT - totalContentHeight) / 2) + 12)
+  const bottomY = startY + (finalLines.length + 1) * LINE_H
 
-  const isAnimated = Boolean(cfg.animated) && !forceStatic
-  let framesCss = ''
+  const actualContentWidth = (INNER_W + 4) * CHAR_W
+  const padX = Math.max(8, Math.round((BASE_WIDTH - actualContentWidth) / 2))
+
+  const rawId = widget?.instanceId || 'premium-ascii-score'
+  const id = rawId.replace(/[^a-zA-Z0-9_-]/g, '_')
+
+  const isAnimated = cfg.animated !== false && !forceStatic
+  let framesCss = `
+    #${id} text {
+      font-family: 'JetBrains Mono', 'Courier New', Consolas, monospace;
+      font-size: ${FONT_SIZE}px;
+      fill: ${textChalk};
+      white-space: pre;
+    }
+  `
   let framesXml = ''
 
   if (!isAnimated) {
     const rowsXml: string[] = []
-    rowsXml.push(`<text x="16" y="24" fill="${borderColor}">┌${'─'.repeat(INNER_W + 2)}┐</text>`)
+    rowsXml.push(
+      `<text x="${padX}" y="${startY}"><tspan fill="${borderColor}">┌${'─'.repeat(INNER_W + 2)}┐</tspan></text>`
+    )
     finalLines.forEach((line, idx) => {
-      const y = 24 + (idx + 1) * LINE_H
+      const y = startY + (idx + 1) * LINE_H
       const visualLen = vLen(line)
       const paddingRight = ' '.repeat(Math.max(0, INNER_W + 1 - visualLen))
       rowsXml.push(
-        `<text x="16" y="${y}"><tspan fill="${borderColor}">│</tspan> ${line}${paddingRight}<tspan fill="${borderColor}">│</tspan></text>`
+        `<text x="${padX}" y="${y}"><tspan fill="${borderColor}">│</tspan> ${line}${paddingRight}<tspan fill="${borderColor}">│</tspan></text>`
       )
     })
     rowsXml.push(
-      `<text x="16" y="${bottomY}" fill="${borderColor}">└${'─'.repeat(INNER_W + 2)}┘</text>`
+      `<text x="${padX}" y="${bottomY}"><tspan fill="${borderColor}">└${'─'.repeat(INNER_W + 2)}┘</tspan></text>`
     )
     framesXml = `<g>${rowsXml.join('\n    ')}</g>`
   } else {
@@ -170,35 +222,37 @@ export function renderPremiumAsciiDevScore(
       const currentLines = buildCardLines(p)
       const rowsXml: string[] = []
 
-      rowsXml.push(`<text x="16" y="24" fill="${borderColor}">┌${'─'.repeat(INNER_W + 2)}┐</text>`)
+      rowsXml.push(
+        `<text x="${padX}" y="${startY}"><tspan fill="${borderColor}">┌${'─'.repeat(INNER_W + 2)}┐</tspan></text>`
+      )
       currentLines.forEach((line, idx) => {
-        const y = 24 + (idx + 1) * LINE_H
+        const y = startY + (idx + 1) * LINE_H
         const visualLen = vLen(line)
         const paddingRight = ' '.repeat(Math.max(0, INNER_W + 1 - visualLen))
         rowsXml.push(
-          `<text x="16" y="${y}"><tspan fill="${borderColor}">│</tspan> ${line}${paddingRight}<tspan fill="${borderColor}">│</tspan></text>`
+          `<text x="${padX}" y="${y}"><tspan fill="${borderColor}">│</tspan> ${line}${paddingRight}<tspan fill="${borderColor}">│</tspan></text>`
         )
       })
       rowsXml.push(
-        `<text x="16" y="${bottomY}" fill="${borderColor}">└${'─'.repeat(INNER_W + 2)}┘</text>`
+        `<text x="${padX}" y="${bottomY}"><tspan fill="${borderColor}">└${'─'.repeat(INNER_W + 2)}┘</tspan></text>`
       )
 
       if (f === FRAMES - 1) {
         const startPct = ((f / FRAMES) * 100).toFixed(1)
         framesCss += `
-    .frame-${f} { opacity: 0; animation: show-${f} ${DUR}s forwards; }
-    @keyframes show-${f} { 0%, ${Number(startPct) - 0.01}% { opacity: 0; } ${startPct}%, 100% { opacity: 1; } }`
+    #${id} .frame-${f} { opacity: 0; animation: show-${id}-${f} ${DUR}s forwards; }
+    @keyframes show-${id}-${f} { 0%, ${Number(startPct) - 0.01}% { opacity: 0; } ${startPct}%, 100% { opacity: 1; } }`
       } else {
         const startPct = ((f / FRAMES) * 100).toFixed(1)
         const endPct = (((f + 1) / FRAMES) * 100).toFixed(1)
         if (f === 0) {
           framesCss += `
-    .frame-${f} { animation: show-${f} ${DUR}s forwards; }
-    @keyframes show-${f} { 0%, ${Number(endPct) - 0.01}% { opacity: 1; } ${endPct}%, 100% { opacity: 0; } }`
+    #${id} .frame-${f} { animation: show-${id}-${f} ${DUR}s forwards; }
+    @keyframes show-${id}-${f} { 0%, ${Number(endPct) - 0.01}% { opacity: 1; } ${endPct}%, 100% { opacity: 0; } }`
         } else {
           framesCss += `
-    .frame-${f} { opacity: 0; animation: show-${f} ${DUR}s forwards; }
-    @keyframes show-${f} { 0%, ${Number(startPct) - 0.01}% { opacity: 0; } ${startPct}%, ${Number(endPct) - 0.01}% { opacity: 1; } ${endPct}%, 100% { opacity: 0; } }`
+    #${id} .frame-${f} { opacity: 0; animation: show-${id}-${f} ${DUR}s forwards; }
+    @keyframes show-${id}-${f} { 0%, ${Number(startPct) - 0.01}% { opacity: 0; } ${startPct}%, ${Number(endPct) - 0.01}% { opacity: 1; } ${endPct}%, 100% { opacity: 0; } }`
         }
       }
 
@@ -206,23 +260,21 @@ export function renderPremiumAsciiDevScore(
     }
   }
 
+  const bgRect = isTransparent ? '' : `<rect width="100%" height="100%" fill="${bg}" rx="6"/>`
+
   return `<svg
   xmlns="http://www.w3.org/2000/svg"
+  id="${id}"
   width="${width}"
   height="${height}"
-  viewBox="0 0 ${width} ${bottomY + 20}"
+  viewBox="0 0 ${BASE_WIDTH} ${BASE_HEIGHT}"
+  preserveAspectRatio="xMidYMid meet"
   fill="none"
 >
   <style>
-    text {
-      font-family: 'JetBrains Mono', 'Courier New', Consolas, monospace;
-      font-size: ${FONT_SIZE}px;
-      fill: ${textChalk};
-      white-space: pre;
-    }
     ${framesCss}
   </style>
-  <rect width="100%" height="100%" fill="${bg}" rx="6"/>
+  ${bgRect}
   ${framesXml}
 </svg>`
 }

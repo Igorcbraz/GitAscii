@@ -722,6 +722,80 @@ export const SURVEILLANCE_COLOR_THEMES: readonly SurveillanceColorTheme[] = [
   },
 ]
 
+export interface AsciiPremiumColorTheme {
+  name: string
+  primary: string
+  secondary: string
+  border: string
+  background: string
+}
+
+export const ASCII_PREMIUM_COLOR_THEMES: readonly AsciiPremiumColorTheme[] = [
+  {
+    name: 'Matrix Green',
+    primary: '#3fb950',
+    secondary: '#39c5cf',
+    border: '#30363d',
+    background: 'transparent',
+  },
+  {
+    name: 'Cyber Amber',
+    primary: '#ffb454',
+    secondary: '#ff5555',
+    border: '#3e2815',
+    background: 'transparent',
+  },
+  {
+    name: 'Electric Cyan',
+    primary: '#39c5cf',
+    secondary: '#58a6ff',
+    border: '#1f3448',
+    background: 'transparent',
+  },
+  {
+    name: 'Dracula Neon',
+    primary: '#bd93f9',
+    secondary: '#ff79c6',
+    border: '#382a47',
+    background: 'transparent',
+  },
+  {
+    name: 'Solarized Teal',
+    primary: '#2aa198',
+    secondary: '#b58900',
+    border: '#2b353b',
+    background: 'transparent',
+  },
+  {
+    name: 'Monochrome Silver',
+    primary: '#e6edf3',
+    secondary: '#8b949e',
+    border: '#30363d',
+    background: 'transparent',
+  },
+  {
+    name: 'Crimson Alert',
+    primary: '#ff5252',
+    secondary: '#ffa726',
+    border: '#3d1d1d',
+    background: 'transparent',
+  },
+  {
+    name: 'Synthwave Sunset',
+    primary: '#ff71ce',
+    secondary: '#01cdfe',
+    border: '#3b1c45',
+    background: 'transparent',
+  },
+  {
+    name: 'Golden Horizon',
+    primary: '#e3b341',
+    secondary: '#f0883e',
+    border: '#3b2c15',
+    background: 'transparent',
+  },
+]
+
 export interface GlobalColorTheme {
   name: string
   category: 'cyberpunk' | 'terminal' | 'dracula' | 'monochrome' | 'synthwave'
@@ -950,6 +1024,31 @@ export const MONTH_NAMES: readonly string[] = [
   'Oct',
   'Nov',
   'Dec',
+] as const
+
+export const MONTH_FULL_NAMES: readonly string[] = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const
+
+export const DAY_NAMES: readonly string[] = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
 ] as const
 
 export const GITHUB_CONTRIBUTION_COLORS = {

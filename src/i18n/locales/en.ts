@@ -783,6 +783,7 @@ export const en: Record<string, string> = {
   'editor.streak.mode_total': 'Total Days & Current',
   'editor.streak.theme': 'Streak Theme',
   'editor.streak.title': 'Contribution Streak Card',
+  'editor.ascii_premium.color_presets': 'ASCII Premium Theme Presets',
   'editor.surveillance.add_custom_lang': 'Add custom language...',
   'editor.surveillance.add_custom_tool': 'Add custom tool...',
   'editor.surveillance.bio': 'Bio / System Message',

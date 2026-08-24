@@ -838,12 +838,26 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           ...(widgetId === 'codeweb-retro-grid' && detectedTechs
             ? { selectedTechs: detectedTechs }
             : {}),
-          ...(widgetId === 'avatar' || widgetId === 'ascii-art' ? { lockAspectRatio: true } : {}),
+          ...(widgetId === 'avatar' ||
+          widgetId === 'ascii-art' ||
+          widgetId.startsWith('premium-ascii-')
+            ? { lockAspectRatio: true }
+            : {}),
           ...(catalogItem?.category === 'controlplane'
             ? { layoutType: 'hero', accentColor: '#00A7D1' }
             : {}),
           ...(catalogItem?.category === 'godprofile' ? { accentColor: '#b6a891' } : {}),
           ...(catalogItem?.category === 'asciiprofile' ? { accentColor: '#ffa657' } : {}),
+          ...(catalogItem?.category === 'premium-ascii' || widgetId.startsWith('premium-ascii-')
+            ? {
+                lockAspectRatio: true,
+                transparentBackground: true,
+                backgroundColor: 'transparent',
+                accentColor: '#3fb950',
+                secondaryColor: '#39c5cf',
+                borderColor: '#30363d',
+              }
+            : {}),
           ...(catalogItem?.category === 'surveillance'
             ? {
                 accentColor: '#55ffff',

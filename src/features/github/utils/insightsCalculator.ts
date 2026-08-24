@@ -1,3 +1,5 @@
+import { DAY_NAMES, MONTH_FULL_NAMES } from '@/constants'
+
 import type {
   DerivedInsight,
   GitHubRepo,
@@ -7,29 +9,12 @@ import type {
   TemporalHabits,
 } from '../types/github'
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
-
 export function calculateLanguageBreakdown(
   languages: Record<string, number> = {},
   repos: GitHubRepo[] = []
 ): LanguageBreakdown {
   const totalBytes = Object.values(languages).reduce((sum, bytes) => sum + (bytes || 0), 0)
 
-  // Count repos per language
   const repoLangCount: Record<string, number> = {}
   repos.forEach((r) => {
     if (r.language) {
@@ -85,7 +70,6 @@ export function calculateTemporalHabits(
     })
   })
 
-  // Determine peak day of week
   let maxDayIdx = 1
   let maxDayVal = -1
   dayOfWeekCounts.forEach((val, idx) => {
@@ -94,9 +78,8 @@ export function calculateTemporalHabits(
       maxDayIdx = idx
     }
   })
-  const peakDayOfWeek = DAYS[maxDayIdx] || 'Monday'
+  const peakDayOfWeek = DAY_NAMES[maxDayIdx] || 'Monday'
 
-  // Determine peak month
   let maxMonthIdx = 0
   let maxMonthVal = -1
   Object.entries(monthCounts).forEach(([mIdxStr, val]) => {
@@ -105,9 +88,8 @@ export function calculateTemporalHabits(
       maxMonthIdx = Number(mIdxStr)
     }
   })
-  const peakMonth = MONTHS[maxMonthIdx] || 'August'
+  const peakMonth = MONTH_FULL_NAMES[maxMonthIdx] || 'August'
 
-  // Estimated distribution (Night owl typical pattern based on developer profile trends)
   const morningPercent = 20
   const afternoonPercent = 35
   const eveningPercent = 30
@@ -139,14 +121,13 @@ export function calculateDerivedInsights(
 ): DerivedInsight[] {
   const insights: DerivedInsight[] = []
 
-  // 1. Night Owl vs Early Bird
   if (habits.isNightOwl) {
     insights.push({
       id: 'night-owl',
       title: 'Night Owl Developer Schedule',
       subtitle: 'Over 65% of commits occur after 6 PM',
       category: 'behavior',
-      icon: '🌙',
+      icon: '▸',
     })
   } else {
     insights.push({
@@ -154,11 +135,10 @@ export function calculateDerivedInsights(
       title: 'Early Bird Developer Schedule',
       subtitle: 'Peak coding volume concentrated in morning hours',
       category: 'behavior',
-      icon: '☀️',
+      icon: '▸',
     })
   }
 
-  // 2. Top Impact Project
   const sortedRepos = [...repos].sort(
     (a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0)
   )
@@ -172,21 +152,19 @@ export function calculateDerivedInsights(
         title: `Flagship Project: ${topRepo.name}`,
         subtitle: `Concentrates ${starPct}% of all repository stars`,
         category: 'impact',
-        icon: '⭐',
+        icon: '★',
       })
     }
   }
 
-  // 3. Peak Day
   insights.push({
     id: 'peak-day',
     title: `Peak Coding Cadence: ${habits.peakDayOfWeek}s`,
     subtitle: `Highest cumulative weekly commit throughput`,
     category: 'behavior',
-    icon: '⚡',
+    icon: '>',
   })
 
-  // 4. Dominant & Growing Languages
   const langEntries = Object.entries(languages).sort((a, b) => b[1] - a[1])
   if (langEntries.length > 0) {
     const topLang = langEntries[0][0]
@@ -195,11 +173,10 @@ export function calculateDerivedInsights(
       title: `Core Technology: ${topLang}`,
       subtitle: `Dominates the public open-source codebase`,
       category: 'language',
-      icon: '💻',
+      icon: '#',
     })
   }
 
-  // 5. Account Longevity
   if (user?.created_at) {
     const createdDate = new Date(user.created_at)
     const years = Math.max(1, new Date().getFullYear() - createdDate.getFullYear())
@@ -208,7 +185,7 @@ export function calculateDerivedInsights(
       title: `${years}+ Years Open Source Track Record`,
       subtitle: `Active public development since ${createdDate.getFullYear()}`,
       category: 'longevity',
-      icon: '🏆',
+      icon: '★',
     })
   }
 

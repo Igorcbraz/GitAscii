@@ -31,19 +31,19 @@ function getWidgetMinimalMeta(id: string) {
     case WIDGET_IDS.PREMIUM_ASCII_INSIGHTS:
       return {
         cmd: '$ insights --habits',
-        highlight: '🌙 Night Owl • Peak Day • 4 Shifts',
+        highlight: '[*] Night Owl • Peak Day • 4 Shifts',
         tag: 'Insights',
       }
     case WIDGET_IDS.PREMIUM_ASCII_DNA:
       return {
         cmd: '$ dna --archetype',
-        highlight: '🧬 > THE BUILDER • 5 Traits',
+        highlight: '[#] > THE BUILDER • 5 Traits',
         tag: 'Archetype',
       }
     case WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY:
       return {
         cmd: '$ velocity --cadence',
-        highlight: '⚡ 143 commits/mo • 4.7/day',
+        highlight: '[>] 143 commits/mo • 4.7/day',
         tag: 'Velocity',
       }
     default:
@@ -73,7 +73,6 @@ export function PremiumAsciiWidgetCardItem({
       onMouseLeave={onLeave}
       className="group relative border border-[#30363d] hover:border-[#3fb950]/70 bg-[#0d1117] hover:bg-[#161b22] transition-all duration-200 ease-out rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_16px_rgba(63,185,80,0.14)] flex flex-col font-jetbrains-mono"
     >
-      {/* Subtle CRT scanline overlay on hover */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-0"
         style={{
@@ -82,7 +81,6 @@ export function PremiumAsciiWidgetCardItem({
         }}
       />
 
-      {/* Header bar */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-[#161b22] border-b border-[#30363d] group-hover:border-[#3fb950]/40 transition-colors select-none relative z-10">
         <div className="flex items-center gap-1.5 text-[10px]">
           <div className="flex gap-1 text-[8px] font-bold text-[#8b949e]">
@@ -98,7 +96,6 @@ export function PremiumAsciiWidgetCardItem({
         </span>
       </div>
 
-      {/* Main card content */}
       <div className="p-3 relative z-10 space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -125,7 +122,6 @@ export function PremiumAsciiWidgetCardItem({
           </button>
         </div>
 
-        {/* Minimalist expressive indicator */}
         <div className="flex items-center gap-1.5 px-2 py-1 bg-[#090d12] border border-[#21262d] group-hover:border-[#3fb950]/30 rounded-xs text-[10px] text-[#8b949e] group-hover:text-[#c9d1d9] transition-colors truncate">
           <span className="text-[#3fb950] font-bold">›</span>
           <span className="truncate">{meta.highlight}</span>

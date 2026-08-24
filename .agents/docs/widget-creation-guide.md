@@ -150,49 +150,117 @@ const handleLayoutChange = (newLayout: 'single' | 'grid' | 'cards') => {
 }
 ```
 
-### 4.2. Padrões de SVG para Responsividade
+### 4.2. Padrões de SVG para Responsividade e Redimensionamento Proporcional
 
-- **`viewBox` dinâmico**: Utilize sempre `viewBox="0 0 ${width} ${height}"` no SVG raiz.
-- **Backgrounds e Grids fluidos**: Use larguras percentuais ou `${width - padding * 2}` para que o SVG preencha exatamente a caixa delimitadora do canvas.
-- **Truncamento de texto seguro**: Calcule comprimentos máximos de strings ou use atributos SVG `<text>` com `text-overflow` e `clip-path` para evitar transbordamento.
+- **Widgets de Layout Base / ASCII Cards (Escala Proporcional)**:
+  - Para widgets com layout fixo de caracteres, fontes monospace ou cards (ex: ASCII Premium Kit, Bento Grids, Radar Cards), utilize dimensões base de design no `viewBox` combinadas com `preserveAspectRatio="xMidYMid meet"`:
+    ```xml
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      id="${id}"
+      width="${width}"
+      height="${height}"
+      viewBox="0 0 ${BASE_WIDTH} ${BASE_HEIGHT}"
+      preserveAspectRatio="xMidYMid meet"
+      fill="none"
+    >
+    ```
+  - Isso garante que, ao redimensionar o widget na tela (mesmo para tamanhos menores), todo o conteúdo (textos, barras, bordas e ícones) **escale suavemente de forma proporcional** sem truncar nem cortar o conteúdo.
+  - Ative `lockAspectRatio: true` na inicialização do widget no `editorStore.ts`.
+
+- **Background Transparente por Padrão**:
+  - Respeite `transparentBackground: true` e `bg === 'transparent'`:
+    ```ts
+    const isTransparent =
+      !cfg.backgroundColor ||
+      cfg.backgroundColor === 'transparent' ||
+      Boolean(cfg.transparentBackground)
+    const bgRect = isTransparent ? '' : `<rect width="100%" height="100%" fill="${bg}" rx="6"/>`
+    ```
 
 ### 4.3. Isolamento Estrito de CSS & Prevenção de Vazamento de Fontes e Estilos Globais
 
 > [!CAUTION]
-> **PERIGO DE VAZAMENTO DE ESTILOS NO EDITOR:**  
-> Quando os SVGs são renderizados inline no DOM (por exemplo, no hover de tooltip da biblioteca `WidgetPreviewTooltip` ou no Canvas do editor), qualquer bloco `<style>` injetado dentro do SVG é lido pelo navegador como stylesheet da página inteira!  
-> **NUNCA use seletores de elementos globais sem escopo** como `text, tspan { font-family: ... }`, `svg { ... }`, `.minha-classe { ... }` ou `@keyframes blink { ... }`.  
-> Fazer isso altera instantaneamente a tipografia, fontes, espaçamentos ou cores de **toda a interface do editor e de outros widgets**!
+> **PERIGO CRÍTICO DE VAZAMENTO DE ESTILOS NO EDITOR (CASO ASCII PREMIUM KIT):**  
+> Quando os SVGs são renderizados inline no DOM pelo React (como no hover de preview `WidgetPreviewTooltip` na biblioteca de widgets ou dentro do Canvas do editor via `dangerouslySetInnerHTML`), qualquer tag `<style>` contida no SVG é parseada pelo navegador como uma **folha de estilos global para toda a página**!
+>
+> **O que causou o bug:**  
+> Se o renderer do widget declarar seletores nus como:
+>
+> ```css
+> text {
+>   font-family: 'JetBrains Mono', monospace;
+>   font-size: 12px;
+>   white-space: pre;
+> }
+> ```
+>
+> No exato momento em que o usuário passa o mouse sobre o card na barra lateral e o tooltip de preview é montado, o navegador aplica essa regra a **todos os elementos `<text>` de toda a aplicação** (incluindo o canvas, widgets existentes, réguas, botões e labels SVG). Ao retirar o mouse, o tooltip desmonta e a fonte volta ao normal, causando um efeito visual desconcertante de layout quebrando e fontes piscando.
 
 #### Regras Obrigatórias para `<style>` em SVGs:
 
-1. **Sempre definir `id="${id}"` na tag raiz `<svg>`**:
-   ```svg
-   <svg xmlns="http://www.w3.org/2000/svg" id="${id}" width="${w}" height="${h}" ...>
+1. **Sempre gerar um ID de escopo seguro e sanitizado**:
+
+   ```ts
+   const rawId = widget?.instanceId || 'meu-widget-prefix'
+   const id = rawId.replace(/[^a-zA-Z0-9_-]/g, '_')
    ```
-2. **Escopar todo seletor de tag ou classe com `#${id}`**:
+
+2. **Sempre definir `id="${id}"` na tag raiz `<svg>`**:
+
+   ```svg
+   <svg xmlns="http://www.w3.org/2000/svg" id="${id}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
+   ```
+
+3. **Escopar todo seletor de tag ou classe com `#${id}` (SEM incluir `tspan` na regra de fill)**:
+
    ```css
-   /* CORRETO (100% isolado): */
-   #${id} text, #${id} tspan {
-     font-family: 'Departure Mono', ui-monospace, Consolas, monospace;
+   /* ✅ CORRETO (100% isolado, cores dos tspans preservadas): */
+   #${id} text {
+     font-family: 'JetBrains Mono', 'Courier New', Consolas, monospace;
+     font-size: ${FONT_SIZE}px;
+     fill: ${textChalk};
      white-space: pre;
    }
-   #${id} .led { animation: blink-${id} 1.1s steps(1,end) infinite; }
+   #${id} .cursor { animation: blink-${id} 0.8s infinite; }
+   #${id} .frame-${f} { opacity: 0; animation: show-${id}-${f} ${DUR}s forwards; }
 
-   /* ERRADO (vaza para toda a aplicação): */
-   text, tspan { font-family: 'Departure Mono'; }
-   .led { animation: blink 1.1s infinite; }
+   /* ❌ PROIBIDO: NUNCA inclua #${id} tspan na regra de CSS fill! */
+   /* Em SVG, regras CSS no seletor tspan têm prioridade sobre o atributo presentation inline `<tspan fill="...">`, */
+   /* o que apaga todas as cores de destaque e deixa todo o texto branco/monocromático. */
+   #${id} text, #${id} tspan { fill: ${textChalk}; }
+
+   /* ❌ TOTALMENTE PROIBIDO (vaza para toda a aplicação e quebra o editor): */
+   text { font-family: 'JetBrains Mono'; }
+   text, tspan { font-size: 12px; }
+   .cursor { animation: blink 0.8s infinite; }
+   .frame-0 { opacity: 1; }
    ```
-3. **Sempre sufixar nomes de `@keyframes` com o ID da instância (`${id}`)**:
+
+4. **Sempre sufixar nomes de `@keyframes` com o ID da instância (`${id}`)**:
+
    ```css
-   @keyframes blink-${id} { 0%,55%{opacity:1} 56%,100%{opacity:.12} }
-   @keyframes jitter-${id} { ... }
+   /* ✅ CORRETO: */
+   @keyframes blink-${id} {
+     0%, 49% { opacity: 1; }
+     50%, 100% { opacity: 0; }
+   }
+   @keyframes show-${id}-${f} {
+     0%, ${startPct}% { opacity: 0; }
+     ${startPct}%, 100% { opacity: 1; }
+   }
+
+   /* ❌ PROIBIDO (colide entre múltiplos widgets e previews): */
+   @keyframes blink { ... }
+   @keyframes show-0 { ... }
    ```
-4. **Sempre sufixar IDs de `<defs>`, `<pattern>`, `<filter>`, `<clipPath>`, `<linearGradient>` com `${id}`**:
+
+5. **Sempre sufixar IDs de `<defs>`, `<pattern>`, `<filter>`, `<clipPath>`, `<linearGradient>` com `${id}`**:
    ```svg
    <pattern id="scan-${id}" ...>
    <filter id="glow-${id}" ...>
    <clipPath id="clip-${id}" ...>
+   <linearGradient id="grad-${id}" ...>
    ```
 
 ---
@@ -236,22 +304,26 @@ Ofereça botões de 1 clique para temas pré-configurados:
 #### Padrões de Implementação de Cor:
 
 1. **Suporte a Cor Secundária (`supportsSecondaryColor`)**:
-   - Se o seu widget utiliza uma paleta de duas cores de destaque (ex: cor primária para bordas/título e cor secundária para tags/subtítulos como em _Surveillance_, _Control Plane_ ou _Codeweb_), registre a verificação em `PropertiesPanel.tsx`:
+   - Se o seu widget utiliza uma paleta de duas cores de destaque (ex: cor primária para bordas/título e cor secundária para tags/subtítulos como em _Surveillance_, _Control Plane_, _ASCII Premium Kit_ ou _Codeweb_), registre a verificação em `PropertiesPanel.tsx`:
      ```tsx
+     const isSurveillance = selectedWidget.widgetId.startsWith('surveillance-')
+     const isAsciiPremium = selectedWidget.widgetId.startsWith('premium-ascii-')
      const supportsSecondaryColor =
-       selectedWidget.widgetId.startsWith('surveillance-') ||
+       isSurveillance ||
+       isAsciiPremium ||
        selectedWidget.widgetId.startsWith('controlplane-') ||
        selectedWidget.widgetId === 'codeweb-retro-grid' ||
        'secondaryColor' in cfg
      ```
 2. **Presets de Temas de 1 Clique (Theme Presets)**:
-   - Se a categoria tiver combinações pré-definidas de cores (como _Cyan Oxide_, _Matrix Green_, _Cyber Crimson_, _Amber Terminal_, _Synthwave Violet_, _Monochrome Ice_), posicione a grade de botões de presets **diretamente dentro da seção `Cores & Tema` no `PropertiesPanel.tsx`**, logo abaixo dos `ColorPicker`s.
-   - Ao clicar no preset, atualize `accentColor`, `secondaryColor` e `ledColor` em conjunto:
+   - Se a categoria tiver combinações pré-definidas de cores (como _Matrix Green_, _Cyber Amber_, _Electric Cyan_, _Dracula Neon_, _Solarized Teal_, _Monochrome Silver_, _Crimson Alert_, _Synthwave Sunset_, _Golden Horizon_), posicione a grade de botões de presets **diretamente dentro da seção `Cores & Tema` no `PropertiesPanel.tsx`**, logo abaixo dos `ColorPicker`s.
+   - Ao clicar no preset, atualize `accentColor`, `secondaryColor`, `borderColor` e `backgroundColor` em conjunto:
      ```tsx
      updateWidgetConfig(selectedWidget.instanceId, {
        accentColor: th.primary,
        secondaryColor: th.secondary,
-       ...(isSurveillance ? { ledColor: th.led } : {}),
+       borderColor: th.border,
+       backgroundColor: th.background,
      })
      ```
 3. **Resolução de Cores no Renderer (`SurveillanceRenderers.ts` ou `MeuRenderer.ts`)**:
@@ -330,6 +402,52 @@ Quando o widget renderizar linguagens de programação, ferramentas de workflow 
 > Todo widget deve obrigatoriamente utilizar `data.user.login` como identificador padrão do desenvolvedor.  
 > **Não inclua** inputs para digitação de nome de usuário alternativo ou listas de sugestões de terceiros no painel de propriedades (`MeuWidgetControls.tsx`).
 
+### 5.10. Animações Específicas vs Painel Global (Regra de Centralização e Presets Quadrados)
+
+> [!IMPORTANT]
+> **Regra Obrigatória de Animações Temáticas:**  
+> **NUNCA** crie uma nova categoria de animação no menu genérico ou solte botões fora de lugar no painel.  
+> Quando uma categoria ou widget tiver animações especiais (ex: animação de contagem de números e preenchimento de barras ASCII, typing effect, radar sweeps, scanline cycles):
+
+1. **Posicionamento no Fim das Configurações**:
+   - A seção de animação deve ser posicionada no **final do painel de propriedades** do widget (`MeuWidgetControls.tsx`), logo abaixo de todos os filtros e opções específicas.
+2. **Formato de Botões Quadrados de Presets**:
+   - Utilize a grade de botões de 2 colunas com o padrão visual de cards quadrados (`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xs text-[10px] font-inter-tight leading-tight`):
+     - **Opção 1**: "Sem animação" (ícone `<Ban />`).
+     - **Opção 2**: Preset temático da categoria (ex: "Animar Números e Barras" com ícone `<Sparkles />` ou `<Zap />`).
+3. **Animação Ativada por Padrão (`animated: true`)**:
+   - No renderer e nos controles, o estado padrão deve ser sempre ativo (`config.animated !== false && !forceStatic`). O usuário que adiciona o widget deve ver a animação de entrada funcionando de imediato.
+4. **Isolamento de Controles Globais**:
+   - Widgets com animações próprias devem ser excluídos do componente genérico `AnimationControls` em `PropertiesPanel.tsx` (via `!selectedWidget.widgetId.startsWith('minha-categoria-')`), mantendo a interface limpa e intuitiva.
+
+### 5.11. Organização em Cards Expansíveis / Accordions Clicáveis
+
+Quando um widget possuir muitas opções e filtros:
+
+1. **Não empilhe dezenas de switches verticalmente**:
+   - Agrupe as configurações em **cards compactos com cabeçalhos retráteis** (ex: _Identidade & Informações_, _Métricas do GitHub_, _Top Repositórios_, _Linguagens & Tecnologias_).
+2. **Prevenção de Erros de Hidratação (`<button>` aninhado em `<button>`)**:
+   - O cabeçalho colapsável do card **deve ser um `<div role="button" tabIndex={0}>`** acessível, e **NUNCA** uma tag `<button>`.
+   - Se houver um `<Switch />` ou outro botão no cabeçalho do card, adicione `onClick={(e) => e.stopPropagation()}` no container do botão/switch filho para que clicar nele não dispare a abertura/fechamento do card.
+
+### 5.12. Proibição Estrita de Emojis
+
+> [!CAUTION]
+> **Proibição Total de Emojis na Interface e Renderização:**  
+> **NUNCA utilize emojis** (ex: `🧠`, `🌙`, `⭐`, `⚡`, `💻`, `🏆`) em títulos, subtítulos, cards da library, painéis de propriedades ou dentro dos arquivos SVG gerados.
+>
+> - Para elementos de interface: use exclusivamente ícones da biblioteca `lucide-react`.
+> - Para símbolos e glifos dentro do SVG: use exclusivamente caracteres ASCII monoespaçados (ex: `▸`, `★`, `>`, `#`) ou ícones vetoriais.
+
+### 5.13. Seletor de Linguagens e Tecnologias com Ícones Visuais
+
+Ao permitir que o usuário selecione ou oculte linguagens/tecnologias:
+
+- **Não use inputs de texto puro**: Forneça um grid visual com ícones (`https://skillicons.dev/icons?i=${id}&theme=dark`) baseado no `TECH_CATALOG` (`@/data/techCatalog`).
+- **Abas de Filtragem**:
+  - _Do seu Perfil_: Exibe as linguagens reais detectadas no GitHub do usuário com badges clicáveis de status.
+  - _Catálogo Completo_: Oferece busca instantânea e permite adicionar/ocultar qualquer stack com um clique.
+
 ---
 
 ## 6. Estilização Única por Categoria na Library
@@ -338,13 +456,14 @@ Ao renderizar os cards de uma categoria na `WidgetLibrary.tsx`, você **DEVE** i
 
 ### Exemplos de Identidade Visual Existentes:
 
-| Categoria         | Identidade Visual                          | Efeitos de Hover Obrigatórios                                                                                               |
-| :---------------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| **Surveillance**  | CRT terminal 198X, CCTV, scanlines, HUD    | Borda superior com scanlines verdes/azuis piscantes; retículas nos 4 cantos expandindo no hover.                            |
-| **Codeweb Aura**  | Aurora boreal, cosmic glow, glassmorphism  | `radial-gradient` orbs ocultos que revelam opacidade no hover; caixas translúcidas. Sem badges `aura`.                      |
-| **Control Plane** | Blueprint técnico, cyber grid, CAD         | SVG de grid no background revelando opacidade no hover; linhas vetoriais brilhantes crescendo nas bordas. Sem badges `sys`. |
-| **ASCII Profile** | Terminal retrô monoespaçado, hacker        | Padrões de `repeating-linear-gradient` (scanlines); cantos brilhantes desenhados com bordas expandindo no hover.            |
-| **GodProfile**    | Cyberpunk neon, alta densidade de métricas | Sombras profundas (glows coloridos) no hover; bordas de alta opacidade ou efeitos glitchy sutis.                            |
+| Categoria             | Identidade Visual                          | Efeitos de Hover Obrigatórios                                                                                               |
+| :-------------------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| **Surveillance**      | CRT terminal 198X, CCTV, scanlines, HUD    | Borda superior com scanlines verdes/azuis piscantes; retículas nos 4 cantos expandindo no hover.                            |
+| **Codeweb Aura**      | Aurora boreal, cosmic glow, glassmorphism  | `radial-gradient` orbs ocultos que revelam opacidade no hover; caixas translúcidas. Sem badges `aura`.                      |
+| **Control Plane**     | Blueprint técnico, cyber grid, CAD         | SVG de grid no background revelando opacidade no hover; linhas vetoriais brilhantes crescendo nas bordas. Sem badges `sys`. |
+| **ASCII Premium Kit** | Terminal hacker monospace alta densidade   | Barra superior estilo janela CLI com comandos dinâmicos, scanlines CRT sutis no hover e prompt com destaque terminal.       |
+| **ASCII Profile**     | Terminal retrô monoespaçado, hacker        | Padrões de `repeating-linear-gradient` (scanlines); cantos brilhantes desenhados com bordas expandindo no hover.            |
+| **GodProfile**        | Cyberpunk neon, alta densidade de métricas | Sombras profundas (glows coloridos) no hover; bordas de alta opacidade ou efeitos glitchy sutis.                            |
 
 ### Estrutura de Card Recomendada com Efeitos (Modelo Control Plane/ASCII):
 
@@ -355,17 +474,15 @@ Sempre envolva seu card em um `group relative overflow-hidden` e inclua `<div>`s
   onClick={() => addWidget(item.id)}
   className="group relative border border-thematic/30 hover:border-thematic/60 bg-thematic-bg hover:bg-thematic-hover transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden hover:shadow-[0_4px_15px_rgba(THEMATIC_COLOR,0.15)] flex flex-col"
 >
-  {/* Efeitos de Fundo & Animações Dinâmicas (Revealed on Hover) */}
   <div
     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
     style={{
       backgroundImage:
         'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(THEMA_R, THEMA_G, THEMA_B, 0.05) 2px, rgba(THEMA_R, THEMA_G, THEMA_B, 0.05) 4px)',
     }}
-  ></div>
-  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-thematic scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300 shadow-[0_0_8px_rgba(THEMATIC_COLOR,0.8)] z-20"></div>
+  />
+  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-thematic scale-y-0 group-hover:scale-y-100 origin-top transition-transform duration-300 shadow-[0_0_8px_rgba(THEMATIC_COLOR,0.8)] z-20" />
 
-  {/* Conteúdo do Card (z-index superior para ficar acima dos efeitos) */}
   <div className="flex items-center gap-3 relative z-10 p-3">
     <div className="p-2 bg-thematic-dark backdrop-blur-xs border border-thematic/40 text-thematic-light group-hover:text-thematic transition-all duration-300 shrink-0">
       <Icon size={16} />
@@ -391,17 +508,20 @@ Sempre envolva seu card em um `group relative overflow-hidden` e inclua `<div>`s
 Antes de considerar um novo widget ou categoria concluído, execute esta verificação:
 
 - [ ] **ID & Constantes**: Registrado em `WIDGET_IDS` e `WIDGET_CATALOG`.
-- [ ] **Default Size**: `defaultSize` definido e coerente com a renderização inicial.
+- [ ] **Default Size**: `defaultSize` definido exatamente conforme o design do conteúdo (sem margens extras ou _letterboxing_).
 - [ ] **Renderer Isolado**: Código SVG limpo, sem tags HTML inválidas dentro do SVG.
 - [ ] **Isolamento de CSS & Fontes**: Todo `<style>` e `@keyframes` dentro do SVG é estritamente escopado com `#${id}` (sem seletores nus como `text`, `tspan` ou `.classe-generica`).
 - [ ] **Cores Centralizadas no Topo**: Controles de cor (primária, secundária, fundo, borda, texto e presets de temas) residem no topo em `PropertiesPanel.tsx`, sem duplicações em `MeuWidgetControls.tsx`.
+- [ ] **Animação na Posição Correta**: Animações específicas ficam no final do painel de propriedades, em botões quadrados de presets e ativadas por padrão (`animated !== false`).
+- [ ] **Sem Emojis**: 100% livre de emojis (`🧠`, `🌙`, `⭐`, etc.), utilizando ícones `lucide-react` na UI e símbolos limpos no SVG.
+- [ ] **Sem Erros de Hidratação**: Accordions e cards colapsáveis usam `<div role="button">` em vez de `<button>` quando contêm `<Switch />` ou botões filhos.
+- [ ] **Seletor de Linguagens Visual**: Stacks e linguagens selecionáveis usam o grid com ícones de `skillicons.dev` / `TECH_CATALOG`.
+- [ ] **Filtros Granulares em Accordions**: Toggles organizados em seções colapsáveis limpas.
 - [ ] **Tinting Dinâmico de Fotos**: Imagens/avatares usam matriz de filtro SVG dinâmica derivada de `${rNorm}, ${gNorm}, ${bNorm}` (sem `hue-rotate` estático).
 - [ ] **Tech Stack & Badges**: Widgets de ferramentas/skills suportam `displayMode` (`both`, `logo`, `name`) e ícones de `skillicons.dev`.
 - [ ] **Identidade do Perfil Travada**: O widget consome exclusivamente `data.user.login` do perfil ativo sem permitir seleção de terceiros.
 - [ ] **Switches Vetoriais**: Todas as opções booleanas usam o componente `<Switch />` em vez de `<input type="checkbox">`.
-- [ ] **Filtros Granulares**: O usuário pode ligar/desligar elementos e campos específicos.
 - [ ] **Auto-Resize sem History Pollution**: Mudanças estruturais ajustam a altura com `recordHistory: false`.
-- [ ] **Sem Emojis em Elementos de UI**: Todos os botões e seletores usam ícones Lucide vetoriais.
 - [ ] **Scroll em Listas Longas**: Containers de seleção têm `max-h` com scroll customizado.
 - [ ] **Tooltip & Preview**: `WidgetPreviewTooltip` exibe a proporção correta no hover da library sem vazar estilos.
 - [ ] **API de Exportação**: Rota `[profileSlug]` possui dimensões de fallback para o novo widget.

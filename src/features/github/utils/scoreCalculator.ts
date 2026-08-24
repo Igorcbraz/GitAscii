@@ -233,9 +233,14 @@ export function calculateCodingVelocity(
 
   const maxVal = Math.max(commitsPerMonth, 150)
   const metrics = [
-    { label: 'Commits/month', value: commitsPerMonth, max: maxVal },
-    { label: 'PRs/month', value: prsPerMonth, max: Math.max(40, prsPerMonth * 1.2) },
-    { label: 'Issues/month', value: issuesPerMonth, max: Math.max(25, issuesPerMonth * 1.2) },
+    { id: 'commits', label: 'Commits/month', value: commitsPerMonth, max: maxVal },
+    { id: 'prs', label: 'PRs/month', value: prsPerMonth, max: Math.max(40, prsPerMonth * 1.2) },
+    {
+      id: 'issues',
+      label: 'Issues/month',
+      value: issuesPerMonth,
+      max: Math.max(25, issuesPerMonth * 1.2),
+    },
   ]
 
   return {
