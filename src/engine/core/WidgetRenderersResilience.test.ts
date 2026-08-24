@@ -317,4 +317,26 @@ describe('Engine Robustness & Widget Error Boundary', () => {
       expect(emptyOutput).toContain('<svg')
     })
   })
+
+  it('renders ASCII Premium Kit widgets with aligned ASCII borders regardless of tspan tags', () => {
+    const widget: WidgetInstance = {
+      widgetId: 'premium-ascii-coding-velocity',
+      instanceId: 'inst_test_velocity',
+      name: 'Velocity',
+      position: { x: 0, y: 0 },
+      size: { width: 400, height: 260 },
+      config: {},
+      locked: false,
+      visible: true,
+      zIndex: 1,
+    }
+
+    const renderer = getRenderer('premium-ascii-coding-velocity')
+    const output = renderer(widget, mockFullData, mockGlobalStyles)
+    expect(output).toContain('<svg')
+    expect(output).toContain('CODING VELOCITY')
+    expect(output).toContain('│')
+    expect(output).toContain('┌')
+    expect(output).toContain('└')
+  })
 })

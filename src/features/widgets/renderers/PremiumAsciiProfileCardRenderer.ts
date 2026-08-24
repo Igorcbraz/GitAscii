@@ -31,7 +31,19 @@ function getAccountUptime(createdAtStr?: string): string {
 }
 
 function vLen(str: string): number {
-  return str.replace(/<[^>]+>/g, '').length
+  let len = 0
+  let inTag = false
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i]
+    if (char === '<') {
+      inTag = true
+    } else if (char === '>') {
+      inTag = false
+    } else if (!inTag) {
+      len++
+    }
+  }
+  return len
 }
 
 function vPad(str: string, targetWidth: number): string {
