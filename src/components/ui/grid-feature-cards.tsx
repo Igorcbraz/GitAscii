@@ -5,10 +5,13 @@ import React, { useId, useMemo, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-type FeatureType = {
+export type FeatureType = {
   title: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   description: string
+  tag?: string
+  actionText?: string
+  href?: string
 }
 
 type FeatureCardProps = React.ComponentProps<typeof motion.div> & {
@@ -34,12 +37,12 @@ export function FeatureCard({ feature, index, className, ...props }: FeatureCard
       whileHover={{ y: -6, transition: { duration: 0.2, ease: 'easeOut' } }}
       onMouseMove={handleMouseMove}
       className={cn(
-        'bg-onyx border border-graphite rounded-none transition-colors duration-300 group relative overflow-hidden p-8 flex flex-col cursor-default select-none min-h-62.5',
+        'bg-onyx border border-graphite rounded-none transition-colors duration-300 group relative overflow-hidden p-8 flex flex-col justify-between cursor-default select-none min-h-[260px]',
         className
       )}
       {...props}
     >
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-40 group-hover:opacity-60 transition-opacity duration-300">
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-40 group-hover:opacity-70 transition-opacity duration-300">
         <div className="absolute inset-0 bg-linear-to-r from-white/5 to-transparent mask-[radial-gradient(farthest-side_at_top,white,transparent)]" />
         <GridPattern
           width={20}
@@ -54,53 +57,63 @@ export function FeatureCard({ feature, index, className, ...props }: FeatureCard
       <div
         className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"
         style={{
-          background: `radial-gradient(280px circle at ${coords.x}px ${coords.y}px, rgba(197, 255, 74, 0.06), transparent 80%)`,
+          background: `radial-gradient(380px circle at ${coords.x}px ${coords.y}px, rgba(197, 255, 74, 0.12), rgba(197, 255, 74, 0.03) 50%, transparent 80%)`,
         }}
       />
 
       <div
-        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0 border border-signal-lime/25"
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0 border border-signal-lime/40"
         style={{
-          maskImage: `radial-gradient(120px circle at ${coords.x}px ${coords.y}px, black, transparent)`,
+          maskImage: `radial-gradient(220px circle at ${coords.x}px ${coords.y}px, black, transparent)`,
+          WebkitMaskImage: `radial-gradient(220px circle at ${coords.x}px ${coords.y}px, black, transparent)`,
         }}
       />
 
-      <div className="absolute top-2 left-2 text-graphite/40 font-mono text-[8px] pointer-events-none select-none group-hover:text-signal-lime/20 transition-colors duration-300">
+      <div className="absolute top-2 left-2 text-graphite/40 font-mono text-[9px] pointer-events-none select-none group-hover:text-signal-lime/40 transition-colors duration-300">
         +
       </div>
-      <div className="absolute top-2 right-2 text-graphite/40 font-mono text-[8px] pointer-events-none select-none group-hover:text-signal-lime/20 transition-colors duration-300">
+      <div className="absolute top-2 right-2 text-graphite/40 font-mono text-[9px] pointer-events-none select-none group-hover:text-signal-lime/40 transition-colors duration-300">
         +
       </div>
-      <div className="absolute bottom-2 left-2 text-graphite/40 font-mono text-[8px] pointer-events-none select-none group-hover:text-signal-lime/20 transition-colors duration-300">
+      <div className="absolute bottom-2 left-2 text-graphite/40 font-mono text-[9px] pointer-events-none select-none group-hover:text-signal-lime/40 transition-colors duration-300">
         +
       </div>
-      <div className="absolute bottom-2 right-2 text-graphite/40 font-mono text-[8px] pointer-events-none select-none group-hover:text-signal-lime/20 transition-colors duration-300">
+      <div className="absolute bottom-2 right-2 text-graphite/40 font-mono text-[9px] pointer-events-none select-none group-hover:text-signal-lime/40 transition-colors duration-300">
         +
       </div>
 
       <div className="relative z-10 flex flex-col h-full justify-between grow">
         <div>
           <div className="flex justify-between items-start">
-            <div className="p-2 border border-graphite bg-carbon/50 group-hover:border-signal-lime/30 group-hover:bg-carbon transition-colors duration-300">
+            <div className="p-2.5 border border-graphite bg-carbon/50 group-hover:border-signal-lime/40 group-hover:bg-carbon transition-colors duration-300">
               <feature.icon
                 className="text-ash group-hover:text-signal-lime size-6 transition-all duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
                 aria-hidden
               />
             </div>
-            <span className="font-mono text-caption text-ash group-hover:text-signal-lime/70 transition-colors duration-300 mt-1">
-              {formattedIndex}
+            <span className="font-mono text-caption text-ash group-hover:text-signal-lime/80 transition-colors duration-300 mt-1">
+              {feature.tag || formattedIndex}
             </span>
           </div>
 
-          <h3 className="mt-8 font-inter-tight font-medium text-subheading text-chalk tracking-tight group-hover:text-white transition-colors duration-200">
+          <h3 className="mt-6 font-inter-tight font-medium text-subheading text-chalk tracking-tight group-hover:text-white transition-colors duration-200">
             {feature.title}
           </h3>
 
-          <p className="font-inter-tight font-normal text-body text-bone leading-body mt-3">
+          <p className="font-inter-tight font-normal text-body text-bone leading-body mt-2.5">
             {feature.description}
           </p>
         </div>
+
+        {feature.actionText && (
+          <div className="pt-4 mt-4 border-t border-graphite/40 flex items-center justify-between">
+            <span className="font-jetbrains-mono text-[11px] uppercase tracking-wider text-signal-lime group-hover:text-chalk font-semibold transition-colors flex items-center gap-1.5">
+              <span>{feature.actionText}</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+          </div>
+        )}
       </div>
     </motion.div>
   )

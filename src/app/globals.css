@@ -263,3 +263,12 @@
 .animate-pulse-glow-bar {
   animation: pulseGlowBar 1.5s ease-in-out infinite;
 }
+
+@keyframes shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}

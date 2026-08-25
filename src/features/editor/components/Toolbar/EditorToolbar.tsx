@@ -30,7 +30,11 @@ import { GuestLoginModal } from './GuestLoginModal'
 import { StarPromptModal } from './StarPromptModal'
 import { ViewModeToggle } from './ViewModeToggle'
 
-export function EditorToolbar() {
+interface EditorToolbarProps {
+  embedded?: boolean
+}
+
+export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
   const { t } = useI18n()
 
   const username = useEditorStore((state) => state.config?.username)
@@ -545,59 +549,70 @@ export function EditorToolbar() {
 
         <div className="h-4 w-px bg-graphite hidden sm:block" />
 
-        <div className="flex items-center gap-3 z-10">
-          {session ? (
-            <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
-              <Link
-                href={`/${session.username}`}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-label font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
-                title={`Profile @${session.username}`}
-              >
-                <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
-                <span className="truncate max-w-[65px] font-inter-tight">@{session.username}</span>
-              </Link>
-              <span className="h-4 w-px bg-graphite/80 shrink-0" />
+        {!embedded && (
+          <div className="flex items-center gap-3 z-10">
+            {session ? (
+              <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
+                <Link
+                  href={`/${session.username}`}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-label font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
+                  title={`Profile @${session.username}`}
+                >
+                  <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
+                  <span className="truncate max-w-[65px] font-inter-tight">@{session.username}</span>
+                </Link>
+                <span className="h-4 w-px bg-graphite/80 shrink-0" />
+                <button
+                  onClick={handleLogout}
+                  className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+                  title={t('editor.toolbar.logout', 'Sair da conta')}
+                >
+                  <LogOut className="size-3.5" />
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={handleLogout}
-                className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
-                title={t('editor.toolbar.logout', 'Sair da conta')}
+                onClick={() => {
+                  setIsLoginLoading(true)
+                  window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
+                }}
+                disabled={isLoginLoading}
+                className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/70 bg-gradient-to-r from-onyx via-carbon to-onyx px-3 h-[32px] w-[130px] font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:border-graphite hover:bg-carbon hover:shadow-[0_0_14px_rgba(197,255,74,0.15)] active:scale-[0.98] group cursor-pointer disabled:opacity-60 disabled:hover:scale-100 overflow-hidden relative"
               >
-                <LogOut className="size-3.5" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setIsLoginLoading(true)
-                window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
-              }}
-              disabled={isLoginLoading}
-              className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/70 bg-gradient-to-r from-onyx via-carbon to-onyx px-3 h-[32px] w-[130px] font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:border-graphite hover:bg-carbon hover:shadow-[0_0_14px_rgba(197,255,74,0.15)] active:scale-[0.98] group cursor-pointer disabled:opacity-60 disabled:hover:scale-100 overflow-hidden relative"
-            >
-              <div className="absolute inset-0 bg-signal-lime/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              {isLoginLoading ? (
-                <span className="w-3.5 h-3.5 border-2 border-signal-lime border-t-transparent rounded-full animate-spin shrink-0" />
-              ) : (
-                <LogIn className="size-3.5 text-signal-lime group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
-              )}
-              <span className="font-inter-tight font-medium text-white tracking-wide z-10">
-                Log
-                <span className="font-pt-serif italic text-signal-lime ml-0.5 font-light text-[14px]">
-                  in
+                <div className="absolute inset-0 bg-signal-lime/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                {isLoginLoading ? (
+                  <span className="w-3.5 h-3.5 border-2 border-signal-lime border-t-transparent rounded-full animate-spin shrink-0" />
+                ) : (
+                  <LogIn className="size-3.5 text-signal-lime group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+                )}
+                <span className="font-inter-tight font-medium text-white tracking-wide z-10">
+                  Log
+                  <span className="font-pt-serif italic text-signal-lime ml-0.5 font-light text-[14px]">
+                    in
+                  </span>
                 </span>
-              </span>
-            </button>
-          )}
-        </div>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-2">
         <button
-          onClick={() => setCommandPaletteOpen(true)}
+          onClick={embedded ? undefined : () => setCommandPaletteOpen(true)}
+          disabled={embedded}
           data-testid="command-palette-btn"
           id="tour-global-search"
-          title={t('editor.toolbar.search_shortcut', 'Global Search (Ctrl+K)')}
-          className="flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 hover:border-graphite text-ash hover:text-chalk transition-all duration-200 cursor-pointer group"
+          title={
+            embedded
+              ? t('editor.toolbar.search_commands', 'Search widgets, templates...')
+              : t('editor.toolbar.search_shortcut', 'Global Search (Ctrl+K)')
+          }
+          className={`flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 text-ash transition-all duration-200 ${
+            embedded
+              ? 'opacity-60 cursor-not-allowed'
+              : 'hover:border-graphite hover:text-chalk cursor-pointer group'
+          }`}
         >
           <Search size={13} className="shrink-0 text-fog" />
           <span className="font-inter-tight text-note text-fog flex-1 text-left">
@@ -617,18 +632,27 @@ export function EditorToolbar() {
         </button>
       </div>
 
-      <div className="flex items-center gap-3" id="tour-export-buttons">
-        <button
-          onClick={handleExport}
-          data-testid="export-layout-btn"
-          title={t('editor.toolbar.export_json', 'Export Layout (JSON)')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
-        >
-          <Download size={14} />
-          <span className="hidden sm:inline">{t('editor.toolbar.export', 'Export Layout')}</span>
-        </button>
-        {renderUpdateReadmeButton()}
-      </div>
+      {!embedded ? (
+        <div className="flex items-center gap-3" id="tour-export-buttons">
+          <button
+            onClick={handleExport}
+            data-testid="export-layout-btn"
+            title={t('editor.toolbar.export_json', 'Export Layout (JSON)')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">{t('editor.toolbar.export', 'Export Layout')}</span>
+          </button>
+          {renderUpdateReadmeButton()}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="px-2.5 py-1 bg-signal-lime/10 border border-signal-lime/30 text-signal-lime font-jetbrains-mono text-[10px] uppercase tracking-wider hidden sm:flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-signal-lime animate-pulse" />
+            <span>Interactive Demo</span>
+          </div>
+        </div>
+      )}
 
       <CommandPalette
         open={commandPaletteOpen}

@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 
-import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
+import { embedExternalImages } from '@/engine/core/embedExternalImages'
+import { renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'

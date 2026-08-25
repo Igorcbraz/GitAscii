@@ -238,21 +238,11 @@ export default function Navbar() {
                                   <div className="flex flex-col mt-0.5 z-10">
                                     <h4 className="text-[17px] leading-snug">
                                       <span className="font-inter-tight font-medium text-white">
-                                        {item.titleNormal || item.defaultTitle}
+                                        {t(`landing.navbar.item.${item.key}`, item.defaultTitle)}
                                       </span>
-                                      {item.titleHighlight && (
-                                        <span className="font-pt-serif italic text-signal-lime font-light ml-1">
-                                          {item.titleHighlight}
-                                        </span>
-                                      )}
-                                      {item.titleEnd && (
-                                        <span className="font-inter-tight font-medium text-white">
-                                          {item.titleEnd}
-                                        </span>
-                                      )}
                                     </h4>
                                     <p className="font-inter-tight text-[12px] text-bone/80 mt-1 leading-relaxed group-hover:text-white transition-colors">
-                                      {item.defaultDesc}
+                                      {t(`landing.navbar.item.${item.key}_desc`, item.defaultDesc)}
                                     </p>
                                   </div>
                                 </motion.div>
@@ -271,13 +261,8 @@ export default function Navbar() {
                                             : 'text-chalk group-hover:text-white'
                                         }`}
                                       >
-                                        {item.titleNormal || item.defaultTitle}
+                                        {t(`landing.navbar.item.${item.key}`, item.defaultTitle)}
                                       </span>
-                                      {item.titleHighlight && (
-                                        <span className="font-pt-serif italic text-ash group-hover:text-signal-lime text-[14px] transition-colors">
-                                          {item.titleHighlight}
-                                        </span>
-                                      )}
                                       {item.badge && (
                                         <span className="font-jetbrains-mono text-[9px] text-ash uppercase">
                                           · {item.badge}
@@ -285,7 +270,7 @@ export default function Navbar() {
                                       )}
                                     </div>
                                     <p className="font-inter-tight text-[12px] text-ash mt-0.5 leading-snug line-clamp-1 group-hover:text-bone transition-colors">
-                                      {item.defaultDesc}
+                                      {t(`landing.navbar.item.${item.key}_desc`, item.defaultDesc)}
                                     </p>
                                   </div>
 
@@ -333,7 +318,7 @@ export default function Navbar() {
                                   className="font-inter-tight text-[12px] text-ash hover:text-signal-lime flex items-center gap-1.5 transition-colors duration-200 group"
                                   onClick={() => setActiveDropdown(null)}
                                 >
-                                  <span>{section.footerLink.defaultLabel}</span>
+                                  <span>{t(section.footerLink.key, section.footerLink.defaultLabel)}</span>
                                   <ArrowRight className="size-3 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-200" />
                                 </a>
                               ) : (
@@ -342,7 +327,7 @@ export default function Navbar() {
                                   className="font-inter-tight text-[12px] text-ash hover:text-signal-lime flex items-center gap-1.5 transition-colors duration-200 group"
                                   onClick={() => setActiveDropdown(null)}
                                 >
-                                  <span>{section.footerLink.defaultLabel}</span>
+                                  <span>{t(section.footerLink.key, section.footerLink.defaultLabel)}</span>
                                   <ArrowRight className="size-3 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-200" />
                                 </Link>
                               )}
@@ -461,7 +446,7 @@ export default function Navbar() {
                                 isItemActive ? 'text-signal-lime' : 'text-chalk'
                               }`}
                             >
-                              {item.defaultTitle}
+                              {t(`landing.navbar.item.${item.key}`, item.defaultTitle)}
                             </span>
                             {item.isExternal && <ExternalLink className="size-2.5 text-ash" />}
                           </div>

@@ -1,11 +1,13 @@
 'use client'
 
-import { ArrowRight, Github, User } from 'lucide-react'
+import { ArrowRight, Github, Sparkles, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import AsciiHands from '@/components/ui/ascii-hands'
+import Magnet from '@/components/ui/Magnet'
+import ShinyText from '@/components/ui/ShinyText'
 import { useToast } from '@/components/ui/toast'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -79,9 +81,12 @@ export default function Hero() {
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pb-24 md:pb-32 pt-16">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
-            <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
-              {t('landing.hero.eyebrow', '[ THE FUTURE OF GITHUB PROFILES ]')}
-            </span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 font-jetbrains-mono text-[11px] uppercase tracking-[0.22em] text-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.15)]">
+              <Sparkles className="w-3.5 h-3.5" />
+              <ShinyText speed={3.5}>
+                {t('landing.hero.eyebrow', '[ THE FUTURE OF GITHUB PROFILES ]')}
+              </ShinyText>
+            </div>
           </div>
 
           <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-300 font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
@@ -101,30 +106,34 @@ export default function Hero() {
 
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
             {session ? (
-              <Link
-                href={`/${session.username}`}
-                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              >
-                <User size={18} />
-                <span>
-                  {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
-                </span>
-              </Link>
+              <Magnet distance={60} strength={0.25} className="w-full">
+                <Link
+                  href={`/${session.username}`}
+                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  <User size={18} />
+                  <span>
+                    {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
+                  </span>
+                </Link>
+              </Magnet>
             ) : (
-              <Link
-                href={API_ENDPOINTS.AUTH.LOGIN()}
-                prefetch={false}
-                rel="nofollow"
-                onClick={() => setIsGithubLoading(true)}
-                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
-              >
-                {isGithubLoading ? (
-                  <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Github size={18} />
-                )}
-                <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
-              </Link>
+              <Magnet distance={60} strength={0.25} className="w-full">
+                <Link
+                  href={API_ENDPOINTS.AUTH.LOGIN()}
+                  prefetch={false}
+                  rel="nofollow"
+                  onClick={() => setIsGithubLoading(true)}
+                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
+                >
+                  {isGithubLoading ? (
+                    <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Github size={18} />
+                  )}
+                  <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
+                </Link>
+              </Magnet>
             )}
 
             <div className="flex items-center gap-3 w-full">
