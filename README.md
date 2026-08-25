@@ -170,6 +170,10 @@ Check out our [CHANGELOG.md](CHANGELOG.md) to see what's new.
 
 ## 🤝 Contributing
 
+We thank the following people who contributed to this project:
+
+[![Contributors](https://contrib.rocks/image?repo=Igorcbraz/GitAscii)](https://github.com/Igorcbraz/GitAscii/graphs/contributors)
+
 Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything about how to contribute, and please review our [Code of Conduct](CODE_OF_CONDUCT.md). Any contributions you make are **greatly appreciated**.
 
 ---
@@ -177,6 +181,14 @@ Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file before assuming anything
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+<a href="https://www.star-history.com/?repos=Igorcbraz%2FGitAscii&type=timeline&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&theme=dark&legend=top-left&sealed_token=WAD4KArNuQ379AYAAoB6NexJVTlM87nPSibH24PjWHA2xpmSsSX4eJWBlGiU9tbd-YClRBG7XZHaW6SSUVIv27QhMZxnEnV0KgKySkMm5E6C6-iPLWte26fmitbhcT-QChuroLPJjncYMEl-nBkNYlSu4p4g9u5WHKRep13NneGZ7iZaiq0ZngEy0b53" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&legend=top-left&sealed_token=WAD4KArNuQ379AYAAoB6NexJVTlM87nPSibH24PjWHA2xpmSsSX4eJWBlGiU9tbd-YClRBG7XZHaW6SSUVIv27QhMZxnEnV0KgKySkMm5E6C6-iPLWte26fmitbhcT-QChuroLPJjncYMEl-nBkNYlSu4p4g9u5WHKRep13NneGZ7iZaiq0ZngEy0b53" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Igorcbraz/GitAscii&type=timeline&legend=top-left&sealed_token=WAD4KArNuQ379AYAAoB6NexJVTlM87nPSibH24PjWHA2xpmSsSX4eJWBlGiU9tbd-YClRBG7XZHaW6SSUVIv27QhMZxnEnV0KgKySkMm5E6C6-iPLWte26fmitbhcT-QChuroLPJjncYMEl-nBkNYlSu4p4g9u5WHKRep13NneGZ7iZaiq0ZngEy0b53" />
+ </picture>
+</a>
 
 <div align="center">
   <sub>Built with design obsession by <a href="https://github.com/Igorcbraz">Igorcbraz</a>.</sub>
