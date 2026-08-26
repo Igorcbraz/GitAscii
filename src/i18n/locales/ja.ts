@@ -1674,4 +1674,143 @@ export const ja: Record<string, string> = {
   'landing.why.title_normal': 'あなたに必要な',
   'landing.why.title_italic': 'すべて。',
   'landing.why.subtitle': '美しいGitHubプロフィールを作成・共有するためのオールインワンツール。',
+  'unsubscribe.badge': 'メール設定',
+  'unsubscribe.success_title': '配信停止が完了しました',
+  'unsubscribe.success_desc_email':
+    '{email} は今後 GitAscii からの製品アップデートや再通知を受信しません。',
+  'unsubscribe.success_desc': '今後 GitAscii からのマーケティングや製品通知を受信しません。',
+  'unsubscribe.security_notice':
+    'お客様の直接の操作によってトリガーされた重要なセキュリティ警告や必要なトランザクション通知は引き続き送信されます。',
+  'unsubscribe.invalid_title': '無効または期限切れのリンク',
+  'unsubscribe.invalid_desc':
+    'アクセスした配信停止リンクは無効か期限切れです。設定を管理したい場合は、最新のメールに記載されているリンクをご利用ください。',
+  'unsubscribe.manage_title': '通知設定の管理',
+  'unsubscribe.preferences_for': '@{username} の設定:',
+  'unsubscribe.email_settings': 'メール設定:',
+  'unsubscribe.footer_hint':
+    'メール配信を停止するには、該当メールのフッターにある配信停止リンクをクリックしてください。',
+  'unsubscribe.return_button': 'GitAscii に戻る',
+  'email.badge_notification': '[ スタジオ通知 ]',
+  'email.footer_tagline': 'GitAscii — 謎めいたターミナルと洗練されたエディトリアルデザインの融合。',
+  'email.nav_templates': 'テンプレート',
+  'email.nav_community': 'コミュニティ',
+  'email.footer_reason': 'このメールは GitAscii にご登録いただいた皆様にお送りしています。',
+  'email.manage_preferences': '配信設定の管理',
+  'email.unsubscribe': '配信停止',
+  'email.footer_built_for': '世界中の開発者のために構築されました。',
+  'email.welcome.subject': 'GitAscii へようこそ、@{username} 🚀',
+  'email.welcome.preview':
+    'GitAscii へようこそ、{displayName}！ダイナミックな README の作成を始めましょう。',
+  'email.welcome.badge': '[ オンボーディング · はじめに ]',
+  'email.welcome.headline': 'GitAscii へようこそ、',
+  'email.welcome.intro':
+    'こんにちは {displayName}、最高品質の GitHub プロフィール README を作成するためのビジュアルスタジオの準備が整いました。動的 SVG、ASCII アートウィジェット、エッジでレンダリングされるリアルタイム開発者統計を自由に組み合わせましょう。',
+  'email.welcome.feature1_title': 'ビジュアルキャンバス＆ドラッグ＆ドロップエディタ',
+  'email.welcome.feature1_desc':
+    'リアルタイムプレビュー、配置ガイド、レスポンシブスケールを備えた多層 SVG を作成。',
+  'email.welcome.feature2_title': '40以上のモジュール型ウィジェットテンプレート',
+  'email.welcome.feature2_desc':
+    'GitHub 統計、ストリークカウンター、ミュージックビジュアライザー、ターミナルバナー、ASCII タイポグラフィ、監視モニター。',
+  'email.welcome.feature3_title': '1クリック GitHub エクスポート',
+  'email.welcome.feature3_desc': '公式 GitHub App 連携を通じて、あなたの専用',
+  'email.welcome.feature3_desc_end': 'リポジトリに直接コミット・エクスポートします。',
+  'email.welcome.cta': 'ビジュアルスタジオを開く →',
+  'email.welcome.tip_title': 'プロのヒント:',
+  'email.welcome.tip_desc': 'コミュニティが作成したテンプレートを',
+  'email.welcome.tip_link': 'コミュニティギャラリー',
+  'email.welcome.tip_desc_end':
+    'から直接読み込むことで、魅力的なレイアウトを素早く手に入れられます。',
+  'email.first_export.subject': '🚀 あなたの GitAscii README が GitHub で公開されました！',
+  'email.first_export.preview':
+    'あなたの GitAscii README が GitHub で公開されました、@{username}！',
+  'email.first_export.badge': '[ GITHUB エクスポート · プロフィール公開中 ]',
+  'email.first_export.headline': 'あなたの GitAscii README が',
+  'email.first_export.live_text': '公開されました',
+  'email.first_export.intro':
+    'GitHub のプロフィールリポジトリが新しいビジュアルレイアウトと動的 SVG 埋め込みで更新されました。',
+  'email.first_export.card_subtitle': 'プロフィール README · GitAscii Studio 経由で更新',
+  'email.first_export.synced_badge': '同期完了',
+  'email.first_export.asset_config_title': '// ライブアセット設定:',
+  'email.first_export.slug_label': 'プロフィール Slug:',
+  'email.first_export.widgets_label': '有効なウィジェット:',
+  'email.first_export.endpoint_label': 'エッジ SVG エンドポイント:',
+  'email.first_export.cta': 'GitHub でプロフィールを見る',
+  'email.first_export.customize_link': 'GitAscii Studio を開いてさらにウィジェットをカスタマイズ',
+  'email.first_export.notes_title': 'エッジ動的アーキテクチャ',
+  'email.first_export.notes_desc':
+    'GitHub は Camo プロキシ経由で画像をキャッシュします。GitAscii の動的 SVG は訪問者がプロフィールを開くたびに自動更新され、コミット統計を常に最新に保ちます。',
+  'email.app_disconnected.subject':
+    '⚠️ [要対応] GitAscii には @{username} への書き込み権限が必要です',
+  'email.app_disconnected.preview':
+    'GitAscii が {targetRepo} リポジトリを更新するには書き込み権限が必要です',
+  'email.app_disconnected.badge': '[ GITHUB APP · 権限が必要です ]',
+  'email.app_disconnected.headline': 'GitHub App の権限が',
+  'email.app_disconnected.needed_text': '必要です',
+  'email.app_disconnected.intro':
+    'こんにちは {displayName}、GitAscii が README の更新をコミットするには、リポジトリへの書き込みアクセス権が必要です。',
+  'email.app_disconnected.status_text':
+    'GitHub App の書き込みアクセスが切断されているか、承認待ちです',
+  'email.app_disconnected.resolution_title': '// 解決手順:',
+  'email.app_disconnected.step1':
+    '1. GitHub 設定で GitAscii App のインストールが取り消されたか変更された可能性があります。',
+  'email.app_disconnected.step2_prefix': '2. 対象リポジトリ',
+  'email.app_disconnected.step2_suffix':
+    'が許可されたリポジトリに含まれていることを確認してください。',
+  'email.app_disconnected.step3':
+    '3. 再承認されると、1クリック README 同期が自動的に再開されます。',
+  'email.app_disconnected.cta': 'GitHub で再接続する',
+  'email.app_disconnected.disclaimer':
+    'これはアカウントのセキュリティおよび連携状態に関する重要なお知らせです。',
+  'email.star_thank_you.subject':
+    '⭐ GitHub で GitAscii を応援いただきありがとうございます、@{username}！',
+  'email.star_thank_you.preview':
+    'GitHub で GitAscii を応援いただきありがとうございます、@{username}！',
+  'email.star_thank_you.badge': '[ GITHUB · サポーターへの感謝 ]',
+  'email.star_thank_you.headline': 'ご支援いただきありがとうございます、',
+  'email.star_thank_you.intro':
+    'こんにちは {displayName}、GitAscii の GitHub リポジトリへのスターを受け取りました。個人開発のオープンソースプロジェクトは、コミュニティからのフィードバックと関心によって成長し続けることができます。',
+  'email.star_thank_you.repo_tagline': 'GitHub プロフィール README ジェネレーター',
+  'email.star_thank_you.starred_badge': 'スター獲得',
+  'email.star_thank_you.badge_section_title': '// サポーターバッジのコード:',
+  'email.star_thank_you.badge_instruction':
+    'GitHub リポジトリにサポーターバッジを表示したい場合は、以下のスニペットをコピーしてください:',
+  'email.star_thank_you.cta': 'GitHub リポジトリを開く',
+  'email.star_thank_you.disclaimer':
+    'このメールは GitHub で GitAscii にスターを付けてくださった開発者様への一度限りの感謝メールです。',
+  'email.request_star.subject':
+    '動的 GitHub README をお楽しみいただけていますか？ GitAscii に ⭐ をお願いします！',
+  'email.request_star.preview':
+    '動的 README をお楽しみいただけていますか、@{username}？ GitAscii にスターをお願いします！',
+  'email.request_star.badge': '[ コミュニティ支援 · オープンソース ]',
+  'email.request_star.headline': 'GitAscii に',
+  'email.request_star.star_text': 'スター',
+  'email.request_star.headline_suffix': 'をお願いします',
+  'email.request_star.intro':
+    'こんにちは {displayName}、GitHub であなたのプロフィール README が注目を集めていることを願っています！ GitAscii が素敵なプロフィール作りに役立ちましたら、スターでプロジェクトを応援してください。',
+  'email.request_star.repo_tagline': 'GitHub プロフィール README ジェネレーター',
+  'email.request_star.open_source_badge': 'オープンソース',
+  'email.request_star.cta': 'GitHub でスターを付ける',
+  'email.request_star.continue_link': 'またはスタジオでウィジェットのカスタマイズを続ける',
+  'email.request_star.disclaimer':
+    'これは GitAscii のアクティブなクリエイター様へのお願いです。このメッセージが再度送信されることはありません。',
+  'email.reengagement.subject': '新機能で GitHub README をさらにグレードアップしましょう',
+  'email.reengagement.preview':
+    '新しいウィジェットやレイアウトがあなたの GitHub README を待っています、@{username}。',
+  'email.reengagement.badge': '[ プロダクト更新 · スタジオの新着 ]',
+  'email.reengagement.headline': 'GitHub README を進化させましょう、',
+  'email.reengagement.intro':
+    'こんにちは {displayName}、最後にプロフィールを更新してから {inactiveDays} 日が経過しました。スタジオに新しいコミュニティウィジェットとテーマオプションを追加しました。',
+  'email.reengagement.feature1_title': 'Snake コントリビューションアニメーション',
+  'email.reengagement.feature1_desc':
+    '草（コントリビューショングリッド）の上を動くヘビアニメーションを自動生成する GitHub Action を構成。',
+  'email.reengagement.feature2_title': 'インタラクティブなカード＆ウィジェット',
+  'email.reengagement.feature2_desc':
+    'ポケモンTCGホログラムカード、スカウトプロフィール、継続日数バッジ、技術スタックグリッドを追加。',
+  'email.reengagement.feature3_title': 'アダプティブテーマエンジン',
+  'email.reengagement.feature3_desc':
+    'エッジ SVG は訪問者の GitHub ダーク/ライトモード設定に自動でシームレスに適応します。',
+  'email.reengagement.cta': 'スタジオを開いてプロフィールを更新',
+  'email.reengagement.explore_link': 'コミュニティの README ギャラリーを見る',
+  'email.reengagement.disclaimer':
+    'GitAscii に登録されているためこのメールをお送りしています。この通知は最大で月1回に制限されています。',
 }

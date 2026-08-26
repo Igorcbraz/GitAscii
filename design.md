@@ -238,8 +238,6 @@ Text 'FOR HUMANS · BROWSER EXTENSION' or 'FOR AGENTS · TRANSGATE SDK' in Inter
 - **Transitions:** `translate-y-0 opacity-100 scale-100` (visible) vs `translate-y-6 opacity-0 scale-95 pointer-events-none` (hidden).
 - **Structure:** Same 3-zone standard (`bg-carbon border border-graphite rounded-sm overflow-hidden shadow-2xl`).
 
-
-
 ## Do's and Don'ts
 
 ### Do

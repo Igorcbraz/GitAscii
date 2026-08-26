@@ -42,6 +42,8 @@ function getSecretKey(): Buffer {
 export interface UserSession {
   username: string
   githubId: number
+  email?: string
+  name?: string
   accessToken?: string
   createdAt?: number
   expiresAt?: number

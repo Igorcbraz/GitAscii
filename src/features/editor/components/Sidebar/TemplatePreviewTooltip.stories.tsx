@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
-import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
-
+import { TEMPLATE_PRESETS } from '../../../../engine/core/TemplateRenderer'
 import { useEditorStore } from '../../store/editorStore'
 import { mockConfig, mockGithubData } from '../stories/mockData'
 import { TemplatePreviewTooltip } from './TemplatePreviewTooltip'

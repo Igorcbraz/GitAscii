@@ -60,6 +60,21 @@ export async function POST(request: Request) {
     } else {
       const { token, installUrl } = await getInstallationTokenForUser(username)
       if (!token) {
+        if (session.email) {
+          const { emailService } = await import('@/lib/email/service')
+          void emailService
+            .sendAppDisconnectedEmail({
+              username: session.username,
+              name: session.name,
+              email: session.email,
+              installUrl: installUrl || undefined,
+              repoName: `${session.username}/${session.username}`,
+            })
+            .catch((err) => {
+              console.error('[Commit Route] Non-blocking app disconnected email error:', err)
+            })
+        }
+
         if (installUrl) {
           return NextResponse.json({ error: 'not_installed', installUrl }, { status: 403 })
         }
@@ -253,7 +268,7 @@ jobs:
               method: 'PUT',
               headers,
               body: JSON.stringify({
-                message: 'Configura GitHub Action do Contribution Snake',
+                message: 'Configure Contribution Snake GitHub Action',
                 content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
                 sha: actionSha,
               }),
@@ -262,10 +277,10 @@ jobs:
           )
 
           if (!updateActionRes.ok) {
-            console.error('Falha ao configurar a Action da Snake:', await updateActionRes.text())
+            console.error('Failed to configure Snake GitHub Action:', await updateActionRes.text())
           }
         } catch (err) {
-          console.error('Erro ao configurar o workflow da snake:', err)
+          console.error('Error configuring snake workflow:', err)
         }
       }
     }
@@ -276,6 +291,22 @@ jobs:
       } catch (saveErr) {
         console.error('Failed to cache profile configuration in memory:', saveErr)
       }
+    }
+
+    if (session.email) {
+      const { emailService } = await import('@/lib/email/service')
+      void emailService
+        .sendFirstExportEmail({
+          username: session.username,
+          name: session.name,
+          email: session.email,
+          profileSlug:
+            typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default',
+          widgetCount: Array.isArray(exportData?.widgets) ? exportData.widgets.length : undefined,
+        })
+        .catch((err) => {
+          console.error('[Commit Route] Non-blocking first export email error:', err)
+        })
     }
 
     return NextResponse.json({ success: true })

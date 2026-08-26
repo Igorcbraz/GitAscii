@@ -52,7 +52,5 @@ coverage/
 # Debug / Reports
 *.log
 *.zip
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# React Email
+.react-email/

@@ -19,6 +19,12 @@
       "skillPath": ".agents/skills/deslop/SKILL.md",
       "computedHash": "3c23fbbacdb1c576d5a3588ba8a0724a70e43fbee84356de6791bbe7f18354fc"
     },
+    "email-best-practices": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/email-best-practices/SKILL.md",
+      "computedHash": "cf53e0d7ad72c440818c64a104ab220f527f26f10c7d8163fa99e066bf747eed"
+    },
     "keyword-clustering": {
       "source": "every-app/open-seo",
       "sourceType": "github",
@@ -66,6 +72,24 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/papercuts/SKILL.md",
       "computedHash": "3124892c4909d2aca94297c01ebaf56a17e3de3edd283353bdc2c2db1b8ae06c"
+    },
+    "react-email": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-email/SKILL.md",
+      "computedHash": "1d2afbc631670c6bc23e90d0d4776d25f08eabed4bac72485bf06aea1f91ae89"
+    },
+    "resend": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/resend/SKILL.md",
+      "computedHash": "a486d36eea12ce46b7bd85629b49b2ed3c05906c9300d7532c62fa9fef6920d1"
+    },
+    "resend-cli": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/resend-cli/SKILL.md",
+      "computedHash": "f686f236f7c45c5d8866a928442b95223c5b58c992b2100f3b30dec6b03d0c09"
     },
     "seo-coach": {
       "source": "every-app/open-seo",

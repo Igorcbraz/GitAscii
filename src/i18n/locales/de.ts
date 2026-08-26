@@ -1690,4 +1690,141 @@ export const de: Record<string, string> = {
   'landing.why.title_italic': 'brauchen.',
   'landing.why.subtitle':
     'Alles, was Sie zum Erstellen und Teilen ansprechender GitHub-Profile benötigen.',
+  'unsubscribe.badge': 'E-MAIL-EINSTELLUNGEN',
+  'unsubscribe.success_title': 'Sie wurden erfolgreich abgemeldet',
+  'unsubscribe.success_desc_email':
+    '{email} erhält keine Produkt-Updates oder Re-Engagement-Benachrichtigungen mehr von GitAscii.',
+  'unsubscribe.success_desc':
+    'Sie erhalten keine Marketing- oder Produktbenachrichtigungen mehr von GitAscii.',
+  'unsubscribe.security_notice':
+    'Wichtige Kontosicherheitswarnungen und wesentliche Transaktionsbestätigungen werden weiterhin zugestellt, wenn sie durch Ihre direkten Aktionen ausgelöst werden.',
+  'unsubscribe.invalid_title': 'Ungültiger oder abgelaufener Link',
+  'unsubscribe.invalid_desc':
+    'Der von Ihnen aufgerufene Abmeldelink ist ungültig oder abgelaufen. Wenn Sie Ihre Einstellungen verwalten möchten, verwenden Sie bitte den Link aus der neuesten E-Mail.',
+  'unsubscribe.manage_title': 'Benachrichtigungseinstellungen verwalten',
+  'unsubscribe.preferences_for': 'Einstellungen für @{username}:',
+  'unsubscribe.email_settings': 'Ihre E-Mail-Einstellungen:',
+  'unsubscribe.footer_hint':
+    'Um sich von einer E-Mail-Liste abzumelden, klicken Sie auf den Abmeldelink in der Fußzeile der jeweiligen E-Mail.',
+  'unsubscribe.return_button': 'Zurück zu GitAscii',
+  'email.badge_notification': '[ STUDIO-BENACHRICHTIGUNG ]',
+  'email.footer_tagline': 'GitAscii — Wo kryptische Terminals auf redaktionelles Design treffen.',
+  'email.nav_templates': 'Vorlagen',
+  'email.nav_community': 'Community',
+  'email.footer_reason': 'Sie haben diese E-Mail erhalten, weil Sie bei GitAscii registriert sind.',
+  'email.manage_preferences': 'Einstellungen verwalten',
+  'email.unsubscribe': 'Abmelden',
+  'email.footer_built_for': 'Entwickelt für Entwickler weltweit.',
+  'email.welcome.subject': 'Willkommen bei GitAscii, @{username} 🚀',
+  'email.welcome.preview':
+    'Willkommen bei GitAscii, {displayName}! Starten Sie mit Ihrer dynamischen README.',
+  'email.welcome.badge': '[ ONBOARDING · ERSTE SCHRITTE ]',
+  'email.welcome.headline': 'Willkommen bei GitAscii,',
+  'email.welcome.intro':
+    'Hallo {displayName}, Ihr visuelles Studio für anspruchsvolle GitHub-Profil-READMEs ist bereit. Erstellen Sie dynamische SVGs, ASCII-Art-Widgets und Live-Entwicklerstatistiken, die am Edge gerendert werden.',
+  'email.welcome.feature1_title': 'Visuelle Leinwand & Drag-and-Drop-Editor',
+  'email.welcome.feature1_desc':
+    'Erstellen Sie mehrschichtige SVGs mit Echtzeit-Vorschau, Ausrichtungshilfen und responsiver Skalierung.',
+  'email.welcome.feature2_title': '40+ modulare Widget-Vorlagen',
+  'email.welcome.feature2_desc':
+    'GitHub-Statistiken, Streak-Zähler, Musik-Visualizer, Terminal-Banner, ASCII-Typografie und Monitore.',
+  'email.welcome.feature3_title': '1-Klick GitHub-Export',
+  'email.welcome.feature3_desc': 'Direkt in Ihr spezielles',
+  'email.welcome.feature3_desc_end':
+    'Repository über unsere offizielle GitHub App-Integration exportieren.',
+  'email.welcome.cta': 'Visuelles Studio öffnen →',
+  'email.welcome.tip_title': 'Profi-Tipp:',
+  'email.welcome.tip_desc': 'Sie können Vorlagen aus der Community direkt aus der',
+  'email.welcome.tip_link': 'Community-Galerie',
+  'email.welcome.tip_desc_end': 'laden, um sich in Sekundenschnelle inspirieren zu lassen.',
+  'email.first_export.subject': '🚀 Ihre GitAscii-README ist jetzt live auf GitHub!',
+  'email.first_export.preview': 'Ihre GitAscii-README ist jetzt live auf GitHub, @{username}!',
+  'email.first_export.badge': '[ GITHUB-EXPORT · PROFIL LIVE ]',
+  'email.first_export.headline': 'Ihre GitAscii-README ist',
+  'email.first_export.live_text': 'Live',
+  'email.first_export.intro':
+    'Ihr GitHub-Profil-Repository wurde mit Ihrem neuen visuellen Layout und dem dynamischen SVG-Embed aktualisiert.',
+  'email.first_export.card_subtitle': 'Profil-README · Aktualisiert über GitAscii Studio',
+  'email.first_export.synced_badge': 'SYNCHRONISIERT',
+  'email.first_export.asset_config_title': '// LIVE-ASSET-KONFIGURATION:',
+  'email.first_export.slug_label': 'Profil-Slug:',
+  'email.first_export.widgets_label': 'Aktive Widgets:',
+  'email.first_export.endpoint_label': 'EDGE SVG-ENDPUNKT:',
+  'email.first_export.cta': 'Profil auf GitHub anzeigen',
+  'email.first_export.customize_link': 'GitAscii Studio öffnen, um weitere Widgets anzupassen',
+  'email.first_export.notes_title': 'Dynamische Edge-Architektur',
+  'email.first_export.notes_desc':
+    'GitHub zwischenspeichert Profilbilder über seinen Camo-Proxy. Ihr dynamisches SVG von GitAscii aktualisiert sich automatisch bei jedem Aufruf.',
+  'email.app_disconnected.subject':
+    '⚠️ [Handlung erforderlich] GitAscii benötigt Schreibrechte für @{username}',
+  'email.app_disconnected.preview':
+    'GitAscii benötigt Schreibrechte zur Aktualisierung Ihres {targetRepo}-Repositorys',
+  'email.app_disconnected.badge': '[ GITHUB APP · BERECHTIGUNG ERFORDERLICH ]',
+  'email.app_disconnected.headline': 'GitHub App-Berechtigung',
+  'email.app_disconnected.needed_text': 'erforderlich',
+  'email.app_disconnected.intro':
+    'Hallo {displayName}, GitAscii benötigt Schreibzugriff auf Ihr Repository, um Ihre README-Aktualisierungen zu übertragen.',
+  'email.app_disconnected.status_text':
+    'Schreibzugriff der GitHub App getrennt oder Autorisierung ausstehend',
+  'email.app_disconnected.resolution_title': '// SCHRITTE ZUR BEHEBUNG:',
+  'email.app_disconnected.step1':
+    '1. Die Installation der GitAscii App wurde möglicherweise in den GitHub-Einstellungen widerrufen oder geändert.',
+  'email.app_disconnected.step2_prefix': '2. Stellen Sie sicher, dass das Repository',
+  'email.app_disconnected.step2_suffix': 'in den autorisierten Repositorys enthalten ist.',
+  'email.app_disconnected.step3':
+    '3. Die 1-Klick-README-Synchronisierung wird nach der erneuten Autorisierung automatisch fortgesetzt.',
+  'email.app_disconnected.cta': 'Auf GitHub erneut verbinden',
+  'email.app_disconnected.disclaimer':
+    'Dies ist eine Benachrichtigung zur Kontosicherheit und zum Integrationsstatus.',
+  'email.star_thank_you.subject': '⭐ Vielen Dank für Ihre Unterstützung auf GitHub, @{username}!',
+  'email.star_thank_you.preview': 'Vielen Dank für Ihre Unterstützung auf GitHub, @{username}!',
+  'email.star_thank_you.badge': '[ GITHUB · UNTERSTÜTZER-DANK ]',
+  'email.star_thank_you.headline': 'Vielen Dank für Ihre Unterstützung,',
+  'email.star_thank_you.intro':
+    'Hallo {displayName}, wir haben Ihren Stern auf dem GitHub-Repository von GitAscii erhalten. Unabhängige Open-Source-Projekte leben vom Feedback und der Sichtbarkeit der Community.',
+  'email.star_thank_you.repo_tagline': 'GitHub Profil-README Generator',
+  'email.star_thank_you.starred_badge': 'GESTERNTE',
+  'email.star_thank_you.badge_section_title': '// CODE FÜR UNTERSTÜTZER-BADGE:',
+  'email.star_thank_you.badge_instruction':
+    'Kopieren Sie diesen Code, wenn Sie ein Unterstützer-Badge in Ihrem GitHub-Repository einbinden möchten:',
+  'email.star_thank_you.cta': 'GitHub-Repository öffnen',
+  'email.star_thank_you.disclaimer':
+    'Dies ist eine einmalige Danksagung an Entwickler, die GitAscii auf GitHub mit einem Stern ausgezeichnet haben.',
+  'email.request_star.subject':
+    'Gefällt Ihnen Ihre dynamische GitHub-README? Hinterlassen Sie ein ⭐ auf GitAscii!',
+  'email.request_star.preview':
+    'Gefällt Ihnen Ihre dynamische README auf GitHub, @{username}? Vergeben Sie einen Stern auf GitAscii!',
+  'email.request_star.badge': '[ COMMUNITY-UNTERSTÜTZUNG · OPEN SOURCE ]',
+  'email.request_star.headline': 'Hinterlassen Sie Ihren',
+  'email.request_star.star_text': 'Stern',
+  'email.request_star.headline_suffix': 'auf GitAscii',
+  'email.request_star.intro':
+    'Hallo {displayName}, wir hoffen, dass Ihre Profil-README auf GitHub auffällt! Wenn GitAscii Ihnen geholfen hat, unterstützen Sie das Projekt gerne mit einem Stern.',
+  'email.request_star.repo_tagline': 'GitHub Profil-README Generator',
+  'email.request_star.open_source_badge': 'OPEN SOURCE',
+  'email.request_star.cta': 'Auf GitHub einen Stern vergeben',
+  'email.request_star.continue_link': 'Oder passen Sie weitere Widgets im Studio an',
+  'email.request_star.disclaimer':
+    'Dies ist eine einmalige Anfrage an aktive GitAscii-Entwickler. Sie erhalten diese Nachricht nicht erneut.',
+  'email.reengagement.subject':
+    'Bringen Sie Ihre GitHub-README mit neuen GitAscii-Funktionen auf das nächste Level',
+  'email.reengagement.preview':
+    'Neue Widgets und Layouts warten auf Ihre GitHub-README, @{username}.',
+  'email.reengagement.badge': '[ PRODUKT-UPDATE · STUDIO-ENTDECKUNG ]',
+  'email.reengagement.headline': 'Bringen Sie Ihre GitHub-README voran,',
+  'email.reengagement.intro':
+    'Hallo {displayName}, es ist {inactiveDays} Tage her, seit Sie Ihr Profil zuletzt aktualisiert haben. Wir haben neue Community-Widgets und Theme-Optionen im Studio hinzugefügt.',
+  'email.reengagement.feature1_title': 'Contribution Snake-Workflow',
+  'email.reengagement.feature1_desc':
+    'Konfigurieren Sie eine automatische GitHub Action, die eine lebendige Schlangenanimation auf Ihrem Beitragsgitter erzeugt.',
+  'email.reengagement.feature2_title': 'Interaktive Karten & Widgets',
+  'email.reengagement.feature2_desc':
+    'Fügen Sie holografische Pokemon TCG-Karten, Scouting-Profile, Streak-Badges und Tech-Stack-Raster hinzu.',
+  'email.reengagement.feature3_title': 'Adaptive Theme-Engine',
+  'email.reengagement.feature3_desc':
+    'Edge-SVGs passen sich automatisch nahtlos dem Dark/Light-Modus des Besuchers auf GitHub an.',
+  'email.reengagement.cta': 'Studio öffnen & Profil aktualisieren',
+  'email.reengagement.explore_link': 'Community-README-Galerie durchsuchen',
+  'email.reengagement.disclaimer':
+    'Sie erhalten diese Benachrichtigung, da Sie bei GitAscii registriert sind. Wir beschränken diese E-Mails auf höchstens einmal im Monat.',
 }

@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React, { useEffect } from 'react'
 
-import { ToastProvider } from '@/components/ui/toast'
-
+import { ToastProvider } from '../../../components/ui/toast'
 import Hero from './Hero'
 
 const meta: Meta<typeof Hero> = {
