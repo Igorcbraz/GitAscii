@@ -1,6 +1,6 @@
 ---
-title: "Signal Grid Mesh Widget"
-description: "Wired signal topology map and connected telemetry grid structure"
+title: 'Signal Grid Mesh Widget'
+description: 'Wired signal topology map and connected telemetry grid structure'
 ---
 
 # Signal Grid Mesh Widget (`controlplane-signal-grid`)
@@ -11,14 +11,14 @@ The Signal Grid Mesh widget maps repositories across a wired coordinate grid wit
 
 ```typescript
 export interface SignalGridConfig {
-  layoutType?: 'hero' | 'closed-loop'  // Default: 'closed-loop'
-  customTitle?: string                 // Station identity title
-  customBio?: string                   // Subtitle copy
-  selectedRepos?: string[]             // Pinned node list
+  layoutType?: 'hero' | 'closed-loop' // Default: 'closed-loop'
+  customTitle?: string // Station identity title
+  customBio?: string // Subtitle copy
+  selectedRepos?: string[] // Pinned node list
   repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
-  maxRepos?: number                    // Default: 8
-  accentColor?: string                 // Carrier line tint (default: '#00A7D1')
-  secondaryColor?: string              // Sensor pulse tint (default: '#E84A8A')
+  maxRepos?: number // Default: 8
+  accentColor?: string // Carrier line tint (default: '#00A7D1')
+  secondaryColor?: string // Sensor pulse tint (default: '#E84A8A')
 }
 ```
 

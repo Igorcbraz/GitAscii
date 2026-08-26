@@ -1,6 +1,6 @@
 ---
-title: "Avatar Widget"
-description: "Profile picture frame with support for GitHub avatars, custom URLs, and base64 uploads"
+title: 'Avatar Widget'
+description: 'Profile picture frame with support for GitHub avatars, custom URLs, and base64 uploads'
 ---
 
 # Avatar Widget (`avatar`)
@@ -12,16 +12,17 @@ The Avatar widget renders a framed developer photo clipped with configurable cor
 ```typescript
 export interface AvatarConfig {
   sourceType?: 'avatar' | 'url' | 'upload' // Default: 'avatar'
-  avatarUrl?: string                       // Direct image URL fallback
-  imageUrl?: string                        // When sourceType === 'url'
-  uploadedImageData?: string               // Base64 data URI when sourceType === 'upload'
-  borderRadius?: number                    // Default: globalStyles.borderRadius || 0
-  accentColor?: string                     // Default: globalStyles.accentColor || '#c5ff4a'
+  avatarUrl?: string // Direct image URL fallback
+  imageUrl?: string // When sourceType === 'url'
+  uploadedImageData?: string // Base64 data URI when sourceType === 'upload'
+  borderRadius?: number // Default: globalStyles.borderRadius || 0
+  accentColor?: string // Default: globalStyles.accentColor || '#c5ff4a'
 }
 ```
 
 <ParamField body="sourceType" type="'avatar' | 'url' | 'upload'" default="avatar">
-  Selects whether to use the GitHub account avatar (`avatar`), a custom image URL (`url`), or an uploaded base64 data string (`upload`).
+  Selects whether to use the GitHub account avatar (`avatar`), a custom image URL (`url`), or an
+  uploaded base64 data string (`upload`).
 </ParamField>
 
 <ParamField body="imageUrl" type="string" optional>

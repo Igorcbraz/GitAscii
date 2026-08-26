@@ -1,6 +1,6 @@
 ---
-title: "GitHub Trophies Widget"
-description: "Gamified achievement showcase ranking developer metrics across S, A, B, and C tiers"
+title: 'GitHub Trophies Widget'
+description: 'Gamified achievement showcase ranking developer metrics across S, A, B, and C tiers'
 ---
 
 # GitHub Trophies Widget (`godprofile-trophies`)
@@ -12,21 +12,21 @@ The GitHub Trophies widget transforms GitHub metrics into ranked trophy cards (S
 ```typescript
 export interface GodprofileTrophiesConfig {
   disabledTrophies?: string[] // Array of trophy names to omit (e.g. ['Issues'])
-  accentColor?: string        // Default: globalStyles.accentColor || '#b6a891'
-  textColor?: string          // Default: globalStyles.textColor || '#eceff4'
+  accentColor?: string // Default: globalStyles.accentColor || '#b6a891'
+  textColor?: string // Default: globalStyles.textColor || '#eceff4'
 }
 ```
 
 ### Rank Calculation Matrix
 
-| Trophy | S Rank | A Rank | B Rank | C Rank |
-| :--- | :--- | :--- | :--- | :--- |
-| **Stars** | $\ge 1000$ | $\ge 200$ | $\ge 50$ | $< 50$ |
-| **Commits** | $\ge 3000$ | $\ge 1000$ | $\ge 300$ | $< 300$ |
-| **PRs** | $\ge 200$ | $\ge 50$ | $\ge 10$ | $< 10$ |
-| **Issues** | $\ge 200$ | $\ge 50$ | $\ge 10$ | $< 10$ |
-| **Repos** | $\ge 100$ | $\ge 30$ | $\ge 10$ | $< 10$ |
-| **Followers** | $\ge 500$ | $\ge 100$ | $\ge 20$ | $< 20$ |
+| Trophy        | S Rank     | A Rank     | B Rank    | C Rank  |
+| :------------ | :--------- | :--------- | :-------- | :------ |
+| **Stars**     | $\ge 1000$ | $\ge 200$  | $\ge 50$  | $< 50$  |
+| **Commits**   | $\ge 3000$ | $\ge 1000$ | $\ge 300$ | $< 300$ |
+| **PRs**       | $\ge 200$  | $\ge 50$   | $\ge 10$  | $< 10$  |
+| **Issues**    | $\ge 200$  | $\ge 50$   | $\ge 10$  | $< 10$  |
+| **Repos**     | $\ge 100$  | $\ge 30$   | $\ge 10$  | $< 10$  |
+| **Followers** | $\ge 500$  | $\ge 100$  | $\ge 20$  | $< 20$  |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
-title: "Bio & Links Widget"
-description: "Word-wrapped biography text, location pin, and clickable portfolio links"
+title: 'Bio & Links Widget'
+description: 'Word-wrapped biography text, location pin, and clickable portfolio links'
 ---
 
 # Bio & Links Widget (`bio`)
@@ -11,11 +11,11 @@ The Bio widget renders formatted developer bio text with automatic word-wrapping
 
 ```typescript
 export interface BioConfig {
-  customBio?: string       // Custom bio text (defaults to data.user.bio)
-  customLocation?: string  // Custom location string (defaults to data.user.location)
-  customBlog?: string      // Custom website link (defaults to data.user.blog)
-  textColor?: string       // Default: globalStyles.textColor
-  accentColor?: string     // Default: globalStyles.accentColor
+  customBio?: string // Custom bio text (defaults to data.user.bio)
+  customLocation?: string // Custom location string (defaults to data.user.location)
+  customBlog?: string // Custom website link (defaults to data.user.blog)
+  textColor?: string // Default: globalStyles.textColor
+  accentColor?: string // Default: globalStyles.accentColor
 }
 ```
 
@@ -45,7 +45,8 @@ const bioWidget: WidgetInstance = {
   position: { x: 0, y: 106 },
   size: { width: 800, height: 140 },
   config: {
-    customBio: 'Full-stack engineer crafting high-performance developer tooling and CLI applications.\nPassionate about cryptography, compilers, and typography.',
+    customBio:
+      'Full-stack engineer crafting high-performance developer tooling and CLI applications.\nPassionate about cryptography, compilers, and typography.',
     customLocation: 'San Francisco, CA',
     customBlog: 'https://octocat.dev',
     textColor: '#e5e5e5',

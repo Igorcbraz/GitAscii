@@ -1,6 +1,6 @@
 ---
-title: "Animation Engine Reference"
-description: "CSS keyframes, SMIL transitions, typewriter effects, and animation controls"
+title: 'Animation Engine Reference'
+description: 'CSS keyframes, SMIL transitions, typewriter effects, and animation controls'
 ---
 
 # Animation Engine Reference
@@ -9,29 +9,29 @@ GitAscii includes a high-performance SVG animation system that injects CSS `@key
 
 ## Animation Types (`AnimationType`)
 
-| ID | Name | Description | Keyframe Implementation |
-| :--- | :--- | :--- | :--- |
-| `none` | None | Instant static appearance | No CSS injected |
-| `fade-in` | Fade In | Smooth opacity transition | `opacity: 0` $\rightarrow$ `opacity: 1` |
-| `slide-up` | Slide Up | Upward translation reveal | `transform: translateY(20px)` $\rightarrow$ `translateY(0)` |
-| `slide-down` | Slide Down | Downward translation reveal | `transform: translateY(-20px)` $\rightarrow$ `translateY(0)` |
-| `slide-left` | Slide Left | Slide from right to left | `transform: translateX(20px)` $\rightarrow$ `translateX(0)` |
-| `slide-right` | Slide Right | Slide from left to right | `transform: translateX(-20px)` $\rightarrow$ `translateX(0)` |
-| `zoom-in` | Zoom In | Scaled expansion | `transform: scale(0.9)` $\rightarrow$ `scale(1)` |
-| `zoom-out` | Zoom Out | Scaled compression | `transform: scale(1.1)` $\rightarrow$ `scale(1)` |
-| `flip-x` | Flip X | Horizontal 3D flip | `transform: rotateX(90deg)` $\rightarrow$ `rotateX(0deg)` |
-| `flip-y` | Flip Y | Vertical 3D flip | `transform: rotateY(90deg)` $\rightarrow$ `rotateY(0deg)` |
-| `typewriter` | Typewriter | Line-by-line character typing | Cascading `clipPath` reveals |
-| `glitch` | Glitch | Cyberpunk signal glitch | Multi-stage chromatic aberration steps |
-| `scan-lines` | Scan Lines | CRT scan line sweep | Translating scan bar overlay |
+| ID            | Name        | Description                   | Keyframe Implementation                                      |
+| :------------ | :---------- | :---------------------------- | :----------------------------------------------------------- |
+| `none`        | None        | Instant static appearance     | No CSS injected                                              |
+| `fade-in`     | Fade In     | Smooth opacity transition     | `opacity: 0` $\rightarrow$ `opacity: 1`                      |
+| `slide-up`    | Slide Up    | Upward translation reveal     | `transform: translateY(20px)` $\rightarrow$ `translateY(0)`  |
+| `slide-down`  | Slide Down  | Downward translation reveal   | `transform: translateY(-20px)` $\rightarrow$ `translateY(0)` |
+| `slide-left`  | Slide Left  | Slide from right to left      | `transform: translateX(20px)` $\rightarrow$ `translateX(0)`  |
+| `slide-right` | Slide Right | Slide from left to right      | `transform: translateX(-20px)` $\rightarrow$ `translateX(0)` |
+| `zoom-in`     | Zoom In     | Scaled expansion              | `transform: scale(0.9)` $\rightarrow$ `scale(1)`             |
+| `zoom-out`    | Zoom Out    | Scaled compression            | `transform: scale(1.1)` $\rightarrow$ `scale(1)`             |
+| `flip-x`      | Flip X      | Horizontal 3D flip            | `transform: rotateX(90deg)` $\rightarrow$ `rotateX(0deg)`    |
+| `flip-y`      | Flip Y      | Vertical 3D flip              | `transform: rotateY(90deg)` $\rightarrow$ `rotateY(0deg)`    |
+| `typewriter`  | Typewriter  | Line-by-line character typing | Cascading `clipPath` reveals                                 |
+| `glitch`      | Glitch      | Cyberpunk signal glitch       | Multi-stage chromatic aberration steps                       |
+| `scan-lines`  | Scan Lines  | CRT scan line sweep           | Translating scan bar overlay                                 |
 
 ---
 
 ## Easing Functions (`AnimationEasing`)
 
-* `ease`
-* `ease-in`
-* `ease-out` (Default)
-* `ease-in-out`
-* `linear`
-* `spring` (`cubic-bezier(0.175, 0.885, 0.32, 1.275)`)
+- `ease`
+- `ease-in`
+- `ease-out` (Default)
+- `ease-in-out`
+- `linear`
+- `spring` (`cubic-bezier(0.175, 0.885, 0.32, 1.275)`)

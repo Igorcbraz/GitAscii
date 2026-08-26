@@ -1,6 +1,6 @@
 ---
-title: "Pokémon Card Widget"
-description: "Interactive 3D holographic Pokémon card generator with tilt, holographic glare, and cosmic shine effects"
+title: 'Pokémon Card Widget'
+description: 'Interactive 3D holographic Pokémon card generator with tilt, holographic glare, and cosmic shine effects'
 ---
 
 # Pokémon Card Widget (`pokemon-card`)
@@ -11,16 +11,16 @@ The Pokémon Card widget renders an interactive collectible trading card with 3D
 
 ```typescript
 export interface PokemonCardConfig {
-  imageUrl?: string        // Remote high-res card art URL
-  isLoading?: boolean      // Displays animated cyber Pokéball scanning graphic
-  rotateX?: number         // Perspective tilt X (-30 to +30 degrees)
-  rotateY?: number         // Perspective tilt Y (-30 to +30 degrees)
-  glareX?: number          // Glare reflection center X (0-100%)
-  glareY?: number          // Glare reflection center Y (0-100%)
-  shineX?: number          // Holographic shine origin X (0-100%)
-  shineY?: number          // Holographic shine origin Y (0-100%)
-  intensity?: number       // Holographic opacity multiplier (0 to 2, default: 1)
-  scale?: number           // Transform scale multiplier (default: 1)
+  imageUrl?: string // Remote high-res card art URL
+  isLoading?: boolean // Displays animated cyber Pokéball scanning graphic
+  rotateX?: number // Perspective tilt X (-30 to +30 degrees)
+  rotateY?: number // Perspective tilt Y (-30 to +30 degrees)
+  glareX?: number // Glare reflection center X (0-100%)
+  glareY?: number // Glare reflection center Y (0-100%)
+  shineX?: number // Holographic shine origin X (0-100%)
+  shineY?: number // Holographic shine origin Y (0-100%)
+  intensity?: number // Holographic opacity multiplier (0 to 2, default: 1)
+  scale?: number // Transform scale multiplier (default: 1)
 }
 ```
 

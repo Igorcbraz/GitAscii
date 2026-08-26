@@ -1,6 +1,6 @@
 ---
-title: "Control Plane Loop Widget"
-description: "Animated closed-loop architecture map connecting repository execution nodes"
+title: 'Control Plane Loop Widget'
+description: 'Animated closed-loop architecture map connecting repository execution nodes'
 ---
 
 # Control Plane Loop Widget (`controlplane-system-loop`)
@@ -12,16 +12,16 @@ The Control Plane Loop widget represents projects as an interconnected circuit l
 ```typescript
 export interface ControlplaneSystemLoopConfig {
   layoutType?: 'hero' | 'closed-loop' // Default: 'closed-loop'
-  customTitle?: string                // Header identity label
-  customBio?: string                  // Subtitle copy
-  accentColor?: string                // Primary highlight (default: '#00A7D1')
-  secondaryColor?: string             // Secondary signal color (default: '#E84A8A')
+  customTitle?: string // Header identity label
+  customBio?: string // Subtitle copy
+  accentColor?: string // Primary highlight (default: '#00A7D1')
+  secondaryColor?: string // Secondary signal color (default: '#E84A8A')
 }
 ```
 
 <ParamField body="layoutType" type="'hero' | 'closed-loop'" default="closed-loop">
-  * `closed-loop`: Elliptical circuit loop with orbiting core reactor and 6 satellite nodes.
-  * `hero`: Full-bleed 1200x360 mission console with active execution path layers.
+  * `closed-loop`: Elliptical circuit loop with orbiting core reactor and 6 satellite nodes. *
+  `hero`: Full-bleed 1200x360 mission console with active execution path layers.
 </ParamField>
 
 ---

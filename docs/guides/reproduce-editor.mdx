@@ -1,6 +1,6 @@
 ---
-title: "Reproducing Editor Layouts in Code"
-description: "How to export JSON from the visual editor and execute it programmatically via SDK"
+title: 'Reproducing Editor Layouts in Code'
+description: 'How to export JSON from the visual editor and execute it programmatically via SDK'
 ---
 
 # Reproducing Editor Layouts in Code
@@ -32,12 +32,7 @@ Place your `gitascii.json` into your project and execute:
 ```typescript
 import fs from 'node:fs'
 import path from 'node:path'
-import {
-  renderSvg,
-  embedExternalImages,
-  SavedConfiguration,
-  NormalizedGitHubData,
-} from '@/engine'
+import { renderSvg, embedExternalImages, SavedConfiguration, NormalizedGitHubData } from '@/engine'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 
 export async function generateReadmeBanner(username: string): Promise<string> {
