@@ -540,6 +540,7 @@ export const zh: Record<string, string> = {
   'editor.onboarding.title_italic': '开始，',
   'editor.onboarding.title_prefix': '你想如何',
   'editor.pokemon.extracting': '正在提取宝可梦属性与卡片立绘...',
+  'editor.pokemon.holo_effect': '全息效果',
   'editor.pokemon.instruction_click': '点击卡片即可将其添加到画布中。',
   'editor.pokemon.instruction_end': '选择一张宝可梦卡片以展示在您的 GitHub README 中。',
   'editor.pokemon.instruction_start': '在上方搜索喜爱的宝可梦卡片。',

@@ -564,6 +564,7 @@ export const es: Record<string, string> = {
   'editor.onboarding.title_italic': 'empezar,',
   'editor.onboarding.title_prefix': '¿Cómo deseas ',
   'editor.pokemon.extracting': 'Extrayendo estadísticas & arte del Pokémon...',
+  'editor.pokemon.holo_effect': 'Efecto Holográfico',
   'editor.pokemon.instruction_click': 'Haz clic en cualquier carta para añadirla al lienzo.',
   'editor.pokemon.instruction_end':
     'Selecciona una carta Pokémon para mostrar en tu GitHub README.',

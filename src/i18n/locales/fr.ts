@@ -569,6 +569,7 @@ export const fr: Record<string, string> = {
   'editor.onboarding.title_italic': 'commencer,',
   'editor.onboarding.title_prefix': 'Comment aimeriez-vous',
   'editor.pokemon.extracting': 'Extraction des statistiques et des illustrations de Pokémon...',
+  'editor.pokemon.holo_effect': 'Effet holographique',
   'editor.pokemon.instruction_click':
     'Cliquez sur n’importe quel résultat de carte pour l’ajouter au canevas.',
   'editor.pokemon.instruction_end':

@@ -565,6 +565,7 @@ export const ja: Record<string, string> = {
   'editor.onboarding.title_italic': '始める、',
   'editor.onboarding.title_prefix': 'どうしますか',
   'editor.pokemon.extracting': 'ポケモンのステータスとアートワークを抽出しています...',
+  'editor.pokemon.holo_effect': 'ホログラフィック効果',
   'editor.pokemon.instruction_click': 'カードの結果をクリックしてキャンバスに追加します。',
   'editor.pokemon.instruction_end': 'GitHub README に表示するポケモンカードを選択します。',
   'editor.pokemon.instruction_start': '上からお気に入りのポケモンカードを検索してください。',

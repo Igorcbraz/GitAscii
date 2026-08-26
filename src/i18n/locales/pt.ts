@@ -569,6 +569,7 @@ export const pt: Record<string, string> = {
   'editor.onboarding.title_italic': 'começar,',
   'editor.onboarding.title_prefix': 'Como deseja ',
   'editor.pokemon.extracting': 'Extraindo stats & arte do Pokémon...',
+  'editor.pokemon.holo_effect': 'Efeito Holográfico',
   'editor.pokemon.instruction_click': 'Clique em qualquer carta para adicioná-la ao canvas.',
   'editor.pokemon.instruction_end': 'Selecione uma carta Pokémon para exibir no seu GitHub README.',
   'editor.pokemon.instruction_start': 'Busque sua carta de Pokémon favorita acima.',

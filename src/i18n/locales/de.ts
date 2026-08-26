@@ -567,6 +567,7 @@ export const de: Record<string, string> = {
   'editor.onboarding.title_italic': 'Start,',
   'editor.onboarding.title_prefix': 'Wie möchten Sie',
   'editor.pokemon.extracting': 'Extrahieren von Pokémon-Statistiken und -Grafiken ...',
+  'editor.pokemon.holo_effect': 'Holografischer Effekt',
   'editor.pokemon.instruction_click':
     'Klicken Sie auf ein beliebiges Kartenergebnis, um es zur Leinwand hinzuzufügen.',
   'editor.pokemon.instruction_end':

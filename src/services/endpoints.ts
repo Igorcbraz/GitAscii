@@ -70,6 +70,11 @@ export const API_ENDPOINTS = {
     CARDS_BY_NAME: (name: string) =>
       `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(name)}`,
   },
+  POKEMON_TCG: {
+    SETS: 'https://cdn.jsdelivr.net/gh/PokemonTCG/pokemon-tcg-data@master/sets/en.json',
+    SET_CARDS: (setId: string) =>
+      `https://cdn.jsdelivr.net/gh/PokemonTCG/pokemon-tcg-data@master/cards/en/${encodeURIComponent(setId)}.json`,
+  },
   GITFUT: {
     CARD_IMAGE: (username: string, country?: string) =>
       `https://gitfut.com/${encodeURIComponent(username)}.png${country ? `?country=${encodeURIComponent(country)}` : ''}`,

@@ -74,8 +74,10 @@ export const ALL_COUNTRY_FLAGS: readonly CountryFlagDef[] = [
 export const TRUSTED_CDN_HOSTNAMES: readonly string[] = [
   'gitfut.com',
   'assets.tcgdex.net',
+  'images.pokemontcg.io',
   'avatars.githubusercontent.com',
   'raw.githubusercontent.com',
+  'cdn.jsdelivr.net',
 ] as const
 
 export function isTrustedCdnHostname(hostname: string): boolean {
