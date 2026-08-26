@@ -421,14 +421,14 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
 
     const baseIcon =
       commitStatus === 'committing' ? (
-        <Loader2 size={14} className="animate-spin" />
+        <Loader2 size={12} className="animate-spin" />
       ) : commitStatus === 'success' ? (
-        <Check size={14} />
+        <Check size={12} />
       ) : (
-        <Github size={14} />
+        <Github size={12} />
       )
 
-    const btnClass = `flex items-center gap-1.5 px-3 py-1.5 font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer ${
+    const btnClass = `flex items-center gap-1.5 px-2.5 h-[30px] font-inter-tight font-medium text-[10px] uppercase tracking-[0.08em] transition-all cursor-pointer ${
       commitStatus === 'success'
         ? 'bg-signal-lime text-black glow-lime'
         : commitStatus === 'error'
@@ -529,47 +529,59 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
 
   return (
     <header
-      className={`relative h-14 w-full bg-void-black border-b border-graphite px-4 flex items-center justify-between text-chalk shrink-0 transition-[z-index] ${
+      className={`relative h-14 w-full bg-void-black border-b border-graphite/60 flex items-center text-chalk shrink-0 transition-[z-index] ${
         showPreviewNudge ? 'z-[9995]' : 'z-60'
       }`}
     >
-      <div className="flex items-center gap-3">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black">
+      {/* ── LEFT ZONE: brand + controls ── */}
+      <div className="flex items-center h-full pl-3 pr-2 gap-0 shrink-0">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 pr-3 mr-1 hover:opacity-80 transition-opacity shrink-0"
+        >
+          <div className="w-5 h-5 bg-signal-lime flex items-center justify-center font-mono font-bold text-xs text-black shrink-0">
             G
           </div>
-          <span className="font-mono text-base font-semibold text-white tracking-tight">
+          <span className="font-mono text-[13px] font-semibold text-white tracking-tight hidden sm:block">
             GitAscii
           </span>
         </Link>
 
-        <LanguageSelector align="left" />
+        {/* Left separator */}
+        <span className="h-5 w-px bg-graphite/80 shrink-0" />
 
-        <ViewModeToggle />
+        {/* Language + ViewMode cluster */}
+        <div className="flex items-center gap-1 px-2">
+          <LanguageSelector align="left" />
+          <ViewModeToggle />
+        </div>
 
-        <div className="h-4 w-px bg-graphite hidden sm:block" />
+        {/* Separator before user */}
+        {!embedded && <span className="h-5 w-px bg-graphite/80 shrink-0" />}
 
+        {/* User widget */}
         {!embedded && (
-          <div className="flex items-center gap-3 z-10">
+          <div className="flex items-center pl-2 z-10">
             {session ? (
-              <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
+              <div className="inline-flex items-center rounded-sm border border-graphite/60 bg-onyx h-[30px] w-[126px] overflow-hidden group hover:border-graphite transition-all duration-200">
                 <Link
                   href={`/${session.username}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-label font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-[11px] font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
                   title={`Profile @${session.username}`}
                 >
-                  <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
+                  <User className="size-3 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
                   <span className="truncate max-w-[65px] font-inter-tight">
                     @{session.username}
                   </span>
                 </Link>
-                <span className="h-4 w-px bg-graphite/80 shrink-0" />
+                <span className="h-4 w-px bg-graphite/70 shrink-0" />
                 <button
                   onClick={handleLogout}
                   className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
                   title={t('editor.toolbar.logout', 'Sair da conta')}
                 >
-                  <LogOut className="size-3.5" />
+                  <LogOut className="size-3" />
                 </button>
               </div>
             ) : (
@@ -579,17 +591,17 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
                   window.location.href = API_ENDPOINTS.AUTH.LOGIN(`/${username}`)
                 }}
                 disabled={isLoginLoading}
-                className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/70 bg-gradient-to-r from-onyx via-carbon to-onyx px-3 h-[32px] w-[130px] font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:border-graphite hover:bg-carbon hover:shadow-[0_0_14px_rgba(197,255,74,0.15)] active:scale-[0.98] group cursor-pointer disabled:opacity-60 disabled:hover:scale-100 overflow-hidden relative"
+                className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/60 bg-onyx px-3 h-[30px] w-[116px] font-inter-tight text-[11px] font-medium text-white transition-all duration-200 hover:border-graphite hover:shadow-[0_0_12px_rgba(197,255,74,0.12)] active:scale-[0.98] group cursor-pointer disabled:opacity-60 disabled:hover:scale-100 overflow-hidden relative"
               >
                 <div className="absolute inset-0 bg-signal-lime/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 {isLoginLoading ? (
-                  <span className="w-3.5 h-3.5 border-2 border-signal-lime border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="w-3 h-3 border-[1.5px] border-signal-lime border-t-transparent rounded-full animate-spin shrink-0" />
                 ) : (
-                  <LogIn className="size-3.5 text-signal-lime group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+                  <LogIn className="size-3 text-signal-lime group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
                 )}
                 <span className="font-inter-tight font-medium text-white tracking-wide z-10">
                   Log
-                  <span className="font-pt-serif italic text-signal-lime ml-0.5 font-light text-[14px]">
+                  <span className="font-pt-serif italic text-signal-lime ml-0.5 font-light text-[13px]">
                     in
                   </span>
                 </span>
@@ -599,7 +611,8 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
         )}
       </div>
 
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-2">
+      {/* ── CENTER ZONE: global search + info (absolute center) ── */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5">
         <button
           onClick={embedded ? undefined : () => setCommandPaletteOpen(true)}
           disabled={embedded}
@@ -610,46 +623,54 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
               ? t('editor.toolbar.search_commands', 'Search widgets, templates...')
               : t('editor.toolbar.search_shortcut', 'Global Search (Ctrl+K)')
           }
-          className={`flex items-center gap-2.5 w-70 xl:w-90 px-3 py-1.5 rounded-sm bg-onyx border border-graphite/70 text-ash transition-all duration-200 ${
+          className={`flex items-center gap-2 w-64 xl:w-80 px-2.5 h-[30px] rounded-sm bg-onyx border border-graphite/60 text-ash transition-all duration-200 ${
             embedded
               ? 'opacity-60 cursor-not-allowed'
-              : 'hover:border-graphite hover:text-chalk cursor-pointer group'
+              : 'hover:border-graphite hover:bg-carbon/60 hover:text-chalk cursor-pointer group'
           }`}
         >
-          <Search size={13} className="shrink-0 text-fog" />
-          <span className="font-inter-tight text-note text-fog flex-1 text-left">
+          <Search size={12} className="shrink-0 text-fog/80" />
+          <span className="font-inter-tight text-[11px] text-fog/80 flex-1 text-left">
             {t('editor.toolbar.search_commands', 'Search widgets, templates...')}
           </span>
-          <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/50 text-fog text-caption px-1.5 py-0.5 rounded-xs font-inter-tight shrink-0">
-            <Command size={9} />K
+          <kbd className="flex items-center gap-0.5 bg-void-black border border-graphite/40 text-fog/60 text-[9px] px-1.5 py-0.5 rounded-[2px] font-inter-tight shrink-0 leading-none">
+            <Command size={8} />K
           </kbd>
         </button>
 
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
           title={t('editor.toolbar.tour', 'Take Tour')}
-          className="p-1.5 h-[32px] w-[32px] flex items-center justify-center text-ash hover:text-signal-lime transition-colors cursor-pointer"
+          className="h-[30px] w-[30px] flex items-center justify-center text-ash/70 hover:text-signal-lime hover:bg-graphite/40 rounded-sm transition-all duration-150 cursor-pointer"
         >
-          <Info size={14} />
+          <Info size={13} />
         </button>
       </div>
 
+      {/* ── RIGHT ZONE: actions ── */}
       {!embedded ? (
-        <div className="flex items-center gap-3" id="tour-export-buttons">
-          <button
-            onClick={handleExport}
-            data-testid="export-layout-btn"
-            title={t('editor.toolbar.export_json', 'Export Layout (JSON)')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-inter-tight font-medium text-note uppercase tracking-wider transition-all cursor-pointer bg-onyx text-chalk border border-graphite hover:bg-graphite hover:text-white"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">{t('editor.toolbar.export', 'Export Layout')}</span>
-          </button>
-          {renderUpdateReadmeButton()}
+        <div className="flex items-center h-full ml-auto pr-3 pl-2 gap-0" id="tour-export-buttons">
+          {/* Separator before actions */}
+          <span className="h-5 w-px bg-graphite/80 shrink-0 mr-3" />
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              data-testid="export-layout-btn"
+              title={t('editor.toolbar.export_json', 'Export Layout (JSON)')}
+              className="flex items-center gap-1.5 px-2.5 h-[30px] rounded-sm font-inter-tight font-medium text-[10px] uppercase tracking-[0.08em] transition-all duration-150 cursor-pointer bg-onyx text-ash border border-graphite/60 hover:border-graphite hover:bg-graphite/60 hover:text-chalk"
+            >
+              <Download size={12} />
+              <span className="hidden sm:inline">
+                {t('editor.toolbar.export', 'Export Layout')}
+              </span>
+            </button>
+            {renderUpdateReadmeButton()}
+          </div>
         </div>
       ) : (
-        <div className="flex items-center gap-2">
-          <div className="px-2.5 py-1 bg-signal-lime/10 border border-signal-lime/30 text-signal-lime font-jetbrains-mono text-[10px] uppercase tracking-wider hidden sm:flex items-center gap-1.5">
+        <div className="flex items-center ml-auto pr-3 gap-2">
+          <div className="px-2.5 py-1 bg-signal-lime/10 border border-signal-lime/30 text-signal-lime font-jetbrains-mono text-[9px] uppercase tracking-[0.12em] hidden sm:flex items-center gap-1.5 rounded-[2px]">
             <span className="w-1.5 h-1.5 rounded-full bg-signal-lime animate-pulse" />
             <span>Interactive Demo</span>
           </div>
