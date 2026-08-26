@@ -711,6 +711,8 @@ export const pt: Record<string, string> = {
   'editor.sidebar.filter.premiumascii': 'ASCII Premium Kit',
   'editor.sidebar.filter.popular': 'Destaques',
   'editor.sidebar.filter.surveillance': 'Surveillance',
+  'editor.sidebar.filter.winxp': 'Windows XP',
+  'editor.sidebar.winxp_category': 'Windows XP Retro',
   'editor.sidebar.godprofile_category': 'God Profile (B&W Edition)',
   'editor.sidebar.import.invalid_format':
     'Formato de arquivo inválido: lista de widgets não encontrada.',

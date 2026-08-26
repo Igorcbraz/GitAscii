@@ -722,6 +722,64 @@ export const SURVEILLANCE_COLOR_THEMES: readonly SurveillanceColorTheme[] = [
   },
 ]
 
+export interface WinXPColorTheme {
+  name: string
+  titleGradientStart: string
+  titleGradientEnd: string
+  titleColor: string
+  windowBg: string
+  border: string
+  accent: string
+}
+
+export const WINXP_COLOR_THEMES: readonly WinXPColorTheme[] = [
+  {
+    name: 'Luna Blue (Default)',
+    titleGradientStart: '#0058ee',
+    titleGradientEnd: '#2989f5',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#0054e3',
+    accent: '#3c81f3',
+  },
+  {
+    name: 'Homestead (Olive Green)',
+    titleGradientStart: '#738849',
+    titleGradientEnd: '#96b169',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#6f8346',
+    accent: '#839c55',
+  },
+  {
+    name: 'Metallic (Silver)',
+    titleGradientStart: '#787782',
+    titleGradientEnd: '#b5b4be',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#706f7b',
+    accent: '#9a98a6',
+  },
+  {
+    name: 'Royale (Energy Blue)',
+    titleGradientStart: '#1d488c',
+    titleGradientEnd: '#3a76d8',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#1c4689',
+    accent: '#2c67c5',
+  },
+  {
+    name: 'Zune (Dark Slate)',
+    titleGradientStart: '#202020',
+    titleGradientEnd: '#383838',
+    titleColor: '#ffffff',
+    windowBg: '#2a2a2a',
+    border: '#1c1c1c',
+    accent: '#f35a22',
+  },
+]
+
 export interface AsciiPremiumColorTheme {
   name: string
   primary: string

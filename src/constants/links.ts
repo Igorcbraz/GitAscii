@@ -31,6 +31,7 @@ export interface ExternalLinksDef {
     readonly GITFUT: string
     readonly PEDRO_FONSECA: string
   }
+  readonly DEFAULT_WINXP_BLISS_WALLPAPER: string
   readonly CODEWEB_DEFAULT_GIFS: {
     readonly LEFT: string
     readonly CARD1: string
@@ -75,6 +76,8 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
     GITFUT: 'https://gitfut.com',
     PEDRO_FONSECA: 'https://github.com/PedroFnseca',
   },
+  DEFAULT_WINXP_BLISS_WALLPAPER:
+    'https://external-preview.redd.it/in-honor-of-windows-xp-i-made-a-4k-version-of-bliss-v0-MXldSKpu4bnUgr75VORKhtjGpb2WLN2zc2w6PVMHaco.jpeg?auto=webp&s=292d049cd3cac11575e8f2ea145873fbcf41cfbc',
   CODEWEB_DEFAULT_GIFS: {
     LEFT: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif',
     CARD1:

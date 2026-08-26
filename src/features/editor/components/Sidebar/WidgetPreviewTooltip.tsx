@@ -74,6 +74,13 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.PREMIUM_ASCII_INSIGHTS]: { width: 400, height: 280 },
   [WIDGET_IDS.PREMIUM_ASCII_DNA]: { width: 400, height: 230 },
   [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY]: { width: 400, height: 160 },
+  [WIDGET_IDS.WINXP_WINDOW]: { width: 780, height: 380 },
+  [WIDGET_IDS.WINXP_MINESWEEPER]: { width: 780, height: 340 },
+  [WIDGET_IDS.WINXP_MEDIA_PLAYER]: { width: 780, height: 300 },
+  [WIDGET_IDS.WINXP_PAINT]: { width: 780, height: 360 },
+  [WIDGET_IDS.WINXP_TASKBAR]: { width: 780, height: 48 },
+  [WIDGET_IDS.WINXP_ERROR_DIALOG]: { width: 520, height: 210 },
+  [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES]: { width: 780, height: 400 },
 }
 
 function extractExternalUrls(html: string): string[] {

@@ -677,6 +677,8 @@ export const zh: Record<string, string> = {
   'editor.sidebar.filter.external': '外部',
   'editor.sidebar.filter.popular': '精选',
   'editor.sidebar.filter.surveillance': '监控终端',
+  'editor.sidebar.filter.winxp': 'Windows XP',
+  'editor.sidebar.winxp_category': 'Windows XP 复古经典',
   'editor.sidebar.godprofile_category': 'God Profile (黑白典藏版)',
   'editor.sidebar.import.invalid_format': '文件格式无效：未找到 widgets 数组。',
   'editor.sidebar.import.invalid_json': '解析 JSON 文件失败，请提供有效的 JSON 布局文件。',

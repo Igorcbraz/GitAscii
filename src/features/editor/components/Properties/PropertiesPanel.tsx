@@ -30,6 +30,7 @@ import { SurveillanceControls } from './SurveillanceControls'
 import { TechStackControls } from './TechStackControls'
 import { TerminalInfoControls } from './TerminalInfoControls'
 import { TopLanguagesControls } from './TopLanguagesControls'
+import { WinXPControls } from './WinXPControls'
 
 function DimensionInput({
   value,
@@ -845,6 +846,22 @@ export function PropertiesPanel() {
           WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY as string,
         ].includes(selectedWidget.widgetId) && (
           <PremiumAsciiControls
+            instanceId={selectedWidget.instanceId}
+            widgetId={selectedWidget.widgetId}
+            config={cfg}
+          />
+        )}
+
+        {[
+          WIDGET_IDS.WINXP_WINDOW as string,
+          WIDGET_IDS.WINXP_MINESWEEPER as string,
+          WIDGET_IDS.WINXP_MEDIA_PLAYER as string,
+          WIDGET_IDS.WINXP_PAINT as string,
+          WIDGET_IDS.WINXP_TASKBAR as string,
+          WIDGET_IDS.WINXP_ERROR_DIALOG as string,
+          WIDGET_IDS.WINXP_SYSTEM_PROPERTIES as string,
+        ].includes(selectedWidget.widgetId) && (
+          <WinXPControls
             instanceId={selectedWidget.instanceId}
             widgetId={selectedWidget.widgetId}
             config={cfg}

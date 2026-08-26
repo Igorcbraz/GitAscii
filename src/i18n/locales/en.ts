@@ -707,6 +707,8 @@ export const en: Record<string, string> = {
   'editor.sidebar.filter.premiumascii': 'ASCII Premium Kit',
   'editor.sidebar.filter.popular': 'Featured',
   'editor.sidebar.filter.surveillance': 'Surveillance',
+  'editor.sidebar.filter.winxp': 'Windows XP',
+  'editor.sidebar.winxp_category': 'Windows XP Retro',
   'editor.sidebar.godprofile_category': 'God Profile (B&W Edition)',
   'editor.sidebar.import.invalid_format': 'Invalid file format: widgets array not found.',
   'editor.sidebar.import.invalid_json':

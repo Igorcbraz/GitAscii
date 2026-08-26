@@ -25,6 +25,7 @@ import { SurveillanceCardItem } from './WidgetLibrary/SurveillanceCardItem'
 import { TemplateLibrarySection } from './WidgetLibrary/TemplateLibrarySection'
 import { WidgetCardItem } from './WidgetLibrary/WidgetCardItem'
 import { WidgetFilterBar } from './WidgetLibrary/WidgetFilterBar'
+import { WinXPCardItem } from './WidgetLibrary/WinXPCardItem'
 import { WidgetPreviewTooltip } from './WidgetPreviewTooltip'
 
 export function WidgetLibrary() {
@@ -902,6 +903,130 @@ export function WidgetLibrary() {
                                 className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
                               >
                                 {expandedLists['surveillance']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('windows-xp')}
+                    className="w-full mb-2 cursor-pointer text-left focus:outline-hidden overflow-hidden group"
+                    style={{
+                      borderRadius: '4px 4px 0 0',
+                      boxShadow:
+                        '1px 1px 0px rgba(255,255,255,0.4) inset, -1px -1px 0px rgba(0,0,0,0.3) inset, 0 2px 4px rgba(0,0,0,0.3)',
+                    }}
+                  >
+                    <div
+                      className="flex items-center justify-between px-2 py-[5px]"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, #2F6FD4 0%, #1F4FC6 30%, #1245A8 70%, #0A346E 100%)',
+                        borderBottom: '1px solid #0A246A',
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="w-[10px] h-[10px] rounded-full border border-[rgba(0,0,0,0.4)]"
+                          style={{
+                            background: 'radial-gradient(circle at 35% 35%, #FF8C8C, #E03030)',
+                          }}
+                        />
+                        <span
+                          className="text-[11px] font-bold tracking-wide"
+                          style={{
+                            fontFamily: 'Tahoma, Arial, sans-serif',
+                            color: '#FFFFFF',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          Windows XP
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="text-[9px]"
+                          style={{
+                            fontFamily: 'Tahoma, Arial, sans-serif',
+                            color: 'rgba(255,255,255,0.8)',
+                          }}
+                        >
+                          {
+                            filteredWidgets.filter(
+                              (w) => w.category === WIDGET_CATEGORIES.WINDOWS_XP
+                            ).length
+                          }
+                        </span>
+                        <ChevronDown
+                          size={11}
+                          className={`transition-transform duration-200 ${collapsedSections['windows-xp'] ? '-rotate-90' : ''}`}
+                          style={{ color: 'rgba(255,255,255,0.9)' }}
+                        />
+                      </div>
+                    </div>
+                  </button>
+                  {!collapsedSections['windows-xp'] && (
+                    <div className="space-y-2">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.WINDOWS_XP
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+                        return (
+                          <>
+                            {baseItems.map((item) => (
+                              <WinXPCardItem
+                                key={item.id}
+                                item={item}
+                                onAdd={addWidget}
+                                onHover={handleHover}
+                                onLeave={handleLeave}
+                              />
+                            ))}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['windows-xp'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-windows-xp"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map((item) => (
+                                    <WinXPCardItem
+                                      key={item.id}
+                                      item={item}
+                                      onAdd={addWidget}
+                                      onHover={handleHover}
+                                      onLeave={handleLeave}
+                                    />
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    'windows-xp': !prev['windows-xp'],
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['windows-xp']
                                   ? t('editor.sidebar.show_less', 'Mostrar menos')
                                   : t('editor.sidebar.load_more', 'Carregar mais')}
                               </button>

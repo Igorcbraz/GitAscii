@@ -59,6 +59,16 @@ import { renderTerminalInfo } from '@/features/widgets/renderers/TerminalInfoRen
 import { renderTerminal } from '@/features/widgets/renderers/TerminalRenderer'
 import { renderTrophies } from '@/features/widgets/renderers/TrophiesRenderer'
 import { renderWakaTime } from '@/features/widgets/renderers/WakaTimeRenderer'
+import {
+  renderWinXPBliss,
+  renderWinXPErrorDialog,
+  renderWinXPMediaPlayer,
+  renderWinXPMinesweeper,
+  renderWinXPPaint,
+  renderWinXPSystemProperties,
+  renderWinXPTaskbar,
+  renderWinXPWindow,
+} from '@/features/widgets/renderers/WinXPRenderers'
 
 import { escapeXml } from './xmlUtils'
 
@@ -150,6 +160,15 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
     WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY,
     (w, d, g, s) => renderPremiumAsciiCodingVelocity(w, d, g, s),
   ],
+
+  [WIDGET_IDS.WINXP_WINDOW, (w, d, g, s) => renderWinXPWindow(w, d, g, s)],
+  [WIDGET_IDS.WINXP_MINESWEEPER, (w, d, g, s) => renderWinXPMinesweeper(w, d, g, s)],
+  [WIDGET_IDS.WINXP_MEDIA_PLAYER, (w, d, g, s) => renderWinXPMediaPlayer(w, d, g, s)],
+  [WIDGET_IDS.WINXP_PAINT, (w, d, g, s) => renderWinXPPaint(w, d, g, s)],
+  [WIDGET_IDS.WINXP_TASKBAR, (w, d, g, s) => renderWinXPTaskbar(w, d, g, s)],
+  [WIDGET_IDS.WINXP_ERROR_DIALOG, (w, d, g, s) => renderWinXPErrorDialog(w, d, g, s)],
+  [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES, (w, d, g, s) => renderWinXPSystemProperties(w, d, g, s)],
+  [WIDGET_IDS.WINXP_BLISS, (w, d, g, s) => renderWinXPBliss(w, d, g, s)],
 
   // External Integration Widgets
   [WIDGET_IDS.GITFEST_LINEUP, (w, d, g) => renderExternalWidgets(w, d, g)],

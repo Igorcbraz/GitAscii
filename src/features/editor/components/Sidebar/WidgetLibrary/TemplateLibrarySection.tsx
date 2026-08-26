@@ -24,6 +24,7 @@ interface TemplateLibrarySectionProps {
 const WIDGET_CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'Nenhuma (GitAscii Native)' },
   { value: WIDGET_CATEGORIES.SURVEILLANCE, label: 'rugbedbugg' },
+  { value: WIDGET_CATEGORIES.WINDOWS_XP, label: 'Windows XP' },
   { value: WIDGET_CATEGORIES.ASCIIPROFILE, label: 'ASCII Profile Kit' },
   { value: WIDGET_CATEGORIES.GODPROFILE, label: 'GodProfile' },
   { value: WIDGET_CATEGORIES.CONTROLPLANE, label: 'Control Plane' },
