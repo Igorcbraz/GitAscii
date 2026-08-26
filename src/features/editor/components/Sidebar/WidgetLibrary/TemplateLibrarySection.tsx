@@ -6,10 +6,12 @@ import { createPortal } from 'react-dom'
 
 import { useToast } from '@/components/ui/toast'
 import { USER_SPECIFIC_FIELDS, WIDGET_CATEGORIES } from '@/constants'
-import { TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
+import { TEMPLATE_PRESETS, type TemplatePreset } from '@/engine/core/TemplateRenderer'
 import type { SavedConfiguration } from '@/engine/types'
 import { useI18n } from '@/i18n'
 
+import { useEditorStore } from '../../../store/editorStore'
+import { TemplatePreviewTooltip } from '../TemplatePreviewTooltip'
 import { ContributeTemplateModal } from './ContributeTemplateModal'
 
 interface TemplateLibrarySectionProps {
@@ -36,10 +38,23 @@ export function TemplateLibrarySection({
 }: TemplateLibrarySectionProps) {
   const { t } = useI18n()
   const { error } = useToast()
+  const githubData = useEditorStore((state) => state.githubData)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false)
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [pendingWidgetCategory, setPendingWidgetCategory] = useState('')
+  const [hoveredTemplate, setHoveredTemplate] = useState<{
+    template: TemplatePreset
+    rect: DOMRect
+  } | null>(null)
+
+  const handleHover = (tmpl: TemplatePreset, rect: DOMRect) => {
+    setHoveredTemplate({ template: tmpl, rect })
+  }
+
+  const handleLeave = () => {
+    setHoveredTemplate(null)
+  }
 
   const handleExport = (widgetCategory?: string) => {
     try {
@@ -346,6 +361,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative p-3 border rounded-xs cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 flex flex-col justify-between ${
                         config.templateId === tmpl.id
@@ -401,6 +420,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative border bg-[#0d1117] hover:bg-[#161b22] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer shadow-xs hover:-translate-y-0.5 overflow-hidden flex flex-col ${
                         config.templateId === tmpl.id
@@ -468,6 +491,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative p-3 border bg-[#0a0a14] hover:bg-[#121224] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
                         config.templateId === tmpl.id
@@ -528,6 +555,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative p-3 border bg-[#050308] hover:bg-[#0c0814] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
                         config.templateId === tmpl.id
@@ -586,6 +617,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative p-3 border bg-[#09090b] hover:bg-[#121215] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
                         config.templateId === tmpl.id
@@ -643,6 +678,10 @@ export function TemplateLibrarySection({
                     <div
                       key={tmpl.id}
                       onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
                       data-testid={`template-${tmpl.id}`}
                       className={`group relative p-3 border bg-[#020617] hover:bg-[#031024] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-none cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
                         config.templateId === tmpl.id
@@ -795,6 +834,14 @@ export function TemplateLibrarySection({
           </>,
           document.body
         )}
+
+      {hoveredTemplate && (
+        <TemplatePreviewTooltip
+          template={hoveredTemplate.template}
+          targetRect={hoveredTemplate.rect}
+          githubData={githubData}
+        />
+      )}
     </>
   )
 }

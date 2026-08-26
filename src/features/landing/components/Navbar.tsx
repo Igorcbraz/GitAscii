@@ -318,7 +318,9 @@ export default function Navbar() {
                                   className="font-inter-tight text-[12px] text-ash hover:text-signal-lime flex items-center gap-1.5 transition-colors duration-200 group"
                                   onClick={() => setActiveDropdown(null)}
                                 >
-                                  <span>{t(section.footerLink.key, section.footerLink.defaultLabel)}</span>
+                                  <span>
+                                    {t(section.footerLink.key, section.footerLink.defaultLabel)}
+                                  </span>
                                   <ArrowRight className="size-3 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-200" />
                                 </a>
                               ) : (
@@ -327,7 +329,9 @@ export default function Navbar() {
                                   className="font-inter-tight text-[12px] text-ash hover:text-signal-lime flex items-center gap-1.5 transition-colors duration-200 group"
                                   onClick={() => setActiveDropdown(null)}
                                 >
-                                  <span>{t(section.footerLink.key, section.footerLink.defaultLabel)}</span>
+                                  <span>
+                                    {t(section.footerLink.key, section.footerLink.defaultLabel)}
+                                  </span>
                                   <ArrowRight className="size-3 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all duration-200" />
                                 </Link>
                               )}

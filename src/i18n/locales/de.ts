@@ -1516,17 +1516,22 @@ export const de: Record<string, string> = {
   'landing.navbar.item.templates': 'Vorlagen-Katalog',
   'landing.navbar.item.templates_desc': 'Über 13 erprobte Layout-Vorlagen zum Klonen und Anpassen.',
   'landing.navbar.item.widgets': 'Dynamische Widgets',
-  'landing.navbar.item.widgets_desc': 'Über 30 Echtzeit-SVG-Widgets mit GitHub-Statistiken und ASCII-Art.',
+  'landing.navbar.item.widgets_desc':
+    'Über 30 Echtzeit-SVG-Widgets mit GitHub-Statistiken und ASCII-Art.',
   'landing.navbar.item.explore': 'Profile entdecken',
   'landing.navbar.item.explore_desc': 'Echte Entwickler-Profile durchstöbern und READMEs klonen.',
   'landing.navbar.item.guides': 'Anleitungen & Tutorials',
-  'landing.navbar.item.guides_desc': 'Ausgewählte Artikel zu GitHub Markdown, SVG-Badges und Themes.',
+  'landing.navbar.item.guides_desc':
+    'Ausgewählte Artikel zu GitHub Markdown, SVG-Badges und Themes.',
   'landing.navbar.item.api_rendering': 'Edge-Rendering-API',
-  'landing.navbar.item.api_rendering_desc': 'Dynamische SVGs in Millisekunden aus globalen Edge-Caches.',
+  'landing.navbar.item.api_rendering_desc':
+    'Dynamische SVGs in Millisekunden aus globalen Edge-Caches.',
   'landing.navbar.item.quickstart': 'Schnellstart-Anleitung',
-  'landing.navbar.item.quickstart_desc': 'Richten Sie Ihr dynamisches README in unter 2 Minuten ein.',
+  'landing.navbar.item.quickstart_desc':
+    'Richten Sie Ihr dynamisches README in unter 2 Minuten ein.',
   'landing.navbar.item.ascii_pipeline': 'ASCII-Architektur',
-  'landing.navbar.item.ascii_pipeline_desc': 'Einblick in FIGlet-Schriftarten und Luminanz-Mapping.',
+  'landing.navbar.item.ascii_pipeline_desc':
+    'Einblick in FIGlet-Schriftarten und Luminanz-Mapping.',
   'landing.navbar.item.design_tokens': 'Design-Tokens & Themes',
   'landing.navbar.item.design_tokens_desc': 'Hell-/Dunkel-Spezifikationen und Farbpaletten.',
   'landing.traction.stars': 'GitHub Stars',
@@ -1546,7 +1551,8 @@ export const de: Record<string, string> = {
   'landing.editor_demo.status_loaded': 'Vollständige Engine geladen',
   'landing.editor_demo.status_idle': 'Standby-Modus',
   'landing.editor_demo.standby_title': '[ STANDBY · ZERO CPU-MODUS ]',
-  'landing.editor_demo.standby_desc': 'Die interaktive Canvas-Engine aktiviert sich automatisch beim Scrollen in diesen Bereich.',
+  'landing.editor_demo.standby_desc':
+    'Die interaktive Canvas-Engine aktiviert sich automatisch beim Scrollen in diesen Bereich.',
   'landing.editor_demo.target_profile': 'Zielprofil:',
   'landing.editor_demo.engine_label': 'Engine: WebGL & Vektor-SVG',
   'landing.community.verified_devs': 'Verifizierte Entwickler',
@@ -1560,7 +1566,8 @@ export const de: Record<string, string> = {
   'landing.community.live_cdn_endpoint': 'Live-CDN-Endpunkt:',
   'landing.community.dynamic_readme': '[ Dynamisches GitHub README ]',
   'landing.community.explore_all': 'Alle verifizierten Community-Profile anzeigen',
-  'landing.community.join_text': 'Schließen Sie sich {count}+ Entwicklern an, die dynamische Profilkarten erstellen.',
+  'landing.community.join_text':
+    'Schließen Sie sich {count}+ Entwicklern an, die dynamische Profilkarten erstellen.',
   'landing.community.verified_badge': 'Verifiziert',
   'landing.community.view_profile': 'GitHub-Profil ansehen',
   'landing.templates.badge_suffix': 'PRODUKTIONS-VORLAGEN',
@@ -1580,7 +1587,8 @@ export const de: Record<string, string> = {
   'landing.widgets.badge_suffix': 'LIVE-SVG-WIDGETS',
   'landing.widgets.title_start': 'Modulare Engine mit über ',
   'landing.widgets.title_highlight': '{count}+ dynamischen Karten.',
-  'landing.widgets.subtitle': 'Entdecken Sie Widgets in der Reihenfolge des Studios: Empfohlen, GitAscii Native, Thematische Kategorien und Community-Erweiterungen.',
+  'landing.widgets.subtitle':
+    'Entdecken Sie Widgets in der Reihenfolge des Studios: Empfohlen, GitAscii Native, Thematische Kategorien und Community-Erweiterungen.',
   'landing.widgets.tab_all': 'Alle ({count})',
   'landing.widgets.tab_featured': '1. Empfohlen',
   'landing.widgets.tab_native': '2. GitAscii Native',
@@ -1592,7 +1600,8 @@ export const de: Record<string, string> = {
   'landing.widgets.cat2_title': '2. GitAscii Native',
   'landing.widgets.cat2_desc': 'Stats Card, Sprachenleiste, ASCII-Matrix, Tech-Stack, Neofetch',
   'landing.widgets.cat3_title': '3. Kategorien',
-  'landing.widgets.cat3_desc': 'ASCII Premium, ASCII Profile, GodProfile, Control Plane, Codeweb, rugbedbugg',
+  'landing.widgets.cat3_desc':
+    'ASCII Premium, ASCII Profile, GodProfile, Control Plane, Codeweb, rugbedbugg',
   'landing.widgets.cat4_title': '4. Community',
   'landing.widgets.cat4_desc': 'Snake Game, Trophäen, Profilaufrufe, Externe Module',
   'landing.widgets.explore_all': 'Vollständige Widget-Bibliothek durchsuchen ({count}+)',
@@ -1600,19 +1609,26 @@ export const de: Record<string, string> = {
   'landing.ecosystem.badge': '[ DAS GITASCII-ÖKOSYSTEM ]',
   'landing.ecosystem.title_start': 'Alles, was Sie für Ihre Entwickler-Präsenz ',
   'landing.ecosystem.title_highlight': 'benötigen.',
-  'landing.ecosystem.subtitle': 'Statische Markdown-Tabellen brechen leicht und veralten schnell. GitAscii verwandelt Ihr Profil in ein interaktives, hochwertiges Statement, das immer aktuell bleibt.',
+  'landing.ecosystem.subtitle':
+    'Statische Markdown-Tabellen brechen leicht und veralten schnell. GitAscii verwandelt Ihr Profil in ein interaktives, hochwertiges Statement, das immer aktuell bleibt.',
   'landing.why.dynamic_title': 'Dynamisch & Selbstaktualisierend',
-  'landing.why.dynamic_desc': 'Ihr Profil veraltet nie. Commits, Stars, Streaks und Programmiersprachen werden live von GitHub abgerufen und auf Edge-Funktionen gerendert.',
+  'landing.why.dynamic_desc':
+    'Ihr Profil veraltet nie. Commits, Stars, Streaks und Programmiersprachen werden live von GitHub abgerufen und auf Edge-Funktionen gerendert.',
   'landing.why.theme_title': 'Automatische Hell-/Dunkel-Umschaltung',
-  'landing.why.theme_desc': 'Nahtloser Wechsel zwischen GitHub Dark und Light Mode mittels Standard-HTML-<picture>-Tags und Media Queries ohne Layout-Verschiebung.',
+  'landing.why.theme_desc':
+    'Nahtloser Wechsel zwischen GitHub Dark und Light Mode mittels Standard-HTML-<picture>-Tags und Media Queries ohne Layout-Verschiebung.',
   'landing.why.craft_title': 'Exzellentes Design ohne CSS-Aufwand',
-  'landing.why.craft_desc': 'Überspringen Sie mühsame Formatierungen. Wählen Sie aus {count} professionellen Presets und passen Sie Schrift, Layout und Farben visuell an.',
+  'landing.why.craft_desc':
+    'Überspringen Sie mühsame Formatierungen. Wählen Sie aus {count} professionellen Presets und passen Sie Schrift, Layout und Farben visuell an.',
   'landing.why.widgets_title': '{count}+ Dynamische Widgets',
-  'landing.why.widgets_desc': 'Von Live-Statistiken und ASCII-Porträts bis hin zu sammelbaren Pokémon-Karten, FIFA FUT-Karten und Aktivitätsanalysen.',
+  'landing.why.widgets_desc':
+    'Von Live-Statistiken und ASCII-Porträts bis hin zu sammelbaren Pokémon-Karten, FIFA FUT-Karten und Aktivitätsanalysen.',
   'landing.why.zerodb_title': 'Keine Datenbank & Volle Datensouveränität',
-  'landing.why.zerodb_desc': 'Ihre Konfiguration wird direkt als saubere gitascii.json-Datei in Ihrem eigenen GitHub-Profil-Repository gespeichert. Kein Lock-in.',
+  'landing.why.zerodb_desc':
+    'Ihre Konfiguration wird direkt als saubere gitascii.json-Datei in Ihrem eigenen GitHub-Profil-Repository gespeichert. Kein Lock-in.',
   'landing.why.oss_title': '100% MIT Open Source',
-  'landing.why.oss_desc': 'Transparent, selbst hostbar und für immer kostenlos. Für die Entwickler-Community entwickelt.',
+  'landing.why.oss_desc':
+    'Transparent, selbst hostbar und für immer kostenlos. Für die Entwickler-Community entwickelt.',
   'landing.why.tag_edge': '// 01 · EDGE CDN',
   'landing.why.tag_adaptive': '// 02 · ADAPTIV',
   'landing.why.tag_presets': '// 03 · {count} PRESETS',
@@ -1625,16 +1641,20 @@ export const de: Record<string, string> = {
   'landing.why.action_widgets': 'Widgets entdecken',
   'landing.why.action_community': 'Community ansehen',
   'landing.why.action_compare': 'Mit Alternativen vergleichen',
-  'landing.ecosystem.vs_question': 'Möchten Sie einen direkten technischen Vergleich mit herkömmlichen README-Tools sehen?',
+  'landing.ecosystem.vs_question':
+    'Möchten Sie einen direkten technischen Vergleich mit herkömmlichen README-Tools sehen?',
   'landing.ecosystem.vs_link': 'GitAscii vs. Readme.so vs. GPRM vergleichen',
   'landing.ecosystem.guarantee_badge': '[ ZERO-LOCK-IN-GARANTIE ]',
-  'landing.ecosystem.guarantee_title': 'Bereit, Ihr dynamisches Profil in 60 Sekunden zu erstellen?',
-  'landing.ecosystem.guarantee_desc': 'Keine Kreditkarte, keine Datenbankkonten, keine komplizierten YAML-Dateien.',
+  'landing.ecosystem.guarantee_title':
+    'Bereit, Ihr dynamisches Profil in 60 Sekunden zu erstellen?',
+  'landing.ecosystem.guarantee_desc':
+    'Keine Kreditkarte, keine Datenbankkonten, keine komplizierten YAML-Dateien.',
   'landing.ecosystem.guarantee_cta': 'GitHub-Benutzernamen eingeben',
   'landing.comparison.badge': '[ ARCHITEKTUR-MATRIX ]',
   'landing.comparison.title_start': 'Entwickelt für ',
   'landing.comparison.title_highlight': 'Edge-Performance.',
-  'landing.comparison.subtitle': 'Sehen Sie, wie GitAscii im Vergleich zu herkömmlichen statischen Generatoren und formularbasierten Tools abschneidet.',
+  'landing.comparison.subtitle':
+    'Sehen Sie, wie GitAscii im Vergleich zu herkömmlichen statischen Generatoren und formularbasierten Tools abschneidet.',
   'landing.comparison.th_capability': 'Architektur-Funktion',
   'landing.comparison.footer_desc': 'Detaillierte technische Analyse und Benchmarks:',
   'landing.comparison.footer_link': 'Vollständige Vergleichsmatrix öffnen',
@@ -1649,7 +1669,8 @@ export const de: Record<string, string> = {
   'landing.final_cta.title_start': 'Bereit, Ihr Profil zu ',
   'landing.final_cta.title_highlight': 'transformieren?',
   'landing.final_cta.subtitle_prefix': 'Schließen Sie sich ',
-  'landing.final_cta.subtitle_suffix': ' Entwicklern an, die ihre GitHub-Präsenz mit ASCII-Art, dynamischen Statistiken und SVGs auf das nächste Level gehoben haben.',
+  'landing.final_cta.subtitle_suffix':
+    ' Entwicklern an, die ihre GitHub-Präsenz mit ASCII-Art, dynamischen Statistiken und SVGs auf das nächste Level gehoben haben.',
   'landing.final_cta.start_building': 'Kostenlos starten',
   'landing.final_cta.explore_community': 'Community entdecken',
   'landing.final_cta.badge_free': '100% Kostenlos & Open Source',
@@ -1661,9 +1682,11 @@ export const de: Record<string, string> = {
   'landing.editor_demo.badge': '[ INTERAKTIVE LIVE-STUDIO-SANDBOX ]',
   'landing.editor_demo.title_start': 'Interaktives ',
   'landing.editor_demo.title_highlight': 'Studio.',
-  'landing.editor_demo.subtitle': 'Erstellen und konfigurieren Sie Ihr dynamisches GitHub-Profil in Echtzeit.',
+  'landing.editor_demo.subtitle':
+    'Erstellen und konfigurieren Sie Ihr dynamisches GitHub-Profil in Echtzeit.',
   'landing.why.eyebrow': '[ WARUM GITASCII ]',
   'landing.why.title_normal': 'Alles, was Sie ',
   'landing.why.title_italic': 'brauchen.',
-  'landing.why.subtitle': 'Alles, was Sie zum Erstellen und Teilen ansprechender GitHub-Profile benötigen.',
+  'landing.why.subtitle':
+    'Alles, was Sie zum Erstellen und Teilen ansprechender GitHub-Profile benötigen.',
 }

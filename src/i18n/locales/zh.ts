@@ -1506,7 +1506,8 @@ export const zh: Record<string, string> = {
   'landing.widgets.badge_suffix': '实时 SVG 小组件',
   'landing.widgets.title_start': '模块化引擎包含超过 ',
   'landing.widgets.title_highlight': '{count}+ 款动态卡片。',
-  'landing.widgets.subtitle': '按 Studio 中的顺序探索组件：精选、GitAscii 原生、主题分类以及社区扩展。',
+  'landing.widgets.subtitle':
+    '按 Studio 中的顺序探索组件：精选、GitAscii 原生、主题分类以及社区扩展。',
   'landing.widgets.tab_all': '全部 ({count})',
   'landing.widgets.tab_featured': '1. 精选推荐',
   'landing.widgets.tab_native': '2. GitAscii 原生',
@@ -1518,7 +1519,8 @@ export const zh: Record<string, string> = {
   'landing.widgets.cat2_title': '2. GitAscii 原生',
   'landing.widgets.cat2_desc': '统计卡片、语言占比条、ASCII 矩阵、技术栈、Neofetch',
   'landing.widgets.cat3_title': '3. 主题分类',
-  'landing.widgets.cat3_desc': 'ASCII 尊享卡、ASCII 头像、GodProfile、Control Plane、Codeweb、rugbedbugg',
+  'landing.widgets.cat3_desc':
+    'ASCII 尊享卡、ASCII 头像、GodProfile、Control Plane、Codeweb、rugbedbugg',
   'landing.widgets.cat4_title': '4. 社区模块',
   'landing.widgets.cat4_desc': '贪吃蛇提交图、成就奖杯、主页访问计数、外部模块',
   'landing.widgets.explore_all': '探索完整组件库 ({count}+)',
@@ -1526,17 +1528,23 @@ export const zh: Record<string, string> = {
   'landing.ecosystem.badge': '[ GITASCII 生态系统 ]',
   'landing.ecosystem.title_start': '打造卓越个人主页的',
   'landing.ecosystem.title_highlight': '必备工具箱。',
-  'landing.ecosystem.subtitle': '静态 Markdown 表格容易排版错乱且无法更新。GitAscii 将你的开发者主页转变为永不过时的交互式视觉名片。',
+  'landing.ecosystem.subtitle':
+    '静态 Markdown 表格容易排版错乱且无法更新。GitAscii 将你的开发者主页转变为永不过时的交互式视觉名片。',
   'landing.why.dynamic_title': '动态与自动更新',
-  'landing.why.dynamic_desc': '你的主页永不过时。提交、星标、连胜和语言数据均从 GitHub 实时获取，并通过全球边缘节点极速分发。',
+  'landing.why.dynamic_desc':
+    '你的主页永不过时。提交、星标、连胜和语言数据均从 GitHub 实时获取，并通过全球边缘节点极速分发。',
   'landing.why.theme_title': '自适应亮暗主题',
-  'landing.why.theme_desc': '使用标准 HTML <picture> 标签和媒体查询，在 GitHub 的明暗模式间无缝切换，零布局抖动。',
+  'landing.why.theme_desc':
+    '使用标准 HTML <picture> 标签和媒体查询，在 GitHub 的明暗模式间无缝切换，零布局抖动。',
   'landing.why.craft_title': '无需 CSS 即可获得精美设计',
-  'landing.why.craft_desc': '告别繁琐的 Markdown 格式调试。从 {count} 款专为软件工程师定制的设计预设中选择，可视化调整排版与色彩。',
+  'landing.why.craft_desc':
+    '告别繁琐的 Markdown 格式调试。从 {count} 款专为软件工程师定制的设计预设中选择，可视化调整排版与色彩。',
   'landing.why.widgets_title': '{count}+ 动态小组件',
-  'landing.why.widgets_desc': '从实时统计和 ASCII 肖像，到宝可梦卡牌、FIFA FUT 球员卡和夜猫子作息分析。',
+  'landing.why.widgets_desc':
+    '从实时统计和 ASCII 肖像，到宝可梦卡牌、FIFA FUT 球员卡和夜猫子作息分析。',
   'landing.why.zerodb_title': '零数据库依赖与客户端安全',
-  'landing.why.zerodb_desc': '你的配置直接以纯净的 gitascii.json 文件保存在你自己的仓库中，绝无数据库锁定。',
+  'landing.why.zerodb_desc':
+    '你的配置直接以纯净的 gitascii.json 文件保存在你自己的仓库中，绝无数据库锁定。',
   'landing.why.oss_title': '100% MIT 开源',
   'landing.why.oss_desc': '透明、可自建、永远免费。专为开发者社区打造，持续接受开源贡献。',
   'landing.why.tag_edge': '// 01 · 边缘 CDN',
@@ -1575,7 +1583,8 @@ export const zh: Record<string, string> = {
   'landing.final_cta.title_start': '准备好升级你的',
   'landing.final_cta.title_highlight': '个人主页了吗？',
   'landing.final_cta.subtitle_prefix': '加入 ',
-  'landing.final_cta.subtitle_suffix': ' 位已经通过精美 ASCII 艺术、动态统计和 SVG 提升 GitHub 影响力的开发者。',
+  'landing.final_cta.subtitle_suffix':
+    ' 位已经通过精美 ASCII 艺术、动态统计和 SVG 提升 GitHub 影响力的开发者。',
   'landing.final_cta.start_building': '免费开始制作',
   'landing.final_cta.explore_community': '探索社区',
   'landing.final_cta.badge_free': '100% 免费开源',

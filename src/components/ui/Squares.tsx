@@ -111,8 +111,12 @@ export function Squares({
       const startX = Math.floor(gridOffset.current.x / squareSize) * squareSize
       const startY = Math.floor(gridOffset.current.y / squareSize) * squareSize
 
-      const hoveredX = Math.floor((mouseX + (gridOffset.current.x % squareSize) - startX) / squareSize)
-      const hoveredY = Math.floor((mouseY + (gridOffset.current.y % squareSize) - startY) / squareSize)
+      const hoveredX = Math.floor(
+        (mouseX + (gridOffset.current.x % squareSize) - startX) / squareSize
+      )
+      const hoveredY = Math.floor(
+        (mouseY + (gridOffset.current.y % squareSize) - startY) / squareSize
+      )
 
       hoveredSquare.current = { x: hoveredX, y: hoveredY }
     }

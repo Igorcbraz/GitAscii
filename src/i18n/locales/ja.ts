@@ -1512,7 +1512,8 @@ export const ja: Record<string, string> = {
   'landing.navbar.item.guides': 'ガイドとチュートリアル',
   'landing.navbar.item.guides_desc': 'Markdown、SVGバッジ、テーマに関する厳選された記事。',
   'landing.navbar.item.api_rendering': 'EdgeレンダリングAPI',
-  'landing.navbar.item.api_rendering_desc': 'グローバルなエッジキャッシュからミリ秒単位で配信される動的SVG。',
+  'landing.navbar.item.api_rendering_desc':
+    'グローバルなエッジキャッシュからミリ秒単位で配信される動的SVG。',
   'landing.navbar.item.quickstart': 'クイックスタートガイド',
   'landing.navbar.item.quickstart_desc': '2分未満で動的READMEを立ち上げることができます。',
   'landing.navbar.item.ascii_pipeline': 'ASCIIアーキテクチャ',
@@ -1536,7 +1537,8 @@ export const ja: Record<string, string> = {
   'landing.editor_demo.status_loaded': '完全エンジン読み込み完了',
   'landing.editor_demo.status_idle': '待機モード',
   'landing.editor_demo.standby_title': '[ スタンバイ · CPUゼロ消費モード ]',
-  'landing.editor_demo.standby_desc': 'このエリアにスクロールすると、キャンバスエンジンが自動的にアクティブになります。',
+  'landing.editor_demo.standby_desc':
+    'このエリアにスクロールすると、キャンバスエンジンが自動的にアクティブになります。',
   'landing.editor_demo.target_profile': '対象プロフィール:',
   'landing.editor_demo.engine_label': 'エンジン: WebGL & ベクターSVG',
   'landing.community.verified_devs': '認証済み開発者',
@@ -1550,7 +1552,8 @@ export const ja: Record<string, string> = {
   'landing.community.live_cdn_endpoint': '配信CDNエンドポイント:',
   'landing.community.dynamic_readme': '[ 動的GitHub README ]',
   'landing.community.explore_all': '認証済みコミュニティプロフィールをすべて見る',
-  'landing.community.join_text': '{count}人以上の開発者がリアルタイムなプロフィールカードを作成中。',
+  'landing.community.join_text':
+    '{count}人以上の開発者がリアルタイムなプロフィールカードを作成中。',
   'landing.community.verified_badge': '認証済み',
   'landing.community.view_profile': 'GitHubプロフィールを見る',
   'landing.templates.badge_suffix': 'プロダクション用テンプレート',
@@ -1570,7 +1573,8 @@ export const ja: Record<string, string> = {
   'landing.widgets.badge_suffix': 'リアルタイムSVGウィジェット',
   'landing.widgets.title_start': 'モジュラーエンジンに搭載された',
   'landing.widgets.title_highlight': '{count}+以上の動的カード。',
-  'landing.widgets.subtitle': '注目ウィジェット、GitAscii Native、テーマカテゴリ、コミュニティ拡張など、スタジオで利用可能な順序で探索できます。',
+  'landing.widgets.subtitle':
+    '注目ウィジェット、GitAscii Native、テーマカテゴリ、コミュニティ拡張など、スタジオで利用可能な順序で探索できます。',
   'landing.widgets.tab_all': 'すべて ({count})',
   'landing.widgets.tab_featured': '1. 注目',
   'landing.widgets.tab_native': '2. GitAscii Native',
@@ -1582,7 +1586,8 @@ export const ja: Record<string, string> = {
   'landing.widgets.cat2_title': '2. GitAscii Native',
   'landing.widgets.cat2_desc': '統計カード、言語バー、ASCIIマトリクス、技術スタック、Neofetch',
   'landing.widgets.cat3_title': '3. カテゴリ',
-  'landing.widgets.cat3_desc': 'ASCII Premium、ASCII Profile、GodProfile、Control Plane、Codeweb、rugbedbugg',
+  'landing.widgets.cat3_desc':
+    'ASCII Premium、ASCII Profile、GodProfile、Control Plane、Codeweb、rugbedbugg',
   'landing.widgets.cat4_title': '4. コミュニティ',
   'landing.widgets.cat4_desc': 'スネークゲーム、トロフィー、訪問数カウンター、外部モジュール',
   'landing.widgets.explore_all': 'ウィジェットライブラリをすべて見る ({count}+)',
@@ -1590,19 +1595,26 @@ export const ja: Record<string, string> = {
   'landing.ecosystem.badge': '[ GITASCII エコシステム ]',
   'landing.ecosystem.title_start': '魅力的なプロフィール作成に必要な',
   'landing.ecosystem.title_highlight': 'すべてがここに。',
-  'landing.ecosystem.subtitle': '静的なMarkdownテーブルは崩れやすく更新も大変です。GitAsciiなら、常に最新の状態を保つ洗練されたプロフィールを簡単に構築できます。',
+  'landing.ecosystem.subtitle':
+    '静的なMarkdownテーブルは崩れやすく更新も大変です。GitAsciiなら、常に最新の状態を保つ洗練されたプロフィールを簡単に構築できます。',
   'landing.why.dynamic_title': 'リアルタイム＆自動更新',
-  'landing.why.dynamic_desc': 'コミット、スター、継続日数、言語情報がGitHubから自動取得され、高速CDNエッジ関数で動的にレンダリングされます。',
+  'landing.why.dynamic_desc':
+    'コミット、スター、継続日数、言語情報がGitHubから自動取得され、高速CDNエッジ関数で動的にレンダリングされます。',
   'landing.why.theme_title': 'ライト/ダークモード自動切り替え',
-  'landing.why.theme_desc': '標準のHTML <picture> タグとメディアクエリを使用し、レイアウト崩れなくGitHubのテーマに応じて自動で切り替わります。',
+  'landing.why.theme_desc':
+    '標準のHTML <picture> タグとメディアクエリを使用し、レイアウト崩れなくGitHubのテーマに応じて自動で切り替わります。',
   'landing.why.craft_title': 'CSS不要の上質なデザイン',
-  'landing.why.craft_desc': '面倒なMarkdownの調整は不要です。エンジニア向けに調整された{count}種類のプリセットから選び、視覚的に調整できます。',
+  'landing.why.craft_desc':
+    '面倒なMarkdownの調整は不要です。エンジニア向けに調整された{count}種類のプリセットから選び、視覚的に調整できます。',
   'landing.why.widgets_title': '{count}+以上の動的ウィジェット',
-  'landing.why.widgets_desc': '統計やASCIIポートレートから、ポケモン風カード、FUTスカウトカード、夜型開発者分析まで多彩に対応。',
+  'landing.why.widgets_desc':
+    '統計やASCIIポートレートから、ポケモン風カード、FUTスカウトカード、夜型開発者分析まで多彩に対応。',
   'landing.why.zerodb_title': 'DB不要・安全設計',
-  'landing.why.zerodb_desc': '設定はご自身のGitHubプロフィールリポジトリに gitascii.json として保存されます。外部DBへの囲い込みはありません。',
+  'landing.why.zerodb_desc':
+    '設定はご自身のGitHubプロフィールリポジトリに gitascii.json として保存されます。外部DBへの囲い込みはありません。',
   'landing.why.oss_title': '100% MITオープンソース',
-  'landing.why.oss_desc': '透明性があり、セルフホスト可能でずっと無料。開発者コミュニティのために作られ、継続的に改善されています。',
+  'landing.why.oss_desc':
+    '透明性があり、セルフホスト可能でずっと無料。開発者コミュニティのために作られ、継続的に改善されています。',
   'landing.why.tag_edge': '// 01 · EDGE CDN',
   'landing.why.tag_adaptive': '// 02 · アダプティブ',
   'landing.why.tag_presets': '// 03 · {count} プリセット',
@@ -1615,16 +1627,19 @@ export const ja: Record<string, string> = {
   'landing.why.action_widgets': 'ウィジェットを探す',
   'landing.why.action_community': 'コミュニティを見る',
   'landing.why.action_compare': '他ツールと比較',
-  'landing.ecosystem.vs_question': '従来のREADMEジェネレーターとの詳細な技術比較をご覧になりたいですか？',
+  'landing.ecosystem.vs_question':
+    '従来のREADMEジェネレーターとの詳細な技術比較をご覧になりたいですか？',
   'landing.ecosystem.vs_link': 'GitAscii vs Readme.so vs GPRM の比較',
   'landing.ecosystem.guarantee_badge': '[ ロックインなし保証 ]',
   'landing.ecosystem.guarantee_title': '60秒で動的なプロフィールを作成しませんか？',
-  'landing.ecosystem.guarantee_desc': 'クレジットカード不要、データベース登録不要、複雑なYAML設定も不要です。',
+  'landing.ecosystem.guarantee_desc':
+    'クレジットカード不要、データベース登録不要、複雑なYAML設定も不要です。',
   'landing.ecosystem.guarantee_cta': 'GitHubユーザー名を入力',
   'landing.comparison.badge': '[ アーキテクチャ比較表 ]',
   'landing.comparison.title_start': 'エッジでの高速動作のために',
   'landing.comparison.title_highlight': '設計されたエンジン。',
-  'landing.comparison.subtitle': '従来の静的READMEジェネレーターやフォーム型ツールとの違いをご覧ください。',
+  'landing.comparison.subtitle':
+    '従来の静的READMEジェネレーターやフォーム型ツールとの違いをご覧ください。',
   'landing.comparison.th_capability': '機能・設計項目',
   'landing.comparison.footer_desc': '詳細な技術解説とベンチマーク分析:',
   'landing.comparison.footer_link': '完全な比較表を見る',
@@ -1639,7 +1654,8 @@ export const ja: Record<string, string> = {
   'landing.final_cta.title_start': 'あなたのプロフィールを',
   'landing.final_cta.title_highlight': '変革しませんか？',
   'landing.final_cta.subtitle_prefix': 'すでに',
-  'landing.final_cta.subtitle_suffix': '人以上の開発者が、ASCIIアートや動的統計を活用して魅力的なGitHubプロフィールを作成しています。',
+  'landing.final_cta.subtitle_suffix':
+    '人以上の開発者が、ASCIIアートや動的統計を活用して魅力的なGitHubプロフィールを作成しています。',
   'landing.final_cta.start_building': '無料で作成を始める',
   'landing.final_cta.explore_community': 'コミュニティを見る',
   'landing.final_cta.badge_free': '100% 無料＆オープンソース',
@@ -1651,7 +1667,8 @@ export const ja: Record<string, string> = {
   'landing.editor_demo.badge': '[ リアルタイム・スタジオ・サンドボックス ]',
   'landing.editor_demo.title_start': 'インタラクティブ ',
   'landing.editor_demo.title_highlight': 'スタジオ。',
-  'landing.editor_demo.subtitle': 'ドラッグ＆ドロップでリアルタイムにGitHubプロフィールをカスタマイズ。',
+  'landing.editor_demo.subtitle':
+    'ドラッグ＆ドロップでリアルタイムにGitHubプロフィールをカスタマイズ。',
   'landing.why.eyebrow': '[ GITASCIIを選ぶ理由 ]',
   'landing.why.title_normal': 'あなたに必要な',
   'landing.why.title_italic': 'すべて。',

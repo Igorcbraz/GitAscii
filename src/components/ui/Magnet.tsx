@@ -10,12 +10,7 @@ interface MagnetProps {
   className?: string
 }
 
-export function Magnet({
-  children,
-  distance = 100,
-  strength = 0.35,
-  className = '',
-}: MagnetProps) {
+export function Magnet({ children, distance = 100, strength = 0.35, className = '' }: MagnetProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   const x = useMotionValue(0)

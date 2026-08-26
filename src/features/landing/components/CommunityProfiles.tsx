@@ -1,13 +1,6 @@
 'use client'
 
-import {
-  CheckCircle2,
-  Code2,
-  ExternalLink,
-  Github,
-  Layers,
-  Users,
-} from 'lucide-react'
+import { CheckCircle2, Code2, ExternalLink, Github, Layers, Users } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -148,10 +141,16 @@ export function CommunityProfiles({
     return FEATURED_PROFILES.slice(0, 6)
   }, [profiles])
 
-  const totalCommunityCount = Math.max(resolvedUsersCount, resolvedProfilesCount, (profiles?.length || 0))
+  const totalCommunityCount = Math.max(
+    resolvedUsersCount,
+    resolvedProfilesCount,
+    profiles?.length || 0
+  )
   const remainingProfilesCount = Math.max(1, totalCommunityCount - profileList.length)
 
-  const [activeUsername, setActiveUsername] = useState<string>(profileList[0]?.username || 'Igorcbraz')
+  const [activeUsername, setActiveUsername] = useState<string>(
+    profileList[0]?.username || 'Igorcbraz'
+  )
   const activeProfile = useMemo(
     () => profileList.find((p) => p.username === activeUsername) || profileList[0],
     [profileList, activeUsername]
@@ -188,7 +187,8 @@ export function CommunityProfiles({
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 text-signal-lime font-jetbrains-mono text-[11px] uppercase tracking-[0.2em]">
             <Users className="w-3.5 h-3.5" />
             <ShinyText speed={3}>
-              [ <AnimatedCounter value={resolvedProfilesCount} suffix="+" /> {t('landing.community.badge', 'VERIFIED COMMUNITY PROFILES')} ]
+              [ <AnimatedCounter value={resolvedProfilesCount} suffix="+" />{' '}
+              {t('landing.community.badge', 'VERIFIED COMMUNITY PROFILES')} ]
             </ShinyText>
           </div>
 
@@ -218,9 +218,13 @@ export function CommunityProfiles({
             <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase">
               <span>{t('landing.community.verified_devs', 'Verified Developers')}</span>
               <span>
-                {t('landing.community.featured_profiles', `${profileList.length} Featured Profiles`, {
-                  count: String(profileList.length),
-                })}
+                {t(
+                  'landing.community.featured_profiles',
+                  `${profileList.length} Featured Profiles`,
+                  {
+                    count: String(profileList.length),
+                  }
+                )}
               </span>
             </div>
 
@@ -331,7 +335,10 @@ export function CommunityProfiles({
                 </div>
                 <span className="font-jetbrains-mono text-[9px] text-signal-lime uppercase px-2 py-0.5 border border-signal-lime/40 bg-signal-lime/10 flex items-center gap-1 shrink-0 group-hover:border-signal-lime transition-colors">
                   <span>{t('landing.community.more_profiles_badge', 'Explorar')}</span>
-                  <span aria-hidden="true" className="group-hover:translate-x-0.5 transition-transform">
+                  <span
+                    aria-hidden="true"
+                    className="group-hover:translate-x-0.5 transition-transform"
+                  >
                     →
                   </span>
                 </span>
@@ -396,17 +403,19 @@ export function CommunityProfiles({
                 <div className="my-1 py-2 px-3 bg-carbon border border-graphite/70 flex flex-wrap items-center justify-between gap-3 font-jetbrains-mono text-[11px]">
                   <div className="flex items-center gap-2 text-ash uppercase">
                     <span>{t('landing.community.applied_template', 'Applied Template:')}</span>
-                    <span className="text-signal-lime font-bold">
-                      {activeProfile.templateId}
-                    </span>
+                    <span className="text-signal-lime font-bold">{activeProfile.templateId}</span>
                   </div>
 
                   <div className="flex items-center gap-4 text-ash">
                     <span className="flex items-center gap-1.5">
                       <Layers size={12} className="text-signal-lime" />
-                      {t('landing.community.widgets_active', `${activeProfile.widgetsCount} Widgets Active`, {
-                        count: String(activeProfile.widgetsCount),
-                      })}
+                      {t(
+                        'landing.community.widgets_active',
+                        `${activeProfile.widgetsCount} Widgets Active`,
+                        {
+                          count: String(activeProfile.widgetsCount),
+                        }
+                      )}
                     </span>
                     <span className="text-graphite">|</span>
                     <span className="text-pearl">
@@ -466,15 +475,20 @@ export function CommunityProfiles({
                   ))}
                   <span className="px-2 py-0.5 border border-graphite rounded-none font-jetbrains-mono text-[9px] uppercase text-ash tracking-wider bg-carbon flex items-center gap-1">
                     <Layers size={10} className="text-signal-lime" />
-                    {t('landing.community.modules_active', `${activeProfile.widgetsCount} Modules Active`, {
-                      count: String(activeProfile.widgetsCount),
-                    })}
+                    {t(
+                      'landing.community.modules_active',
+                      `${activeProfile.widgetsCount} Modules Active`,
+                      {
+                        count: String(activeProfile.widgetsCount),
+                      }
+                    )}
                   </span>
                 </div>
 
                 <div className="pt-3 border-t border-graphite/60 flex flex-wrap items-center justify-between gap-3">
                   <span className="font-jetbrains-mono text-[11px] text-ash">
-                    {t('landing.community.live_cdn_endpoint', 'Live CDN Endpoint:')} <code className="text-signal-lime">/api/{activeProfile.username}</code>
+                    {t('landing.community.live_cdn_endpoint', 'Live CDN Endpoint:')}{' '}
+                    <code className="text-signal-lime">/api/{activeProfile.username}</code>
                   </span>
                   <span className="font-jetbrains-mono text-[10px] text-signal-lime uppercase">
                     {t('landing.community.dynamic_readme', '[ Dynamic GitHub README ]')}
@@ -491,7 +505,9 @@ export function CommunityProfiles({
               href="/explore"
               className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 bg-signal-lime hover:bg-signal-lime-hover text-carbon font-inter-tight font-semibold text-[14px] uppercase tracking-wider transition-colors shadow-[0_0_20px_rgba(197,255,74,0.2)]"
             >
-              <span>{t('landing.community.explore_all', 'Explore All Verified Community Profiles')}</span>
+              <span>
+                {t('landing.community.explore_all', 'Explore All Verified Community Profiles')}
+              </span>
               <span aria-hidden="true">→</span>
             </Link>
           </Magnet>

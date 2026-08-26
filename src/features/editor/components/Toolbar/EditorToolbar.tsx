@@ -559,7 +559,9 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
                   title={`Profile @${session.username}`}
                 >
                   <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
-                  <span className="truncate max-w-[65px] font-inter-tight">@{session.username}</span>
+                  <span className="truncate max-w-[65px] font-inter-tight">
+                    @{session.username}
+                  </span>
                 </Link>
                 <span className="h-4 w-px bg-graphite/80 shrink-0" />
                 <button

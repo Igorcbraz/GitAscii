@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  ArrowRight,
-  Compass,
-  Cpu,
-  Layers,
-  Moon,
-  ShieldCheck,
-  Sparkles,
-  Zap,
-} from 'lucide-react'
+import { ArrowRight, Compass, Cpu, Layers, Moon, ShieldCheck, Sparkles, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import React from 'react'

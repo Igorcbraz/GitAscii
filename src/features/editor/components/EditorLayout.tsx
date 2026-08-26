@@ -383,7 +383,9 @@ export function EditorLayout({
 
   if (showOnboarding && githubData) {
     return (
-      <div className={`${embedded ? 'absolute inset-0 z-20' : 'fixed inset-0'} bg-carbon overflow-hidden font-inter-tight`}>
+      <div
+        className={`${embedded ? 'absolute inset-0 z-20' : 'fixed inset-0'} bg-carbon overflow-hidden font-inter-tight`}
+      >
         <div className="absolute inset-0 z-0 pointer-events-none">
           <KineticGrid className="absolute inset-0 w-full h-full pointer-events-auto" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.88)_0%,rgba(6,6,6,0.55)_55%,rgba(6,6,6,0.15)_100%)] pointer-events-none" />
@@ -507,7 +509,9 @@ export function EditorLayout({
   const isOwner = session && session.username.toLowerCase() === username.toLowerCase()
 
   return (
-    <div className={`${embedded ? 'w-full h-full min-h-[760px] relative' : 'h-screen w-screen'} flex flex-col overflow-hidden bg-carbon`}>
+    <div
+      className={`${embedded ? 'w-full h-full min-h-[760px] relative' : 'h-screen w-screen'} flex flex-col overflow-hidden bg-carbon`}
+    >
       <EditorToolbar embedded={embedded} />
       {!isOwner && !embedded && (
         <div className="bg-onyx border-b border-graphite px-4 py-2 flex items-center justify-between text-note text-ash font-inter-tight select-none">

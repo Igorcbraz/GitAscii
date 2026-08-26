@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  Flame,
-  Globe,
-  Layers,
-  Sparkles,
-  Zap,
-} from 'lucide-react'
+import { Flame, Globe, Layers, Sparkles, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import React, { useMemo, useState } from 'react'
@@ -420,7 +414,8 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 text-signal-lime font-jetbrains-mono text-[11px] uppercase tracking-[0.2em]">
             <Layers className="w-3.5 h-3.5" />
             <ShinyText speed={3}>
-              [ <AnimatedCounter value={count} suffix="+" /> {t('landing.widgets.badge_suffix', 'LIVE SVG WIDGETS')} ]
+              [ <AnimatedCounter value={count} suffix="+" />{' '}
+              {t('landing.widgets.badge_suffix', 'LIVE SVG WIDGETS')} ]
             </ShinyText>
           </div>
 
@@ -461,7 +456,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                 : 'border-graphite bg-carbon text-ash hover:text-chalk hover:border-ash/60'
             }`}
           >
-            <Flame size={13} className={activeGroup === 'featured' ? 'text-carbon' : 'text-signal-lime'} />
+            <Flame
+              size={13}
+              className={activeGroup === 'featured' ? 'text-carbon' : 'text-signal-lime'}
+            />
             <span>{t('landing.widgets.tab_featured', '1. Featured')}</span>
           </button>
 
@@ -473,7 +471,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                 : 'border-graphite bg-carbon text-ash hover:text-chalk hover:border-ash/60'
             }`}
           >
-            <Zap size={13} className={activeGroup === 'native' ? 'text-carbon' : 'text-signal-lime'} />
+            <Zap
+              size={13}
+              className={activeGroup === 'native' ? 'text-carbon' : 'text-signal-lime'}
+            />
             <span>{t('landing.widgets.tab_native', '2. GitAscii Native')}</span>
           </button>
 
@@ -485,7 +486,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                 : 'border-graphite bg-carbon text-ash hover:text-chalk hover:border-ash/60'
             }`}
           >
-            <Sparkles size={13} className={activeGroup === 'categories' ? 'text-carbon' : 'text-signal-lime'} />
+            <Sparkles
+              size={13}
+              className={activeGroup === 'categories' ? 'text-carbon' : 'text-signal-lime'}
+            />
             <span>{t('landing.widgets.tab_categories', '3. Thematic Categories')}</span>
           </button>
 
@@ -497,7 +501,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                 : 'border-graphite bg-carbon text-ash hover:text-chalk hover:border-ash/60'
             }`}
           >
-            <Globe size={13} className={activeGroup === 'external' ? 'text-carbon' : 'text-violet-400'} />
+            <Globe
+              size={13}
+              className={activeGroup === 'external' ? 'text-carbon' : 'text-violet-400'}
+            />
             <span>{t('landing.widgets.tab_external', '4. External & Community')}</span>
           </button>
         </div>
@@ -520,9 +527,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                 }}
                 className={widget.spanClass}
               >
-                <SpotlightCard
-                  className="p-5 sm:p-6 flex flex-col justify-between space-y-4 transition-all duration-300 group shadow-lg hover:shadow-[0_0_25px_rgba(197,255,74,0.1)] border-graphite h-full"
-                >
+                <SpotlightCard className="p-5 sm:p-6 flex flex-col justify-between space-y-4 transition-all duration-300 group shadow-lg hover:shadow-[0_0_25px_rgba(197,255,74,0.1)] border-graphite h-full">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-graphite/60 pb-2.5">
                       <div>
@@ -592,7 +597,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
               {t('landing.widgets.cat2_title', '2. GitAscii Native')}
             </span>
             <p className="text-ash">
-              {t('landing.widgets.cat2_desc', 'Stats Card, Languages Bar, ASCII Matrix, Tech Stack, Neofetch')}
+              {t(
+                'landing.widgets.cat2_desc',
+                'Stats Card, Languages Bar, ASCII Matrix, Tech Stack, Neofetch'
+              )}
             </p>
           </div>
           <div className="space-y-1">
@@ -600,7 +608,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
               {t('landing.widgets.cat3_title', '3. Categories')}
             </span>
             <p className="text-ash">
-              {t('landing.widgets.cat3_desc', 'ASCII Premium, ASCII Profile, GodProfile, Control Plane, Codeweb, rugbedbugg')}
+              {t(
+                'landing.widgets.cat3_desc',
+                'ASCII Premium, ASCII Profile, GodProfile, Control Plane, Codeweb, rugbedbugg'
+              )}
             </p>
           </div>
           <div className="space-y-1">
@@ -608,7 +619,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
               {t('landing.widgets.cat4_title', '4. Community')}
             </span>
             <p className="text-ash">
-              {t('landing.widgets.cat4_desc', 'Snake Game, Trophies, Profile Views, External Modules')}
+              {t(
+                'landing.widgets.cat4_desc',
+                'Snake Game, Trophies, Profile Views, External Modules'
+              )}
             </p>
           </div>
         </motion.div>

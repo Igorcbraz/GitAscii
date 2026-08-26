@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  GitFork,
-  Layers,
-  LayoutTemplate,
-  Palette,
-} from 'lucide-react'
+import { GitFork, Layers, LayoutTemplate, Palette } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import React, { useMemo, useState } from 'react'
@@ -16,7 +11,11 @@ import ShinyText from '@/components/ui/ShinyText'
 import SpotlightCard from '@/components/ui/SpotlightCard'
 import { EXTERNAL_LINKS } from '@/constants'
 import { renderSvg } from '@/engine/core/SVGEngine'
-import { createConfiguration, TEMPLATE_PRESETS, type TemplatePreset } from '@/engine/core/TemplateRenderer'
+import {
+  createConfiguration,
+  TEMPLATE_PRESETS,
+  type TemplatePreset,
+} from '@/engine/core/TemplateRenderer'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
 
@@ -67,7 +66,8 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 text-signal-lime font-jetbrains-mono text-[11px] uppercase tracking-[0.2em]">
             <LayoutTemplate className="w-3.5 h-3.5" />
             <ShinyText speed={3}>
-              [ <AnimatedCounter value={count} suffix="+" /> {t('landing.templates.badge_suffix', 'PRODUCTION TEMPLATES')} ]
+              [ <AnimatedCounter value={count} suffix="+" />{' '}
+              {t('landing.templates.badge_suffix', 'PRODUCTION TEMPLATES')} ]
             </ShinyText>
           </div>
 
@@ -103,9 +103,13 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
                         [ tpl://{activeTemplate.id} ]
                       </span>
                       <span className="px-2 py-0.5 bg-carbon border border-graphite rounded-none font-jetbrains-mono text-[10px] uppercase text-ash">
-                        {t('landing.templates.widgets_placed', `${activeTemplate.layout.length} Widgets Placed`, {
-                          count: String(activeTemplate.layout.length),
-                        })}
+                        {t(
+                          'landing.templates.widgets_placed',
+                          `${activeTemplate.layout.length} Widgets Placed`,
+                          {
+                            count: String(activeTemplate.layout.length),
+                          }
+                        )}
                       </span>
                     </div>
                     <h3 className="text-xl sm:text-2xl font-semibold text-white tracking-tight mt-1">
@@ -176,16 +180,21 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
                   ))}
                   {activeTemplate.layout.length > 6 && (
                     <span className="px-2 py-0.5 border border-graphite rounded-none font-jetbrains-mono text-[9px] uppercase text-ash bg-carbon">
-                      {t('landing.templates.more_widgets', `+${activeTemplate.layout.length - 6} more`, {
-                        count: String(activeTemplate.layout.length - 6),
-                      })}
+                      {t(
+                        'landing.templates.more_widgets',
+                        `+${activeTemplate.layout.length - 6} more`,
+                        {
+                          count: String(activeTemplate.layout.length - 6),
+                        }
+                      )}
                     </span>
                   )}
                 </div>
 
                 <div className="pt-3 border-t border-graphite/60 flex flex-wrap items-center justify-between gap-3">
                   <span className="font-jetbrains-mono text-[11px] text-ash">
-                    {t('landing.templates.engine_layout', 'Engine Layout:')} <code className="text-signal-lime">{activeTemplate.id}.json</code>
+                    {t('landing.templates.engine_layout', 'Engine Layout:')}{' '}
+                    <code className="text-signal-lime">{activeTemplate.id}.json</code>
                   </span>
                   <span className="font-jetbrains-mono text-[10px] text-signal-lime uppercase">
                     {t('landing.templates.vector_mode', '[ Pixel-Perfect Vector Mode ]')}
@@ -205,9 +214,13 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
             <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase">
               <span>{t('landing.templates.presets_header', 'Layout Presets')}</span>
               <span>
-                {t('landing.templates.available_studio', `${templateList.length} Available in Studio`, {
-                  count: String(templateList.length),
-                })}
+                {t(
+                  'landing.templates.available_studio',
+                  `${templateList.length} Available in Studio`,
+                  {
+                    count: String(templateList.length),
+                  }
+                )}
               </span>
             </div>
 
@@ -285,7 +298,10 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
                       {t('landing.templates.contribute', 'Contribute a Template!')}
                     </h4>
                     <p className="font-inter-tight text-[10px] text-ash leading-tight mt-0.5">
-                      {t('landing.templates.contribute_desc', 'Submit your JSON preset via GitHub Pull Request')}
+                      {t(
+                        'landing.templates.contribute_desc',
+                        'Submit your JSON preset via GitHub Pull Request'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -304,9 +320,13 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
               className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 bg-signal-lime hover:bg-signal-lime-hover text-carbon font-inter-tight font-semibold text-[14px] uppercase tracking-wider transition-colors shadow-[0_0_20px_rgba(197,255,74,0.2)]"
             >
               <span>
-                {t('landing.templates.explore_all', `Explore Complete Template Directory (${count}+)`, {
-                  count: String(count),
-                })}
+                {t(
+                  'landing.templates.explore_all',
+                  `Explore Complete Template Directory (${count}+)`,
+                  {
+                    count: String(count),
+                  }
+                )}
               </span>
               <span aria-hidden="true">→</span>
             </Link>

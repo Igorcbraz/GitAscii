@@ -12,29 +12,15 @@ import { TractionBar } from '@/features/landing/components/TractionBar'
 const InteractiveEditorDemo = dynamic(
   () => import('@/features/landing/components/InteractiveEditorDemo')
 )
-const CommunityProfiles = dynamic(
-  () => import('@/features/landing/components/CommunityProfiles')
-)
-const TemplatesPreview = dynamic(
-  () => import('@/features/landing/components/TemplatesPreview')
-)
-const WidgetsShowcase = dynamic(
-  () => import('@/features/landing/components/WidgetsShowcase')
-)
-const EcosystemHub = dynamic(
-  () => import('@/features/landing/components/EcosystemHub')
-)
-const ComparisonTable = dynamic(
-  () => import('@/features/landing/components/ComparisonTable')
-)
-const FAQ = dynamic(
-  () => import('@/features/landing/components/FAQ').then((mod) => mod.FAQ)
-)
-const FinalCTA = dynamic(
-  () => import('@/features/landing/components/FinalCTA')
-)
-const Footer = dynamic(
-  () => import('@/features/landing/components/Footer').then((mod) => mod.Footer)
+const CommunityProfiles = dynamic(() => import('@/features/landing/components/CommunityProfiles'))
+const TemplatesPreview = dynamic(() => import('@/features/landing/components/TemplatesPreview'))
+const WidgetsShowcase = dynamic(() => import('@/features/landing/components/WidgetsShowcase'))
+const EcosystemHub = dynamic(() => import('@/features/landing/components/EcosystemHub'))
+const ComparisonTable = dynamic(() => import('@/features/landing/components/ComparisonTable'))
+const FAQ = dynamic(() => import('@/features/landing/components/FAQ').then((mod) => mod.FAQ))
+const FinalCTA = dynamic(() => import('@/features/landing/components/FinalCTA'))
+const Footer = dynamic(() =>
+  import('@/features/landing/components/Footer').then((mod) => mod.Footer)
 )
 
 export async function generateMetadata({
@@ -131,10 +117,7 @@ export async function generateMetadata({
 }
 
 export default async function LandingPage() {
-  const [metrics, storedProfiles] = await Promise.all([
-    fetchLandingMetrics(),
-    getStoredProfiles(),
-  ])
+  const [metrics, storedProfiles] = await Promise.all([fetchLandingMetrics(), getStoredProfiles()])
 
   return (
     <main className="min-h-screen relative bg-carbon">

@@ -20,12 +20,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useMemo, useState } from 'react'
 
-import {
-  APP_URL,
-  EXTERNAL_LINKS,
-  WIDGET_IDS,
-  type WidgetId,
-} from '@/constants'
+import { APP_URL, EXTERNAL_LINKS, WIDGET_IDS, type WidgetId } from '@/constants'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
@@ -413,7 +408,8 @@ export function LandingMiniEditor({ readmesCount = 12400 }: { readmesCount?: num
                 [ SANDBOX PREVIEW ]
               </span>
               <span className="text-pearl">
-                Testing as <strong className="text-chalk">@Igorcbraz</strong>. Connect your GitHub account in the Hero to sync in 1 click.
+                Testing as <strong className="text-chalk">@Igorcbraz</strong>. Connect your GitHub
+                account in the Hero to sync in 1 click.
               </span>
             </div>
 
@@ -422,7 +418,11 @@ export function LandingMiniEditor({ readmesCount = 12400 }: { readmesCount?: num
                 onClick={handleCopy}
                 className="hover:text-signal-lime flex items-center gap-1 cursor-pointer transition-colors"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-signal-lime" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-signal-lime" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
                 <span>{copied ? 'Copied Snippet' : 'Copy Markdown'}</span>
               </button>
             </div>
@@ -535,7 +535,10 @@ export function LandingMiniEditor({ readmesCount = 12400 }: { readmesCount?: num
                   <div
                     suppressHydrationWarning
                     className="w-full max-w-[760px] shadow-2xl transition-all duration-300 relative"
-                    style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
+                    style={{
+                      transform: `scale(${zoomLevel / 100})`,
+                      transformOrigin: 'top center',
+                    }}
                     dangerouslySetInnerHTML={{ __html: svgMarkup }}
                   />
                 ) : (
@@ -645,7 +648,8 @@ export function LandingMiniEditor({ readmesCount = 12400 }: { readmesCount?: num
                     Active Widget
                   </span>
                   <div className="font-inter-tight font-medium text-[13px] text-chalk">
-                    {CATALOG_WIDGETS.find((w) => `demo-${w.id}` === selectedInstanceId)?.name || 'Stats Card'}
+                    {CATALOG_WIDGETS.find((w) => `demo-${w.id}` === selectedInstanceId)?.name ||
+                      'Stats Card'}
                   </div>
                   <p className="font-inter-tight text-[11px] text-ash">
                     SVG vectors re-render on the fly at 60fps on every configuration update.

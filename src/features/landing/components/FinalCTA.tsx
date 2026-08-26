@@ -61,9 +61,7 @@ export function FinalCTA({ metrics = DEFAULT_LANDING_METRICS }: FinalCTAProps) {
         className="relative z-10 max-w-4xl mx-auto text-center space-y-8 flex flex-col items-center"
       >
         <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
-          <ShinyText speed={3}>
-            {t('landing.final_cta.eyebrow', '[ GET STARTED TODAY ]')}
-          </ShinyText>
+          <ShinyText speed={3}>{t('landing.final_cta.eyebrow', '[ GET STARTED TODAY ]')}</ShinyText>
         </span>
 
         <h2 className="font-pt-serif font-light text-4xl sm:text-5xl lg:text-6xl leading-[0.95] tracking-[-0.02em] text-chalk max-w-3xl">

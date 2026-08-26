@@ -139,12 +139,8 @@ export function ComparisonTable() {
                       <td className="py-4 px-6 bg-signal-lime/5 border-x border-graphite font-jetbrains-mono">
                         {renderBadge(row.gitascii)}
                       </td>
-                      <td className="py-4 px-6 font-jetbrains-mono">
-                        {renderBadge(row.readme)}
-                      </td>
-                      <td className="py-4 px-6 font-jetbrains-mono">
-                        {renderBadge(row.gprm)}
-                      </td>
+                      <td className="py-4 px-6 font-jetbrains-mono">{renderBadge(row.readme)}</td>
+                      <td className="py-4 px-6 font-jetbrains-mono">{renderBadge(row.gprm)}</td>
                     </motion.tr>
                   )
                 })}
@@ -154,7 +150,10 @@ export function ComparisonTable() {
 
           <div className="p-4 sm:p-5 bg-carbon border-t border-graphite flex flex-wrap items-center justify-between gap-3">
             <span className="font-jetbrains-mono text-[12px] text-ash">
-              {t('landing.comparison.footer_desc', 'Detailed technical breakdown and benchmark analysis:')}
+              {t(
+                'landing.comparison.footer_desc',
+                'Detailed technical breakdown and benchmark analysis:'
+              )}
             </span>
 
             <Link

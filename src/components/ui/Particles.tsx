@@ -189,7 +189,11 @@ export function Particles({
         const { w, h } = canvasSize.current
         const x = e.clientX - rect.left - w / 2
         const y = e.clientY - rect.top - h / 2
-        const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom
+        const inside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
         if (inside) {
           mousePosition.current.x = x
           mousePosition.current.y = y

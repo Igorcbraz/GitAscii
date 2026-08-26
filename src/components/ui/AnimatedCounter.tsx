@@ -86,9 +86,7 @@ export function AnimatedCounter({
     }
   }, [value, duration, delay])
 
-  const formatted = formatter
-    ? formatter(displayValue)
-    : displayValue.toLocaleString('en-US')
+  const formatted = formatter ? formatter(displayValue) : displayValue.toLocaleString('en-US')
 
   return (
     <span ref={ref} className={`tabular-nums inline-block tracking-tight ${className}`}>
@@ -98,5 +96,3 @@ export function AnimatedCounter({
     </span>
   )
 }
-
-

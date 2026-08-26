@@ -134,7 +134,11 @@ function ScanLine() {
   )
 }
 
-export function EditorLoadingScreen({ username, steps, embedded = false }: EditorLoadingScreenProps) {
+export function EditorLoadingScreen({
+  username,
+  steps,
+  embedded = false,
+}: EditorLoadingScreenProps) {
   const { t } = useI18n()
   const typedUser = useTyped(`@${username}`, 32)
 
@@ -159,7 +163,9 @@ export function EditorLoadingScreen({ username, steps, embedded = false }: Edito
         }
       `}</style>
 
-      <div className={`${embedded ? 'absolute inset-0 z-20' : 'fixed inset-0'} bg-carbon overflow-hidden font-inter-tight`}>
+      <div
+        className={`${embedded ? 'absolute inset-0 z-20' : 'fixed inset-0'} bg-carbon overflow-hidden font-inter-tight`}
+      >
         <div className="absolute inset-0 z-0 pointer-events-none">
           <KineticGrid className="absolute inset-0 w-full h-full pointer-events-auto" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.92)_0%,rgba(6,6,6,0.65)_55%,rgba(6,6,6,0.2)_100%)] pointer-events-none" />

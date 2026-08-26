@@ -60,9 +60,7 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       aria-label="GitAscii Traction Metrics"
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 divide-y sm:divide-y-0 divide-graphite/40 sm:divide-x sm:divide-graphite/40"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 divide-y sm:divide-y-0 divide-graphite/40 sm:divide-x sm:divide-graphite/40">
           {stats.map((stat, i) => {
             const Icon = stat.icon
             return (
@@ -75,7 +73,10 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
                 } ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}
               >
                 <div className="flex items-center gap-2 mb-2 text-signal-lime group-hover:text-chalk transition-colors">
-                  <Icon className="w-4 h-4 opacity-90 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-200" aria-hidden="true" />
+                  <Icon
+                    className="w-4 h-4 opacity-90 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-200"
+                    aria-hidden="true"
+                  />
                   <span className="font-jetbrains-mono text-[10px] tracking-[0.25em] uppercase text-ash group-hover:text-signal-lime transition-colors">
                     [ 0{i + 1} ]
                   </span>

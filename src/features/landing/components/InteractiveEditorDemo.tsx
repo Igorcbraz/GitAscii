@@ -115,7 +115,10 @@ export function InteractiveEditorDemo({
 
             <div className="flex items-center gap-2">
               <span className="text-caption text-ash font-jetbrains-mono">
-                {t('landing.editor_demo.hint', 'Try dragging widgets, tweaking props & changing themes')}
+                {t(
+                  'landing.editor_demo.hint',
+                  'Try dragging widgets, tweaking props & changing themes'
+                )}
               </span>
             </div>
           </div>
@@ -177,4 +180,3 @@ export function InteractiveEditorDemo({
 }
 
 export default InteractiveEditorDemo
-

@@ -37,9 +37,7 @@ export function FAQ() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 text-signal-lime font-jetbrains-mono text-[11px] uppercase tracking-[0.2em]">
             <HelpCircle className="w-3.5 h-3.5" />
-            <ShinyText speed={3}>
-              {t('landing.faq.eyebrow', '[ QUESTIONS & ANSWERS ]')}
-            </ShinyText>
+            <ShinyText speed={3}>{t('landing.faq.eyebrow', '[ QUESTIONS & ANSWERS ]')}</ShinyText>
           </div>
           <h2 className="text-chalk font-pt-serif font-light text-heading leading-[0.9] tracking-[-0.02em]">
             {t('landing.faq.title_normal', 'Frequently Asked ')}
@@ -132,4 +130,3 @@ export function FAQ() {
     </section>
   )
 }
-
