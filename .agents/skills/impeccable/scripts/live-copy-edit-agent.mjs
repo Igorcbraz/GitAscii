@@ -7,29 +7,31 @@
  * helper to ask Codex/Claude to edit true source files.
  */
 
-import { spawn, spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { createRequire } from 'node:module';
+import { spawn, spawnSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { createRequire } from 'node:module'
 
-const DEFAULT_TIMEOUT_MS = 60_000;
-const require = createRequire(import.meta.url);
+const DEFAULT_TIMEOUT_MS = 60_000
+const require = createRequire(import.meta.url)
 
 export function buildCopyEditBatchPrompt(batch, { cwd = process.cwd() } = {}) {
-  const repairLines = batch?.repair ? [
-    '',
-    'Repair mode:',
-    '- The previous Apply attempt changed source, but validation failed.',
-    '- Do not restart from the old source. Inspect and repair the current source files.',
-    '- Fix the validation failures below while preserving all successfully applied visible copy edits.',
-    '- If a failure says source_verification_failed, make the current source prove each applied op: the newText must appear at a plausible hinted, candidate, or coupled source location.',
-    '- If the old visible text is still present only because newText contains it, keep the valid append/edit and repair only missing source evidence.',
-    '- If failures or candidates show edited text is also a lookup key, update coupled count, animation, icon, image, asset, style, or metadata keys in the current source, or fail that entry without partial edits.',
-    '- Keep failed and notes as arrays.',
-    '- Return the same canonical JSON shape after repair.',
-    JSON.stringify(batch.repair, null, 2),
-  ] : [];
+  const repairLines = batch?.repair
+    ? [
+        '',
+        'Repair mode:',
+        '- The previous Apply attempt changed source, but validation failed.',
+        '- Do not restart from the old source. Inspect and repair the current source files.',
+        '- Fix the validation failures below while preserving all successfully applied visible copy edits.',
+        '- If a failure says source_verification_failed, make the current source prove each applied op: the newText must appear at a plausible hinted, candidate, or coupled source location.',
+        '- If the old visible text is still present only because newText contains it, keep the valid append/edit and repair only missing source evidence.',
+        '- If failures or candidates show edited text is also a lookup key, update coupled count, animation, icon, image, asset, style, or metadata keys in the current source, or fail that entry without partial edits.',
+        '- Keep failed and notes as arrays.',
+        '- Return the same canonical JSON shape after repair.',
+        JSON.stringify(batch.repair, null, 2),
+      ]
+    : []
   return [
     'You are the Impeccable staged copy-edit batch applier.',
     '',
@@ -81,124 +83,135 @@ export function buildCopyEditBatchPrompt(batch, { cwd = process.cwd() } = {}) {
     '',
     'Staged copy-edit batch:',
     JSON.stringify(compactBatchForPrompt(batch), null, 2),
-  ].join('\n');
+  ].join('\n')
 }
 
 export function parseCopyEditBatchResult(text) {
-  const parsed = parseCopyEditAgentResult(text);
+  const parsed = parseCopyEditAgentResult(text)
   if (parsed?.status === 'done' || parsed?.status === 'partial' || parsed?.status === 'error') {
-    return normalizeBatchResult(parsed);
+    return normalizeBatchResult(parsed)
   }
-  return null;
+  return null
 }
 
 export async function runCopyEditBatchAgent(batch, opts = {}) {
-  const cwd = opts.cwd || process.cwd();
-  const env = opts.env || process.env;
-  const provider = opts.provider || chooseCopyEditAgent({ env, chatAvailable: opts.chatAvailable });
+  const cwd = opts.cwd || process.cwd()
+  const env = opts.env || process.env
+  const provider = opts.provider || chooseCopyEditAgent({ env, chatAvailable: opts.chatAvailable })
   if (provider === 'mock') {
-    const delayMs = Number(env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_DELAY_MS || 0);
-    if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
-    return mockBatchResult(batch, env, cwd);
+    const delayMs = Number(env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_DELAY_MS || 0)
+    if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs))
+    return mockBatchResult(batch, env, cwd)
   }
   if (provider === 'chat') {
     if (typeof opts.applyBatchToSource !== 'function') {
-      throw new Error('chat provider requires applyBatchToSource callback');
+      throw new Error('chat provider requires applyBatchToSource callback')
     }
-    const raw = await opts.applyBatchToSource(batch, { repair: batch?.repair || null });
-    return normalizeBatchResult(raw || {});
+    const raw = await opts.applyBatchToSource(batch, { repair: batch?.repair || null })
+    return normalizeBatchResult(raw || {})
   }
   if (!provider) {
-    throw new Error(describeNoProviderError({ env }));
+    throw new Error(describeNoProviderError({ env }))
   }
 
-  const prompt = buildCopyEditBatchPrompt(batch, { cwd });
-  const outDir = opts.outDir || fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-copy-batch-'));
-  fs.mkdirSync(outDir, { recursive: true });
-  const resultPath = path.join(outDir, 'result.json');
-  const logPath = path.join(outDir, 'agent.log');
+  const prompt = buildCopyEditBatchPrompt(batch, { cwd })
+  const outDir = opts.outDir || fs.mkdtempSync(path.join(os.tmpdir(), 'impeccable-copy-batch-'))
+  fs.mkdirSync(outDir, { recursive: true })
+  const resultPath = path.join(outDir, 'result.json')
+  const logPath = path.join(outDir, 'agent.log')
 
   if (provider === 'codex') {
-    await runCodex(prompt, { cwd, env, resultPath, logPath, timeoutMs: opts.timeoutMs });
+    await runCodex(prompt, { cwd, env, resultPath, logPath, timeoutMs: opts.timeoutMs })
   } else if (provider === 'claude') {
-    await runClaude(prompt, { cwd, env, resultPath, logPath, timeoutMs: opts.timeoutMs });
+    await runClaude(prompt, { cwd, env, resultPath, logPath, timeoutMs: opts.timeoutMs })
   } else {
-    throw new Error(`Unsupported live copy-edit AI runner: ${provider}`);
+    throw new Error(`Unsupported live copy-edit AI runner: ${provider}`)
   }
 
-  const output = fs.existsSync(resultPath) ? fs.readFileSync(resultPath, 'utf-8') : '';
-  const parsed = parseCopyEditBatchResult(output);
-  if (parsed) return parsed;
+  const output = fs.existsSync(resultPath) ? fs.readFileSync(resultPath, 'utf-8') : ''
+  const parsed = parseCopyEditBatchResult(output)
+  if (parsed) return parsed
 
-  const tail = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf-8').slice(-1200) : output.slice(-1200);
-  throw new Error('AI copy-edit batch did not return a valid completion payload. ' + tail.trim());
+  const tail = fs.existsSync(logPath)
+    ? fs.readFileSync(logPath, 'utf-8').slice(-1200)
+    : output.slice(-1200)
+  throw new Error('AI copy-edit batch did not return a valid completion payload. ' + tail.trim())
 }
 
 export function runCopyEditPostApplyChecks({ cwd = process.cwd(), files = [] } = {}) {
-  const failures = [];
-  const warnings = [];
-  const uniqueFiles = [...new Set((files || []).filter((file) => typeof file === 'string' && file.trim()))];
+  const failures = []
+  const warnings = []
+  const uniqueFiles = [
+    ...new Set((files || []).filter((file) => typeof file === 'string' && file.trim())),
+  ]
   for (const relativeFile of uniqueFiles) {
-    const file = path.resolve(cwd, relativeFile);
+    const file = path.resolve(cwd, relativeFile)
     if (!isPathInsideOrEqual(cwd, file) || !fs.existsSync(file)) {
-      warnings.push({ file: relativeFile, reason: 'file_missing_or_outside_cwd' });
-      continue;
+      warnings.push({ file: relativeFile, reason: 'file_missing_or_outside_cwd' })
+      continue
     }
-    let content = '';
-    try { content = fs.readFileSync(file, 'utf-8'); } catch (err) {
-      failures.push({ file: relativeFile, reason: 'read_failed', message: err.message });
-      continue;
+    let content = ''
+    try {
+      content = fs.readFileSync(file, 'utf-8')
+    } catch (err) {
+      failures.push({ file: relativeFile, reason: 'read_failed', message: err.message })
+      continue
     }
-    const markerMatch = findLeftoverImpeccableMarker(content);
-    if (markerMatch) failures.push({ file: relativeFile, reason: 'leftover_impeccable_marker', marker: markerMatch });
+    const markerMatch = findLeftoverImpeccableMarker(content)
+    if (markerMatch)
+      failures.push({
+        file: relativeFile,
+        reason: 'leftover_impeccable_marker',
+        marker: markerMatch,
+      })
     if (/\.json$/.test(relativeFile)) {
       try {
-        JSON.parse(content);
+        JSON.parse(content)
       } catch (err) {
         failures.push({
           file: relativeFile,
           reason: 'invalid_json',
           message: err.message || String(err),
-        });
+        })
       }
     }
-    const syntaxCheck = checkFrameworkSourceSyntax(relativeFile, content);
-    if (syntaxCheck?.failure) failures.push(syntaxCheck.failure);
-    if (syntaxCheck?.warning) warnings.push(syntaxCheck.warning);
+    const syntaxCheck = checkFrameworkSourceSyntax(relativeFile, content)
+    if (syntaxCheck?.failure) failures.push(syntaxCheck.failure)
+    if (syntaxCheck?.warning) warnings.push(syntaxCheck.warning)
     if (/\.(mjs|cjs|js)$/.test(relativeFile)) {
-      const check = spawnSync(process.execPath, ['--check', file], { cwd, encoding: 'utf-8' });
+      const check = spawnSync(process.execPath, ['--check', file], { cwd, encoding: 'utf-8' })
       if (check.status !== 0) {
         failures.push({
           file: relativeFile,
           reason: 'invalid_js',
           message: (check.stderr || check.stdout || '').trim(),
-        });
+        })
       }
     }
   }
-  const validation = runManualEditValidationScript(cwd);
-  if (validation?.failure) failures.push(validation.failure);
-  if (validation?.warning) warnings.push(validation.warning);
-  return { ok: failures.length === 0, failures, warnings };
+  const validation = runManualEditValidationScript(cwd)
+  if (validation?.failure) failures.push(validation.failure)
+  if (validation?.warning) warnings.push(validation.warning)
+  return { ok: failures.length === 0, failures, warnings }
 }
 
 function checkFrameworkSourceSyntax(relativeFile, content) {
-  if (!/\.(jsx|tsx|ts)$/.test(relativeFile)) return null;
-  let parser;
+  if (!/\.(jsx|tsx|ts)$/.test(relativeFile)) return null
+  let parser
   try {
-    parser = require('@babel/parser');
+    parser = require('@babel/parser')
   } catch {
-    return { warning: { file: relativeFile, reason: 'syntax_parser_unavailable' } };
+    return { warning: { file: relativeFile, reason: 'syntax_parser_unavailable' } }
   }
-  const plugins = ['jsx'];
-  if (/\.(ts|tsx)$/.test(relativeFile)) plugins.push('typescript');
+  const plugins = ['jsx']
+  if (/\.(ts|tsx)$/.test(relativeFile)) plugins.push('typescript')
   try {
     parser.parse(content, {
       sourceType: 'module',
       plugins,
       errorRecovery: false,
-    });
-    return null;
+    })
+    return null
   } catch (err) {
     return {
       failure: {
@@ -206,56 +219,58 @@ function checkFrameworkSourceSyntax(relativeFile, content) {
         reason: 'invalid_source_syntax',
         message: err.message || String(err),
       },
-    };
+    }
   }
 }
 
 function findLeftoverImpeccableMarker(content) {
-  const commentMarker = content.match(/^\s*(?:<!--|\{\/\*)\s*impeccable-carbonize-(?:start|end)\b|^\s*(?:<!--|\{\/\*)\s*impeccable-variants-(?:start|end)\b/m);
-  if (commentMarker) return commentMarker[0];
+  const commentMarker = content.match(
+    /^\s*(?:<!--|\{\/\*)\s*impeccable-carbonize-(?:start|end)\b|^\s*(?:<!--|\{\/\*)\s*impeccable-variants-(?:start|end)\b/m
+  )
+  if (commentMarker) return commentMarker[0]
 
-  const attrPattern = /\bdata-impeccable-(?:variants?|original-text|editable|text-wrap)\s*=/g;
+  const attrPattern = /\bdata-impeccable-(?:variants?|original-text|editable|text-wrap)\s*=/g
   for (const line of content.split(/\r?\n/)) {
-    attrPattern.lastIndex = 0;
-    let match;
+    attrPattern.lastIndex = 0
+    let match
     while ((match = attrPattern.exec(line))) {
-      if (!isInsideQuotedLiteral(line, match.index)) return match[0];
+      if (!isInsideQuotedLiteral(line, match.index)) return match[0]
     }
   }
-  return null;
+  return null
 }
 
 function isInsideQuotedLiteral(line, index) {
-  let quote = null;
-  let escaped = false;
+  let quote = null
+  let escaped = false
   for (let i = 0; i < index; i++) {
-    const ch = line[i];
+    const ch = line[i]
     if (escaped) {
-      escaped = false;
-      continue;
+      escaped = false
+      continue
     }
     if (ch === '\\') {
-      escaped = true;
-      continue;
+      escaped = true
+      continue
     }
     if (quote) {
-      if (ch === quote) quote = null;
-      continue;
+      if (ch === quote) quote = null
+      continue
     }
-    if (ch === '"' || ch === "'" || ch === '`') quote = ch;
+    if (ch === '"' || ch === "'" || ch === '`') quote = ch
   }
-  return quote !== null;
+  return quote !== null
 }
 
 function runManualEditValidationScript(cwd) {
-  const script = readManualEditValidationScript(cwd);
-  if (!script) return null;
+  const script = readManualEditValidationScript(cwd)
+  if (!script) return null
   const validation = spawnSync(script, {
     cwd,
     encoding: 'utf-8',
     shell: true,
     timeout: 30_000,
-  });
+  })
   if (validation.error) {
     return {
       failure: {
@@ -263,7 +278,7 @@ function runManualEditValidationScript(cwd) {
         reason: 'manual_edit_validation_failed',
         message: validation.error.message || String(validation.error),
       },
-    };
+    }
   }
   if (validation.status !== 0) {
     return {
@@ -272,20 +287,20 @@ function runManualEditValidationScript(cwd) {
         reason: 'manual_edit_validation_failed',
         message: [validation.stderr, validation.stdout].filter(Boolean).join('\n').trim(),
       },
-    };
+    }
   }
-  return null;
+  return null
 }
 
 function readManualEditValidationScript(cwd) {
-  const pkgPath = path.join(cwd, 'package.json');
-  if (!fs.existsSync(pkgPath)) return null;
+  const pkgPath = path.join(cwd, 'package.json')
+  if (!fs.existsSync(pkgPath)) return null
   try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    const script = pkg?.scripts?.['impeccable:manual-edit-validate'];
-    return typeof script === 'string' && script.trim() ? script : null;
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    const script = pkg?.scripts?.['impeccable:manual-edit-validate']
+    return typeof script === 'string' && script.trim() ? script : null
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -301,7 +316,7 @@ function compactBatchForPrompt(batch) {
       ops: (entry.ops || []).map(compactBatchOp),
     })),
     candidates: batch?.candidates || [],
-  };
+  }
 }
 
 function compactBatchOp(op) {
@@ -317,14 +332,16 @@ function compactBatchOp(op) {
     deleted: op.deleted === true || undefined,
     sourceHint: op.sourceHint,
     leaf: compactContextForBatch(op.leaf),
-    nearbyEditableTexts: Array.isArray(op.nearbyEditableTexts) ? op.nearbyEditableTexts.slice(0, 8) : [],
+    nearbyEditableTexts: Array.isArray(op.nearbyEditableTexts)
+      ? op.nearbyEditableTexts.slice(0, 8)
+      : [],
     container: compactContextForBatch(op.container),
     contextHints: Array.isArray(op.contextHints) ? op.contextHints.slice(0, 12) : [],
-  };
+  }
 }
 
 function compactContextForBatch(value) {
-  if (!value || typeof value !== 'object') return value || null;
+  if (!value || typeof value !== 'object') return value || null
   return {
     ref: value.ref,
     tagName: value.tagName,
@@ -332,37 +349,48 @@ function compactContextForBatch(value) {
     classes: value.classes,
     textContent: truncate(value.textContent, 900),
     outerHTML: truncate(stripLiveRuntimeHtml(value.outerHTML), 1800),
-  };
+  }
 }
 
 function stripLiveRuntimeHtml(html) {
-  if (typeof html !== 'string') return html || null;
+  if (typeof html !== 'string') return html || null
   return html
-    .replace(/\sdata-impeccable-(?:original-text|editable|text-wrap)(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?/g, '')
+    .replace(
+      /\sdata-impeccable-(?:original-text|editable|text-wrap)(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?/g,
+      ''
+    )
     .replace(/\scontenteditable(?:=(?:"[^"]*"|'[^']*'|[^\s>]+))?/g, '')
-    .replace(/\sstyle=(["'])(?:(?!\1)[\s\S])*(?:-webkit-user-modify|user-select:\s*text|cursor:\s*text)(?:(?!\1)[\s\S])*\1/g, '');
+    .replace(
+      /\sstyle=(["'])(?:(?!\1)[\s\S])*(?:-webkit-user-modify|user-select:\s*text|cursor:\s*text)(?:(?!\1)[\s\S])*\1/g,
+      ''
+    )
 }
 
 function normalizeBatchResult(result) {
-  const status = result.status === 'partial' ? 'partial' : result.status === 'error' ? 'error' : 'done';
+  const status =
+    result.status === 'partial' ? 'partial' : result.status === 'error' ? 'error' : 'done'
   const appliedEntryIds = Array.isArray(result.appliedEntryIds)
     ? result.appliedEntryIds.filter((id) => typeof id === 'string')
-    : [];
+    : []
   const failed = Array.isArray(result.failed)
     ? result.failed.filter(Boolean).map((item) => ({
         entryId: item.entryId || item.id || null,
         reason: item.reason || item.message || 'failed',
         candidates: Array.isArray(item.candidates) ? item.candidates : [],
       }))
-    : [];
-  const files = Array.isArray(result.files) ? result.files.filter((file) => typeof file === 'string') : [];
-  const notes = Array.isArray(result.notes) ? result.notes.filter((note) => typeof note === 'string') : [];
+    : []
+  const files = Array.isArray(result.files)
+    ? result.files.filter((file) => typeof file === 'string')
+    : []
+  const notes = Array.isArray(result.notes)
+    ? result.notes.filter((note) => typeof note === 'string')
+    : []
   const warnings = Array.isArray(result.warnings)
     ? result.warnings
         .filter(Boolean)
-        .map((warning) => typeof warning === 'string' ? { message: warning } : warning)
+        .map((warning) => (typeof warning === 'string' ? { message: warning } : warning))
         .filter((warning) => warning && typeof warning === 'object')
-    : [];
+    : []
   return {
     status,
     message: result.message || null,
@@ -371,16 +399,16 @@ function normalizeBatchResult(result) {
     files,
     notes,
     warnings,
-  };
+  }
 }
 
 function mockBatchResult(batch, env, cwd = process.cwd()) {
-  applyMockWrites(env, cwd);
-  const raw = env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT;
+  applyMockWrites(env, cwd)
+  const raw = env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT
   if (raw) {
-    const parsed = parseCopyEditBatchResult(raw);
-    if (parsed) return parsed;
-    throw new Error('Invalid IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT JSON');
+    const parsed = parseCopyEditBatchResult(raw)
+    if (parsed) return parsed
+    throw new Error('Invalid IMPECCABLE_LIVE_COPY_AGENT_MOCK_RESULT JSON')
   }
   return {
     status: 'done',
@@ -388,43 +416,49 @@ function mockBatchResult(batch, env, cwd = process.cwd()) {
     failed: [],
     files: [],
     notes: ['mock copy-edit batch result'],
-  };
+  }
 }
 
 function applyMockWrites(env, cwd) {
-  const raw = env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_WRITES;
-  if (!raw) return;
-  const writes = tryParseJson(raw);
+  const raw = env.IMPECCABLE_LIVE_COPY_AGENT_MOCK_WRITES
+  if (!raw) return
+  const writes = tryParseJson(raw)
   if (!writes || typeof writes !== 'object' || Array.isArray(writes)) {
-    throw new Error('Invalid IMPECCABLE_LIVE_COPY_AGENT_MOCK_WRITES JSON');
+    throw new Error('Invalid IMPECCABLE_LIVE_COPY_AGENT_MOCK_WRITES JSON')
   }
   for (const [relativeFile, content] of Object.entries(writes)) {
-    if (typeof relativeFile !== 'string' || typeof content !== 'string') continue;
-    const absolute = path.resolve(cwd, relativeFile);
-    if (!isPathInsideOrEqual(cwd, absolute)) continue;
-    fs.mkdirSync(path.dirname(absolute), { recursive: true });
-    fs.writeFileSync(absolute, content, 'utf-8');
+    if (typeof relativeFile !== 'string' || typeof content !== 'string') continue
+    const absolute = path.resolve(cwd, relativeFile)
+    if (!isPathInsideOrEqual(cwd, absolute)) continue
+    fs.mkdirSync(path.dirname(absolute), { recursive: true })
+    fs.writeFileSync(absolute, content, 'utf-8')
   }
 }
 
 export function parseCopyEditAgentResult(text) {
-  const trimmed = String(text || '').trim();
-  if (!trimmed) return null;
+  const trimmed = String(text || '').trim()
+  if (!trimmed) return null
 
-  const parsedOuter = tryParseJson(trimmed);
+  const parsedOuter = tryParseJson(trimmed)
   if (parsedOuter) {
     if (typeof parsedOuter.result === 'string') {
-      const nested = parseCopyEditAgentResult(parsedOuter.result);
-      if (nested) return nested;
+      const nested = parseCopyEditAgentResult(parsedOuter.result)
+      if (nested) return nested
     }
-    if (parsedOuter.status === 'done' || parsedOuter.status === 'partial' || parsedOuter.status === 'error') return parsedOuter;
+    if (
+      parsedOuter.status === 'done' ||
+      parsedOuter.status === 'partial' ||
+      parsedOuter.status === 'error'
+    )
+      return parsedOuter
   }
 
-  const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return null;
-  const parsed = tryParseJson(jsonMatch[0]);
-  if (parsed?.status === 'done' || parsed?.status === 'partial' || parsed?.status === 'error') return parsed;
-  return null;
+  const jsonMatch = trimmed.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) return null
+  const parsed = tryParseJson(jsonMatch[0])
+  if (parsed?.status === 'done' || parsed?.status === 'partial' || parsed?.status === 'error')
+    return parsed
+  return null
 }
 
 export function chooseCopyEditAgent({
@@ -432,125 +466,136 @@ export function chooseCopyEditAgent({
   authCheck = commandAuthed,
   chatAvailable = () => false,
 } = {}) {
-  const mode = (env.IMPECCABLE_LIVE_COPY_AGENT || 'auto').trim().toLowerCase();
-  if (mode === '0' || mode === 'false' || mode === 'off' || mode === 'none') return null;
-  if (mode === 'mock') return 'mock';
-  if (mode === 'chat') return chatAvailable() ? 'chat' : null;
-  if (mode === 'codex') return commandExists('codex') ? 'codex' : null;
-  if (mode === 'claude') return commandExists('claude') ? 'claude' : null;
-  if (mode !== 'auto') return null;
-  if (authCheck('codex')) return 'codex';
-  if (authCheck('claude')) return 'claude';
-  if (chatAvailable()) return 'chat';
-  return null;
+  const mode = (env.IMPECCABLE_LIVE_COPY_AGENT || 'auto').trim().toLowerCase()
+  if (mode === '0' || mode === 'false' || mode === 'off' || mode === 'none') return null
+  if (mode === 'mock') return 'mock'
+  if (mode === 'chat') return chatAvailable() ? 'chat' : null
+  if (mode === 'codex') return commandExists('codex') ? 'codex' : null
+  if (mode === 'claude') return commandExists('claude') ? 'claude' : null
+  if (mode !== 'auto') return null
+  if (authCheck('codex')) return 'codex'
+  if (authCheck('claude')) return 'claude'
+  if (chatAvailable()) return 'chat'
+  return null
 }
 
 function runCodex(prompt, { cwd, env, resultPath, logPath, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   const args = [
     'exec',
-    '--cd', cwd,
+    '--cd',
+    cwd,
     '--dangerously-bypass-approvals-and-sandbox',
     '--ephemeral',
-    '--output-last-message', resultPath,
-    '-c', `model_reasoning_effort="${env.IMPECCABLE_LIVE_COPY_AGENT_EFFORT || 'low'}"`,
-  ];
+    '--output-last-message',
+    resultPath,
+    '-c',
+    `model_reasoning_effort="${env.IMPECCABLE_LIVE_COPY_AGENT_EFFORT || 'low'}"`,
+  ]
   if (env.IMPECCABLE_LIVE_COPY_AGENT_MODEL) {
-    args.push('--model', env.IMPECCABLE_LIVE_COPY_AGENT_MODEL);
+    args.push('--model', env.IMPECCABLE_LIVE_COPY_AGENT_MODEL)
   }
-  args.push('-');
-  return runAgentProcess('codex', args, prompt, { cwd, env, logPath, timeoutMs });
+  args.push('-')
+  return runAgentProcess('codex', args, prompt, { cwd, env, logPath, timeoutMs })
 }
 
 function runClaude(prompt, { cwd, env, resultPath, logPath, timeoutMs = DEFAULT_TIMEOUT_MS }) {
-  const args = [
-    '--print',
-    '--permission-mode', 'bypassPermissions',
-    '--output-format', 'json',
-  ];
+  const args = ['--print', '--permission-mode', 'bypassPermissions', '--output-format', 'json']
   if (env.IMPECCABLE_LIVE_COPY_AGENT_MODEL) {
-    args.push('--model', env.IMPECCABLE_LIVE_COPY_AGENT_MODEL);
+    args.push('--model', env.IMPECCABLE_LIVE_COPY_AGENT_MODEL)
   }
-  args.push(prompt);
+  args.push(prompt)
   // Forward env as-is so CLAUDE_CODE_OAUTH_TOKEN and ANTHROPIC_API_KEY flow
   // through. On macOS, `claude /login` stores creds in the Keychain, which a
   // non-TTY subprocess cannot read; setting CLAUDE_CODE_OAUTH_TOKEN (via
   // `claude setup-token`) is the supported headless auth path.
-  return runAgentProcess('claude', args, '', { cwd, env, logPath, timeoutMs, mirrorOutputPath: resultPath });
+  return runAgentProcess('claude', args, '', {
+    cwd,
+    env,
+    logPath,
+    timeoutMs,
+    mirrorOutputPath: resultPath,
+  })
 }
 
 function runAgentProcess(command, args, stdin, { cwd, env, logPath, timeoutMs, mirrorOutputPath }) {
   return new Promise((resolve, reject) => {
-    const log = fs.createWriteStream(logPath, { flags: 'a' });
+    const log = fs.createWriteStream(logPath, { flags: 'a' })
     const child = spawn(command, args, {
       cwd,
       env,
       stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    let output = '';
-    let settled = false;
+    })
+    let output = ''
+    let settled = false
     const timer = setTimeout(() => {
-      child.kill('SIGTERM');
-      rejectOnce(new Error(`AI copy-edit worker timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
+      child.kill('SIGTERM')
+      rejectOnce(new Error(`AI copy-edit worker timed out after ${timeoutMs}ms`))
+    }, timeoutMs)
 
     const rejectOnce = (err) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      log.end();
-      reject(err);
-    };
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      log.end()
+      reject(err)
+    }
     const resolveOnce = () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      if (mirrorOutputPath) fs.writeFileSync(mirrorOutputPath, output);
-      log.end();
-      resolve();
-    };
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      if (mirrorOutputPath) fs.writeFileSync(mirrorOutputPath, output)
+      log.end()
+      resolve()
+    }
 
     process.once('SIGTERM', () => {
-      try { child.kill('SIGTERM'); } catch {}
-    });
+      try {
+        child.kill('SIGTERM')
+      } catch {}
+    })
     child.stdout.on('data', (chunk) => {
-      output += chunk.toString();
-      log.write(chunk);
-    });
+      output += chunk.toString()
+      log.write(chunk)
+    })
     child.stderr.on('data', (chunk) => {
-      log.write(chunk);
-    });
-    child.on('error', rejectOnce);
+      log.write(chunk)
+    })
+    child.on('error', rejectOnce)
     child.on('exit', (code, signal) => {
       if (code === 0) {
-        resolveOnce();
+        resolveOnce()
       } else {
-        const hint = extractRunnerErrorMessage(output, command);
-        rejectOnce(new Error(hint || `${command} exited with ${signal || code}`));
+        const hint = extractRunnerErrorMessage(output, command)
+        rejectOnce(new Error(hint || `${command} exited with ${signal || code}`))
       }
-    });
-    if (stdin) child.stdin.end(stdin);
-    else child.stdin.end();
-  });
+    })
+    if (stdin) child.stdin.end(stdin)
+    else child.stdin.end()
+  })
 }
 
 function isPathInsideOrEqual(cwd, file) {
-  const relative = path.relative(path.resolve(cwd), path.resolve(file));
-  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+  const relative = path.relative(path.resolve(cwd), path.resolve(file))
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
 }
 
 function tryParseJson(text) {
-  try { return JSON.parse(text); } catch { return null; }
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
 }
 
 function truncate(value, max) {
-  if (typeof value !== 'string') return value;
-  if (value.length <= max) return value;
-  return value.slice(0, max) + `... [truncated ${value.length - max} chars]`;
+  if (typeof value !== 'string') return value
+  if (value.length <= max) return value
+  return value.slice(0, max) + `... [truncated ${value.length - max} chars]`
 }
 
 function commandExists(command) {
-  const result = spawnSync(command, ['--version'], { stdio: 'ignore' });
-  return !result.error && result.status === 0;
+  const result = spawnSync(command, ['--version'], { stdio: 'ignore' })
+  return !result.error && result.status === 0
 }
 
 /**
@@ -563,30 +608,42 @@ export function describeNoProviderError({
   chatAvailable = () => false,
   env = process.env,
 } = {}) {
-  const lines = ['No live copy-edit AI runner is available.'];
+  const lines = ['No live copy-edit AI runner is available.']
   if (exists('claude')) {
     if (env.CLAUDE_CODE_OAUTH_TOKEN) {
-      lines.push('  • Claude CLI: installed; CLAUDE_CODE_OAUTH_TOKEN is set but the CLI still rejected it. The token may be expired or invalid.');
+      lines.push(
+        '  • Claude CLI: installed; CLAUDE_CODE_OAUTH_TOKEN is set but the CLI still rejected it. The token may be expired or invalid.'
+      )
     } else {
-      lines.push('  • Claude CLI: installed but not selected. If Apply still fails, the subprocess may be unable to read your `claude /login` credentials (on macOS, the Keychain can be unreachable from a no-TTY child).');
-      lines.push('      Headless fix: run `claude setup-token` once, then `export CLAUDE_CODE_OAUTH_TOKEN=<the printed sk-ant-oat01-… token>` before starting `live-server.mjs`.');
-      lines.push('      Alternative: `export ANTHROPIC_API_KEY=<key>` if you have console.anthropic.com credits.');
+      lines.push(
+        '  • Claude CLI: installed but not selected. If Apply still fails, the subprocess may be unable to read your `claude /login` credentials (on macOS, the Keychain can be unreachable from a no-TTY child).'
+      )
+      lines.push(
+        '      Headless fix: run `claude setup-token` once, then `export CLAUDE_CODE_OAUTH_TOKEN=<the printed sk-ant-oat01-… token>` before starting `live-server.mjs`.'
+      )
+      lines.push(
+        '      Alternative: `export ANTHROPIC_API_KEY=<key>` if you have console.anthropic.com credits.'
+      )
     }
   } else {
-    lines.push('  • Claude CLI: not installed.');
+    lines.push('  • Claude CLI: not installed.')
   }
   if (exists('codex')) {
-    lines.push('  • Codex CLI: installed. If Apply still fails, run `codex login` to authenticate.');
+    lines.push('  • Codex CLI: installed. If Apply still fails, run `codex login` to authenticate.')
   } else {
-    lines.push('  • Codex CLI: not installed.');
+    lines.push('  • Codex CLI: not installed.')
   }
   if (chatAvailable()) {
-    lines.push('  • Chat: an Impeccable live session is polling but selection chose another provider — unexpected; please report.');
+    lines.push(
+      '  • Chat: an Impeccable live session is polling but selection chose another provider — unexpected; please report.'
+    )
   } else {
-    lines.push('  • Chat: no Impeccable live session is currently polling on this server. Start Impeccable live in your chat to route Apply through the chat agent.');
+    lines.push(
+      '  • Chat: no Impeccable live session is currently polling on this server. Start Impeccable live in your chat to route Apply through the chat agent.'
+    )
   }
-  lines.push('Fix one of the above, or set IMPECCABLE_LIVE_COPY_AGENT=mock for tests.');
-  return lines.join('\n');
+  lines.push('Fix one of the above, or set IMPECCABLE_LIVE_COPY_AGENT=mock for tests.')
+  return lines.join('\n')
 }
 
 /**
@@ -600,34 +657,37 @@ export function describeNoProviderError({
  * to its existing "X exited with N" message.
  */
 export function extractRunnerErrorMessage(output, command) {
-  const text = String(output || '').trim();
-  if (!text) return null;
-  const candidates = [];
-  const direct = tryParseJson(text);
-  if (direct) candidates.push(direct);
-  const trailingMatch = text.match(/\{[\s\S]*\}\s*$/);
+  const text = String(output || '').trim()
+  if (!text) return null
+  const candidates = []
+  const direct = tryParseJson(text)
+  if (direct) candidates.push(direct)
+  const trailingMatch = text.match(/\{[\s\S]*\}\s*$/)
   if (trailingMatch) {
-    const tail = tryParseJson(trailingMatch[0]);
-    if (tail && tail !== direct) candidates.push(tail);
+    const tail = tryParseJson(trailingMatch[0])
+    if (tail && tail !== direct) candidates.push(tail)
   }
   for (const parsed of candidates) {
-    if (!parsed || typeof parsed !== 'object') continue;
+    if (!parsed || typeof parsed !== 'object') continue
     if (parsed.is_error === true && typeof parsed.result === 'string' && parsed.result.trim()) {
-      return `${command} CLI: ${parsed.result.trim()}`;
+      return `${command} CLI: ${parsed.result.trim()}`
     }
     if (typeof parsed.message === 'string' && parsed.message.trim()) {
-      return `${command} CLI: ${parsed.message.trim()}`;
+      return `${command} CLI: ${parsed.message.trim()}`
     }
     if (typeof parsed.error === 'string' && parsed.error.trim()) {
-      return `${command} CLI: ${parsed.error.trim()}`;
+      return `${command} CLI: ${parsed.error.trim()}`
     }
   }
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
   if (lines.length > 0) {
-    const last = lines[lines.length - 1];
-    if (last.length > 0 && last.length < 400) return `${command}: ${last}`;
+    const last = lines[lines.length - 1]
+    if (last.length > 0 && last.length < 400) return `${command}: ${last}`
   }
-  return null;
+  return null
 }
 
 /**
@@ -643,41 +703,37 @@ export function extractRunnerErrorMessage(output, command) {
  * here; if the user has codex installed but unauthed, the runtime error from
  * runCodex (now improved by extractRunnerErrorMessage) will surface clearly.
  */
-const COMMAND_AUTH_CACHE = new Map();
+const COMMAND_AUTH_CACHE = new Map()
 
 function commandAuthed(command) {
-  if (COMMAND_AUTH_CACHE.has(command)) return COMMAND_AUTH_CACHE.get(command);
-  const ok = computeCommandAuthed(command);
-  COMMAND_AUTH_CACHE.set(command, ok);
-  return ok;
+  if (COMMAND_AUTH_CACHE.has(command)) return COMMAND_AUTH_CACHE.get(command)
+  const ok = computeCommandAuthed(command)
+  COMMAND_AUTH_CACHE.set(command, ok)
+  return ok
 }
 
 function computeCommandAuthed(command) {
-  if (!commandExists(command)) return false;
-  if (command === 'codex') return true;
-  if (command !== 'claude') return false;
-  let result;
+  if (!commandExists(command)) return false
+  if (command === 'codex') return true
+  if (command !== 'claude') return false
+  let result
   try {
-    result = spawnSync('claude', [
-      '--print',
-      '--output-format', 'json',
-      'ping',
-    ], {
+    result = spawnSync('claude', ['--print', '--output-format', 'json', 'ping'], {
       encoding: 'utf-8',
       timeout: 10000,
       env: process.env,
-    });
+    })
   } catch {
-    return false;
+    return false
   }
-  if (result.error || result.signal) return false;
-  const stdout = String(result.stdout || '').trim();
+  if (result.error || result.signal) return false
+  const stdout = String(result.stdout || '').trim()
   if (result.status !== 0) {
     // Non-zero exit: probably an auth or config error. Definitely not usable.
-    return false;
+    return false
   }
-  if (!stdout) return true;
-  const parsed = tryParseJson(stdout) || tryParseJson(stdout.match(/\{[\s\S]*\}\s*$/)?.[0] || '');
-  if (parsed && parsed.is_error === true) return false;
-  return true;
+  if (!stdout) return true
+  const parsed = tryParseJson(stdout) || tryParseJson(stdout.match(/\{[\s\S]*\}\s*$/)?.[0] || '')
+  if (parsed && parsed.is_error === true) return false
+  return true
 }

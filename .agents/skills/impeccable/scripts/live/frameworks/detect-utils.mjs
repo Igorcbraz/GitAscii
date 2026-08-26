@@ -6,53 +6,55 @@
  * malformed file means "not this framework", never a throw.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from 'node:fs'
+import path from 'node:path'
 
 /** Merged dependency names from package.json, or an empty object. */
 export function readPackageDeps(cwd) {
-  const file = path.join(cwd, 'package.json');
+  const file = path.join(cwd, 'package.json')
   try {
-    const pkg = JSON.parse(fs.readFileSync(file, 'utf-8'));
+    const pkg = JSON.parse(fs.readFileSync(file, 'utf-8'))
     return {
       ...(pkg.dependencies || {}),
       ...(pkg.devDependencies || {}),
       ...(pkg.peerDependencies || {}),
-    };
+    }
   } catch {
-    return {};
+    return {}
   }
 }
 
 export function hasAnyDependency(cwd, names) {
-  const deps = readPackageDeps(cwd);
-  return names.some((name) => Boolean(deps[name]));
+  const deps = readPackageDeps(cwd)
+  return names.some((name) => Boolean(deps[name]))
 }
 
 /** First top-level file name matching `re`, or null. */
 export function findConfigFile(cwd, re) {
   try {
-    return fs.readdirSync(cwd, { withFileTypes: true })
-      .find((entry) => entry.isFile() && re.test(entry.name))
-      ?.name ?? null;
+    return (
+      fs
+        .readdirSync(cwd, { withFileTypes: true })
+        .find((entry) => entry.isFile() && re.test(entry.name))?.name ?? null
+    )
   } catch {
-    return null;
+    return null
   }
 }
 
 export function fileExists(cwd, rel) {
   try {
-    return fs.existsSync(path.join(cwd, rel));
+    return fs.existsSync(path.join(cwd, rel))
   } catch {
-    return false;
+    return false
   }
 }
 
 export function firstExistingFile(cwd, candidates) {
   for (const rel of candidates) {
-    if (fileExists(cwd, rel)) return rel;
+    if (fileExists(cwd, rel)) return rel
   }
-  return null;
+  return null
 }
 
 /**
@@ -62,12 +64,12 @@ export function firstExistingFile(cwd, candidates) {
  * to the framework that authored them.
  */
 export function literalConfigFiles(cwd, config) {
-  const files = Array.isArray(config?.files) ? config.files : [];
-  const out = [];
+  const files = Array.isArray(config?.files) ? config.files : []
+  const out = []
   for (const rel of files) {
-    if (typeof rel !== 'string' || rel.includes('*') || rel.includes('?')) continue;
-    const normalized = rel.split(path.sep).join('/');
-    if (fileExists(cwd, normalized)) out.push(normalized);
+    if (typeof rel !== 'string' || rel.includes('*') || rel.includes('?')) continue
+    const normalized = rel.split(path.sep).join('/')
+    if (fileExists(cwd, normalized)) out.push(normalized)
   }
-  return out;
+  return out
 }

@@ -12,6 +12,6 @@
  * server's token-gated /live.js handler authorizes the fetch.
  */
 export function buildLiveScriptSrc(port, token) {
-  const base = 'http://localhost:' + port + '/live.js';
-  return token ? base + '?token=' + encodeURIComponent(token) : base;
+  const base = 'http://localhost:' + port + '/live.js'
+  return token ? base + '?token=' + encodeURIComponent(token) : base
 }

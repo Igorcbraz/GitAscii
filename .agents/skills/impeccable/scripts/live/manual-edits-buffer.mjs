@@ -10,47 +10,50 @@
  * the real source state).
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { getLiveDir } from '../lib/impeccable-paths.mjs';
+import fs from 'node:fs'
+import path from 'node:path'
+import { getLiveDir } from '../lib/impeccable-paths.mjs'
 
-const BUFFER_VERSION = 1;
-const BUFFER_FILENAME = 'pending-manual-edits.json';
+const BUFFER_VERSION = 1
+const BUFFER_FILENAME = 'pending-manual-edits.json'
 
 export function getBufferPath(cwd = process.cwd()) {
-  return path.join(getLiveDir(cwd), BUFFER_FILENAME);
+  return path.join(getLiveDir(cwd), BUFFER_FILENAME)
 }
 
 export function readBuffer(cwd = process.cwd()) {
-  return readBufferInternal(cwd, { strict: false });
+  return readBufferInternal(cwd, { strict: false })
 }
 
 export function readBufferStrict(cwd = process.cwd()) {
-  return readBufferInternal(cwd, { strict: true });
+  return readBufferInternal(cwd, { strict: true })
 }
 
 function readBufferInternal(cwd, { strict }) {
-  const filePath = getBufferPath(cwd);
+  const filePath = getBufferPath(cwd)
   try {
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    const parsed = JSON.parse(raw);
+    const raw = fs.readFileSync(filePath, 'utf-8')
+    const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.entries)) {
-      if (strict) throw new Error('manual_edit_buffer_invalid_schema');
-      return { version: BUFFER_VERSION, entries: [] };
+      if (strict) throw new Error('manual_edit_buffer_invalid_schema')
+      return { version: BUFFER_VERSION, entries: [] }
     }
-    return { version: BUFFER_VERSION, entries: parsed.entries };
+    return { version: BUFFER_VERSION, entries: parsed.entries }
   } catch (err) {
     if (strict && err?.code !== 'ENOENT') {
-      throw new Error('manual_edit_buffer_unreadable: ' + (err.message || String(err)));
+      throw new Error('manual_edit_buffer_unreadable: ' + (err.message || String(err)))
     }
-    return { version: BUFFER_VERSION, entries: [] };
+    return { version: BUFFER_VERSION, entries: [] }
   }
 }
 
 export function writeBuffer(cwd, buffer) {
-  const filePath = getBufferPath(cwd);
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify({ version: BUFFER_VERSION, entries: buffer.entries }, null, 2));
+  const filePath = getBufferPath(cwd)
+  fs.mkdirSync(path.dirname(filePath), { recursive: true })
+  fs.writeFileSync(
+    filePath,
+    JSON.stringify({ version: BUFFER_VERSION, entries: buffer.entries }, null, 2)
+  )
 }
 
 /**
@@ -62,13 +65,13 @@ export function writeBuffer(cwd, buffer) {
  * Multiple ops in one Save are allowed; each is keyed by (pageUrl, ref).
  */
 export function stageEntry(cwd, newEntry) {
-  const buf = readBufferStrict(cwd);
-  const pageUrl = newEntry.pageUrl;
+  const buf = readBufferStrict(cwd)
+  const pageUrl = newEntry.pageUrl
   for (const newOp of newEntry.ops) {
-    let mergedIntoExisting = false;
+    let mergedIntoExisting = false
     for (const existing of buf.entries) {
-      if (existing.pageUrl !== pageUrl) continue;
-      const existingOpIdx = existing.ops.findIndex((op) => op.ref === newOp.ref);
+      if (existing.pageUrl !== pageUrl) continue
+      const existingOpIdx = existing.ops.findIndex((op) => op.ref === newOp.ref)
       if (existingOpIdx >= 0) {
         // Keep the original source text but refresh the latest DOM/source evidence.
         existing.ops[existingOpIdx] = {
@@ -76,16 +79,16 @@ export function stageEntry(cwd, newEntry) {
           originalText: existing.ops[existingOpIdx].originalText,
           newText: newOp.newText,
           deleted: newOp.deleted || false,
-        };
-        if (newEntry.element) existing.element = newEntry.element;
-        existing.stagedAt = new Date().toISOString();
-        mergedIntoExisting = true;
-        break;
+        }
+        if (newEntry.element) existing.element = newEntry.element
+        existing.stagedAt = new Date().toISOString()
+        mergedIntoExisting = true
+        break
       }
     }
-    if (mergedIntoExisting) continue;
+    if (mergedIntoExisting) continue
     // No existing op for this (pageUrl, ref). Find or create an entry to hold it.
-    let entry = buf.entries.find((e) => e.pageUrl === pageUrl && e.id === newEntry.id);
+    let entry = buf.entries.find((e) => e.pageUrl === pageUrl && e.id === newEntry.id)
     if (!entry) {
       entry = {
         id: newEntry.id,
@@ -93,14 +96,14 @@ export function stageEntry(cwd, newEntry) {
         element: newEntry.element,
         ops: [],
         stagedAt: new Date().toISOString(),
-      };
-      buf.entries.push(entry);
+      }
+      buf.entries.push(entry)
     }
-    entry.ops.push(newOp);
-    entry.stagedAt = new Date().toISOString();
+    entry.ops.push(newOp)
+    entry.stagedAt = new Date().toISOString()
   }
-  writeBuffer(cwd, buf);
-  return buf;
+  writeBuffer(cwd, buf)
+  return buf
 }
 
 /**
@@ -109,34 +112,34 @@ export function stageEntry(cwd, newEntry) {
  * pill's per-page op count. Empty entries (no ops left) are also pruned.
  */
 export function removeEntries(cwd, predicate) {
-  const buf = readBuffer(cwd);
-  let removedOps = 0;
-  const kept = [];
+  const buf = readBuffer(cwd)
+  let removedOps = 0
+  const kept = []
   for (const entry of buf.entries) {
     if (predicate(entry)) {
-      removedOps += entry.ops?.length || 0;
+      removedOps += entry.ops?.length || 0
     } else if (entry.ops && entry.ops.length > 0) {
-      kept.push(entry);
+      kept.push(entry)
     }
   }
-  buf.entries = kept;
-  writeBuffer(cwd, buf);
-  return removedOps;
+  buf.entries = kept
+  writeBuffer(cwd, buf)
+  return removedOps
 }
 
 /**
  * Count by page for the counter UI. Returns { totalCount, perPage: {[pageUrl]: count} }.
  */
 export function countByPage(cwd = process.cwd()) {
-  const buf = readBuffer(cwd);
-  const perPage = {};
-  let totalCount = 0;
+  const buf = readBuffer(cwd)
+  const perPage = {}
+  let totalCount = 0
   for (const entry of buf.entries) {
-    const n = entry.ops.length;
-    perPage[entry.pageUrl] = (perPage[entry.pageUrl] || 0) + n;
-    totalCount += n;
+    const n = entry.ops.length
+    perPage[entry.pageUrl] = (perPage[entry.pageUrl] || 0) + n
+    totalCount += n
   }
-  return { totalCount, perPage };
+  return { totalCount, perPage }
 }
 
 /**
@@ -144,9 +147,9 @@ export function countByPage(cwd = process.cwd()) {
  * removed ops.
  */
 export function truncateBuffer(cwd) {
-  const buf = readBuffer(cwd);
-  let removed = 0;
-  for (const entry of buf.entries) removed += entry.ops.length;
-  writeBuffer(cwd, { version: BUFFER_VERSION, entries: [] });
-  return removed;
+  const buf = readBuffer(cwd)
+  let removed = 0
+  for (const entry of buf.entries) removed += entry.ops.length
+  writeBuffer(cwd, { version: BUFFER_VERSION, entries: [] })
+  return removed
 }

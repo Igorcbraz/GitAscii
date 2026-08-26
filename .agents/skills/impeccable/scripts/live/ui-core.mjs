@@ -7,12 +7,7 @@
  * values at runtime because it is served as a standalone script.
  */
 
-export const LIVE_CHROME_MOUNT_CONTRACT = Object.freeze([
-  'root',
-  'transport',
-  'state',
-  'actions',
-]);
+export const LIVE_CHROME_MOUNT_CONTRACT = Object.freeze(['root', 'transport', 'state', 'actions'])
 
 export const LIVE_UI_SURFACES = Object.freeze([
   {
@@ -67,7 +62,16 @@ export const LIVE_UI_SURFACES = Object.freeze([
   {
     key: 'variant-cycling-row',
     ids: ['impeccable-live-bar', 'impeccable-live-params-panel'],
-    states: ['variant-1', 'variant-2', 'variant-3', 'left-disabled', 'right-disabled', 'dot-click', 'accept', 'discard'],
+    states: [
+      'variant-1',
+      'variant-2',
+      'variant-3',
+      'left-disabled',
+      'right-disabled',
+      'dot-click',
+      'accept',
+      'discard',
+    ],
   },
   {
     key: 'variant-params-panel',
@@ -117,64 +121,63 @@ export const LIVE_UI_SURFACES = Object.freeze([
     ids: ['impeccable-live-root'],
     states: ['shadow-root', 'style-tags', 'hostile-css'],
   },
-]);
+])
 
 export const LIVE_UI_COMPONENT_IDS = Object.freeze([
   ...new Set(LIVE_UI_SURFACES.flatMap((surface) => surface.ids)),
-]);
+])
 
 export function resolveLiveUiRoot(env = globalThis) {
-  const doc = env?.document;
-  const explicit = env?.__IMPECCABLE_LIVE_UI_ROOT__
-    || env?.window?.__IMPECCABLE_LIVE_UI_ROOT__;
-  if (explicit && typeof explicit.appendChild === 'function') return explicit;
-  return doc?.body || null;
+  const doc = env?.document
+  const explicit = env?.__IMPECCABLE_LIVE_UI_ROOT__ || env?.window?.__IMPECCABLE_LIVE_UI_ROOT__
+  if (explicit && typeof explicit.appendChild === 'function') return explicit
+  return doc?.body || null
 }
 
 export function getLiveUiElementById(id, env = globalThis) {
-  const doc = env?.document;
-  const root = resolveLiveUiRoot(env);
-  if (!id) return null;
+  const doc = env?.document
+  const root = resolveLiveUiRoot(env)
+  if (!id) return null
   if (root?.getElementById) {
-    const found = root.getElementById(id);
-    if (found) return found;
+    const found = root.getElementById(id)
+    if (found) return found
   }
   if (root?.querySelector) {
-    const found = root.querySelector('#' + escapeCssIdent(id));
-    if (found) return found;
+    const found = root.querySelector('#' + escapeCssIdent(id))
+    if (found) return found
   }
-  return doc?.getElementById?.(id) || null;
+  return doc?.getElementById?.(id) || null
 }
 
 export function appendToLiveUiRoot(el, env = globalThis) {
-  const root = resolveLiveUiRoot(env);
-  if (!root) throw new Error('Impeccable live UI root is not available');
-  root.appendChild(el);
-  return el;
+  const root = resolveLiveUiRoot(env)
+  if (!root) throw new Error('Impeccable live UI root is not available')
+  root.appendChild(el)
+  return el
 }
 
 export function appendStyleToLiveUiRoot(styleEl, env = globalThis) {
-  const doc = env?.document;
-  const root = resolveLiveUiRoot(env);
+  const doc = env?.document
+  const root = resolveLiveUiRoot(env)
   if (root && root !== doc?.body) {
-    root.appendChild(styleEl);
+    root.appendChild(styleEl)
   } else {
-    (doc?.head || doc?.body || root).appendChild(styleEl);
+    ;(doc?.head || doc?.body || root).appendChild(styleEl)
   }
-  return styleEl;
+  return styleEl
 }
 
 export function activeElementDeep(doc = globalThis.document) {
-  let active = doc?.activeElement || null;
+  let active = doc?.activeElement || null
   while (active?.shadowRoot?.activeElement) {
-    active = active.shadowRoot.activeElement;
+    active = active.shadowRoot.activeElement
   }
-  return active;
+  return active
 }
 
 function escapeCssIdent(value) {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
-    return CSS.escape(String(value));
+    return CSS.escape(String(value))
   }
-  return String(value).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+  return String(value).replace(/([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1')
 }

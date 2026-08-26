@@ -21,70 +21,70 @@
  *   SERPAPI_KEY=xxx node serp-analyzer.mjs --keywords "what is DePAI" --track "axisrobotics.ai,bittensor.com"
  */
 
-import https from "https";
-import fs from "fs";
-import { URLSearchParams } from "url";
+import https from 'https'
+import fs from 'fs'
+import { URLSearchParams } from 'url'
 
-const SERPAPI_KEY = process.env.SERPAPI_KEY || "";
+const SERPAPI_KEY = process.env.SERPAPI_KEY || ''
 
 function parseArgs() {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2)
   const opts = {
     input: null,
     keywords: [],
     top: 10,
     track: [],
     out: null,
-    gl: "us",
-    hl: "en",
-  };
+    gl: 'us',
+    hl: 'en',
+  }
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
-      case "--input":
-      case "-i":
-        opts.input = args[++i];
-        break;
-      case "--keywords":
-      case "-k":
-        opts.keywords = args[++i].split(",").map((s) => s.trim());
-        break;
-      case "--top":
-      case "-t":
-        opts.top = parseInt(args[++i], 10);
-        break;
-      case "--track":
-        opts.track = args[++i].split(",").map((s) => s.trim().toLowerCase());
-        break;
-      case "--out":
-      case "-o":
-        opts.out = args[++i];
-        break;
-      case "--gl":
-        opts.gl = args[++i];
-        break;
-      case "--hl":
-        opts.hl = args[++i];
-        break;
-      case "--help":
-      case "-h":
-        printHelp();
-        process.exit(0);
+      case '--input':
+      case '-i':
+        opts.input = args[++i]
+        break
+      case '--keywords':
+      case '-k':
+        opts.keywords = args[++i].split(',').map((s) => s.trim())
+        break
+      case '--top':
+      case '-t':
+        opts.top = parseInt(args[++i], 10)
+        break
+      case '--track':
+        opts.track = args[++i].split(',').map((s) => s.trim().toLowerCase())
+        break
+      case '--out':
+      case '-o':
+        opts.out = args[++i]
+        break
+      case '--gl':
+        opts.gl = args[++i]
+        break
+      case '--hl':
+        opts.hl = args[++i]
+        break
+      case '--help':
+      case '-h':
+        printHelp()
+        process.exit(0)
     }
   }
 
   if (!SERPAPI_KEY) {
-    console.error("Error: SERPAPI_KEY environment variable is required.");
-    console.error("Get a free key at https://serpapi.com (100 searches/month).");
-    process.exit(1);
+    console.error('Error: SERPAPI_KEY environment variable is required.')
+    console.error('Get a free key at https://serpapi.com (100 searches/month).')
+    process.exit(1)
   }
 
   if (!opts.input && opts.keywords.length === 0) {
-    console.error("Error: --input or --keywords is required. Use --help for usage.");
-    process.exit(1);
+    console.error('Error: --input or --keywords is required. Use --help for usage.')
+    process.exit(1)
   }
 
-  return opts;
+  return opts
 }
 
 function printHelp() {
@@ -107,42 +107,42 @@ Options:
 
 Environment:
   SERPAPI_KEY      Your SerpAPI key (required, free tier: serpapi.com)
-  `);
+  `)
 }
 
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
     https
       .get(url, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => {
+        let data = ''
+        res.on('data', (chunk) => (data += chunk))
+        res.on('end', () => {
           try {
-            resolve(JSON.parse(data));
+            resolve(JSON.parse(data))
           } catch {
-            reject(new Error(`Parse error: ${data.slice(0, 200)}`));
+            reject(new Error(`Parse error: ${data.slice(0, 200)}`))
           }
-        });
+        })
       })
-      .on("error", reject);
-  });
+      .on('error', reject)
+  })
 }
 
 function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
+  return new Promise((r) => setTimeout(r, ms))
 }
 
 async function analyzeSERP(keyword, gl, hl) {
   const params = new URLSearchParams({
     api_key: SERPAPI_KEY,
-    engine: "google",
+    engine: 'google',
     q: keyword,
     gl,
     hl,
     num: 10,
-  });
+  })
 
-  const data = await fetchJSON(`https://serpapi.com/search.json?${params}`);
+  const data = await fetchJSON(`https://serpapi.com/search.json?${params}`)
 
   const analysis = {
     keyword,
@@ -153,16 +153,16 @@ async function analyzeSERP(keyword, gl, hl) {
     featuredSnippet: null,
     paaQuestions: [],
     relatedSearches: [],
-    difficulty: "unknown",
-  };
+    difficulty: 'unknown',
+  }
 
   // SERP Features
   if (data.ai_overview) {
-    analysis.features.push("ai_overview");
+    analysis.features.push('ai_overview')
     analysis.aiOverview = {
       text: data.ai_overview.text_blocks
-        ?.map((b) => b.snippet || b.text || "")
-        .join(" ")
+        ?.map((b) => b.snippet || b.text || '')
+        .join(' ')
         .slice(0, 300),
       sources: (data.ai_overview.references || data.ai_overview.organic_results || [])
         .slice(0, 5)
@@ -171,33 +171,33 @@ async function analyzeSERP(keyword, gl, hl) {
           link: r.link,
           domain: r.source || extractDomain(r.link),
         })),
-    };
+    }
   }
 
   if (data.answer_box) {
-    analysis.features.push("featured_snippet");
+    analysis.features.push('featured_snippet')
     analysis.featuredSnippet = {
-      type: data.answer_box.type || "paragraph",
-      snippet: (data.answer_box.snippet || data.answer_box.answer || "").slice(0, 300),
-      source: data.answer_box.link || "",
-      domain: extractDomain(data.answer_box.link || ""),
-    };
+      type: data.answer_box.type || 'paragraph',
+      snippet: (data.answer_box.snippet || data.answer_box.answer || '').slice(0, 300),
+      source: data.answer_box.link || '',
+      domain: extractDomain(data.answer_box.link || ''),
+    }
   }
 
-  if (data.knowledge_graph) analysis.features.push("knowledge_graph");
-  if (data.related_questions?.length) analysis.features.push("people_also_ask");
-  if (data.top_stories) analysis.features.push("top_stories");
-  if (data.video_results?.length) analysis.features.push("video_results");
-  if (data.shopping_results?.length) analysis.features.push("shopping");
+  if (data.knowledge_graph) analysis.features.push('knowledge_graph')
+  if (data.related_questions?.length) analysis.features.push('people_also_ask')
+  if (data.top_stories) analysis.features.push('top_stories')
+  if (data.video_results?.length) analysis.features.push('video_results')
+  if (data.shopping_results?.length) analysis.features.push('shopping')
 
   // PAA
   if (data.related_questions) {
-    analysis.paaQuestions = data.related_questions.map((q) => q.question);
+    analysis.paaQuestions = data.related_questions.map((q) => q.question)
   }
 
   // Related Searches
   if (data.related_searches) {
-    analysis.relatedSearches = data.related_searches.map((r) => r.query);
+    analysis.relatedSearches = data.related_searches.map((r) => r.query)
   }
 
   // Organic Results
@@ -207,207 +207,208 @@ async function analyzeSERP(keyword, gl, hl) {
       title: r.title,
       link: r.link,
       domain: extractDomain(r.link),
-      snippet: (r.snippet || "").slice(0, 200),
-    }));
-    analysis.domains = analysis.organicResults.map((r) => r.domain);
+      snippet: (r.snippet || '').slice(0, 200),
+    }))
+    analysis.domains = analysis.organicResults.map((r) => r.domain)
   }
 
   // Simple difficulty estimation
-  analysis.difficulty = estimateDifficulty(analysis);
+  analysis.difficulty = estimateDifficulty(analysis)
 
-  return analysis;
+  return analysis
 }
 
 function extractDomain(url) {
   try {
-    return new URL(url).hostname.replace("www.", "");
+    return new URL(url).hostname.replace('www.', '')
   } catch {
-    return url;
+    return url
   }
 }
 
 function estimateDifficulty(analysis) {
   // Simple heuristic based on who ranks
-  const domains = analysis.domains;
+  const domains = analysis.domains
   const bigDomains = [
-    "nvidia.com", "ibm.com", "microsoft.com", "google.com", "deloitte.com",
-    "wikipedia.org", "amazon.com", "forbes.com", "techcrunch.com",
-    "coinmarketcap.com", "coingecko.com", "coindesk.com",
-  ];
+    'nvidia.com',
+    'ibm.com',
+    'microsoft.com',
+    'google.com',
+    'deloitte.com',
+    'wikipedia.org',
+    'amazon.com',
+    'forbes.com',
+    'techcrunch.com',
+    'coinmarketcap.com',
+    'coingecko.com',
+    'coindesk.com',
+  ]
 
-  const bigCount = domains.filter((d) =>
-    bigDomains.some((bd) => d.includes(bd))
-  ).length;
+  const bigCount = domains.filter((d) => bigDomains.some((bd) => d.includes(bd))).length
 
-  if (bigCount >= 5) return "hard";
-  if (bigCount >= 3) return "medium";
-  if (bigCount >= 1) return "easy-medium";
-  return "easy";
+  if (bigCount >= 5) return 'hard'
+  if (bigCount >= 3) return 'medium'
+  if (bigCount >= 1) return 'easy-medium'
+  return 'easy'
 }
 
 function printReport(results, trackedDomains) {
-  console.log("\n╔══════════════════════════════════════════════════════════════╗");
-  console.log("║                   SERP ANALYSIS REPORT                      ║");
-  console.log("╚══════════════════════════════════════════════════════════════╝\n");
+  console.log('\n╔══════════════════════════════════════════════════════════════╗')
+  console.log('║                   SERP ANALYSIS REPORT                      ║')
+  console.log('╚══════════════════════════════════════════════════════════════╝\n')
 
   // Summary table
-  console.log("┌─────────────────────────────────────────────┬────────────┬──────────────────────────────────┐");
-  console.log("│ Keyword                                     │ Difficulty │ SERP Features                    │");
-  console.log("├─────────────────────────────────────────────┼────────────┼──────────────────────────────────┤");
+  console.log(
+    '┌─────────────────────────────────────────────┬────────────┬──────────────────────────────────┐'
+  )
+  console.log(
+    '│ Keyword                                     │ Difficulty │ SERP Features                    │'
+  )
+  console.log(
+    '├─────────────────────────────────────────────┼────────────┼──────────────────────────────────┤'
+  )
 
   for (const r of results) {
-    const kw = r.keyword.slice(0, 43).padEnd(43);
-    const diff = r.difficulty.padEnd(10);
-    const features = r.features.join(", ").slice(0, 32).padEnd(32);
-    console.log(`│ ${kw} │ ${diff} │ ${features} │`);
+    const kw = r.keyword.slice(0, 43).padEnd(43)
+    const diff = r.difficulty.padEnd(10)
+    const features = r.features.join(', ').slice(0, 32).padEnd(32)
+    console.log(`│ ${kw} │ ${diff} │ ${features} │`)
   }
 
-  console.log("└─────────────────────────────────────────────┴────────────┴──────────────────────────────────┘");
+  console.log(
+    '└─────────────────────────────────────────────┴────────────┴──────────────────────────────────┘'
+  )
 
   // AI Overview opportunities
-  const aiOverviewKeywords = results.filter((r) =>
-    r.features.includes("ai_overview")
-  );
+  const aiOverviewKeywords = results.filter((r) => r.features.includes('ai_overview'))
   if (aiOverviewKeywords.length > 0) {
-    console.log(`\n✦ AI Overview detected for ${aiOverviewKeywords.length}/${results.length} keywords (high GEO opportunity):`);
+    console.log(
+      `\n✦ AI Overview detected for ${aiOverviewKeywords.length}/${results.length} keywords (high GEO opportunity):`
+    )
     for (const r of aiOverviewKeywords) {
-      console.log(`  • ${r.keyword}`);
+      console.log(`  • ${r.keyword}`)
       if (r.aiOverview?.sources?.length) {
-        console.log(`    Cited sources: ${r.aiOverview.sources.map((s) => s.domain).join(", ")}`);
+        console.log(`    Cited sources: ${r.aiOverview.sources.map((s) => s.domain).join(', ')}`)
       }
     }
   }
 
   // Featured Snippet opportunities
-  const snippetKeywords = results.filter((r) =>
-    r.features.includes("featured_snippet")
-  );
+  const snippetKeywords = results.filter((r) => r.features.includes('featured_snippet'))
   if (snippetKeywords.length > 0) {
-    console.log(`\n✦ Featured Snippet detected for ${snippetKeywords.length} keywords:`);
+    console.log(`\n✦ Featured Snippet detected for ${snippetKeywords.length} keywords:`)
     for (const r of snippetKeywords) {
-      console.log(`  • ${r.keyword} — currently held by: ${r.featuredSnippet?.domain || "unknown"}`);
+      console.log(`  • ${r.keyword} — currently held by: ${r.featuredSnippet?.domain || 'unknown'}`)
     }
   }
 
   // Easy wins (low difficulty)
-  const easyWins = results.filter(
-    (r) => r.difficulty === "easy" || r.difficulty === "easy-medium"
-  );
+  const easyWins = results.filter((r) => r.difficulty === 'easy' || r.difficulty === 'easy-medium')
   if (easyWins.length > 0) {
-    console.log(`\n✦ Easy wins (${easyWins.length} keywords with low competition):`);
+    console.log(`\n✦ Easy wins (${easyWins.length} keywords with low competition):`)
     for (const r of easyWins) {
-      console.log(`  • ${r.keyword} [${r.difficulty}]`);
+      console.log(`  • ${r.keyword} [${r.difficulty}]`)
     }
   }
 
   // Tracked domain presence
   if (trackedDomains.length > 0) {
-    console.log(`\n✦ Tracked domains presence:`);
+    console.log(`\n✦ Tracked domains presence:`)
     for (const domain of trackedDomains) {
-      const present = results.filter((r) =>
-        r.domains.some((d) => d.includes(domain))
-      );
-      const absent = results.filter(
-        (r) => !r.domains.some((d) => d.includes(domain))
-      );
-      console.log(`\n  ${domain}:`);
-      console.log(`    Ranking for: ${present.length}/${results.length} keywords`);
+      const present = results.filter((r) => r.domains.some((d) => d.includes(domain)))
+      const absent = results.filter((r) => !r.domains.some((d) => d.includes(domain)))
+      console.log(`\n  ${domain}:`)
+      console.log(`    Ranking for: ${present.length}/${results.length} keywords`)
       if (present.length > 0) {
         for (const r of present) {
-          const pos = r.organicResults.find((o) => o.domain.includes(domain));
-          console.log(`      ✓ "${r.keyword}" — position ${pos?.position || "?"}`);
+          const pos = r.organicResults.find((o) => o.domain.includes(domain))
+          console.log(`      ✓ "${r.keyword}" — position ${pos?.position || '?'}`)
         }
       }
       if (absent.length > 0) {
-        console.log(`    Missing from (content gap):`);
+        console.log(`    Missing from (content gap):`)
         for (const r of absent) {
-          console.log(`      ✗ "${r.keyword}"`);
+          console.log(`      ✗ "${r.keyword}"`)
         }
       }
     }
   }
 
   // All PAA questions (deduplicated)
-  const allPAA = new Set();
+  const allPAA = new Set()
   for (const r of results) {
-    for (const q of r.paaQuestions) allPAA.add(q);
+    for (const q of r.paaQuestions) allPAA.add(q)
   }
   if (allPAA.size > 0) {
-    console.log(`\n✦ All People Also Ask questions (${allPAA.size} unique):`);
-    let i = 0;
+    console.log(`\n✦ All People Also Ask questions (${allPAA.size} unique):`)
+    let i = 0
     for (const q of allPAA) {
       if (i++ >= 30) {
-        console.log(`  ... and ${allPAA.size - 30} more`);
-        break;
+        console.log(`  ... and ${allPAA.size - 30} more`)
+        break
       }
-      console.log(`  ? ${q}`);
+      console.log(`  ? ${q}`)
     }
   }
 
   // Domain frequency across all SERPs
-  const domainFreq = {};
+  const domainFreq = {}
   for (const r of results) {
     for (const d of r.domains) {
-      domainFreq[d] = (domainFreq[d] || 0) + 1;
+      domainFreq[d] = (domainFreq[d] || 0) + 1
     }
   }
   const topDomains = Object.entries(domainFreq)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 15);
+    .slice(0, 15)
 
-  console.log(`\n✦ Most frequent ranking domains (top competitors):`);
+  console.log(`\n✦ Most frequent ranking domains (top competitors):`)
   for (const [domain, count] of topDomains) {
-    const bar = "█".repeat(count);
-    console.log(`  ${domain.padEnd(35)} ${bar} (${count})`);
+    const bar = '█'.repeat(count)
+    console.log(`  ${domain.padEnd(35)} ${bar} (${count})`)
   }
 
-  console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
 }
 
 async function main() {
-  const opts = parseArgs();
+  const opts = parseArgs()
 
-  let keywords = opts.keywords;
+  let keywords = opts.keywords
 
   // Load from input file if provided
   if (opts.input) {
-    const data = JSON.parse(fs.readFileSync(opts.input, "utf-8"));
-    const kws = data.keywords || [];
-    keywords = kws.slice(0, opts.top).map((k) =>
-      typeof k === "string" ? k : k.keyword
-    );
-    console.log(
-      `Loaded ${kws.length} keywords from ${opts.input}, analyzing top ${opts.top}`
-    );
+    const data = JSON.parse(fs.readFileSync(opts.input, 'utf-8'))
+    const kws = data.keywords || []
+    keywords = kws.slice(0, opts.top).map((k) => (typeof k === 'string' ? k : k.keyword))
+    console.log(`Loaded ${kws.length} keywords from ${opts.input}, analyzing top ${opts.top}`)
   }
 
-  console.log(`\nAnalyzing ${keywords.length} keywords...\n`);
+  console.log(`\nAnalyzing ${keywords.length} keywords...\n`)
 
-  const results = [];
+  const results = []
 
   for (let i = 0; i < keywords.length; i++) {
-    const keyword = keywords[i];
-    console.log(
-      `[${i + 1}/${keywords.length}] Analyzing: "${keyword}"`
-    );
+    const keyword = keywords[i]
+    console.log(`[${i + 1}/${keywords.length}] Analyzing: "${keyword}"`)
 
     try {
-      const analysis = await analyzeSERP(keyword, opts.gl, opts.hl);
-      results.push(analysis);
+      const analysis = await analyzeSERP(keyword, opts.gl, opts.hl)
+      results.push(analysis)
       console.log(
         `  → ${analysis.features.length} features, ${analysis.organicResults.length} organic, difficulty: ${analysis.difficulty}`
-      );
+      )
     } catch (e) {
-      console.log(`  → Error: ${e.message}`);
+      console.log(`  → Error: ${e.message}`)
     }
 
-    if (i < keywords.length - 1) await sleep(1500);
+    if (i < keywords.length - 1) await sleep(1500)
   }
 
-  printReport(results, opts.track);
+  printReport(results, opts.track)
 
   // Save results
-  const outPath = opts.out || `serp-analysis-${Date.now()}.json`;
+  const outPath = opts.out || `serp-analysis-${Date.now()}.json`
   const output = {
     meta: {
       generated: new Date().toISOString(),
@@ -415,12 +416,12 @@ async function main() {
       trackedDomains: opts.track,
     },
     results,
-  };
-  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
-  console.log(`Full results saved to: ${outPath}`);
+  }
+  fs.writeFileSync(outPath, JSON.stringify(output, null, 2))
+  console.log(`Full results saved to: ${outPath}`)
 }
 
 main().catch((e) => {
-  console.error("Fatal error:", e.message);
-  process.exit(1);
-});
+  console.error('Fatal error:', e.message)
+  process.exit(1)
+})
