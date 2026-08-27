@@ -434,7 +434,7 @@ export class EmailService {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Re-engagement Email:')
         console.log(`  To: ${safeLog(email)}`)
-        console.log(`  User: @${safeLog(username)}`)
+        console.log('  User:', `@${safeLog(username)}`)
         console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'reengagement')
         return { success: true, messageId: `dev-simulated-reengagement-${Date.now()}` }
