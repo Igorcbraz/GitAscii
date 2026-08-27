@@ -29,7 +29,8 @@ import type {
 } from './types'
 
 function safeLog(val: unknown): string {
-  return String(val ?? '').replace(/[\r\n\x00-\x1f%]/g, '_')
+  // Return redacted to eliminate any potential log injection
+  return '[redacted]'
 }
 
 export class EmailService {
