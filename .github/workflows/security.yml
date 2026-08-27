@@ -39,7 +39,7 @@ jobs:
             p/owasp-top-ten
             p/javascript
             p/typescript
-          generateSarif: '1'
+          args: '--sarif --output=semgrep.sarif'
         env:
           SEMGREP_RULES: p/security-audit p/owasp-top-ten p/javascript p/typescript
 
@@ -75,7 +75,7 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
-          comment-on-pr: true
+          comment-summary-in-pr: true
 
       - name: Run npm audit
         run: npm audit --audit-level=high

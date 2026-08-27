@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
+import { GridMode } from '@/constants'
 import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
 import { safeStorage } from '@/utils/storage'
 
-import { GridMode } from '@/constants'
 import { WIDGET_CATALOG } from '../config/widgets'
 import { detectSocialsFromProfile, detectTechStackFromProfile } from '../utils/profileAutoDetection'
 
