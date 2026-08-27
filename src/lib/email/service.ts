@@ -388,7 +388,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send request star email to @${safeLog(username)}:`,
+          '[EmailService] Failed to send request star email to @%s:',
+          safeLog(username),
           safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend Request Star Error: ${error.message}`))
