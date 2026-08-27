@@ -46,19 +46,37 @@ export function renderTerminalInfo(
   const statsValClr = (cfg.statsValColor as string) || '#79c0ff'
   const dividerClr = (cfg.dividerColor as string) || '#3d444d'
 
-  const fontSize = 14
+  const fontSize = width < 320 ? 11 : width < 420 ? 12 : 14
   const fontCharWidth = fontSize * 0.6
   const paddingX = 12
-  const totalChars = Math.max(26, Math.floor((width - paddingX * 2) / fontCharWidth))
-  const lineHeight = Math.max(18, Math.floor(fontSize * 1.35))
+  const totalChars = Math.max(16, Math.floor((width - paddingX * 2) / fontCharWidth))
+  const lineHeight = Math.max(15, Math.floor(fontSize * 1.35))
 
   const lines: string[] = []
-  let currentY = 20
+  let currentY = fontSize + 6
+
+  const formatRow = (label: string, val: string, valueColorOverride?: string) => {
+    const minLabelLen = label.length
+    const availableForVal = Math.max(3, totalChars - minLabelLen - (dotLeaders ? 3 : 1))
+    let displayVal = val
+    if (val.length > availableForVal) {
+      displayVal = val.slice(0, Math.max(1, availableForVal - 1)) + '…'
+    }
+    const dotCount = dotLeaders ? Math.max(1, totalChars - minLabelLen - displayVal.length) : 2
+    const dotsStr = dotLeaders ? '.'.repeat(dotCount) : '  '
+    const finalValColor = valueColorOverride || valClr
+
+    return `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(label)}</tspan><tspan fill="${dotClr}">${dotsStr}</tspan><tspan fill="${finalValColor}">${escapeXml(displayVal)}</tspan></text>`
+  }
 
   if (showMainSection) {
     const username = data?.user?.login || 'user'
-    const titleStr = (cfg.customTitle as string) || `${username}@github`
-    const dashesCount = Math.max(2, totalChars - 1 - (titleStr.length + 2))
+    let titleStr = (cfg.customTitle as string) || `${username}@github`
+    const maxTitleLen = Math.max(6, totalChars - 6)
+    if (titleStr.length > maxTitleLen) {
+      titleStr = titleStr.slice(0, maxTitleLen - 1) + '…'
+    }
+    const dashesCount = Math.max(1, totalChars - 1 - (titleStr.length + 2))
     const dashesStr = '─'.repeat(dashesCount)
 
     lines.push(
@@ -124,22 +142,15 @@ export function renderTerminalInfo(
     }
 
     for (const item of mainItems) {
-      const dotCount = dotLeaders
-        ? Math.max(2, totalChars - item.label.length - item.val.length)
-        : 2
-      const dotsStr = dotLeaders ? '.'.repeat(dotCount) : '  '
-
-      lines.push(
-        `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(item.label)}</tspan><tspan fill="${dotClr}">${dotsStr}</tspan><tspan fill="${valClr}">${escapeXml(item.val)}</tspan></text>`
-      )
+      lines.push(formatRow(item.label, item.val))
       currentY += lineHeight
     }
-    currentY += 12
+    currentY += 8
   }
 
   if (showContactSection) {
     const contactTitleStr = (cfg.customContactTitle as string) || 'Contact'
-    const dashesCount = Math.max(2, totalChars - 1 - (contactTitleStr.length + 2))
+    const dashesCount = Math.max(1, totalChars - 1 - (contactTitleStr.length + 2))
     const dashesStr = '─'.repeat(dashesCount)
 
     lines.push(
@@ -173,22 +184,15 @@ export function renderTerminalInfo(
     }
 
     for (const item of contactItems) {
-      const dotCount = dotLeaders
-        ? Math.max(2, totalChars - item.label.length - item.val.length)
-        : 2
-      const dotsStr = dotLeaders ? '.'.repeat(dotCount) : '  '
-
-      lines.push(
-        `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(item.label)}</tspan><tspan fill="${dotClr}">${dotsStr}</tspan><tspan fill="${valClr}">${escapeXml(item.val)}</tspan></text>`
-      )
+      lines.push(formatRow(item.label, item.val))
       currentY += lineHeight
     }
-    currentY += 12
+    currentY += 8
   }
 
   if (showStatsSection) {
     const statsTitleStr = (cfg.customStatsTitle as string) || 'GitHub Stats'
-    const dashesCount = Math.max(2, totalChars - 1 - (statsTitleStr.length + 2))
+    const dashesCount = Math.max(1, totalChars - 1 - (statsTitleStr.length + 2))
     const dashesStr = '─'.repeat(dashesCount)
 
     lines.push(
@@ -232,31 +236,35 @@ export function renderTerminalInfo(
       if (gistsCount) statFields.push({ label: '. Gists: ', val: ` ${gistsCount}` })
     }
 
-    for (let i = 0; i < statFields.length; i += 2) {
-      const item1 = statFields[i]
-      const item2 = statFields[i + 1]
+    const allowTwoCols = totalChars >= 36
 
-      if (item1 && item2) {
-        const halfChars = Math.floor((totalChars - 3) / 2)
-        const dots1 = dotLeaders
-          ? Math.max(2, halfChars - item1.label.length - item1.val.length)
-          : 2
-        const dots2 = dotLeaders
-          ? Math.max(2, halfChars - item2.label.length - item2.val.length)
-          : 2
+    if (allowTwoCols) {
+      for (let i = 0; i < statFields.length; i += 2) {
+        const item1 = statFields[i]
+        const item2 = statFields[i + 1]
 
-        lines.push(
-          `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(item1.label)}</tspan><tspan fill="${dotClr}">${'.'.repeat(dots1)}</tspan><tspan fill="${statsValClr}">${escapeXml(item1.val)}</tspan><tspan fill="${dividerClr}"> | </tspan><tspan fill="${labelClr}">${escapeXml(item2.label)}</tspan><tspan fill="${dotClr}">${'.'.repeat(dots2)}</tspan><tspan fill="${statsValClr}">${escapeXml(item2.val)}</tspan></text>`
-        )
-      } else if (item1) {
-        const dots1 = dotLeaders
-          ? Math.max(2, totalChars - item1.label.length - item1.val.length)
-          : 2
-        lines.push(
-          `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(item1.label)}</tspan><tspan fill="${dotClr}">${'.'.repeat(dots1)}</tspan><tspan fill="${statsValClr}">${escapeXml(item1.val)}</tspan></text>`
-        )
+        if (item1 && item2) {
+          const halfChars = Math.floor((totalChars - 3) / 2)
+          const dots1 = dotLeaders
+            ? Math.max(1, halfChars - item1.label.length - item1.val.length)
+            : 2
+          const dots2 = dotLeaders
+            ? Math.max(1, halfChars - item2.label.length - item2.val.length)
+            : 2
+
+          lines.push(
+            `<text x="${paddingX}" y="${currentY}" font-family="'Consolas', 'Menlo', 'DejaVu Sans Mono', 'JetBrains Mono', monospace" xml:space="preserve" font-size="${fontSize}"><tspan fill="${labelClr}">${escapeXml(item1.label)}</tspan><tspan fill="${dotClr}">${'.'.repeat(dots1)}</tspan><tspan fill="${statsValClr}">${escapeXml(item1.val)}</tspan><tspan fill="${dividerClr}"> | </tspan><tspan fill="${labelClr}">${escapeXml(item2.label)}</tspan><tspan fill="${dotClr}">${'.'.repeat(dots2)}</tspan><tspan fill="${statsValClr}">${escapeXml(item2.val)}</tspan></text>`
+          )
+        } else if (item1) {
+          lines.push(formatRow(item1.label, item1.val, statsValClr))
+        }
+        currentY += lineHeight
       }
-      currentY += lineHeight
+    } else {
+      for (const item of statFields) {
+        lines.push(formatRow(item.label, item.val, statsValClr))
+        currentY += lineHeight
+      }
     }
   }
 

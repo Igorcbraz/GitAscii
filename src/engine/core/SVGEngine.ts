@@ -1,4 +1,4 @@
-import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_ALIASES } from '@/constants'
+import { EXTERNAL_LINKS, GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_ALIASES } from '@/constants'
 
 import type {
   GlobalStyles,
@@ -187,7 +187,7 @@ export function renderSvg(
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=PT+Serif:ital,wght@0,300;1,300&amp;display=swap');
+    @import url('${EXTERNAL_LINKS.GOOGLE_FONTS_CSS.replace(/&/g, '&amp;')}');
 
     * {
       box-sizing: border-box;

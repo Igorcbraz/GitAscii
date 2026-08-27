@@ -165,13 +165,8 @@ export async function POST(request: Request) {
       /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
     const isWidgetMissing = !currentContent.match(widgetRegex)
 
-    if (hasJsonChanged || isWidgetMissing) {
-      let newContent = currentContent
-      if (!isWidgetMissing) {
-        newContent = currentContent.replace(widgetRegex, finalEmbedCode)
-      } else {
-        newContent = currentContent ? `${currentContent}\n\n${finalEmbedCode}` : finalEmbedCode
-      }
+    if (hasJsonChanged || isWidgetMissing || currentContent.trim() !== finalEmbedCode.trim()) {
+      const newContent = finalEmbedCode
 
       const updateRes = await fetch(
         API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),

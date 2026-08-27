@@ -4,7 +4,13 @@ import { Eye, EyeOff, Lock, Maximize2, Palette, Trash2, Type, Unlock } from 'luc
 import React from 'react'
 
 import { Switch } from '@/components/ui/Switch'
-import { ASCII_PREMIUM_COLOR_THEMES, SURVEILLANCE_COLOR_THEMES, WIDGET_IDS } from '@/constants'
+import {
+  ASCII_PREMIUM_COLOR_THEMES,
+  GLOBAL_FONT_OPTIONS,
+  SURVEILLANCE_COLOR_THEMES,
+  TEXT_ALIGN_OPTIONS,
+  WIDGET_IDS,
+} from '@/constants'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -200,13 +206,26 @@ export function PropertiesPanel() {
                 onChange={(e) =>
                   useEditorStore.getState().updateGlobalStyles({ fontFamily: e.target.value })
                 }
-                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none"
+                className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note px-2 py-1.5 rounded-xs focus:border-signal-lime focus:outline-none cursor-pointer"
               >
-                <option value="Inter Tight">Inter Tight</option>
-                <option value="JetBrains Mono">JetBrains Mono</option>
-                <option value="Roboto">Roboto</option>
-                <option value="Fira Code">Fira Code</option>
-                <option value="PT Serif">PT Serif</option>
+                {(['sans-serif', 'monospace', 'serif'] as const).map((cat) => (
+                  <optgroup
+                    key={cat}
+                    label={
+                      cat === 'sans-serif'
+                        ? 'Sans-Serif'
+                        : cat === 'monospace'
+                          ? 'Monospace'
+                          : 'Serif'
+                    }
+                  >
+                    {GLOBAL_FONT_OPTIONS.filter((f) => f.category === cat).map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
 
@@ -608,7 +627,7 @@ export function PropertiesPanel() {
           )}
         </div>
 
-        {selectedWidget.widgetId === 'bio' && (
+        {selectedWidget.widgetId === WIDGET_IDS.BIO && (
           <div className="space-y-3 pt-3 border-t border-graphite">
             <div className="flex items-center gap-2 text-signal-lime font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
               <Type size={14} />
@@ -641,6 +660,36 @@ export function PropertiesPanel() {
                 )}
                 className="w-full bg-graphite border border-graphite text-chalk font-inter-tight text-note p-2 rounded-xs focus:border-signal-lime focus:outline-none resize-none"
               />
+            </div>
+
+            <div>
+              <label className="text-eyebrow text-ash block mb-1.5 font-inter-tight">
+                {t('editor.properties.text_align', 'Alinhamento do Texto')}
+              </label>
+              <div className="grid grid-cols-4 gap-1 p-1 bg-graphite rounded-xs border border-graphite">
+                {TEXT_ALIGN_OPTIONS.map((item) => {
+                  const currentAlign = (cfg.textAlign as string) || 'left'
+                  const isActive = currentAlign === item.id
+                  const Icon = item.icon
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        updateWidgetConfig(selectedWidget.instanceId, { textAlign: item.id })
+                      }
+                      title={t(item.labelKey, item.defaultLabel)}
+                      className={`py-1.5 flex items-center justify-center rounded-xs transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-signal-lime text-black font-semibold shadow-xs'
+                          : 'text-ash hover:text-chalk hover:bg-carbon'
+                      }`}
+                    >
+                      <Icon size={14} />
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             <div>
