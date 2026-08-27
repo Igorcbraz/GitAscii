@@ -28,6 +28,10 @@ import type {
   WelcomeEmailPayload,
 } from './types'
 
+function safeLog(val: unknown): string {
+  return String(val ?? '').replace(/[\r\n\x00-\x1f%]/g, '_')
+}
+
 export class EmailService {
   private buildHeaders(email: string, username: string) {
     const unsubUrl = getUnsubscribeUrl(email, username)
@@ -59,15 +63,15 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Welcome Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'welcome')
         return { success: true, messageId: `dev-simulated-welcome-${Date.now()}` }
       }
       if (process.env.NODE_ENV !== 'test') {
         console.warn(
-          `[EmailService] RESEND_API_KEY is not configured. Skipped sending welcome email to @${username}.`
+          `[EmailService] RESEND_API_KEY is not configured. Skipped sending welcome email to @${safeLog(username)}.`
         )
       }
       return { success: false, skipped: true, reason: 'Resend API key not configured' }
@@ -90,7 +94,10 @@ export class EmailService {
       )
 
       if (error) {
-        console.error(`[EmailService] Failed to send welcome email to @${username}:`, error.message)
+        console.error(
+          `[EmailService] Failed to send welcome email to @${safeLog(username)}:`,
+          safeLog(error.message)
+        )
         Sentry.captureException(new Error(`Resend Welcome Email Error: ${error.message}`))
         return { success: false, error: error.message }
       }
@@ -99,7 +106,10 @@ export class EmailService {
       return { success: true, messageId: data?.id }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error sending welcome email'
-      console.error(`[EmailService] Exception sending welcome email to @${username}:`, message)
+      console.error(
+        `[EmailService] Exception sending welcome email to @${safeLog(username)}:`,
+        safeLog(message)
+      )
       Sentry.captureException(err)
       return { success: false, error: message }
     }
@@ -127,15 +137,15 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated First Export Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'first_export')
         return { success: true, messageId: `dev-simulated-export-${Date.now()}` }
       }
       if (process.env.NODE_ENV !== 'test') {
         console.warn(
-          `[EmailService] RESEND_API_KEY is not configured. Skipped sending first export email to @${username}.`
+          `[EmailService] RESEND_API_KEY is not configured. Skipped sending first export email to @${safeLog(username)}.`
         )
       }
       return { success: false, skipped: true, reason: 'Resend API key not configured' }
@@ -159,8 +169,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send first export email to @${username}:`,
-          error.message
+          `[EmailService] Failed to send first export email to @${safeLog(username)}:`,
+          safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend First Export Error: ${error.message}`))
         return { success: false, error: error.message }
@@ -171,7 +181,10 @@ export class EmailService {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Unknown error sending first export email'
-      console.error(`[EmailService] Exception sending first export email to @${username}:`, message)
+      console.error(
+        `[EmailService] Exception sending first export email to @${safeLog(username)}:`,
+        safeLog(message)
+      )
       Sentry.captureException(err)
       return { success: false, error: message }
     }
@@ -200,9 +213,9 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated App Disconnected Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'app_disconnected')
         return { success: true, messageId: `dev-simulated-app-disc-${Date.now()}` }
       }
@@ -227,8 +240,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send app disconnected alert to @${username}:`,
-          error.message
+          `[EmailService] Failed to send app disconnected alert to @${safeLog(username)}:`,
+          safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend App Disconnected Error: ${error.message}`))
         return { success: false, error: error.message }
@@ -239,8 +252,8 @@ export class EmailService {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error(
-        `[EmailService] Exception sending app disconnected email to @${username}:`,
-        message
+        `[EmailService] Exception sending app disconnected email to @${safeLog(username)}:`,
+        safeLog(message)
       )
       Sentry.captureException(err)
       return { success: false, error: message }
@@ -269,9 +282,9 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Star Thank You Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'star_thank_you')
         return { success: true, messageId: `dev-simulated-star-thanks-${Date.now()}` }
       }
@@ -296,8 +309,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send star thank-you email to @${username}:`,
-          error.message
+          `[EmailService] Failed to send star thank-you email to @${safeLog(username)}:`,
+          safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend Star Thank You Error: ${error.message}`))
         return { success: false, error: error.message }
@@ -308,8 +321,8 @@ export class EmailService {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error(
-        `[EmailService] Exception sending star thank-you email to @${username}:`,
-        message
+        `[EmailService] Exception sending star thank-you email to @${safeLog(username)}:`,
+        safeLog(message)
       )
       Sentry.captureException(err)
       return { success: false, error: message }
@@ -348,9 +361,9 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Request Star Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'request_star')
         return { success: true, messageId: `dev-simulated-request-star-${Date.now()}` }
       }
@@ -375,8 +388,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send request star email to @${username}:`,
-          error.message
+          `[EmailService] Failed to send request star email to @${safeLog(username)}:`,
+          safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend Request Star Error: ${error.message}`))
         return { success: false, error: error.message }
@@ -386,7 +399,10 @@ export class EmailService {
       return { success: true, messageId: data?.id }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      console.error(`[EmailService] Exception sending request star email to @${username}:`, message)
+      console.error(
+        `[EmailService] Exception sending request star email to @${safeLog(username)}:`,
+        safeLog(message)
+      )
       Sentry.captureException(err)
       return { success: false, error: message }
     }
@@ -417,15 +433,15 @@ export class EmailService {
     if (!resend || !isEmailConfigured()) {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Re-engagement Email:')
-        console.log(`  To: ${email}`)
-        console.log(`  User: @${username}`)
-        console.log(`  Subject: ${subject}`)
+        console.log(`  To: ${safeLog(email)}`)
+        console.log(`  User: @${safeLog(username)}`)
+        console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'reengagement')
         return { success: true, messageId: `dev-simulated-reengagement-${Date.now()}` }
       }
       if (process.env.NODE_ENV !== 'test') {
         console.warn(
-          `[EmailService] RESEND_API_KEY is not configured. Skipped sending re-engagement email to @${username}.`
+          `[EmailService] RESEND_API_KEY is not configured. Skipped sending re-engagement email to @${safeLog(username)}.`
         )
       }
       return { success: false, skipped: true, reason: 'Resend API key not configured' }
@@ -450,8 +466,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send re-engagement email to @${username}:`,
-          error.message
+          `[EmailService] Failed to send re-engagement email to @${safeLog(username)}:`,
+          safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend Reengagement Error: ${error.message}`))
         return { success: false, error: error.message }
@@ -463,8 +479,8 @@ export class EmailService {
       const message =
         err instanceof Error ? err.message : 'Unknown error sending re-engagement email'
       console.error(
-        `[EmailService] Exception sending re-engagement email to @${username}:`,
-        message
+        `[EmailService] Exception sending re-engagement email to @${safeLog(username)}:`,
+        safeLog(message)
       )
       Sentry.captureException(err)
       return { success: false, error: message }

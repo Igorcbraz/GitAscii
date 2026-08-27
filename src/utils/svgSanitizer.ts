@@ -12,7 +12,7 @@ function decodeXmlEntities(str: string): string {
 export function sanitizeSvg(svgContent: string): string {
   if (!svgContent || typeof svgContent !== 'string') return ''
 
-  let cleaned = svgContent.replace(/<\?xml[\s\S]*?\?>/gi, '').replace(/<!DOCTYPE[\s\S]*?>/gi, '')
+  let cleaned = svgContent.replace(/<\?xml[^?]*\?>/gi, '').replace(/<!DOCTYPE[^>]*>/gi, '')
 
   const dangerousTags = [
     'script',
@@ -51,17 +51,13 @@ export function sanitizeSvg(svgContent: string): string {
     }
 
     if (
-      /(?:values|to|from|by)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:text\/|data:application\/)/i.test(
-        decodedAttrs
-      )
+      /(?:values|to|from|by)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:)/i.test(decodedAttrs)
     ) {
       return ''
     }
 
     if (
-      /(?:href|xlink:href)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:text\/|data:application\/)/i.test(
-        decodedAttrs
-      )
+      /(?:href|xlink:href)\s*=\s*["']?[^"']*(?:javascript:|vbscript:|data:)/i.test(decodedAttrs)
     ) {
       return ''
     }

@@ -324,12 +324,10 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
-  const imageRegex = /<image\b[^<>]*>/gi
-  const imageMatches = [...finalSvg.matchAll(imageRegex)]
+  const imageMatches = finalSvg.match(/<image[^>]*>/gi) || []
 
-  for (const m of imageMatches) {
-    const fullMatch = m[0]
-    const hrefMatch = fullMatch.match(/href="((?:https?:\/\/|www\.)[^"]+?)"/)
+  for (const fullMatch of imageMatches) {
+    const hrefMatch = fullMatch.match(/href="((?:https?:\/\/|www\.)[^"]+?)"/i)
     if (!hrefMatch) continue
     let url = hrefMatch[1].replace(/&amp;/g, '&')
 

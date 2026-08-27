@@ -141,14 +141,16 @@ export async function generateProfileSvgResponse(
 
       if (widgetsParam && widgetsParam.length > 0) {
         for (const widgetId of widgetsParam) {
-          const hasWidget = config.widgets.some((w: any) => w.widgetId === widgetId)
+          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
+          if (!item) continue
+          const safeWidgetId = item.id
+          const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
           if (!hasWidget) {
-            const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
             config.widgets.push({
-              instanceId: `${widgetId}-query-${Date.now()}`,
-              widgetId,
+              instanceId: `${safeWidgetId}-query-${Date.now()}`,
+              widgetId: safeWidgetId,
               position: { x: 20, y: 20 },
-              size: item?.defaultSize || { width: 400, height: 200 },
+              size: item.defaultSize || { width: 400, height: 200 },
               config: {},
               locked: false,
               visible: true,

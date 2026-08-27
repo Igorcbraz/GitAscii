@@ -133,11 +133,23 @@ async function searchPokemonCards(query: string): Promise<UnifiedPokemonCard[]> 
   return []
 }
 
+function isTcgdexHost(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr)
+    return (
+      parsed.hostname === 'assets.tcgdex.net' ||
+      parsed.hostname === 'tcgdex.net' ||
+      parsed.hostname.endsWith('.tcgdex.net')
+    )
+  } catch {
+    return false
+  }
+}
+
 async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
+  const isTcgdex = isTcgdexHost(cardImageUrl)
   const targetUrl =
-    cardImageUrl.includes('tcgdex.net') && !cardImageUrl.endsWith('.webp')
-      ? `${cardImageUrl}/low.webp`
-      : cardImageUrl
+    isTcgdex && !cardImageUrl.endsWith('.webp') ? `${cardImageUrl}/low.webp` : cardImageUrl
 
   try {
     const res = await fetch(targetUrl)

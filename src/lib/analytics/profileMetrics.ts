@@ -27,9 +27,11 @@ export function parseViewerMetadata(request: Request): {
   const headers = request.headers
   const userAgent = headers.get('user-agent') || ''
   const uaLower = userAgent.toLowerCase()
+  const uaTokens = uaLower.split(/[\s();,]+/)
   const isCamoProxy =
     uaLower.includes('github-camo') ||
-    /(?:^|[^a-z0-9.-])camo\.githubusercontent\.com(?:[^a-z0-9.-]|$)/i.test(uaLower)
+    uaLower.includes('camo-proxy') ||
+    uaTokens.some((t) => t === 'camo.githubusercontent.com')
 
   const referrer = headers.get('referer') || null
   const country = headers.get('x-vercel-ip-country') || headers.get('cf-ipcountry') || null
