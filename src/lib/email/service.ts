@@ -362,7 +362,7 @@ export class EmailService {
       if (process.env.NODE_ENV === 'development') {
         console.log('\n[EmailService:DEV] ✉️ Simulated Request Star Email:')
         console.log(`  To: ${safeLog(email)}`)
-        console.log(`  User: @${safeLog(username)}`)
+        console.log('  User: [redacted]')
         console.log(`  Subject: ${safeLog(subject)}`)
         recordEventSent(username, 'request_star')
         return { success: true, messageId: `dev-simulated-request-star-${Date.now()}` }
