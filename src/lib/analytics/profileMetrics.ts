@@ -28,6 +28,7 @@ export function parseViewerMetadata(request: Request): {
   const userAgent = headers.get('user-agent') || ''
   const uaLower = userAgent.toLowerCase()
   const uaTokens = uaLower.split(/[\s();,]+/)
+  // codeql[js/incomplete-url-substring-sanitization] Not used for URL validation
   const isCamoProxy =
     uaLower.includes('github-camo') ||
     uaLower.includes('camo-proxy') ||

@@ -162,6 +162,7 @@ export async function generateProfileSvgResponse(
 
       const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
       const embedResult = await embedExternalImages(rawSvgContent)
+      // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
       svgContent = sanitizeSvg(embedResult.svg)
       etag = computeEtag(svgContent)
       hasErrors = embedResult.hasErrors
@@ -234,6 +235,7 @@ export async function generateProfileSvgResponse(
       })
     }
 
+    // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
     return new NextResponse(svgContent, {
       status: 200,
       headers,

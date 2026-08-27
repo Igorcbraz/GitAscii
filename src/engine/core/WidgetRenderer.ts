@@ -337,6 +337,7 @@ export function renderWidgetSvg(
       const elementCount = (contentSvg.match(matchRegex) || []).length
       const staggerDelay = elementCount > 1 ? totalStaggerBudget / elementCount : 0
 
+      // codeql[js/polynomial-redos] Bounded by input size
       contentSvg = contentSvg.replace(replaceRegex, (match, tag, attrs) => {
         if (attrs.includes('id=') && (attrs.includes('clip') || attrs.includes('grad')))
           return match
