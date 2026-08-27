@@ -400,7 +400,8 @@ export class EmailService {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error(
-        `[EmailService] Exception sending request star email to @${safeLog(username)}:`,
+        '[EmailService] Exception sending request star email to @%s: %s',
+        safeLog(username),
         safeLog(message)
       )
       Sentry.captureException(err)
