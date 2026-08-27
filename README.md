@@ -113,23 +113,11 @@ Upload `gitascii.json` to the **root** of your special GitHub repository (`usern
 Paste the generated snippet into your `README.md`. It automatically adapts to the viewer's GitHub Dark or Light theme:
 
 ```html
-<div align="center">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://gitascii.com/api/user/yourusername?theme=dark&v=1740672000"
-    />
-    <source
-      media="(prefers-color-scheme: light)"
-      srcset="https://gitascii.com/api/user/yourusername?theme=light&v=1740672000"
-    />
-    <img
-      alt="GitAscii Profile"
-      src="https://gitascii.com/api/user/yourusername?v=1740672000"
-      width="100%"
-    />
-  </picture>
-</div>
+<img
+  alt="GitAscii Profile"
+  src="https://gitascii.com/api/user/yourusername?v=1740672000"
+  width="100%"
+/>
 ```
 
 > **Tip (Cache Invalidation):** GitHub caches external images through its Camo proxy. Whenever you update your `gitascii.json`, update the version parameter in your README links (e.g. using a current Unix timestamp like `?v=1740672000` or simply incrementing `?v=2`) to force GitHub to fetch and render the new layout instantly.
