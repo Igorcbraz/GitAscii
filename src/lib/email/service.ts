@@ -466,7 +466,8 @@ export class EmailService {
 
       if (error) {
         console.error(
-          `[EmailService] Failed to send re-engagement email to @${safeLog(username)}:`,
+          '[EmailService] Failed to send re-engagement email',
+          { username: safeLog(username) },
           safeLog(error.message)
         )
         Sentry.captureException(new Error(`Resend Reengagement Error: ${error.message}`))
@@ -479,7 +480,8 @@ export class EmailService {
       const message =
         err instanceof Error ? err.message : 'Unknown error sending re-engagement email'
       console.error(
-        `[EmailService] Exception sending re-engagement email to @${safeLog(username)}:`,
+        '[EmailService] Exception sending re-engagement email',
+        { username: safeLog(username) },
         safeLog(message)
       )
       Sentry.captureException(err)
