@@ -57,7 +57,7 @@
     "@storybook/nextjs-vite": "^10.5.9",
     "@storybook/test": "*",
     "@tailwindcss/postcss": "^4.0.0",
-    "@types/node": "^24.13.3",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.0.0",
     "@vitest/browser-playwright": "^4.1.10",
