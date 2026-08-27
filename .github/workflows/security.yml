@@ -39,7 +39,7 @@ jobs:
             p/owasp-top-ten
             p/javascript
             p/typescript
-          args: '--sarif --output=semgrep.sarif'
+          generateSarif: '1'
         env:
           SEMGREP_RULES: p/security-audit p/owasp-top-ten p/javascript p/typescript
 
