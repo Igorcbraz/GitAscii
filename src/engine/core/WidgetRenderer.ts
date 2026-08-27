@@ -177,7 +177,7 @@ export function renderWidgetSvg(
         let rectAnimations = ''
 
         if (widget.widgetId.startsWith('terminal-')) {
-          const textTagMatches = contentSvg.match(/<text[^>]*>/gi) || []
+          const textTagMatches = contentSvg.match(/<text[^<>]*>/gi) || []
           const yValues: number[] = []
           for (const tag of textTagMatches) {
             const yMatch = tag.match(/\by="([0-9.]+)"/i)

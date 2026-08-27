@@ -13,7 +13,7 @@ export function sanitizeSvg(svgContent: string): string {
   if (!svgContent || typeof svgContent !== 'string') return ''
 
   // codeql[js/polynomial-redos] Unrolled loops and safe bounds
-  let cleaned = svgContent.replace(/<\?xml[^?]*\?>/gi, '').replace(/<!DOCTYPE[^>]*>/gi, '')
+  let cleaned = svgContent.replace(/<\?xml[^?]*\?>/gi, '').replace(/<!DOCTYPE[^<>]*>/gi, '')
 
   const dangerousTags = [
     'script',

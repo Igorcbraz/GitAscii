@@ -30,7 +30,7 @@ function inlineSvg(
   let svg = sanitized.replace(/<\?xml[\s\S]*?\?>/i, '').trim()
   svg = svg.replace(/<!DOCTYPE[\s\S]*?>/i, '').trim()
 
-  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi
+  const styleRegex = /<style[^<>]*>([\s\S]*?)<\/style>/gi
   let extractedStyles = ''
   const styleMatches = [...svg.matchAll(styleRegex)]
   for (const match of styleMatches) {
@@ -324,7 +324,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
-  const imageMatches = finalSvg.match(/<image[^>]*>/gi) || []
+  const imageMatches = finalSvg.match(/<image[^<>]*>/gi) || []
 
   for (const fullMatch of imageMatches) {
     const hrefMatch = fullMatch.match(/href="((?:https?:\/\/|www\.)[^"]+?)"/i)
