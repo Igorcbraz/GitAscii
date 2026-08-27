@@ -75,7 +75,7 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
-          comment-on-pr: true
+          comment-summary-in-pr: true
 
       - name: Run npm audit
         run: npm audit --audit-level=high

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     API_BASE: 'https://api.github.com',
     GRAPHQL: 'https://api.github.com/graphql',
     CURRENT_USER: 'https://api.github.com/user',
+    USER_EMAILS: 'https://api.github.com/user/emails',
     USER_REPOS: 'https://api.github.com/user/repos',
     PROFILE: (username: string) => `/api/github/${encodeURIComponent(username)}`,
     COMMIT: '/api/github/commit',
@@ -42,7 +43,7 @@ export const API_ENDPOINTS = {
     APP_INSTALL: 'https://github.com/apps/gitascii/installations/new',
     APP_DEV_INSTALL: 'https://github.com/apps/gitascii-dev/installations/new',
     OAUTH_AUTHORIZE: (clientId: string, state = '/') =>
-      `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&scope=read:user&state=${encodeURIComponent(state)}`,
+      `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`,
     OAUTH_ACCESS_TOKEN: 'https://github.com/login/oauth/access_token',
     AVATAR: (username: string, size = 150) =>
       `https://github.com/${encodeURIComponent(username)}.png?size=${size}`,
@@ -69,6 +70,11 @@ export const API_ENDPOINTS = {
   TCGDEX: {
     CARDS_BY_NAME: (name: string) =>
       `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(name)}`,
+  },
+  POKEMON_TCG: {
+    SETS: 'https://cdn.jsdelivr.net/gh/PokemonTCG/pokemon-tcg-data@master/sets/en.json',
+    SET_CARDS: (setId: string) =>
+      `https://cdn.jsdelivr.net/gh/PokemonTCG/pokemon-tcg-data@master/cards/en/${encodeURIComponent(setId)}.json`,
   },
   GITFUT: {
     CARD_IMAGE: (username: string, country?: string) =>

@@ -41,7 +41,11 @@ export function renderStats(
   if (statsStyle === 'terminal') {
     const startY = 48
     const monoFont = `'JetBrains Mono', monospace`
-    if (statsLayout === 'horizontal') {
+    const minColWidth = 100
+    const fitsHorizontal =
+      statsLayout === 'horizontal' && (width - 48) / Math.max(1, statItems.length) >= minColWidth
+
+    if (statsLayout === 'horizontal' && fitsHorizontal) {
       const itemW = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
       statsSvg = statItems
         .map(
@@ -56,18 +60,19 @@ export function renderStats(
       statsSvg = statItems
         .map(
           (m, i) => `
-        <g transform="translate(24, ${startY + i * 32})">
+        <g transform="translate(24, ${startY + i * 34})">
           <text x="0" y="18" font-family="${monoFont}" font-size="13" fill="${accent}">[ ${m.val} ]</text>
           ${labelStyle !== 'none' ? `<text x="${(m.val.length + 4) * 8 + 4}" y="18" font-family="${monoFont}" font-size="9" fill="#7a7a7a" letter-spacing="2">${getLabel(m)}</text>` : ''}
         </g>`
         )
         .join('')
     } else {
-      const colW = (width - 48) / 2
+      const cols = width < 260 ? 1 : 2
+      const colW = (width - 48) / cols
       statsSvg = statItems
         .map(
           (m, i) => `
-        <g transform="translate(${24 + (i % 2) * colW}, ${startY + Math.floor(i / 2) * 40})">
+        <g transform="translate(${24 + (i % cols) * colW}, ${startY + Math.floor(i / cols) * 40})">
           <text x="0" y="18" font-family="${monoFont}" font-size="13" fill="${accent}">[ ${m.val} ]</text>
           ${labelStyle !== 'none' ? `<text x="0" y="30" font-family="${monoFont}" font-size="9" fill="#7a7a7a" letter-spacing="2">${getLabel(m)}</text>` : ''}
         </g>`
@@ -75,8 +80,15 @@ export function renderStats(
         .join('')
     }
   } else if (statsStyle === 'minimal') {
-    const fs = valueFontSize
-    if (statsLayout === 'horizontal') {
+    const minColWidth = 70
+    const fitsHorizontal =
+      statsLayout === 'horizontal' && (width - 48) / Math.max(1, statItems.length) >= minColWidth
+    const fs = Math.min(
+      valueFontSize,
+      Math.max(14, Math.floor((width - 48) / (statItems.length * 3.5)))
+    )
+
+    if (statsLayout === 'horizontal' && fitsHorizontal) {
       const itemW = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
       statsSvg = statItems
         .map(
@@ -92,18 +104,19 @@ export function renderStats(
         )
         .join('')
     } else {
-      const colW = (width - 48) / 2
+      const cols = width < 240 ? 1 : 2
+      const colW = (width - 48) / cols
       statsSvg = statItems
         .map(
           (m, i) => `
-        <text x="${24 + (i % 2) * colW}" y="${48 + Math.floor(i / 2) * (Math.min(fs, 24) + 8) + Math.min(fs, 24)}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(fs, 24)}" font-weight="200" fill="${textClr}">${m.val}</text>`
+        <text x="${24 + (i % cols) * colW}" y="${48 + Math.floor(i / cols) * (Math.min(fs, 24) + 8) + Math.min(fs, 24)}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(fs, 24)}" font-weight="200" fill="${textClr}">${m.val}</text>`
         )
         .join('')
     }
   } else if (statsStyle === 'cards') {
     const cardH = 52
     const gap = 8
-    const cols = statsLayout === 'vertical' ? 1 : 2
+    const cols = statsLayout === 'vertical' || width < 280 ? 1 : 2
     const cardW = cols === 1 ? width - 48 : Math.floor((width - 48 - gap) / 2)
     statsSvg = statItems
       .map((m, i) => {
@@ -115,41 +128,49 @@ export function renderStats(
         <g transform="translate(${cx}, ${cy})">
           <rect x="0" y="0" width="${cardW}" height="${cardH}" fill="#1e1e1e" rx="6" />
           <rect x="0" y="0" width="3" height="${cardH}" fill="${accent}" rx="1" />
-          <text x="12" y="22" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 22)}" font-weight="300" fill="${accent}">${m.val}</text>
+          <text x="12" y="22" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 20)}" font-weight="300" fill="${accent}">${m.val}</text>
           ${labelStyle !== 'none' ? `<text x="12" y="42" font-family="${globalStyles.fontFamily}" font-size="9" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
         </g>`
       })
       .join('')
   } else {
-    if (statsLayout === 'horizontal') {
+    const minColWidth = 90
+    const fitsHorizontal =
+      statsLayout === 'horizontal' && (width - 48) / Math.max(1, statItems.length) >= minColWidth
+
+    if (statsLayout === 'horizontal' && fitsHorizontal) {
       const itemWidth = statItems.length > 0 ? (width - 48) / statItems.length : width - 48
+      const responsiveFs = Math.min(valueFontSize, Math.max(16, Math.floor(itemWidth / 3.2)))
       statsSvg = statItems
         .map(
           (m, i) => `
         <g transform="translate(${24 + i * itemWidth}, 48)">
-          <text x="0" y="${valueFontSize}" font-family="${globalStyles.fontFamily}" font-size="${valueFontSize}" font-weight="300" fill="${accent}">${m.val}</text>
-          ${labelStyle !== 'none' ? `<text x="0" y="${valueFontSize + 18}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+          <text x="0" y="${responsiveFs}" font-family="${globalStyles.fontFamily}" font-size="${responsiveFs}" font-weight="300" fill="${accent}">${m.val}</text>
+          ${labelStyle !== 'none' ? `<text x="0" y="${responsiveFs + 16}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
         </g>`
         )
         .join('')
-    } else if (statsLayout === 'vertical') {
+    } else if (statsLayout === 'vertical' || width < 260) {
+      const responsiveFs = Math.min(valueFontSize, 22)
       statsSvg = statItems
         .map(
           (m, i) => `
-        <g transform="translate(24, ${48 + i * 52})">
-          <text x="0" y="28" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 24)}" font-weight="300" fill="${accent}">${m.val}</text>
-          ${labelStyle !== 'none' ? `<text x="${Math.min(valueFontSize, 24) * (m.val.length * 0.6) + 8}" y="28" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+        <g transform="translate(24, ${48 + i * 48})">
+          <text x="0" y="${responsiveFs}" font-family="${globalStyles.fontFamily}" font-size="${responsiveFs}" font-weight="300" fill="${accent}">${m.val}</text>
+          ${labelStyle !== 'none' ? `<text x="${responsiveFs * (m.val.length * 0.55) + 12}" y="${responsiveFs}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
         </g>`
         )
         .join('')
     } else {
-      const colW = (width - 48) / 2
+      const cols = 2
+      const colW = (width - 48) / cols
+      const responsiveFs = Math.min(valueFontSize, Math.max(16, Math.floor(colW / 4)))
       statsSvg = statItems
         .map(
           (m, i) => `
-        <g transform="translate(${24 + (i % 2) * colW}, ${48 + Math.floor(i / 2) * 60})">
-          <text x="0" y="${Math.min(valueFontSize, 26)}" font-family="${globalStyles.fontFamily}" font-size="${Math.min(valueFontSize, 26)}" font-weight="300" fill="${accent}">${m.val}</text>
-          ${labelStyle !== 'none' ? `<text x="0" y="${Math.min(valueFontSize, 26) + 16}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
+        <g transform="translate(${24 + (i % cols) * colW}, ${48 + Math.floor(i / cols) * 56})">
+          <text x="0" y="${responsiveFs}" font-family="${globalStyles.fontFamily}" font-size="${responsiveFs}" font-weight="300" fill="${accent}">${m.val}</text>
+          ${labelStyle !== 'none' ? `<text x="0" y="${responsiveFs + 15}" font-family="${globalStyles.fontFamily}" font-size="10" font-weight="500" fill="#7a7a7a" letter-spacing="1.5">${getLabel(m)}</text>` : ''}
         </g>`
         )
         .join('')

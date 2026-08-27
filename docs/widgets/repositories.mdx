@@ -1,6 +1,6 @@
 ---
-title: "Featured Repositories Widget"
-description: "Showcase highlighted repositories in list or two-column grid cards"
+title: 'Featured Repositories Widget'
+description: 'Showcase highlighted repositories in list or two-column grid cards'
 ---
 
 # Featured Repositories Widget (`repositories`)
@@ -11,22 +11,22 @@ The Repositories widget highlights pinned or top-starred repositories with repos
 
 ```typescript
 export interface RepositoriesConfig {
-  repoViewMode?: 'list' | 'grid'              // Default: 'list'
+  repoViewMode?: 'list' | 'grid' // Default: 'list'
   repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
-  maxRepos?: number                           // Default: 3
-  selectedRepos?: string[]                    // Specific repository names in display order
-  showRepoStars?: boolean                     // Default: true
-  showRepoLanguage?: boolean                  // Default: true
-  showRepoForks?: boolean                     // Default: false
-  showRepoDesc?: boolean                      // Default: true
-  showRepoUpdated?: boolean                   // Default: false
-  accentColor?: string                        // Default: globalStyles.accentColor
+  maxRepos?: number // Default: 3
+  selectedRepos?: string[] // Specific repository names in display order
+  showRepoStars?: boolean // Default: true
+  showRepoLanguage?: boolean // Default: true
+  showRepoForks?: boolean // Default: false
+  showRepoDesc?: boolean // Default: true
+  showRepoUpdated?: boolean // Default: false
+  accentColor?: string // Default: globalStyles.accentColor
 }
 ```
 
 <ParamField body="repoViewMode" type="'list' | 'grid'" default="list">
-  * `list`: Full-width stacked cards with left vertical accent stripe.
-  * `grid`: Two-column responsive card matrix.
+  * `list`: Full-width stacked cards with left vertical accent stripe. * `grid`: Two-column
+  responsive card matrix.
 </ParamField>
 
 <ParamField body="repoSortBy" type="'stars' | 'forks' | 'updated' | 'name'" default="stars">
@@ -34,7 +34,8 @@ export interface RepositoriesConfig {
 </ParamField>
 
 <ParamField body="selectedRepos" type="string[]" optional>
-  Manual list of repository names (e.g. `['GitAscii', 'next-starter']`) taking precedence over automatic sorting.
+  Manual list of repository names (e.g. `['GitAscii', 'next-starter']`) taking precedence over
+  automatic sorting.
 </ParamField>
 
 ---

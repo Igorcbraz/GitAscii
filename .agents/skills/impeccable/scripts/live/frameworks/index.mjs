@@ -36,16 +36,16 @@
  *    agree, which tests/live-frameworks.test.mjs asserts.
  */
 
-import path from 'node:path';
+import path from 'node:path'
 
-import { sveltekit } from './sveltekit.mjs';
-import { nuxt } from './nuxt.mjs';
-import { tanstackStart } from './tanstack-start.mjs';
-import { astro } from './astro.mjs';
-import { nextjs } from './nextjs.mjs';
-import { viteGeneric } from './vite-generic.mjs';
-import { staticHtml } from './static-html.mjs';
-import { TAG_PATCH_MARKERS, unpatchTagFile } from './tag-strategy.mjs';
+import { sveltekit } from './sveltekit.mjs'
+import { nuxt } from './nuxt.mjs'
+import { tanstackStart } from './tanstack-start.mjs'
+import { astro } from './astro.mjs'
+import { nextjs } from './nextjs.mjs'
+import { viteGeneric } from './vite-generic.mjs'
+import { staticHtml } from './static-html.mjs'
+import { TAG_PATCH_MARKERS, unpatchTagFile } from './tag-strategy.mjs'
 
 /** Priority order. Do not reorder without re-reading rule 1 above. */
 export const FRAMEWORKS = Object.freeze([
@@ -56,12 +56,12 @@ export const FRAMEWORKS = Object.freeze([
   nextjs,
   viteGeneric,
   staticHtml,
-]);
+])
 
-export const PREVIEW_MODES = Object.freeze(['source', 'component']);
-export const STYLE_MODES = Object.freeze(['scoped', 'astro-global-prefixed']);
-export const COMMENT_SYNTAXES = Object.freeze(['html', 'jsx']);
-export const INJECT_KINDS = Object.freeze(['adapter', 'tag']);
+export const PREVIEW_MODES = Object.freeze(['source', 'component'])
+export const STYLE_MODES = Object.freeze(['scoped', 'astro-global-prefixed'])
+export const COMMENT_SYNTAXES = Object.freeze(['html', 'jsx'])
+export const INJECT_KINDS = Object.freeze(['adapter', 'tag'])
 
 export const SOURCE_TRAIT_DEFAULTS = Object.freeze({
   preview: 'source',
@@ -69,19 +69,21 @@ export const SOURCE_TRAIT_DEFAULTS = Object.freeze({
   styleTag: '<style data-impeccable-css="SESSION_ID">',
   commentSyntax: 'html',
   injectScriptAttrs: '',
-});
+})
 
 /** The patch kind the generic tag strategy records in the journal. */
-export const TAG_PATCH_KIND = 'live-tag';
+export const TAG_PATCH_KIND = 'live-tag'
 
 /**
  * Undo functions keyed by the `patch` value an artifact carries. Built from
  * the entries so a new adapter registers its own undo alongside its apply.
  */
-export const PATCH_UNDOERS = Object.freeze(Object.assign(
-  { [TAG_PATCH_KIND]: unpatchTagFile },
-  ...FRAMEWORKS.map((framework) => framework.inject.unpatch || {}),
-));
+export const PATCH_UNDOERS = Object.freeze(
+  Object.assign(
+    { [TAG_PATCH_KIND]: unpatchTagFile },
+    ...FRAMEWORKS.map((framework) => framework.inject.unpatch || {})
+  )
+)
 
 /**
  * First entry whose detect() matches. Returns { framework, project } where
@@ -90,12 +92,12 @@ export const PATCH_UNDOERS = Object.freeze(Object.assign(
  */
 export function resolveFramework(cwd = process.cwd(), config = null) {
   for (const framework of FRAMEWORKS) {
-    const project = framework.detect(cwd, config);
-    if (project) return { framework, project };
+    const project = framework.detect(cwd, config)
+    if (project) return { framework, project }
   }
   // Unreachable while static-html stays terminal, but a caller that reorders
   // the array should get a diagnosable null rather than a silent tag inject.
-  return null;
+  return null
 }
 
 /**
@@ -103,14 +105,14 @@ export function resolveFramework(cwd = process.cwd(), config = null) {
  * `framework` names the entry that claimed the extension, or null.
  */
 export function resolveSourceTraits(filePath) {
-  const ext = path.extname(String(filePath || '')).toLowerCase();
+  const ext = path.extname(String(filePath || '')).toLowerCase()
   for (const framework of FRAMEWORKS) {
-    const source = framework.source;
-    if (!source || !source.extensions.includes(ext)) continue;
-    const { extensions, ...traits } = source;
-    return { framework: framework.name, ...SOURCE_TRAIT_DEFAULTS, ...traits };
+    const source = framework.source
+    if (!source || !source.extensions.includes(ext)) continue
+    const { extensions, ...traits } = source
+    return { framework: framework.name, ...SOURCE_TRAIT_DEFAULTS, ...traits }
   }
-  return { framework: null, ...SOURCE_TRAIT_DEFAULTS };
+  return { framework: null, ...SOURCE_TRAIT_DEFAULTS }
 }
 
 /**
@@ -119,8 +121,8 @@ export function resolveSourceTraits(filePath) {
  * extension and so cannot be written down ahead of time).
  */
 export function frameworkIgnorePatterns(resolved) {
-  const fn = resolved?.framework?.inject?.ignorePatterns;
-  return typeof fn === 'function' ? (fn(resolved.project) || []) : [];
+  const fn = resolved?.framework?.inject?.ignorePatterns
+  return typeof fn === 'function' ? fn(resolved.project) || [] : []
 }
 
 /**
@@ -129,15 +131,15 @@ export function frameworkIgnorePatterns(resolved) {
  * config files.
  */
 export function describeInjectArtifacts(resolved, { cwd = process.cwd(), files = [] } = {}) {
-  if (!resolved) return [];
-  const { framework, project } = resolved;
+  if (!resolved) return []
+  const { framework, project } = resolved
   if (framework.inject.kind === 'adapter') {
-    return (framework.inject.artifacts?.({ cwd, project }) || []).filter((a) => a && a.path);
+    return (framework.inject.artifacts?.({ cwd, project }) || []).filter((a) => a && a.path)
   }
   return files.map((file) => ({
     kind: 'patched',
     path: file,
     patch: TAG_PATCH_KIND,
     markers: [...TAG_PATCH_MARKERS],
-  }));
+  }))
 }

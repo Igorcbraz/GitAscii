@@ -1,6 +1,6 @@
 ---
-title: "ASCII Text Widget"
-description: "Custom headline text rendered using stylized ASCII art fonts"
+title: 'ASCII Text Widget'
+description: 'Custom headline text rendered using stylized ASCII art fonts'
 ---
 
 # ASCII Text Widget (`ascii-text`)
@@ -11,14 +11,14 @@ The ASCII Text widget renders custom alphanumeric text strings using FIGlet-styl
 
 ```typescript
 export interface AsciiTextConfig {
-  customText?: string       // Text string to convert (e.g. 'HACK THE PLANET')
+  customText?: string // Text string to convert (e.g. 'HACK THE PLANET')
   asciiFont?: 'block' | 'slant' | 'thin' // Default: 'block'
-  charSpacing?: number      // Default: 1 (spaces between characters)
-  fontSize?: number         // Default: 12
-  charset?: string          // Character substitution ramp
-  customCharset?: string    // Custom replacement character set
-  accentColor?: string      // Default: globalStyles.accentColor || '#c5ff4a'
-  asciiLines?: string[]     // Pre-calculated ASCII lines override
+  charSpacing?: number // Default: 1 (spaces between characters)
+  fontSize?: number // Default: 12
+  charset?: string // Character substitution ramp
+  customCharset?: string // Custom replacement character set
+  accentColor?: string // Default: globalStyles.accentColor || '#c5ff4a'
+  asciiLines?: string[] // Pre-calculated ASCII lines override
 }
 ```
 
@@ -27,10 +27,8 @@ export interface AsciiTextConfig {
 </ParamField>
 
 <ParamField body="asciiFont" type="'block' | 'slant' | 'thin'" default="block">
-  Selects the ASCII letterform matrix:
-  * `block`: Solid geometric blocks.
-  * `slant`: Angled, forward-leaning italic aesthetic.
-  * `thin`: Lightweight minimalist stroke font.
+  Selects the ASCII letterform matrix: * `block`: Solid geometric blocks. * `slant`: Angled,
+  forward-leaning italic aesthetic. * `thin`: Lightweight minimalist stroke font.
 </ParamField>
 
 ---

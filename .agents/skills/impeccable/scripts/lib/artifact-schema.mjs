@@ -17,10 +17,10 @@
  */
 
 /** PRODUCT.md as init.md writes it today: the ten-section v4 record. */
-export const PRODUCT_SCHEMA_VERSION = 1;
+export const PRODUCT_SCHEMA_VERSION = 1
 
 /** `.impeccable/design.json`, as documented in reference/document.md Step 4b. */
-export const DESIGN_SIDECAR_SCHEMA_VERSION = 2;
+export const DESIGN_SIDECAR_SCHEMA_VERSION = 2
 
 /**
  * Sections init.md added in v4. A PRODUCT.md carrying none of them, and no
@@ -32,7 +32,7 @@ export const PRODUCT_V4_SECTIONS = Object.freeze([
   'Operating Context',
   'Evidence on Hand',
   'Product Principles',
-]);
+])
 
 /**
  * Headings Impeccable used to read and no longer does, with the reason. The
@@ -41,16 +41,17 @@ export const PRODUCT_V4_SECTIONS = Object.freeze([
  * v4 output.
  */
 export const PRODUCT_DEPRECATED_SECTIONS = Object.freeze({
-  Register: 'v4 replaced the brand/product register axis with the four visitor modes '
-    + '(Persuade, Operate, Read, Experience), which are chosen per surface and persisted in that '
-    + "surface's brief. Nothing reads `## Register` any more.",
-});
+  Register:
+    'v4 replaced the brand/product register axis with the four visitor modes ' +
+    '(Persuade, Operate, Read, Experience), which are chosen per surface and persisted in that ' +
+    "surface's brief. Nothing reads `## Register` any more.",
+})
 
-const PRODUCT_STAMP_RE = /^[ \t]*<!--[ \t]*impeccable:product-schema[ \t]+(\d+)[ \t]*-->[ \t]*$/im;
+const PRODUCT_STAMP_RE = /^[ \t]*<!--[ \t]*impeccable:product-schema[ \t]+(\d+)[ \t]*-->[ \t]*$/im
 
 /** The literal stamp line, for the init template and for migrations. */
 export function productStampLine(version = PRODUCT_SCHEMA_VERSION) {
-  return `<!-- impeccable:product-schema ${version} -->`;
+  return `<!-- impeccable:product-schema ${version} -->`
 }
 
 /**
@@ -58,10 +59,10 @@ export function productStampLine(version = PRODUCT_SCHEMA_VERSION) {
  * means "written before stamping existed", not "invalid".
  */
 export function readProductSchemaVersion(markdown) {
-  const match = String(markdown || '').match(PRODUCT_STAMP_RE);
-  if (!match) return null;
-  const version = Number.parseInt(match[1], 10);
-  return Number.isInteger(version) ? version : null;
+  const match = String(markdown || '').match(PRODUCT_STAMP_RE)
+  if (!match) return null
+  const version = Number.parseInt(match[1], 10)
+  return Number.isInteger(version) ? version : null
 }
 
 /**
@@ -71,15 +72,15 @@ export function readProductSchemaVersion(markdown) {
  * heading, or at the top when there is none.
  */
 export function stampProductSchema(markdown, version = PRODUCT_SCHEMA_VERSION) {
-  const body = String(markdown || '');
-  const line = productStampLine(version);
-  if (PRODUCT_STAMP_RE.test(body)) return body.replace(PRODUCT_STAMP_RE, line);
+  const body = String(markdown || '')
+  const line = productStampLine(version)
+  if (PRODUCT_STAMP_RE.test(body)) return body.replace(PRODUCT_STAMP_RE, line)
 
-  const lines = body.split('\n');
-  const headingIndex = lines.findIndex((entry) => /^#\s+\S/.test(entry));
-  if (headingIndex === -1) return `${line}\n\n${body.replace(/^\n+/, '')}`;
-  lines.splice(headingIndex + 1, 0, '', line);
-  return lines.join('\n');
+  const lines = body.split('\n')
+  const headingIndex = lines.findIndex((entry) => /^#\s+\S/.test(entry))
+  if (headingIndex === -1) return `${line}\n\n${body.replace(/^\n+/, '')}`
+  lines.splice(headingIndex + 1, 0, '', line)
+  return lines.join('\n')
 }
 
 /**
@@ -88,6 +89,6 @@ export function stampProductSchema(markdown, version = PRODUCT_SCHEMA_VERSION) {
  * (the field predates the v2 rewrite in some files).
  */
 export function readSidecarSchemaVersion(sidecar) {
-  const version = sidecar && typeof sidecar === 'object' ? sidecar.schemaVersion : null;
-  return Number.isInteger(version) ? version : null;
+  const version = sidecar && typeof sidecar === 'object' ? sidecar.schemaVersion : null
+  return Number.isInteger(version) ? version : null
 }

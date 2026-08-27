@@ -1,6 +1,6 @@
 ---
-title: "Social Media Widget"
-description: "Interactive badge strip and shields linking to developer social platforms"
+title: 'Social Media Widget'
+description: 'Interactive badge strip and shields linking to developer social platforms'
 ---
 
 # Social Media Widget (`social-media`)
@@ -11,24 +11,29 @@ The Social Media widget generates clickable badges for GitHub, LinkedIn, X/Twitt
 
 ```typescript
 export interface SocialMediaConfig {
-  selectedSocials?: string[]               // Array of platform keys
-  socialUrls?: Record<string, string>      // Custom URLs keyed by platform ID
+  selectedSocials?: string[] // Array of platform keys
+  socialUrls?: Record<string, string> // Custom URLs keyed by platform ID
   badgeStyle?: 'for-the-badge' | 'flat-square' | 'social' | 'skillicons' // Default: 'for-the-badge'
-  showTitle?: boolean                      // Default: true
-  customTitle?: string                     // Default: '[ SOCIAL MEDIA ]'
-  theme?: 'dark' | 'light'                 // Default: 'dark'
+  showTitle?: boolean // Default: true
+  customTitle?: string // Default: '[ SOCIAL MEDIA ]'
+  theme?: 'dark' | 'light' // Default: 'dark'
 }
 ```
 
 <ParamField body="selectedSocials" type="string[]" default="Auto-detected">
-  Platform IDs to render. Supported platforms: `github`, `linkedin`, `twitter`, `discord`, `youtube`, `instagram`, `twitch`, `devto`, `medium`, `email`, `website`, `stackoverflow`, `bluesky`, `mastodon`, `reddit`, `spotify`, `telegram`, `tiktok`, `steam`, `hashnode`.
+  Platform IDs to render. Supported platforms: `github`, `linkedin`, `twitter`, `discord`,
+  `youtube`, `instagram`, `twitch`, `devto`, `medium`, `email`, `website`, `stackoverflow`,
+  `bluesky`, `mastodon`, `reddit`, `spotify`, `telegram`, `tiktok`, `steam`, `hashnode`.
 </ParamField>
 
-<ParamField body="badgeStyle" type="'for-the-badge' | 'flat-square' | 'social' | 'skillicons'" default="for-the-badge">
-  * `for-the-badge`: Bold, uppercase Shields.io badges.
-  * `flat-square`: Clean rectangular flat badges.
-  * `social`: Minimalist social counter badges.
-  * `skillicons`: Circular dark/light skill icon strip.
+<ParamField
+  body="badgeStyle"
+  type="'for-the-badge' | 'flat-square' | 'social' | 'skillicons'"
+  default="for-the-badge"
+>
+  * `for-the-badge`: Bold, uppercase Shields.io badges. * `flat-square`: Clean rectangular flat
+  badges. * `social`: Minimalist social counter badges. * `skillicons`: Circular dark/light skill
+  icon strip.
 </ParamField>
 
 <ParamField body="socialUrls" type="Record<string, string>" optional>

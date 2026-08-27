@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 
+import { GridMode } from '@/constants'
 import { convertTextToAscii } from '@/engine/ascii/textConverter'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import type { NormalizedGitHubData, SavedConfiguration, WidgetInstance } from '@/engine/types'
@@ -83,7 +84,10 @@ export interface EditorStore {
   setZoom: (zoom: number) => void
   setActiveTab: (tab: 'widgets' | 'layers' | 'templates') => void
   recordHistorySnapshot: () => void
-
+  showGrid: boolean
+  gridMode: GridMode
+  toggleGrid: () => void
+  setGridMode: (mode: GridMode) => void
   undo: () => void
   redo: () => void
   canUndo: boolean
@@ -142,6 +146,18 @@ export const useEditorStore = create<EditorStore>((set, get) => {
 
     canUndo: false,
     canRedo: false,
+    showGrid: false,
+    gridMode: 'basic',
+    toggleGrid: () =>
+      set((state) => ({
+        showGrid: !state.showGrid,
+        gridMode: state.showGrid ? 'off' : state.gridMode === 'off' ? 'basic' : state.gridMode,
+      })),
+    setGridMode: (mode) =>
+      set({
+        gridMode: mode,
+        showGrid: mode !== 'off',
+      }),
 
     initEditor: (config, data) => {
       set({

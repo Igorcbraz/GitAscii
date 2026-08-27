@@ -1,6 +1,6 @@
 ---
-title: "API Overview"
-description: "Core HTTP Endpoints and Engine Architecture"
+title: 'API Overview'
+description: 'Core HTTP Endpoints and Engine Architecture'
 ---
 
 # API Overview
@@ -9,14 +9,14 @@ GitAscii provides both an HTTP API deployed on Next.js serverless edge functions
 
 ## HTTP Endpoints
 
-| Endpoint | Method | Response Type | Description |
-| :--- | :--- | :--- | :--- |
-| `GET /api/:username` | `GET` | `image/svg+xml` | Renders the default profile composition SVG for `:username`. |
-| `GET /api/:username/:profileSlug` | `GET` | `image/svg+xml` | Renders a named profile layout SVG (e.g. `work`, `terminal`, `dark`). |
-| `GET /api/svg/:username.svg` | `GET` | `image/svg+xml` | Extension-style SVG endpoint for direct markdown links. |
-| `GET /api/config/:username/:profileSlug` | `GET` | `application/json` | Retrieves the stored `SavedConfiguration` JSON schema for a profile. |
-| `POST /api/generate` | `POST` | `application/json` | Runs `profileAnalyzer` to return the optimal template configuration and normalized profile data. |
-| `GET /api/github/:username` | `GET` | `application/json` | Returns the raw `NormalizedGitHubData` fetched via GraphQL/REST. |
+| Endpoint                                 | Method | Response Type      | Description                                                                                      |
+| :--------------------------------------- | :----- | :----------------- | :----------------------------------------------------------------------------------------------- |
+| `GET /api/:username`                     | `GET`  | `image/svg+xml`    | Renders the default profile composition SVG for `:username`.                                     |
+| `GET /api/:username/:profileSlug`        | `GET`  | `image/svg+xml`    | Renders a named profile layout SVG (e.g. `work`, `terminal`, `dark`).                            |
+| `GET /api/svg/:username.svg`             | `GET`  | `image/svg+xml`    | Extension-style SVG endpoint for direct markdown links.                                          |
+| `GET /api/config/:username/:profileSlug` | `GET`  | `application/json` | Retrieves the stored `SavedConfiguration` JSON schema for a profile.                             |
+| `POST /api/generate`                     | `POST` | `application/json` | Runs `profileAnalyzer` to return the optimal template configuration and normalized profile data. |
+| `GET /api/github/:username`              | `GET`  | `application/json` | Returns the raw `NormalizedGitHubData` fetched via GraphQL/REST.                                 |
 
 ---
 
@@ -25,31 +25,28 @@ GitAscii provides both an HTTP API deployed on Next.js serverless edge functions
 Every SVG route supports query parameters to override theme, template, and widget selection on the fly:
 
 <ParamField query="theme" type="'dark' | 'light'" default="dark">
-  Sets the global color mode. When set to `light`, the background switches to pure `#ffffff` and default text to dark tones.
+  Sets the global color mode. When set to `light`, the background switches to pure `#ffffff` and
+  default text to dark tones.
 </ParamField>
 
 <ParamField query="template" type="string" default="terminal">
   Applies a preset template style ID if no custom profile configuration is found on storage.
-  Supported presets: `blank`, `terminal`, `minimal`, `dracula`, `synthwave`, `tokyonight`, `gruvbox`, `bento`, `githubdark`, `nordic`, `hackerspace`, `contributor`, `galaxy`, `devcard`.
+  Supported presets: `blank`, `terminal`, `minimal`, `dracula`, `synthwave`, `tokyonight`,
+  `gruvbox`, `bento`, `githubdark`, `nordic`, `hackerspace`, `contributor`, `galaxy`, `devcard`.
 </ParamField>
 
 <ParamField query="widgets" type="string" default="undefined">
-  Comma-separated list of widget IDs or aliases to isolate.
-  When provided, the engine **shrink-wraps** the output SVG viewBox to only encapsulate the targeted widgets.
-  
-  **Aliases supported**:
-  * `stats` $\rightarrow$ `stats`, `github-readme-stats`, `metrics-card`, `terminal-info`
-  * `streak` $\rightarrow$ `streak-stats`, `asciiprofile-heatmap`, `godprofile-trophies`
-  * `languages` $\rightarrow$ `languages`, `tech-stack`
-  * `stack` $\rightarrow$ `tech-stack`, `codeweb-retro-grid`, `godprofile-neural`
-  * `ascii` $\rightarrow$ `ascii-art`, `ascii-text`, `asciiprofile-portrait`, `asciiprofile-info`
-  * `terminal` $\rightarrow$ `terminal-info`, `godprofile-terminal`
-  * `avatar` $\rightarrow$ `avatar`, `asciiprofile-portrait`
-  * `bio` $\rightarrow$ `bio`, `terminal-info`
-  * `snake` $\rightarrow$ `contribution-snake`
-  * `trophies` $\rightarrow$ `godprofile-trophies`, `profile-trophy`
-  * `views` $\rightarrow$ `views-counter`
-  * `quotes` $\rightarrow$ `readme-quotes`
+  Comma-separated list of widget IDs or aliases to isolate. When provided, the engine
+  **shrink-wraps** the output SVG viewBox to only encapsulate the targeted widgets. **Aliases
+  supported**: * `stats` $\rightarrow$ `stats`, `github-readme-stats`, `metrics-card`,
+  `terminal-info` * `streak` $\rightarrow$ `streak-stats`, `asciiprofile-heatmap`,
+  `godprofile-trophies` * `languages` $\rightarrow$ `languages`, `tech-stack` * `stack`
+  $\rightarrow$ `tech-stack`, `codeweb-retro-grid`, `godprofile-neural` * `ascii` $\rightarrow$
+  `ascii-art`, `ascii-text`, `asciiprofile-portrait`, `asciiprofile-info` * `terminal` $\rightarrow$
+  `terminal-info`, `godprofile-terminal` * `avatar` $\rightarrow$ `avatar`, `asciiprofile-portrait`
+  * `bio` $\rightarrow$ `bio`, `terminal-info` * `snake` $\rightarrow$ `contribution-snake` *
+  `trophies` $\rightarrow$ `godprofile-trophies`, `profile-trophy` * `views` $\rightarrow$
+  `views-counter` * `quotes` $\rightarrow$ `readme-quotes`
 </ParamField>
 
 ---
@@ -68,5 +65,5 @@ X-Content-Type-Options: nosniff
 Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data: https:;
 ```
 
-* **Cache Hits**: If the client sends an `If-None-Match` header matching the computed SVG hash, the endpoint immediately responds with `304 Not Modified` with zero body transfer.
-* **Degraded Cache**: If an external widget failed to load, `s-maxage` drops to `300` (5 minutes) to retry quickly without poisoning CDNs.
+- **Cache Hits**: If the client sends an `If-None-Match` header matching the computed SVG hash, the endpoint immediately responds with `304 Not Modified` with zero body transfer.
+- **Degraded Cache**: If an external widget failed to load, `s-maxage` drops to `300` (5 minutes) to retry quickly without poisoning CDNs.

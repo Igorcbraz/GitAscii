@@ -74,8 +74,10 @@ export const ALL_COUNTRY_FLAGS: readonly CountryFlagDef[] = [
 export const TRUSTED_CDN_HOSTNAMES: readonly string[] = [
   'gitfut.com',
   'assets.tcgdex.net',
+  'images.pokemontcg.io',
   'avatars.githubusercontent.com',
   'raw.githubusercontent.com',
+  'cdn.jsdelivr.net',
 ] as const
 
 export function isTrustedCdnHostname(hostname: string): boolean {
@@ -128,6 +130,29 @@ export const WIDGET_ALIASES: Readonly<Record<string, readonly string[]>> = {
   developerdna: [WIDGET_IDS.PREMIUM_ASCII_DNA],
   velocity: [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY],
   codingvelocity: [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY],
+  winxp: [
+    WIDGET_IDS.WINXP_WINDOW,
+    WIDGET_IDS.WINXP_MINESWEEPER,
+    WIDGET_IDS.WINXP_MEDIA_PLAYER,
+    WIDGET_IDS.WINXP_PAINT,
+    WIDGET_IDS.WINXP_TASKBAR,
+    WIDGET_IDS.WINXP_ERROR_DIALOG,
+    WIDGET_IDS.WINXP_SYSTEM_PROPERTIES,
+  ],
+  windowsxp: [
+    WIDGET_IDS.WINXP_WINDOW,
+    WIDGET_IDS.WINXP_MINESWEEPER,
+    WIDGET_IDS.WINXP_MEDIA_PLAYER,
+    WIDGET_IDS.WINXP_PAINT,
+    WIDGET_IDS.WINXP_TASKBAR,
+    WIDGET_IDS.WINXP_ERROR_DIALOG,
+    WIDGET_IDS.WINXP_SYSTEM_PROPERTIES,
+  ],
+  minesweeper: [WIDGET_IDS.WINXP_MINESWEEPER],
+  paint: [WIDGET_IDS.WINXP_PAINT],
+  mediaplayer: [WIDGET_IDS.WINXP_MEDIA_PLAYER],
+  taskbar: [WIDGET_IDS.WINXP_TASKBAR],
+  sysprop: [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES],
 } as const
 
 export interface WidgetDocParam {

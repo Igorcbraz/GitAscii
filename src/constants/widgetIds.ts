@@ -68,6 +68,14 @@ export const WIDGET_IDS = {
   PREMIUM_ASCII_INSIGHTS: 'premium-ascii-insights',
   PREMIUM_ASCII_DNA: 'premium-ascii-dna',
   PREMIUM_ASCII_CODING_VELOCITY: 'premium-ascii-coding-velocity',
+  WINXP_WINDOW: 'winxp-window',
+  WINXP_MINESWEEPER: 'winxp-minesweeper',
+  WINXP_MEDIA_PLAYER: 'winxp-media-player',
+  WINXP_PAINT: 'winxp-paint',
+  WINXP_TASKBAR: 'winxp-taskbar',
+  WINXP_ERROR_DIALOG: 'winxp-error-dialog',
+  WINXP_SYSTEM_PROPERTIES: 'winxp-system-properties',
+  WINXP_BLISS: 'winxp-bliss',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -84,6 +92,7 @@ export const WIDGET_CATEGORIES = {
   CODEWEB_DEV: 'codeweb-dev',
   SURVEILLANCE: 'surveillance',
   PREMIUM_ASCII: 'premium-ascii',
+  WINDOWS_XP: 'windows-xp',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

@@ -1,0 +1,116 @@
+{
+  "id": "windows_xp",
+  "name": "Windows XP Bliss Desktop",
+  "description": "Nostalgic Windows XP desktop setup with Luna Blue window explorer, Minesweeper, Media Player, and Start Taskbar.",
+  "category": "Retro OS",
+  "widgetCategory": "windows-xp",
+  "widgets": [
+    {
+      "instanceId": "widget_winxp_window_1",
+      "widgetId": "winxp-window",
+      "name": "XP Window Explorer",
+      "position": {
+        "x": 10,
+        "y": 0
+      },
+      "size": {
+        "width": 780,
+        "height": 380
+      },
+      "config": {
+        "themePreset": "Luna Blue (Default)"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_winxp_minesweeper_2",
+      "widgetId": "winxp-minesweeper",
+      "name": "XP Minesweeper Game",
+      "position": {
+        "x": 10,
+        "y": 390
+      },
+      "size": {
+        "width": 780,
+        "height": 340
+      },
+      "config": {
+        "themePreset": "Luna Blue (Default)"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_winxp_media_player_3",
+      "widgetId": "winxp-media-player",
+      "name": "Windows Media Player 9",
+      "position": {
+        "x": 10,
+        "y": 740
+      },
+      "size": {
+        "width": 780,
+        "height": 300
+      },
+      "config": {
+        "themePreset": "Luna Blue (Default)"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_winxp_paint_4",
+      "widgetId": "winxp-paint",
+      "name": "XP MS Paint Canvas",
+      "position": {
+        "x": 10,
+        "y": 1050
+      },
+      "size": {
+        "width": 780,
+        "height": 360
+      },
+      "config": {
+        "themePreset": "Luna Blue (Default)"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    },
+    {
+      "instanceId": "widget_winxp_taskbar_5",
+      "widgetId": "winxp-taskbar",
+      "name": "XP Start Taskbar",
+      "position": {
+        "x": 10,
+        "y": 1420
+      },
+      "size": {
+        "width": 780,
+        "height": 48
+      },
+      "config": {
+        "customTime": "04:20 PM"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 5
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#0055ea",
+    "textColor": "#ffffff",
+    "accentColor": "#2989f5",
+    "borderColor": "#0054e3",
+    "fontFamily": "'Trebuchet MS', 'Segoe UI', sans-serif",
+    "borderRadius": 4,
+    "padding": 20,
+    "themeMode": "light",
+    "templateStyle": "windows-xp"
+  },
+  "templateId": "windows_xp"
+}

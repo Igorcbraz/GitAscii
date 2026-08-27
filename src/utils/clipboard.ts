@@ -10,7 +10,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     }
   }
 
-  // Fallback for older browsers, iframes, or non-HTTPS origins
   try {
     const textArea = document.createElement('textarea')
     textArea.value = text

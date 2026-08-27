@@ -1,6 +1,6 @@
 ---
-title: "Aura Bento Cards Widget"
-description: "Modular glassmorphic bento identity showcase with avatar card and responsive tech pills"
+title: 'Aura Bento Cards Widget'
+description: 'Modular glassmorphic bento identity showcase with avatar card and responsive tech pills'
 ---
 
 # Aura Bento Cards Widget (`codeweb-retro-grid`)
@@ -11,23 +11,22 @@ The Aura Bento Cards widget combines a 260x260 developer portrait card with an a
 
 ```typescript
 export interface CodewebRetroGridConfig {
-  title?: string                              // Header label (default: 'Tech Stack')
-  displayMode?: 'both' | 'logo' | 'name'       // Pill display mode (default: 'both')
-  sourceType?: 'avatar' | 'url' | 'upload'     // Image source type
-  imageUrl?: string                           // Custom avatar URL
-  uploadedImageData?: string                  // Base64 image data
-  devCardLink?: string                        // Clickable link for avatar card
-  userName?: string                           // Name overlay string
-  userHandle?: string                         // Handle overlay string
-  selectedTechs?: string[]                    // Array of tech keys to display
-  staticMode?: boolean                        // Disables glowing orb animations
+  title?: string // Header label (default: 'Tech Stack')
+  displayMode?: 'both' | 'logo' | 'name' // Pill display mode (default: 'both')
+  sourceType?: 'avatar' | 'url' | 'upload' // Image source type
+  imageUrl?: string // Custom avatar URL
+  uploadedImageData?: string // Base64 image data
+  devCardLink?: string // Clickable link for avatar card
+  userName?: string // Name overlay string
+  userHandle?: string // Handle overlay string
+  selectedTechs?: string[] // Array of tech keys to display
+  staticMode?: boolean // Disables glowing orb animations
 }
 ```
 
 <ParamField body="displayMode" type="'both' | 'logo' | 'name'" default="both">
-  * `both`: Displays official skill icon + title text.
-  * `logo`: Compact 32px circular icon badges only.
-  * `name`: Text-only pill badges.
+  * `both`: Displays official skill icon + title text. * `logo`: Compact 32px circular icon badges
+  only. * `name`: Text-only pill badges.
 </ParamField>
 
 ---

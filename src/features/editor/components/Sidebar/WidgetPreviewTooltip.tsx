@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { DEFAULT_POKEMON_CARD_IMAGE, EXTERNAL_LINKS, WIDGET_IDS } from '@/constants'
 import { convertImageToAsciiCanvas } from '@/engine/ascii/converter'
@@ -10,7 +10,7 @@ import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engin
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
 
-import { type WidgetCatalogItem } from '../../config/widgets'
+import { isExternalWidget, type WidgetCatalogItem } from '../../config/widgets'
 
 interface WidgetPreviewTooltipProps {
   widgetItem: WidgetCatalogItem | null
@@ -74,6 +74,31 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.PREMIUM_ASCII_INSIGHTS]: { width: 400, height: 280 },
   [WIDGET_IDS.PREMIUM_ASCII_DNA]: { width: 400, height: 230 },
   [WIDGET_IDS.PREMIUM_ASCII_CODING_VELOCITY]: { width: 400, height: 160 },
+  [WIDGET_IDS.WINXP_WINDOW]: { width: 780, height: 380 },
+  [WIDGET_IDS.WINXP_MINESWEEPER]: { width: 780, height: 340 },
+  [WIDGET_IDS.WINXP_MEDIA_PLAYER]: { width: 780, height: 300 },
+  [WIDGET_IDS.WINXP_PAINT]: { width: 780, height: 360 },
+  [WIDGET_IDS.WINXP_TASKBAR]: { width: 780, height: 48 },
+  [WIDGET_IDS.WINXP_ERROR_DIALOG]: { width: 520, height: 210 },
+  [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES]: { width: 780, height: 400 },
+}
+
+function extractExternalUrls(html: string): string[] {
+  const urls: string[] = []
+  const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi
+  let match: RegExpExecArray | null
+  while ((match = imgRegex.exec(html)) !== null) {
+    if (match[1] && !match[1].startsWith('data:')) {
+      urls.push(match[1])
+    }
+  }
+  const imageSvgRegex = /<image[^>]+(?:href|xlink:href)=["']([^"']+)["']/gi
+  while ((match = imageSvgRegex.exec(html)) !== null) {
+    if (match[1] && !match[1].startsWith('data:')) {
+      urls.push(match[1])
+    }
+  }
+  return urls
 }
 
 export function WidgetPreviewTooltip({
@@ -87,16 +112,31 @@ export function WidgetPreviewTooltip({
     lines: string[]
     colors?: string[][]
   } | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const size = widgetItem
     ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 }
     : { width: 800, height: 120 }
   const data = githubData || getMockGitHubData('Igorcbraz')
 
+  const isExternalResource = useMemo(() => {
+    if (!widgetItem) return false
+    return (
+      isExternalWidget(widgetItem) ||
+      Boolean(widgetItem.isExternal) ||
+      widgetItem.id === WIDGET_IDS.ASCII_ART ||
+      widgetItem.id === WIDGET_IDS.GITFEST_LINEUP ||
+      widgetItem.id === WIDGET_IDS.CUSTOM_IMAGE ||
+      widgetItem.id === WIDGET_IDS.POKEMON_CARD ||
+      widgetItem.id === WIDGET_IDS.GITFUT_CARD
+    )
+  }, [widgetItem])
+
   useEffect(() => {
     if (widgetItem?.id !== WIDGET_IDS.ASCII_ART || asciiArtCache) return
 
     let isCurrent = true
+    setIsLoading(true)
     async function loadPreviewAscii() {
       const avatarUrl = data.user.avatar_url || EXTERNAL_LINKS.DEFAULT_GITHUB_AVATAR
       try {
@@ -110,9 +150,11 @@ export function WidgetPreviewTooltip({
             lines: result.lines,
             colors: result.colorMatrix,
           })
+          setIsLoading(false)
         }
       } catch (err) {
         console.warn('Preview ASCII art generation failed:', err)
+        if (isCurrent) setIsLoading(false)
       }
     }
 
@@ -122,65 +164,144 @@ export function WidgetPreviewTooltip({
     }
   }, [widgetItem?.id, data.user.avatar_url, asciiArtCache])
 
-  if (!widgetItem || !targetRect) return null
-
-  const translatedName = t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name)
-  const translatedDesc = widgetItem.desc
+  const translatedName = widgetItem
+    ? t(`widget.catalog.${widgetItem.id}.name`, widgetItem.name)
+    : ''
+  const translatedDesc = widgetItem?.desc
     ? t(`widget.catalog.${widgetItem.id}.desc`, widgetItem.desc)
     : ''
-  const translatedBadgeText = widgetItem.badge
+  const translatedBadgeText = widgetItem?.badge
     ? t(
         `widget.badge.${widgetItem.badge.text.toLowerCase().replace(/\s+/g, '_')}`,
         widgetItem.badge.text
       )
     : ''
 
-  const previewWidget: WidgetInstance = {
-    instanceId: `preview_${widgetItem.id}`,
-    widgetId: widgetItem.id,
-    name: translatedName,
-    position: { x: 0, y: 0 },
-    size,
-    config: {
-      ...(widgetItem.id === 'avatar' ||
-      widgetItem.id === 'ascii-art' ||
-      widgetItem.id.startsWith('premium-ascii-')
-        ? { lockAspectRatio: true }
-        : {}),
-      ...(widgetItem.category === 'controlplane' ? { layoutType: 'hero' } : {}),
-      ...(widgetItem.id === 'ascii-art' && asciiArtCache
-        ? {
-            asciiText: asciiArtCache.lines,
-            asciiColors: asciiArtCache.colors,
-          }
-        : {}),
-      ...(widgetItem.id === WIDGET_IDS.POKEMON_CARD
-        ? {
-            imageUrl: DEFAULT_POKEMON_CARD_IMAGE,
-            rotateX: -8,
-            rotateY: 12,
-            glareX: 45,
-            glareY: 35,
-            intensity: 1.2,
-          }
-        : {}),
-      ...(widgetItem.id === WIDGET_IDS.GITFUT_CARD
-        ? {
-            username: data?.user?.login || 'torvalds',
-            rotateX: -6,
-            rotateY: 10,
-            glareX: 45,
-            glareY: 35,
-            intensity: 1.1,
-          }
-        : {}),
-    },
-    locked: false,
-    visible: true,
-    zIndex: 1,
-  }
+  const previewWidget: WidgetInstance = useMemo(() => {
+    if (!widgetItem) {
+      return {
+        instanceId: 'preview_unknown',
+        widgetId: 'unknown',
+        name: 'Unknown',
+        position: { x: 0, y: 0 },
+        size: { width: 800, height: 120 },
+        config: {},
+        locked: false,
+        visible: true,
+        zIndex: 1,
+      }
+    }
 
-  const svgContent = renderWidgetSvg(previewWidget, data, globalStyles)
+    return {
+      instanceId: `preview_${widgetItem.id}`,
+      widgetId: widgetItem.id,
+      name: translatedName,
+      position: { x: 0, y: 0 },
+      size,
+      config: {
+        ...(widgetItem.id === 'avatar' ||
+        widgetItem.id === 'ascii-art' ||
+        widgetItem.id.startsWith('premium-ascii-')
+          ? { lockAspectRatio: true }
+          : {}),
+        ...(widgetItem.category === 'controlplane' ? { layoutType: 'hero' } : {}),
+        ...(widgetItem.id === 'ascii-art' && asciiArtCache
+          ? {
+              asciiText: asciiArtCache.lines,
+              asciiColors: asciiArtCache.colors,
+            }
+          : {}),
+        ...(widgetItem.id === WIDGET_IDS.POKEMON_CARD
+          ? {
+              imageUrl: DEFAULT_POKEMON_CARD_IMAGE,
+              rotateX: -8,
+              rotateY: 12,
+              glareX: 45,
+              glareY: 35,
+              intensity: 1.2,
+            }
+          : {}),
+        ...(widgetItem.id === WIDGET_IDS.GITFUT_CARD
+          ? {
+              username: data?.user?.login || 'torvalds',
+              rotateX: -6,
+              rotateY: 10,
+              glareX: 45,
+              glareY: 35,
+              intensity: 1.1,
+            }
+          : {}),
+      },
+      locked: false,
+      visible: true,
+      zIndex: 1,
+    }
+  }, [widgetItem, translatedName, size, asciiArtCache, data?.user?.login])
+
+  const svgContent = useMemo(() => {
+    if (!widgetItem) return ''
+    return renderWidgetSvg(previewWidget, data, globalStyles)
+  }, [widgetItem, previewWidget, data, globalStyles])
+
+  useEffect(() => {
+    if (!widgetItem) {
+      setIsLoading(false)
+      return
+    }
+
+    if (widgetItem.id === WIDGET_IDS.ASCII_ART) {
+      setIsLoading(!asciiArtCache)
+      return
+    }
+
+    const urls = extractExternalUrls(svgContent)
+    if (!isExternalResource && urls.length === 0) {
+      setIsLoading(false)
+      return
+    }
+
+    setIsLoading(true)
+    let isCurrent = true
+    let loadedCount = 0
+    const total = Math.max(1, urls.length)
+
+    // Safety timeout in case remote API is slow or fails
+    const timer = setTimeout(() => {
+      if (isCurrent) setIsLoading(false)
+    }, 2000)
+
+    if (urls.length === 0) {
+      const quickTimer = setTimeout(() => {
+        if (isCurrent) setIsLoading(false)
+      }, 250)
+      return () => {
+        isCurrent = false
+        clearTimeout(timer)
+        clearTimeout(quickTimer)
+      }
+    }
+
+    urls.forEach((url) => {
+      const img = new Image()
+      const onDone = () => {
+        if (!isCurrent) return
+        loadedCount++
+        if (loadedCount >= total) {
+          setIsLoading(false)
+        }
+      }
+      img.onload = onDone
+      img.onerror = onDone
+      img.src = url
+    })
+
+    return () => {
+      isCurrent = false
+      clearTimeout(timer)
+    }
+  }, [widgetItem, svgContent, isExternalResource, asciiArtCache])
+
+  if (!widgetItem || !targetRect) return null
 
   const leftPosition = targetRect.right + 12
   const rawTop = targetRect.top - 20
@@ -224,12 +345,21 @@ export function WidgetPreviewTooltip({
         </span>
       </div>
 
-      <div className="bg-carbon border border-graphite/80 rounded-xs p-2 overflow-hidden flex items-center justify-center min-h-22.5">
-        <svg
-          viewBox={`0 0 ${size.width} ${size.height}`}
-          className="w-full h-auto max-h-42.5 rounded object-contain"
-          dangerouslySetInnerHTML={{ __html: svgContent }}
-        />
+      <div className="bg-carbon border border-graphite/80 rounded-xs p-2 overflow-hidden flex items-center justify-center min-h-22.5 relative">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-6 gap-2 animate-fade-in text-center">
+            <div className="w-6 h-6 border-2 border-signal-lime/20 border-t-signal-lime rounded-full animate-spin" />
+            <span className="font-jetbrains-mono text-[10px] text-signal-lime tracking-widest uppercase animate-pulse">
+              [ {t('editor.sidebar.loading_preview', 'Carregando recurso externo...')} ]
+            </span>
+          </div>
+        ) : (
+          <svg
+            viewBox={`0 0 ${size.width} ${size.height}`}
+            className="w-full h-auto max-h-42.5 rounded object-contain animate-fade-in"
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
+        )}
       </div>
 
       <div className="mt-2.5 flex items-center justify-between text-eyebrow">

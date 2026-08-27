@@ -7,6 +7,7 @@ import KineticGrid from '@/components/ui/kinetic-grid'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
+import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
@@ -28,12 +29,14 @@ interface EditorLayoutProps {
   username: string
   profileSlug?: string
   autoGenerate?: boolean
+  embedded?: boolean
 }
 
 export function EditorLayout({
   username,
   profileSlug = 'default',
   autoGenerate = false,
+  embedded = false,
 }: EditorLayoutProps) {
   const { t } = useI18n()
   const initEditor = useEditorStore((state) => state.initEditor)
@@ -156,33 +159,37 @@ export function EditorLayout({
         }
 
         if (!data || !data.user) {
-          let errMsg = t('errors.fetch_profile_failed', 'Failed to fetch GitHub profile')
-          try {
-            const errText = await res.text()
+          if (embedded) {
+            data = getMockGitHubData(username || 'Igorcbraz')
+          } else {
+            let errMsg = t('errors.fetch_profile_failed', 'Failed to fetch GitHub profile')
             try {
-              const errJson = JSON.parse(errText)
-              if (errJson && typeof errJson.error === 'string') {
-                errMsg = errJson.error
+              const errText = await res.text()
+              try {
+                const errJson = JSON.parse(errText)
+                if (errJson && typeof errJson.error === 'string') {
+                  errMsg = errJson.error
+                }
+              } catch {
+                if (errText && !errText.trim().startsWith('<') && errText.length < 200) {
+                  errMsg = errText.trim()
+                }
               }
-            } catch {
-              if (errText && !errText.trim().startsWith('<') && errText.length < 200) {
-                errMsg = errText.trim()
-              }
+            } catch (textErr) {
+              console.debug('Failed to read error response text:', textErr)
             }
-          } catch (textErr) {
-            console.debug('Failed to read error response text:', textErr)
-          }
 
-          const notFoundStatus =
-            res.status === 404 ||
-            errMsg.toLowerCase().includes('not found') ||
-            errMsg.toLowerCase().includes('não encontrado')
+            const notFoundStatus =
+              res.status === 404 ||
+              errMsg.toLowerCase().includes('not found') ||
+              errMsg.toLowerCase().includes('não encontrado')
 
-          if (isMounted) {
-            setIsNotFound(notFoundStatus)
-            setStep('github', 'error', errMsg)
+            if (isMounted) {
+              setIsNotFound(notFoundStatus)
+              setStep('github', 'error', errMsg)
+            }
+            throw new Error(errMsg)
           }
-          throw new Error(errMsg)
         }
 
         setStep(
@@ -269,6 +276,13 @@ export function EditorLayout({
           }
         }
       } catch (err: unknown) {
+        if (embedded && isMounted) {
+          const fallbackData = getMockGitHubData(username || 'Igorcbraz')
+          setGithubData(fallbackData)
+          setShowOnboarding(true)
+          setLoading(false)
+          return
+        }
         if (isMounted) {
           setError(
             err instanceof Error
@@ -328,6 +342,8 @@ export function EditorLayout({
   }, [username, profileSlug, initEditor])
 
   useEffect(() => {
+    if (embedded) return
+
     const handleZoomKeyboard = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+' || e.key === '-')) {
         e.preventDefault()
@@ -344,7 +360,6 @@ export function EditorLayout({
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault()
         const store = useEditorStore.getState()
-        // e.deltaY < 0 means scroll up (zoom in), e.deltaY > 0 means scroll down (zoom out)
         if (e.deltaY < 0) {
           store.setZoom(Math.min(1.5, store.zoom + 0.1))
         } else if (e.deltaY > 0) {
@@ -353,22 +368,24 @@ export function EditorLayout({
       }
     }
 
-    window.addEventListener('keydown', handleZoomKeyboard, { capture: true, passive: false })
-    window.addEventListener('wheel', handleZoomWheel, { capture: true, passive: false })
+    window.addEventListener('keydown', handleZoomKeyboard)
+    window.addEventListener('wheel', handleZoomWheel, { passive: false })
 
     return () => {
-      window.removeEventListener('keydown', handleZoomKeyboard, { capture: true } as any)
-      window.removeEventListener('wheel', handleZoomWheel, { capture: true } as any)
+      window.removeEventListener('keydown', handleZoomKeyboard)
+      window.removeEventListener('wheel', handleZoomWheel)
     }
-  }, [])
+  }, [embedded])
 
   if (loading) {
-    return <EditorLoadingScreen username={username} steps={steps} />
+    return <EditorLoadingScreen username={username} steps={steps} embedded={embedded} />
   }
 
   if (showOnboarding && githubData) {
     return (
-      <div className="fixed inset-0 bg-carbon overflow-hidden font-inter-tight">
+      <div
+        className={`${embedded ? 'absolute inset-0 z-20' : 'fixed inset-0'} bg-carbon overflow-hidden font-inter-tight`}
+      >
         <div className="absolute inset-0 z-0 pointer-events-none">
           <KineticGrid className="absolute inset-0 w-full h-full pointer-events-auto" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.88)_0%,rgba(6,6,6,0.55)_55%,rgba(6,6,6,0.15)_100%)] pointer-events-none" />
@@ -492,9 +509,11 @@ export function EditorLayout({
   const isOwner = session && session.username.toLowerCase() === username.toLowerCase()
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-carbon">
-      <EditorToolbar />
-      {!isOwner && (
+    <div
+      className={`${embedded ? 'w-full h-full min-h-[760px] relative' : 'h-screen w-screen'} flex flex-col overflow-hidden bg-carbon`}
+    >
+      <EditorToolbar embedded={embedded} />
+      {!isOwner && !embedded && (
         <div className="bg-onyx border-b border-graphite px-4 py-2 flex items-center justify-between text-note text-ash font-inter-tight select-none">
           <div className="flex items-center gap-2">
             <AlertCircle size={14} className="text-signal-lime shrink-0" />
@@ -614,7 +633,7 @@ export function EditorLayout({
         </div>
       </div>
 
-      <EditorTour />
+      <EditorTour embedded={embedded} />
     </div>
   )
 }

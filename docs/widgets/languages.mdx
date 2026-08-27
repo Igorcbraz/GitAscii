@@ -1,6 +1,6 @@
 ---
-title: "Top Languages Widget"
-description: "Language breakdown visualization with horizontal progress bars, compact grids, and donut charts"
+title: 'Top Languages Widget'
+description: 'Language breakdown visualization with horizontal progress bars, compact grids, and donut charts'
 ---
 
 # Top Languages Widget (`languages`)
@@ -12,21 +12,20 @@ The Languages widget computes byte distributions from public repositories and re
 ```typescript
 export interface LanguagesConfig {
   langsLayout?: 'bars' | 'list' | 'compact' | 'donut' // Default: 'bars'
-  langsCount?: number                                 // Default: 5 (max languages to show)
-  showPercentage?: boolean                            // Default: true
-  hideLangsArr?: string[]                             // Excluded languages array
-  hideLangs?: string                                  // Comma-separated excluded languages
-  donutLegendPos?: 'bottom' | 'side'                  // Default: 'bottom' (donut mode only)
-  donutShowPct?: boolean                              // Default: true (donut mode only)
-  donutCenterLabel?: boolean                          // Default: false (donut mode only)
+  langsCount?: number // Default: 5 (max languages to show)
+  showPercentage?: boolean // Default: true
+  hideLangsArr?: string[] // Excluded languages array
+  hideLangs?: string // Comma-separated excluded languages
+  donutLegendPos?: 'bottom' | 'side' // Default: 'bottom' (donut mode only)
+  donutShowPct?: boolean // Default: true (donut mode only)
+  donutCenterLabel?: boolean // Default: false (donut mode only)
 }
 ```
 
 <ParamField body="langsLayout" type="'bars' | 'list' | 'compact' | 'donut'" default="bars">
-  * `bars`: Continuous stacked horizontal progress bar with two-column legend below.
-  * `list`: Vertical list with individual percentage progress bars.
-  * `compact`: Dense badge pills with color dots.
-  * `donut`: Trigonometric SVG donut arc chart with legend and optional center label.
+  * `bars`: Continuous stacked horizontal progress bar with two-column legend below. * `list`:
+  Vertical list with individual percentage progress bars. * `compact`: Dense badge pills with color
+  dots. * `donut`: Trigonometric SVG donut arc chart with legend and optional center label.
 </ParamField>
 
 <ParamField body="langsCount" type="number" default="5">

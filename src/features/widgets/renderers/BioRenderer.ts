@@ -18,11 +18,18 @@ export function renderBio(
   const customLocation =
     cfg.customLocation !== undefined ? String(cfg.customLocation) : data?.user?.location || ''
   const customBlog = cfg.customBlog !== undefined ? String(cfg.customBlog) : data?.user?.blog || ''
+  const textAlign = (cfg.textAlign as 'left' | 'center' | 'right' | 'justify') || 'left'
 
-  const maxCharsPerLine = Math.max(20, Math.floor((width - 72) / 8.5))
+  const contentWidth = Math.max(80, width - 48)
+  const charWidthApprox = 8.1
+  const maxCharsPerLine = Math.max(12, Math.floor(contentWidth / charWidthApprox))
   const wrappedLines: string[] = []
 
   for (const p of customBio.split('\n')) {
+    if (!p.trim()) {
+      wrappedLines.push('')
+      continue
+    }
     if (p.length <= maxCharsPerLine) {
       wrappedLines.push(p)
       continue
@@ -42,8 +49,26 @@ export function renderBio(
     }
   }
 
+  const textAnchor = textAlign === 'center' ? 'middle' : textAlign === 'right' ? 'end' : 'start'
+  const textX = textAlign === 'center' ? width / 2 : textAlign === 'right' ? width - 24 : 24
+
   const bioSvg = wrappedLines
-    .map((line, i) => `<tspan x="24" dy="${i === 0 ? 0 : 20}">${escapeXml(line)}</tspan>`)
+    .map((line, i) => {
+      if (textAlign === 'justify' && wrappedLines.length > 1 && i < wrappedLines.length - 1) {
+        const words = line.trim().split(/\s+/)
+        if (words.length > 1) {
+          const totalWordsLen = words.reduce((acc, w) => acc + w.length, 0)
+          const spaceSlots = words.length - 1
+          const extraSpace = Math.max(
+            0,
+            (contentWidth - totalWordsLen * charWidthApprox) / spaceSlots
+          )
+          const wordSpacingPx = Math.max(4, extraSpace)
+          return `<tspan x="24" dy="${i === 0 ? 0 : 20}" word-spacing="${wordSpacingPx.toFixed(1)}px">${escapeXml(line)}</tspan>`
+        }
+      }
+      return `<tspan x="${textX}" dy="${i === 0 ? 0 : 20}">${escapeXml(line)}</tspan>`
+    })
     .join('')
 
   const requiredHeight = 60 + (Math.max(1, wrappedLines.length) - 1) * 20 + 48
@@ -68,7 +93,7 @@ export function renderBio(
 
   return `
     <text x="24" y="32" font-family="${globalStyles.fontFamily}" font-size="11" font-weight="500" fill="#7a7a7a" letter-spacing="2">[ BIOGRAPHY ]</text>
-    <text x="24" y="60" font-family="${globalStyles.fontFamily}" font-size="14" fill="${textClr}">
+    <text x="${textX}" y="60" text-anchor="${textAnchor}" font-family="${globalStyles.fontFamily}" font-size="14" fill="${textClr}">
       ${bioSvg}
     </text>
     <g transform="translate(24, ${finalHeight - 24})">

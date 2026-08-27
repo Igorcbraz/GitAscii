@@ -1,6 +1,6 @@
 ---
-title: "ASCII Portrait Widget"
-description: "Monochrome ASCII portrait with line-by-line typing animation and riding cursor"
+title: 'ASCII Portrait Widget'
+description: 'Monochrome ASCII portrait with line-by-line typing animation and riding cursor'
 ---
 
 # ASCII Portrait Widget (`asciiprofile-portrait`)
@@ -11,18 +11,18 @@ The ASCII Portrait widget renders a dark-mode terminal window containing an anim
 
 ```typescript
 export interface AsciiPortraitConfig {
-  cols?: number            // Default: 100
-  charset?: string         // Character ramp (default: ' .`:-=+*cs#%@')
-  customCharset?: string   // Custom character ramp
-  rowDur?: number          // Duration per row in seconds (default: 0.11)
-  stagger?: number         // Delay between row triggers (default: 0.11)
-  staticMode?: boolean     // Disables animation for clean static SVG
-  customTitle?: string     // Terminal header title
-  customWhoami?: string    // Terminal footer status handle
-  asciiText?: string[]     // Pre-calculated ASCII lines
-  accentColor?: string     // Default: '#c9d1d9'
+  cols?: number // Default: 100
+  charset?: string // Character ramp (default: ' .`:-=+*cs#%@')
+  customCharset?: string // Custom character ramp
+  rowDur?: number // Duration per row in seconds (default: 0.11)
+  stagger?: number // Delay between row triggers (default: 0.11)
+  staticMode?: boolean // Disables animation for clean static SVG
+  customTitle?: string // Terminal header title
+  customWhoami?: string // Terminal footer status handle
+  asciiText?: string[] // Pre-calculated ASCII lines
+  accentColor?: string // Default: '#c9d1d9'
   backgroundColor?: string // Default: '#111722'
-  borderColor?: string     // Default: '#30363d'
+  borderColor?: string // Default: '#30363d'
 }
 ```
 

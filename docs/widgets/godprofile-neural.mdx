@@ -1,6 +1,6 @@
 ---
-title: "Neural Network Map Widget"
-description: "Animated topological tech stack visualization with moving signal packets"
+title: 'Neural Network Map Widget'
+description: 'Animated topological tech stack visualization with moving signal packets'
 ---
 
 # Neural Network Map Widget (`godprofile-neural`)
@@ -12,13 +12,18 @@ The Neural Network widget organizes skills into connected category layers (e.g. 
 ```typescript
 export interface GodprofileNeuralConfig {
   neuralTechs?: Record<string, string[]> // Mapping of category name to tech keys
-  accentColor?: string                   // Default: globalStyles.accentColor || '#b6a891'
-  textColor?: string                     // Default: globalStyles.textColor || '#eceff4'
+  accentColor?: string // Default: globalStyles.accentColor || '#b6a891'
+  textColor?: string // Default: globalStyles.textColor || '#eceff4'
 }
 ```
 
-<ParamField body="neuralTechs" type="Record<string, string[]>" default="{'Frontend': ['react', 'nextjs', 'tailwind'], 'Backend': ['nodejs', 'postgres', 'docker'], 'DevOps': ['git', 'github', 'linux']}">
-  Categorized node layers. Each column renders vertical nodes and interconnects to subsequent columns.
+<ParamField
+  body="neuralTechs"
+  type="Record<string, string[]>"
+  default="{'Frontend': ['react', 'nextjs', 'tailwind'], 'Backend': ['nodejs', 'postgres', 'docker'], 'DevOps': ['git', 'github', 'linux']}"
+>
+  Categorized node layers. Each column renders vertical nodes and interconnects to subsequent
+  columns.
 </ParamField>
 
 ---

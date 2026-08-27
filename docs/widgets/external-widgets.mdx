@@ -1,6 +1,6 @@
 ---
-title: "External Integrations"
-description: "Documentation for GitHub Readme Stats, Streak, Trophy, Snake, Metrics, Quotes, GitFest, and Custom Image widgets"
+title: 'External Integrations'
+description: 'Documentation for GitHub Readme Stats, Streak, Trophy, Snake, Metrics, Quotes, GitFest, and Custom Image widgets'
 ---
 
 # External Integrations
@@ -15,13 +15,13 @@ Renders Anurag Hazra's official [github-readme-stats](https://github.com/anuragh
 
 ```typescript
 export interface GitHubReadmeStatsConfig {
-  showIcons?: boolean          // Default: true
-  includeAllCommits?: boolean  // Default: true
-  countPrivate?: boolean       // Default: true
-  theme?: string               // Default: 'tokyonight'
-  hideTitle?: boolean          // Default: false
-  hideRank?: boolean           // Default: false
-  showLifetimeCommits?: boolean// Default: false
+  showIcons?: boolean // Default: true
+  includeAllCommits?: boolean // Default: true
+  countPrivate?: boolean // Default: true
+  theme?: string // Default: 'tokyonight'
+  hideTitle?: boolean // Default: false
+  hideRank?: boolean // Default: false
+  showLifetimeCommits?: boolean // Default: false
 }
 ```
 
@@ -33,9 +33,9 @@ Renders DenverCoder1's [github-readme-streak-stats](https://github.com/DenverCod
 
 ```typescript
 export interface StreakStatsConfig {
-  theme?: string               // Default: 'tokyonight'
-  hideBorder?: boolean         // Default: true
-  borderRadius?: number        // Default: 0
+  theme?: string // Default: 'tokyonight'
+  hideBorder?: boolean // Default: true
+  borderRadius?: number // Default: 0
   cardSection?: 'all' | 'current' | 'total' // Default: 'all'
 }
 ```
@@ -48,12 +48,12 @@ Renders RyotaK's [github-profile-trophy](https://github.com/ryo-ma/github-profil
 
 ```typescript
 export interface ProfileTrophyConfig {
-  theme?: string               // Default: 'onedark'
-  column?: number              // Default: 6
-  row?: number                 // Default: 1
-  noBg?: boolean               // Default: true
-  noFrame?: boolean            // Default: true
-  marginW?: number             // Default: 0
+  theme?: string // Default: 'onedark'
+  column?: number // Default: 6
+  row?: number // Default: 1
+  noBg?: boolean // Default: true
+  noFrame?: boolean // Default: true
+  marginW?: number // Default: 0
 }
 ```
 
@@ -65,11 +65,11 @@ Renders Ashutosh00710's [github-readme-activity-graph](https://github.com/Ashuto
 
 ```typescript
 export interface ActivityGraphConfig {
-  theme?: string               // Default: 'tokyo-night'
-  area?: boolean               // Default: true
-  hideTitle?: boolean          // Default: false
-  hideBorder?: boolean         // Default: true
-  radius?: number              // Default: 0
+  theme?: string // Default: 'tokyo-night'
+  area?: boolean // Default: true
+  hideTitle?: boolean // Default: false
+  hideBorder?: boolean // Default: true
+  radius?: number // Default: 0
 }
 ```
 
@@ -93,7 +93,7 @@ Renders Lowlighter's [metrics](https://github.com/lowlighter/metrics) infocard.
 
 ```typescript
 export interface MetricsCardConfig {
-  theme?: string               // Default: 'dark'
+  theme?: string // Default: 'dark'
 }
 ```
 
@@ -106,9 +106,9 @@ Renders a dynamic visit counter badge via Komarev's visitor badge service.
 ```typescript
 export interface ViewsCounterConfig {
   style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' // Default: 'for-the-badge'
-  color?: string               // Hex without '#' (default: 'c5ff4a')
-  labelColor?: string          // Default: '000000'
-  label?: string               // Default: 'PROFILE VIEWS'
+  color?: string // Hex without '#' (default: 'c5ff4a')
+  labelColor?: string // Default: '000000'
+  label?: string // Default: 'PROFILE VIEWS'
 }
 ```
 
@@ -120,8 +120,8 @@ Renders inspirational developer quotes from the Quotes API.
 
 ```typescript
 export interface ReadmeQuotesConfig {
-  theme?: string               // Default: 'tokyonight'
-  animation?: boolean          // Default: true
+  theme?: string // Default: 'tokyonight'
+  animation?: boolean // Default: true
   layout?: 'default' | 'horizontal'
 }
 ```
@@ -134,9 +134,9 @@ Renders a festival lineup poster where top starred repositories headline the eve
 
 ```typescript
 export interface GitFestConfig {
-  festivalName?: string        // Default: 'GITFEST 2026'
-  headlinerCount?: number      // Default: 3
-  accentColor?: string         // Default: '#c5ff4a'
+  festivalName?: string // Default: 'GITFEST 2026'
+  headlinerCount?: number // Default: 3
+  accentColor?: string // Default: '#c5ff4a'
 }
 ```
 
@@ -148,10 +148,10 @@ Embeds remote PNGs, WebPs, SVGs, or animated GIFs.
 
 ```typescript
 export interface CustomImageConfig {
-  url?: string                 // Image URL
+  url?: string // Image URL
   objectFit?: 'contain' | 'cover' | 'fill' // Default: 'contain'
-  borderRadius?: number        // Corner radius in px
-  opacity?: number             // Default: 1
+  borderRadius?: number // Corner radius in px
+  opacity?: number // Default: 1
 }
 ```
 

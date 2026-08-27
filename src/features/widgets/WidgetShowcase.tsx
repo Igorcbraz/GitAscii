@@ -1,12 +1,21 @@
 'use client'
 
-import { ArrowRight, Check, Copy, ExternalLink, Github, RefreshCw, Zap } from 'lucide-react'
+import {
+  ArrowRight,
+  Check,
+  Copy,
+  ExternalLink,
+  Github,
+  Monitor,
+  RefreshCw,
+  Zap,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
-import { APP_URL, EXTERNAL_LINKS } from '@/constants'
+import { APP_URL, EXTERNAL_LINKS, WIDGET_CATEGORIES } from '@/constants'
 import { attributions, WidgetItem, widgetsList } from '@/data/widgetsData'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { useI18n } from '@/i18n'
@@ -55,6 +64,18 @@ export function WidgetShowcase() {
       }))
 
       .filter((w) => !existingIds.has(w.id))
+  }, [])
+
+  const winXpWidgets: WidgetItem[] = React.useMemo(() => {
+    return WIDGET_CATALOG.filter((w) => w.category === WIDGET_CATEGORIES.WINDOWS_XP).map((w) => ({
+      id: w.id,
+      name: w.name,
+      type: 'Windows XP Widget',
+      description: w.desc || '',
+      codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
+      features: ['Luna Blue Theme', 'Retro Nostalgia', 'Classic Windows XP'],
+      githubSourceUrl: EXTERNAL_LINKS.GITHUB_REPO,
+    }))
   }, [])
 
   const widgetParamMap: Record<string, string> = {
@@ -241,6 +262,237 @@ export function WidgetShowcase() {
                       className="w-full inline-flex items-center justify-center gap-2 bg-carbon border border-graphite hover:border-signal-lime text-ash hover:text-white font-medium text-caption py-1.5 uppercase tracking-wider transition-all"
                     >
                       <span>{t('widget_showcase.edit_builder', 'Edit in Visual Builder')}</span>
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-8 pb-4 border-b-2 border-[#1b56b5]">
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="inline-flex items-center gap-1.5 font-sans text-[11px] font-bold text-white uppercase tracking-widest px-3 py-1.5"
+                  style={{
+                    background: 'linear-gradient(180deg, #2989f5 0%, #1461d3 50%, #0c4fbf 100%)',
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.3)',
+                    border: '1px solid #0a3a9e',
+                  }}
+                >
+                  <Monitor className="size-3.5" />
+                  Windows XP
+                </span>
+              </div>
+              <h2 className="font-pt-serif font-light text-3xl text-chalk">Windows XP Widgets</h2>
+              <p className="text-note text-ash font-inter-tight mt-1 max-w-lg">
+                Nostalgic Windows XP Luna theme widgets — classic dialogs, games, and apps
+                reimagined as GitHub profile decorations.
+              </p>
+            </div>
+            <span className="font-jetbrains-mono text-caption text-ash/60 uppercase tracking-widest hidden md:block">
+              {winXpWidgets.length} widgets
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {winXpWidgets.map((widget) => {
+            const markdownSnippet = widget.codeSnippet.replace('YOUR_USERNAME', activeUsername)
+
+            return (
+              <article
+                key={widget.id}
+                className="flex flex-col lg:flex-row justify-between items-start gap-6 p-6 group"
+                style={{
+                  background: 'linear-gradient(180deg, #dce9f9 0%, #c5d9f5 40%, #adc6ef 100%)',
+                  border: '2px solid #1b56b5',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 2px 2px 8px rgba(0,0,0,0.25)',
+                  fontFamily: 'Tahoma, Arial, sans-serif',
+                }}
+              >
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <a
+                      href={widget.githubSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 transition-colors"
+                      style={{
+                        color: '#0a3a9e',
+                        fontSize: '11px',
+                        fontFamily: 'Tahoma, Arial, sans-serif',
+                      }}
+                    >
+                      <Github className="size-3.5" />
+                      <span>View Source Code ↗</span>
+                    </a>
+                  </div>
+
+                  <h3
+                    className="text-subheading font-bold"
+                    style={{ color: '#003087', fontFamily: 'Tahoma, Arial, sans-serif' }}
+                  >
+                    {widget.name}
+                  </h3>
+                  <p
+                    style={{
+                      color: '#1a1a2e',
+                      fontSize: '13px',
+                      lineHeight: '1.5',
+                      fontFamily: 'Tahoma, Arial, sans-serif',
+                    }}
+                  >
+                    {widget.description}
+                  </p>
+
+                  <div
+                    className="p-3 flex items-center justify-between gap-4"
+                    style={{
+                      background: '#ffffff',
+                      border: '2px inset #ced7e3',
+                      boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.2)',
+                      fontFamily: 'Lucida Console, Courier New, monospace',
+                      fontSize: '11px',
+                      color: '#003087',
+                    }}
+                  >
+                    <code className="truncate">{markdownSnippet}</code>
+                    <button
+                      onClick={() => handleCopyMarkdown(widget)}
+                      className="shrink-0 p-1 cursor-pointer transition-colors"
+                      style={{ color: '#1461d3' }}
+                      title="Copy Markdown"
+                    >
+                      {copiedId === widget.id ? (
+                        <Check className="size-4" style={{ color: '#0a7c0a' }} />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="w-full lg:w-72 shrink-0 flex flex-col justify-between gap-4 self-stretch lg:self-start"
+                  style={{
+                    background: 'linear-gradient(180deg, #e8f0fb 0%, #d6e4f7 100%)',
+                    border: '2px solid #1b56b5',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)',
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-1.5 px-2 py-1"
+                    style={{
+                      background: 'linear-gradient(180deg, #2989f5 0%, #1461d3 50%, #0c4fbf 100%)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)',
+                    }}
+                  >
+                    <Monitor className="size-3 text-white opacity-90" />
+                    <span
+                      style={{
+                        color: 'white',
+                        fontSize: '11px',
+                        fontFamily: 'Tahoma, Arial, sans-serif',
+                        fontWeight: 'bold',
+                        textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                      }}
+                    >
+                      [ LIVE PREVIEW ]
+                    </span>
+                    <div className="ml-auto flex gap-1">
+                      <span
+                        className="w-3.5 h-3.5 rounded-sm inline-block"
+                        style={{
+                          background: 'linear-gradient(135deg, #f5c842, #e0a800)',
+                          border: '1px solid #a07800',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4)',
+                        }}
+                      />
+                      <span
+                        className="w-3.5 h-3.5 rounded-sm inline-block"
+                        style={{
+                          background: 'linear-gradient(135deg, #4caf50, #2e7d32)',
+                          border: '1px solid #1b5e20',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4)',
+                        }}
+                      />
+                      <span
+                        className="w-3.5 h-3.5 rounded-sm inline-block"
+                        style={{
+                          background: 'linear-gradient(135deg, #f44336, #b71c1c)',
+                          border: '1px solid #7f0000',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3">
+                    <div
+                      className="flex flex-col items-center justify-center text-center overflow-hidden min-h-22.5"
+                      style={{
+                        background: '#ffffff',
+                        border: '2px inset #ced7e3',
+                        padding: '10px',
+                        boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.15)',
+                      }}
+                    >
+                      <Image
+                        src={`/api/${activeUsername}?widgets=${widget.id}`}
+                        alt={widget.name}
+                        width={800}
+                        height={96}
+                        unoptimized
+                        className="max-w-full max-h-24 object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="px-3 pb-3 space-y-2">
+                    <Link
+                      href={`/widgets/${widget.id}`}
+                      className="w-full inline-flex items-center justify-center gap-2 font-bold text-[12px] uppercase py-1.5 px-4 cursor-pointer transition-all active:translate-y-px"
+                      style={{
+                        fontFamily: 'Tahoma, Arial, sans-serif',
+                        color: '#000000',
+                        background:
+                          'linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 45%, #d0d0d0 50%, #e8e8e8 100%)',
+                        border: '2px solid',
+                        borderColor: '#ffffff #808080 #808080 #ffffff',
+                        boxShadow: '1px 1px 0 #000000, inset 0 1px 0 rgba(255,255,255,0.9)',
+                      }}
+                    >
+                      <span>View Docs &amp; API Params</span>
+                      <ArrowRight size={12} />
+                    </Link>
+
+                    <Link
+                      href={{
+                        pathname: '/',
+                        query: { username: activeUsername, widget: widget.id },
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 font-bold text-[12px] py-1.5 px-4 cursor-pointer transition-all active:translate-y-px"
+                      style={{
+                        fontFamily: 'Tahoma, Arial, sans-serif',
+                        color: '#000000',
+                        background:
+                          'linear-gradient(180deg, #f0f6ff 0%, #d6e8ff 45%, #c4dbff 50%, #dceeff 100%)',
+                        border: '2px solid',
+                        borderColor: '#ffffff #4080d0 #4080d0 #ffffff',
+                        boxShadow: '1px 1px 0 #003087, inset 0 1px 0 rgba(255,255,255,0.9)',
+                      }}
+                    >
+                      <span>Edit in Visual Builder</span>
                     </Link>
                   </div>
                 </div>

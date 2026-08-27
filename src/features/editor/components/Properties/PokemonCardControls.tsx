@@ -1,7 +1,8 @@
-import { RefreshCw, RotateCcw, Search } from 'lucide-react'
+import { RefreshCw, RotateCcw, Search, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { Switch } from '@/components/ui/Switch'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -23,10 +24,135 @@ const SUGGESTED_POKEMON = [
   'Lucario',
 ]
 
-async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
-  const lowUrl = `${cardImageUrl}/low.webp`
+const POPULAR_SETS = [
+  'base1',
+  'base2',
+  'base3',
+  'base4',
+  'base5',
+  'gym1',
+  'gym2',
+  'neo1',
+  'neo2',
+  'neo3',
+  'neo4',
+  'ex1',
+  'ex2',
+  'ex3',
+  'dp1',
+  'dp2',
+  'pl1',
+  'hgss1',
+  'bw1',
+  'bw2',
+  'xy1',
+  'xy2',
+  'sm1',
+  'sm2',
+  'swsh1',
+  'swsh2',
+  'sv1',
+  'sv2',
+  'sv9',
+]
+
+interface UnifiedPokemonCard {
+  id: string
+  name: string
+  image: string
+}
+
+let cachedPokemonTcgCards: UnifiedPokemonCard[] | null = null
+
+async function searchPokemonCards(query: string): Promise<UnifiedPokemonCard[]> {
+  const cleanQuery = query.trim().toLowerCase()
+  if (!cleanQuery) return []
+
+  // 1. Try TCGdex API first
   try {
-    const res = await fetch(lowUrl)
+    const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(cleanQuery), {
+      signal: AbortSignal.timeout(3000),
+    })
+    if (res.ok) {
+      const json = await res.json()
+      if (Array.isArray(json)) {
+        const valid = json
+          .filter((c: any) => c.image)
+          .map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            image: `${c.image}/low.webp`,
+          }))
+        if (valid.length > 0) {
+          return valid
+        }
+      }
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  // 2. Fallback to PokemonTCG open dataset via jsDelivr CDN
+  try {
+    if (!cachedPokemonTcgCards) {
+      const allResults = await Promise.allSettled(
+        POPULAR_SETS.map((setId) =>
+          fetch(API_ENDPOINTS.POKEMON_TCG.SET_CARDS(setId), {
+            signal: AbortSignal.timeout(4000),
+          }).then((r) => (r.ok ? r.json() : []))
+        )
+      )
+
+      const cards: UnifiedPokemonCard[] = []
+      for (const result of allResults) {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          for (const card of result.value) {
+            const imgUrl = card.images?.small || card.images?.large
+            if (imgUrl) {
+              cards.push({
+                id: card.id,
+                name: card.name,
+                image: imgUrl,
+              })
+            }
+          }
+        }
+      }
+      if (cards.length > 0) {
+        cachedPokemonTcgCards = cards
+      }
+    }
+
+    if (cachedPokemonTcgCards && cachedPokemonTcgCards.length > 0) {
+      return cachedPokemonTcgCards.filter((c) => c.name.toLowerCase().includes(cleanQuery))
+    }
+  } catch (err) {
+    console.warn('Fallback Pokemon TCG fetch failed:', err)
+  }
+
+  return []
+}
+
+function isTcgdexHost(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr)
+    return (
+      parsed.hostname === 'assets.tcgdex.net' ||
+      parsed.hostname === 'tcgdex.net' ||
+      parsed.hostname.endsWith('.tcgdex.net')
+    )
+  } catch {
+    return false
+  }
+}
+
+async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
+  const isTcgdex = isTcgdexHost(cardImageUrl)
+  const targetUrl =
+    isTcgdex && !cardImageUrl.endsWith('.webp') ? `${cardImageUrl}/low.webp` : cardImageUrl
+
+  try {
+    const res = await fetch(targetUrl)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const blob = await res.blob()
     return new Promise((resolve, reject) => {
@@ -43,7 +169,7 @@ async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
     })
   } catch (err) {
     console.warn('Could not convert Pokemon card image to data URI:', err)
-    return `${cardImageUrl}/low.webp`
+    return targetUrl
   }
 }
 
@@ -53,7 +179,8 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
 
   const [searchQuery, setSearchQuery] = useState((config.searchQuery as string) || '')
   const [loading, setLoading] = useState(false)
-  const [cards, setCards] = useState<any[]>((config.searchCards as any[]) || [])
+  const [cards, setCards] = useState<UnifiedPokemonCard[]>((config.searchCards as any[]) || [])
+  const enableHolo = config.enableHolo !== false
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -88,29 +215,20 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
           const randomName = SUGGESTED_POKEMON[Math.floor(Math.random() * SUGGESTED_POKEMON.length)]
           setSearchQuery(randomName)
 
-          const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(randomName), {
-            signal: AbortSignal.timeout(6000),
-          })
-          if (!res.ok) {
-            throw new Error(`API error: ${res.status}`)
-          }
-          const json = await res.json()
-          if (Array.isArray(json)) {
-            const validCards = json.filter((c: any) => c.image)
-            if (validCards.length > 0) {
-              const randomCardIndex = Math.floor(Math.random() * Math.min(validCards.length, 5))
-              const card = validCards[randomCardIndex]
+          const validCards = await searchPokemonCards(randomName)
+          if (validCards.length > 0) {
+            const randomCardIndex = Math.floor(Math.random() * Math.min(validCards.length, 5))
+            const card = validCards[randomCardIndex]
 
-              const newCards = validCards.slice(0, 20)
-              setCards(newCards)
-              const cardDataUri = await fetchCardAsDataUri(card.image)
-              updateWidgetConfig(instanceId, {
-                searchQuery: randomName,
-                searchCards: newCards,
-                imageUrl: cardDataUri,
-                cardRawUrl: `${card.image}/low.webp`,
-              })
-            }
+            const newCards = validCards.slice(0, 20)
+            setCards(newCards)
+            const cardDataUri = await fetchCardAsDataUri(card.image)
+            updateWidgetConfig(instanceId, {
+              searchQuery: randomName,
+              searchCards: newCards,
+              imageUrl: cardDataUri,
+              cardRawUrl: card.image,
+            })
           }
         } catch (err) {
           console.warn('Unable to load initial random Pokemon card:', err)
@@ -132,22 +250,12 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(query), {
-        signal: AbortSignal.timeout(6000),
-      })
-      if (!res.ok) {
-        throw new Error(`API error: ${res.status}`)
-      }
-      const json = await res.json()
-      if (Array.isArray(json)) {
-        const newCards = json.filter((c: any) => c.image).slice(0, 20)
-        setCards(newCards)
-        updateWidgetConfig(instanceId, { searchQuery: query, searchCards: newCards })
-        if (newCards.length === 0) {
-          setError(t('errors.pokemon_no_cards', 'Nenhuma carta encontrada para esta busca.'))
-        }
-      } else {
-        setCards([])
+      const validCards = await searchPokemonCards(query)
+      const newCards = validCards.slice(0, 20)
+      setCards(newCards)
+      updateWidgetConfig(instanceId, { searchQuery: query, searchCards: newCards })
+      if (newCards.length === 0) {
+        setError(t('errors.pokemon_no_cards', 'Nenhuma carta encontrada para esta busca.'))
       }
     } catch (err) {
       console.warn('Error fetching Pokemon cards:', err)
@@ -162,15 +270,15 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
     }
   }
 
-  const selectCard = async (card: any) => {
+  const selectCard = async (card: UnifiedPokemonCard) => {
     if (card.image) {
       updateWidgetConfig(instanceId, {
-        imageUrl: `${card.image}/low.webp`,
-        cardRawUrl: `${card.image}/low.webp`,
+        imageUrl: card.image,
+        cardRawUrl: card.image,
       })
       const dataUri = await fetchCardAsDataUri(card.image)
       if (dataUri) {
-        updateWidgetConfig(instanceId, { imageUrl: dataUri, cardRawUrl: `${card.image}/low.webp` })
+        updateWidgetConfig(instanceId, { imageUrl: dataUri, cardRawUrl: card.image })
       }
     }
   }
@@ -346,7 +454,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
             >
               {c.image && (
                 <Image
-                  src={`${c.image}/low.webp`}
+                  src={c.image}
                   alt={c.name || 'Pokemon card'}
                   width={96}
                   height={144}
@@ -361,6 +469,17 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
 
       {imageUrl && !loading && (
         <div className="pt-4 space-y-4">
+          <div className="flex items-center justify-between p-2 bg-graphite rounded-xs border border-graphite">
+            <label className="flex items-center gap-1.5 text-eyebrow text-chalk font-inter-tight cursor-pointer">
+              <Sparkles size={13} className="text-signal-lime" />
+              {t('editor.pokemon.holo_effect', 'Efeito Holográfico')}
+            </label>
+            <Switch
+              checked={enableHolo}
+              onChange={(checked) => updateWidgetConfig(instanceId, { enableHolo: checked })}
+            />
+          </div>
+
           <div className="flex items-center justify-between text-ash font-inter-tight text-eyebrow uppercase tracking-wider font-medium">
             <span>{t('editor.pokemon.interactive_preview', 'Pré-visualização Interativa')}</span>
             <button
@@ -390,6 +509,7 @@ export function PokemonCardControls({ instanceId, config }: { instanceId: string
                       instanceId: instanceId + '-preview',
                       config: {
                         ...config,
+                        enableHolo,
                         imageUrl,
                         rotateX,
                         rotateY,

@@ -114,11 +114,53 @@ export async function GET(request: Request) {
       throw new Error('Invalid user details returned from GitHub')
     }
 
+    let userEmail: string | undefined = userData.email || undefined
+
+    if (!userEmail) {
+      try {
+        const emailsResponse = await fetch(API_ENDPOINTS.GITHUB.USER_EMAILS, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'User-Agent': 'GitAscii-App',
+          },
+          signal: AbortSignal.timeout(4000),
+        })
+
+        if (emailsResponse.ok) {
+          const emailsData = await emailsResponse.json()
+          if (Array.isArray(emailsData)) {
+            const primaryEmailObj =
+              emailsData.find((e: any) => e.primary && e.verified) ||
+              emailsData.find((e: any) => e.verified) ||
+              emailsData[0]
+            if (primaryEmailObj?.email) {
+              userEmail = primaryEmailObj.email
+            }
+          }
+        }
+      } catch {}
+    }
+
     await setSession({
       username: userData.login,
       githubId: userData.id,
+      email: userEmail,
+      name: userData.name || userData.login,
       accessToken: accessToken,
     })
+
+    if (userEmail) {
+      const { emailService } = await import('@/lib/email/service')
+      void emailService
+        .sendWelcomeEmail({
+          username: userData.login,
+          email: userEmail,
+          name: userData.name || userData.login,
+        })
+        .catch((err) => {
+          console.error('[OAuth Callback] Non-blocking welcome email error:', err)
+        })
+    }
 
     const origin = new URL(request.url).origin
     const safePath = customRedirectPath === '/' ? `/${userData.login}` : customRedirectPath

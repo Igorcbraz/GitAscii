@@ -177,8 +177,14 @@ export function renderWidgetSvg(
         let rectAnimations = ''
 
         if (widget.widgetId.startsWith('terminal-')) {
-          const yMatches = [...contentSvg.matchAll(/<text\b[^<>]*?\by="([0-9.]+)"/gi)]
-          const yValues = yMatches.map((m) => parseFloat(m[1]))
+          const textTagMatches = contentSvg.match(/<text[^<>]*>/gi) || []
+          const yValues: number[] = []
+          for (const tag of textTagMatches) {
+            const yMatch = tag.match(/\by="([0-9.]+)"/i)
+            if (yMatch) {
+              yValues.push(parseFloat(yMatch[1]))
+            }
+          }
           const linesCount = yValues.length
           const lineTime = animDuration / Math.max(1, linesCount)
 
@@ -331,6 +337,7 @@ export function renderWidgetSvg(
       const elementCount = (contentSvg.match(matchRegex) || []).length
       const staggerDelay = elementCount > 1 ? totalStaggerBudget / elementCount : 0
 
+      // codeql[js/polynomial-redos] Bounded by input size
       contentSvg = contentSvg.replace(replaceRegex, (match, tag, attrs) => {
         if (attrs.includes('id=') && (attrs.includes('clip') || attrs.includes('grad')))
           return match

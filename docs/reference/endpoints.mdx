@@ -1,6 +1,6 @@
 ---
-title: "HTTP Endpoints Reference"
-description: "Detailed specification of routes, query parameters, cache headers, and error codes"
+title: 'HTTP Endpoints Reference'
+description: 'Detailed specification of routes, query parameters, cache headers, and error codes'
 ---
 
 # HTTP Endpoints Reference
@@ -18,18 +18,18 @@ GET /api/svg/:username
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `username` | `string` | **Yes** | GitHub username handle |
-| `profileSlug` | `string` | No | Stored profile slug (`default`, `work`, etc.) |
+| Parameter     | Type     | Required | Description                                   |
+| :------------ | :------- | :------- | :-------------------------------------------- |
+| `username`    | `string` | **Yes**  | GitHub username handle                        |
+| `profileSlug` | `string` | No       | Stored profile slug (`default`, `work`, etc.) |
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `theme` | `'dark' \| 'light'` | `'dark'` | Force light or dark mode palette |
-| `template` | `string` | `'terminal'` | Fallback template preset ID |
-| `widgets` | `string` | `undefined` | Comma-separated widget IDs / aliases to shrink-wrap |
+| Parameter  | Type                | Default      | Description                                         |
+| :--------- | :------------------ | :----------- | :-------------------------------------------------- |
+| `theme`    | `'dark' \| 'light'` | `'dark'`     | Force light or dark mode palette                    |
+| `template` | `string`            | `'terminal'` | Fallback template preset ID                         |
+| `widgets`  | `string`            | `undefined`  | Comma-separated widget IDs / aliases to shrink-wrap |
 
 ### Response Headers
 
@@ -79,7 +79,7 @@ Content-Type: application/json
 
 ```json
 {
-  "config": { /* Complete SavedConfiguration object tailored to user's tech stack */ },
-  "data": { /* NormalizedGitHubData */ }
+  "config": {/* Complete SavedConfiguration object tailored to user's tech stack */},
+  "data": {/* NormalizedGitHubData */}
 }
 ```

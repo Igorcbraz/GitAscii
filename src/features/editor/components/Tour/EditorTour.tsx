@@ -26,7 +26,11 @@ interface TargetRect {
   height: number
 }
 
-export function EditorTour() {
+interface EditorTourProps {
+  embedded?: boolean
+}
+
+export function EditorTour({ embedded = false }: EditorTourProps) {
   const { t } = useI18n()
   const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -144,61 +148,125 @@ export function EditorTour() {
         ),
         icon: Sparkles,
       },
-      {
-        target: '#tour-export-buttons',
-        placement: 'left-center',
-        badge: t('tour.export.badge', 'CONCLUSÃO · SALVAR'),
-        titlePrefix: t('tour.export.title_prefix', 'Salvar e '),
-        titleHighlight: t('tour.export.title_highlight', 'Exportar'),
-        titleSuffix: '',
-        description: t(
-          'tour.export.desc',
-          'Aqui você encontra as opções para salvar seu trabalho, exportar o layout em JSON ou atualizar o README diretamente no GitHub quando finalizar.'
-        ),
-        tipLabel: t('tour.export.tip_label', 'Exportação com 1 Clique'),
-        tipText: t(
-          'tour.export.tip_text',
-          'Clique em "Update README" na barra superior para sincronizar o layout gerado diretamente com seu repositório.'
-        ),
-        icon: Download,
-      },
+      ...(embedded
+        ? [
+            {
+              target: null,
+              placement: 'center',
+              badge: t('tour.demo_done.badge', 'SANDBOX · DEMO'),
+              titlePrefix: t('tour.demo_done.title_prefix', 'Experimente '),
+              titleHighlight: t('tour.demo_done.title_highlight', 'Livremente'),
+              titleSuffix: '',
+              description: t(
+                'tour.demo_done.desc',
+                'Adicione widgets, teste temas, alterne entre Canvas e GitHub Mode. Quando quiser salvar e sincronizar, abra o estúdio com seu GitHub!'
+              ),
+              tipLabel: t('tour.demo_done.tip_label', 'Pronto para Construir'),
+              tipText: t(
+                'tour.demo_done.tip_text',
+                'Use o botão abaixo do editor para conectar seu perfil do GitHub em 1 clique.'
+              ),
+              icon: Sparkles,
+            },
+          ]
+        : [
+            {
+              target: '#tour-export-buttons',
+              placement: 'left-center',
+              badge: t('tour.export.badge', 'CONCLUSÃO · SALVAR'),
+              titlePrefix: t('tour.export.title_prefix', 'Salvar e '),
+              titleHighlight: t('tour.export.title_highlight', 'Exportar'),
+              titleSuffix: '',
+              description: t(
+                'tour.export.desc',
+                'Aqui você encontra as opções para salvar seu trabalho, exportar o layout em JSON ou atualizar o README diretamente no GitHub quando finalizar.'
+              ),
+              tipLabel: t('tour.export.tip_label', 'Exportação com 1 Clique'),
+              tipText: t(
+                'tour.export.tip_text',
+                'Clique em "Update README" na barra superior para sincronizar o layout gerado diretamente com seu repositório.'
+              ),
+              icon: Download,
+            },
+          ]),
     ],
-    [t]
+    [t, embedded]
   )
 
-  const updateTargetPosition = useCallback((targetSelector: string | null) => {
-    if (!targetSelector) {
-      setTargetRect((prev) => (prev !== null ? null : prev))
-      return
-    }
+  const updateTargetPosition = useCallback(
+    (targetSelector: string | null) => {
+      if (!targetSelector) {
+        setTargetRect((prev) => (prev !== null ? null : prev))
+        return
+      }
 
-    const element = document.querySelector(targetSelector)
-    if (element) {
-      const rect = element.getBoundingClientRect()
-      setTargetRect((prev) => {
-        if (
-          prev &&
-          Math.abs(prev.top - rect.top) < 1 &&
-          Math.abs(prev.left - rect.left) < 1 &&
-          Math.abs(prev.width - rect.width) < 1 &&
-          Math.abs(prev.height - rect.height) < 1
-        ) {
-          return prev
+      const element = document.querySelector(targetSelector)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        if (embedded) {
+          const container =
+            element.closest('.interactive-editor-workspace') ||
+            element.closest('[data-sandbox-container="true"]') ||
+            element.closest('.bg-carbon')
+          if (container) {
+            const cRect = container.getBoundingClientRect()
+            setTargetRect((prev) => {
+              const newTop = rect.top - cRect.top
+              const newLeft = rect.left - cRect.left
+              if (
+                prev &&
+                Math.abs(prev.top - newTop) < 1 &&
+                Math.abs(prev.left - newLeft) < 1 &&
+                Math.abs(prev.width - rect.width) < 1 &&
+                Math.abs(prev.height - rect.height) < 1
+              ) {
+                return prev
+              }
+              return {
+                top: newTop,
+                left: newLeft,
+                width: rect.width,
+                height: rect.height,
+              }
+            })
+            return
+          }
         }
-        return {
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        }
-      })
-    } else {
-      setTargetRect((prev) => (prev !== null ? null : prev))
-    }
-  }, [])
+
+        setTargetRect((prev) => {
+          if (
+            prev &&
+            Math.abs(prev.top - rect.top) < 1 &&
+            Math.abs(prev.left - rect.left) < 1 &&
+            Math.abs(prev.width - rect.width) < 1 &&
+            Math.abs(prev.height - rect.height) < 1
+          ) {
+            return prev
+          }
+          return {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          }
+        })
+      } else {
+        setTargetRect((prev) => (prev !== null ? null : prev))
+      }
+    },
+    [embedded]
+  )
 
   useEffect(() => {
     setMounted(true)
+
+    if (embedded) {
+      const timer = setTimeout(() => {
+        setIsOpen(true)
+        setCurrentStep(0)
+      }, 400)
+      return () => clearTimeout(timer)
+    }
 
     const timer = setTimeout(() => {
       const hasSeenTour = safeStorage.getItem('gitascii_has_seen_tour')
@@ -222,7 +290,7 @@ export function EditorTour() {
       clearTimeout(timer)
       window.removeEventListener('gitascii:start-tour', handleStartTourEvent)
     }
-  }, [])
+  }, [embedded])
 
   const currentTargetSelector = isOpen ? steps[currentStep]?.target || null : null
 
@@ -235,7 +303,7 @@ export function EditorTour() {
     updateTargetPosition(currentTargetSelector)
 
     const element = document.querySelector(currentTargetSelector)
-    if (element) {
+    if (element && !embedded) {
       element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
 
@@ -244,22 +312,27 @@ export function EditorTour() {
     }
 
     window.addEventListener('resize', handleResizeOrScroll)
-    window.addEventListener('scroll', handleResizeOrScroll, true)
+    if (!embedded) {
+      window.addEventListener('scroll', handleResizeOrScroll, true)
+    }
 
     return () => {
       window.removeEventListener('resize', handleResizeOrScroll)
-      window.removeEventListener('scroll', handleResizeOrScroll, true)
+      if (!embedded) {
+        window.removeEventListener('scroll', handleResizeOrScroll, true)
+      }
     }
-  }, [isOpen, currentTargetSelector, updateTargetPosition])
+  }, [isOpen, currentTargetSelector, updateTargetPosition, embedded])
 
   const handleClose = useCallback(() => {
     setIsClosing(true)
-    safeStorage.setItem('gitascii_has_seen_tour', 'true')
+    const tourKey = embedded ? 'gitascii_has_seen_demo_tour' : 'gitascii_has_seen_tour'
+    safeStorage.setItem(tourKey, 'true')
     setTimeout(() => {
       setIsOpen(false)
       setIsClosing(false)
     }, 200)
-  }, [])
+  }, [embedded])
 
   const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {
@@ -299,32 +372,42 @@ export function EditorTour() {
   const getDialogPositionClasses = () => {
     switch (step.placement) {
       case 'right-side':
-        return 'top-1/2 right-4 md:right-16 lg:right-24 -translate-y-1/2'
+        return embedded
+          ? 'top-1/2 right-3 md:right-8 -translate-y-1/2'
+          : 'top-1/2 right-4 md:right-16 lg:right-24 -translate-y-1/2'
       case 'left-side':
-        return 'top-1/2 left-4 md:left-16 lg:left-24 -translate-y-1/2'
+        return embedded
+          ? 'top-1/2 left-3 md:left-8 -translate-y-1/2'
+          : 'top-1/2 left-4 md:left-16 lg:left-24 -translate-y-1/2'
       case 'left-center':
         return 'top-1/2 left-4 md:left-20 lg:left-32 -translate-y-1/2'
       case 'bottom-center':
-        return 'bottom-8 md:bottom-16 left-1/2 -translate-x-1/2'
+        return embedded
+          ? 'bottom-6 left-1/2 -translate-x-1/2'
+          : 'bottom-8 md:bottom-16 left-1/2 -translate-x-1/2'
       case 'top-center':
-        return 'top-12 md:top-20 left-1/2 -translate-x-1/2'
+        return embedded
+          ? 'top-8 left-1/2 -translate-x-1/2'
+          : 'top-12 md:top-20 left-1/2 -translate-x-1/2'
       case 'center':
       default:
         return 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
     }
   }
 
-  return createPortal(
+  const tourElements = (
     <>
       {targetRect ? (
         <svg
-          className={`fixed inset-0 z-110 pointer-events-auto w-full h-full transition-opacity duration-200 ${
+          className={`${
+            embedded ? 'absolute inset-0 z-40' : 'fixed inset-0 z-110'
+          } pointer-events-auto w-full h-full transition-opacity duration-200 ${
             isClosing ? 'opacity-0' : 'opacity-100'
           }`}
           onClick={handleClose}
         >
           <defs>
-            <mask id="tour-spotlight-mask">
+            <mask id={embedded ? 'tour-spotlight-mask-embedded' : 'tour-spotlight-mask'}>
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               <rect
                 x={Math.max(0, targetRect.left - 6)}
@@ -342,12 +425,14 @@ export function EditorTour() {
             width="100%"
             height="100%"
             fill="rgba(0, 0, 0, 0.78)"
-            mask="url(#tour-spotlight-mask)"
+            mask={`url(#${embedded ? 'tour-spotlight-mask-embedded' : 'tour-spotlight-mask'})`}
           />
         </svg>
       ) : (
         <div
-          className={`fixed inset-0 z-110 bg-black/78 backdrop-blur-xs transition-opacity duration-200 ${
+          className={`${
+            embedded ? 'absolute inset-0 z-40' : 'fixed inset-0 z-110'
+          } bg-black/78 backdrop-blur-xs transition-opacity duration-200 ${
             isClosing ? 'opacity-0' : 'opacity-100'
           }`}
           onClick={handleClose}
@@ -362,7 +447,9 @@ export function EditorTour() {
             width: `${targetRect.width + 12}px`,
             height: `${targetRect.height + 12}px`,
           }}
-          className="fixed z-115 pointer-events-none rounded-md border-2 border-signal-lime shadow-[0_0_24px_rgba(197,255,74,0.65)] transition-all duration-300 animate-pulse"
+          className={`${
+            embedded ? 'absolute z-45' : 'fixed z-115'
+          } pointer-events-none rounded-md border-2 border-signal-lime shadow-[0_0_24px_rgba(197,255,74,0.65)] transition-all duration-300 animate-pulse`}
         >
           <div className="absolute -top-3 left-2 px-1.5 py-0.5 bg-signal-lime text-black font-jetbrains-mono font-bold text-[9px] uppercase tracking-wider rounded-xs shadow-md">
             [ FOCO DO TOUR ]
@@ -371,7 +458,9 @@ export function EditorTour() {
       )}
 
       <div
-        className={`fixed z-120 ${getDialogPositionClasses()} w-full max-w-[480px] p-4 transition-all duration-200 ${
+        className={`${
+          embedded ? 'absolute z-50' : 'fixed z-120'
+        } ${getDialogPositionClasses()} w-full max-w-[460px] p-3 sm:p-4 transition-all duration-200 ${
           isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
         }`}
       >
@@ -469,7 +558,14 @@ export function EditorTour() {
           </div>
         </div>
       </div>
-    </>,
-    document.body
+    </>
   )
+
+  if (embedded) {
+    return tourElements
+  }
+
+  return createPortal(tourElements, document.body)
 }
+
+export default EditorTour

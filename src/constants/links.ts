@@ -31,6 +31,7 @@ export interface ExternalLinksDef {
     readonly GITFUT: string
     readonly PEDRO_FONSECA: string
   }
+  readonly DEFAULT_WINXP_BLISS_WALLPAPER: string
   readonly CODEWEB_DEFAULT_GIFS: {
     readonly LEFT: string
     readonly CARD1: string
@@ -55,7 +56,7 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
   DEFAULT_APP_OG_IMAGE: 'https://git-ascii.vercel.app/og-image.png',
   DEFAULT_APP_OG_IMAGE_PT: 'https://git-ascii.vercel.app/og-image-pt-br.png',
   GOOGLE_FONTS_CSS:
-    'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=PT+Serif:ital,wght@0,300;1,300&display=swap',
+    'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap',
   GOOGLE_PRIVACY: 'https://policies.google.com/privacy',
   MICROSOFT_PRIVACY: 'https://privacy.microsoft.com',
   SENTRY_PRIVACY: 'https://sentry.io/privacy/',
@@ -75,6 +76,8 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
     GITFUT: 'https://gitfut.com',
     PEDRO_FONSECA: 'https://github.com/PedroFnseca',
   },
+  DEFAULT_WINXP_BLISS_WALLPAPER:
+    'https://external-preview.redd.it/in-honor-of-windows-xp-i-made-a-4k-version-of-bliss-v0-MXldSKpu4bnUgr75VORKhtjGpb2WLN2zc2w6PVMHaco.jpeg?auto=webp&s=292d049cd3cac11575e8f2ea145873fbcf41cfbc',
   CODEWEB_DEFAULT_GIFS: {
     LEFT: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmVyNmVtYnVubXg1Mmw1MTZ5Y29hdXN0dzJlOTFtNzVmNWwycmgxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVsVfxVwz40I24GT7X/giphy.gif',
     CARD1:

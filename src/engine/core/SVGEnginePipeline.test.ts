@@ -4,7 +4,8 @@ import { GITHUB_THEME_KEYS } from '@/constants'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { sanitizeSvg } from '@/utils/svgSanitizer'
 
-import { embedExternalImages, renderSvg } from './SVGEngine'
+import { embedExternalImages } from './embedExternalImages'
+import { renderSvg } from './SVGEngine'
 
 const mockProfileData: NormalizedGitHubData = {
   user: {

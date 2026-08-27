@@ -158,4 +158,3 @@ export function PrivacySettingsButton() {
     </button>
   )
 }
-

@@ -1,6 +1,6 @@
 ---
-title: "Command Deck Console Widget"
-description: "Mission dashboard showing active deployment status, flagship channels, and hardware meters"
+title: 'Command Deck Console Widget'
+description: 'Mission dashboard showing active deployment status, flagship channels, and hardware meters'
 ---
 
 # Command Deck Console Widget (`controlplane-command-deck`)
@@ -11,15 +11,15 @@ The Command Deck Console widget renders an industrial aerospace-grade mission da
 
 ```typescript
 export interface CommandDeckConfig {
-  layoutType?: 'hero' | 'closed-loop'  // Default: 'closed-loop'
-  customTitle?: string                 // Header operator title
-  customBio?: string                   // Subtitle copy
-  selectedRepos?: string[]             // Manual priority repository list
+  layoutType?: 'hero' | 'closed-loop' // Default: 'closed-loop'
+  customTitle?: string // Header operator title
+  customBio?: string // Subtitle copy
+  selectedRepos?: string[] // Manual priority repository list
   repoSortBy?: 'stars' | 'forks' | 'updated' | 'name' // Default: 'stars'
-  maxRepos?: number                    // Default: 8
+  maxRepos?: number // Default: 8
   repoLanguages?: Record<string, string> // Custom language label mapping
-  accentColor?: string                 // Primary telemetry tint (default: '#00A7D1')
-  secondaryColor?: string              // Secondary signal tint (default: '#E84A8A')
+  accentColor?: string // Primary telemetry tint (default: '#00A7D1')
+  secondaryColor?: string // Secondary signal tint (default: '#E84A8A')
 }
 ```
 

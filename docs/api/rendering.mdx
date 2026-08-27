@@ -1,6 +1,6 @@
 ---
-title: "Rendering"
-description: "Core rendering functions: SVGEngine, WidgetRenderer, and External Asset Inlining"
+title: 'Rendering'
+description: 'Core rendering functions: SVGEngine, WidgetRenderer, and External Asset Inlining'
 ---
 
 # Rendering Engine
@@ -32,11 +32,10 @@ export function renderSvg(
 </ParamField>
 
 <ParamField body="options" type="RenderOptions" optional>
-  Optional rendering overrides:
-  * `theme?: 'dark' | 'light'` - Forces dark or light palette.
-  * `width?: number` - Explicit output canvas width (defaults to bounding max or 800px).
-  * `height?: number` - Explicit output canvas height.
-  * `widgets?: string[]` - Target widget instance IDs or widget IDs to isolate with automatic shrink-wrap.
+  Optional rendering overrides: * `theme?: 'dark' | 'light'` - Forces dark or light palette. *
+  `width?: number` - Explicit output canvas width (defaults to bounding max or 800px). * `height?:
+  number` - Explicit output canvas height. * `widgets?: string[]` - Target widget instance IDs or
+  widget IDs to isolate with automatic shrink-wrap.
 </ParamField>
 
 ### Shrink-Wrap Calculation
@@ -88,6 +87,6 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
 
 ### Security & Inlining Mechanisms
 
-* **SSRF Validator**: Every external URL is pre-validated against private IP ranges (e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254`) before making network calls.
-* **SVG Inlining (`inlineSvg`)**: Parses remote SVGs, extracts `<style>` blocks to prevent namespace collisions, normalizes the `viewBox`, and replaces external image tags with direct `<svg x="..." y="...">` structures.
-* **Binary Fallback**: Non-SVG images (PNG, WebP, GIF) are converted to `data:image/png;base64,...` data URIs.
+- **SSRF Validator**: Every external URL is pre-validated against private IP ranges (e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254`) before making network calls.
+- **SVG Inlining (`inlineSvg`)**: Parses remote SVGs, extracts `<style>` blocks to prevent namespace collisions, normalizes the `viewBox`, and replaces external image tags with direct `<svg x="..." y="...">` structures.
+- **Binary Fallback**: Non-SVG images (PNG, WebP, GIF) are converted to `data:image/png;base64,...` data URIs.

@@ -74,23 +74,25 @@
  *
  *   node serve-question.mjs --payload question.json [--timeout 900] [--no-open] [--port 0]
  */
-import http from 'node:http';
-import fs from 'node:fs';
-import path from 'node:path';
-import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import http from 'node:http'
+import fs from 'node:fs'
+import path from 'node:path'
+import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 function arg(name, fallback = null) {
-  const i = process.argv.indexOf(`--${name}`);
-  if (i === -1) return fallback;
-  const v = process.argv[i + 1];
-  return v && !v.startsWith('--') ? v : fallback;
+  const i = process.argv.indexOf(`--${name}`)
+  if (i === -1) return fallback
+  const v = process.argv[i + 1]
+  return v && !v.startsWith('--') ? v : fallback
 }
-const hasFlag = (name) => process.argv.includes(`--${name}`);
+const hasFlag = (name) => process.argv.includes(`--${name}`)
 
 if (process.env.IMPECCABLE_QUESTION_DISABLED) {
-  console.log('serve-question: disabled in this session (no browser); use the structured question tool instead.');
-  process.exit(2);
+  console.log(
+    'serve-question: disabled in this session (no browser); use the structured question tool instead.'
+  )
+  process.exit(2)
 }
 // Headless self-detection, applied only where a browser is actually wanted.
 // --no-open means the caller opens the URL itself, and --wait / --stop /
@@ -98,15 +100,18 @@ if (process.env.IMPECCABLE_QUESTION_DISABLED) {
 // was already settled at --start, --stop kills one, --schema prints text. A
 // spurious exit 2 from those breaks the documented loop, which polls --wait
 // while it exits 3 and reads --schema before building a payload.
-const wantsBrowser = !hasFlag('no-open') && !hasFlag('wait') && !hasFlag('stop') && !hasFlag('schema');
+const wantsBrowser =
+  !hasFlag('no-open') && !hasFlag('wait') && !hasFlag('stop') && !hasFlag('schema')
 if (wantsBrowser && !process.env.IMPECCABLE_QUESTION_FORCE) {
   const headless =
     process.env.CI ||
     (process.env.SSH_CONNECTION && !process.env.DISPLAY) ||
-    (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY);
+    (process.platform === 'linux' && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY)
   if (headless) {
-    console.log('serve-question: no browser detected in this environment (CI/headless/remote); use the structured question tool instead. Set IMPECCABLE_QUESTION_FORCE=1 to serve anyway.');
-    process.exit(2);
+    console.log(
+      'serve-question: no browser detected in this environment (CI/headless/remote); use the structured question tool instead. Set IMPECCABLE_QUESTION_FORCE=1 to serve anyway.'
+    )
+    process.exit(2)
   }
 }
 
@@ -116,51 +121,96 @@ if (wantsBrowser && !process.env.IMPECCABLE_QUESTION_FORCE) {
 // working turn, because a build that never reopens the chosen world's board
 // and hero calibrates on nothing.
 function printAnswer(raw) {
-  console.log(`ANSWER: ${raw}`);
+  console.log(`ANSWER: ${raw}`)
   try {
-    const a = JSON.parse(raw);
+    const a = JSON.parse(raw)
     if (a.hero || a.board) {
-      console.log("CHOSEN CARD: open the chosen world's board and hero images now, before any code. When your harness only reads files, or runs sandboxed, download them INTO the workspace and open the relative path; a sandboxed viewer rejects absolute paths outside it. They set the craft bar the build must reach.");
+      console.log(
+        "CHOSEN CARD: open the chosen world's board and hero images now, before any code. When your harness only reads files, or runs sandboxed, download them INTO the workspace and open the relative path; a sandboxed viewer rejects absolute paths outside it. They set the craft bar the build must reach."
+      )
     }
     if (a.sketch) {
-      console.log('CHOSEN SKETCH: the decision sketch at that path may seed one comp probe; the comp round still renders its full set, because a sketch chose the direction, not the composition.');
+      console.log(
+        'CHOSEN SKETCH: the decision sketch at that path may seed one comp probe; the comp round still renders its full set, because a sketch chose the direction, not the composition.'
+      )
     }
     if (a.optionId === 'canon') {
-      console.log('CANON CHOSEN: the user picked the category standard on purpose. Ask once for two or three products this should sit alongside; their craft level becomes the quality bar. Execute the canon at full commitment, conventions embraced without irony or smuggled quirk.');
+      console.log(
+        'CANON CHOSEN: the user picked the category standard on purpose. Ask once for two or three products this should sit alongside; their craft level becomes the quality bar. Execute the canon at full commitment, conventions embraced without irony or smuggled quirk.'
+      )
     }
-  } catch { /* raw answer */ }
+  } catch {
+    /* raw answer */
+  }
 }
 
-const payloadPath = arg('payload');
-const timeoutSec = Number(arg('timeout', '900'));
-const portArg = Number(arg('port', '0'));
-const QUESTION_DIR = path.join(process.cwd(), '.impeccable', 'questions');
-const stateFile = (key) => path.join(QUESTION_DIR, `${key}.state.json`);
-const answerFile = (key) => path.join(QUESTION_DIR, `${key}.answer.json`);
+const payloadPath = arg('payload')
+const timeoutSec = Number(arg('timeout', '900'))
+const portArg = Number(arg('port', '0'))
+const QUESTION_DIR = path.join(process.cwd(), '.impeccable', 'questions')
+const stateFile = (key) => path.join(QUESTION_DIR, `${key}.state.json`)
+const answerFile = (key) => path.join(QUESTION_DIR, `${key}.answer.json`)
 
 if (hasFlag('schema')) {
-  console.log(JSON.stringify({
-    title: 'Choose the visual world',
-    question: 'The roll assigned Fillmore Handbill. Keep it, take an alternate, or re-roll.',
-    options: [
-      { id: 'assigned', label: 'Fillmore Handbill', kicker: 'THE ROLL', lineage: '1966-71 Fillmore psychedelic handbills', thesis: 'The gig poster that treats every release like a one-night stand.', palette: ['#e8452c', '#f5d64c', '#1b2a52', '#f3ead8'], materials: ['letterpress', 'split-fountain ink'], viewport: 'A full-bleed dated bill with the product name in warped display type.', risk: 'Reads nostalgic when the type is set timidly.', sketch: '.impeccable/sketches/assigned.webp', hero: 'https://impeccable.style/worlds/cards/fillmore-handbill-hero.webp', board: 'https://impeccable.style/worlds/cards/fillmore-handbill.webp' },
-      { id: 'challenger-teletext', label: 'Teletext Service', lineage: 'broadcast teletext magazines', thesis: 'The catalog as a broadcast index: pages, not sections.', case: 'Fuses cleanly: releases map to numbered pages.', sketch: '.impeccable/sketches/challenger-teletext.webp', hero: 'https://impeccable.style/worlds/cards/broadcast-programming-teletext-service-hero.webp' },
-    ],
-    reroll: true,
-    canon: true,
-    canonCard: { label: 'The category standard', thesis: 'What this category ships, executed impeccably.', viewport: 'The arrangement a visitor expects, at full craft.', sketch: '.impeccable/sketches/canon.webp' },
-    steer: true,
-  }, null, 2));
-  console.log('\nOption ids return verbatim in ANSWER; "reroll" and "canon" are reserved. hero/board/sketch accept URLs or local paths; sketch slots may point at files that do not exist yet (serve first, generate after; the page polls until they land, so never block serving on generation). hero on a challenger is the inspiration it draws from and renders picture-in-picture beside the sketch, never as the promise of the build. canonCard renders the standing exit as a subordinate card with the same anatomy; without it, canon stays a quiet footer action. Include canon only for visual-direction rounds; never present it as your own recommendation. Keep thesis and each fact to one short sentence: the card front shows thesis, identity, and a two-line risk, while first viewport and the case read on the card back behind the Details chip, so long facts cost the reader a flip, not the page its scanability. Sketch aspect follows the surface: portrait at device viewport for native or mobile-first surfaces, landscape otherwise; the page adapts its cards to either.');
-  process.exit(0);
+  console.log(
+    JSON.stringify(
+      {
+        title: 'Choose the visual world',
+        question: 'The roll assigned Fillmore Handbill. Keep it, take an alternate, or re-roll.',
+        options: [
+          {
+            id: 'assigned',
+            label: 'Fillmore Handbill',
+            kicker: 'THE ROLL',
+            lineage: '1966-71 Fillmore psychedelic handbills',
+            thesis: 'The gig poster that treats every release like a one-night stand.',
+            palette: ['#e8452c', '#f5d64c', '#1b2a52', '#f3ead8'],
+            materials: ['letterpress', 'split-fountain ink'],
+            viewport: 'A full-bleed dated bill with the product name in warped display type.',
+            risk: 'Reads nostalgic when the type is set timidly.',
+            sketch: '.impeccable/sketches/assigned.webp',
+            hero: 'https://impeccable.style/worlds/cards/fillmore-handbill-hero.webp',
+            board: 'https://impeccable.style/worlds/cards/fillmore-handbill.webp',
+          },
+          {
+            id: 'challenger-teletext',
+            label: 'Teletext Service',
+            lineage: 'broadcast teletext magazines',
+            thesis: 'The catalog as a broadcast index: pages, not sections.',
+            case: 'Fuses cleanly: releases map to numbered pages.',
+            sketch: '.impeccable/sketches/challenger-teletext.webp',
+            hero: 'https://impeccable.style/worlds/cards/broadcast-programming-teletext-service-hero.webp',
+          },
+        ],
+        reroll: true,
+        canon: true,
+        canonCard: {
+          label: 'The category standard',
+          thesis: 'What this category ships, executed impeccably.',
+          viewport: 'The arrangement a visitor expects, at full craft.',
+          sketch: '.impeccable/sketches/canon.webp',
+        },
+        steer: true,
+      },
+      null,
+      2
+    )
+  )
+  console.log(
+    '\nOption ids return verbatim in ANSWER; "reroll" and "canon" are reserved. hero/board/sketch accept URLs or local paths; sketch slots may point at files that do not exist yet (serve first, generate after; the page polls until they land, so never block serving on generation). hero on a challenger is the inspiration it draws from and renders picture-in-picture beside the sketch, never as the promise of the build. canonCard renders the standing exit as a subordinate card with the same anatomy; without it, canon stays a quiet footer action. Include canon only for visual-direction rounds; never present it as your own recommendation. Keep thesis and each fact to one short sentence: the card front shows thesis, identity, and a two-line risk, while first viewport and the case read on the card back behind the Details chip, so long facts cost the reader a flip, not the page its scanability. Sketch aspect follows the surface: portrait at device viewport for native or mobile-first surfaces, landscape otherwise; the page adapts its cards to either.'
+  )
+  process.exit(0)
 }
 
 if (hasFlag('wait')) {
-  const key = arg('key');
-  if (!key) { console.error('serve-question: --wait needs --key'); process.exit(1); }
-  const pollSec = Number(arg('poll', '60'));
-  const deadline = Date.now() + pollSec * 1000;
-  const answered = () => fs.existsSync(answerFile(key));
+  const key = arg('key')
+  if (!key) {
+    console.error('serve-question: --wait needs --key')
+    process.exit(1)
+  }
+  const pollSec = Number(arg('poll', '60'))
+  const deadline = Date.now() + pollSec * 1000
+  const answered = () => fs.existsSync(answerFile(key))
   // Liveness must survive sandboxes: a sandboxed --wait cannot signal the
   // daemon (kill throws EPERM even for a living process), so a fresh page
   // heartbeat in the state file is the primary proof of life, the kill probe
@@ -169,208 +219,315 @@ if (hasFlag('wait')) {
   // the user had walked away while they were still reading the board.
   const alive = () => {
     try {
-      const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'));
-      if (state.lastBeat && Date.now() - state.lastBeat < 12000) return true;
-      try { process.kill(state.pid, 0); return true; }
-      catch (err) { return err.code === 'EPERM'; }
-    } catch { return false; }
-  };
-  let sawClose = false;
+      const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'))
+      if (state.lastBeat && Date.now() - state.lastBeat < 12000) return true
+      try {
+        process.kill(state.pid, 0)
+        return true
+      } catch (err) {
+        return err.code === 'EPERM'
+      }
+    } catch {
+      return false
+    }
+  }
+  let sawClose = false
   while (Date.now() < deadline) {
-    if (answered()) break;
+    if (answered()) break
     if (!alive()) {
-      console.log('serve-question: the question server is gone with no answer. This is a server failure, not a user decision: restart it with --start and the same payload, reopen the URL for the user, and wait again. Never proceed without their choice while their browser session is open.');
-      process.exit(2);
+      console.log(
+        'serve-question: the question server is gone with no answer. This is a server failure, not a user decision: restart it with --start and the same payload, reopen the URL for the user, and wait again. Never proceed without their choice while their browser session is open.'
+      )
+      process.exit(2)
     }
     try {
-      const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'));
-      if (state.lastBeat && Date.now() - state.lastBeat > 15000) { sawClose = true; break; }
-    } catch { /* state mid-write */ }
-    await new Promise((r) => setTimeout(r, 1000));
+      const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'))
+      if (state.lastBeat && Date.now() - state.lastBeat > 15000) {
+        sawClose = true
+        break
+      }
+    } catch {
+      /* state mid-write */
+    }
+    await new Promise((r) => setTimeout(r, 1000))
   }
   if (sawClose && !answered()) {
-    console.log('PAGE CLOSED: the question page went away without an answer; re-present, reopen the URL, or fall back to the structured question tool');
-    process.exit(4);
+    console.log(
+      'PAGE CLOSED: the question page went away without an answer; re-present, reopen the URL, or fall back to the structured question tool'
+    )
+    process.exit(4)
   }
-  if (!answered()) { console.log(`WAITING: no answer yet after ${pollSec}s; run --wait --key ${key} again`); process.exit(3); }
-  const collected = fs.readFileSync(answerFile(key), 'utf8').trim();
-  printAnswer(collected);
+  if (!answered()) {
+    console.log(`WAITING: no answer yet after ${pollSec}s; run --wait --key ${key} again`)
+    process.exit(3)
+  }
+  const collected = fs.readFileSync(answerFile(key), 'utf8').trim()
+  printAnswer(collected)
   // A re-roll keeps the table open: the server stays alive awaiting --update,
   // so only the answer file is consumed. Terminal choices clean up fully.
-  let isRerollAnswer = false;
-  try { isRerollAnswer = JSON.parse(collected).optionId === 'reroll'; } catch { /* treat as terminal */ }
-  try { fs.rmSync(answerFile(key)); } catch { /* already gone */ }
-  if (!isRerollAnswer) { try { fs.rmSync(stateFile(key)); } catch { /* already gone */ } }
-  process.exit(0);
+  let isRerollAnswer = false
+  try {
+    isRerollAnswer = JSON.parse(collected).optionId === 'reroll'
+  } catch {
+    /* treat as terminal */
+  }
+  try {
+    fs.rmSync(answerFile(key))
+  } catch {
+    /* already gone */
+  }
+  if (!isRerollAnswer) {
+    try {
+      fs.rmSync(stateFile(key))
+    } catch {
+      /* already gone */
+    }
+  }
+  process.exit(0)
 }
 
 if (hasFlag('stop')) {
-  const key = arg('key');
-  if (!key) { console.error('serve-question: --stop needs --key'); process.exit(1); }
-  try { process.kill(JSON.parse(fs.readFileSync(stateFile(key), 'utf8')).pid); } catch { /* dead already */ }
-  try { fs.rmSync(answerFile(key)); } catch {}
-  try { fs.rmSync(stateFile(key)); } catch {}
-  console.log('stopped');
-  process.exit(0);
+  const key = arg('key')
+  if (!key) {
+    console.error('serve-question: --stop needs --key')
+    process.exit(1)
+  }
+  try {
+    process.kill(JSON.parse(fs.readFileSync(stateFile(key), 'utf8')).pid)
+  } catch {
+    /* dead already */
+  }
+  try {
+    fs.rmSync(answerFile(key))
+  } catch {}
+  try {
+    fs.rmSync(stateFile(key))
+  } catch {}
+  console.log('stopped')
+  process.exit(0)
 }
 
 if (hasFlag('update')) {
-  const key = arg('key');
-  if (!key || !payloadPath) { console.error('serve-question: --update needs --key and --payload'); process.exit(1); }
-  JSON.parse(fs.readFileSync(payloadPath, 'utf8'));
-  try { process.kill(JSON.parse(fs.readFileSync(stateFile(key), 'utf8')).pid, 0); }
-  catch { console.error('serve-question: no live question server for that key'); process.exit(2); }
-  fs.copyFileSync(payloadPath, path.join(QUESTION_DIR, `${key}.next.json`));
-  console.log('next round delivered; the page reloads itself');
-  process.exit(0);
+  const key = arg('key')
+  if (!key || !payloadPath) {
+    console.error('serve-question: --update needs --key and --payload')
+    process.exit(1)
+  }
+  JSON.parse(fs.readFileSync(payloadPath, 'utf8'))
+  try {
+    process.kill(JSON.parse(fs.readFileSync(stateFile(key), 'utf8')).pid, 0)
+  } catch {
+    console.error('serve-question: no live question server for that key')
+    process.exit(2)
+  }
+  fs.copyFileSync(payloadPath, path.join(QUESTION_DIR, `${key}.next.json`))
+  console.log('next round delivered; the page reloads itself')
+  process.exit(0)
 }
 
 if (hasFlag('start')) {
-  if (!payloadPath) { console.error('serve-question: --start needs --payload <file>'); process.exit(1); }
-  JSON.parse(fs.readFileSync(payloadPath, 'utf8'));
-  fs.mkdirSync(QUESTION_DIR, { recursive: true });
-  const key = arg('key') || Math.random().toString(16).slice(2, 10);
+  if (!payloadPath) {
+    console.error('serve-question: --start needs --payload <file>')
+    process.exit(1)
+  }
+  JSON.parse(fs.readFileSync(payloadPath, 'utf8'))
+  fs.mkdirSync(QUESTION_DIR, { recursive: true })
+  const key = arg('key') || Math.random().toString(16).slice(2, 10)
   // In start mode the agent is alive and owns browser routing; the server
   // only opens the system browser itself when --open forces it.
   // The daemon's output lands in a per-key log so a startup failure can say
   // what actually went wrong instead of only that it did.
-  const logFile = path.join(QUESTION_DIR, `${key}.log`);
-  const logFd = fs.openSync(logFile, 'a');
-  const child = spawn(process.execPath, [
-    fileURLToPath(import.meta.url), '--payload', payloadPath, '--detached-serve', '--key', key,
-    '--timeout', String(timeoutSec), ...(hasFlag('open') ? [] : ['--no-open']),
-  ], { detached: true, stdio: ['ignore', logFd, logFd] });
-  child.unref();
-  fs.closeSync(logFd);
-  const deadline = Date.now() + 8000;
-  while (Date.now() < deadline && !fs.existsSync(stateFile(key))) await new Promise((r) => setTimeout(r, 100));
+  const logFile = path.join(QUESTION_DIR, `${key}.log`)
+  const logFd = fs.openSync(logFile, 'a')
+  const child = spawn(
+    process.execPath,
+    [
+      fileURLToPath(import.meta.url),
+      '--payload',
+      payloadPath,
+      '--detached-serve',
+      '--key',
+      key,
+      '--timeout',
+      String(timeoutSec),
+      ...(hasFlag('open') ? [] : ['--no-open']),
+    ],
+    { detached: true, stdio: ['ignore', logFd, logFd] }
+  )
+  child.unref()
+  fs.closeSync(logFd)
+  const deadline = Date.now() + 8000
+  while (Date.now() < deadline && !fs.existsSync(stateFile(key)))
+    await new Promise((r) => setTimeout(r, 100))
   if (!fs.existsSync(stateFile(key))) {
-    let tail = '';
-    try { tail = fs.readFileSync(logFile, 'utf8').trim().split('\n').slice(-4).join('\n  '); } catch { /* log never written */ }
-    console.error(`serve-question: server failed to start${tail ? `\n  ${tail}` : ''}`);
-    console.error(`serve-question: log at ${path.relative(process.cwd(), logFile) || logFile}. A sandboxed exec that cannot listen on localhost causes exactly this; rerun this command once through the harness's network-enabled or unsandboxed command tool before falling back.`);
-    process.exit(1);
+    let tail = ''
+    try {
+      tail = fs.readFileSync(logFile, 'utf8').trim().split('\n').slice(-4).join('\n  ')
+    } catch {
+      /* log never written */
+    }
+    console.error(`serve-question: server failed to start${tail ? `\n  ${tail}` : ''}`)
+    console.error(
+      `serve-question: log at ${path.relative(process.cwd(), logFile) || logFile}. A sandboxed exec that cannot listen on localhost causes exactly this; rerun this command once through the harness's network-enabled or unsandboxed command tool before falling back.`
+    )
+    process.exit(1)
   }
-  const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'));
-  console.log(`QUESTION URL: ${state.url}`);
-  console.log(`QUESTION KEY: ${key}`);
-  console.log('Open the URL for the user now: in-app browser when the harness has one, otherwise the system opener (macOS `open`, Linux `xdg-open`), otherwise show the URL.');
-  console.log(`Then collect the answer with: node ${fileURLToPath(import.meta.url)} --wait --key ${key}`);
-  process.exit(0);
+  const state = JSON.parse(fs.readFileSync(stateFile(key), 'utf8'))
+  console.log(`QUESTION URL: ${state.url}`)
+  console.log(`QUESTION KEY: ${key}`)
+  console.log(
+    'Open the URL for the user now: in-app browser when the harness has one, otherwise the system opener (macOS `open`, Linux `xdg-open`), otherwise show the URL.'
+  )
+  console.log(
+    `Then collect the answer with: node ${fileURLToPath(import.meta.url)} --wait --key ${key}`
+  )
+  process.exit(0)
 }
 
-let raw;
-if (payloadPath) raw = fs.readFileSync(payloadPath, 'utf8');
-else raw = fs.readFileSync(0, 'utf8');
+let raw
+if (payloadPath) raw = fs.readFileSync(payloadPath, 'utf8')
+else raw = fs.readFileSync(0, 'utf8')
 
 // Round state is mutable: a re-roll keeps this server alive and --update
 // swaps in the next hand, so payload, options, and the local-image table
 // rebuild per round.
-let payload;
-let options;
-let localImages = [];
+let payload
+let options
+let localImages = []
 
 function loadRound(json) {
-  const parsed = JSON.parse(json);
+  const parsed = JSON.parse(json)
   if (!parsed || !Array.isArray(parsed.options) || parsed.options.length === 0) {
-    throw new Error('payload needs an options array');
+    throw new Error('payload needs an options array')
   }
-  localImages = [];
+  localImages = []
   const imageSrc = (value) => {
-    if (!value) return null;
-    if (/^https?:\/\//.test(value)) return value;
-    const abs = path.resolve(value);
-    if (!fs.existsSync(abs)) return null;
-    localImages.push(abs);
-    return `/img/${localImages.length - 1}`;
-  };
+    if (!value) return null
+    if (/^https?:\/\//.test(value)) return value
+    const abs = path.resolve(value)
+    if (!fs.existsSync(abs)) return null
+    localImages.push(abs)
+    return `/img/${localImages.length - 1}`
+  }
   // Sketches stream in after the page is served, so their slots register
   // whether or not the file exists yet; /img answers 404 until it lands and
   // the page polls the slot. Remote sketch URLs pass through untouched.
   const sketchSrc = (value) => {
-    if (!value) return null;
-    if (/^https?:\/\//.test(value)) return value;
-    localImages.push(path.resolve(value));
-    return `/img/${localImages.length - 1}`;
-  };
-  payload = parsed;
+    if (!value) return null
+    if (/^https?:\/\//.test(value)) return value
+    localImages.push(path.resolve(value))
+    return `/img/${localImages.length - 1}`
+  }
+  payload = parsed
   const decorate = (option) => ({
     ...option,
     heroSrc: imageSrc(option.hero),
     boardSrc: imageSrc(option.board),
     sketchSrc: sketchSrc(option.sketch),
-  });
-  options = parsed.options.map(decorate);
+  })
+  options = parsed.options.map(decorate)
   // The standing exit as a full card: same anatomy, reserved id, rendered
   // subordinate by the page. Without it, canon stays the quiet footer action.
   if (parsed.canonCard && typeof parsed.canonCard === 'object') {
-    options = [...options, { ...decorate(parsed.canonCard), id: 'canon', isCanon: true }];
+    options = [...options, { ...decorate(parsed.canonCard), id: 'canon', isCanon: true }]
   }
 }
-try { loadRound(raw); } catch (error) { console.error(`serve-question: ${error.message}`); process.exit(1); }
-const detachedKey = hasFlag('detached-serve') ? arg('key') : null;
-const nextFile = () => detachedKey ? path.join(QUESTION_DIR, `${detachedKey}.next.json`) : null;
+try {
+  loadRound(raw)
+} catch (error) {
+  console.error(`serve-question: ${error.message}`)
+  process.exit(1)
+}
+const detachedKey = hasFlag('detached-serve') ? arg('key') : null
+const nextFile = () => (detachedKey ? path.join(QUESTION_DIR, `${detachedKey}.next.json`) : null)
 
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const esc = (s) =>
+  String(s ?? '').replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]
+  )
 
 function page() {
-  const flipChip = (label) => `<button type="button" class="chip flip" aria-label="Flip the card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 1-8 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 5.5V12h6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${label}</span></button>`;
-  const expandChip = `<button type="button" class="chip expand" aria-label="Expand the image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  const flipChip = (label) =>
+    `<button type="button" class="chip flip" aria-label="Flip the card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 1-8 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 5.5V12h6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${label}</span></button>`
+  const expandChip = `<button type="button" class="chip expand" aria-label="Expand the image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
   // Structured anatomy: chips and one-line facts render when the payload
   // carries them; a plain body falls back to the prose block. Palette chips
   // and material tags give a text-only direction an immediate identity that
   // no generation luck can distort.
-  const fact = (label, value, cls = '') => value ? `<p class="fact${cls ? ` ${cls}` : ''}"><span class="fact-label">${label}</span>${esc(value)}</p>` : '';
-  const hasBack = (option) => Boolean(option.viewport || option.case || (option.boardSrc && option.heroSrc));
+  const fact = (label, value, cls = '') =>
+    value
+      ? `<p class="fact${cls ? ` ${cls}` : ''}"><span class="fact-label">${label}</span>${esc(value)}</p>`
+      : ''
+  const hasBack = (option) =>
+    Boolean(option.viewport || option.case || (option.boardSrc && option.heroSrc))
   const anatomy = (option) => {
-    const rows = [];
-    if (option.thesis) rows.push(`<p class="thesis">${esc(option.thesis)}</p>`);
-    const idBits = [];
+    const rows = []
+    if (option.thesis) rows.push(`<p class="thesis">${esc(option.thesis)}</p>`)
+    const idBits = []
     if (Array.isArray(option.palette) && option.palette.length) {
-      idBits.push(`<span class="swatches">${option.palette.slice(0, 6).map((c) => `<i style="background:${esc(c)}" title="${esc(c)}"></i>`).join('')}</span>`);
+      idBits.push(
+        `<span class="swatches">${option.palette
+          .slice(0, 6)
+          .map((c) => `<i style="background:${esc(c)}" title="${esc(c)}"></i>`)
+          .join('')}</span>`
+      )
     }
     if (Array.isArray(option.materials) && option.materials.length) {
-      idBits.push(option.materials.slice(0, 4).map((m) => `<span class="tag">${esc(m)}</span>`).join(''));
+      idBits.push(
+        option.materials
+          .slice(0, 4)
+          .map((m) => `<span class="tag">${esc(m)}</span>`)
+          .join('')
+      )
     }
-    if (idBits.length) rows.push(`<div class="identity">${idBits.join('')}</div>`);
+    if (idBits.length) rows.push(`<div class="identity">${idBits.join('')}</div>`)
     // The front carries only what the choice needs: thesis, identity, and the
     // honest risk clamped to two lines. First viewport and the case read on
     // the card's back; once the sketch lands, the first viewport is a picture.
-    rows.push(fact('Risk', option.risk, 'clamp'));
-    if (!option.thesis && option.body) rows.push(`<p class="detail">${esc(option.body)}</p>`);
-    else if (option.body && option.thesis && !hasBack(option)) rows.push(`<p class="detail more">${esc(option.body)}</p>`);
-    return rows.join('\n            ');
-  };
-  const backFacts = (option) => [
-    fact('First viewport', option.viewport),
-    fact('The case', option.case),
-    fact('Risk', option.risk),
-    option.body && option.thesis ? `<p class="detail more">${esc(option.body)}</p>` : '',
-  ].filter(Boolean).join('\n            ');
+    rows.push(fact('Risk', option.risk, 'clamp'))
+    if (!option.thesis && option.body) rows.push(`<p class="detail">${esc(option.body)}</p>`)
+    else if (option.body && option.thesis && !hasBack(option))
+      rows.push(`<p class="detail more">${esc(option.body)}</p>`)
+    return rows.join('\n            ')
+  }
+  const backFacts = (option) =>
+    [
+      fact('First viewport', option.viewport),
+      fact('The case', option.case),
+      fact('Risk', option.risk),
+      option.body && option.thesis ? `<p class="detail more">${esc(option.body)}</p>` : '',
+    ]
+      .filter(Boolean)
+      .join('\n            ')
   const media = (option) => {
-    const inspiration = option.heroSrc ? `<figure class="pip" title="Inspiration: the world this direction draws from. Your page will not look like this image.">
+    const inspiration = option.heroSrc
+      ? `<figure class="pip" title="Inspiration: the world this direction draws from. Your page will not look like this image.">
               <img src="${esc(option.heroSrc)}" alt="">
               <figcaption>inspiration</figcaption>
-            </figure>` : '';
-    const details = hasBack(option) ? flipChip('Details') : '';
+            </figure>`
+      : ''
+    const details = hasBack(option) ? flipChip('Details') : ''
     if (option.sketchSrc) {
       return `<div class="media sketching" data-sketch="${esc(option.sketchSrc)}">
             <div class="shimmer"><span class="sketch-note">sketching&hellip;</span></div>
             <img class="sketch" alt="" hidden>
             ${inspiration}
             <div class="chips">${expandChip}${details}</div>
-          </div>`;
+          </div>`
     }
     if (option.heroSrc || option.boardSrc) {
       return `<div class="media">
             <img src="${esc(option.heroSrc || option.boardSrc)}" alt="">
             <div class="chips">${expandChip}${details}</div>
-          </div>`;
+          </div>`
     }
-    return '';
-  };
-  const cards = options.map((option, index) => `
-    <article class="card${option.isCanon ? ' canon' : ''}" style="--fan:${index === 0 ? '0deg' : (index % 2 ? '1.4deg' : '-1.2deg')};--deal:${index * 90}ms" data-id="${esc(option.id)}">
+    return ''
+  }
+  const cards = options
+    .map(
+      (option, index) => `
+    <article class="card${option.isCanon ? ' canon' : ''}" style="--fan:${index === 0 ? '0deg' : index % 2 ? '1.4deg' : '-1.2deg'};--deal:${index * 90}ms" data-id="${esc(option.id)}">
       <div class="card-inner">
         <div class="face front${index === 0 ? ' lead' : ''}${media(option) ? '' : ' text-only'}">
           ${option.kicker ? `<span class="kicker">${esc(option.kicker)}</span>` : option.isCanon ? '<span class="kicker standing">The standing door</span>' : ''}
@@ -382,19 +539,29 @@ function page() {
             <button class="choose" data-id="${esc(option.id)}">${option.isCanon ? 'Play it straight' : 'Build this'}</button>
           </div>
         </div>
-        ${hasBack(option) ? `<div class="face back${index === 0 ? ' lead' : ''}">
-          ${option.boardSrc ? `<div class="media back-media">
+        ${
+          hasBack(option)
+            ? `<div class="face back${index === 0 ? ' lead' : ''}">
+          ${
+            option.boardSrc
+              ? `<div class="media back-media">
             <img src="${esc(option.boardSrc)}" alt="">
             <div class="chips">${expandChip}${flipChip('Front')}</div>
-          </div>` : `<div class="back-head"><p class="tier">The full read &middot; ${esc(option.label)}</p>${flipChip('Front')}</div>`}
+          </div>`
+              : `<div class="back-head"><p class="tier">The full read &middot; ${esc(option.label)}</p>${flipChip('Front')}</div>`
+          }
           <div class="body back-body">
             ${option.boardSrc ? `<p class="tier">The full read &middot; ${esc(option.label)}</p>` : ''}
             ${backFacts(option)}
             <button class="choose" data-id="${esc(option.id)}">${option.isCanon ? 'Play it straight' : 'Build this'}</button>
           </div>
-        </div>` : ''}
+        </div>`
+            : ''
+        }
       </div>
-    </article>`).join('\n');
+    </article>`
+    )
+    .join('\n')
   return `<!doctype html>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(payload.title || 'impeccable · decision')}</title>
@@ -831,102 +998,132 @@ function page() {
       } catch { /* server briefly busy */ }
     }, 1200);
   });
-</script>`;
+</script>`
 }
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/') {
-    const pending = nextFile();
+    const pending = nextFile()
     if (pending && fs.existsSync(pending)) {
-      try { loadRound(fs.readFileSync(pending, 'utf8')); fs.rmSync(pending); } catch { /* keep current round */ }
-    }
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    res.end(page());
-    return;
-  }
-  if (req.method === 'POST' && req.url === '/heartbeat') {
-    res.writeHead(204); res.end();
-    if (detachedKey) {
-      const now = Date.now();
-      if (!server.lastBeatWrite || now - server.lastBeatWrite > 4000) {
-        server.lastBeatWrite = now;
-        try {
-          const state = JSON.parse(fs.readFileSync(stateFile(detachedKey), 'utf8'));
-          state.lastBeat = now;
-          fs.writeFileSync(stateFile(detachedKey), JSON.stringify(state));
-        } catch { /* state file recreated on next beat */ }
+      try {
+        loadRound(fs.readFileSync(pending, 'utf8'))
+        fs.rmSync(pending)
+      } catch {
+        /* keep current round */
       }
     }
-    return;
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+    res.end(page())
+    return
+  }
+  if (req.method === 'POST' && req.url === '/heartbeat') {
+    res.writeHead(204)
+    res.end()
+    if (detachedKey) {
+      const now = Date.now()
+      if (!server.lastBeatWrite || now - server.lastBeatWrite > 4000) {
+        server.lastBeatWrite = now
+        try {
+          const state = JSON.parse(fs.readFileSync(stateFile(detachedKey), 'utf8'))
+          state.lastBeat = now
+          fs.writeFileSync(stateFile(detachedKey), JSON.stringify(state))
+        } catch {
+          /* state file recreated on next beat */
+        }
+      }
+    }
+    return
   }
   if (req.method === 'GET' && req.url === '/next-status') {
-    const pending = nextFile();
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ ready: Boolean(pending && fs.existsSync(pending)) }));
-    return;
+    const pending = nextFile()
+    res.writeHead(200, { 'content-type': 'application/json' })
+    res.end(JSON.stringify({ ready: Boolean(pending && fs.existsSync(pending)) }))
+    return
   }
-  const imageMatch = req.method === 'GET' && req.url?.match(/^\/img\/(\d+)(?:\?.*)?$/);
+  const imageMatch = req.method === 'GET' && req.url?.match(/^\/img\/(\d+)(?:\?.*)?$/)
   if (imageMatch) {
-    const abs = localImages[Number(imageMatch[1])];
-    if (!abs || !fs.existsSync(abs)) { res.writeHead(404); res.end(); return; }
-    const type = abs.endsWith('.webp') ? 'image/webp'
-      : abs.endsWith('.png') ? 'image/png'
-      : abs.endsWith('.svg') ? 'image/svg+xml'
-      : abs.endsWith('.gif') ? 'image/gif'
-      : 'image/jpeg';
-    res.writeHead(200, { 'content-type': type });
-    fs.createReadStream(abs).pipe(res);
-    return;
+    const abs = localImages[Number(imageMatch[1])]
+    if (!abs || !fs.existsSync(abs)) {
+      res.writeHead(404)
+      res.end()
+      return
+    }
+    const type = abs.endsWith('.webp')
+      ? 'image/webp'
+      : abs.endsWith('.png')
+        ? 'image/png'
+        : abs.endsWith('.svg')
+          ? 'image/svg+xml'
+          : abs.endsWith('.gif')
+            ? 'image/gif'
+            : 'image/jpeg'
+    res.writeHead(200, { 'content-type': type })
+    fs.createReadStream(abs).pipe(res)
+    return
   }
   if (req.method === 'POST' && req.url === '/answer') {
-    let body = '';
-    req.on('data', (chunk) => { body += chunk; });
+    let body = ''
+    req.on('data', (chunk) => {
+      body += chunk
+    })
     req.on('end', () => {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end('{"ok":true}');
-      let parsed = {};
-      try { parsed = JSON.parse(body); } catch { /* empty steer */ }
-      const chosen = options.find((o) => o.id === parsed.optionId);
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.end('{"ok":true}')
+      let parsed = {}
+      try {
+        parsed = JSON.parse(body)
+      } catch {
+        /* empty steer */
+      }
+      const chosen = options.find((o) => o.id === parsed.optionId)
       const answer = JSON.stringify({
         optionId: parsed.optionId ?? null,
         steer: parsed.steer ?? '',
-        ...(chosen?.hero || chosen?.board ? { hero: chosen.hero ?? null, board: chosen.board ?? null } : {}),
+        ...(chosen?.hero || chosen?.board
+          ? { hero: chosen.hero ?? null, board: chosen.board ?? null }
+          : {}),
         ...(chosen?.sketch ? { sketch: chosen.sketch } : {}),
-      });
-      const isReroll = parsed.optionId === 'reroll';
+      })
+      const isReroll = parsed.optionId === 'reroll'
       if (detachedKey) {
-        fs.mkdirSync(QUESTION_DIR, { recursive: true });
-        fs.writeFileSync(answerFile(detachedKey), answer + '\n');
+        fs.mkdirSync(QUESTION_DIR, { recursive: true })
+        fs.writeFileSync(answerFile(detachedKey), answer + '\n')
       } else {
-        printAnswer(answer);
+        printAnswer(answer)
       }
       // A re-roll in detached mode keeps the table open: the client shows a
       // loading hand and reloads when --update delivers the next round.
-      if (!(isReroll && detachedKey)) setTimeout(() => process.exit(0), 150);
-    });
-    return;
+      if (!(isReroll && detachedKey)) setTimeout(() => process.exit(0), 150)
+    })
+    return
   }
-  res.writeHead(404); res.end();
-});
+  res.writeHead(404)
+  res.end()
+})
 
 server.listen(portArg, '127.0.0.1', () => {
-  const { port } = server.address();
-  const url = `http://127.0.0.1:${port}/`;
+  const { port } = server.address()
+  const url = `http://127.0.0.1:${port}/`
   if (hasFlag('detached-serve')) {
-    fs.mkdirSync(QUESTION_DIR, { recursive: true });
-    fs.writeFileSync(stateFile(arg('key')), JSON.stringify({ pid: process.pid, port, url }));
+    fs.mkdirSync(QUESTION_DIR, { recursive: true })
+    fs.writeFileSync(stateFile(arg('key')), JSON.stringify({ pid: process.pid, port, url }))
   } else {
-    console.log(`QUESTION URL: ${url}`);
-    console.log('Waiting for the user to choose in the browser (Ctrl-C aborts)...');
+    console.log(`QUESTION URL: ${url}`)
+    console.log('Waiting for the user to choose in the browser (Ctrl-C aborts)...')
   }
   if (!hasFlag('no-open')) {
-    const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-    try { spawn(opener, [url], { stdio: 'ignore', detached: true }).unref(); } catch { /* URL printed anyway */ }
+    const opener =
+      process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
+    try {
+      spawn(opener, [url], { stdio: 'ignore', detached: true }).unref()
+    } catch {
+      /* URL printed anyway */
+    }
   }
   if (timeoutSec > 0) {
     setTimeout(() => {
-      console.log('serve-question: timed out with no answer');
-      process.exit(2);
-    }, timeoutSec * 1000).unref?.();
+      console.log('serve-question: timed out with no answer')
+      process.exit(2)
+    }, timeoutSec * 1000).unref?.()
   }
-});
+})

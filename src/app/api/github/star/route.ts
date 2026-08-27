@@ -22,9 +22,7 @@ export async function GET() {
       stargazersCount =
         typeof repoData.stargazers_count === 'number' ? repoData.stargazers_count : null
     }
-  } catch {
-    // Continue if repo count fetch fails
-  }
+  } catch {}
 
   try {
     const session = await getSession()
@@ -95,6 +93,20 @@ export async function POST() {
     })
 
     if (response.status === 204 || response.ok) {
+      if (session.email) {
+        const { emailService } = await import('@/lib/email/service')
+        void emailService
+          .sendStarThankYouEmail({
+            username: session.username,
+            name: session.name,
+            email: session.email,
+            repoUrl: REPO_URL,
+          })
+          .catch((err) => {
+            console.error('[Star Route] Non-blocking star thank-you email error:', err)
+          })
+      }
+
       return NextResponse.json({
         success: true,
         starred: true,

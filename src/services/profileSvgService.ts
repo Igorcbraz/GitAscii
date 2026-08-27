@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 
-import { embedExternalImages, renderSvg } from '@/engine/core/SVGEngine'
+import { embedExternalImages } from '@/engine/core/embedExternalImages'
+import { renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
@@ -140,14 +141,16 @@ export async function generateProfileSvgResponse(
 
       if (widgetsParam && widgetsParam.length > 0) {
         for (const widgetId of widgetsParam) {
-          const hasWidget = config.widgets.some((w: any) => w.widgetId === widgetId)
+          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
+          if (!item) continue
+          const safeWidgetId = item.id
+          const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
           if (!hasWidget) {
-            const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
             config.widgets.push({
-              instanceId: `${widgetId}-query-${Date.now()}`,
-              widgetId,
+              instanceId: `${safeWidgetId}-query-${Date.now()}`,
+              widgetId: safeWidgetId,
               position: { x: 20, y: 20 },
-              size: item?.defaultSize || { width: 400, height: 200 },
+              size: item.defaultSize || { width: 400, height: 200 },
               config: {},
               locked: false,
               visible: true,
@@ -159,6 +162,7 @@ export async function generateProfileSvgResponse(
 
       const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
       const embedResult = await embedExternalImages(rawSvgContent)
+      // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
       svgContent = sanitizeSvg(embedResult.svg)
       etag = computeEtag(svgContent)
       hasErrors = embedResult.hasErrors
@@ -231,6 +235,7 @@ export async function generateProfileSvgResponse(
       })
     }
 
+    // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
     return new NextResponse(svgContent, {
       status: 200,
       headers,

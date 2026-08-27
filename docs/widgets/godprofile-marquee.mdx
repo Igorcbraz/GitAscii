@@ -1,6 +1,6 @@
 ---
-title: "Icon Marquee Widget"
-description: "Infinite CSS-scrolling horizontal marquee of glowing skill badge pills"
+title: 'Icon Marquee Widget'
+description: 'Infinite CSS-scrolling horizontal marquee of glowing skill badge pills'
 ---
 
 # Icon Marquee Widget (`godprofile-marquee`)
@@ -11,14 +11,20 @@ The Icon Marquee widget renders an infinitely scrolling horizontal ribbon of tec
 
 ```typescript
 export interface GodprofileMarqueeConfig {
-  marqueeLangs?: string[]  // Array of tech keys (e.g. ['react', 'ts', 'nodejs', 'docker'])
-  accentColor?: string     // Default: globalStyles.accentColor || '#b6a891'
-  textColor?: string       // Default: globalStyles.textColor || '#eceff4'
+  marqueeLangs?: string[] // Array of tech keys (e.g. ['react', 'ts', 'nodejs', 'docker'])
+  accentColor?: string // Default: globalStyles.accentColor || '#b6a891'
+  textColor?: string // Default: globalStyles.textColor || '#eceff4'
 }
 ```
 
-<ParamField body="marqueeLangs" type="string[]" default="['react', 'ts', 'js', 'html', 'css', 'nodejs', 'python', 'git', 'docker', 'linux']">
-  Technology keys to loop. Supported keys include: `js`, `ts`, `react`, `nextjs`, `vue`, `svelte`, `tailwind`, `nodejs`, `python`, `rust`, `go`, `docker`, `kubernetes`, `aws`, `postgres`, `mongodb`, `redis`, `git`, `linux`, etc.
+<ParamField
+  body="marqueeLangs"
+  type="string[]"
+  default="['react', 'ts', 'js', 'html', 'css', 'nodejs', 'python', 'git', 'docker', 'linux']"
+>
+  Technology keys to loop. Supported keys include: `js`, `ts`, `react`, `nextjs`, `vue`, `svelte`,
+  `tailwind`, `nodejs`, `python`, `rust`, `go`, `docker`, `kubernetes`, `aws`, `postgres`,
+  `mongodb`, `redis`, `git`, `linux`, etc.
 </ParamField>
 
 ---

@@ -39,8 +39,27 @@ export function renderSocialMedia(
   const startY = showTitle ? 44 : 16
 
   if (badgeStyle === 'skillicons') {
-    const socialTechString = selectedSocials.join(',')
-    const skillIconsUrl = API_ENDPOINTS.SKILL_ICONS.GET(socialTechString, theme, 12)
+    const SKILL_ICONS_MAP: Record<string, string> = {
+      github: 'github',
+      linkedin: 'linkedin',
+      twitter: 'twitter',
+      discord: 'discord',
+      instagram: 'instagram',
+      twitch: 'twitch',
+      devto: 'devto',
+      stackoverflow: 'stackoverflow',
+      email: 'gmail',
+      website: 'googlechrome',
+      codepen: 'codepen',
+      gitlab: 'gitlab',
+    }
+
+    const mappedKeys = selectedSocials
+      .map((id) => SKILL_ICONS_MAP[id.toLowerCase()] || id.toLowerCase())
+      .filter(Boolean)
+
+    const socialTechString = mappedKeys.join(',')
+    const skillIconsUrl = API_ENDPOINTS.SKILL_ICONS.GET(socialTechString || 'github', theme, 12)
     const imageWidth = width - 48
     const imageHeight = Math.max(40, height - startY - 16)
 

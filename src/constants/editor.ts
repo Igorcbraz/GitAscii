@@ -1,5 +1,9 @@
 import type { LucideIcon } from 'lucide-react'
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -7,6 +11,7 @@ import {
   Ban,
   Check,
   Cloud,
+  Crosshair,
   Download,
   FileCode2,
   FileJson,
@@ -16,9 +21,12 @@ import {
   GitFork,
   Github,
   Globe,
+  Grid,
   Keyboard,
   Layers,
+  LayoutGrid,
   Monitor,
+  Move,
   Server,
   Sparkles,
   Star,
@@ -119,6 +127,88 @@ export const COMMON_LANGUAGES: readonly string[] = [
   'MDX',
   'Vue',
   'Svelte',
+]
+
+export interface FontOption {
+  value: string
+  label: string
+  category: 'sans-serif' | 'monospace' | 'serif'
+}
+
+export const GLOBAL_FONT_OPTIONS: readonly FontOption[] = [
+  { value: 'Inter Tight', label: 'Inter Tight (Sans-serif)', category: 'sans-serif' },
+  { value: 'Inter', label: 'Inter (Sans-serif)', category: 'sans-serif' },
+  { value: 'Plus Jakarta Sans', label: 'Plus Jakarta Sans (Sans-serif)', category: 'sans-serif' },
+  { value: 'DM Sans', label: 'DM Sans (Sans-serif)', category: 'sans-serif' },
+  { value: 'Outfit', label: 'Outfit (Sans-serif)', category: 'sans-serif' },
+  { value: 'Poppins', label: 'Poppins (Sans-serif)', category: 'sans-serif' },
+  { value: 'Space Grotesk', label: 'Space Grotesk (Sans-serif)', category: 'sans-serif' },
+  { value: 'Roboto', label: 'Roboto (Sans-serif)', category: 'sans-serif' },
+  { value: 'JetBrains Mono', label: 'JetBrains Mono (Monospace)', category: 'monospace' },
+  { value: 'Fira Code', label: 'Fira Code (Monospace)', category: 'monospace' },
+  { value: 'PT Serif', label: 'PT Serif (Serif)', category: 'serif' },
+]
+
+export type GridMode = 'off' | 'basic' | 'axes' | 'thirds' | 'dense'
+
+export interface GridModeOptionDef {
+  id: Exclude<GridMode, 'off'>
+  labelKey: string
+  defaultLabel: string
+  descKey: string
+  defaultDesc: string
+  icon: LucideIcon
+}
+
+export const GRID_MODE_OPTIONS: readonly GridModeOptionDef[] = [
+  {
+    id: 'basic',
+    labelKey: 'editor.grid.mode_basic',
+    defaultLabel: 'Básico (Blocos 100px)',
+    descKey: 'editor.grid.mode_basic_desc',
+    defaultDesc: 'Quadrados maiores para alinhamento geral',
+    icon: LayoutGrid,
+  },
+  {
+    id: 'axes',
+    labelKey: 'editor.grid.mode_axes',
+    defaultLabel: 'Apenas Eixo X e Y (Centro)',
+    descKey: 'editor.grid.mode_axes_desc',
+    defaultDesc: 'Linhas centrais vertical e horizontal',
+    icon: Crosshair,
+  },
+  {
+    id: 'thirds',
+    labelKey: 'editor.grid.mode_thirds',
+    defaultLabel: 'Regra dos Terços (3x3)',
+    descKey: 'editor.grid.mode_thirds_desc',
+    defaultDesc: 'Guias de proporção estilo câmera/fotografia',
+    icon: Move,
+  },
+  {
+    id: 'dense',
+    labelKey: 'editor.grid.mode_dense',
+    defaultLabel: 'Grade Fina (20px)',
+    descKey: 'editor.grid.mode_dense_desc',
+    defaultDesc: 'Grade detalhada para precisão milimétrica',
+    icon: Grid,
+  },
+]
+
+export type TextAlignMode = 'left' | 'center' | 'right' | 'justify'
+
+export interface TextAlignOptionDef {
+  id: TextAlignMode
+  icon: LucideIcon
+  labelKey: string
+  defaultLabel: string
+}
+
+export const TEXT_ALIGN_OPTIONS: readonly TextAlignOptionDef[] = [
+  { id: 'left', icon: AlignLeft, labelKey: 'editor.properties.align_left', defaultLabel: 'Esquerda' },
+  { id: 'center', icon: AlignCenter, labelKey: 'editor.properties.align_center', defaultLabel: 'Centro' },
+  { id: 'right', icon: AlignRight, labelKey: 'editor.properties.align_right', defaultLabel: 'Direita' },
+  { id: 'justify', icon: AlignJustify, labelKey: 'editor.properties.align_justify', defaultLabel: 'Justificado' },
 ]
 
 export interface TechStackPreset {
@@ -719,6 +809,64 @@ export const SURVEILLANCE_COLOR_THEMES: readonly SurveillanceColorTheme[] = [
     primary: '#e6fbfb',
     secondary: '#8a8a8a',
     led: '#ffffff',
+  },
+]
+
+export interface WinXPColorTheme {
+  name: string
+  titleGradientStart: string
+  titleGradientEnd: string
+  titleColor: string
+  windowBg: string
+  border: string
+  accent: string
+}
+
+export const WINXP_COLOR_THEMES: readonly WinXPColorTheme[] = [
+  {
+    name: 'Luna Blue (Default)',
+    titleGradientStart: '#0058ee',
+    titleGradientEnd: '#2989f5',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#0054e3',
+    accent: '#3c81f3',
+  },
+  {
+    name: 'Homestead (Olive Green)',
+    titleGradientStart: '#738849',
+    titleGradientEnd: '#96b169',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#6f8346',
+    accent: '#839c55',
+  },
+  {
+    name: 'Metallic (Silver)',
+    titleGradientStart: '#787782',
+    titleGradientEnd: '#b5b4be',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#706f7b',
+    accent: '#9a98a6',
+  },
+  {
+    name: 'Royale (Energy Blue)',
+    titleGradientStart: '#1d488c',
+    titleGradientEnd: '#3a76d8',
+    titleColor: '#ffffff',
+    windowBg: '#ece9d8',
+    border: '#1c4689',
+    accent: '#2c67c5',
+  },
+  {
+    name: 'Zune (Dark Slate)',
+    titleGradientStart: '#202020',
+    titleGradientEnd: '#383838',
+    titleColor: '#ffffff',
+    windowBg: '#2a2a2a',
+    border: '#1c1c1c',
+    accent: '#f35a22',
   },
 ]
 

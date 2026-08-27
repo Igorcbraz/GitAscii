@@ -110,7 +110,6 @@ export function ContributeFeaturedWidgetModal({
         className={`fixed z-101 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-140 max-h-[90vh] flex flex-col transition-all duration-200 ${isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
       >
         <div className="bg-onyx border border-graphite rounded-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-          {/* Header */}
           <div className="relative px-6 pt-5 pb-4 border-b border-graphite shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -142,7 +141,6 @@ export function ContributeFeaturedWidgetModal({
               </button>
             </div>
 
-            {/* Progress Bars */}
             <div className="flex gap-1.5 mt-4">
               {steps.map((_, idx) => (
                 <div
@@ -164,7 +162,6 @@ export function ContributeFeaturedWidgetModal({
             </div>
           </div>
 
-          {/* Content */}
           <div className="px-6 py-5 overflow-y-auto flex-1" key={currentStep}>
             <div className="flex items-start gap-4 animate-guide-fade-in">
               <div className="shrink-0 flex flex-col items-center gap-1.5">
@@ -182,7 +179,6 @@ export function ContributeFeaturedWidgetModal({
                 </h3>
                 <p className="text-label text-pearl leading-relaxed mb-3">{step.description}</p>
 
-                {/* Step 1: Definition of Featured Space */}
                 {currentStep === 0 && (
                   <div className="p-3 rounded-md bg-signal-lime/10 border border-signal-lime/25 flex items-start gap-2.5">
                     <div className="text-caption text-bone leading-relaxed font-inter-tight">
@@ -197,7 +193,6 @@ export function ContributeFeaturedWidgetModal({
                   </div>
                 )}
 
-                {/* Step 2: Implementation & Pull Request */}
                 {currentStep === 1 && (
                   <div className="space-y-3">
                     <div className="space-y-1.5">
@@ -256,7 +251,6 @@ export function ContributeFeaturedWidgetModal({
             </div>
           </div>
 
-          {/* Footer */}
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between shrink-0">
             <div className="text-caption text-ash font-inter-tight">
               {t('common.step', 'Passo')} {currentStep + 1} {t('common.of', 'de')} {steps.length}

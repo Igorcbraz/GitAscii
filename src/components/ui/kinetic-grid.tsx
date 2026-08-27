@@ -304,10 +304,25 @@ export default function KineticGrid({
       draw(performance.now())
     }
 
+    const isVisibleRef = { current: true }
+
+    let observer: IntersectionObserver | null = null
+    if (typeof window !== 'undefined' && 'IntersectionObserver' in window && canvas.parentElement) {
+      observer = new IntersectionObserver((entries) => {
+        const [entry] = entries
+        isVisibleRef.current = Boolean(entry && entry.isIntersecting)
+        if (isVisibleRef.current) {
+          startAnimation()
+        }
+      })
+      observer.observe(canvas.parentElement)
+    }
+
     setSize()
-    window.addEventListener('resize', setSize)
+    window.addEventListener('resize', setSize, { passive: true })
 
     const onMouseMove = (e: MouseEvent) => {
+      if (!isVisibleRef.current) return
       targetMouseRef.current = { x: e.clientX, y: e.clientY }
       startAnimation()
     }
@@ -318,6 +333,7 @@ export default function KineticGrid({
     }
 
     const onClick = (e: MouseEvent) => {
+      if (!isVisibleRef.current) return
       ripplesRef.current.push({
         x: e.clientX,
         y: e.clientY,
@@ -328,12 +344,13 @@ export default function KineticGrid({
       startAnimation()
     }
 
-    window.addEventListener('mousemove', onMouseMove)
-    window.addEventListener('mouseleave', onMouseLeave)
-    window.addEventListener('click', onClick)
+    window.addEventListener('mousemove', onMouseMove, { passive: true })
+    window.addEventListener('mouseleave', onMouseLeave, { passive: true })
+    window.addEventListener('click', onClick, { passive: true })
     startAnimation()
 
     return () => {
+      if (observer) observer.disconnect()
       window.removeEventListener('resize', setSize)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseleave', onMouseLeave)
@@ -356,7 +373,7 @@ export default function KineticGrid({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="fixed inset-0 w-full h-full z-0 pointer-events-none"
+        className="absolute inset-0 w-full h-full z-0 pointer-events-none"
       />
 
       <div className="relative z-10 w-full">{children}</div>

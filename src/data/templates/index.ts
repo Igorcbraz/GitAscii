@@ -7,6 +7,7 @@ import Native from './Native.json'
 import native_advanced from './native_advanced.json'
 import native_simple from './native_simple.json'
 import rugbedbugg from './rugbedbugg.json'
+import windows_xp from './windows_xp.json'
 
 export interface RawTemplateData {
   id?: string
@@ -49,4 +50,5 @@ export const RAW_TEMPLATES: RawTemplateData[] = [
   hacker as unknown as RawTemplateData,
   minimal_luxe as unknown as RawTemplateData,
   rugbedbugg as unknown as RawTemplateData,
+  windows_xp as unknown as RawTemplateData,
 ]

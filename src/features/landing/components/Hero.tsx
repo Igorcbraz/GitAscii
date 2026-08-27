@@ -1,11 +1,13 @@
 'use client'
 
-import { ArrowRight, Github, User } from 'lucide-react'
+import { ArrowRight, ChevronDown, Github, Sparkles, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import AsciiHands from '@/components/ui/ascii-hands'
+import Magnet from '@/components/ui/Magnet'
+import ShinyText from '@/components/ui/ShinyText'
 import { useToast } from '@/components/ui/toast'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -79,9 +81,12 @@ export default function Hero() {
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pb-24 md:pb-32 pt-16">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
-            <span className="font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
-              {t('landing.hero.eyebrow', '[ THE FUTURE OF GITHUB PROFILES ]')}
-            </span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 font-jetbrains-mono text-[11px] uppercase tracking-[0.22em] text-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.15)]">
+              <Sparkles className="w-3.5 h-3.5" />
+              <ShinyText speed={3.5}>
+                {t('landing.hero.eyebrow', '[ THE FUTURE OF GITHUB PROFILES ]')}
+              </ShinyText>
+            </div>
           </div>
 
           <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-300 font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
@@ -101,80 +106,96 @@ export default function Hero() {
 
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
             {session ? (
-              <Link
-                href={`/${session.username}`}
-                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              >
-                <User size={18} />
-                <span>
-                  {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
-                </span>
-              </Link>
+              <Magnet distance={60} strength={0.25} className="w-full">
+                <Link
+                  href={`/${session.username}`}
+                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  <User size={18} />
+                  <span>
+                    {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
+                  </span>
+                </Link>
+              </Magnet>
             ) : (
-              <Link
-                href={API_ENDPOINTS.AUTH.LOGIN()}
-                prefetch={false}
-                rel="nofollow"
-                onClick={() => setIsGithubLoading(true)}
-                className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
-              >
-                {isGithubLoading ? (
-                  <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Github size={18} />
-                )}
-                <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
-              </Link>
+              <>
+                <Magnet distance={60} strength={0.25} className="w-full">
+                  <Link
+                    href={API_ENDPOINTS.AUTH.LOGIN()}
+                    prefetch={false}
+                    rel="nofollow"
+                    onClick={() => setIsGithubLoading(true)}
+                    className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
+                  >
+                    {isGithubLoading ? (
+                      <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Github size={18} />
+                    )}
+                    <span>{t('landing.hero.login_github', 'Login with GitHub')}</span>
+                  </Link>
+                </Magnet>
+
+                <div className="flex items-center gap-3 w-full">
+                  <span className="flex-1 h-px bg-graphite/60" />
+                  <span className="uppercase text-caption tracking-widest text-ash font-inter-tight">
+                    {t('common.or', 'or')}
+                  </span>
+                  <span className="flex-1 h-px bg-graphite/60" />
+                </div>
+
+                <form onSubmit={handleOpenEditor} className="flex w-full group">
+                  <div className="relative grow flex items-center">
+                    <label htmlFor="hero-username-input" className="sr-only">
+                      {t('landing.hero.placeholder', 'Enter your GitHub username')}
+                    </label>
+                    <Github className="absolute left-4 w-5 h-5 text-ash z-10" aria-hidden="true" />
+                    <input
+                      id="hero-username-input"
+                      type="text"
+                      aria-label={t('landing.hero.placeholder', 'Enter your GitHub username')}
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      disabled={isLoading}
+                      placeholder={t('landing.hero.placeholder', 'Enter your GitHub username')}
+                      className="w-full bg-onyx border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime/60 focus:ring-1 focus:ring-signal-lime/60 transition-all disabled:opacity-50 [&:-webkit-autofill]:[WebkitTextFillColor:#ffffff] [&:-webkit-autofill]:[WebkitBoxShadow:0_0_0_1000px_#060606_inset] [&:-webkit-autofill]:[transition:background-color_5000s_ease-in-out_0s]"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    aria-label={t('landing.hero.open_editor', 'Open Editor')}
+                    className="shrink-0 bg-onyx border border-graphite border-l-0 text-white font-inter-tight font-medium text-body py-3.5 px-5 rounded-r-sm transition-all duration-300 hover:border-signal-lime/50 hover:text-signal-lime flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        <span>{t('landing.hero.loading', 'Loading...')}</span>
+                      </>
+                    ) : (
+                      <>
+                        {t('landing.hero.open_editor', 'Open Editor')} <ArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </>
             )}
-
-            <div className="flex items-center gap-3 w-full">
-              <span className="flex-1 h-px bg-graphite/60" />
-              <span className="uppercase text-caption tracking-widest text-ash font-inter-tight">
-                {t('common.or', 'or')}
-              </span>
-              <span className="flex-1 h-px bg-graphite/60" />
-            </div>
-
-            <form onSubmit={handleOpenEditor} className="flex w-full group">
-              <div className="relative grow flex items-center">
-                <label htmlFor="hero-username-input" className="sr-only">
-                  {t('landing.hero.placeholder', 'Enter your GitHub username')}
-                </label>
-                <Github className="absolute left-4 w-5 h-5 text-ash z-10" aria-hidden="true" />
-                <input
-                  id="hero-username-input"
-                  type="text"
-                  aria-label={t('landing.hero.placeholder', 'Enter your GitHub username')}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isLoading}
-                  placeholder={t('landing.hero.placeholder', 'Enter your GitHub username')}
-                  className="w-full bg-onyx border border-graphite text-white font-inter-tight text-body py-3.5 pl-11 pr-5 rounded-l-sm focus:outline-none focus:border-signal-lime/60 focus:ring-1 focus:ring-signal-lime/60 transition-all disabled:opacity-50 [&:-webkit-autofill]:[WebkitTextFillColor:#ffffff] [&:-webkit-autofill]:[WebkitBoxShadow:0_0_0_1000px_#060606_inset] [&:-webkit-autofill]:[transition:background-color_5000s_ease-in-out_0s]"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                aria-label={t('landing.hero.open_editor', 'Open Editor')}
-                className="shrink-0 bg-onyx border border-graphite border-l-0 text-white font-inter-tight font-medium text-body py-3.5 px-5 rounded-r-sm transition-all duration-300 hover:border-signal-lime/50 hover:text-signal-lime flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>{t('landing.hero.loading', 'Loading...')}</span>
-                  </>
-                ) : (
-                  <>
-                    {t('landing.hero.open_editor', 'Open Editor')} <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </form>
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)] z-20"></div>
+      <div
+        className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 pointer-events-none animate-in fade-in duration-1000 fill-mode-both delay-1000"
+        style={{ top: 'calc(100vh - 72px)' }}
+      >
+        <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.22em] text-ash/60">
+          {t('landing.hero.scroll_cue', 'scroll to explore')}
+        </span>
+        <ChevronDown className="w-4 h-4 text-signal-lime/60 animate-bounce" />
+      </div>
+
+      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)] z-20" />
     </section>
   )
 }

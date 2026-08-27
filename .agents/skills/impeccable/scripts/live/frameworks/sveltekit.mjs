@@ -13,30 +13,30 @@ import {
   detectSvelteKitProject,
   removeSvelteKitLiveAdapter,
   unpatchSvelteLayout,
-} from '../sveltekit-adapter.mjs';
+} from '../sveltekit-adapter.mjs'
 
 export const sveltekit = {
   name: 'sveltekit',
 
   detect(cwd, config) {
-    return detectSvelteKitProject(cwd, config);
+    return detectSvelteKitProject(cwd, config)
   },
 
   inject: {
     kind: 'adapter',
 
     apply({ cwd, port, token, config }) {
-      return applySvelteKitLiveAdapter({ cwd, port, token, config });
+      return applySvelteKitLiveAdapter({ cwd, port, token, config })
     },
 
     remove({ cwd, config }) {
-      return removeSvelteKitLiveAdapter({ cwd, config });
+      return removeSvelteKitLiveAdapter({ cwd, config })
     },
 
     // The generated root component and the `src/lib/impeccable/` runtime paths
     // are already in the static LIVE_IGNORE_PATTERNS list, so nothing extra.
     ignorePatterns() {
-      return [];
+      return []
     },
 
     artifacts({ project }) {
@@ -53,7 +53,7 @@ export const sveltekit = {
           patch: 'sveltekit-layout',
           markers: [SVELTE_LAYOUT_MARKER_OPEN],
         },
-      ];
+      ]
     },
 
     unpatch: {
@@ -68,4 +68,4 @@ export const sveltekit = {
     preview: 'component',
     commentSyntax: 'html',
   },
-};
+}

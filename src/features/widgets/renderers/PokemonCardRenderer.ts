@@ -113,6 +113,7 @@ export function renderPokemonCard(
   }
 
   // Visual state from controls
+  const enableHolo = cfg.enableHolo !== false
   const rotateX = Number(cfg.rotateX) || 0
   const rotateY = Number(cfg.rotateY) || 0
   const glareX = Number(cfg.glareX) || 50
@@ -164,6 +165,9 @@ export function renderPokemonCard(
         <feDropShadow dx="${rotateY * 0.5}" dy="${-rotateX * 0.5 + 10}" stdDeviation="15" flood-color="#000" flood-opacity="0.6"/>
       </filter>
 
+      ${
+        enableHolo
+          ? `
       <radialGradient id="glare-grad-${id}" cx="${glareX}%" cy="${glareY}%" r="70%">
         <stop offset="0%" stop-color="white" stop-opacity="${glareOpacity}" />
         <stop offset="100%" stop-color="white" stop-opacity="0" />
@@ -177,6 +181,9 @@ export function renderPokemonCard(
         <stop offset="80%" stop-color="rgba(200,100,255,${shineOpacity})" />
         <stop offset="100%" stop-color="rgba(255,100,200,${shineOpacity})" />
       </linearGradient>
+      `
+          : ''
+      }
 
       <clipPath id="card-clip-${id}">
         <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" rx="${cardWidth * 0.05}" />
@@ -186,8 +193,14 @@ export function renderPokemonCard(
     <g transform="${transformStr}" filter="url(#card-shadow-${id})">
       <g clip-path="url(#card-clip-${id})">
         <image href="${imageUrl}" x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" preserveAspectRatio="xMidYMid slice" />
+        ${
+          enableHolo
+            ? `
         <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" fill="url(#glare-grad-${id})" style="mix-blend-mode: screen;" pointer-events="none" />
         <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" fill="url(#shine-grad-${id})" style="mix-blend-mode: color-dodge;" pointer-events="none" />
+        `
+            : ''
+        }
       </g>
       <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" rx="${cardWidth * 0.05}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" pointer-events="none" />
     </g>

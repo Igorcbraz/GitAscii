@@ -5,7 +5,7 @@ import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'n
 import { headers } from 'next/headers'
 
 import { ToastProvider } from '@/components/ui/toast'
-import { APP_URL, EXTERNAL_LINKS } from '@/constants'
+import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
@@ -206,40 +206,14 @@ const orgLd = {
 const faqLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'What is GitAscii?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'GitAscii is a platform for creating premium GitHub Profile READMEs using customizable SVGs and a visual editor. Think of it as Canva for your GitHub profile.',
-      },
+  mainEntity: LANDING_FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
     },
-    {
-      '@type': 'Question',
-      name: 'Is GitAscii free?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes! GitAscii is completely free and open source under the MIT License.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'How does live SVG rendering work?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Instead of uploading static images to GitHub, you embed a URL that points to our servers. We generate your SVG on-the-fly with your latest GitHub data, so your profile is always up to date.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What is ASCII Art conversion?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Our ASCII Art Engine converts any image (like your GitHub avatar) into stunning character-based art using configurable character sets, density, and color options.',
-      },
-    },
-  ],
+  })),
 }
 
 export default async function RootLayout({

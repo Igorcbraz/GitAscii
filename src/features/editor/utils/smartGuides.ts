@@ -1,3 +1,5 @@
+import { GridMode } from '@/constants'
+
 export interface Rect {
   x: number
   y: number
@@ -26,6 +28,8 @@ export interface SmartGuidesResult {
   spacingGuides: SpacingGuide[]
 }
 
+export type { GridMode }
+
 export const COMMON_GAPS = [8, 16, 24, 32, 48]
 export const DEFAULT_SNAP_THRESHOLD = 6
 export const CANVAS_WIDTH = 800
@@ -52,6 +56,7 @@ interface ComputeSmartGuidesOptions {
   minY?: number
   snapThreshold?: number
   canvasWidth?: number
+  gridMode?: GridMode
 }
 
 function hasOverlap(minA: number, maxA: number, minB: number, maxB: number): boolean {
@@ -66,6 +71,7 @@ export function computeSmartGuides({
   minY = 0,
   snapThreshold = DEFAULT_SNAP_THRESHOLD,
   canvasWidth = CANVAS_WIDTH,
+  gridMode = 'off',
 }: ComputeSmartGuidesOptions): SmartGuidesResult {
   const rawX = activeRect.x
   const rawY = activeRect.y
@@ -101,6 +107,43 @@ export function computeSmartGuides({
   considerXAlign(canvasWidth - width, canvasWidth)
   considerXAlign(canvasWidth / 2 - width / 2, canvasWidth / 2)
   considerYAlign(0, 0)
+
+  if (gridMode === 'basic') {
+    const majorStep = 100
+    for (let gx = 0; gx <= canvasWidth; gx += majorStep) {
+      considerXAlign(gx, gx)
+      considerXAlign(gx - width, gx)
+      considerXAlign(gx - width / 2, gx)
+    }
+    for (let gy = 0; gy <= 2000; gy += majorStep) {
+      considerYAlign(gy, gy)
+      considerYAlign(gy - height, gy)
+      considerYAlign(gy - height / 2, gy)
+    }
+  } else if (gridMode === 'axes') {
+    considerXAlign(canvasWidth / 2 - width / 2, canvasWidth / 2)
+    considerXAlign(canvasWidth / 2, canvasWidth / 2)
+    considerXAlign(canvasWidth / 2 - width, canvasWidth / 2)
+  } else if (gridMode === 'thirds') {
+    const third1 = Math.round(canvasWidth / 3)
+    const third2 = Math.round((canvasWidth * 2) / 3)
+    considerXAlign(third1, third1)
+    considerXAlign(third1 - width, third1)
+    considerXAlign(third1 - width / 2, third1)
+    considerXAlign(third2, third2)
+    considerXAlign(third2 - width, third2)
+    considerXAlign(third2 - width / 2, third2)
+  } else if (gridMode === 'dense') {
+    const fineStep = 20
+    for (let gx = 0; gx <= canvasWidth; gx += fineStep) {
+      considerXAlign(gx, gx)
+      considerXAlign(gx - width, gx)
+    }
+    for (let gy = 0; gy <= 2000; gy += fineStep) {
+      considerYAlign(gy, gy)
+      considerYAlign(gy - height, gy)
+    }
+  }
 
   for (let i = 0; i < otherRects.length; i++) {
     const other = otherRects[i].rect
@@ -625,11 +668,9 @@ export function computeResizeSmartGuides({
   }
 
   if (resizeType === 'resize-r' || resizeType === 'resize-br') {
-    // Canvas bounds
     considerWidth(canvasWidth)
     considerWidth(canvasWidth / 2)
 
-    // Other rects
     for (let i = 0; i < otherRects.length; i++) {
       const other = otherRects[i].rect
       const otherLeft = other.x
@@ -640,7 +681,6 @@ export function computeResizeSmartGuides({
       considerWidth(otherRight)
       considerWidth(otherCenterX)
 
-      // Common gaps to the right
       for (let g = 0; g < COMMON_GAPS.length; g++) {
         considerWidth(otherLeft - COMMON_GAPS[g])
       }
@@ -658,7 +698,6 @@ export function computeResizeSmartGuides({
       considerHeight(otherBottom)
       considerHeight(otherCenterY)
 
-      // Common gaps below
       for (let g = 0; g < COMMON_GAPS.length; g++) {
         considerHeight(otherTop - COMMON_GAPS[g])
       }

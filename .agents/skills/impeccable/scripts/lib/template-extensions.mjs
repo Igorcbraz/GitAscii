@@ -12,8 +12,8 @@
  * so double extensions like `.blade.php`, `.html.erb`, and `.html.heex` work.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from 'node:fs'
+import path from 'node:path'
 
 /**
  * Built-in markup extensions for Live's wrap/accept source search.
@@ -25,9 +25,16 @@ import path from 'node:path';
  * only gives the wrap query a chance to match build config by accident.
  */
 export const LIVE_TEMPLATE_EXTENSIONS = Object.freeze([
-  '.html', '.jsx', '.tsx', '.vue', '.svelte', '.astro',
-  '.ex', '.heex', '.eex',
-]);
+  '.html',
+  '.jsx',
+  '.tsx',
+  '.vue',
+  '.svelte',
+  '.astro',
+  '.ex',
+  '.heex',
+  '.eex',
+])
 
 /**
  * Normalize `detector.extensions` entries to `{ ext, engine }`.
@@ -36,41 +43,44 @@ export const LIVE_TEMPLATE_EXTENSIONS = Object.freeze([
  * the common case for server-side templates) or bare strings as shorthand.
  */
 export function normalizeExtensionEntries(entries) {
-  if (!Array.isArray(entries)) return [];
-  const out = [];
+  if (!Array.isArray(entries)) return []
+  const out = []
   for (const entry of entries) {
-    const raw = typeof entry === 'string' ? entry : entry?.ext;
-    if (typeof raw !== 'string') continue;
-    let ext = raw.trim().toLowerCase();
-    if (!ext) continue;
-    if (!ext.startsWith('.')) ext = `.${ext}`;
-    const engine = (!(typeof entry === 'string') && entry?.engine === 'text') ? 'text' : 'html';
-    out.push({ ext, engine });
+    const raw = typeof entry === 'string' ? entry : entry?.ext
+    if (typeof raw !== 'string') continue
+    let ext = raw.trim().toLowerCase()
+    if (!ext) continue
+    if (!ext.startsWith('.')) ext = `.${ext}`
+    const engine = !(typeof entry === 'string') && entry?.engine === 'text' ? 'text' : 'html'
+    out.push({ ext, engine })
   }
-  return out;
+  return out
 }
 
 export function mergeExtensions(existing, incoming) {
-  const map = new Map();
-  for (const entry of normalizeExtensionEntries(existing)) map.set(entry.ext, entry);
-  for (const entry of normalizeExtensionEntries(incoming)) map.set(entry.ext, entry);
-  return Array.from(map.values());
+  const map = new Map()
+  for (const entry of normalizeExtensionEntries(existing)) map.set(entry.ext, entry)
+  for (const entry of normalizeExtensionEntries(incoming)) map.set(entry.ext, entry)
+  return Array.from(map.values())
 }
 
 export function matchConfiguredExtension(filePath, extensions) {
-  if (!Array.isArray(extensions) || extensions.length === 0) return null;
-  const name = path.basename(String(filePath || '')).toLowerCase();
-  if (!name) return null;
+  if (!Array.isArray(extensions) || extensions.length === 0) return null
+  const name = path.basename(String(filePath || '')).toLowerCase()
+  if (!name) return null
   // The longest matching suffix wins, so `.blade.php` beats a broader `.php`
   // entry regardless of config order.
-  let best = null;
+  let best = null
   for (const entry of normalizeExtensionEntries(extensions)) {
-    if (name.length > entry.ext.length && name.endsWith(entry.ext)
-      && (!best || entry.ext.length > best.ext.length)) {
-      best = entry;
+    if (
+      name.length > entry.ext.length &&
+      name.endsWith(entry.ext) &&
+      (!best || entry.ext.length > best.ext.length)
+    ) {
+      best = entry
     }
   }
-  return best;
+  return best
 }
 
 /**
@@ -82,12 +92,12 @@ export function matchConfiguredExtension(filePath, extensions) {
  * counting as a template.
  */
 export function matchesTemplateExtension(filePath, extensions) {
-  const name = path.basename(String(filePath || '')).toLowerCase();
-  if (!name) return false;
+  const name = path.basename(String(filePath || '')).toLowerCase()
+  if (!name) return false
   for (const ext of extensions) {
-    if (name.length > ext.length && name.endsWith(ext)) return true;
+    if (name.length > ext.length && name.endsWith(ext)) return true
   }
-  return false;
+  return false
 }
 
 /**
@@ -100,47 +110,47 @@ export function matchesTemplateExtension(filePath, extensions) {
  * hook-lib.mjs.
  */
 export function resolveLiveTemplateExtensions(cwd = process.cwd()) {
-  const cached = extensionCache.get(cwd);
-  if (cached) return cached;
-  const resolved = readLiveTemplateExtensions(cwd);
-  extensionCache.set(cwd, resolved);
-  return resolved;
+  const cached = extensionCache.get(cwd)
+  if (cached) return cached
+  const resolved = readLiveTemplateExtensions(cwd)
+  extensionCache.set(cwd, resolved)
+  return resolved
 }
 
 // live-wrap calls the resolver once per candidate query per pass (up to eight
 // times in one CLI run), and every call would otherwise re-read and re-parse
 // both config files. Keyed by cwd; a single CLI process never rewrites its own
 // config mid-run.
-const extensionCache = new Map();
+const extensionCache = new Map()
 
 /** Test seam: drop the memoized config so a fixture can rewrite config.json. */
 export function clearTemplateExtensionCache() {
-  extensionCache.clear();
+  extensionCache.clear()
 }
 
 function readLiveTemplateExtensions(cwd) {
-  const configured = [];
+  const configured = []
   for (const name of ['config.json', 'config.local.json']) {
-    const raw = safeReadJson(path.join(cwd, '.impeccable', name));
-    const detector = raw?.detector;
+    const raw = safeReadJson(path.join(cwd, '.impeccable', name))
+    const detector = raw?.detector
     if (detector && typeof detector === 'object' && !Array.isArray(detector)) {
-      configured.push(...normalizeExtensionEntries(detector.extensions));
+      configured.push(...normalizeExtensionEntries(detector.extensions))
     }
   }
-  const seen = new Set(LIVE_TEMPLATE_EXTENSIONS);
-  const out = [...LIVE_TEMPLATE_EXTENSIONS];
+  const seen = new Set(LIVE_TEMPLATE_EXTENSIONS)
+  const out = [...LIVE_TEMPLATE_EXTENSIONS]
   for (const { ext } of configured) {
-    if (seen.has(ext)) continue;
-    seen.add(ext);
-    out.push(ext);
+    if (seen.has(ext)) continue
+    seen.add(ext)
+    out.push(ext)
   }
-  return out;
+  return out
 }
 
 function safeReadJson(filePath) {
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
   } catch {
-    return null;
+    return null
   }
 }

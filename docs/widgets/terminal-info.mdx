@@ -1,6 +1,6 @@
 ---
-title: "Terminal Info Widget"
-description: "Neofetch-style terminal info card with dot-leader alignments and developer metadata"
+title: 'Terminal Info Widget'
+description: 'Neofetch-style terminal info card with dot-leader alignments and developer metadata'
 ---
 
 # Terminal Info Widget (`terminal-info`)
@@ -12,45 +12,45 @@ The Terminal Info widget renders a comprehensive, Unix `neofetch`-style console 
 ```typescript
 export interface TerminalInfoConfig {
   // Section Visibility
-  showMainSection?: boolean      // Default: true
-  showContactSection?: boolean   // Default: true
-  showStatsSection?: boolean     // Default: true
-  dotLeaders?: boolean           // Default: true (renders dotted alignment guides)
+  showMainSection?: boolean // Default: true
+  showContactSection?: boolean // Default: true
+  showStatsSection?: boolean // Default: true
+  dotLeaders?: boolean // Default: true (renders dotted alignment guides)
 
   // Main Section Fields
-  showUptime?: boolean           // Default: true
-  showLocation?: boolean         // Default: true
-  showCompany?: boolean          // Default: true
-  showLanguages?: boolean        // Default: true
-  showJoined?: boolean           // Default: false
-  showStatus?: boolean           // Default: false
-  showPronouns?: boolean         // Default: false
-  showTimezone?: boolean         // Default: false
-  showAchievements?: boolean     // Default: false
-  showHighlights?: boolean       // Default: false
+  showUptime?: boolean // Default: true
+  showLocation?: boolean // Default: true
+  showCompany?: boolean // Default: true
+  showLanguages?: boolean // Default: true
+  showJoined?: boolean // Default: false
+  showStatus?: boolean // Default: false
+  showPronouns?: boolean // Default: false
+  showTimezone?: boolean // Default: false
+  showAchievements?: boolean // Default: false
+  showHighlights?: boolean // Default: false
 
   // Contact Fields
-  showWebsite?: boolean          // Default: true
-  showGithub?: boolean           // Default: true
-  showTwitter?: boolean          // Default: false
-  showEmail?: boolean            // Default: false
-  showOrgs?: boolean             // Default: false
+  showWebsite?: boolean // Default: true
+  showGithub?: boolean // Default: true
+  showTwitter?: boolean // Default: false
+  showEmail?: boolean // Default: false
+  showOrgs?: boolean // Default: false
 
   // Stats Fields
-  showRepos?: boolean            // Default: true
-  showStars?: boolean            // Default: true
-  showCommits?: boolean          // Default: true
-  showFollowers?: boolean        // Default: true
-  showFollowing?: boolean        // Default: false
-  showGists?: boolean            // Default: false
+  showRepos?: boolean // Default: true
+  showStars?: boolean // Default: true
+  showCommits?: boolean // Default: true
+  showFollowers?: boolean // Default: true
+  showFollowing?: boolean // Default: false
+  showGists?: boolean // Default: false
 
   // Color Tokens
-  headerColor?: string           // Default: '#58a6ff'
-  labelColor?: string            // Default: '#ffa657'
-  dotColor?: string              // Default: '#484f58'
-  valueColor?: string            // Default: '#c9d1d9'
-  statsValColor?: string         // Default: '#79c0ff'
-  dividerColor?: string          // Default: '#3d444d'
+  headerColor?: string // Default: '#58a6ff'
+  labelColor?: string // Default: '#ffa657'
+  dotColor?: string // Default: '#484f58'
+  valueColor?: string // Default: '#c9d1d9'
+  statsValColor?: string // Default: '#79c0ff'
+  dividerColor?: string // Default: '#3d444d'
 }
 ```
 

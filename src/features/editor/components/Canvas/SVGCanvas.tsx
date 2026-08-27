@@ -55,6 +55,8 @@ export function SVGCanvas() {
     selectWidget,
     updateWidgetConfig,
     zoom,
+    showGrid,
+    gridMode,
   } = useEditorStore()
 
   const [isLayersOpen, setIsLayersOpen] = useState(false)
@@ -426,6 +428,10 @@ export function SVGCanvas() {
             },
           }))
 
+        const currentGridMode = useEditorStore.getState().showGrid
+          ? useEditorStore.getState().gridMode
+          : 'off'
+
         const smartResult = computeSmartGuides({
           activeRect: { x: rawX, y: rawY, width, height },
           otherRects,
@@ -434,6 +440,7 @@ export function SVGCanvas() {
           minY,
           snapThreshold: SNAP_THRESHOLD,
           canvasWidth: CANVAS_WIDTH,
+          gridMode: currentGridMode,
         })
 
         const x = smartResult.snappedX
@@ -893,6 +900,51 @@ export function SVGCanvas() {
         </div>
 
         <CanvasAlignmentGuides guides={alignmentGuides} spacingGuides={spacingGuides} />
+
+        {showGrid && gridMode !== 'off' && (
+          <div
+            data-testid="canvas-grid-overlay"
+            className="absolute inset-0 pointer-events-none z-20 overflow-hidden"
+            style={{
+              backgroundImage:
+                gridMode === 'basic'
+                  ? `
+                    linear-gradient(to right, rgba(197, 255, 74, 0.15) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(197, 255, 74, 0.15) 1px, transparent 1px)
+                  `
+                  : gridMode === 'dense'
+                    ? `
+                    linear-gradient(to right, rgba(197, 255, 74, 0.07) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(197, 255, 74, 0.07) 1px, transparent 1px),
+                    linear-gradient(to right, rgba(197, 255, 74, 0.18) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(197, 255, 74, 0.18) 1px, transparent 1px)
+                  `
+                    : undefined,
+              backgroundSize:
+                gridMode === 'basic'
+                  ? '100px 100px, 100px 100px'
+                  : gridMode === 'dense'
+                    ? '20px 20px, 20px 20px, 100px 100px, 100px 100px'
+                    : undefined,
+            }}
+          >
+            {(gridMode === 'axes' || gridMode === 'basic') && (
+              <>
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-signal-lime/40 border-r border-dashed border-signal-lime/60 shadow-[0_0_8px_rgba(197,255,74,0.3)]" />
+                <div className="absolute left-0 right-0 top-1/2 h-px bg-signal-lime/40 border-b border-dashed border-signal-lime/60 shadow-[0_0_8px_rgba(197,255,74,0.3)]" />
+              </>
+            )}
+
+            {gridMode === 'thirds' && (
+              <>
+                <div className="absolute left-1/3 top-0 bottom-0 w-px bg-cyan-400/40 border-r border-dashed border-cyan-400/60 shadow-[0_0_8px_rgba(34,211,238,0.3)]" />
+                <div className="absolute left-2/3 top-0 bottom-0 w-px bg-cyan-400/40 border-r border-dashed border-cyan-400/60 shadow-[0_0_8px_rgba(34,211,238,0.3)]" />
+                <div className="absolute left-0 right-0 top-1/3 h-px bg-cyan-400/40 border-b border-dashed border-cyan-400/60 shadow-[0_0_8px_rgba(34,211,238,0.3)]" />
+                <div className="absolute left-0 right-0 top-2/3 h-px bg-cyan-400/40 border-b border-dashed border-cyan-400/60 shadow-[0_0_8px_rgba(34,211,238,0.3)]" />
+              </>
+            )}
+          </div>
+        )}
 
         <div className="absolute inset-0 pointer-events-auto">
           <CanvasMarquee marquee={marquee && containerRef.current ? marquee : null} />

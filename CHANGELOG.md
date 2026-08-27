@@ -2,92 +2,80 @@
 
 ## [1.15.0](https://github.com/Igorcbraz/GitAscii/compare/v1.14.1...v1.15.0) (2026-08-24)
 
-
 ### Features
 
-* **editor:** enhance ASCII premium widgets and complete i18n configurations ([d58a0ed](https://github.com/Igorcbraz/GitAscii/commit/d58a0edd19a8d4b542ec22fa86b34bdc5122006c))
-* **editor:** enhance ASCII premium widgets and complete i18n configurations ([1788813](https://github.com/Igorcbraz/GitAscii/commit/17888136aec2876587455d079ba833db77fb7f1c))
-* **widgets:** add ASCII Premium Kit widgets and analytics engine ([da1a4d1](https://github.com/Igorcbraz/GitAscii/commit/da1a4d18c53b61d3a72076e070f715fd1471bdcc))
-
+- **editor:** enhance ASCII premium widgets and complete i18n configurations ([d58a0ed](https://github.com/Igorcbraz/GitAscii/commit/d58a0edd19a8d4b542ec22fa86b34bdc5122006c))
+- **editor:** enhance ASCII premium widgets and complete i18n configurations ([1788813](https://github.com/Igorcbraz/GitAscii/commit/17888136aec2876587455d079ba833db77fb7f1c))
+- **widgets:** add ASCII Premium Kit widgets and analytics engine ([da1a4d1](https://github.com/Igorcbraz/GitAscii/commit/da1a4d18c53b61d3a72076e070f715fd1471bdcc))
 
 ### Bug Fixes
 
-* **security:** resolve CodeQL incomplete sanitization alert in ascii renderers ([8d2530f](https://github.com/Igorcbraz/GitAscii/commit/8d2530f44e95b6474cbc558956706c9e6d135203))
+- **security:** resolve CodeQL incomplete sanitization alert in ascii renderers ([8d2530f](https://github.com/Igorcbraz/GitAscii/commit/8d2530f44e95b6474cbc558956706c9e6d135203))
 
 ## [1.14.1](https://github.com/Igorcbraz/GitAscii/compare/v1.14.0...v1.14.1) (2026-08-21)
 
-
 ### Bug Fixes
 
-* **analytics:** enable essential product telemetry by default while preserving privacy consent ([63c8d78](https://github.com/Igorcbraz/GitAscii/commit/63c8d783fc24f47af6772ea6bafd8b3f589af967))
+- **analytics:** enable essential product telemetry by default while preserving privacy consent ([63c8d78](https://github.com/Igorcbraz/GitAscii/commit/63c8d783fc24f47af6772ea6bafd8b3f589af967))
 
 ## [1.14.0](https://github.com/Igorcbraz/GitAscii/compare/v1.13.2...v1.14.0) (2026-08-21)
 
-
 ### Features
 
-* **editor:** add contribution guide modals for featured and community widgets ([b8f6f00](https://github.com/Igorcbraz/GitAscii/commit/b8f6f001c35107db97c2a10a56c9d193e6002a16))
-* **editor:** add GitHub adaptive profile themes and presets to ColorPicker ([58e15f0](https://github.com/Igorcbraz/GitAscii/commit/58e15f0fd8e23f5421bd70963eff730177aaa620))
-* **editor:** add GitHub profile preview mode with toggle and nudge banner ([9d71494](https://github.com/Igorcbraz/GitAscii/commit/9d71494809491d28baa9151a9f7064ba48b811da))
-* **i18n:** add support for ja, de, and fr languages ([2918995](https://github.com/Igorcbraz/GitAscii/commit/29189956e79ed73af77d51f5ed7292802e125d06))
-* **templates:** add widget category support in export and categorize template presets ([1f65bad](https://github.com/Igorcbraz/GitAscii/commit/1f65bad957fde718973642cf7d65380cdd719edc))
-* **widgets:** add GitFut card widget and modularize sidebar cards ([0952c3f](https://github.com/Igorcbraz/GitAscii/commit/0952c3f1ae7217e0096eb3cac71b884acaf419ab))
-
+- **editor:** add contribution guide modals for featured and community widgets ([b8f6f00](https://github.com/Igorcbraz/GitAscii/commit/b8f6f001c35107db97c2a10a56c9d193e6002a16))
+- **editor:** add GitHub adaptive profile themes and presets to ColorPicker ([58e15f0](https://github.com/Igorcbraz/GitAscii/commit/58e15f0fd8e23f5421bd70963eff730177aaa620))
+- **editor:** add GitHub profile preview mode with toggle and nudge banner ([9d71494](https://github.com/Igorcbraz/GitAscii/commit/9d71494809491d28baa9151a9f7064ba48b811da))
+- **i18n:** add support for ja, de, and fr languages ([2918995](https://github.com/Igorcbraz/GitAscii/commit/29189956e79ed73af77d51f5ed7292802e125d06))
+- **templates:** add widget category support in export and categorize template presets ([1f65bad](https://github.com/Igorcbraz/GitAscii/commit/1f65bad957fde718973642cf7d65380cdd719edc))
+- **widgets:** add GitFut card widget and modularize sidebar cards ([0952c3f](https://github.com/Igorcbraz/GitAscii/commit/0952c3f1ae7217e0096eb3cac71b884acaf419ab))
 
 ### Bug Fixes
 
-* **editor:** fix github placeholder url typing in TerminalInfoControls ([e902e74](https://github.com/Igorcbraz/GitAscii/commit/e902e747a163c4bec6b1730b2e44930d29a08bac))
-* **editor:** fix pokemon card widget sidebar hover preview ([c59280d](https://github.com/Igorcbraz/GitAscii/commit/c59280db19c7af3d98a9929f2793b592bd18f5e2))
-* **editor:** smart guides on resize, multi scale and widget fixes ([f4641b2](https://github.com/Igorcbraz/GitAscii/commit/f4641b25a8e36c47312394920584e961e44ab6f1))
+- **editor:** fix github placeholder url typing in TerminalInfoControls ([e902e74](https://github.com/Igorcbraz/GitAscii/commit/e902e747a163c4bec6b1730b2e44930d29a08bac))
+- **editor:** fix pokemon card widget sidebar hover preview ([c59280d](https://github.com/Igorcbraz/GitAscii/commit/c59280db19c7af3d98a9929f2793b592bd18f5e2))
+- **editor:** smart guides on resize, multi scale and widget fixes ([f4641b2](https://github.com/Igorcbraz/GitAscii/commit/f4641b25a8e36c47312394920584e961e44ab6f1))
 
 ## [1.13.2](https://github.com/Igorcbraz/GitAscii/compare/v1.13.1...v1.13.2) (2026-08-21)
 
-
 ### Performance Improvements
 
-* **explore:** optimize gallery rendering, SVG response caching, and profile fetching ([f18470a](https://github.com/Igorcbraz/GitAscii/commit/f18470a85f1c7297374def8aa7e977654a6b6e19))
+- **explore:** optimize gallery rendering, SVG response caching, and profile fetching ([f18470a](https://github.com/Igorcbraz/GitAscii/commit/f18470a85f1c7297374def8aa7e977654a6b6e19))
 
 ## [1.13.1](https://github.com/Igorcbraz/GitAscii/compare/v1.13.0...v1.13.1) (2026-08-21)
 
-
 ### Bug Fixes
 
-* **svg:** restore animations and fix svg data URIs ([2794907](https://github.com/Igorcbraz/GitAscii/commit/2794907e6dbcb023dfd25e7c098148e62c7e806c))
+- **svg:** restore animations and fix svg data URIs ([2794907](https://github.com/Igorcbraz/GitAscii/commit/2794907e6dbcb023dfd25e7c098148e62c7e806c))
 
 ## [1.13.0](https://github.com/Igorcbraz/GitAscii/compare/v1.12.1...v1.13.0) (2026-08-21)
 
-
 ### Features
 
-* **editor:** add simultaneous multi-widget editing with category-aware controls ([7d6cf44](https://github.com/Igorcbraz/GitAscii/commit/7d6cf443cd298c726728222118007953034b6784))
-* **widgets:** add surveillance widgets suite and centralize constants ([6b7cfa7](https://github.com/Igorcbraz/GitAscii/commit/6b7cfa7fb7e8315457ee4a8fff6b81e6c9d99907))
-
+- **editor:** add simultaneous multi-widget editing with category-aware controls ([7d6cf44](https://github.com/Igorcbraz/GitAscii/commit/7d6cf443cd298c726728222118007953034b6784))
+- **widgets:** add surveillance widgets suite and centralize constants ([6b7cfa7](https://github.com/Igorcbraz/GitAscii/commit/6b7cfa7fb7e8315457ee4a8fff6b81e6c9d99907))
 
 ### Bug Fixes
 
-* **editor:** fix re-render loops and filter extension/DOM noise ([cef75ea](https://github.com/Igorcbraz/GitAscii/commit/cef75eaf4169bae899f92cec836450ef6e28e89d))
-* **security:** resolve all 16 GHAS CodeQL code-scanning alerts ([127738a](https://github.com/Igorcbraz/GitAscii/commit/127738acea761b3a9ee135ad0c187aaf7a11aed0))
+- **editor:** fix re-render loops and filter extension/DOM noise ([cef75ea](https://github.com/Igorcbraz/GitAscii/commit/cef75eaf4169bae899f92cec836450ef6e28e89d))
+- **security:** resolve all 16 GHAS CodeQL code-scanning alerts ([127738a](https://github.com/Igorcbraz/GitAscii/commit/127738acea761b3a9ee135ad0c187aaf7a11aed0))
 
 ## [1.12.1](https://github.com/Igorcbraz/GitAscii/compare/v1.12.0...v1.12.1) (2026-08-20)
 
-
 ### Bug Fixes
 
-* **widgets:** embed pokemon cards as lightweight data uri and improve svg image fallback ([ec4c765](https://github.com/Igorcbraz/GitAscii/commit/ec4c765f59b626a16ad503ad0c7538e58037aaf1))
+- **widgets:** embed pokemon cards as lightweight data uri and improve svg image fallback ([ec4c765](https://github.com/Igorcbraz/GitAscii/commit/ec4c765f59b626a16ad503ad0c7538e58037aaf1))
 
 ## [1.12.0](https://github.com/Igorcbraz/GitAscii/compare/v1.11.1...v1.12.0) (2026-08-19)
 
-
 ### Features
 
-* AEO/GEO Discovery, 404 Redesign, WebP Optimizations & Core Web Vitals ([#95](https://github.com/Igorcbraz/GitAscii/issues/95)) ([13132a0](https://github.com/Igorcbraz/GitAscii/commit/13132a06f93f33ff1314235b6e5a2f8cee1db1c0))
+- AEO/GEO Discovery, 404 Redesign, WebP Optimizations & Core Web Vitals ([#95](https://github.com/Igorcbraz/GitAscii/issues/95)) ([13132a0](https://github.com/Igorcbraz/GitAscii/commit/13132a06f93f33ff1314235b6e5a2f8cee1db1c0))
 
 ## [1.11.1](https://github.com/Igorcbraz/GitAscii/compare/v1.11.0...v1.11.1) (2026-08-19)
 
-
 ### Bug Fixes
 
-* **svg-canvas:** support full transparency for footer widget rendering ([#93](https://github.com/Igorcbraz/GitAscii/issues/93)) ([674fa6e](https://github.com/Igorcbraz/GitAscii/commit/674fa6e8d509f9b5a0dc3235d0c2c7331e2436e6))
+- **svg-canvas:** support full transparency for footer widget rendering ([#93](https://github.com/Igorcbraz/GitAscii/issues/93)) ([674fa6e](https://github.com/Igorcbraz/GitAscii/commit/674fa6e8d509f9b5a0dc3235d0c2c7331e2436e6))
 
 ## [1.11.0](https://github.com/Igorcbraz/GitAscii/compare/v1.10.0...v1.11.0) (2026-08-19)
 
