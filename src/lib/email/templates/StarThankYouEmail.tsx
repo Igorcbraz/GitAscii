@@ -35,7 +35,6 @@ export function StarThankYouEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -51,7 +50,6 @@ export function StarThankYouEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -82,7 +80,6 @@ export function StarThankYouEmail({
         )}
       </Text>
 
-      {/* GitHub Repo Card - Matches StarPromptModal styling */}
       <div
         style={{
           backgroundColor: '#18181c',
@@ -148,7 +145,6 @@ export function StarThankYouEmail({
         </table>
       </div>
 
-      {/* Special Badge Box */}
       <Section
         style={{
           backgroundColor: '#141418',
@@ -192,7 +188,6 @@ export function StarThankYouEmail({
         />
       </Section>
 
-      {/* CTA Button */}
       <Section style={{ textAlign: 'center', margin: '28px 0 20px 0' }}>
         <EmailButton href={targetRepoUrl}>
           {t('email.star_thank_you.cta', 'Open GitHub Repository')}

@@ -2,21 +2,48 @@
 
 import { ArrowRight, Check, Copy, Filter, Search } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { TechIcon } from '@/components/ui/TechIcon'
 import { useToast } from '@/components/ui/toast'
 import { APP_URL } from '@/constants'
 import { languageStacks, templateList } from '@/data/templatesData'
+import { renderSvg } from '@/engine/core/SVGEngine'
+import { createConfiguration, TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
+import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
 import { copyToClipboard } from '@/utils/clipboard'
 
 export function TemplateGallery() {
   const { t } = useI18n()
+  const demoData = useMemo(() => getMockGitHubData('Igorcbraz'), [])
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
   const { success } = useToast()
+
+  const renderedSvgMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    templateList.forEach((tpl) => {
+      const targetPresetId = TEMPLATE_PRESETS[tpl.slug] ? tpl.slug : 'native'
+      const config = createConfiguration(
+        0,
+        'Igorcbraz',
+        targetPresetId,
+        'default',
+        'Default',
+        demoData
+      )
+
+      config.globalStyles.backgroundColor = tpl.bg
+      config.globalStyles.accentColor = tpl.accent
+      config.globalStyles.templateStyle = tpl.slug
+
+      const rawSvg = renderSvg(config, demoData, { width: 800 })
+      map[tpl.slug] = rawSvg.replace(/<\?xml[\s\S]*?\?>/i, '').trim()
+    })
+    return map
+  }, [demoData])
 
   const filteredTemplates = templateList.filter((tpl) => {
     const matchesCategory = activeCategory === 'all' || tpl.category === activeCategory
@@ -124,54 +151,26 @@ export function TemplateGallery() {
             className="bg-onyx border border-graphite rounded-none flex flex-col justify-between p-6 hover:border-signal-lime/50 transition-all duration-300 group hover:shadow-[0_0_16px_rgba(0,0,0,0.6)]"
           >
             <div>
-              <div
-                className="h-44 w-full rounded-none mb-6 p-5 flex flex-col justify-between border border-graphite relative overflow-hidden transition-all duration-300"
-                style={{ backgroundColor: tpl.bg }}
-              >
-                <div className="flex items-center justify-between z-10">
-                  <span
-                    className="font-jetbrains-mono text-caption font-bold"
-                    style={{ color: tpl.accent }}
-                  >
-                    {'// '}
-                    {tpl.name}
-                  </span>
-                  {tpl.popular && (
-                    <span className="bg-signal-lime text-black font-inter-tight text-caption font-bold px-2 py-0.5 uppercase tracking-wider">
+              <div className="h-48 w-full rounded-none mb-6 p-2 flex items-center justify-center border border-graphite relative overflow-hidden bg-void-black shadow-inner">
+                <div
+                  suppressHydrationWarning
+                  className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:max-h-44 [&>svg]:object-contain"
+                  dangerouslySetInnerHTML={{ __html: renderedSvgMap[tpl.slug] || '' }}
+                />
+                {tpl.popular && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <span className="bg-signal-lime text-black font-inter-tight text-caption font-bold px-2 py-0.5 uppercase tracking-wider shadow-xs">
                       {t('template_gallery.badge.popular', 'Popular')}
                     </span>
-                  )}
-                  {tpl.featured && !tpl.popular && (
-                    <span className="bg-white/10 text-white border border-white/20 font-inter-tight text-caption font-medium px-2 py-0.5 uppercase tracking-wider">
+                  </div>
+                )}
+                {tpl.featured && !tpl.popular && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <span className="bg-white/10 text-white border border-white/20 backdrop-blur-xs font-inter-tight text-caption font-medium px-2 py-0.5 uppercase tracking-wider">
                       {t('template_gallery.badge.featured', 'Featured')}
                     </span>
-                  )}
-                </div>
-
-                <div className="z-10 bg-black/40 backdrop-blur-xs border border-white/10 p-3 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="size-2 rounded-full animate-pulse"
-                      style={{ backgroundColor: tpl.accent }}
-                    />
-                    <span className="font-jetbrains-mono text-eyebrow text-white/90 truncate">
-                      user@github:~$ gitascii --theme={tpl.slug}
-                    </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-1 pt-1 border-t border-white/10 text-[9px] font-jetbrains-mono text-ash">
-                    <div>{t('template_gallery.stats.commits', 'COMMITS: 1,420')}</div>
-                    <div>{t('template_gallery.stats.stars', 'STARS: 428')}</div>
-                    <div>{t('template_gallery.stats.streak', 'STREAK: 84d')}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between z-10 text-caption font-jetbrains-mono text-white/60">
-                  <span>{tpl.vibe}</span>
-                  <div
-                    className="size-3 rounded-full border border-white/20"
-                    style={{ backgroundColor: tpl.accent }}
-                  />
-                </div>
+                )}
               </div>
 
               <div className="flex items-center gap-1.5 mb-3 flex-wrap">

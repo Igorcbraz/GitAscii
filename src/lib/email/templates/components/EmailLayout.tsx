@@ -71,7 +71,6 @@ export function EmailLayout({
             boxShadow: '0 16px 40px rgba(0, 0, 0, 0.6)',
           }}
         >
-          {/* Header Banner - Matches Modal Dialog Header */}
           <Section
             style={{
               backgroundColor: '#18181c',
@@ -127,10 +126,8 @@ export function EmailLayout({
             </table>
           </Section>
 
-          {/* Main Body Content */}
           <Section style={{ padding: '28px 24px' }}>{children}</Section>
 
-          {/* Footer */}
           <Section
             style={{
               backgroundColor: '#0e0e11',

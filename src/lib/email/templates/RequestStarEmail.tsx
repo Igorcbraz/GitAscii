@@ -35,7 +35,6 @@ export function RequestStarEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -51,7 +50,6 @@ export function RequestStarEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -85,7 +83,6 @@ export function RequestStarEmail({
         )}
       </Text>
 
-      {/* GitHub Repo Card - Matches StarPromptModal styling */}
       <div
         style={{
           backgroundColor: '#18181c',
@@ -151,7 +148,6 @@ export function RequestStarEmail({
         </table>
       </div>
 
-      {/* CTA Button */}
       <Section style={{ textAlign: 'center', margin: '24px 0 16px 0' }}>
         <EmailButton href={targetRepoUrl}>
           {t('email.request_star.cta', 'Star on GitHub')}

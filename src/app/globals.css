@@ -272,3 +272,62 @@
     background-position: -200% center;
   }
 }
+
+.gitascii-player {
+  outline: none;
+  background: #000;
+  display: block;
+}
+
+.gitascii-player:focus {
+  outline: none;
+}
+
+.gitascii-player::-webkit-media-controls-panel {
+  background: linear-gradient(
+    to top,
+    rgba(6, 6, 6, 0.96) 0%,
+    rgba(6, 6, 6, 0.72) 70%,
+    transparent 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 12px 8px;
+}
+
+.gitascii-player::-webkit-media-controls-play-button,
+.gitascii-player::-webkit-media-controls-mute-button,
+.gitascii-player::-webkit-media-controls-fullscreen-button,
+.gitascii-player::-webkit-media-controls-toggle-closed-captions-button,
+.gitascii-player::-webkit-media-controls-overflow-button {
+  filter: brightness(0) saturate(100%) invert(89%) sepia(60%) saturate(400%) hue-rotate(36deg)
+    brightness(108%);
+  opacity: 0.8;
+}
+
+.gitascii-player::-webkit-media-controls-play-button:hover,
+.gitascii-player::-webkit-media-controls-mute-button:hover,
+.gitascii-player::-webkit-media-controls-fullscreen-button:hover {
+  opacity: 1;
+}
+
+.gitascii-player::-webkit-media-controls-timeline {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  height: 3px;
+  margin: 0 6px;
+}
+
+.gitascii-player::-webkit-media-controls-volume-slider {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.gitascii-player::-webkit-media-controls-current-time-display,
+.gitascii-player::-webkit-media-controls-time-remaining-display {
+  color: rgba(197, 197, 197, 0.75);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}

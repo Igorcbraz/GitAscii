@@ -41,7 +41,6 @@ export function StarPromptModal({
       setStarSuccess(false)
       setIsRedirecting(false)
 
-      // Fetch live star count and status
       fetch(API_ENDPOINTS.GITHUB.STAR)
         .then((res) => res.json())
         .then((data) => {

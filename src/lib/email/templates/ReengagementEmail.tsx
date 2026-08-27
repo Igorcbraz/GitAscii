@@ -34,7 +34,6 @@ export function ReengagementEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -50,7 +49,6 @@ export function ReengagementEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -81,7 +79,6 @@ export function ReengagementEmail({
         )}
       </Text>
 
-      {/* Feature Highlights Grid */}
       <Section style={{ margin: '0 0 24px 0' }}>
         <div
           style={{
@@ -227,7 +224,6 @@ export function ReengagementEmail({
         </div>
       </Section>
 
-      {/* CTA Button */}
       <Section style={{ textAlign: 'center', margin: '28px 0 16px 0' }}>
         <EmailButton href={targetEditorUrl}>
           {t('email.reengagement.cta', 'Open Studio & Update Profile')}

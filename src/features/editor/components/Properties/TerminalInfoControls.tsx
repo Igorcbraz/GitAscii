@@ -138,7 +138,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
 
   return (
     <div className="space-y-4 pt-3 border-t border-graphite font-inter-tight">
-      {/* Title */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-signal-lime text-eyebrow uppercase tracking-wider font-semibold">
           <Terminal size={14} />
@@ -146,7 +145,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </div>
       </div>
 
-      {/* 1. TOP: STYLE & COLOR PRESETS */}
       <div className="p-3 bg-carbon rounded-sm border border-graphite space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-signal-lime text-eyebrow font-semibold uppercase tracking-wider">
@@ -212,7 +210,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
           })}
         </div>
 
-        {/* Custom individual color pickers & dot leader switch */}
         <div className="pt-2 border-t border-graphite/60 space-y-2.5">
           <div className="grid grid-cols-2 gap-2">
             <ColorPicker
@@ -272,7 +269,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </div>
       </div>
 
-      {/* 2. TAB SELECTION */}
       <div className="grid grid-cols-2 gap-1 bg-carbon p-1 rounded-sm border border-graphite">
         <button
           type="button"
@@ -301,7 +297,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </button>
       </div>
 
-      {/* 3. TAB: TOGGLES */}
       {activeTab === 'toggles' && (
         <div className="space-y-4">
           <div className="space-y-1.5 bg-carbon p-2.5 rounded-sm border border-graphite">
@@ -420,7 +415,6 @@ export function TerminalInfoControls({ instanceId, config }: TerminalInfoControl
         </div>
       )}
 
-      {/* 4. TAB: CUSTOM */}
       {activeTab === 'custom' && (
         <div className="space-y-3">
           <p className="text-eyebrow text-ash">

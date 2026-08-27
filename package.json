@@ -27,6 +27,7 @@
     "@react-email/components": "^1.0.12",
     "@sentry/nextjs": "^10.69.0",
     "@tcgdex/sdk": "^2.9.0",
+    "@vidstack/react": "^1.15.6",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "motion": "^12.43.0",
@@ -37,6 +38,7 @@
     "resend": "^6.24.0",
     "tailwind-merge": "^3.6.0",
     "undici": "^8.10.0",
+    "vidstack": "^1.15.6",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

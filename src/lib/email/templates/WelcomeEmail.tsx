@@ -31,7 +31,6 @@ export function WelcomeEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -47,7 +46,6 @@ export function WelcomeEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -78,7 +76,6 @@ export function WelcomeEmail({
         )}
       </Text>
 
-      {/* Feature Highlights Box - Matches Tour / Guest modal item cards */}
       <Section style={{ margin: '0 0 24px 0' }}>
         <div
           style={{
@@ -213,7 +210,6 @@ export function WelcomeEmail({
         </div>
       </Section>
 
-      {/* Primary CTA */}
       <div style={{ textAlign: 'center', margin: '32px 0 28px 0' }}>
         <EmailButton href={targetEditorUrl}>
           {t('email.welcome.cta', 'Open Visual Studio →')}
@@ -222,7 +218,6 @@ export function WelcomeEmail({
 
       <Hr style={{ borderColor: '#27272a', margin: '24px 0' }} />
 
-      {/* Quick Start Tip */}
       <div
         style={{
           borderLeft: '2px solid #c5ff4a',

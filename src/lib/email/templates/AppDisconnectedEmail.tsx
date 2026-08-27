@@ -33,7 +33,6 @@ export function AppDisconnectedEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -49,7 +48,6 @@ export function AppDisconnectedEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -82,7 +80,6 @@ export function AppDisconnectedEmail({
         )}
       </Text>
 
-      {/* Target Repo & Status Card */}
       <div
         style={{
           backgroundColor: '#18181c',
@@ -132,7 +129,6 @@ export function AppDisconnectedEmail({
         </table>
       </div>
 
-      {/* Info Card */}
       <Section
         style={{
           backgroundColor: '#141418',
@@ -178,7 +174,6 @@ export function AppDisconnectedEmail({
         </Text>
       </Section>
 
-      {/* CTA Button */}
       <Section style={{ textAlign: 'center', margin: '28px 0 20px 0' }}>
         <EmailButton href={targetInstallUrl}>
           {t('email.app_disconnected.cta', 'Reconnect on GitHub')}

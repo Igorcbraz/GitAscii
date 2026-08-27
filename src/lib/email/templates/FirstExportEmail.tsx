@@ -40,7 +40,6 @@ export function FirstExportEmail({
       username={username}
       locale={locale}
     >
-      {/* Dialog-style Badge */}
       <div style={{ marginBottom: '12px' }}>
         <span
           style={{
@@ -56,7 +55,6 @@ export function FirstExportEmail({
         </span>
       </div>
 
-      {/* Editorial Headline */}
       <Heading
         as="h1"
         style={{
@@ -88,7 +86,6 @@ export function FirstExportEmail({
         )}
       </Text>
 
-      {/* Target Repo & Status Card */}
       <div
         style={{
           backgroundColor: '#18181c',
@@ -157,7 +154,6 @@ export function FirstExportEmail({
         </table>
       </div>
 
-      {/* Asset Details Box */}
       <Section
         style={{
           backgroundColor: '#141418',
@@ -235,7 +231,6 @@ export function FirstExportEmail({
         </div>
       </Section>
 
-      {/* Primary Action Button */}
       <Section style={{ textAlign: 'center', margin: '28px 0 16px 0' }}>
         <EmailButton href={targetGithubUrl}>
           {t('email.first_export.cta', 'View Profile on GitHub')}
@@ -257,7 +252,6 @@ export function FirstExportEmail({
 
       <Hr style={{ borderColor: '#27272a', margin: '20px 0' }} />
 
-      {/* Maintenance Notes */}
       <div style={{ fontSize: '12px', color: '#71717a', lineHeight: '1.5' }}>
         <div style={{ fontWeight: '600', color: '#a1a1aa', marginBottom: '4px' }}>
           {t('email.first_export.notes_title', 'Dynamic Edge Architecture')}

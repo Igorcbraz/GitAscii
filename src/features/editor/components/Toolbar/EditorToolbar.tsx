@@ -533,9 +533,7 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
         showPreviewNudge ? 'z-[9995]' : 'z-60'
       }`}
     >
-      {/* ── LEFT ZONE: brand + controls ── */}
       <div className="flex items-center h-full pl-3 pr-2 gap-0 shrink-0">
-        {/* Logo */}
         <Link
           href="/"
           className="flex items-center gap-2 pr-3 mr-1 hover:opacity-80 transition-opacity shrink-0"
@@ -548,19 +546,15 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
           </span>
         </Link>
 
-        {/* Left separator */}
         <span className="h-5 w-px bg-graphite/80 shrink-0" />
 
-        {/* Language + ViewMode cluster */}
         <div className="flex items-center gap-1 px-2">
           <LanguageSelector align="left" />
           <ViewModeToggle />
         </div>
 
-        {/* Separator before user */}
         {!embedded && <span className="h-5 w-px bg-graphite/80 shrink-0" />}
 
-        {/* User widget */}
         {!embedded && (
           <div className="flex items-center pl-2 z-10">
             {session ? (
@@ -611,7 +605,6 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
         )}
       </div>
 
-      {/* ── CENTER ZONE: global search + info (absolute center) ── */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5">
         <button
           onClick={embedded ? undefined : () => setCommandPaletteOpen(true)}
@@ -647,10 +640,8 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
         </button>
       </div>
 
-      {/* ── RIGHT ZONE: actions ── */}
       {!embedded ? (
         <div className="flex items-center h-full ml-auto pr-3 pl-2 gap-0" id="tour-export-buttons">
-          {/* Separator before actions */}
           <span className="h-5 w-px bg-graphite/80 shrink-0 mr-3" />
 
           <div className="flex items-center gap-2">

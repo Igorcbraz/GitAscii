@@ -121,15 +121,17 @@ export default async function LandingPage() {
 
   return (
     <main className="min-h-screen relative bg-carbon">
+      <Navbar />
       <KineticGrid className="min-h-screen">
-        <Navbar />
         <Hero />
       </KineticGrid>
 
-      <div className="relative z-10 w-full overflow-hidden bg-carbon">
+      <div className="relative z-10 w-full bg-carbon">
         <LandingBackgroundDecorations />
+        <div className="-mt-[clamp(80px,10vw,140px)]">
+          <InteractiveEditorDemo defaultUsername="Igorcbraz" />
+        </div>
         <TractionBar metrics={metrics} />
-        <InteractiveEditorDemo defaultUsername="Igorcbraz" />
         <CommunityProfiles profiles={storedProfiles} usersCount={metrics.users} />
         <TemplatesPreview count={metrics.templates} />
         <WidgetsShowcase count={metrics.widgets} />
