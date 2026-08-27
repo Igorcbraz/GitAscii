@@ -1,0 +1,40 @@
+name: 💡 Feature / Enhancement Request
+description: Suggest an idea or enhancement for the GitAscii editor, engine, or platform
+title: '[Feature]: '
+labels: ['enhancement', 'feature']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Share your idea with GitAscii!
+        Have an idea to make profile creation faster, more expressive, or technologically advanced? Tell us about it!
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem or Use Case
+      description: Is your feature request related to a problem or limitation? Please describe.
+      placeholder: "I'm always frustrated when I want to display..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution & Feature Concept
+      description: Describe the solution or user experience you would like to see.
+      placeholder: 'A feature that allows users to...'
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives-considered
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context & Mockups
+      description: Add any mockups, links, screenshots, or context here.
+    validations:
+      required: false

@@ -1,0 +1,75 @@
+name: 🎨 Community Template Submission
+description: Submit a new pre-built profile template to be included in GitAscii's template gallery
+title: '[Template]: '
+labels: ['template', 'community', 'gallery']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Submit a Community Template
+        Share your custom GitAscii layout with the community!
+
+        > **Tip:** Export your template JSON directly from the editor sidebar (**Export Template**), which automatically removes private personal data while retaining the layout, widget grid, and visual tokens.
+  - type: input
+    id: template-name
+    attributes:
+      label: Template Name
+      description: The public name of your template.
+      placeholder: e.g. Cyberpunk Terminal Minimal
+    validations:
+      required: true
+  - type: input
+    id: template-author
+    attributes:
+      label: Author / GitHub Username
+      description: Your GitHub username (for credits in the template gallery).
+      placeholder: e.g. @yourusername
+    validations:
+      required: true
+  - type: dropdown
+    id: template-category
+    attributes:
+      label: Template Category
+      description: Which category best describes your layout?
+      options:
+        - 'Minimal & Luxe'
+        - 'Developer & Terminal'
+        - 'Cyberpunk & Sci-Fi'
+        - 'Retro & Nostalgia'
+        - 'Data & Telemetry'
+        - 'Creative & ASCII Art'
+    validations:
+      required: true
+  - type: textarea
+    id: template-description
+    attributes:
+      label: Short Description
+      description: Brief summary of the template design and intended developer profile vibe.
+      placeholder: 'An ultra-clean high-density terminal layout with real-time stats and an ASCII portrait frame...'
+    validations:
+      required: true
+  - type: textarea
+    id: template-json
+    attributes:
+      label: Cleaned Template JSON Payload
+      description: Paste the exported template JSON contents here.
+      placeholder: '{"id": "my_template", "name": "...", "widgets": [...], "globalStyles": {...}}'
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: preview-screenshots
+    attributes:
+      label: Preview Screenshots / SVGs
+      description: Attach screenshots showing the rendered layout in both Dark and Light themes.
+    validations:
+      required: true
+  - type: checkboxes
+    id: template-checks
+    attributes:
+      label: Template Verification
+      options:
+        - label: I verified that all personal links, private bio text, and custom avatars have been removed from the JSON.
+          required: true
+        - label: The layout renders correctly without overflow or clipping.
+          required: true

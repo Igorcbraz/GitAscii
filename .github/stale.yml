@@ -1,8 +1,27 @@
+# Number of days of inactivity before an issue becomes stale
 daysUntilStale: 60
-daysUntilClose: 7
+
+# Number of days of inactivity before a stale issue is closed
+daysUntilClose: 14
+
+# Issues with these labels will never be marked as stale
 exemptLabels:
-  - pinned
-  - security
-staleLabel: stale
+  - 'pinned'
+  - 'security'
+  - 'good first issue'
+  - 'help wanted'
+  - 'in progress'
+  - 'feature'
+  - 'discussion'
+
+# Label to apply when marking an issue as stale
+staleLabel: 'stale'
+
+# Comment to post when marking an issue as stale
 markComment: >
-  This issue has been automatically marked as stale because it has not had recent activity.
+  This issue has been automatically marked as stale because it has not had recent activity for 60 days.
+  If this is still relevant, please leave a comment to keep it open. We appreciate your contributions to GitAscii!
+
+# Comment to post when closing a stale issue
+closeComment: >
+  This issue has been closed due to inactivity. If you are still experiencing this issue or would like to resume discussion, please feel free to reopen or create a new issue.

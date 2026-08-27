@@ -1,0 +1,51 @@
+name: 🗂️ Widget Category / Suite Proposal
+description: Propose a new widget category or cohesive suite of widgets (e.g. Control Plane, Aura, Retro)
+title: '[Category]: '
+labels: ['category', 'widget-suite', 'discussion']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Propose a New Widget Category / Suite
+        If you have a set of 2 or more cohesive widgets that share a unified theme, visual language, or purpose, you can propose a new category in GitAscii's widget catalog!
+  - type: input
+    id: category-name
+    attributes:
+      label: Category Name & Key
+      description: Name of the proposed category.
+      placeholder: 'e.g. Neon Arcade Suite (categoryKey: neon-arcade)'
+    validations:
+      required: true
+  - type: textarea
+    id: suite-concept
+    attributes:
+      label: Suite Theme & Concept
+      description: What is the cohesive design language or theme uniting this suite?
+      placeholder: 'A collection of retro 8-bit arcade widgets with pixel art stats, high-score leaderboards...'
+    validations:
+      required: true
+  - type: textarea
+    id: planned-widgets
+    attributes:
+      label: Planned Widgets in this Suite
+      description: List the widgets that belong to this category (at least 2 required).
+      placeholder: |
+        1. Arcade Leaderboard (widgetId: arcade-leaderboard)
+        2. Pixel Health Bar & XP (widgetId: arcade-health-bar)
+        3. Retro Inventory Deck (widgetId: arcade-inventory)
+    validations:
+      required: true
+  - type: textarea
+    id: design-system-alignment
+    attributes:
+      label: Design System Alignment
+      description: How does this category adapt to GitAscii's design tokens and dark/light modes?
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution-readiness
+    attributes:
+      label: Contribution Scope
+      options:
+        - label: I plan on developing and submitting a Pull Request for this suite.
+        - label: I am proposing this as an open idea for community collaboration.
