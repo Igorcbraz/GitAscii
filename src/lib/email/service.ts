@@ -441,7 +441,7 @@ export class EmailService {
       }
       if (process.env.NODE_ENV !== 'test') {
         console.warn(
-          `[EmailService] RESEND_API_KEY is not configured. Skipped sending re-engagement email to @${safeLog(username)}.`
+          '[EmailService] RESEND_API_KEY is not configured. Skipped sending re-engagement email.'
         )
       }
       return { success: false, skipped: true, reason: 'Resend API key not configured' }
