@@ -1,6 +1,16 @@
 'use client'
 
-import { Check, ChevronUp, Grid, Maximize2, Minus, Plus, Redo2, RotateCcw, Undo2 } from 'lucide-react'
+import {
+  Check,
+  ChevronUp,
+  Grid,
+  Maximize2,
+  Minus,
+  Plus,
+  Redo2,
+  RotateCcw,
+  Undo2,
+} from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { GRID_MODE_OPTIONS } from '@/constants'

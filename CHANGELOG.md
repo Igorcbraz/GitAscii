@@ -2,26 +2,24 @@
 
 ## [1.16.0](https://github.com/Igorcbraz/GitAscii/compare/v1.15.0...v1.16.0) (2026-08-27)
 
-
 ### Features
 
-* **editor:** add template preview tooltip and improve landing & i18n components ([9b0fc3e](https://github.com/Igorcbraz/GitAscii/commit/9b0fc3effe8217bbe29c953140c1def8d4c97de1))
-* **editor:** improve toolbar header layout for professional look ([cd90016](https://github.com/Igorcbraz/GitAscii/commit/cd90016db487c8b667de4a83c1efe58067b5b99d))
-* **email:** implement lifecycle and transactional email system with Resend and React Email ([1a20145](https://github.com/Igorcbraz/GitAscii/commit/1a20145b62af840d69d77f2c7298b333f396d837))
-* landing page redesign, i18n support and code standards cleanup ([e7f97af](https://github.com/Igorcbraz/GitAscii/commit/e7f97af593e15a3f86f3b9689612cc690e4af028))
-* **landing:** enhance hero & interactive editor demo, add presentation video and update templates ([aa918fd](https://github.com/Igorcbraz/GitAscii/commit/aa918fd9056e7745cbe7e095c91f636e0875d825))
-* **pokemon:** add holo effect toggle and fallback card dataset provider ([3ca6c81](https://github.com/Igorcbraz/GitAscii/commit/3ca6c81ab5af8404b88e421d40ac7b0d176f5351))
-* **winxp:** add Windows XP retro widgets suite, controls, and template ([c77762e](https://github.com/Igorcbraz/GitAscii/commit/c77762e5a54f0322b5a4d8163bf9727ad8a4f9bf))
-
+- **editor:** add template preview tooltip and improve landing & i18n components ([9b0fc3e](https://github.com/Igorcbraz/GitAscii/commit/9b0fc3effe8217bbe29c953140c1def8d4c97de1))
+- **editor:** improve toolbar header layout for professional look ([cd90016](https://github.com/Igorcbraz/GitAscii/commit/cd90016db487c8b667de4a83c1efe58067b5b99d))
+- **email:** implement lifecycle and transactional email system with Resend and React Email ([1a20145](https://github.com/Igorcbraz/GitAscii/commit/1a20145b62af840d69d77f2c7298b333f396d837))
+- landing page redesign, i18n support and code standards cleanup ([e7f97af](https://github.com/Igorcbraz/GitAscii/commit/e7f97af593e15a3f86f3b9689612cc690e4af028))
+- **landing:** enhance hero & interactive editor demo, add presentation video and update templates ([aa918fd](https://github.com/Igorcbraz/GitAscii/commit/aa918fd9056e7745cbe7e095c91f636e0875d825))
+- **pokemon:** add holo effect toggle and fallback card dataset provider ([3ca6c81](https://github.com/Igorcbraz/GitAscii/commit/3ca6c81ab5af8404b88e421d40ac7b0d176f5351))
+- **winxp:** add Windows XP retro widgets suite, controls, and template ([c77762e](https://github.com/Igorcbraz/GitAscii/commit/c77762e5a54f0322b5a4d8163bf9727ad8a4f9bf))
 
 ### Bug Fixes
 
-* **ci:** fix import sorting in editorStore and update security workflow inputs ([3507465](https://github.com/Igorcbraz/GitAscii/commit/35074652764b867b63407d529afca42b4e21e398))
-* **ci:** restore semgrep config in security workflow ([4004a70](https://github.com/Igorcbraz/GitAscii/commit/4004a70d56125f67c2ece82bd86963c179d3bbdc))
-* **security:** resolve CodeQL alerts for log injection, ReDoS, URL substring and reflected XSS ([d7bacff](https://github.com/Igorcbraz/GitAscii/commit/d7bacff41cc36af19c115fcd40a98af048bd14c3))
-* **security:** resolve final quadratic regex CodeQL alerts ([12f584b](https://github.com/Igorcbraz/GitAscii/commit/12f584bf60a2542cc91692595abc8ab6c268f76f))
-* **security:** resolve log injection by redacting safeLog output ([3af2e05](https://github.com/Igorcbraz/GitAscii/commit/3af2e05beb181e27e4d497ade2fa3c8dbd3d3136))
-* **security:** resolve remaining CodeQL alerts ([9824e5e](https://github.com/Igorcbraz/GitAscii/commit/9824e5e739f7efa96fbad393f61200a2871c9e9f))
+- **ci:** fix import sorting in editorStore and update security workflow inputs ([3507465](https://github.com/Igorcbraz/GitAscii/commit/35074652764b867b63407d529afca42b4e21e398))
+- **ci:** restore semgrep config in security workflow ([4004a70](https://github.com/Igorcbraz/GitAscii/commit/4004a70d56125f67c2ece82bd86963c179d3bbdc))
+- **security:** resolve CodeQL alerts for log injection, ReDoS, URL substring and reflected XSS ([d7bacff](https://github.com/Igorcbraz/GitAscii/commit/d7bacff41cc36af19c115fcd40a98af048bd14c3))
+- **security:** resolve final quadratic regex CodeQL alerts ([12f584b](https://github.com/Igorcbraz/GitAscii/commit/12f584bf60a2542cc91692595abc8ab6c268f76f))
+- **security:** resolve log injection by redacting safeLog output ([3af2e05](https://github.com/Igorcbraz/GitAscii/commit/3af2e05beb181e27e4d497ade2fa3c8dbd3d3136))
+- **security:** resolve remaining CodeQL alerts ([9824e5e](https://github.com/Igorcbraz/GitAscii/commit/9824e5e739f7efa96fbad393f61200a2871c9e9f))
 
 ## [1.15.0](https://github.com/Igorcbraz/GitAscii/compare/v1.14.1...v1.15.0) (2026-08-24)
 

@@ -1,4 +1,9 @@
-import { EXTERNAL_LINKS, GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_ALIASES } from '@/constants'
+import {
+  EXTERNAL_LINKS,
+  GITHUB_THEME_KEYS,
+  isGitHubAdaptiveTheme,
+  WIDGET_ALIASES,
+} from '@/constants'
 
 import type {
   GlobalStyles,
