@@ -76,7 +76,7 @@
     "postcss": "^8.5.25",
     "prettier": "^3.9.6",
     "react-email": "^6.9.3",
-    "storybook": "^10.5.7",
+    "storybook": "^10.5.10",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
     "vite": "^8.2.0",
