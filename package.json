@@ -50,7 +50,7 @@
     "@eslint/eslintrc": "^3.0.0",
     "@playwright/test": "^1.62.1",
     "@react-email/ui": "^6.9.3",
-    "@storybook/addon-a11y": "^10.5.9",
+    "@storybook/addon-a11y": "^10.5.10",
     "@storybook/addon-docs": "^10.5.7",
     "@storybook/addon-mcp": "^0.7.0",
     "@storybook/addon-vitest": "^10.5.6",
