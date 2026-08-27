@@ -25,7 +25,7 @@
   "dependencies": {
     "@next/third-parties": "^16.3.0",
     "@react-email/components": "^1.0.12",
-    "@sentry/nextjs": "^10.69.0",
+    "@sentry/nextjs": "^10.71.0",
     "@tcgdex/sdk": "^2.9.0",
     "@vidstack/react": "^1.15.6",
     "clsx": "^2.1.1",
