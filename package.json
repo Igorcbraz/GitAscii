@@ -59,7 +59,7 @@
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.0.0",
+    "@types/react-dom": "^19.2.5",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
     "ajv": "^8.20.0",
