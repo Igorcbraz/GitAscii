@@ -23,7 +23,7 @@
     "docs": "cd docs && mintlify dev"
   },
   "dependencies": {
-    "@next/third-parties": "^16.3.0",
+    "@next/third-parties": "^16.3.2",
     "@react-email/components": "^1.0.12",
     "@sentry/nextjs": "^10.71.0",
     "@tcgdex/sdk": "^2.9.0",
