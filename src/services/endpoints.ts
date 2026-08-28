@@ -132,4 +132,36 @@ export const API_ENDPOINTS = {
     CARD_WITH_QUERY: (username: string, queryString: string) =>
       `/api/${encodeURIComponent(username)}?${queryString}`,
   },
+  PRO: {
+    OVERVIEW: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/overview?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/overview',
+    ANALYTICS: (profile?: string, range?: string, compare?: boolean) => {
+      const params = new URLSearchParams()
+      if (profile && profile !== 'all') params.set('profile', profile)
+      if (range) params.set('range', range)
+      if (compare !== undefined) params.set('compare', String(compare))
+      const qs = params.toString()
+      return qs ? `/api/pro/analytics?${qs}` : '/api/pro/analytics'
+    },
+    PROFILES: '/api/pro/profiles',
+    PROFILE: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}`,
+    ERRORS: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/errors?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/errors',
+    ERROR_STATUS: (errorId: string) => `/api/pro/errors/${encodeURIComponent(errorId)}`,
+    EMAILS: '/api/pro/emails',
+    REPORTS: (range?: string, profile?: string) => {
+      const params = new URLSearchParams()
+      if (range) params.set('range', range)
+      if (profile && profile !== 'all') params.set('profile', profile)
+      const qs = params.toString()
+      return qs ? `/api/pro/reports?${qs}` : '/api/pro/reports'
+    },
+    SUBSCRIBE: '/api/pro/subscribe',
+    DEV_TOGGLE: '/api/pro/dev-toggle',
+    ADMIN_GRANT: '/api/pro/admin/grant',
+  },
 } as const

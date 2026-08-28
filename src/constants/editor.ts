@@ -205,10 +205,30 @@ export interface TextAlignOptionDef {
 }
 
 export const TEXT_ALIGN_OPTIONS: readonly TextAlignOptionDef[] = [
-  { id: 'left', icon: AlignLeft, labelKey: 'editor.properties.align_left', defaultLabel: 'Esquerda' },
-  { id: 'center', icon: AlignCenter, labelKey: 'editor.properties.align_center', defaultLabel: 'Centro' },
-  { id: 'right', icon: AlignRight, labelKey: 'editor.properties.align_right', defaultLabel: 'Direita' },
-  { id: 'justify', icon: AlignJustify, labelKey: 'editor.properties.align_justify', defaultLabel: 'Justificado' },
+  {
+    id: 'left',
+    icon: AlignLeft,
+    labelKey: 'editor.properties.align_left',
+    defaultLabel: 'Esquerda',
+  },
+  {
+    id: 'center',
+    icon: AlignCenter,
+    labelKey: 'editor.properties.align_center',
+    defaultLabel: 'Centro',
+  },
+  {
+    id: 'right',
+    icon: AlignRight,
+    labelKey: 'editor.properties.align_right',
+    defaultLabel: 'Direita',
+  },
+  {
+    id: 'justify',
+    icon: AlignJustify,
+    labelKey: 'editor.properties.align_justify',
+    defaultLabel: 'Justificado',
+  },
 ]
 
 export interface TechStackPreset {
@@ -952,7 +972,6 @@ export interface GlobalColorTheme {
   secondary: string
   text: string
   border: string
-  // terminal specific fields
   headerColor?: string
   labelColor?: string
   dotColor?: string

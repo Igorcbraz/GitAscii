@@ -17,7 +17,6 @@ import {
   Menu,
   Palette,
   Star,
-  User,
   X,
   Zap,
 } from 'lucide-react'
@@ -27,6 +26,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
 import LanguageSelector from '@/components/ui/LanguageSelector'
+import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { EXTERNAL_LINKS, NAVBAR_DROPDOWN_SECTIONS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -369,26 +369,7 @@ export default function Navbar() {
             </a>
 
             {session ? (
-              <div className="inline-flex items-center rounded-sm border border-graphite/70 bg-onyx h-[32px] w-[130px] overflow-hidden group hover:border-graphite transition-all duration-200">
-                <Link
-                  href={`/${session.username}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-label font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
-                  title={`Profile @${session.username}`}
-                >
-                  <User className="size-3.5 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
-                  <span className="truncate max-w-[65px] font-inter-tight">
-                    @{session.username}
-                  </span>
-                </Link>
-                <span className="h-4 w-px bg-graphite/80 shrink-0" />
-                <button
-                  onClick={handleLogout}
-                  className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
-                  title={t('editor.toolbar.logout', 'Sign Out')}
-                >
-                  <LogOut className="size-3.5" />
-                </button>
-              </div>
+              <UserMenuDropdown username={session.username} onLogout={handleLogout} />
             ) : (
               <Link
                 href="/api/auth/login"
@@ -486,25 +467,44 @@ export default function Navbar() {
               </div>
             ))}
 
-            <div className="flex flex-col gap-3 mt-2 border-t border-graphite/40 pt-4">
+            <div className="flex flex-col gap-3 pt-3 border-t border-graphite/40">
+              <Link
+                href="/pro"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/40 bg-signal-lime/10 px-5 py-3 font-jetbrains-mono text-label font-bold text-signal-lime transition-all duration-300 w-full min-h-[44px] shadow-[0_0_12px_rgba(197,255,74,0.15)]"
+              >
+                <Zap className="size-4 text-signal-lime" />
+                <span>GITASCII PRO DASHBOARD</span>
+              </Link>
+
               {session ? (
                 <div className="flex flex-col gap-2">
                   <Link
                     href={`/${session.username}`}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-signal-lime/30 bg-onyx px-5 py-3 font-inter-tight text-label font-medium text-signal-lime transition-all duration-300 w-full min-h-[44px]"
+                    className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/30 bg-onyx px-5 py-3 font-inter-tight text-label font-medium text-white hover:text-signal-lime transition-all duration-300 w-full min-h-[44px]"
                   >
-                    <User className="size-3.5" />
-                    <span>@{session.username}</span>
+                    <Layers className="size-4 text-signal-lime" />
+                    <span>Ir ao Editor (@{session.username})</span>
                   </Link>
+
+                  <Link
+                    href="/pro"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/40 bg-signal-lime/10 px-5 py-3 font-jetbrains-mono text-label font-bold text-signal-lime hover:bg-signal-lime/20 transition-all duration-300 w-full min-h-[44px] shadow-[0_0_12px_rgba(197,255,74,0.15)]"
+                  >
+                    <Zap className="size-4 text-signal-lime" />
+                    <span>IR AO PRO DASHBOARD</span>
+                  </Link>
+
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false)
                       handleLogout()
                     }}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite bg-red-500/10 px-5 py-3 font-inter-tight text-label font-medium text-red-400 hover:bg-red-500/20 transition-all duration-300 w-full cursor-pointer min-h-[44px]"
+                    className="inline-flex items-center justify-center gap-2 rounded-sm border border-graphite bg-red-500/10 px-5 py-3 font-inter-tight text-label font-medium text-red-400 hover:bg-red-500/20 transition-all duration-300 w-full cursor-pointer min-h-[44px]"
                   >
-                    <LogOut className="size-3.5" />
+                    <LogOut className="size-4" />
                     <span>{t('editor.toolbar.logout', 'Sign Out')}</span>
                   </button>
                 </div>

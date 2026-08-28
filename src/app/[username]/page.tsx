@@ -78,7 +78,7 @@ export default async function DefaultEditorPage({
   searchParams,
 }: {
   params: Promise<{ username: string }>
-  searchParams: Promise<{ generate?: string }>
+  searchParams: Promise<{ generate?: string; profile?: string; template?: string }>
 }) {
   const { username } = await params
   const cleanUsername = username.trim()
@@ -95,7 +95,12 @@ export default async function DefaultEditorPage({
     notFound()
   }
 
-  const { generate } = await searchParams
+  const { generate, profile, template } = await searchParams
+  if (profile && profile !== 'default') {
+    const query = template ? `?template=${encodeURIComponent(template)}` : ''
+    redirect(`/${cleanUsername}/${profile}${query}`)
+  }
+
   const autoGenerate = generate === 'true'
 
   const breadcrumbLd = {

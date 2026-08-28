@@ -176,6 +176,11 @@ describe('EmailService Dispatch, Error Handling & Sentry Suite', () => {
       repoName: 'octocat/octocat',
     }
 
+    beforeEach(async () => {
+      const { updateUserSettings } = await import('@/features/pro/server/entitlements')
+      await updateUserSettings('octocat', { planTier: 'pro' })
+    })
+
     it('sends app disconnected alert successfully', async () => {
       const result = await emailService.sendAppDisconnectedEmail(validPayload)
 
@@ -203,6 +208,18 @@ describe('EmailService Dispatch, Error Handling & Sentry Suite', () => {
       expect(Sentry.captureException).toHaveBeenCalledTimes(1)
       const capturedError = vi.mocked(Sentry.captureException).mock.calls[0][0] as Error
       expect(capturedError.message).toContain('Resend App Disconnected Error')
+    })
+
+    it('skips app disconnected alert for free plan users', async () => {
+      const { updateUserSettings } = await import('@/features/pro/server/entitlements')
+      await updateUserSettings('free_user', { planTier: 'free' })
+
+      const result = await emailService.sendAppDisconnectedEmail({
+        ...validPayload,
+        username: 'free_user',
+      })
+      expect(result.skipped).toBe(true)
+      expect(result.reason).toContain('exclusive to Pro plan')
     })
 
     it('handles unexpected exceptions and reports to Sentry', async () => {

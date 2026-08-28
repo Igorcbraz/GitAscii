@@ -28,8 +28,7 @@ import type {
   WelcomeEmailPayload,
 } from './types'
 
-function safeLog(val: unknown): string {
-  // Return redacted to eliminate any potential log injection
+function safeLog(_val: unknown): string {
   return '[redacted]'
 }
 
@@ -198,6 +197,21 @@ export class EmailService {
     if (!email || !username) {
       return { success: false, skipped: true, reason: 'Missing email or username' }
     }
+
+    try {
+      const { getProEntitlements } = await import('@/features/pro/server/entitlements')
+      const entitlements = await getProEntitlements(username).catch(() => null)
+      if (
+        entitlements &&
+        (entitlements.tier === 'free' || !entitlements.widgetErrorAlertsEnabled)
+      ) {
+        return {
+          success: false,
+          skipped: true,
+          reason: 'App disconnected alert is exclusive to Pro plan users',
+        }
+      }
+    } catch {}
 
     const lastSent = getLastEventTimestamp(username, 'app_disconnected')
     if (lastSent && Date.now() - lastSent < 7 * 24 * 60 * 60 * 1000) {

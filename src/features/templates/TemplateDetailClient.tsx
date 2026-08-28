@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { Footer } from '@/features/landing/components/Footer'
 import Navbar from '@/features/landing/components/Navbar'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface StackData {
   slug: string
@@ -32,6 +33,18 @@ interface TemplateDetailClientProps {
 
 export function TemplateDetailClient({ data, allStackKeys, stacks }: TemplateDetailClientProps) {
   const { t } = useI18n()
+  const [sessionUsername, setSessionUsername] = React.useState<string>('Igorcbraz')
+
+  React.useEffect(() => {
+    fetch(API_ENDPOINTS.AUTH.SESSION)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.session?.username) {
+          setSessionUsername(d.session.username)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <main className="min-h-screen bg-carbon text-chalk font-inter-tight">
@@ -93,7 +106,7 @@ export function TemplateDetailClient({ data, allStackKeys, stacks }: TemplateDet
 
         <div className="pt-2">
           <Link
-            href={`/?template=${data.slug}`}
+            href={`/${sessionUsername}?template=${data.slug}`}
             className="inline-flex items-center gap-2 bg-signal-lime text-black font-medium text-body px-8 py-4 uppercase tracking-wider hover:brightness-110 shadow-[0_0_12px_rgba(197,255,74,0.4)] transition-all"
           >
             <span>

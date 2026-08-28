@@ -116,7 +116,29 @@ export async function generateMetadata({
   }
 }
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const resolvedParams = searchParams ? await searchParams : undefined
+  const rawTemplate = resolvedParams?.template
+  const rawProfile = resolvedParams?.profile
+
+  const template = typeof rawTemplate === 'string' ? rawTemplate : undefined
+  const profile = typeof rawProfile === 'string' ? rawProfile : undefined
+
+  if (template || profile) {
+    const { getSession } = await import('@/lib/auth')
+    const { redirect } = await import('next/navigation')
+    const session = await getSession()
+    const targetUsername = session?.username || 'Igorcbraz'
+    const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
+    const query = template ? `?template=${encodeURIComponent(template)}` : ''
+
+    redirect(`/${targetUsername}${targetProfileSlug}${query}`)
+  }
+
   const [metrics, storedProfiles] = await Promise.all([fetchLandingMetrics(), getStoredProfiles()])
 
   return (

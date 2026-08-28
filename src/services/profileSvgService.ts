@@ -26,7 +26,7 @@ interface SvgCacheEntry {
 }
 
 const svgResponseCache = new Map<string, SvgCacheEntry>()
-const SVG_CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache
+const SVG_CACHE_TTL_MS = 10 * 60 * 1000
 const MAX_CACHE_ENTRIES = 300
 
 function getCachedSvg(key: string): SvgCacheEntry | null {
@@ -162,7 +162,6 @@ export async function generateProfileSvgResponse(
 
       const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
       const embedResult = await embedExternalImages(rawSvgContent)
-      // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
       svgContent = sanitizeSvg(embedResult.svg)
       etag = computeEtag(svgContent)
       hasErrors = embedResult.hasErrors
@@ -176,8 +175,6 @@ export async function generateProfileSvgResponse(
     }
     const ifNoneMatch = request.headers.get('if-none-match')
 
-    // Healthy cache: 1 hour fresh, 2 hours stale-while-revalidate
-    // Degraded/error cache: 5 minutes fresh, 10 minutes stale-while-revalidate
     const cacheControl = hasErrors
       ? 'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
       : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200'
@@ -200,7 +197,6 @@ export async function generateProfileSvgResponse(
     const renderTimeMs = Date.now() - startTime
     const viewerMeta = parseViewerMetadata(request)
 
-    // Non-blocking telemetry ingestion
     try {
       const metricPayload = {
         username,
@@ -212,21 +208,51 @@ export async function generateProfileSvgResponse(
         userAgent: viewerMeta.userAgent,
         referrer: viewerMeta.referrer,
         country: viewerMeta.country,
+        region: viewerMeta.region,
+        city: viewerMeta.city,
+        timezone: viewerMeta.timezone,
+        continent: viewerMeta.continent,
+        language: viewerMeta.language,
         ip: viewerMeta.ip,
+        statusCode: isCacheHit ? 304 : 200,
         timestamp: new Date().toISOString(),
       }
 
       if (typeof after === 'function') {
         after(async () => {
           await recordProfileView(metricPayload)
+          if (hasErrors) {
+            try {
+              const { recordWidgetError } = await import('@/features/pro/server/errorTrackerStore')
+              await recordWidgetError({
+                username,
+                profileSlug,
+                widgetId: 'external-widget',
+                widgetName: 'External Widget / Asset',
+                errorType: 'FETCH_TIMEOUT',
+                message: 'External widget or image asset failed to load or timed out',
+              })
+            } catch {}
+          }
         })
       } else {
-        // Fallback fire-and-forget
         void recordProfileView(metricPayload)
+        if (hasErrors) {
+          void import('@/features/pro/server/errorTrackerStore')
+            .then(({ recordWidgetError }) => {
+              void recordWidgetError({
+                username,
+                profileSlug,
+                widgetId: 'external-widget',
+                widgetName: 'External Widget / Asset',
+                errorType: 'FETCH_TIMEOUT',
+                message: 'External widget or image asset failed to load or timed out',
+              })
+            })
+            .catch(() => {})
+        }
       }
-    } catch {
-      // Ignore background telemetry errors
-    }
+    } catch {}
 
     if (isCacheHit) {
       return new NextResponse(null, {
@@ -235,7 +261,6 @@ export async function generateProfileSvgResponse(
       })
     }
 
-    // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
     return new NextResponse(svgContent, {
       status: 200,
       headers,

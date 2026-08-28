@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, ChevronDown, Github, Sparkles, User } from 'lucide-react'
+import { ArrowRight, ChevronDown, Github, Sparkles, User, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -106,17 +106,28 @@ export default function Hero() {
 
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
             {session ? (
-              <Magnet distance={60} strength={0.25} className="w-full">
+              <div className="w-full flex flex-col items-center gap-3">
+                <Magnet distance={60} strength={0.25} className="w-full">
+                  <Link
+                    href={`/${session.username}`}
+                    className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <User size={18} />
+                    <span>
+                      {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
+                    </span>
+                  </Link>
+                </Magnet>
+
                 <Link
-                  href={`/${session.username}`}
-                  className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  href="/pro"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/30 bg-onyx/90 px-6 py-3 font-jetbrains-mono text-[13px] font-semibold tracking-wider text-signal-lime hover:bg-signal-lime/10 hover:border-signal-lime/60 hover:shadow-[0_0_15px_rgba(197,255,74,0.15)] transition-all duration-200 active:scale-[0.98] cursor-pointer group"
                 >
-                  <User size={18} />
-                  <span>
-                    {t('landing.hero.go_to_editor', 'Go to Editor')} (@{session.username})
-                  </span>
+                  <Zap className="size-4 text-signal-lime group-hover:scale-110 transition-transform" />
+                  <span>IR AO PRO DASHBOARD</span>
+                  <ArrowRight className="size-4 text-signal-lime group-hover:translate-x-0.5 transition-transform" />
                 </Link>
-              </Magnet>
+              </div>
             ) : (
               <>
                 <Magnet distance={60} strength={0.25} className="w-full">

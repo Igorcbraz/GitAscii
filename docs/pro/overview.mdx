@@ -1,0 +1,77 @@
+---
+title: 'GitAscii Pro Overview'
+description: 'Real-time telemetry, error monitoring, and multi-profile intelligence for GitHub READMEs.'
+---
+
+# GitAscii Pro
+
+**GitAscii Pro** is an executive telemetry, diagnostic, and profile management suite built specifically for developers who use GitAscii SVGs in their GitHub READMEs, portfolios, and project documentations.
+
+While the standard GitAscii engine renders high-performance dynamic ASCII widgets, **GitAscii Pro** provides complete visibility into who views your profile, when traffic peaks, which external widgets fail, and how your developer audience is distributed across the globe — all with **100% privacy compliance**.
+
+```
+GitHub Profile README (embeds <img src="https://gitascii.com/api/username" />)
+       │
+       ▼
+GitAscii Edge / Serverless Ingest (In-memory metadata parsing & Daily Salt Anonymization)
+       │
+       ├──► Upstash Redis (HyperLogLog unique tokens, 90-day daily rollups, error sets)
+       │
+       ├──► Resend Alert Pipeline (Instant email notification if upstream widget fails)
+       │
+       ▼
+GitAscii Pro Workspace (/pro, /pro/analytics, /pro/reports, /pro/errors, /pro/profiles)
+```
+
+---
+
+## Key Pillars
+
+<CardGroup cols={2}>
+  <Card title="Privacy-First Telemetry" icon="shield-check" href="/pro/telemetry-and-privacy">
+    Zero raw IP address storage. Ephemeral daily rotating HMAC salts and Redis HyperLogLog for cryptographic visitor anonymization.
+  </Card>
+  <Card title="Deep Metrics & Trust" icon="chart-mixed" href="/pro/metrics-and-charts">
+    Comprehensive breakdown of views, unique visitors, hourly distributions, geographic maps, and technology breakdowns.
+  </Card>
+  <Card title="Widget Error Monitoring" icon="triangle-alert" href="/pro/error-monitoring-and-alerts">
+    Real-time tracking of failed external badges and upstream APIs with automated email alerts and 1-hour anti-spam cooldowns.
+  </Card>
+  <Card title="Multi-Profile Management" icon="layer-group" href="/pro/multi-profile">
+    Create and manage independent profile variations (`default`, `minimal`, `stats`) with isolated telemetry streams.
+  </Card>
+</CardGroup>
+
+---
+
+## Architectural Principles
+
+<ResponseField name="Integrated Architecture" type="Next.js App Router">
+  Runs natively within the GitAscii Next.js application without requiring auxiliary tracking microservices or slow client-side JavaScript tags.
+</ResponseField>
+
+<ResponseField name="Single Persistence Engine" type="Upstash Redis">
+  All time-series metrics, HyperLogLog registers, dimension hashes, error logs, and profile states reside in a low-latency Upstash Redis instance with strict 90-day TTL eviction.
+</ResponseField>
+
+<ResponseField name="Zero-Overhead Readme Ingest" type="< 25ms Latency">
+  Telemetry extraction occurs asynchronously during SVG rendering, ensuring no latency penalty for visitors viewing your GitHub README.
+</ResponseField>
+
+<ResponseField name="Transparent Data Provenance" type="Verification">
+  Every metric displayed in your dashboard is auditable: direct requests vs. GitHub Camo CDN proxy caches are clearly distinguished so you always understand the exact origin of your traffic.
+</ResponseField>
+
+---
+
+## Pro Route Structure
+
+| View | Route | Description |
+| :--- | :--- | :--- |
+| **Overview** | `/pro` | High-level summary of total views, unique visitors, active profiles, error alerts, recent events, and 30-day traffic curves. |
+| **Analytics** | `/pro/analytics` | Deep-dive telemetry dashboard featuring interactive world maps, hourly histograms, weekday activity matrices, and tech dimensions. |
+| **Reports** | `/pro/reports` | Executive performance summaries with export options (PNG share cards, CSV data, JSON payloads) and uptime statistics. |
+| **Profiles** | `/pro/profiles` | Multi-profile workspace for creating custom slugs, editing profile metadata, setting defaults, and copying markdown embed snippets. |
+| **Widget Errors** | `/pro/errors` | Diagnostic console listing real-time upstream widget failures, response status codes, occurrence counts, and resolve actions. |
+| **Email Logs** | `/pro/emails` | Delivery audit trail of dispatched widget alerts and weekly traffic digests powered by Resend. |
+| **Documentation** | `/pro/docs` | In-app transparency center and methodology guide explaining data collection, algorithms, and metric definitions. |

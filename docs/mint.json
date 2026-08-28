@@ -49,6 +49,16 @@
       "pages": ["api/overview", "api/rendering", "api/configuration", "api/json"]
     },
     {
+      "group": "GitAscii Pro",
+      "pages": [
+        "pro/overview",
+        "pro/telemetry-and-privacy",
+        "pro/metrics-and-charts",
+        "pro/error-monitoring-and-alerts",
+        "pro/multi-profile"
+      ]
+    },
+    {
       "group": "Widgets Overview",
       "pages": ["widgets/overview"]
     },
