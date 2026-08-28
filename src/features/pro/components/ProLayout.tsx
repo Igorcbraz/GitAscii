@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 
+import { PRO_PLAN_TIERS } from '@/constants'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { ProAuthGuard } from './ProAuthGuard'
@@ -14,6 +15,7 @@ export interface ProLayoutProps {
 export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
   const [username, setUsername] = useState<string | undefined>()
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
+  const [isPro, setIsPro] = useState<boolean>(false)
   const [activeErrorsCount, setActiveErrorsCount] = useState<number>(0)
 
   useEffect(() => {
@@ -23,18 +25,22 @@ export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
         if (res.ok) {
           const data = await res.json()
           if (data?.session?.username) {
+            const hasPro = Boolean(data.session.isPro || data.session.tier !== PRO_PLAN_TIERS.FREE)
             setUsername(data.session.username)
+            setIsPro(hasPro)
             setAvatarUrl(`https://github.com/${data.session.username}.png`)
 
-            fetch(API_ENDPOINTS.PRO.ERRORS())
-              .then((r) => (r.ok ? r.json() : null))
-              .then((d) => {
-                if (d?.errors && Array.isArray(d.errors)) {
-                  const active = d.errors.filter((e: any) => e.status !== 'resolved').length
-                  setActiveErrorsCount(active)
-                }
-              })
-              .catch(() => {})
+            if (hasPro) {
+              fetch(API_ENDPOINTS.PRO.ERRORS())
+                .then((r) => (r.ok ? r.json() : null))
+                .then((d) => {
+                  if (d?.errors && Array.isArray(d.errors)) {
+                    const active = d.errors.filter((e: any) => e.status !== 'resolved').length
+                    setActiveErrorsCount(active)
+                  }
+                })
+                .catch(() => {})
+            }
           }
         }
       } catch (err) {
@@ -43,11 +49,23 @@ export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
     }
 
     void loadSession()
+
+    const handleUpgrade = () => {
+      void loadSession()
+    }
+
+    window.addEventListener('gitascii:pro-upgrade', handleUpgrade)
+    return () => window.removeEventListener('gitascii:pro-upgrade', handleUpgrade)
   }, [])
 
   return (
     <div className="h-screen bg-[#070707] text-[#e5e5e5] flex overflow-hidden">
-      <ProSidebar username={username} avatarUrl={avatarUrl} activeErrorsCount={activeErrorsCount} />
+      <ProSidebar
+        username={username}
+        avatarUrl={avatarUrl}
+        isPro={isPro}
+        activeErrorsCount={activeErrorsCount}
+      />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <ProAuthGuard>{children}</ProAuthGuard>

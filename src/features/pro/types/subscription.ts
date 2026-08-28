@@ -1,4 +1,11 @@
-export type ProPlanTier = 'free' | 'pro' | 'team' | 'enterprise'
+export const PRO_PLAN_TIERS = {
+  FREE: 'free',
+  PRO: 'pro',
+  TEAM: 'team',
+  ENTERPRISE: 'enterprise',
+} as const
+
+export type ProPlanTier = (typeof PRO_PLAN_TIERS)[keyof typeof PRO_PLAN_TIERS]
 
 export interface ProEntitlements {
   tier: ProPlanTier

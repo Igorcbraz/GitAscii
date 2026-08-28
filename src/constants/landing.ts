@@ -251,6 +251,17 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
     defaultLabel: 'PLATFORM',
     items: [
       {
+        key: 'pricing',
+        defaultTitle: 'GitAscii Pro',
+        titleNormal: 'GitAscii ',
+        titleHighlight: 'Pro',
+        titleEnd: '',
+        defaultDesc: 'Lifetime analytics, 24/7 monitoring, multi-profile & edge CDN. Pay once.',
+        href: '/pro',
+        badge: 'LIFETIME ACCESS',
+        featured: true,
+      },
+      {
         key: 'templates',
         defaultTitle: 'Templates Catalog',
         titleNormal: 'Explore ',
@@ -258,8 +269,7 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
         titleEnd: ' Catalog',
         defaultDesc: '13+ battle-tested layout presets ready to clone & customize.',
         href: '/templates',
-        badge: 'FEATURED',
-        featured: true,
+        badge: '13+',
       },
       {
         key: 'widgets',
@@ -289,9 +299,9 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
       },
     ],
     footerLink: {
-      key: 'landing.navbar.platform_compare',
-      defaultLabel: 'Compare GitAscii vs Alternatives',
-      href: '/vs',
+      key: 'landing.navbar.platform_pricing',
+      defaultLabel: 'View Full Pricing & Features',
+      href: '/pro',
     },
   },
   {
@@ -682,5 +692,25 @@ export const LANDING_FAQS: readonly FaqItemRaw[] = [
     question: 'Can I customize everything?',
     answer:
       'Yes. While templates give you a great starting point, every single widget property (colors, fonts, sizes, positions) can be customized in the visual editor.',
+  },
+  {
+    question: 'What is GitAscii Pro and how does the lifetime access work?',
+    answer:
+      'GitAscii Pro unlocks privacy-friendly real-time telemetry (unique visitors, countries, referrers), 24/7 widget error alerts via email, up to 10 dynamic profiles, instant GitHub Camo cache purging, priority sub-10ms Edge CDN, and lifetime updates. You pay once and own it forever with zero monthly or renewal fees.',
+  },
+  {
+    question: 'How does payment and instant activation work?',
+    answer:
+      'Payments are processed securely via Stripe/Polar with 256-bit encryption. As soon as checkout completes, your GitHub account is instantly upgraded to Pro lifetime access.',
+  },
+  {
+    question: 'What payment methods are supported?',
+    answer:
+      'We accept all major credit and debit cards (Visa, Mastercard, American Express, Discover), along with digital wallets like Apple Pay and Google Pay.',
+  },
+  {
+    question: 'How does the 14-day refund guarantee work?',
+    answer:
+      'We offer an unconditional 14-day 100% money-back guarantee. If GitAscii Pro is not the right fit for you, we refund your payment with no questions asked.',
   },
 ]

@@ -998,6 +998,14 @@ export const en: Record<string, string> = {
     'Our smart generation feature analyzes your GitHub data (repos, languages, contributions, bio) and automatically creates an optimized profile layout tailored to your activity.',
   'landing.faq.a8':
     'Yes. While templates give you a great starting point, every single widget property (colors, fonts, sizes, positions) can be customized in the visual editor.',
+  'landing.faq.a9':
+    'GitAscii Pro unlocks privacy-friendly real-time telemetry (unique visitors, countries, referrers), 24/7 widget error alerts via email, up to 10 dynamic profiles, instant GitHub Camo cache purging, priority sub-10ms Edge CDN, and lifetime updates. You pay once and own it forever with zero monthly or renewal fees.',
+  'landing.faq.a10':
+    'Payments are processed securely via Stripe/Polar with 256-bit encryption. As soon as checkout completes, your GitHub account is instantly upgraded to Pro lifetime access.',
+  'landing.faq.a11':
+    'We accept all major credit and debit cards (Visa, Mastercard, American Express, Discover), along with digital wallets like Apple Pay and Google Pay.',
+  'landing.faq.a12':
+    'We offer an unconditional 14-day 100% money-back guarantee. If GitAscii Pro is not the right fit for you, we refund your payment with no questions asked.',
   'landing.faq.eyebrow': '[ QUESTIONS & ANSWERS ]',
   'landing.faq.q1': 'What is GitAscii?',
   'landing.faq.q2': 'Is GitAscii free?',
@@ -1007,6 +1015,10 @@ export const en: Record<string, string> = {
   'landing.faq.q6': 'Does it support dark and light mode?',
   'landing.faq.q7': 'What is Generate Best Profile?',
   'landing.faq.q8': 'Can I customize everything?',
+  'landing.faq.q9': 'What is GitAscii Pro and how does the lifetime access work?',
+  'landing.faq.q10': 'How does payment and instant activation work?',
+  'landing.faq.q11': 'What payment methods are supported?',
+  'landing.faq.q12': 'How does the 14-day refund guarantee work?',
   'landing.faq.title_italic': 'Questions.',
   'landing.faq.title_normal': 'Frequently Asked ',
   'landing.features.adaptive_themes.desc':
@@ -1847,10 +1859,14 @@ export const en: Record<string, string> = {
   'pro.docs.tabs.profiles': 'Multi-Profile Routing',
   'pro.docs.tabs.faq': 'Data Trust & FAQ',
   'pro.sidebar.member': 'Pro Member',
+  'pro.sidebar.free_plan': 'Free Plan',
   'pro.sidebar.active': 'Active',
+  'pro.sidebar.free': 'Free',
   'pro.sidebar.guest': 'Guest',
   'pro.sidebar.member_desc':
     '90-day analytics retention, widget error alerts & multi-profile management enabled.',
+  'pro.sidebar.free_desc':
+    'Upgrade to Pro to unlock 90-day analytics retention, widget error alerts and multiple profiles.',
   'pro.sidebar.guest_desc':
     'Connect your GitHub account to enable telemetry, errors, and multiple profiles.',
   'pro.sidebar.connect_github': 'Connect with GitHub',
@@ -1884,8 +1900,9 @@ export const en: Record<string, string> = {
   'pro.guard.paywall.f4_desc': 'Immediate GitHub Camo cache bypass and ultra-fast rendering.',
   'pro.guard.paywall.success': 'Pro Plan Activated! Loading...',
   'pro.guard.paywall.processing': 'Processing Upgrade...',
-  'pro.guard.paywall.cta': 'Get GitAscii Pro Lifetime',
+  'pro.guard.paywall.cta': 'Get Lifetime Access',
   'pro.guard.paywall.back_editor': '← Return to Free Editor',
+  'pro.guard.paywall.back_home': '← Return to Home',
   'pro.guard.paywall.guarantee': '14-Day 100% Money-Back Guarantee',
   'pro.dialog.confirm': 'Confirm',
   'pro.dialog.cancel': 'Cancel',
@@ -1898,6 +1915,7 @@ export const en: Record<string, string> = {
   'pro.stat.rolling_telemetry': 'rolling telemetry',
   'pro.stat.details_aria': 'Metric details',
   'pro.geo.unknown_location': 'Unknown Location',
+  'pro.geo.unknown_region': 'Unknown Region',
   'pro.overview.title': 'Overview',
   'pro.overview.subtitle':
     'Unified telemetry, profile health, and operational activity across your GitAscii stack.',
@@ -1941,7 +1959,7 @@ export const en: Record<string, string> = {
   'pro.kpi.widget_health_tooltip':
     'Active widget runtime errors and rendering exceptions requiring review.',
   'pro.insights.peak_day': 'Peak Day:',
-  'pro.insights.peak_hour': 'Peak Hour (UTC):',
+  'pro.insights.peak_hour': 'Peak Hour:',
   'pro.insights.top_country': 'Top Country:',
   'pro.insights.top_referrer': 'Top Referrer:',
   'pro.time.just_now': 'Just now',
@@ -2352,8 +2370,11 @@ export const en: Record<string, string> = {
   'pro.charts.clear_selection': 'Clear ({code})',
   'pro.charts.continent_label': 'Continent:',
   'pro.charts.search_country': 'Search country...',
+  'pro.charts.less': 'Less',
+  'pro.charts.more': 'More',
+  'pro.charts.local_time_note': 'All times converted to your local time',
   'landing.nav.pro_dashboard': 'GITASCII PRO DASHBOARD',
-  'landing.nav.go_to_editor': 'Go to Editor (@{username})',
+  'landing.nav.go_to_editor': 'Go to Editor',
   'landing.nav.go_to_pro_dashboard': 'GO TO PRO DASHBOARD',
   'pro.pricing.hero_badge': 'LIFETIME ACCESS • PAY ONCE',
   'pro.pricing.hero_title': 'Unlock GitAscii Pro for Life',
@@ -2374,10 +2395,14 @@ export const en: Record<string, string> = {
   'pro.pricing.guarantee_text': '{days}-Day Money-Back Guarantee',
   'pro.pricing.instant_activation': 'Instant Account Activation',
   'pro.pricing.secure_checkout': 'Encrypted & Secure Checkout',
-  'pro.pricing.discount_badge': 'SPECIAL OFFER — {pct}% OFF',
-  'pro.pricing.one_time_label': 'One-time payment • Own it forever',
-  'pro.pricing.one_time_short': 'pay once',
-  'pro.pricing.cta_button': 'Get GitAscii Pro Lifetime',
+  'landing.hero.pro_cta_title': 'GITASCII PRO · LIFETIME ACCESS',
+  'landing.hero.pro_cta_subtitle': 'Lifetime access • One-time payment',
+  'landing.hero.pro_cta_dense': 'Get Lifetime Access',
+  'landing.hero.access_pro': 'Access GitAscii Pro',
+  'landing.hero.pro_workspace_desc': 'Real-time analytics, error monitoring & multi-profiles',
+  'landing.hero.pro_active': 'PRO ACTIVE',
+  'landing.pricing.cta': 'Get Lifetime Access',
+  'pro.pricing.cta_button': 'Get Lifetime Access',
   'pro.pricing.cta_footer_note': 'No recurring subscriptions. Instant unlock for @{username}.',
   'pro.pricing.benefits_title': 'Everything included in your Lifetime License',
   'pro.pricing.benefits_subtitle':
@@ -2423,4 +2448,38 @@ export const en: Record<string, string> = {
   'pro.pricing.faq.guarantee_q': 'How does the refund guarantee work?',
   'pro.pricing.faq.guarantee_a':
     'We offer a 14-day 100% money-back guarantee. If GitAscii Pro is not the right fit for your workflow, reach out to our team for a hassle-free refund.',
+  'pro.pricing.hero_title_part1': 'Complete Telemetry & ',
+  'pro.pricing.hero_title_part2': 'Multi-Profile Architecture.',
+  'pro.pricing.hero_desc_extended':
+    'Upgrade your developer presence with real-time cookieless analytics, 24/7 automated widget error monitoring, up to 10 isolated profiles, and instant GitHub Camo edge invalidation. One single payment — yours forever.',
+  'pro.pricing.tier_name': 'GITASCII PRO ECOSYSTEM',
+  'pro.pricing.arch_badge': '[ ARCHITECTURE & DATA PIPELINE ]',
+  'pro.pricing.arch_latency': 'SUB-10MS EDGE LATENCY · ZERO RUNTIME DB LOCK-IN',
+  'pro.pricing.arch_1_title': 'Dynamic Global Edge Rendering',
+  'pro.pricing.arch_1_desc':
+    'GitHub profile SVGs are generated directly at low-latency edge regions closest to your profile visitors with ETag 304 caching.',
+  'pro.pricing.arch_2_title': 'Salt-Hashed Traffic Ingestion',
+  'pro.pricing.arch_2_desc':
+    'IPs and user agents are hashed daily with rotating salt seeds. Delivers granular country and referrer metrics without GDPR banners.',
+  'pro.pricing.arch_3_title': '24/7 External Badges Health',
+  'pro.pricing.arch_3_desc':
+    'Continuous background health probes monitor every external badge and third-party API in your profile, alerting you on timeouts.',
+  'pro.pricing.arch_4_title': 'Instant GitHub Camo Invalidation',
+  'pro.pricing.arch_4_desc':
+    'Instantly purge stale GitHub proxy caches when you change themes, layouts, or switch active profiles.',
+  'pro.pricing.feat_badge': '[ DEEP-DIVE CAPABILITIES ]',
+  'pro.pricing.table_count': '12 DETAILED SPECIFICATIONS',
+  'pro.pricing.guarantee_title': '100% Risk-Free 14-Day Money-Back Guarantee',
+  'pro.pricing.guarantee_desc':
+    'If GitAscii Pro does not elevate your profile, email us for an unconditional refund.',
+  'pro.pricing.cta_button_short': 'Get Lifetime Access · {price}',
+  'pro.pricing.faq.camo_q': 'How does the instant GitHub Camo cache purge work?',
+  'pro.pricing.faq.camo_a':
+    'GitHub uses a proxy server (Camo) that caches external images for hours. With Pro, when you save edits or switch active profiles, our edge invalidation triggers a forced upstream refresh so your visitors see your updated README immediately.',
+  'pro.pricing.faq.profiles_q': 'How do multiple profiles work?',
+  'pro.pricing.faq.profiles_a':
+    'You can create up to 10 separate profile slugs (e.g. /username for main profile, /username/work for recruiter views, /username/oss for open source sponsors). Each profile maintains its own widget configuration, theme, and analytics metrics.',
+  'pro.pricing.faq.telemetry_q': 'Is the telemetry privacy-first and compliant with GDPR/LGPD?',
+  'pro.pricing.faq.telemetry_a':
+    '100%. We do not use persistent cookies, localStorage trackers, or invasive fingerprinting. Visitor metrics are pseudonymized using a daily rotating salt hash, preserving visitor privacy while providing rich geographic and referrer insights.',
 }

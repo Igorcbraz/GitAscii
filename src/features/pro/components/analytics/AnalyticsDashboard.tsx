@@ -30,6 +30,11 @@ import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { AnalyticsSummary, TimeRange } from '../../types'
+import {
+  formatLocalizedCountry,
+  formatLocalizedDay,
+  formatUtcHourToLocal,
+} from '../../utils/proFormatters'
 import { AreaChart } from '../charts/AreaChart'
 import { DimensionRanking, HourlyBarChart, StackedRatioBar } from '../charts/BarChart'
 import { DonutChart } from '../charts/DonutChart'
@@ -46,7 +51,7 @@ type SectionId =
   'overview' | 'traffic' | 'geography' | 'technology' | 'sources' | 'profiles' | 'activity'
 
 export const AnalyticsDashboard: React.FC = () => {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null)
   const [range, setRange] = useState<TimeRange>('30d')
   const [selectedProfile, setSelectedProfile] = useState<string>('all')
@@ -613,28 +618,44 @@ export const AnalyticsDashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
               <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
                 <span className="text-[#8a8a8a]">{t('pro.insights.peak_day', 'Peak Day:')}</span>
-                <span className="text-white font-bold">{summary?.peakDay.day || 'Wednesday'}</span>
+                <span className="text-white font-bold">
+                  {formatLocalizedDay(summary?.peakDay.day, language)}
+                </span>
               </div>
               <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8a8a8a]">
-                  {t('pro.insights.peak_hour', 'Peak Hour (UTC):')}
-                </span>
+                <span className="text-[#8a8a8a]">{t('pro.insights.peak_hour', 'Peak Hour:')}</span>
                 <span className="text-white font-bold">
-                  {String(summary?.peakHour.hour || 14).padStart(2, '0')}:00 UTC
+                  {formatUtcHourToLocal(summary?.peakHour.hour)}
                 </span>
               </div>
               <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
                 <span className="text-[#8a8a8a]">
                   {t('pro.insights.top_country', 'Top Country:')}
                 </span>
-                <span className="text-white font-bold flex items-center gap-1.5">
+                <span className="text-white font-bold flex items-center gap-1.5 truncate">
                   {summary?.topCountries[0] ? (
                     <>
-                      <CountryFlag code={summary.topCountries[0].code} size="sm" />
-                      <span>{summary.topCountries[0].name}</span>
+                      <CountryFlag
+                        code={summary.topCountries[0].code}
+                        name={formatLocalizedCountry(
+                          summary.topCountries[0].code,
+                          summary.topCountries[0].name,
+                          language,
+                          t
+                        )}
+                        size="sm"
+                      />
+                      <span className="truncate">
+                        {formatLocalizedCountry(
+                          summary.topCountries[0].code,
+                          summary.topCountries[0].name,
+                          language,
+                          t
+                        )}
+                      </span>
                     </>
                   ) : (
-                    'United States'
+                    formatLocalizedCountry('US', 'United States', language, t)
                   )}
                 </span>
               </div>
@@ -817,11 +838,11 @@ export const AnalyticsDashboard: React.FC = () => {
                   <DimensionRanking
                     items={(summary?.topCountries || []).map((c) => ({
                       key: c.code,
-                      name: c.name,
+                      name: formatLocalizedCountry(c.code, c.name, language, t),
                       count: c.count,
                       percentage: c.percentage,
                     }))}
-                    label="Countries"
+                    label={t('pro.analytics.top_countries', 'Countries')}
                     showSearch={true}
                     maxItems={7}
                     isCountry={true}
@@ -941,7 +962,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-white">
-                    {t('pro.analytics.browsers_locales', 'Browsers & Locales')}
+                    {t('pro.analytics.browsers_title', 'Browsers & Locales')}
                   </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
                     {t('pro.analytics.browsers_desc', 'Client browsers and preferred languages.')}
@@ -958,7 +979,7 @@ export const AnalyticsDashboard: React.FC = () => {
                   {summary?.topLanguages && summary.topLanguages.length > 0 && (
                     <div className="pt-3 border-t border-white/5">
                       <span className="text-xs font-semibold text-white block mb-2">
-                        {t('pro.analytics.preferred_languages', 'Preferred Languages')}
+                        {t('pro.analytics.languages_title', 'Preferred Languages')}
                       </span>
                       <DimensionRanking
                         items={summary.topLanguages}
@@ -981,7 +1002,7 @@ export const AnalyticsDashboard: React.FC = () => {
                 </h2>
               </div>
               <ProBadge variant="lime">
-                {t('pro.analytics.inbound_traffic', 'Inbound Traffic')}
+                {t('pro.analytics.sources_badge', 'Inbound Traffic')}
               </ProBadge>
             </div>
 
@@ -1013,13 +1034,13 @@ export const AnalyticsDashboard: React.FC = () => {
                     {t('pro.analytics.channel_dist', 'Channel Distribution')}
                   </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    {t('pro.analytics.channel_desc', 'Categorized traffic channels.')}
+                    {t('pro.analytics.channel_dist_desc', 'Categorized traffic channels.')}
                   </p>
                 </div>
 
                 <DonutChart
                   data={summary?.topSources || []}
-                  title={t('pro.analytics.channel_title', 'Channel')}
+                  title={t('pro.analytics.channel_label', 'Channel')}
                   size={160}
                 />
               </div>
@@ -1031,11 +1052,11 @@ export const AnalyticsDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Laptop className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  {t('pro.analytics.profiles_sec_title', 'Profile Performance & Cache Efficiency')}
+                  {t('pro.analytics.profiles_title', 'Profile Performance & Cache Efficiency')}
                 </h2>
               </div>
               <ProBadge variant="lime">
-                {t('pro.analytics.multi_profile', 'Multi-Profile')}
+                {t('pro.analytics.profiles_badge', 'Multi-Profile')}
               </ProBadge>
             </div>
 
@@ -1043,11 +1064,11 @@ export const AnalyticsDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-white">
-                    {t('pro.analytics.profile_matrix', 'Profile Breakdown Matrix')}
+                    {t('pro.analytics.profiles_breakdown', 'Profile Breakdown Matrix')}
                   </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
                     {t(
-                      'pro.analytics.profile_matrix_desc',
+                      'pro.analytics.profiles_breakdown_desc',
                       'Comparative analytics across all configured GitAscii profiles.'
                     )}
                   </p>
@@ -1062,16 +1083,16 @@ export const AnalyticsDashboard: React.FC = () => {
                     </th>
                     <th className="pb-3 font-semibold">{t('pro.analytics.th_views', 'Views')}</th>
                     <th className="pb-3 font-semibold">
-                      {t('pro.analytics.th_unique_visitors', 'Unique Visitors')}
+                      {t('pro.analytics.th_uniques', 'Unique Visitors')}
                     </th>
                     <th className="pb-3 font-semibold">
-                      {t('pro.analytics.th_cache_hit_ratio', 'Cache Hit Ratio')}
+                      {t('pro.analytics.th_cache_hit', 'Cache Hit Ratio')}
                     </th>
                     <th className="pb-3 font-semibold">
                       {t('pro.analytics.th_avg_latency', 'Avg. Latency')}
                     </th>
                     <th className="pb-3 font-semibold">
-                      {t('pro.analytics.th_portfolio_share', 'Portfolio Share')}
+                      {t('pro.analytics.th_share', 'Portfolio Share')}
                     </th>
                   </tr>
                 </thead>
@@ -1123,7 +1144,7 @@ export const AnalyticsDashboard: React.FC = () => {
                 <div>
                   <h2 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                     <span>
-                      {t('pro.analytics.stream_title', 'Live Telemetry & Real-Time Stream')}
+                      {t('pro.analytics.live_stream_title', 'Live Telemetry & Real-Time Stream')}
                     </span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5" />
@@ -1132,7 +1153,7 @@ export const AnalyticsDashboard: React.FC = () => {
                   </h2>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
                     {t(
-                      'pro.analytics.stream_desc',
+                      'pro.analytics.live_stream_desc',
                       'Real-time edge ingestion stream, request pulse, and latency observability.'
                     )}
                   </p>
@@ -1148,17 +1169,17 @@ export const AnalyticsDashboard: React.FC = () => {
                       ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 font-semibold'
                       : 'bg-white/5 border-white/10 text-[#8a8a8a] hover:text-white'
                   }`}
-                  title={t('pro.analytics.toggle_auto_polling', 'Toggle real-time auto-polling')}
+                  title={t('pro.analytics.toggle_stream_title', 'Toggle real-time auto-polling')}
                 >
                   {autoRefresh ? (
                     <>
                       <Pause className="w-3.5 h-3.5" />
-                      <span>{t('pro.analytics.streaming_interval', 'Streaming (15s)')}</span>
+                      <span>{t('pro.analytics.streaming_btn', 'Streaming (15s)')}</span>
                     </>
                   ) : (
                     <>
                       <Play className="w-3.5 h-3.5" />
-                      <span>{t('pro.analytics.resume_stream', 'Resume Stream')}</span>
+                      <span>{t('pro.analytics.resume_stream_btn', 'Resume Stream')}</span>
                     </>
                   )}
                 </button>
@@ -1201,7 +1222,7 @@ export const AnalyticsDashboard: React.FC = () => {
               <div className="p-4 rounded-xl bg-[#111] border border-white/10 space-y-2">
                 <div className="flex items-center justify-between text-xs text-[#8a8a8a]">
                   <span className="font-semibold uppercase tracking-wider">
-                    {t('pro.analytics.edge_render_latency', 'Edge Render Latency')}
+                    {t('pro.analytics.edge_latency', 'Edge Render Latency')}
                   </span>
                   <Zap className="w-4 h-4 text-[#c5ff4a]" />
                 </div>
@@ -1215,14 +1236,14 @@ export const AnalyticsDashboard: React.FC = () => {
                 </div>
                 <div className="text-[11px] font-mono text-[#7a7a7a] flex items-center gap-1.5">
                   <span className="text-cyan-400 font-bold">&lt; 15ms</span>
-                  <span>{t('pro.analytics.for_cached_hits', 'for cached edge hits')}</span>
+                  <span>{t('pro.analytics.cached_edge_hits', 'for cached edge hits')}</span>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#111] border border-white/10 space-y-2">
                 <div className="flex items-center justify-between text-xs text-[#8a8a8a]">
                   <span className="font-semibold uppercase tracking-wider">
-                    {t('pro.analytics.validation_ratio', 'Validation 304 Ratio')}
+                    {t('pro.analytics.val_304_ratio', 'Validation 304 Ratio')}
                   </span>
                   <Cpu className="w-4 h-4 text-cyan-400" />
                 </div>
@@ -1265,11 +1286,11 @@ export const AnalyticsDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-white">
-                    {t('pro.analytics.live_event_stream', 'Live Event Stream Feed')}
+                    {t('pro.analytics.live_feed_title', 'Live Event Stream Feed')}
                   </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
                     {t(
-                      'pro.analytics.live_stream_desc',
+                      'pro.analytics.live_feed_desc',
                       'Anonymized, real-time incoming request telemetry across edge points.'
                     )}
                   </p>
@@ -1287,7 +1308,7 @@ export const AnalyticsDashboard: React.FC = () => {
                     <tr className="border-b border-white/10 text-[#8a8a8a]">
                       <th className="pb-3 font-semibold">{t('pro.analytics.th_time', 'Time')}</th>
                       <th className="pb-3 font-semibold">
-                        {t('pro.analytics.th_profile', 'Profile')}
+                        {t('pro.analytics.th_profile_name', 'Profile')}
                       </th>
                       <th className="pb-3 font-semibold">
                         {t('pro.analytics.th_location', 'Location')}
@@ -1306,64 +1327,75 @@ export const AnalyticsDashboard: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {summary?.recentActivity && summary.recentActivity.length > 0 ? (
-                      summary.recentActivity.map((event) => (
-                        <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="py-2.5 text-[#8a8a8a] flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                            <span>{event.relativeTime}</span>
-                          </td>
-                          <td className="py-2.5 text-white font-medium">{event.profileSlug}</td>
-                          <td className="py-2.5 text-white/90">
-                            <div className="flex items-center gap-2">
-                              <CountryFlag
-                                code={event.country}
-                                name={event.countryName}
-                                size="sm"
-                              />
-                              <span>{event.countryName}</span>
-                              {event.city && (
-                                <span className="text-[#666] ml-1">({event.city})</span>
+                      summary.recentActivity.map((event) => {
+                        const localizedCountry = formatLocalizedCountry(
+                          event.country,
+                          event.countryName,
+                          language,
+                          t
+                        )
+                        return (
+                          <tr key={event.id} className="hover:bg-white/[0.02] transition-colors">
+                            <td className="py-2.5 text-[#8a8a8a] flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                              <span>{event.relativeTime}</span>
+                            </td>
+                            <td className="py-2.5 text-white font-medium">{event.profileSlug}</td>
+                            <td className="py-2.5 text-white/90">
+                              <div className="flex items-center gap-2">
+                                <CountryFlag
+                                  code={event.country}
+                                  name={localizedCountry}
+                                  size="sm"
+                                />
+                                <span>{localizedCountry}</span>
+                                {event.city && (
+                                  <span className="text-[#666] ml-1">({event.city})</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2.5">
+                              {event.trafficType === 'camo' ? (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                  {t('pro.analytics.camo_proxy', 'Camo Proxy')}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#c5ff4a]/10 text-[#c5ff4a] border border-[#c5ff4a]/20">
+                                  {t('pro.analytics.direct_http', 'Direct HTTP')}
+                                </span>
                               )}
-                            </div>
-                          </td>
-                          <td className="py-2.5">
-                            {event.trafficType === 'camo' ? (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                                {t('pro.analytics.camo_proxy', 'Camo Proxy')}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#c5ff4a]/10 text-[#c5ff4a] border border-[#c5ff4a]/20">
-                                {t('pro.analytics.direct_http', 'Direct HTTP')}
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2.5 text-[#8a8a8a]">
-                            {event.os} • {event.browser}
-                          </td>
-                          <td className="py-2.5">
-                            {event.status === 304 || event.isCacheHit ? (
-                              <span className="text-cyan-400 font-bold">
-                                {t('pro.analytics.status_cache_hit', '304 Cache Hit')}
-                              </span>
-                            ) : (
-                              <span className="text-emerald-400 font-bold">
-                                {t('pro.analytics.status_ok', '200 OK')}
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2.5 text-[#8a8a8a]">{event.latencyMs}ms</td>
-                        </tr>
-                      ))
+                            </td>
+                            <td className="py-2.5 text-[#8a8a8a]">
+                              {event.os} • {event.browser}
+                            </td>
+                            <td className="py-2.5">
+                              {event.status === 304 || event.isCacheHit ? (
+                                <span className="text-cyan-400 font-bold">
+                                  {t('pro.analytics.cache_hit_304', '304 Cache Hit')}
+                                </span>
+                              ) : (
+                                <span className="text-emerald-400 font-bold">
+                                  {t('pro.analytics.ok_200', '200 OK')}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 text-[#8a8a8a]">{event.latencyMs}ms</td>
+                          </tr>
+                        )
+                      })
                     ) : (
                       <tr>
                         <td colSpan={7} className="py-8 text-center text-[#8a8a8a]">
                           <div className="space-y-1">
                             <p>
-                              {t('pro.overview.no_activity', 'No recent activity recorded yet.')}
+                              {t(
+                                'pro.analytics.no_activity_title',
+                                'No recent activity recorded yet.'
+                              )}
                             </p>
                             <p className="text-[11px] text-[#666]">
                               {t(
-                                'pro.analytics.embed_cta',
+                                'pro.analytics.no_activity_desc',
                                 'Embed your GitAscii profile SVG badge in your GitHub README to start streaming real-time telemetry!'
                               )}
                             </p>

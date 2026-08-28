@@ -24,6 +24,11 @@ import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { ActivityEvent, ProOverviewData } from '../../types'
+import {
+  formatLocalizedCountry,
+  formatLocalizedDay,
+  formatUtcHourToLocal,
+} from '../../utils/proFormatters'
 import { AreaChart } from '../charts/AreaChart'
 import { CountryFlag } from '../CountryFlag'
 import { ProBadge } from '../ProBadge'
@@ -98,7 +103,7 @@ function getActivityIcon(type: ActivityEvent['type']) {
 }
 
 export const OverviewDashboard: React.FC = () => {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const [data, setData] = useState<ProOverviewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -260,14 +265,16 @@ export const OverviewDashboard: React.FC = () => {
             <span className="text-[#8a8a8a] text-[11px]">
               {t('pro.insights.peak_day', 'Peak Day:')}
             </span>
-            <span className="text-white font-bold">{data?.peakDay?.day || 'Wednesday'}</span>
+            <span className="text-white font-bold">
+              {formatLocalizedDay(data?.peakDay?.day, language)}
+            </span>
           </div>
           <div className="p-2.5 px-3 rounded-xl bg-[#111111] border border-white/[0.07] flex items-center justify-between text-xs font-mono">
             <span className="text-[#8a8a8a] text-[11px]">
-              {t('pro.insights.peak_hour', 'Peak Hour (UTC):')}
+              {t('pro.insights.peak_hour', 'Peak Hour:')}
             </span>
             <span className="text-white font-bold">
-              {String(data?.peakHour?.hour ?? 14).padStart(2, '0')}:00
+              {formatUtcHourToLocal(data?.peakHour?.hour)}
             </span>
           </div>
           <div className="p-2.5 px-3 rounded-xl bg-[#111111] border border-white/[0.07] flex items-center justify-between text-xs font-mono">
@@ -277,11 +284,27 @@ export const OverviewDashboard: React.FC = () => {
             <span className="text-white font-bold flex items-center gap-1.5 truncate">
               {data?.topCountry ? (
                 <>
-                  <CountryFlag code={data.topCountry.code} size="sm" />
-                  <span className="truncate">{data.topCountry.name}</span>
+                  <CountryFlag
+                    code={data.topCountry.code}
+                    name={formatLocalizedCountry(
+                      data.topCountry.code,
+                      data.topCountry.name,
+                      language,
+                      t
+                    )}
+                    size="sm"
+                  />
+                  <span className="truncate">
+                    {formatLocalizedCountry(
+                      data.topCountry.code,
+                      data.topCountry.name,
+                      language,
+                      t
+                    )}
+                  </span>
                 </>
               ) : (
-                'United States'
+                formatLocalizedCountry('US', 'United States', language, t)
               )}
             </span>
           </div>

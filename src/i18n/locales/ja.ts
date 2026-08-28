@@ -996,6 +996,14 @@ export const ja: Record<string, string> = {
     '当社のスマート生成機能は、GitHub データ (リポジトリ、言語、投稿、バイオ) を分析し、アクティビティに合わせて最適化されたプロファイル レイアウトを自動的に作成します。',
   'landing.faq.a8':
     'はい。テンプレートは優れた出発点となりますが、すべてのウィジェット プロパティ (色、フォント、サイズ、位置) はビジュアル エディターでカスタマイズできます。',
+  'landing.faq.a9':
+    'GitAscii Pro は、クッキー不要のリアルタイムテレメトリ（ユニーク訪問者、国別分布、リファラー）、24時間年中無休のウィジェット障害メールアラート、最大10個の動的プロファイル、GitHub Camoキャッシュの即時クリア、高速エッジCDNを解放します。月額費用なしの買い切り1回払いです。',
+  'landing.faq.a10':
+    '決済は Stripe/Polar を通じて256ビット暗号化で安全に処理されます。購入完了後、GitHub アカウントは即座に Pro 永久アクセスにアップグレードされます。',
+  'landing.faq.a11':
+    '各種クレジットカード/デビットカード（Visa、Mastercard、American Express、Discover）、Apple Pay、Google Pay に対応しています。',
+  'landing.faq.a12':
+    '14日間の100%全額返金保証を提供しています。ご満足いただけない場合は、理由を問わず全額返金いたします。',
   'landing.faq.eyebrow': '[ 質疑応答 ]',
   'landing.faq.q1': 'GitAsciiとは何ですか?',
   'landing.faq.q2': 'GitAsciiは無料ですか?',
@@ -1005,6 +1013,10 @@ export const ja: Record<string, string> = {
   'landing.faq.q6': 'ダークモードとライトモードをサポートしていますか?',
   'landing.faq.q7': '最適なプロファイルの生成とは何ですか?',
   'landing.faq.q8': 'すべてカスタマイズできますか?',
+  'landing.faq.q9': 'GitAscii Proとは何ですか？生涯アクセスはどのように機能しますか？',
+  'landing.faq.q10': '支払いと即時有効化はどのように行われますか？',
+  'landing.faq.q11': '利用可能な支払い方法は何ですか？',
+  'landing.faq.q12': '14日間の返金保証はどのように適用されますか？',
   'landing.faq.title_italic': '質問。',
   'landing.faq.title_normal': 'よくある質問',
   'landing.features.adaptive_themes.desc':
@@ -1891,6 +1903,7 @@ export const ja: Record<string, string> = {
   'pro.guard.paywall.processing': 'アップグレードを処理中...',
   'pro.guard.paywall.cta': '今すぐ GitAscii Pro をアンロック',
   'pro.guard.paywall.back_editor': '← 無料エディタに戻る',
+  'pro.guard.paywall.back_home': '← ホームに戻る',
   'pro.guard.paywall.guarantee': '100% 満足保証',
   'pro.dialog.confirm': '確認',
   'pro.dialog.cancel': 'キャンセル',
@@ -1903,6 +1916,7 @@ export const ja: Record<string, string> = {
   'pro.stat.rolling_telemetry': '継続テレメトリ',
   'pro.stat.details_aria': 'メトリクスの詳細',
   'pro.geo.unknown_location': '不明な場所',
+  'pro.geo.unknown_region': '不明な地域',
   'pro.overview.title': '概要',
   'pro.overview.subtitle':
     'GitAsciiスタック全体の統合テレメトリ、プロフィール状態、稼働アクティビティ。',
@@ -1947,7 +1961,7 @@ export const ja: Record<string, string> = {
   'pro.kpi.widget_health_tooltip':
     '確認が必要なアクティブなウィジェット実行時エラーおよび描画例外。',
   'pro.insights.peak_day': 'ピーク日:',
-  'pro.insights.peak_hour': 'ピーク時間 (UTC):',
+  'pro.insights.peak_hour': 'ピーク時間:',
   'pro.insights.top_country': '主要国:',
   'pro.insights.top_referrer': '主要リファラー:',
   'pro.time.just_now': 'たった今',
@@ -2359,7 +2373,52 @@ export const ja: Record<string, string> = {
   'pro.charts.clear_selection': 'クリア ({code})',
   'pro.charts.continent_label': '大陸:',
   'pro.charts.search_country': '国を検索...',
+  'pro.charts.less': '少',
+  'pro.charts.more': '多',
+  'pro.charts.local_time_note': 'すべての時刻はお使いのローカル時刻に変換されています',
   'landing.nav.pro_dashboard': 'GITASCII PRO ダッシュボード',
-  'landing.nav.go_to_editor': 'エディタへ移動 (@{username})',
+  'landing.nav.go_to_editor': 'エディタへ移動',
   'landing.nav.go_to_pro_dashboard': 'PROダッシュボードへ移動',
+  'landing.hero.pro_cta_title': 'GITASCII PRO · 永久アクセス',
+  'landing.hero.pro_cta_subtitle': '永久利用可能 • 買い切り',
+  'landing.hero.pro_cta_dense': '永久アクセスを購入',
+  'landing.hero.access_pro': 'GitAscii Pro にアクセス',
+  'landing.hero.pro_workspace_desc': 'リアルタイム分析・エラー監視・複数プロファイル',
+  'landing.hero.pro_active': 'PRO 有効',
+  'landing.pricing.cta': '生涯アクセスを入手',
+  'pro.pricing.cta_button': '生涯アクセスを入手',
+  'pro.pricing.hero_title_part1': '完全なテレメトリ ＆ ',
+  'pro.pricing.hero_title_part2': 'マルチプロファイル設計。',
+  'pro.pricing.hero_desc_extended':
+    'クッキー不要のリアルタイム分析、24時間365日のウィジェット監視とメール通知、最大10個の独立したプロファイル、GitHub Camoエッジキャッシュの即時無効化で、開発者プロフィールを強化します。買い切りで永続利用可能。',
+  'pro.pricing.tier_name': 'GITASCII PRO エコシステム',
+  'pro.pricing.arch_badge': '[ アーキテクチャ ＆ データパイプライン ]',
+  'pro.pricing.arch_latency': '10MS未満のエッジレイテンシ · データベース拘束ゼロ',
+  'pro.pricing.arch_1_title': 'グローバルエッジでの動的レンダリング',
+  'pro.pricing.arch_1_desc':
+    'GitHubプロフィールのSVGは、閲覧者に近い低遅延エッジサーバーからETag 304キャッシュを使用して直接生成・配信されます。',
+  'pro.pricing.arch_2_title': 'ソルトハッシュ化トラフィック収集',
+  'pro.pricing.arch_2_desc':
+    'IPとUser-Agentは毎日ローテーションされるソルトでハッシュ化。GDPRクッキー同意バナーなしで詳細な国・リファラー分析を提供します。',
+  'pro.pricing.arch_3_title': '24/7 外部バッジ健全性監視',
+  'pro.pricing.arch_3_desc':
+    'バックグラウンド監視がプロフィール内の外部バッジやサードパーティAPIを常時チェックし、タイムアウト時に即座に通知します。',
+  'pro.pricing.arch_4_title': 'GitHub Camo 即時キャッシュクリア',
+  'pro.pricing.arch_4_desc':
+    'テーマやレイアウトの変更、アクティブプロファイルの切り替え時に、GitHubのプロキシキャッシュを即座に破棄します。',
+  'pro.pricing.feat_badge': '[ 機能の詳細 ]',
+  'pro.pricing.table_count': '12項目の詳細仕様',
+  'pro.pricing.guarantee_title': '無条件14日間100%返金保証',
+  'pro.pricing.guarantee_desc':
+    'GitAscii Proがご期待に沿えない場合は、メール1本で全額返金いたします。',
+  'pro.pricing.cta_button_short': '生涯アクセスを入手 · {price}',
+  'pro.pricing.faq.camo_q': 'GitHub Camo キャッシュの即時クリアはどのように機能しますか？',
+  'pro.pricing.faq.camo_a':
+    'GitHubはプロキシサーバー（Camo）を使用して外部画像を数時間キャッシュします。Proでは、変更を保存した瞬間にエッジから即時更新がトリガーされ、訪問者に最新の状態が表示されます。',
+  'pro.pricing.faq.profiles_q': '複数プロファイルはどのように機能しますか？',
+  'pro.pricing.faq.profiles_a':
+    '専用URLを持つ最大10個の独立したプロファイルを作成できます（例：メイン用 /username、採用担当者向け /username/work、OSSスポンサー向け /username/oss）。それぞれ個別のウィジェット設定と分析を保持します。',
+  'pro.pricing.faq.telemetry_q': 'テレメトリはプライバシーとGDPRに準拠していますか？',
+  'pro.pricing.faq.telemetry_a':
+    '100%準拠しています。永続的なクッキーや追跡スクリプトは使用しません。訪問者は暗号化ハッシュとローテーションソルトによって日々匿名化されます。',
 }

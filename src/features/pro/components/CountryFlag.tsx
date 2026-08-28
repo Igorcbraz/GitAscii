@@ -290,7 +290,7 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
   if (flagContent) {
     return (
       <div
-        className={`inline-flex items-center justify-center overflow-hidden border border-white/20 shadow-sm flex-shrink-0 ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center justify-center overflow-hidden border border-white/10 flex-shrink-0 ${sizeClasses[size]} ${className}`}
         title={name || normalizedCode}
       >
         {flagContent}
@@ -300,7 +300,7 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
 
   return (
     <div
-      className={`inline-flex items-center justify-center font-mono font-bold text-[9px] uppercase bg-white/10 text-white/90 border border-white/20 px-1 py-0.5 rounded ${className}`}
+      className={`inline-flex items-center justify-center font-mono font-bold text-[9px] uppercase bg-white/5 text-white/80 border border-white/10 px-1 py-0.5 rounded ${className}`}
       title={name || normalizedCode}
     >
       {normalizedCode}

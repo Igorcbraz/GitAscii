@@ -37,6 +37,7 @@ export interface UserSession {
 }
 
 const ITEM_ICONS: Record<string, React.ReactNode> = {
+  pricing: <Zap className="size-4 text-signal-lime" />,
   templates: <LayoutTemplate className="size-4 text-signal-lime" />,
   widgets: <Grid className="size-4 text-signal-lime" />,
   explore: <Compass className="size-4 text-signal-lime" />,
@@ -474,7 +475,7 @@ export default function Navbar() {
                 className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/40 bg-signal-lime/10 px-5 py-3 font-jetbrains-mono text-label font-bold text-signal-lime transition-all duration-300 w-full min-h-[44px] shadow-[0_0_12px_rgba(197,255,74,0.15)]"
               >
                 <Zap className="size-4 text-signal-lime" />
-                <span>GITASCII PRO DASHBOARD</span>
+                <span>{t('landing.nav.pro_dashboard', 'GITASCII PRO DASHBOARD')}</span>
               </Link>
 
               {session ? (
@@ -485,7 +486,7 @@ export default function Navbar() {
                     className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/30 bg-onyx px-5 py-3 font-inter-tight text-label font-medium text-white hover:text-signal-lime transition-all duration-300 w-full min-h-[44px]"
                   >
                     <Layers className="size-4 text-signal-lime" />
-                    <span>Ir ao Editor (@{session.username})</span>
+                    <span>{t('landing.nav.go_to_editor', 'Go to Editor')}</span>
                   </Link>
 
                   <Link
@@ -494,7 +495,7 @@ export default function Navbar() {
                     className="inline-flex items-center justify-center gap-2 rounded-sm border border-signal-lime/40 bg-signal-lime/10 px-5 py-3 font-jetbrains-mono text-label font-bold text-signal-lime hover:bg-signal-lime/20 transition-all duration-300 w-full min-h-[44px] shadow-[0_0_12px_rgba(197,255,74,0.15)]"
                   >
                     <Zap className="size-4 text-signal-lime" />
-                    <span>IR AO PRO DASHBOARD</span>
+                    <span>{t('landing.nav.go_to_pro_dashboard', 'Go to Pro Dashboard')}</span>
                   </Link>
 
                   <button

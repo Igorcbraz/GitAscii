@@ -156,9 +156,9 @@ export default async function LandingPage({
         <TractionBar metrics={metrics} />
         <CommunityProfiles profiles={storedProfiles} usersCount={metrics.users} />
         <TemplatesPreview count={metrics.templates} />
+        <ComparisonTable />
         <WidgetsShowcase count={metrics.widgets} />
         <EcosystemHub metrics={metrics} />
-        <ComparisonTable />
         <FAQ />
         <FinalCTA metrics={metrics} />
         <Footer />

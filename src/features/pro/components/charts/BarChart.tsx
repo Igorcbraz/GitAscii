@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import { useI18n } from '@/i18n'
 
 import type { DimensionMetric, HourlyDataPoint } from '../../types/analytics'
+import { formatUtcHourToLocal } from '../../utils/proFormatters'
 import { CountryFlag } from '../CountryFlag'
 
 export interface HourlyBarChartProps {
@@ -31,10 +32,10 @@ export const HourlyBarChart: React.FC<HourlyBarChartProps> = ({
       <div className="flex items-center justify-between text-[11px] font-mono text-[#8a8a8a] bg-white/[0.02] border border-white/5 px-2.5 py-1.5 rounded-lg">
         <div className="flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-[#c5ff4a]" />
-          <span>{t('pro.charts.peak_window', 'Peak Traffic Window:')}</span>
+          <span>{t('pro.charts.peak_traffic_window', 'Peak Traffic Window:')}</span>
         </div>
         <span className="text-white font-bold">
-          {String(peakHour.hour).padStart(2, '0')}:00 UTC ({peakHour.views}{' '}
+          {formatUtcHourToLocal(peakHour.hour)} ({peakHour.views.toLocaleString()}{' '}
           {t('pro.common.views', 'views')})
         </span>
       </div>
@@ -60,9 +61,9 @@ export const HourlyBarChart: React.FC<HourlyBarChartProps> = ({
               >
                 <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1c1c1c] text-white border border-white/15 text-[10px] font-mono px-2.5 py-1.5 rounded-lg shadow-2xl pointer-events-none whitespace-nowrap z-30 space-y-0.5">
                   <div className="font-bold text-[#c5ff4a] flex items-center justify-between gap-2">
-                    <span>{String(d.hour).padStart(2, '0')}:00 UTC</span>
+                    <span>{formatUtcHourToLocal(d.hour)}</span>
                     <span>
-                      {d.views} {t('pro.common.views', 'views')}
+                      {d.views.toLocaleString()} {t('pro.common.views', 'views')}
                     </span>
                   </div>
                   <div className="text-[#8a8a8a] text-[9px] flex gap-2">

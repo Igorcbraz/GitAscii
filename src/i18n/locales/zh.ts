@@ -957,6 +957,14 @@ export const zh: Record<string, string> = {
     '我们的智能生成功能会分析你的 GitHub 数据（仓库、语言、贡献、简介）并自动创建一个针对你活动量身定制的最佳资料布局。',
   'landing.faq.a8':
     '可以。虽然模板为你提供了绝佳的起点，但每个组件的属性（颜色、字体、尺寸、位置）都可以在可视化编辑器中自定义。',
+  'landing.faq.a9':
+    'GitAscii Pro 解锁隐私优先的实时遥测（独立访客、国家分布、引荐来源）、24/7 挂件异常邮件告警、多达 10 个独立动态资料、GitHub Camo 缓存即时清除与全球 10ms 级边缘加速。一次性付费，终身拥有，无月费。',
+  'landing.faq.a10':
+    '支付通过 Stripe/Polar 平台以 256 位加密安全处理。结账完成后，您的 GitHub 账户将立即自动升级至 Pro 终身版。',
+  'landing.faq.a11':
+    '支持全球主流信用卡与借记卡（Visa、Mastercard、American Express、Discover），以及 Apple Pay 与 Google Pay。',
+  'landing.faq.a12':
+    '我们提供 14 天 100% 无条件全额退款保障。如果您对 GitAscii Pro 不完全满意，可随时申请全额退款。',
   'landing.faq.eyebrow': '[ 常见问题 ]',
   'landing.faq.q1': 'GitAscii 是什么？',
   'landing.faq.q2': 'GitAscii 是免费的吗？',
@@ -966,6 +974,10 @@ export const zh: Record<string, string> = {
   'landing.faq.q6': '它支持深色与浅色模式吗？',
   'landing.faq.q7': '什么是「一键生成最佳资料」？',
   'landing.faq.q8': '我可以自定义所有内容吗？',
+  'landing.faq.q9': '什么是 GitAscii Pro，终身访问是如何运作的？',
+  'landing.faq.q10': '支付与即时激活如何进行？',
+  'landing.faq.q11': '支持哪些支付方式？',
+  'landing.faq.q12': '14 天退款保障如何运作？',
   'landing.faq.title_italic': '问答。',
   'landing.faq.title_normal': '常见 ',
   'landing.features.adaptive_themes.desc':
@@ -1796,6 +1808,7 @@ export const zh: Record<string, string> = {
   'pro.guard.paywall.processing': '正在处理升级...',
   'pro.guard.paywall.cta': '立即解锁 GitAscii Pro',
   'pro.guard.paywall.back_editor': '← 返回免费编辑器',
+  'pro.guard.paywall.back_home': '← 返回首页',
   'pro.guard.paywall.guarantee': '100% 满意度保证',
   'pro.dialog.confirm': '确认',
   'pro.dialog.cancel': '取消',
@@ -1808,6 +1821,7 @@ export const zh: Record<string, string> = {
   'pro.stat.rolling_telemetry': '滚动遥测',
   'pro.stat.details_aria': '指标详情',
   'pro.geo.unknown_location': '未知位置',
+  'pro.geo.unknown_region': '未知地区',
   'pro.overview.title': '概览',
   'pro.overview.subtitle': 'GitAscii 技术栈的统一遥测、配置文件健康状况与运行活动。',
   'pro.overview.live_indicator': '边缘遥测实时运行中',
@@ -1847,7 +1861,7 @@ export const zh: Record<string, string> = {
   'pro.kpi.health_action_needed': '需要处理',
   'pro.kpi.widget_health_tooltip': '需要检查的活跃小部件运行时错误与渲染异常。',
   'pro.insights.peak_day': '高峰日期：',
-  'pro.insights.peak_hour': '高峰时段 (UTC)：',
+  'pro.insights.peak_hour': '高峰时段：',
   'pro.insights.top_country': '热门国家/地区：',
   'pro.insights.top_referrer': '主要引荐来源：',
   'pro.time.just_now': '刚刚',
@@ -2239,7 +2253,52 @@ export const zh: Record<string, string> = {
   'pro.charts.clear_selection': '清除 ({code})',
   'pro.charts.continent_label': '所属大洲：',
   'pro.charts.search_country': '搜索国家/地区...',
+  'pro.charts.less': '少',
+  'pro.charts.more': '多',
+  'pro.charts.local_time_note': '所有时间均已转换为您的本地时间',
   'landing.nav.pro_dashboard': 'GITASCII PRO 仪表盘',
-  'landing.nav.go_to_editor': '进入编辑器 (@{username})',
+  'landing.nav.go_to_editor': '进入编辑器',
   'landing.nav.go_to_pro_dashboard': '进入 PRO 仪表盘',
+  'landing.hero.pro_cta_title': 'GITASCII PRO · 终身使用权限',
+  'landing.hero.pro_cta_subtitle': '终身可用 • 单次付费',
+  'landing.hero.pro_cta_dense': '获取终身权限',
+  'landing.hero.access_pro': '访问 GitAscii Pro',
+  'landing.hero.pro_workspace_desc': '实时分析、组件错误监控与多主页管理',
+  'landing.hero.pro_active': 'PRO 已激活',
+  'landing.pricing.cta': '获取终身访问权限',
+  'pro.pricing.cta_button': '获取终身访问权限',
+  'pro.pricing.hero_title_part1': '完整遥测与 ',
+  'pro.pricing.hero_title_part2': '多主页架构。',
+  'pro.pricing.hero_desc_extended':
+    '通过无 Cookie 实时分析、24/7 挂件错误监控与告警、多达 10 个独立主页以及 GitHub Camo 边缘即时缓存清除，全面升级您的开发者形象。一次付费，终身拥有。',
+  'pro.pricing.tier_name': 'GITASCII PRO 生态系统',
+  'pro.pricing.arch_badge': '[ 架构与数据流水线 ]',
+  'pro.pricing.arch_latency': '10MS 级边缘超低延迟 · 零数据库锁定',
+  'pro.pricing.arch_1_title': '全球边缘动态渲染',
+  'pro.pricing.arch_1_desc':
+    'GitHub 主页 SVG 直接在离访问者最近的低延迟边缘节点生成并缓存（支持 ETag 304）。',
+  'pro.pricing.arch_2_title': '带盐哈希流量摄取',
+  'pro.pricing.arch_2_desc':
+    'IP 和 User Agent 每天通过轮换盐值哈希加密。提供精细的国家与引荐来源分析，无需弹出烦人的 Cookie 同意横幅。',
+  'pro.pricing.arch_3_title': '24/7 外部徽章健康监控',
+  'pro.pricing.arch_3_desc':
+    '持续后台探测主页中的每个外部徽章和第三方 API，在发生超时或挂掉时立即向您发出邮件预警。',
+  'pro.pricing.arch_4_title': 'GitHub Camo 即时缓存失效',
+  'pro.pricing.arch_4_desc':
+    '当您更改主题、布局或切换活动主页时，立即清除 GitHub 代理缓存，访问者毫秒级看到最新内容。',
+  'pro.pricing.feat_badge': '[ 深度功能解析 ]',
+  'pro.pricing.table_count': '12 项详细功能指标',
+  'pro.pricing.guarantee_title': '14 天 100% 无条件全额退款保证',
+  'pro.pricing.guarantee_desc':
+    '如果 GitAscii Pro 未能让您的 GitHub 个人主页焕然一新，只需一封邮件即可获得全额退款。',
+  'pro.pricing.cta_button_short': '获取终身权限 · {price}',
+  'pro.pricing.faq.camo_q': 'GitHub Camo 缓存即时清除是如何运作的？',
+  'pro.pricing.faq.camo_a':
+    'GitHub 会通过 Camo 代理缓存外部图片长达数小时。在 Pro 版中，当您保存编辑时，我们的边缘机制会触发强制刷新，让访问者立即看到最新更新。',
+  'pro.pricing.faq.profiles_q': '多主页管理是如何运作的？',
+  'pro.pricing.faq.profiles_a':
+    '您可以创建多达 10 个具有独立 URL 的主页（例如 /username 作为主页，/username/work 用于求职招聘，/username/oss 用于开源赞助）。每个主页均拥有独立的挂件配置和分析数据。',
+  'pro.pricing.faq.telemetry_q': '遥测系统是否尊重隐私并符合 GDPR 规范？',
+  'pro.pricing.faq.telemetry_a':
+    '100% 符合。我们不使用持久性 Cookie 或侵入式追踪脚本。所有访问者均通过每日轮换盐值的加密哈希进行匿名化处理。',
 }

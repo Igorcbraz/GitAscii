@@ -6,6 +6,7 @@ import React, { useId, useMemo, useState } from 'react'
 import { useI18n } from '@/i18n'
 
 import type { CountryMetric } from '../../types/analytics'
+import { formatLocalizedCountry } from '../../utils/proFormatters'
 import { CountryFlag } from '../CountryFlag'
 import {
   GRATICULE_LINES,
@@ -38,7 +39,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   onSelectCountry,
   className = '',
 }) => {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const gradientId = useId()
   const [hoveredCountry, setHoveredCountry] = useState<CountryMetric | null>(null)
   const [hoveredRegion, setHoveredRegion] = useState<WorldMapRegion | null>(null)
@@ -269,8 +270,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         {hoveredRegion && (
           <div className="absolute top-4 left-4 z-30 pointer-events-none bg-[#141414]/95 border border-white/20 px-3.5 py-2.5 rounded-xl shadow-2xl backdrop-blur-md text-xs space-y-1 animate-in fade-in-0 zoom-in-95">
             <div className="flex items-center gap-2 font-semibold text-white">
-              <CountryFlag code={hoveredRegion.id} size="sm" />
-              <span>{hoveredRegion.name}</span>
+              <CountryFlag
+                code={hoveredRegion.id}
+                name={formatLocalizedCountry(hoveredRegion.id, hoveredRegion.name, language, t)}
+                size="sm"
+              />
+              <span>
+                {formatLocalizedCountry(hoveredRegion.id, hoveredRegion.name, language, t)}
+              </span>
               <span className="font-mono text-[#8a8a8a] text-[11px]">({hoveredRegion.id})</span>
             </div>
             <div className="flex items-center gap-3 text-[11px] font-mono pt-1">

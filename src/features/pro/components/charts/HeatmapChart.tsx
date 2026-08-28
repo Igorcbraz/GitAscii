@@ -1,11 +1,16 @@
 'use client'
 
 import { Flame, Info } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
 import type { WeekdayHourPoint } from '../../types/analytics'
+import {
+  formatLocalizedDay,
+  formatUtcHourToLocal,
+  getLocalizedDayLabels,
+} from '../../utils/proFormatters'
 
 export interface HeatmapChartProps {
   data: WeekdayHourPoint[]
@@ -20,10 +25,10 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
   peakHourInsight: _peakHourInsight,
   className = '',
 }) => {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const [hoveredCell, setHoveredCell] = useState<WeekdayHourPoint | null>(null)
 
-  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const dayLabels = useMemo(() => getLocalizedDayLabels(language, 'short'), [language])
   const hourLabels = [
     '00',
     '01',
@@ -75,8 +80,8 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
           </div>
           <span className="text-[#8a8a8a]">
             {t(
-              'pro.charts.heatmap_subtitle',
-              'Global README activity across days and hours (UTC).'
+              'pro.charts.heatmap_desc',
+              'Audience density mapped by weekday and hour of day. Spot prime time slots for GitHub profile updates.'
             )}
           </span>
         </div>
@@ -84,7 +89,8 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
         {peakInsight && peakInsight.views > 0 && (
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px]">
             <span>
-              {t('pro.charts.peak_day', 'Peak Day:')} <strong>{peakInsight.day}</strong> (
+              {t('pro.charts.heatmap_peak_day', 'Peak Day:')}{' '}
+              <strong>{formatLocalizedDay(peakInsight.day, language)}</strong> (
               {peakInsight.views.toLocaleString()} {t('pro.common.views', 'views')})
             </span>
           </div>
@@ -95,7 +101,8 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
         {hoveredCell && (
           <div className="absolute top-0 right-0 z-20 pointer-events-none bg-[#1c1c1c] border border-white/20 px-3 py-1.5 rounded-lg shadow-xl text-xs flex items-center gap-2">
             <span className="font-semibold text-[#c5ff4a]">
-              {hoveredCell.dayName} at {String(hoveredCell.hour).padStart(2, '0')}:00 UTC:
+              {formatLocalizedDay(hoveredCell.day, language)} -{' '}
+              {formatUtcHourToLocal(hoveredCell.hour)}:
             </span>
             <span className="font-mono text-white font-bold">
               {hoveredCell.views.toLocaleString()} {t('pro.common.views', 'views')}
@@ -109,7 +116,7 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
             <div />
             {hourLabels.map((h, i) => (
               <div key={h} className={i % 3 === 0 ? 'text-white/80 font-medium' : 'text-[#777]'}>
-                {i % 3 === 0 ? `${h}h` : ''}
+                {i % 3 === 0 ? `${formatUtcHourToLocal(Number(h)).replace(':00', 'h')}` : ''}
               </div>
             ))}
           </div>
@@ -117,10 +124,10 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
           {dayLabels.map((dayName, dayIndex) => {
             return (
               <div
-                key={dayName}
+                key={dayIndex}
                 className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 items-center"
               >
-                <div className="text-[11px] font-mono text-[#8a8a8a] text-right pr-2">
+                <div className="text-[11px] font-mono text-[#8a8a8a] text-right pr-2 truncate">
                   {dayName}
                 </div>
 
@@ -156,11 +163,11 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
       <div className="flex items-center justify-between text-[11px] font-mono text-[#8a8a8a] pt-2 border-t border-white/5">
         <div className="flex items-center gap-1.5 text-xs text-[#777]">
           <Info className="w-3 h-3" />
-          <span>All times normalized to UTC</span>
+          <span>{t('pro.charts.local_time_note', 'All times converted to your local time')}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span>Less</span>
+          <span>{t('pro.charts.less', 'Less')}</span>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-[2px] bg-white/[0.03] border border-white/[0.08]" />
             <span className="w-3 h-3 rounded-[2px] bg-[#c5ff4a]/20 border border-[#c5ff4a]/30" />
@@ -168,7 +175,7 @@ export const HeatmapChart: React.FC<HeatmapChartProps> = ({
             <span className="w-3 h-3 rounded-[2px] bg-[#c5ff4a]/75 border border-[#c5ff4a]/80" />
             <span className="w-3 h-3 rounded-[2px] bg-[#c5ff4a] border border-white" />
           </div>
-          <span>More</span>
+          <span>{t('pro.charts.more', 'More')}</span>
         </div>
       </div>
     </div>

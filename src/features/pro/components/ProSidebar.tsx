@@ -25,12 +25,14 @@ import { ProBadge } from './ProBadge'
 export interface ProSidebarProps {
   username?: string
   avatarUrl?: string
+  isPro?: boolean
   activeErrorsCount?: number
 }
 
 export const ProSidebar: React.FC<ProSidebarProps> = ({
   username,
   avatarUrl,
+  isPro = false,
   activeErrorsCount = 0,
 }) => {
   const pathname = usePathname()
@@ -138,37 +140,56 @@ export const ProSidebar: React.FC<ProSidebarProps> = ({
         <div className="p-3.5 rounded-xl bg-gradient-to-b from-[#141414] to-[#0c0c0c] border border-white/10 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
-              <Zap className="w-3.5 h-3.5 text-[#c5ff4a]" />
+              <Zap className={`w-3.5 h-3.5 ${isPro ? 'text-[#c5ff4a]' : 'text-[#7a7a7a]'}`} />
               <span>
-                {username
+                {isPro
                   ? t('pro.sidebar.member', 'Pro Member')
-                  : t('pro.common.pro_workspace', 'Pro Workspace')}
+                  : username
+                    ? t('pro.sidebar.free_plan', 'Free Plan')
+                    : t('pro.common.pro_workspace', 'Pro Workspace')}
               </span>
             </div>
             <span
               className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
-                username
+                isPro
                   ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                  : 'text-[#8a8a8a] bg-white/5 border-white/10'
+                  : username
+                    ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    : 'text-[#8a8a8a] bg-white/5 border-white/10'
               }`}
             >
-              {username ? t('pro.sidebar.active', 'Active') : t('pro.sidebar.guest', 'Guest')}
+              {isPro
+                ? t('pro.sidebar.active', 'Active')
+                : username
+                  ? t('pro.sidebar.free', 'Free')
+                  : t('pro.sidebar.guest', 'Guest')}
             </span>
           </div>
           <p className="text-[11px] text-[#8a8a8a] leading-relaxed">
-            {username
+            {isPro
               ? t(
                   'pro.sidebar.member_desc',
                   '90-day analytics retention, widget error alerts & multi-profile management enabled.'
                 )
-              : t(
-                  'pro.sidebar.guest_desc',
-                  'Connect your GitHub account to enable telemetry, errors, and multiple profiles.'
-                )}
+              : username
+                ? t(
+                    'pro.sidebar.free_desc',
+                    'Upgrade to Pro to unlock 90-day analytics retention, widget error alerts and multiple profiles.'
+                  )
+                : t(
+                    'pro.sidebar.guest_desc',
+                    'Connect your GitHub account to enable telemetry, errors, and multiple profiles.'
+                  )}
           </p>
           <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${username ? 'bg-[#c5ff4a] w-full' : 'bg-white/20 w-1/4'}`}
+              className={`h-full rounded-full transition-all ${
+                isPro
+                  ? 'bg-[#c5ff4a] w-full'
+                  : username
+                    ? 'bg-amber-400 w-1/3'
+                    : 'bg-white/20 w-1/4'
+              }`}
             />
           </div>
         </div>

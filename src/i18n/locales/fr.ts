@@ -1013,6 +1013,14 @@ export const fr: Record<string, string> = {
     'Notre fonctionnalité de génération intelligente analyse vos données GitHub (dépôts, langues, contributions, biographie) et crée automatiquement une présentation de profil optimisée et adaptée à votre activité.',
   'landing.faq.a8':
     "Oui. Bien que les modèles vous constituent un excellent point de départ, chaque propriété du widget (couleurs, polices, tailles, positions) peut être personnalisée dans l'éditeur visuel.",
+  'landing.faq.a9':
+    'GitAscii Pro débloque la télémétrie en temps réel sans cookies (visiteurs uniques, pays, référents), la surveillance 24/7 avec alertes par e-mail, jusqu’à 10 profils dynamiques, la purge instantanée du cache GitHub Camo et un CDN Edge ultra-rapide (<10ms). Un paiement unique à vie, sans abonnement.',
+  'landing.faq.a10':
+    'Les paiements sont traités de manière 100 % sécurisée via Stripe/Polar avec un chiffrement 256 bits. Dès validation, votre compte GitHub est instantanément mis à niveau avec l’accès Pro à vie.',
+  'landing.faq.a11':
+    'Nous acceptons toutes les cartes de crédit/débit majeures (Visa, Mastercard, American Express, Discover), ainsi qu’Apple Pay et Google Pay.',
+  'landing.faq.a12':
+    'Nous offrons une garantie satisfait ou remboursé de 14 jours à 100 %. Si GitAscii Pro ne vous convient pas, nous vous remboursons intégralement sans condition.',
   'landing.faq.eyebrow': '[ QUESTIONS ET RÉPONSES ]',
   'landing.faq.q1': 'Qu’est-ce que GitAscii ?',
   'landing.faq.q2': 'GitAscii est-il gratuit ?',
@@ -1022,6 +1030,10 @@ export const fr: Record<string, string> = {
   'landing.faq.q6': "Est-ce qu'il prend en charge les modes sombre et clair ?",
   'landing.faq.q7': "Qu'est-ce que Générer le meilleur profil ?",
   'landing.faq.q8': 'Puis-je tout personnaliser ?',
+  'landing.faq.q9': 'Qu’est-ce que GitAscii Pro et comment fonctionne l’accès à vie ?',
+  'landing.faq.q10': 'Comment fonctionnent le paiement et l’activation immédiate ?',
+  'landing.faq.q11': 'Quels sont les modes de paiement acceptés ?',
+  'landing.faq.q12': 'Comment fonctionne la garantie de remboursement de 14 jours ?',
   'landing.faq.title_italic': 'Questions.',
   'landing.faq.title_normal': 'Foire aux questions',
   'landing.features.adaptive_themes.desc':
@@ -1920,6 +1932,7 @@ export const fr: Record<string, string> = {
   'pro.guard.paywall.processing': 'Traitement de la mise à niveau...',
   'pro.guard.paywall.cta': 'Débloquer GitAscii Pro maintenant',
   'pro.guard.paywall.back_editor': "← Retourner à l'éditeur gratuit",
+  'pro.guard.paywall.back_home': "← Retourner à l'accueil",
   'pro.guard.paywall.guarantee': 'Garantie 100% satisfaction',
   'pro.dialog.confirm': 'Confirmer',
   'pro.dialog.cancel': 'Annuler',
@@ -1932,6 +1945,7 @@ export const fr: Record<string, string> = {
   'pro.stat.rolling_telemetry': 'télémétrie continue',
   'pro.stat.details_aria': 'Détails de la métrique',
   'pro.geo.unknown_location': 'Emplacement inconnu',
+  'pro.geo.unknown_region': 'Région inconnue',
   'pro.overview.title': 'Aperçu',
   'pro.overview.subtitle':
     'Télémétrie unifiée, état des profils et activité opérationnelle sur toute votre pile GitAscii.',
@@ -1977,7 +1991,7 @@ export const fr: Record<string, string> = {
   'pro.kpi.widget_health_tooltip':
     "Erreurs d'exécution et exceptions de rendu des widgets actifs nécessitant un examen.",
   'pro.insights.peak_day': 'Jour de pointe :',
-  'pro.insights.peak_hour': 'Heure de pointe (UTC) :',
+  'pro.insights.peak_hour': 'Heure de pointe :',
   'pro.insights.top_country': 'Pays principal :',
   'pro.insights.top_referrer': 'Référant principal :',
   'pro.time.just_now': "À l'instant",
@@ -2392,7 +2406,52 @@ export const fr: Record<string, string> = {
   'pro.charts.clear_selection': 'Effacer ({code})',
   'pro.charts.continent_label': 'Continent :',
   'pro.charts.search_country': 'Rechercher un pays...',
+  'pro.charts.less': 'Moins',
+  'pro.charts.more': 'Plus',
+  'pro.charts.local_time_note': 'Tous les horaires convertis à votre heure locale',
   'landing.nav.pro_dashboard': 'TABLEAU DE BORD GITASCII PRO',
-  'landing.nav.go_to_editor': "Aller à l'éditeur (@{username})",
+  'landing.nav.go_to_editor': "Aller à l'éditeur",
   'landing.nav.go_to_pro_dashboard': 'ALLER AU TABLEAU DE BORD PRO',
+  'landing.hero.pro_cta_title': 'GITASCII PRO · ACCÈS À VIE',
+  'landing.hero.pro_cta_subtitle': 'Achetez à vie • Paiement unique',
+  'landing.hero.pro_cta_dense': 'Obtenir l’accès à vie',
+  'landing.hero.access_pro': 'Accéder à GitAscii Pro',
+  'landing.hero.pro_workspace_desc': 'Analytique en temps réel, suivi des erreurs & multi-profils',
+  'landing.hero.pro_active': 'PRO ACTIF',
+  'landing.pricing.cta': 'Obtenir l’accès à vie',
+  'pro.pricing.cta_button': 'Obtenir l’accès à vie',
+  'pro.pricing.hero_title_part1': 'Télémétrie Complète & ',
+  'pro.pricing.hero_title_part2': 'Architecture Multi-Profils.',
+  'pro.pricing.hero_desc_extended':
+    'Sublimez votre présence de développeur avec des métriques en temps réel sans cookies, un monitoring 24/7 avec alertes d’erreurs de widgets, jusqu’à 10 profils isolés et la purge immédiate du cache GitHub Camo Edge. Un seul paiement — à vous pour toujours.',
+  'pro.pricing.tier_name': 'ÉCOSYSTÈME GITASCII PRO',
+  'pro.pricing.arch_badge': '[ ARCHITECTURE & PIPELINE DE DONNÉES ]',
+  'pro.pricing.arch_latency': 'LATENCE SUB-10MS SUR L’EDGE · ZÉRO DÉPENDANCE DE BASE DE DONNÉES',
+  'pro.pricing.arch_1_title': 'Rendu Dynamique sur l’Edge Global',
+  'pro.pricing.arch_1_desc':
+    'Les SVGs de profil GitHub sont générés directement sur des serveurs edge à très faible latence au plus près de vos visiteurs avec mise en cache ETag 304.',
+  'pro.pricing.arch_2_title': 'Ingestion du Trafic avec Hash et Salt',
+  'pro.pricing.arch_2_desc':
+    'Les adresses IP et user agents sont hachés quotidiennement avec des clés rotatives. Fournit des insights précis par pays et référents sans bannières de cookies.',
+  'pro.pricing.arch_3_title': 'Intégrité des Badges Externes 24/7',
+  'pro.pricing.arch_3_desc':
+    'Des sondes continues en arrière-plan vérifient chaque badge externe et API tierce de votre profil, vous avertissant immédiatement en cas d’anomalie.',
+  'pro.pricing.arch_4_title': 'Invalidation Immédiate du GitHub Camo',
+  'pro.pricing.arch_4_desc':
+    'Purgez instantanément les caches proxy de GitHub lorsque vous modifiez vos thèmes, mises en page ou permutez de profil actif.',
+  'pro.pricing.feat_badge': '[ FONCTIONNALITÉS EN DÉTAIL ]',
+  'pro.pricing.table_count': '12 SPÉCIFICATIONS DÉTAILLÉES',
+  'pro.pricing.guarantee_title': 'Garantie Inconditionnelle de 14 Jours (100% Remboursable)',
+  'pro.pricing.guarantee_desc':
+    'Si GitAscii Pro ne métamorphose pas votre profil GitHub, contactez-nous par e-mail pour un remboursement intégral sans justification.',
+  'pro.pricing.cta_button_short': 'Obtenir l’accès à vie · {price}',
+  'pro.pricing.faq.camo_q': 'Comment fonctionne la purge immédiate du cache GitHub Camo ?',
+  'pro.pricing.faq.camo_a':
+    'GitHub utilise un serveur proxy (Camo) qui met en cache les images externes pendant plusieurs heures. Avec Pro, lors de l’enregistrement de modifications, notre invalidation Edge force une mise à jour immédiate pour vos visiteurs.',
+  'pro.pricing.faq.profiles_q': 'Comment fonctionnent les profils multiples ?',
+  'pro.pricing.faq.profiles_a':
+    'Vous pouvez créer jusqu’à 10 profils avec des URLs dédiées (ex. : /votre-nom pour le principal, /votre-nom/work pour les recruteurs, /votre-nom/oss pour les sponsors). Chacun possède sa configuration de widgets et son analytique isolée.',
+  'pro.pricing.faq.telemetry_q': 'La télémétrie respecte-t-elle la vie privée et le RGPD ?',
+  'pro.pricing.faq.telemetry_a':
+    '100%. Nous n’utilisons aucun cookie persistant ni traceur invasif. Les visites sont pseudonymisées chaque jour avec un hash cryptographique et un sel rotatif.',
 }

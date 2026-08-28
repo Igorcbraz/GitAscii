@@ -5,11 +5,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { PRO_PLAN_TIERS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserMenuDropdownProps {
-  username: string
+  username?: string
   avatarUrl?: string
   align?: 'left' | 'right'
   direction?: 'down' | 'up'
@@ -45,7 +46,7 @@ export function UserMenuDropdown({
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.session) {
-            setIsProUser(Boolean(data.session.isPro || data.session.tier !== 'free'))
+            setIsProUser(Boolean(data.session.isPro || data.session.tier !== PRO_PLAN_TIERS.FREE))
           }
         })
         .catch(() => {})
@@ -125,7 +126,9 @@ export function UserMenuDropdown({
               ? 'bg-white/10 border border-white/20'
               : 'hover:bg-white/5 border border-transparent'
           }`}
-          title={t('landing.nav.account_menu', 'Account menu @{username}', { username })}
+          title={t('landing.nav.account_menu', 'Account menu @{username}', {
+            username: username || '',
+          })}
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs font-bold text-white overflow-hidden flex-shrink-0">
@@ -173,14 +176,16 @@ export function UserMenuDropdown({
               ? 'border-signal-lime/60 bg-carbon text-white shadow-[0_0_12px_rgba(197,255,74,0.15)]'
               : 'border-graphite/70 text-white hover:border-graphite hover:bg-carbon'
           }`}
-          title={t('landing.nav.account_menu', 'Account menu @{username}', { username })}
+          title={t('landing.nav.account_menu', 'Account menu @{username}', {
+            username: username || '',
+          })}
         >
           <div className="size-5 rounded-full bg-signal-lime/10 border border-signal-lime/30 overflow-hidden flex items-center justify-center shrink-0">
             {resolvedAvatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={resolvedAvatarUrl}
-                alt={username}
+                alt={username || 'User'}
                 className="size-full object-cover rounded-full"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
@@ -275,14 +280,9 @@ export function UserMenuDropdown({
                 <Zap className="size-3.5 text-signal-lime" />
               </div>
               <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="leading-tight text-white font-semibold">
-                    {t('landing.nav.go_to_pro', 'Go to Pro')}
-                  </span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-signal-lime/20 text-signal-lime border border-signal-lime/40">
-                    PRO
-                  </span>
-                </div>
+                <span className="leading-tight text-white font-semibold">
+                  {t('landing.nav.go_to_pro', 'Go to Pro')}
+                </span>
                 <span className="text-[10px] text-ash group-hover:text-ash/90">
                   {t('landing.nav.pro_desc', 'Analytics, reports & errors')}
                 </span>
