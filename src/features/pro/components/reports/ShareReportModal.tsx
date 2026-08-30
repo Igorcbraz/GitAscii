@@ -138,27 +138,27 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({ isOpen, onCl
 
     const stats = [
       {
-        label: 'TOTAL VIEWS',
+        label: t('pro.reports.share_image_requests', 'IMAGE REQUESTS'),
         value: data.metrics.totalViews.toLocaleString(),
-        sub: `+${data.metrics.growthRateViews} vs prev.`,
+        sub: `+${data.metrics.growthRateViews} ${t('pro.reports.vs_prev', 'vs prev.')}`,
         accent: accentColor,
       },
       {
-        label: 'UNIQUE DEVS',
+        label: t('pro.reports.share_unique_sources', 'EST. UNIQUE SOURCES'),
         value: data.metrics.uniqueVisitors.toLocaleString(),
-        sub: 'Cookieless HyperLogLog',
+        sub: t('pro.reports.share_hyperloglog', 'Cookieless HyperLogLog'),
         accent: subAccent,
       },
       {
-        label: 'CACHE HIT RATIO',
+        label: t('pro.reports.share_cache_ratio', 'CACHE HIT RATIO'),
         value: data.metrics.cacheHitRatio,
-        sub: 'HTTP 304 Validated',
+        sub: t('pro.reports.share_http_304', 'HTTP 304 Validated'),
         accent: accentColor,
       },
       {
-        label: 'AVG SERVER SPEED',
+        label: t('pro.reports.share_server_speed', 'AVG SERVER SPEED'),
         value: `${data.metrics.avgLatencyMs || 24}ms`,
-        sub: 'Edge Synthesis SLA',
+        sub: t('pro.reports.share_edge_sla', 'Edge Synthesis SLA'),
         accent: subAccent,
       },
     ]
@@ -176,7 +176,7 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({ isOpen, onCl
       ctx.fillRect(x, cardY, cardWidth, 2)
 
       ctx.fillStyle = '#71717a'
-      ctx.font = 'bold 11px monospace'
+      ctx.font = 'bold 10px monospace'
       ctx.fillText(st.label, x + 18, cardY + 28)
 
       ctx.fillStyle = '#ffffff'
@@ -200,7 +200,7 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({ isOpen, onCl
 
     ctx.fillStyle = '#71717a'
     ctx.font = 'bold 11px monospace'
-    ctx.fillText('DAILY TRAFFIC VOLUME (TIME-SERIES CURVE)', chartX + 18, chartY + 26)
+    ctx.fillText('DAILY REQUEST VOLUME (TIME-SERIES CURVE)', chartX + 18, chartY + 26)
 
     const points = data.timeSeries || []
     if (points.length > 1) {
@@ -245,13 +245,8 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({ isOpen, onCl
 
     ctx.fillStyle = '#52525b'
     ctx.font = '12px monospace'
-    const topSrc = data.topSources?.[0]?.name || 'GitHub'
-    const topCtry = data.topCountries?.[0]?.name || 'Global'
-    ctx.fillText(
-      `TOP SOURCE: ${topSrc.toUpperCase()} • TOP REGION: ${topCtry.toUpperCase()}`,
-      56,
-      height - 42
-    )
+    const topSrc = data.topSources?.[0]?.name || 'GitHub README'
+    ctx.fillText(`DELIVERY: GITHUB CAMO PROXY • ORIGIN: ${topSrc.toUpperCase()}`, 56, height - 42)
 
     ctx.textAlign = 'right'
     ctx.fillStyle = '#71717a'
@@ -328,7 +323,7 @@ Verified telemetry with GitAscii Pro! #buildinpublic #github #developer`
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fade-in">
       <div
         className="relative w-full max-w-4xl rounded-2xl bg-[#0f0f10] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
@@ -343,7 +338,9 @@ Verified telemetry with GitAscii Pro! #buildinpublic #github #developer`
                 <h3 className="text-sm font-bold text-white tracking-tight">
                   {t('pro.share.modal_title', 'Share Performance Card')}
                 </h3>
-                <ProBadge variant="lime">PNG 1200x630</ProBadge>
+                <ProBadge variant="lime">
+                  {t('pro.reports.png_dimension_badge', '1200×630 PNG')}
+                </ProBadge>
               </div>
               <p className="text-[11px] text-[#8a8a8a]">
                 {t(

@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronDown, Layers, LogOut, User, Zap } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
@@ -131,12 +132,13 @@ export function UserMenuDropdown({
           })}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs font-bold text-white overflow-hidden flex-shrink-0">
+            <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs font-bold text-white overflow-hidden flex-shrink-0 relative">
               {resolvedAvatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={resolvedAvatarUrl}
                   alt={username || 'User'}
+                  width={28}
+                  height={28}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -180,16 +182,14 @@ export function UserMenuDropdown({
             username: username || '',
           })}
         >
-          <div className="size-5 rounded-full bg-signal-lime/10 border border-signal-lime/30 overflow-hidden flex items-center justify-center shrink-0">
+          <div className="size-5 rounded-full bg-signal-lime/10 border border-signal-lime/30 overflow-hidden flex items-center justify-center shrink-0 relative">
             {resolvedAvatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={resolvedAvatarUrl}
                 alt={username || 'User'}
+                width={20}
+                height={20}
                 className="size-full object-cover rounded-full"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none'
-                }}
               />
             ) : (
               <User className="size-2.5 text-signal-lime" />
@@ -225,12 +225,13 @@ export function UserMenuDropdown({
           {isLanding && (
             <div className="px-2.5 py-2 mb-1 border-b border-graphite/40 flex items-center justify-between">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="size-6 rounded-full bg-white/10 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="size-6 rounded-full bg-white/10 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center relative">
                   {resolvedAvatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={resolvedAvatarUrl}
-                      alt={username}
+                      alt={username || 'User'}
+                      width={24}
+                      height={24}
                       className="size-full object-cover"
                     />
                   ) : (

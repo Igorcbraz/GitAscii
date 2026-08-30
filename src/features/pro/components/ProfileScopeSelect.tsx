@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronDown, Layers, User } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
@@ -12,26 +12,62 @@ export interface ProfileOption {
 }
 
 export interface ProfileScopeSelectProps {
-  options: ProfileOption[]
-  value: string
-  onChange: (slug: string) => void
+  options?: ProfileOption[]
+  profiles?: { slug: string; name?: string; isDefault?: boolean }[]
+  value?: string
+  selectedSlug?: string
+  onChange?: (slug: string) => void
+  onSelect?: (slug: string) => void
   className?: string
+  includeAll?: boolean
 }
 
 export const ProfileScopeSelect: React.FC<ProfileScopeSelectProps> = ({
-  options,
-  value,
+  options: rawOptions,
+  profiles,
+  value: rawValue,
+  selectedSlug,
   onChange,
+  onSelect,
   className = '',
+  includeAll = true,
 }) => {
   const { t } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const selectedOption = options.find((opt) => opt.slug === value) ||
-    options[0] || {
-      slug: 'all',
-      name: t('pro.scope.all_profiles_combined', 'All Profiles Combined'),
+  const handleChange = onChange || onSelect || (() => {})
+  const activeValue = rawValue || selectedSlug || (includeAll ? 'all' : 'default')
+
+  const effectiveOptions: ProfileOption[] = useMemo(() => {
+    if (rawOptions && rawOptions.length > 0) return rawOptions
+    if (profiles && profiles.length > 0) {
+      const mapped = profiles.map((p) => ({
+        slug: p.slug,
+        name: p.name || p.slug,
+        isDefault: p.isDefault,
+      }))
+      return includeAll
+        ? [
+            { slug: 'all', name: t('pro.scope.all_profiles_combined', 'All Profiles Combined') },
+            ...mapped,
+          ]
+        : mapped
+    }
+    return includeAll
+      ? [
+          { slug: 'all', name: t('pro.scope.all_profiles_combined', 'All Profiles Combined') },
+          { slug: 'default', name: 'Default Profile' },
+        ]
+      : [{ slug: 'default', name: 'Default Profile' }]
+  }, [rawOptions, profiles, includeAll, t])
+
+  const selectedOption = effectiveOptions.find((opt) => opt.slug === activeValue) ||
+    effectiveOptions[0] || {
+      slug: includeAll ? 'all' : 'default',
+      name: includeAll
+        ? t('pro.scope.all_profiles_combined', 'All Profiles Combined')
+        : 'Default Profile',
     }
 
   useEffect(() => {
@@ -104,8 +140,8 @@ export const ProfileScopeSelect: React.FC<ProfileScopeSelectProps> = ({
             {t('pro.scope.select_title', 'Select Profile Scope')}
           </div>
 
-          {options.map((opt) => {
-            const isSelected = opt.slug === value
+          {effectiveOptions.map((opt) => {
+            const isSelected = opt.slug === activeValue
 
             return (
               <button
@@ -114,7 +150,7 @@ export const ProfileScopeSelect: React.FC<ProfileScopeSelectProps> = ({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => {
-                  onChange(opt.slug)
+                  handleChange(opt.slug)
                   setIsOpen(false)
                 }}
                 className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-left text-xs transition-colors cursor-pointer ${

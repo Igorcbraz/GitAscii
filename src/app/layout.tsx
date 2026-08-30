@@ -226,10 +226,6 @@ export default async function RootLayout({
   const cookieHeader = headersList.get('cookie') || ''
   const acceptLanguage = headersList.get('accept-language') || ''
 
-  // Priorização rigorosa:
-  // 1. ?lang= explícito na URL
-  // 2. Preferência salva em cookie (gitascii_lang)
-  // 3. Cabeçalho Accept-Language do navegador
   let ssrLang = 'en'
   if (queryLang === 'pt') {
     ssrLang = 'pt-BR'

@@ -420,7 +420,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     {feat.badge}
                   </span>
                   <span className="font-jetbrains-mono text-[9px] uppercase text-graphite">
-                    PRO TIER ONLY
+                    {t('pro.pricing.pro_tier_only', 'PRO TIER ONLY')}
                   </span>
                 </div>
               </div>

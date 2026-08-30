@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  AlertTriangle,
   BarChart3,
   BookOpen,
   ExternalLink,
@@ -10,6 +9,7 @@ import {
   Layers,
   LayoutDashboard,
   Mail,
+  ShieldCheck,
   Zap,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -51,21 +51,21 @@ export const ProSidebar: React.FC<ProSidebarProps> = ({
       icon: BarChart3,
     },
     {
-      label: t('pro.sidebar.nav.reports', 'Reports'),
-      href: '/pro/reports',
-      icon: FileText,
-    },
-    {
       label: t('pro.sidebar.nav.profiles', 'Profiles'),
       href: '/pro/profiles',
       icon: Layers,
     },
     {
-      label: t('pro.sidebar.nav.errors', 'Widget Errors'),
-      href: '/pro/errors',
-      icon: AlertTriangle,
+      label: t('pro.sidebar.nav.health', 'Health'),
+      href: '/pro/health',
+      icon: ShieldCheck,
       badge: activeErrorsCount > 0 ? activeErrorsCount : undefined,
       badgeVariant: 'rose' as const,
+    },
+    {
+      label: t('pro.sidebar.nav.reports', 'Reports'),
+      href: '/pro/reports',
+      icon: FileText,
     },
     {
       label: t('pro.sidebar.nav.emails', 'Email Logs'),

@@ -32,7 +32,6 @@ const DAY_NAME_TO_INDEX: Record<string, number> = {
   '6': 6,
 }
 
-// 2026-01-04 is a Sunday (day 0)
 const SUNDAY_BASE_DATE = new Date(Date.UTC(2026, 0, 4, 12, 0, 0))
 
 export function formatLocalizedDay(
@@ -41,7 +40,7 @@ export function formatLocalizedDay(
   format: 'long' | 'short' = 'long'
 ): string {
   if (dayInput === undefined || dayInput === null || dayInput === '') {
-    dayInput = 3 // default Wednesday
+    dayInput = 3
   }
 
   let dayIndex = 3

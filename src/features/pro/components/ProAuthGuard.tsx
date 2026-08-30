@@ -11,6 +11,7 @@ import { ProPaywallSkeleton } from './ProSkeleton'
 
 export interface ProAuthGuardProps {
   children: React.ReactNode
+  loadingFallback?: React.ReactNode
 }
 
 interface UserSessionState {
@@ -22,7 +23,7 @@ interface UserSessionState {
   tier?: (typeof PRO_PLAN_TIERS)[keyof typeof PRO_PLAN_TIERS]
 }
 
-export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children }) => {
+export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFallback }) => {
   const pathname = usePathname() || '/pro'
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<UserSessionState | null>(null)
@@ -53,8 +54,7 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children }) => {
 
   const handleUpgradeToPro = async () => {
     if (!session || !session.username) {
-      const loginUrl = `/api/auth/login?redirect_to=${encodeURIComponent(pathname)}`
-      window.location.href = loginUrl
+      window.location.href = API_ENDPOINTS.AUTH.LOGIN(pathname)
       return
     }
 
@@ -81,7 +81,7 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children }) => {
   }
 
   if (loading) {
-    return <ProPaywallSkeleton />
+    return <>{loadingFallback ?? <ProPaywallSkeleton />}</>
   }
 
   if (!session?.username || (!session.isPro && session.tier === PRO_PLAN_TIERS.FREE)) {

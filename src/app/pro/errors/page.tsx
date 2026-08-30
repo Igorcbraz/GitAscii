@@ -1,5 +1,5 @@
-import { WidgetErrorsDashboard } from '@/features/pro/components/errors/WidgetErrorsDashboard'
+import { HealthDashboard } from '@/features/pro/components/health/HealthDashboard'
 
 export default function ProErrorsPage() {
-  return <WidgetErrorsDashboard />
+  return <HealthDashboard />
 }

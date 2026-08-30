@@ -10,6 +10,7 @@ import {
   Eye,
   Flame,
   Globe2,
+  Info,
   Laptop,
   Layers,
   Radio,
@@ -21,46 +22,76 @@ import {
 } from 'lucide-react'
 import React from 'react'
 
+import { useI18n } from '@/i18n'
+
 import { ProBadge } from '../ProBadge'
 import { ProHeader } from '../ProHeader'
 import { ProSkeleton } from '../ProSkeleton'
 
-const sections = [
-  { id: 'overview', label: 'Overview', icon: <Layers className="w-3.5 h-3.5" /> },
-  { id: 'traffic', label: 'Traffic & Trends', icon: <TrendingUp className="w-3.5 h-3.5" /> },
-  { id: 'geography', label: 'Geography', icon: <Globe2 className="w-3.5 h-3.5" /> },
-  { id: 'technology', label: 'Technology', icon: <Cpu className="w-3.5 h-3.5" /> },
-  { id: 'sources', label: 'Sources', icon: <Compass className="w-3.5 h-3.5" /> },
-  { id: 'profiles', label: 'Profiles', icon: <Laptop className="w-3.5 h-3.5" /> },
-  {
-    id: 'activity',
-    label: 'Live Telemetry',
-    icon: <Activity className="w-3.5 h-3.5" />,
-    badge: 'LIVE',
-  },
-]
-
-const timeRanges = [
-  { id: '24h', label: 'Last 24h' },
-  { id: '7d', label: '7 Days' },
-  { id: '30d', label: '30 Days' },
-  { id: '90d', label: '90 Days' },
-  { id: 'all', label: 'All Time' },
-]
-
 export const AnalyticsDashboardSkeleton: React.FC = () => {
+  const { t } = useI18n()
+
+  const sections = [
+    {
+      id: 'overview',
+      label: t('pro.analytics.section_overview', 'Overview'),
+      icon: <Layers className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'traffic',
+      label: t('pro.analytics.section_traffic', 'Traffic & Trends'),
+      icon: <TrendingUp className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'geography',
+      label: t('pro.analytics.section_geography', 'Geography'),
+      icon: <Globe2 className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'technology',
+      label: t('pro.analytics.section_technology', 'Technology'),
+      icon: <Cpu className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'sources',
+      label: t('pro.analytics.section_sources', 'Sources'),
+      icon: <Compass className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'profiles',
+      label: t('pro.analytics.section_profiles', 'Profiles'),
+      icon: <Laptop className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'activity',
+      label: t('pro.analytics.section_activity', 'Live Telemetry'),
+      icon: <Activity className="w-3.5 h-3.5" />,
+      badge: t('pro.analytics.live_badge', 'LIVE'),
+    },
+  ]
+
+  const timeRanges = [
+    { id: '24h', label: t('pro.time.24h', 'Last 24h') },
+    { id: '7d', label: t('pro.time.7d', '7 Days') },
+    { id: '30d', label: t('pro.time.30d', '30 Days') },
+    { id: '90d', label: t('pro.time.90d', '90 Days') },
+    { id: 'all', label: t('pro.time.all', 'All Time') },
+  ]
+
   return (
     <div className="flex-1 flex h-screen overflow-hidden bg-[#0a0a0a]">
       <aside className="w-52 lg:w-56 flex-shrink-0 hidden md:flex flex-col justify-between h-screen bg-[#080808] border-r border-white/[0.06] select-none p-3 space-y-4">
         <div className="space-y-4">
           <div className="space-y-1">
             <span className="text-[9px] font-mono uppercase tracking-wider text-[#666] px-1 block">
-              Scope
+              {t('pro.analytics.scope', 'Scope')}
             </span>
             <div className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#c5ff4a]/60 animate-pulse" />
-                <span className="text-[#ccc] font-medium text-xs">All Profiles Combined</span>
+                <span className="text-[#ccc] font-medium text-xs">
+                  {t('pro.analytics.all_profiles_combined', 'All Profiles Combined')}
+                </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[#666]" />
             </div>
@@ -68,7 +99,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
           <div className="space-y-0.5 pt-1">
             <span className="text-[9px] font-mono uppercase tracking-wider text-[#666] px-1 pb-1 block">
-              Sections
+              {t('pro.analytics.sections', 'Sections')}
             </span>
             <nav className="space-y-0.5">
               {sections.map((sec) => {
@@ -98,15 +129,18 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
         </div>
 
         <div className="p-2 rounded-lg bg-white/[0.02] border border-white/5 text-[10px] font-mono text-[#777] flex items-center justify-between">
-          <span>Retention</span>
-          <span className="text-emerald-400">90d Pro</span>
+          <span>{t('pro.analytics.retention', 'Retention')}</span>
+          <span className="text-emerald-400">{t('pro.analytics.pro_retention', '90d Pro')}</span>
         </div>
       </aside>
 
       <div className="flex-1 overflow-y-auto h-screen flex flex-col min-w-0">
         <ProHeader
-          title="Analytics & Telemetry"
-          subtitle="Full-funnel, privacy-first observability for your published GitAscii README profiles."
+          title={t('pro.analytics.title', 'Analytics & Telemetry')}
+          subtitle={t(
+            'pro.analytics.subtitle',
+            'Full-funnel, privacy-first observability for your published GitAscii README profiles.'
+          )}
           center={
             <div className="flex items-center gap-2">
               <div className="flex items-center bg-white/[0.03] border border-white/[0.08] rounded-lg p-0.5">
@@ -124,7 +158,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               </div>
 
               <div className="px-2.5 py-1 text-xs font-mono rounded-lg border bg-white/[0.08] border-white/[0.15] text-white font-medium">
-                Compare
+                {t('pro.analytics.compare', 'Compare')}
               </div>
             </div>
           }
@@ -136,7 +170,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs font-medium">
                 <Download className="w-3.5 h-3.5 text-[#c5ff4a]" />
-                <span>Export</span>
+                <span>{t('pro.analytics.export', 'Export')}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-[#8a8a8a]" />
               </div>
             </div>
@@ -147,7 +181,9 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
           <div className="lg:hidden space-y-3 pb-2 border-b border-white/5">
             <div className="md:hidden">
               <div className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs">
-                <span className="text-[#ccc]">All Profiles Combined</span>
+                <span className="text-[#ccc]">
+                  {t('pro.analytics.all_profiles_combined', 'All Profiles Combined')}
+                </span>
                 <ChevronDown className="w-3.5 h-3.5 text-[#666]" />
               </div>
             </div>
@@ -168,28 +204,12 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs overflow-hidden">
-            <div className="p-3.5 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 flex-shrink-0 text-emerald-400" />
-                <p className="leading-relaxed">
-                  <strong>LGPD & GDPR Privacy-by-Design:</strong> 100% cookieless telemetry. Zero
-                  raw IP storage, daily rotated salted hashes with HyperLogLog, sanitized referrers,
-                  and coarse client metadata.
-                </p>
-              </div>
-              <span className="text-xs text-emerald-400 font-mono whitespace-nowrap">
-                Learn how
-              </span>
-            </div>
-          </div>
-
           <section className="space-y-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-2">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Overview
+                  {t('pro.overview.title', 'Overview')}
                 </h2>
               </div>
               <div className="flex items-center gap-2">
@@ -197,90 +217,125 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-              <div className="p-4 rounded-xl bg-[#141414] border border-[#c5ff4a]/25 space-y-3 relative overflow-hidden">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-white/[0.06] rounded overflow-hidden border border-white/[0.08]">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Total Profile Views</span>
-                  <Eye className="w-4 h-4 text-[#c5ff4a]" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.kpi.total_requests', 'Total Image Requests')}
+                  </span>
+                  <div className="p-1 rounded bg-[#c5ff4a]/10 border border-[#c5ff4a]/20">
+                    <Eye className="w-3.5 h-3.5 text-[#c5ff4a]" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-20 bg-[#c5ff4a]/10" />
-                  <ProSkeleton className="h-3 w-24" />
-                </div>
+                <ProSkeleton className="h-7 w-24 bg-[#c5ff4a]/10" />
+                <span className="text-[10px] text-[#777] block font-medium">
+                  {t('pro.analytics.observed_30d', '30d observed')}
+                </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#141414] border border-white/5 space-y-3">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Est. Unique Visitors</span>
-                  <Users className="w-4 h-4 text-[#8a8a8a]" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.kpi.unique_visitors', 'Est. Unique Sources')}
+                  </span>
+                  <div className="p-1 rounded bg-white/[0.04] border border-white/10">
+                    <Users className="w-3.5 h-3.5 text-[#aaa]" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-16" />
-                  <ProSkeleton className="h-3 w-20" />
-                </div>
+                <ProSkeleton className="h-7 w-20" />
+                <span className="text-[10px] text-cyan-400/80 block font-medium">
+                  {t('pro.analytics.hyperloglog_hashed', 'HyperLogLog Hashed')}
+                </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#141414] border border-white/5 space-y-3">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Cache Validation (304)</span>
-                  <Cpu className="w-4 h-4 text-[#8a8a8a]" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.kpi.cache_validation', 'Cache Validation (304)')}
+                  </span>
+                  <div className="p-1 rounded bg-cyan-500/10 border border-cyan-500/20">
+                    <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-14" />
-                  <ProSkeleton className="h-3 w-24" />
-                </div>
+                <ProSkeleton className="h-7 w-16" />
+                <span className="text-[10px] text-[#777] block font-medium">
+                  {t('pro.analytics.not_modified_304', '304 Not Modified')}
+                </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#141414] border border-white/5 space-y-3">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Avg. Server Render</span>
-                  <Zap className="w-4 h-4 text-[#8a8a8a]" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.kpi.avg_render', 'Avg. Server Latency')}
+                  </span>
+                  <div className="p-1 rounded bg-amber-500/10 border border-amber-500/20">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-16" />
-                  <ProSkeleton className="h-3 w-24" />
-                </div>
+                <ProSkeleton className="h-7 w-16" />
+                <span className="text-[10px] text-[#777] block font-medium">
+                  {t('pro.analytics.edge_speed_sub30', '< 30ms Edge Speed')}
+                </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#141414] border border-white/5 space-y-3">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Recent Viewers (30m)</span>
-                  <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.analytics.recent_viewers', 'Requests (Last 30m)')}
+                  </span>
+                  <div className="p-1 rounded bg-emerald-500/10 border border-emerald-500/20">
+                    <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-12" />
-                  <ProSkeleton className="h-3 w-16" />
-                </div>
+                <ProSkeleton className="h-7 w-16" />
+                <span className="text-[10px] text-emerald-400/80 block font-medium">
+                  {t('pro.analytics.rolling_30m_window', 'Rolling 30m Window')}
+                </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#141414] border border-white/5 space-y-3">
+              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#8a8a8a] font-medium">Daily Avg. Views</span>
-                  <TrendingUp className="w-4 h-4 text-[#8a8a8a]" />
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                    {t('pro.analytics.daily_avg_views', 'Daily Avg. Requests')}
+                  </span>
+                  <div className="p-1 rounded bg-white/[0.04] border border-white/10">
+                    <TrendingUp className="w-3.5 h-3.5 text-[#c5ff4a]" />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <ProSkeleton className="h-7 w-16" />
-                  <ProSkeleton className="h-3 w-20" />
-                </div>
+                <ProSkeleton className="h-7 w-20" />
+                <span className="text-[10px] text-[#777] block font-medium">
+                  {t('pro.analytics.per_day_average', 'Per Day Average')}
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
-              <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8a8a8a]">Peak Traffic Day:</span>
-                <ProSkeleton className="h-4 w-20" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded overflow-hidden border border-white/[0.05]">
+              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666] text-[11px]">
+                  {t('pro.insights.peak_day', 'Peak Day:')}
+                </span>
+                <ProSkeleton className="h-3.5 w-16" />
               </div>
-              <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8a8a8a]">Peak Traffic Hour:</span>
-                <ProSkeleton className="h-4 w-24" />
+              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666] text-[11px]">
+                  {t('pro.insights.peak_hour', 'Peak Hour:')}
+                </span>
+                <ProSkeleton className="h-3.5 w-20" />
               </div>
-              <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8a8a8a]">Top Country:</span>
-                <ProSkeleton className="h-4 w-28" />
+              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666] text-[11px]">
+                  {t('pro.insights.top_country', 'Top Country:')}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <ProSkeleton className="w-4 h-3 rounded-xs" />
+                  <ProSkeleton className="h-3.5 w-24" />
+                </div>
               </div>
-              <div className="p-3.5 rounded-xl bg-[#111] border border-white/5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8a8a8a]">Top Referrer:</span>
-                <ProSkeleton className="h-4 w-20" />
+              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                <span className="text-[#666] text-[11px]">
+                  {t('pro.insights.top_referrer', 'Top Referrer:')}
+                </span>
+                <ProSkeleton className="h-3.5 w-20" />
               </div>
             </div>
           </section>
@@ -290,19 +345,23 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Traffic & Engagement Trends
+                  {t('pro.trends.title', 'Traffic & Engagement Trends')}
                 </h2>
               </div>
-              <ProBadge variant="lime">Time Series</ProBadge>
+              <ProBadge variant="lime">{t('pro.trends.time_series', 'Time Series')}</ProBadge>
             </div>
 
             <div className="p-4 sm:p-5 rounded-xl bg-[#111111] border border-white/[0.08] space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Daily Traffic Volume</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.trends.daily_volume', 'Daily Traffic Volume')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Interactive multi-layer breakdown of profile views, unique visitors, cache hits,
-                    and proxy views.
+                    {t(
+                      'pro.trends.daily_volume_sub',
+                      'Interactive multi-layer breakdown of profile views, unique visitors, cache hits, and proxy views.'
+                    )}
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -355,11 +414,15 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="lg:col-span-2 p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-[#c5ff4a]" />
-                  <h3 className="text-sm font-semibold text-white">24x7 Weekly Activity Matrix</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.trends.matrix_title', '24x7 Weekly Activity Matrix')}
+                  </h3>
                 </div>
                 <p className="text-xs text-[#8a8a8a]">
-                  Audience density mapped by weekday and hour of day. Spot prime time slots for
-                  GitHub profile updates.
+                  {t(
+                    'pro.trends.matrix_sub',
+                    'Audience density mapped by weekday and hour of day. Spot prime time slots for GitHub profile updates.'
+                  )}
                 </p>
 
                 <div className="space-y-1.5 pt-2">
@@ -387,10 +450,15 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#c5ff4a]" />
-                    <h3 className="text-sm font-semibold text-white">Today&apos;s Hourly Pulse</h3>
+                    <h3 className="text-sm font-semibold text-white">
+                      {t('pro.trends.today_pulse', "Today's Hourly Pulse")}
+                    </h3>
                   </div>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    24-hour volume split by Direct traffic vs Camo Proxy.
+                    {t(
+                      'pro.trends.today_pulse_sub',
+                      '24-hour volume split by Direct traffic vs Camo Proxy.'
+                    )}
                   </p>
                 </div>
 
@@ -416,19 +484,23 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Geographic Reach
+                  {t('pro.geo.title', 'Geographic Reach')}
                 </h2>
               </div>
-              <ProBadge variant="lime">Global Heatmap</ProBadge>
+              <ProBadge variant="lime">{t('pro.geo.heatmap_badge', 'Global Heatmap')}</ProBadge>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Global Visitor Intensity</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.geo.intensity_title', 'Global Visitor Intensity')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Vector 2D choropleth highlighting country traffic density. Hover over regions
-                    for granular stats.
+                    {t(
+                      'pro.geo.intensity_sub',
+                      'Vector 2D choropleth highlighting country traffic density. Hover over regions for granular stats.'
+                    )}
                   </p>
                 </div>
 
@@ -440,9 +512,11 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-5">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Top Visitor Countries</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.geo.top_countries', 'Top Visitor Countries')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Ranked by volume and unique visitor shares.
+                    {t('pro.geo.top_countries_sub', 'Ranked by volume and unique visitor shares.')}
                   </p>
                 </div>
 
@@ -459,7 +533,9 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-white/5 space-y-3">
-                  <span className="text-xs font-semibold text-white block">Continent Share</span>
+                  <span className="text-xs font-semibold text-white block">
+                    {t('pro.geo.continent_share', 'Continent Share')}
+                  </span>
                   <div className="space-y-2">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="space-y-1">
@@ -481,18 +557,23 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Technology & Platform Environment
+                  {t('pro.technology.title', 'Technology & Platform Environment')}
                 </h2>
               </div>
-              <ProBadge variant="lime">Clients & Proxy</ProBadge>
+              <ProBadge variant="lime">{t('pro.technology.badge', 'Clients & Proxy')}</ProBadge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Delivery Mode</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.technology.delivery_mode', 'Delivery Mode')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    GitHub Camo Proxy vs Direct browser delivery.
+                    {t(
+                      'pro.technology.delivery_mode_sub',
+                      'GitHub Camo Proxy vs Direct browser delivery.'
+                    )}
                   </p>
                 </div>
 
@@ -514,8 +595,12 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Operating Systems</h3>
-                  <p className="text-xs text-[#8a8a8a] mt-0.5">Visitor platform breakdown.</p>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.technology.os_title', 'Operating Systems')}
+                  </h3>
+                  <p className="text-xs text-[#8a8a8a] mt-0.5">
+                    {t('pro.technology.os_sub', 'Visitor platform breakdown.')}
+                  </p>
                 </div>
 
                 <div className="space-y-3 pt-2">
@@ -533,9 +618,11 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Browsers & Locales</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.technology.browsers_title', 'Browsers & Locales')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Client browsers and preferred languages.
+                    {t('pro.technology.browsers_sub', 'Client browsers and preferred languages.')}
                   </p>
                 </div>
 
@@ -553,7 +640,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
                 <div className="pt-3 border-t border-white/5 space-y-2">
                   <span className="text-xs font-semibold text-white block">
-                    Preferred Languages
+                    {t('pro.technology.pref_languages', 'Preferred Languages')}
                   </span>
                   <div className="space-y-2">
                     {[...Array(2)].map((_, i) => (
@@ -573,18 +660,23 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Compass className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Referral Sources & Channels
+                  {t('pro.sources.title', 'Referral Sources & Channels')}
                 </h2>
               </div>
-              <ProBadge variant="lime">Inbound Traffic</ProBadge>
+              <ProBadge variant="lime">{t('pro.sources.badge', 'Inbound Traffic')}</ProBadge>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Top Referrers</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.sources.top_referrers', 'Top Referrers')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Where your README badge and profile views originate from.
+                    {t(
+                      'pro.sources.top_referrers_sub',
+                      'Where your README badge and profile views originate from.'
+                    )}
                   </p>
                 </div>
 
@@ -603,8 +695,12 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
 
               <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Channel Distribution</h3>
-                  <p className="text-xs text-[#8a8a8a] mt-0.5">Categorized traffic channels.</p>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.sources.channel_dist', 'Channel Distribution')}
+                  </h3>
+                  <p className="text-xs text-[#8a8a8a] mt-0.5">
+                    {t('pro.sources.channel_dist_sub', 'Categorized traffic channels.')}
+                  </p>
                 </div>
 
                 <div className="h-[160px] flex items-center justify-center">
@@ -622,29 +718,44 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Laptop className="w-4 h-4 text-[#c5ff4a]" />
                 <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  Profile Performance & Cache Efficiency
+                  {t('pro.profiles.perf_title', 'Profile Performance & Cache Efficiency')}
                 </h2>
               </div>
-              <ProBadge variant="lime">Multi-Profile</ProBadge>
+              <ProBadge variant="lime">{t('pro.profiles.badge_multi', 'Multi-Profile')}</ProBadge>
             </div>
 
             <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4 overflow-x-auto">
               <div>
-                <h3 className="text-sm font-semibold text-white">Profile Breakdown Matrix</h3>
+                <h3 className="text-sm font-semibold text-white">
+                  {t('pro.profiles.matrix_title', 'Profile Breakdown Matrix')}
+                </h3>
                 <p className="text-xs text-[#8a8a8a] mt-0.5">
-                  Comparative analytics across all configured GitAscii profiles.
+                  {t(
+                    'pro.profiles.matrix_sub',
+                    'Comparative analytics across all configured GitAscii profiles.'
+                  )}
                 </p>
               </div>
 
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className="border-b border-white/10 text-[#8a8a8a]">
-                    <th className="pb-3 font-semibold">Profile Name</th>
-                    <th className="pb-3 font-semibold">Views</th>
-                    <th className="pb-3 font-semibold">Unique Visitors</th>
-                    <th className="pb-3 font-semibold">Cache Hit Ratio</th>
-                    <th className="pb-3 font-semibold">Avg. Latency</th>
-                    <th className="pb-3 font-semibold">Portfolio Share</th>
+                    <th className="pb-3 font-semibold">
+                      {t('pro.table.profile_name', 'Profile Name')}
+                    </th>
+                    <th className="pb-3 font-semibold">{t('pro.table.views', 'Views')}</th>
+                    <th className="pb-3 font-semibold">
+                      {t('pro.table.unique_visitors', 'Unique Visitors')}
+                    </th>
+                    <th className="pb-3 font-semibold">
+                      {t('pro.table.cache_hit_ratio', 'Cache Hit Ratio')}
+                    </th>
+                    <th className="pb-3 font-semibold">
+                      {t('pro.table.avg_latency', 'Avg. Latency')}
+                    </th>
+                    <th className="pb-3 font-semibold">
+                      {t('pro.table.portfolio_share', 'Portfolio Share')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -681,14 +792,17 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                 <Activity className="w-5 h-5 text-[#c5ff4a]" />
                 <div>
                   <h2 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
-                    <span>Live Telemetry & Real-Time Stream</span>
+                    <span>{t('pro.stream.title', 'Live Telemetry & Real-Time Stream')}</span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1.5" />
-                      STREAM ACTIVE
+                      {t('pro.stream.stream_active', 'STREAM ACTIVE')}
                     </span>
                   </h2>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Real-time edge ingestion stream, request pulse, and latency observability.
+                    {t(
+                      'pro.stream.subtitle',
+                      'Real-time edge ingestion stream, request pulse, and latency observability.'
+                    )}
                   </p>
                 </div>
               </div>
@@ -702,16 +816,19 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 {
-                  label: 'Active Concurrency (30m)',
+                  label: t('pro.stream.concurrency_label', 'Active Concurrency (30m)'),
                   icon: <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />,
                 },
-                { label: 'Edge Render Latency', icon: <Zap className="w-4 h-4 text-[#c5ff4a]" /> },
                 {
-                  label: 'Validation 304 Ratio',
+                  label: t('pro.stream.render_latency_label', 'Edge Render Latency'),
+                  icon: <Zap className="w-4 h-4 text-[#c5ff4a]" />,
+                },
+                {
+                  label: t('pro.stream.ratio_label', 'Validation 304 Ratio'),
                   icon: <Cpu className="w-4 h-4 text-cyan-400" />,
                 },
                 {
-                  label: 'Node Health',
+                  label: t('pro.stream.node_health_label', 'Node Health'),
                   icon: <span className="w-2 h-2 rounded-full bg-emerald-400" />,
                 },
               ].map((item, idx) => (
@@ -732,9 +849,14 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
             <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Live Event Stream Feed</h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    {t('pro.stream.feed_title', 'Live Event Stream Feed')}
+                  </h3>
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
-                    Anonymized, real-time incoming request telemetry across edge points.
+                    {t(
+                      'pro.stream.feed_sub',
+                      'Anonymized, real-time incoming request telemetry across edge points.'
+                    )}
                   </p>
                 </div>
                 <ProSkeleton className="h-4 w-32" />
@@ -744,13 +866,15 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                 <table className="w-full text-left text-xs font-mono">
                   <thead>
                     <tr className="border-b border-white/10 text-[#8a8a8a]">
-                      <th className="pb-3 font-semibold">Time</th>
-                      <th className="pb-3 font-semibold">Profile</th>
-                      <th className="pb-3 font-semibold">Location</th>
-                      <th className="pb-3 font-semibold">Delivery Mode</th>
-                      <th className="pb-3 font-semibold">Client</th>
-                      <th className="pb-3 font-semibold">Status</th>
-                      <th className="pb-3 font-semibold">Speed</th>
+                      <th className="pb-3 font-semibold">{t('pro.table.time', 'Time')}</th>
+                      <th className="pb-3 font-semibold">{t('pro.table.profile', 'Profile')}</th>
+                      <th className="pb-3 font-semibold">{t('pro.table.location', 'Location')}</th>
+                      <th className="pb-3 font-semibold">
+                        {t('pro.table.delivery_mode', 'Delivery Mode')}
+                      </th>
+                      <th className="pb-3 font-semibold">{t('pro.table.client', 'Client')}</th>
+                      <th className="pb-3 font-semibold">{t('pro.table.status', 'Status')}</th>
+                      <th className="pb-3 font-semibold">{t('pro.table.speed', 'Speed')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -785,6 +909,42 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
               </div>
             </div>
           </section>
+
+          <div className="space-y-3 pt-2 pb-4 border-t border-white/[0.06] text-xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-[11px] text-[#666]">
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>
+                  <strong className="text-[#888]">
+                    {t('pro.privacy.title', 'LGPD & GDPR Privacy-by-Design:')}{' '}
+                  </strong>
+                  {t(
+                    'pro.privacy.desc',
+                    '100% cookieless telemetry. Zero raw IP storage, daily rotated salted hashes with HyperLogLog, sanitized referrers, and coarse client metadata.'
+                  )}
+                </span>
+              </div>
+              <span className="text-[11px] text-emerald-400 font-mono whitespace-nowrap shrink-0">
+                {t('pro.privacy.learn_how', 'Learn how')}
+              </span>
+            </div>
+
+            <div className="flex items-start gap-2 text-[11px] text-[#555] leading-relaxed">
+              <Info className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-[#777]">
+                  {t(
+                    'pro.notice.observed_vs_real_title',
+                    'Observed HTTP Requests vs. Real Visitors:'
+                  )}{' '}
+                </strong>
+                {t(
+                  'pro.notice.observed_vs_real_desc',
+                  'GitAscii renders dynamic SVGs via image tags. GitHub proxies requests through Camo (camo.githubusercontent.com) to protect visitor privacy and cache images. Metrics display verified server observations: GitHub proxy requests originate from GitHub edge servers, while direct requests (e.g. your portfolio) reflect individual clients.'
+                )}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

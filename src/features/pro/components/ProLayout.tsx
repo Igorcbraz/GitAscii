@@ -1,18 +1,45 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 import { PRO_PLAN_TIERS } from '@/constants'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
+import { AnalyticsDashboardSkeleton } from './analytics/AnalyticsSkeleton'
+import { EmailNotificationsDashboardSkeleton } from './emails/EmailNotificationsSkeleton'
+import { WidgetErrorsDashboardSkeleton } from './errors/WidgetErrorsSkeleton'
+import { HealthSkeleton } from './health/HealthSkeleton'
+import { OverviewDashboardSkeleton } from './overview/OverviewSkeleton'
 import { ProAuthGuard } from './ProAuthGuard'
+import { ProfilesDashboardSkeleton } from './profiles/ProfilesSkeleton'
 import { ProSidebar } from './ProSidebar'
+import { ReportsDashboardSkeleton } from './reports/ReportsSkeleton'
 
 export interface ProLayoutProps {
   children: React.ReactNode
 }
 
+/** Map each pro route prefix → its proper page skeleton. */
+const ROUTE_SKELETONS: [string, React.ReactNode][] = [
+  ['/pro/analytics', <AnalyticsDashboardSkeleton key="analytics" />],
+  ['/pro/reports', <ReportsDashboardSkeleton key="reports" />],
+  ['/pro/emails', <EmailNotificationsDashboardSkeleton key="emails" />],
+  ['/pro/errors', <WidgetErrorsDashboardSkeleton key="errors" />],
+  ['/pro/health', <HealthSkeleton key="health" />],
+  ['/pro/profiles', <ProfilesDashboardSkeleton key="profiles" />],
+]
+
+function getSkeletonForPath(pathname: string): React.ReactNode {
+  for (const [prefix, skeleton] of ROUTE_SKELETONS) {
+    if (pathname.startsWith(prefix)) return skeleton
+  }
+  return <OverviewDashboardSkeleton key="overview" />
+}
+
 export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
+  const pathname = usePathname() ?? '/pro'
+
   const [username, setUsername] = useState<string | undefined>()
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>()
   const [isPro, setIsPro] = useState<boolean>(false)
@@ -68,7 +95,7 @@ export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
       />
 
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <ProAuthGuard>{children}</ProAuthGuard>
+        <ProAuthGuard loadingFallback={getSkeletonForPath(pathname)}>{children}</ProAuthGuard>
       </main>
     </div>
   )

@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+const STATIC_SVG_FILES = new Set(['/icon.svg', '/example.svg'])
+
 export function proxy(request: NextRequest) {
   const host = request.headers.get('host')
   if (host && host.startsWith('www.')) {
@@ -17,7 +19,7 @@ export function proxy(request: NextRequest) {
     requestHeaders.set('x-lang', lang)
   }
 
-  if (pathname.endsWith('.svg')) {
+  if (pathname.endsWith('.svg') && !STATIC_SVG_FILES.has(pathname.toLowerCase())) {
     const url = request.nextUrl.clone()
     url.pathname = `/api/svg${pathname}`
     return NextResponse.rewrite(url, {
@@ -35,5 +37,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|icon.svg|icon.png|apple-icon.png|icon-16.png|icon-32.png|icon-192.png|icon-512.png|example.svg).*)',
+  ],
 }

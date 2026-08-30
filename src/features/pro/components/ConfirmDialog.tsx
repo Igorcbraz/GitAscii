@@ -14,7 +14,8 @@ export interface ConfirmDialogProps {
   variant?: 'danger' | 'warning' | 'primary'
   isLoading?: boolean
   onConfirm: () => void | Promise<void>
-  onClose: () => void
+  onClose?: () => void
+  onCancel?: () => void
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -27,11 +28,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isLoading = false,
   onConfirm,
   onClose,
+  onCancel,
 }) => {
   const { t } = useI18n()
   const [mounted, setMounted] = useState(false)
   const resolvedConfirmLabel = confirmLabel || t('pro.dialog.confirm', 'Confirm')
   const resolvedCancelLabel = cancelLabel || t('pro.dialog.cancel', 'Cancel')
+  const handleClose = onClose || onCancel || (() => {})
 
   useEffect(() => {
     setMounted(true)
@@ -40,12 +43,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen && !isLoading) {
-        onClose()
+        handleClose()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, isLoading, onClose])
+  }, [isOpen, isLoading, handleClose])
 
   if (!isOpen || !mounted) return null
 
@@ -79,7 +82,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const styles = getVariantStyles()
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 animate-fade-in">
       <div className="w-full max-w-md p-6 rounded-2xl bg-[#111111] border border-white/10 shadow-2xl space-y-5 relative">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -89,7 +92,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isLoading}
             className="p-1 rounded-lg text-[#8a8a8a] hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
           >
@@ -103,7 +106,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
         <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/5">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isLoading}
             className="px-4 py-2 text-xs font-medium text-white/80 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all disabled:opacity-50 cursor-pointer"
           >

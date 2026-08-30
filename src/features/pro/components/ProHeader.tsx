@@ -7,6 +7,7 @@ import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { useI18n } from '@/i18n'
 
 import { ProBadge } from './ProBadge'
+import { CustomSelect } from './profiles/CustomSelect'
 
 export interface ProHeaderProps {
   title: string
@@ -55,22 +56,16 @@ export const ProHeader: React.FC<ProHeaderProps> = ({
 
       <div className="flex items-center justify-end gap-3 flex-1">
         {profiles.length > 1 && onSelectProfile && (
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs">
-            <span className="text-[#8a8a8a] text-[11px] font-mono">
-              {t('pro.header.profile', 'Profile:')}
-            </span>
-            <select
+          <div className="w-44">
+            <CustomSelect
+              options={profiles.map((p) => ({
+                value: p.slug,
+                label: p.name,
+                sublabel: `/${p.slug}`,
+              }))}
               value={selectedProfile}
-              onChange={(e) => onSelectProfile(e.target.value)}
-              aria-label={t('pro.header.select_profile_aria', 'Select GitAscii profile')}
-              className="bg-transparent text-white font-medium focus:outline-none cursor-pointer text-xs"
-            >
-              {profiles.map((p) => (
-                <option key={p.slug} value={p.slug} className="bg-[#141414] text-white">
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={onSelectProfile}
+            />
           </div>
         )}
 
