@@ -14,9 +14,6 @@ export const test = base.extend<CustomFixtures>({
 
   checkAccessibility: async ({ page }, use) => {
     const checkA11y = async () => {
-      // Basic accessibility checks using Playwright queries
-
-      // 1. Check that all images have alt text
       const images = page.locator('img')
       const count = await images.count()
       for (let i = 0; i < count; i++) {
@@ -28,7 +25,6 @@ export const test = base.extend<CustomFixtures>({
         }
       }
 
-      // 2. Check that interactive buttons have names or labels
       const buttons = page.locator('button')
       const btnCount = await buttons.count()
       for (let i = 0; i < btnCount; i++) {
@@ -41,7 +37,6 @@ export const test = base.extend<CustomFixtures>({
         }
       }
 
-      // 3. Check for HTML landmark elements
       const mainVisible = await page.locator('main').first().isVisible()
       const navVisible = await page.locator('nav').first().isVisible()
       expect(mainVisible || navVisible).toBeTruthy()
@@ -51,7 +46,6 @@ export const test = base.extend<CustomFixtures>({
   },
 
   page: async ({ page, sessionState, gitHubData }, use) => {
-    // Mock navigator.clipboard to prevent security errors on headless browser
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'clipboard', {
         value: {
@@ -71,7 +65,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept Github repository stats call
     await page.route('**/api.github.com/repos/**', async (route) => {
       await route.fulfill({
         status: 200,
@@ -80,7 +73,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept session info API call based on fixture options
     await page.route('**/api/auth/session', async (route) => {
       const sessionBody =
         sessionState === 'logged-in' ? MOCK_SESSION_LOGGED_IN : MOCK_SESSION_ANONYMOUS
@@ -91,7 +83,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept logout route to mock successful logout actions
     await page.route('**/api/auth/logout', async (route) => {
       await route.fulfill({
         status: 200,
@@ -100,7 +91,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept config route to prevent backend hanging on github fetches
     await page.route('**/api/config/**', async (route) => {
       await route.fulfill({
         status: 404,

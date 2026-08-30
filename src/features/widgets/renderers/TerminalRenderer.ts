@@ -44,7 +44,6 @@ export function renderTerminal(
 
   const lines: string[] = []
 
-  // Prompt Whoami
   lines.push(
     `<tspan fill="${primary}" font-weight="700">$ </tspan><tspan fill="${textClr}">whoami</tspan>`
   )
@@ -52,7 +51,6 @@ export function renderTerminal(
     `<tspan fill="${textClr}" font-weight="700">${localEscapeXml(data.user.name || data.user.login || 'USER')}</tspan>`
   )
 
-  // Prompt Tree
   lines.push(
     `<tspan fill="${primary}" font-weight="700">$ </tspan><tspan fill="${textClr}">tree projects/</tspan>`
   )
@@ -85,7 +83,6 @@ export function renderTerminal(
     `
   })
 
-  // Cursor position
   const cursorY = 72 + lines.length * 18
   const cursor_element = `
     <g class="cur-${widget.instanceId}">
@@ -107,11 +104,11 @@ export function renderTerminal(
 
       <rect width="800" height="520" fill="${bg}"/>
       <rect x="14" y="14" width="772" height="492" rx="10" fill="${panel}" stroke="${border}" stroke-width="1.2"/>
-      
+
       <!-- Chrome Bar -->
       <path d="M14 48V24 a10 10 0 0 1 10-10 h752 a10 10 0 0 1 10 10 v24 Z" fill="${chrome}"/>
       <path d="M14 48 h772" stroke="${border}" stroke-width="1"/>
-      
+
       <!-- Control Circles -->
       <circle cx="38" cy="31" r="5.5" fill="#FF5F57"/>
       <circle cx="57" cy="31" r="5.5" fill="#FEBC2E"/>

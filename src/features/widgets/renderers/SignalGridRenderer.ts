@@ -56,7 +56,6 @@ export function renderSignalGrid(
   const height = Math.max(100, Number(widget?.size?.height) || 400)
   const cfg = widget?.config || {}
 
-  // Industrial palette values
   const bg1 = '#07131A'
   const bg2 = '#10141F'
   const panel = '#0C1C24'
@@ -70,13 +69,11 @@ export function renderSignalGrid(
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
   const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
-  // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
   const sortBy = (cfg.repoSortBy as string) || 'stars'
   const maxRepos = Number(cfg.maxRepos) || 8
 
   if (layoutType === 'hero') {
-    // 1200x360 layout adapted for widgets width x height
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(8, maxRepos))
     const flagships = layers.slice(0, 3)
     const userTitle = escapeXml(customTitle).toUpperCase()
@@ -192,7 +189,7 @@ export function renderSignalGrid(
         <rect x="680" y="44" width="500" height="246" fill="url(#industrial-dots-${widget.instanceId})" opacity=".76"/>
 
         <path d="M0 1H1200" stroke="url(#industrial-accent-${widget.instanceId})" stroke-width="2"/>
-        
+
         <!-- Header -->
         <g transform="translate(20 22)">
           <circle cx="0" r="4" fill="#EF4B5A"/>
@@ -242,7 +239,6 @@ export function renderSignalGrid(
       </svg>
     `
   } else {
-    // 1200x330 Closed-loop layout matching signal topology/closed-loop-dark.svg
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(8, maxRepos))
     const userTitle = escapeXml(customTitle).toUpperCase()
     const activeCount = String(layers.length).padStart(2, '0')
@@ -250,7 +246,7 @@ export function renderSignalGrid(
     const nodes = layers
       .map((layer, index) => {
         const isBottom = index % 2 !== 0
-        const slot = Math.floor(index / 2) // 0, 1, 2, 3
+        const slot = Math.floor(index / 2)
         const x = 110 + slot * 326.7
         const y = isBottom ? 235 : 105
 
@@ -276,7 +272,6 @@ export function renderSignalGrid(
       })
       .join('')
 
-    // Connection paths between nodes
     const pathsHtml = layers
       .map((_, index) => {
         if (index === 0) return ''

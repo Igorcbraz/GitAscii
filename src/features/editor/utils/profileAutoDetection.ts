@@ -86,7 +86,6 @@ export function detectSocialsFromProfile(
 
   foundSocials.add('github')
 
-  // 1. Check official GitHub social accounts (from /users/{username}/social_accounts & GraphQL)
   if (Array.isArray(data.socialAccounts)) {
     for (const acc of data.socialAccounts) {
       if (acc && acc.url) {
@@ -110,7 +109,6 @@ export function detectSocialsFromProfile(
     }
   }
 
-  // 2. Check direct GitHub profile fields
   if (data.user.twitter_username) {
     const handle = data.user.twitter_username.replace(/^@/, '').trim()
     if (handle) {
@@ -137,7 +135,6 @@ export function detectSocialsFromProfile(
     }
   }
 
-  // 3. Scan bio and readme content
   const textsToScan: string[] = []
   if (data.user.bio) textsToScan.push(data.user.bio)
   if (data.readmeContent) textsToScan.push(data.readmeContent)
@@ -145,7 +142,6 @@ export function detectSocialsFromProfile(
   const combinedContent = textsToScan.join('\n\n')
 
   if (combinedContent) {
-    // Regex for standard URLs & mailto links inside markdown [text](url), <a href="url">, or plain text
     const urlPattern =
       /(?:href=["']|src=["']|\]\(|\b)(https?:\/\/[^\s"'<>)\]]+|mailto:[^\s"'<>)\]]+|[a-zA-Z0-9_-]+\.dev|[a-zA-Z0-9_-]+\.me|[a-zA-Z0-9_-]+\.io)(?:["'\)]|\b|\s|$)/gi
 
@@ -224,14 +220,12 @@ function classifyAndStoreUrl(
     const host = parsed.hostname.toLowerCase()
     const path = parsed.pathname
 
-    // LinkedIn
     if (isMatchingDomain(host, 'linkedin.com')) {
       foundSocials.add('linkedin')
       if (!socialUrls.linkedin) socialUrls.linkedin = cleanUrl
       return
     }
 
-    // Twitter / X
     if (isMatchingDomain(host, 'twitter.com') || isMatchingDomain(host, 'x.com')) {
       if (!path.includes('/intent/') && !path.includes('/share')) {
         foundSocials.add('twitter')
@@ -240,7 +234,6 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Discord
     if (
       isMatchingDomain(host, 'discord.gg') ||
       (isMatchingDomain(host, 'discord.com') &&
@@ -251,7 +244,6 @@ function classifyAndStoreUrl(
       return
     }
 
-    // YouTube
     if (
       (isMatchingDomain(host, 'youtube.com') &&
         (path.startsWith('/@') ||
@@ -265,7 +257,6 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Instagram
     if (isMatchingDomain(host, 'instagram.com')) {
       if (!path.startsWith('/p/') && !path.startsWith('/reel/')) {
         foundSocials.add('instagram')
@@ -274,21 +265,18 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Twitch
     if (isMatchingDomain(host, 'twitch.tv')) {
       foundSocials.add('twitch')
       if (!socialUrls.twitch) socialUrls.twitch = cleanUrl
       return
     }
 
-    // Dev.to
     if (isMatchingDomain(host, 'dev.to')) {
       foundSocials.add('devto')
       if (!socialUrls.devto) socialUrls.devto = cleanUrl
       return
     }
 
-    // Medium
     if (
       (isMatchingDomain(host, 'medium.com') && path.startsWith('/@')) ||
       (host.endsWith('.medium.com') && host !== 'medium.com')
@@ -298,21 +286,18 @@ function classifyAndStoreUrl(
       return
     }
 
-    // StackOverflow
     if (isMatchingDomain(host, 'stackoverflow.com') && path.startsWith('/users/')) {
       foundSocials.add('stackoverflow')
       if (!socialUrls.stackoverflow) socialUrls.stackoverflow = cleanUrl
       return
     }
 
-    // Bluesky
     if (isMatchingDomain(host, 'bsky.app') && path.startsWith('/profile/')) {
       foundSocials.add('bluesky')
       if (!socialUrls.bluesky) socialUrls.bluesky = cleanUrl
       return
     }
 
-    // Mastodon
     if (
       isMatchingDomain(host, 'mastodon.social') ||
       isMatchingDomain(host, 'fosstodon.org') ||
@@ -324,14 +309,12 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Reddit
     if (isMatchingDomain(host, 'reddit.com') && path.startsWith('/user/')) {
       foundSocials.add('reddit')
       if (!socialUrls.reddit) socialUrls.reddit = cleanUrl
       return
     }
 
-    // Spotify
     if (
       isMatchingDomain(host, 'spotify.com') &&
       (path.startsWith('/user/') || path.startsWith('/artist/'))
@@ -341,21 +324,18 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Telegram
     if (isMatchingDomain(host, 't.me') || isMatchingDomain(host, 'telegram.me')) {
       foundSocials.add('telegram')
       if (!socialUrls.telegram) socialUrls.telegram = cleanUrl
       return
     }
 
-    // TikTok
     if (isMatchingDomain(host, 'tiktok.com') && path.startsWith('/@')) {
       foundSocials.add('tiktok')
       if (!socialUrls.tiktok) socialUrls.tiktok = cleanUrl
       return
     }
 
-    // Steam
     if (
       isMatchingDomain(host, 'steamcommunity.com') &&
       (path.startsWith('/id/') || path.startsWith('/profiles/'))
@@ -365,7 +345,6 @@ function classifyAndStoreUrl(
       return
     }
 
-    // Hashnode
     if (
       (isMatchingDomain(host, 'hashnode.com') && path.startsWith('/@')) ||
       (host.endsWith('.hashnode.dev') && host !== 'hashnode.dev')
@@ -643,7 +622,6 @@ export function detectTechStackFromProfile(
   const validCatalogIds = new Set(TECH_CATALOG.map((t) => t.id))
   const detected = new Set<string>()
 
-  // 1. Language frequency from repositories
   if (data.languages && Object.keys(data.languages).length > 0) {
     const sortedLangs = Object.entries(data.languages)
       .sort((a, b) => b[1] - a[1])
@@ -653,11 +631,9 @@ export function detectTechStackFromProfile(
     sortedLangs.forEach((id) => detected.add(id))
   }
 
-  // 2. Scan profile README.md
   if (data.readmeContent) {
     const readme = data.readmeContent
 
-    // A. Parse skillicons URLs: skillicons.dev/icons?i=...
     const skillIconsRegex = /skillicons\.dev\/icons\?[^"'\s)]*i=([a-zA-Z0-9,_-]+)/gi
     let skillMatch: RegExpExecArray | null
     while ((skillMatch = skillIconsRegex.exec(readme)) !== null) {
@@ -670,7 +646,6 @@ export function detectTechStackFromProfile(
       }
     }
 
-    // B. Parse shields.io logo query parameters: logo=...
     const logoRegex = /[?&]logo=([a-zA-Z0-9%._+-]+)/gi
     let logoMatch: RegExpExecArray | null
     while ((logoMatch = logoRegex.exec(readme)) !== null) {
@@ -683,7 +658,6 @@ export function detectTechStackFromProfile(
       }
     }
 
-    // C. Parse devicon / badge URLs
     const deviconRegex = /devicon\/icons\/([a-zA-Z0-9_-]+)/gi
     let deviconMatch: RegExpExecArray | null
     while ((deviconMatch = deviconRegex.exec(readme)) !== null) {
@@ -694,11 +668,9 @@ export function detectTechStackFromProfile(
       }
     }
 
-    // D. Scan for prominent keywords throughout the README
     scanTextForKeywords(readme, detected, validCatalogIds)
   }
 
-  // 3. Scan repo names, descriptions, topics, and individual repo languages
   if (Array.isArray(data.repos)) {
     for (const repo of data.repos) {
       if (repo.language) {
@@ -739,7 +711,6 @@ export function detectTechStackFromProfile(
 
 function scanTextForKeywords(text: string, detected: Set<string>, validCatalogIds: Set<string>) {
   const keywordMap: Array<{ pattern: RegExp; techId: string }> = [
-    // Languages
     { pattern: /\b(?:TypeScript|TS)\b/i, techId: 'ts' },
     { pattern: /\b(?:JavaScript|JS|ES6)\b/i, techId: 'js' },
     { pattern: /\bPython\b/i, techId: 'py' },
@@ -772,7 +743,6 @@ function scanTextForKeywords(text: string, detected: Set<string>, validCatalogId
     { pattern: /\bNim\b/i, techId: 'nim' },
     { pattern: /\bMATLAB\b/i, techId: 'matlab' },
 
-    // Frontend
     { pattern: /\b(?:Next\.?js|Nextjs)\b/i, techId: 'nextjs' },
     { pattern: /\b(?:React\.?js|React)\b/i, techId: 'react' },
     { pattern: /\b(?:Vue\.?js|Vuejs|Vue 3|Vue 2)\b/i, techId: 'vue' },
@@ -803,7 +773,6 @@ function scanTextForKeywords(text: string, detected: Set<string>, validCatalogId
     { pattern: /\bGulp\b/i, techId: 'gulp' },
     { pattern: /\bRollup\b/i, techId: 'rollup' },
 
-    // Backend & DB
     { pattern: /\b(?:Node\.?js|Nodejs)\b/i, techId: 'nodejs' },
     { pattern: /\bExpress\.?js\b|\bExpress\b/i, techId: 'express' },
     { pattern: /\bNest\.?js\b|\bNestJS\b/i, techId: 'nest' },
@@ -833,7 +802,6 @@ function scanTextForKeywords(text: string, detected: Set<string>, validCatalogId
     { pattern: /\bSymfony\b/i, techId: 'symfony' },
     { pattern: /\bKoa\b/i, techId: 'koa' },
 
-    // DevOps & Tools
     { pattern: /\bDocker\b/i, techId: 'docker' },
     { pattern: /\bKubernetes\b|\bK8s\b/i, techId: 'kubernetes' },
     { pattern: /\b(?:AWS|Amazon Web Services)\b/i, techId: 'aws' },

@@ -165,7 +165,6 @@ export function renderInterlace(
 
   const rows = layers.map((_, index) => 60 + index * 30)
 
-  // Simple representation of the weave pattern
   const warpXs = [320, 390, 460, 530, 600, 670, 740]
   const warps = warpXs
     .map((x, index) => {
@@ -217,7 +216,7 @@ export function renderInterlace(
       <rect width="800" height="330" fill="${canvas}"/>
       <text x="30" y="28" class="mono" font-size="8" letter-spacing="2.6" fill="${clay}">INTERLACE / WEAVE MAP</text>
       <text x="770" y="28" text-anchor="end" class="mono" font-size="8" letter-spacing="1.8" fill="${muted}">${String(count).padStart(2, '0')} THREADS / PROJECT WEAVE</text>
-      
+
       <path d="M30 40 H770" stroke="${rule}" stroke-width="1"/>
       <path d="M285 44 V306" stroke="${rule}" stroke-width="1"/>
 

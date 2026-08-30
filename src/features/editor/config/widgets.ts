@@ -61,7 +61,7 @@ export interface WidgetCatalogItem {
 
 export interface WidgetFilterItem {
   id: string
-  labelKey: string // Translation key
+  labelKey: string
   defaultLabel: string
   icon: React.ElementType
   match: (item: WidgetCatalogItem) => boolean

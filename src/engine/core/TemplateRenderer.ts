@@ -51,13 +51,10 @@ const BLANK_PRESET: TemplatePreset = {
 function loadAllTemplatePresets(): Record<string, TemplatePreset> {
   const presets: Record<string, TemplatePreset> = {}
 
-  // 1. Blank canvas is always first
   presets.blank = BLANK_PRESET
 
-  // 2. Explicit priority order for the native templates
   const PRIORITY_IDS = ['native', 'native_simple', 'native_advanced']
 
-  // Find priority templates
   for (const priorityId of PRIORITY_IDS) {
     const raw = RAW_TEMPLATES.find((t) => (t.id || t.templateId) === priorityId)
     if (raw) {
@@ -96,7 +93,6 @@ function loadAllTemplatePresets(): Record<string, TemplatePreset> {
     }
   }
 
-  // 3. Add all other templates from RAW_TEMPLATES
   for (const raw of RAW_TEMPLATES) {
     const id = raw.id || raw.templateId || 'template'
     if (presets[id]) continue

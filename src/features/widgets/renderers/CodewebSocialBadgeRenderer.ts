@@ -246,7 +246,6 @@ function renderPillSvg(
   const label = customLabel || p.label || 'GitHub'
   const uniqueId = `pill-${(p.name || 'social').toLowerCase()}-${Math.floor(x)}-${Math.floor(y)}`
 
-  // Calculate pill width based on content
   const charWidth = 8
   const iconSpace = showIcons ? 26 : 0
   const textSpace = showText ? label.length * charWidth : 0
@@ -291,13 +290,13 @@ function renderPillSvg(
     <g id="${uniqueId}">
       <!-- Outer rotating gradient border -->
       <rect x="${x}" y="${y}" width="${pillWidth}" height="${height}" rx="${height / 2}" ry="${height / 2}" fill="none" stroke="url(#grad-${uniqueId})" stroke-width="1.8" />
-      
+
       <!-- Dark container background with subtle glow -->
       <rect x="${x + 1}" y="${y + 1}" width="${pillWidth - 2}" height="${height - 2}" rx="${(height - 2) / 2}" ry="${(height - 2) / 2}" fill="${p.bgColor}" />
-      
+
       <!-- Inner highlight layer -->
       <rect x="${x + 1}" y="${y + 1}" width="${pillWidth - 2}" height="${height - 2}" rx="${(height - 2) / 2}" ry="${(height - 2) / 2}" fill="rgba(255,255,255,0.03)" />
-      
+
       <!-- Icon & Text Content -->
       ${iconElement}
       ${textElement}
@@ -334,7 +333,6 @@ export function renderCodewebSocialBadge(
     const customLabel =
       (cfg.customLabel as string) || (cfg.username ? `${platform}: @${cfg.username}` : undefined)
 
-    // In single mode, calculate pill dimensions and size viewBox to fit snugly or centered
     const pill = renderPillSvg(
       platform,
       customLabel,
@@ -351,7 +349,6 @@ export function renderCodewebSocialBadge(
     viewBoxW = pill.width + 4
     viewBoxH = 44
   } else if (renderMode === 'grid') {
-    // Grid mode: 2, 3 or 4 columns
     const columns = Math.max(1, Number(cfg.gridColumns) || 2)
     const defaultList = ['github', 'instagram', 'facebook', 'gmail', 'x', 'linkedin']
     const activeList =
@@ -363,7 +360,6 @@ export function renderCodewebSocialBadge(
     const gapY = 14
     const pillHeight = 44
 
-    // Fixed width per pill in grid mode for clean aligned cards
     const gridPillWidth = Math.floor((800 - (columns - 1) * gapX) / columns)
     const rows = Math.ceil(activeList.length / columns)
     viewBoxW = 800
@@ -391,7 +387,6 @@ export function renderCodewebSocialBadge(
       elements.push(pill.svg)
     })
   } else {
-    // Multi (horizontal strip) mode
     const defaultList = ['github', 'instagram', 'facebook', 'gmail']
     const activeList =
       Array.isArray(cfg.platforms) && cfg.platforms.length > 0
@@ -402,7 +397,6 @@ export function renderCodewebSocialBadge(
     const pillHeight = 44
     const pillY = 2
 
-    // Pre-calculate positions to center if total width fits
     const pillsInfo = activeList.map((pKey) => {
       const customLabel = (cfg[`label_${pKey}`] as string) || undefined
       return renderPillSvg(

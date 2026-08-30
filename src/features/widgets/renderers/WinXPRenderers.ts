@@ -98,7 +98,7 @@ function renderWindowChrome(
 
     <!-- Title Bar Header -->
     <path d="M 4 8 Q 4 4 8 4 L ${w - 8} 4 Q ${w - 4} 4 ${w - 4} 8 L ${w - 4} 30 L 4 30 Z" fill="url(#${gradId})" />
-    
+
     <!-- Title Bar Inner Highlight (Classic XP Gel Gloss) -->
     <path d="M 4 8 Q 4 4 8 4 L ${w - 8} 4 Q ${w - 4} 4 ${w - 4} 8 L ${w - 4} 16 L 4 16 Z" fill="#ffffff" fill-opacity="0.25" />
 
@@ -197,7 +197,7 @@ export function renderWinXPWindow(
         <circle cx="16" cy="15" r="11" fill="#46a049" stroke="#2e6d30" />
         <path d="M 19 15 L 12 15 M 15 11 L 11 15 L 15 19" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         <text x="32" y="19" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#333333">Back</text>
-        
+
         <!-- Address Bar Box -->
         <text x="80" y="19" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#666666">Address</text>
         <rect x="130" y="4" width="${w - 150}" height="22" rx="2" fill="#ffffff" stroke="#7f9db9" stroke-width="1.5" />
@@ -209,20 +209,20 @@ export function renderWinXPWindow(
       <g transform="translate(10, 96)">
         <!-- Left Task Panel (Classic Blue Gradient Panel) -->
         <rect x="0" y="0" width="200" height="${h - 130}" rx="3" fill="#6b8fc6" />
-        
+
         <!-- Task Panel Section 1: System Tasks -->
         <path d="M 4 4 Q 4 4 8 4 L 192 4 Q 196 4 196 4 L 196 24 L 4 24 Z" fill="#215dc6" />
         <text x="12" y="17" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10.5" font-weight="bold" fill="#ffffff">System Telemetry</text>
         <rect x="4" y="24" width="192" height="100" fill="#d6dff7" />
-        
+
         <!-- Specs in left panel -->
         <g transform="translate(12, 40)">
           <text font-family="'Segoe UI', Tahoma, sans-serif" font-size="10" fill="#001a66" font-weight="bold">Microsoft Windows XP</text>
           <text y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Professional Version 2002</text>
           <text y="28" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Service Pack 3 (Git Edition)</text>
-          
+
           <line x1="0" y1="36" x2="176" y2="36" stroke="#9bb3e1" />
-          
+
           <text y="50" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#001a66" font-weight="bold">Computer Rig:</text>
           <text y="64" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Intel Pentium 4 @ 3.20GHz</text>
           <text y="78" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">${reposCount} Repositories Online</text>
@@ -417,7 +417,7 @@ export function renderWinXPMinesweeper(
       <!-- Classic Minesweeper Bevel Board -->
       <g transform="translate(16, 56)">
         <rect x="0" y="0" width="${w - 32}" height="${h - 68}" fill="#c0c0c0" stroke="#808080" stroke-width="3" />
-        
+
         <!-- Outer 3D Inset Border -->
         <line x1="2" y1="2" x2="${w - 36}" y2="2" stroke="#ffffff" stroke-width="2" />
         <line x1="2" y1="2" x2="2" y2="${h - 72}" stroke="#ffffff" stroke-width="2" />
@@ -425,11 +425,11 @@ export function renderWinXPMinesweeper(
         <!-- Header Panel with LED Counters & Smiley Face -->
         <g transform="translate(${Math.round((w - 32 - 400) / 2)}, 10)">
           <rect x="0" y="0" width="400" height="36" fill="#c0c0c0" stroke="#808080" stroke-width="2" />
-          
+
           <!-- Mines Left LED Display (Red 7-segment style) -->
           <rect x="10" y="5" width="54" height="26" fill="#000000" />
           <text x="14" y="24" font-family="'Courier New', Courier, monospace" font-size="20" font-weight="bold" fill="#ff0000" letter-spacing="2">${minesLeft}</text>
-          
+
           <!-- Classic Smiley Face Button -->
           <g transform="translate(186, 4)">
             <rect x="0" y="0" width="28" height="28" rx="2" fill="#c0c0c0" stroke="#808080" stroke-width="2" />
@@ -579,7 +579,7 @@ export function renderWinXPMediaPlayer(
         <!-- Bottom Transport Controls Bar -->
         <g transform="translate(10, 202)">
           <rect x="0" y="0" width="${w - 32}" height="52" rx="3" fill="#0b1322" stroke="#1e293b" />
-          
+
           <rect x="14" y="8" width="${w - 60}" height="4" rx="2" fill="#1e293b" />
           <rect x="14" y="8" width="${Math.round((w - 60) * 0.65)}" height="4" rx="2" fill="#3b82f6" />
           <circle cx="${14 + Math.round((w - 60) * 0.65)}" cy="10" r="5" fill="#60a5fa" stroke="#ffffff" stroke-width="1.5" />
@@ -671,7 +671,7 @@ export function renderWinXPPaint(
         <!-- Left Classic Tool Palette -->
         <g transform="translate(0, 0)">
           <rect x="0" y="0" width="58" height="230" fill="#ece9d8" stroke="#7f9db9" stroke-width="1.5" />
-          
+
           <rect x="4" y="4" width="22" height="22" fill="#ece9d8" stroke="#808080" />
           <polygon points="15,7 17,12 22,12 18,15 20,20 15,17 10,20 12,15 8,12 13,12" fill="#3b82f6" />
           <rect x="30" y="4" width="22" height="22" fill="#ece9d8" stroke="#808080" />
@@ -760,7 +760,7 @@ export function renderWinXPPaint(
           <rect x="0" y="0" width="${w - 20}" height="36" fill="#ece9d8" stroke="#7f9db9" stroke-width="1.5" />
           <rect x="6" y="6" width="24" height="24" fill="#ffffff" stroke="#808080" />
           <rect x="12" y="12" width="14" height="14" fill="#2563eb" stroke="#000000" />
-          
+
           <g transform="translate(42, 6)">
             ${[
               '#000000',
@@ -855,7 +855,7 @@ export function renderWinXPTaskbar(
       <!-- Iconic Green Start Button -->
       <g transform="translate(0, 0)">
         <path d="M 0 0 L 105 0 Q 118 0 120 24 Q 118 48 105 48 L 0 48 Z" fill="url(#winxp-start-grad-${id})" />
-        
+
         <g transform="translate(14, 12)">
           <path d="M 3 4 Q 7 2 10 4 L 10 10 Q 6 8 3 10 Z" fill="#e11d48" />
           <path d="M 12 4 Q 16 6 19 4 L 19 10 Q 15 12 12 10 Z" fill="#2563eb" />
@@ -872,7 +872,7 @@ export function renderWinXPTaskbar(
       <g transform="translate(130, 8)">
         <line x1="0" y1="4" x2="0" y2="28" stroke="#1d4ed8" stroke-width="1" />
         <line x1="1" y1="4" x2="1" y2="28" stroke="#60a5fa" stroke-width="1" />
-        
+
         <rect x="8" y="6" width="18" height="18" rx="2" fill="#0284c7" stroke="#38bdf8" />
         <circle cx="42" cy="15" r="9" fill="#0284c7" stroke="#ffffff" stroke-width="1.5" />
         <text x="38" y="19" font-family="'Georgia', serif" font-size="13" font-weight="bold" font-style="italic" fill="#ffffff">e</text>
@@ -899,7 +899,7 @@ export function renderWinXPTaskbar(
       <g transform="translate(${w - 145}, 0)">
         <path d="M 12 0 L ${145} 0 L ${145} 48 L 0 48 Q 8 24 12 0 Z" fill="url(#winxp-tray-grad-${id})" />
         <line x1="12" y1="0" x2="${145}" y2="0" stroke="#3b82f6" stroke-width="1.5" />
-        
+
         <g transform="translate(20, 16)">
           <path d="M 0 5 L 4 5 L 8 1 L 8 11 L 4 7 L 0 7 Z" fill="#ffffff" />
           <rect x="16" y="2" width="10" height="8" rx="1" fill="#22c55e" stroke="#ffffff" stroke-width="1" />
@@ -914,7 +914,6 @@ export function renderWinXPTaskbar(
   `
 }
 
-// 6. WINXP CRITICAL ERROR DIALOG
 export function renderWinXPErrorDialog(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
@@ -972,7 +971,6 @@ export function renderWinXPErrorDialog(
   `
 }
 
-// 7. WINXP SYSTEM PROPERTIES (LANGUAGES WIDGET)
 export function renderWinXPSystemProperties(
   widget: WidgetInstance,
   data: NormalizedGitHubData,

@@ -320,7 +320,7 @@ export function SVGCanvas() {
     }
 
     for (const [instanceId, size] of Object.entries(preview.sizes)) {
-      if (preview.positions[instanceId]) continue // already updated above
+      if (preview.positions[instanceId]) continue
       const overlayEl = document.getElementById('overlay-widget-' + instanceId)
       if (overlayEl) {
         overlayEl.style.width = `${size.width}px`

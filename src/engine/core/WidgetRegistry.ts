@@ -80,7 +80,6 @@ export type WidgetRendererFn = (
 ) => string
 
 export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
-  // Core Profile Widgets
   [WIDGET_IDS.HEADER, (w, d, g) => renderHeader(w, d, g)],
   [WIDGET_IDS.AVATAR, (w, d, g) => renderAvatar(w, d, g)],
   [WIDGET_IDS.ASCII_ART, (w, d, g) => renderAsciiArt(w, d, g)],
@@ -98,7 +97,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.POKEMON_CARD, (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
   [WIDGET_IDS.GITFUT_CARD, (w, d, g) => renderGitFutCard(w, d, g, w.size.width, w.size.height)],
 
-  // GodProfile & Specialized
   [WIDGET_IDS.GODPROFILE_TERMINAL, (w, d, g) => renderTerminal(w, d, g)],
   [WIDGET_IDS.GODPROFILE_MARQUEE, (w, d, g) => renderMarquee(w, d, g)],
   [WIDGET_IDS.GODPROFILE_NEURAL, (w, d, g) => renderNeural(w, d, g)],
@@ -106,12 +104,10 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.GODPROFILE_WAKATIME, (w, d, g) => renderWakaTime(w, d, g)],
   [WIDGET_IDS.GODPROFILE_GLOBE, (w, d, g) => renderGlobe(w, d, g)],
 
-  // ASCII Variants
   [WIDGET_IDS.ASCII_PORTRAIT, (w, d, g, s) => renderAsciiPortrait(w, d, g, s)],
   [WIDGET_IDS.ASCII_INFO, (w, d, g, s) => renderAsciiInfoCard(w, d, g, s)],
   [WIDGET_IDS.ASCII_HEATMAP, (w, d, g, s) => renderAsciiHeatmap(w, d, g, s)],
 
-  // ControlPlane Variants
   [WIDGET_IDS.CONTROLPLANE_SYSTEM_LOOP, (w, d, g) => renderSystemLoop(w, d, g)],
   [WIDGET_IDS.CONTROLPLANE_COMMAND_DECK, (w, d, g) => renderCommandDeck(w, d, g)],
   [WIDGET_IDS.CONTROLPLANE_SIGNAL_GRID, (w, d, g) => renderSignalGrid(w, d, g)],
@@ -128,14 +124,12 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.CONTROLPLANE_CARTOGRAPH, (w, d, g) => renderCartograph(w, d, g)],
   [WIDGET_IDS.CONTROLPLANE_FOUNDRY, (w, d, g) => renderFoundry(w, d, g)],
 
-  // Codeweb Variants
   [WIDGET_IDS.CODEWEB_HERO_ORBIT, (w, d, g, s) => renderCodewebHeroOrbit(w, d, g, s)],
   [WIDGET_IDS.CODEWEB_RETRO_GRID, (w, d, g, s) => renderCodewebRetroGrid(w, d, g, s)],
   [WIDGET_IDS.CODEWEB_SHOWCASE_CARDS, (w, d, g, s) => renderCodewebShowcaseCards(w, d, g, s)],
   [WIDGET_IDS.CODEWEB_SOCIAL_BADGE, (w, d, g, s) => renderCodewebSocialBadge(w, d, g, s)],
   [WIDGET_IDS.CODEWEB_MINIMAL_BADGE, (w, d, g, s) => renderCodewebMinimalBadge(w, d, g, s)],
 
-  // Surveillance (198X / Oxide) Variants
   [WIDGET_IDS.SURVEILLANCE_HEADER, (w, d, g, s) => renderSurveillanceHeader(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_DOSSIER, (w, d, g, s) => renderSurveillanceDossier(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_LOADOUT, (w, d, g, s) => renderSurveillanceLoadout(w, d, g, s)],
@@ -148,7 +142,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.SURVEILLANCE_FEEDS, (w, d, g, s) => renderSurveillanceFeeds(w, d, g, s)],
   [WIDGET_IDS.SURVEILLANCE_TITLE, (w, d, g, s) => renderSurveillanceTitle(w, d, g, s)],
 
-  // ASCII Premium Kit
   [
     WIDGET_IDS.PREMIUM_ASCII_PROFILE_CARD,
     (w, d, g, s) => renderPremiumAsciiProfileCard(w, d, g, s),
@@ -170,7 +163,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES, (w, d, g, s) => renderWinXPSystemProperties(w, d, g, s)],
   [WIDGET_IDS.WINXP_BLISS, (w, d, g, s) => renderWinXPBliss(w, d, g, s)],
 
-  // External Integration Widgets
   [WIDGET_IDS.GITFEST_LINEUP, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.GITHUB_README_STATS, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.GHSTATS, (w, d, g) => renderExternalWidgets(w, d, g)],

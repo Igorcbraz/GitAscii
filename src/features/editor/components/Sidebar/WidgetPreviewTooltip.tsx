@@ -265,7 +265,6 @@ export function WidgetPreviewTooltip({
     let loadedCount = 0
     const total = Math.max(1, urls.length)
 
-    // Safety timeout in case remote API is slow or fails
     const timer = setTimeout(() => {
       if (isCurrent) setIsLoading(false)
     }, 2000)

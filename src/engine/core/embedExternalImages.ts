@@ -165,7 +165,6 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
   let finalSvg = svgContent
   let hasErrors = false
 
-  // 1. Process robust JSON format first using safe index scanning (immune to ReDoS)
   while (true) {
     const startIdx = finalSvg.indexOf(JSON_START_TOKEN)
     if (startIdx === -1) break
@@ -236,7 +235,6 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
       finalSvg.slice(blockEndIdx + BLOCK_END_TOKEN.length)
   }
 
-  // 2. Process legacy format for any remaining widgets using safe index scanning
   while (true) {
     const startIdx = finalSvg.indexOf(LEGACY_START_TOKEN)
     if (startIdx === -1) break

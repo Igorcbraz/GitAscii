@@ -48,7 +48,7 @@ export function renderPokemonCard(
         .bg-grid-${id} { animation: pulseBg-${id} 2s infinite; }
         .scanline-${id} { animation: scan-${id} 1.5s linear infinite; }
         .ascii-text-${id} { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #c5ff4a; font-weight: bold; letter-spacing: 1px; animation: blinkText-${id} 1.5s infinite; }
-        
+
         @keyframes shakeBall-${id} {
           0%, 80% { transform: rotate(0deg); }
           82% { transform: rotate(-5deg); }
@@ -75,16 +75,16 @@ export function renderPokemonCard(
 
       <g class="bg-grid-${id}">
         <rect width="${width}" height="${height}" fill="url(#crosses-${id})" />
-        
+
         <text x="16" y="24" class="ascii-text-${id}">SYS.PKMN.DATA // EXTRACTING</text>
         <text x="16" y="40" class="ascii-text-${id}" style="opacity: 0.4;">ID: ${id.slice(0, 8).toUpperCase()}</text>
         <text x="${width - 16}" y="24" class="ascii-text-${id}" text-anchor="end">STATUS: [ FETCHING ]</text>
-        
+
         <rect x="16" y="${height - 24}" width="80" height="4" fill="#c5ff4a" opacity="0.7" />
         <rect x="100" y="${height - 24}" width="20" height="4" fill="#313131" />
         <rect x="124" y="${height - 24}" width="40" height="4" fill="#c5ff4a" opacity="0.3" />
         <text x="${width - 16}" y="${height - 20}" class="ascii-text-${id}" text-anchor="end">PWR: 100%</text>
-        
+
         <rect x="0" y="0" width="${width}" height="100" fill="url(#scanline-${id})" class="scanline-${id}" style="mix-blend-mode: screen;" pointer-events="none" />
       </g>
 
@@ -112,7 +112,6 @@ export function renderPokemonCard(
     `
   }
 
-  // Visual state from controls
   const enableHolo = cfg.enableHolo !== false
   const rotateX = Number(cfg.rotateX) || 0
   const rotateY = Number(cfg.rotateY) || 0
@@ -141,7 +140,6 @@ export function renderPokemonCard(
   const glareOpacity = 0.4 * intensity
   const shineOpacity = 0.3 * intensity
 
-  // Card proportions
   const cardRatio = 63 / 88
   const containerRatio = width / height
 

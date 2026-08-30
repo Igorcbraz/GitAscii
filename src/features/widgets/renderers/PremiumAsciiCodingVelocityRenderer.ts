@@ -57,11 +57,7 @@ export function renderPremiumAsciiCodingVelocity(
 
   const velocity =
     data?.codingVelocity ||
-    calculateCodingVelocity(
-      data?.activityMetrics,
-      data?.contributions?.totalContributions || 0,
-      data?.contributions?.weeks || []
-    )
+    calculateCodingVelocity(data?.activityMetrics, data?.contributions?.totalContributions || 0)
 
   const hideVelocityMetrics = Array.isArray(cfg.hideVelocityMetrics)
     ? (cfg.hideVelocityMetrics as string[])

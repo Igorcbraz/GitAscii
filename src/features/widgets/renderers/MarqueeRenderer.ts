@@ -126,7 +126,7 @@ export function renderMarquee(
         .map((c) => c + c)
         .join('')
     }
-    // Support non-hex strings safely
+
     if (!/^[0-9A-F]{6}$/i.test(h)) {
       return hex
     }

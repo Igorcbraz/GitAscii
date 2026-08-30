@@ -71,7 +71,6 @@ export function renderBlueprint(
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
   const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
-  // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
   const sortBy = (cfg.repoSortBy as string) || 'stars'
   const maxRepos = Number(cfg.maxRepos) || 8
@@ -81,7 +80,6 @@ export function renderBlueprint(
   const authorName = escapeXml(customTitle).toUpperCase()
 
   if (layoutType === 'hero') {
-    // Exact hero layout from blueprint-output assets/hero-dark.svg
     const listG = layers
       .map((layer, index) => {
         const column = index % 3
@@ -150,30 +148,29 @@ export function renderBlueprint(
         <path d="M854 218H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="232" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">DRAWN BY</text>
         <text x="962" y="232" class="mono" font-size="9.5" fill="${ink}">${authorName}</text>
-        
+
         <path d="M854 239H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="253" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">PROJECT</text>
         <text x="962" y="253" class="mono" font-size="9.5" fill="${ink}">AI AGENT INFRASTRUCTURE</text>
-        
+
         <path d="M854 260H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="274" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">LOCATION</text>
         <text x="962" y="274" class="mono" font-size="9.5" fill="${ink}">${escapeXml(data.user.location || 'ONLINE').toUpperCase()}</text>
-        
+
         <path d="M854 281H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="295" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">SHEET</text>
         <text x="962" y="295" class="mono" font-size="9.5" fill="${ink}">01 OF 01</text>
-        
+
         <path d="M854 302H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="316" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">REV</text>
         <text x="962" y="316" class="mono" font-size="9.5" fill="${ink}">08</text>
-        
+
         <path d="M854 323H1184" stroke="${line}" stroke-width=".6"/>
         <text x="864" y="337" class="mono" font-size="8" letter-spacing="1.5" fill="${muted}">SCALE</text>
         <text x="962" y="337" class="mono" font-size="9.5" fill="${ink}">NTS</text>
       </svg>
     `
   } else {
-    // Exact closed-loop layout from blueprint-output assets/closed-loop-dark.svg
     const explodedParts = layers
       .map((layer, index) => {
         const xOffset = 127.77 + index * 57.77
@@ -257,7 +254,7 @@ export function renderBlueprint(
 
         <text x="40" y="46" class="mono" font-size="12" font-weight="700" letter-spacing="3" fill="${ink}">EXPLODED ASSEMBLY — ${partsCount} PARTS</text>
         <text x="40" y="62" class="mono" font-size="8.5" letter-spacing="1.5" fill="${muted}">${authorName}</text>
-        
+
         <path class="cline" d="M50 165H610" stroke="${line}" stroke-opacity=".55" stroke-width=".9"/>
         <path d="M610 165H618" stroke="${line}" stroke-width=".9" marker-end="url(#bp-arr-${widget.instanceId})"/>
 

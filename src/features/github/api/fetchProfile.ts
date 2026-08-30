@@ -283,8 +283,7 @@ export async function fetchGitHubProfile(username: string): Promise<NormalizedGi
       )
       const codingVelocity = calculateCodingVelocity(
         result.activityMetrics,
-        result.contributions?.totalContributions || 0,
-        weeks
+        result.contributions?.totalContributions || 0
       )
 
       result.languageBreakdown = languageBreakdown
