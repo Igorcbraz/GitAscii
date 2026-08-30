@@ -54,6 +54,8 @@
         "pro/overview",
         "pro/telemetry-and-privacy",
         "pro/metrics-and-charts",
+        "pro/health-monitoring",
+        "pro/dynamic-rules",
         "pro/error-monitoring-and-alerts",
         "pro/multi-profile"
       ]
