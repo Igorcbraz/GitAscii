@@ -264,4 +264,229 @@ describe('Pro API Route Handlers Test Suite', () => {
       expect(data.tier).toBe('pro')
     })
   })
+
+  describe('Multi-profile enhancements: Duplicate, Default, Versions', () => {
+    it('duplicates, sets default, and creates/restores versions', async () => {
+      mockedGetSession.mockResolvedValue({
+        username: 'MultiTester',
+        githubId: 101,
+      } as any)
+
+      const { POST: postDuplicate } = await import('@/app/api/pro/profiles/[slug]/duplicate/route')
+      const { POST: postDefault } = await import('@/app/api/pro/profiles/[slug]/default/route')
+      const { GET: getVersions, POST: postVersion } =
+        await import('@/app/api/pro/profiles/[slug]/versions/route')
+      const { POST: restoreVersion } =
+        await import('@/app/api/pro/profiles/[slug]/versions/[versionId]/restore/route')
+
+      // 1. Duplicate default profile
+      const dupReq = new Request('http://localhost:3000/api/pro/profiles/default/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetSlug: 'resume',
+          name: 'Resume Profile',
+          description: 'Cloned from default',
+        }),
+      })
+      const dupRes = await postDuplicate(dupReq, {
+        params: Promise.resolve({ slug: 'default' }),
+      })
+      expect(dupRes.status).toBe(201)
+
+      // 2. Set 'resume' as default
+      const defReq = new Request('http://localhost:3000/api/pro/profiles/resume/default', {
+        method: 'POST',
+      })
+      const defRes = await postDefault(defReq, {
+        params: Promise.resolve({ slug: 'resume' }),
+      })
+      expect(defRes.status).toBe(200)
+
+      // 3. Create version checkpoint
+      const verReq = new Request('http://localhost:3000/api/pro/profiles/resume/versions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label: 'Checkpoint v1',
+          description: 'First version',
+          config: {
+            id: 'c1',
+            userId: '101',
+            username: 'MultiTester',
+            slug: 'resume',
+            name: 'Resume Profile',
+            widgets: [],
+            theme: 'dark',
+            layout: 'freeform',
+            version: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        }),
+      })
+      const verRes = await postVersion(verReq, {
+        params: Promise.resolve({ slug: 'resume' }),
+      })
+      expect(verRes.status).toBe(201)
+      const verData = await verRes.json()
+
+      // 4. List versions
+      const listReq = new Request('http://localhost:3000/api/pro/profiles/resume/versions')
+      const listRes = await getVersions(listReq, {
+        params: Promise.resolve({ slug: 'resume' }),
+      })
+      expect(listRes.status).toBe(200)
+
+      // 5. Restore version
+      const restReq = new Request(
+        'http://localhost:3000/api/pro/profiles/resume/versions/restore',
+        {
+          method: 'POST',
+        }
+      )
+      const restRes = await restoreVersion(restReq, {
+        params: Promise.resolve({ slug: 'resume', versionId: verData.version.id }),
+      })
+      expect(restRes.status).toBe(200)
+    })
+  })
+
+  describe('Dynamic Profiles API routes', () => {
+    it('manages dynamic rules and preview simulator', async () => {
+      mockedGetSession.mockResolvedValue({
+        username: 'DynamicTester',
+        githubId: 202,
+      } as any)
+
+      const {
+        GET: getDynRules,
+        POST: postDynRule,
+        PUT: putDynConfig,
+      } = await import('@/app/api/pro/dynamic-rules/route')
+      const { PATCH: patchDynRule, DELETE: deleteDynRule } =
+        await import('@/app/api/pro/dynamic-rules/[ruleId]/route')
+      const { POST: postDynPreview } = await import('@/app/api/pro/dynamic-rules/preview/route')
+
+      // GET initial
+      const initialRes = await getDynRules()
+      expect(initialRes.status).toBe(200)
+
+      // POST create rule
+      const createReq = new Request('http://localhost:3000/api/pro/dynamic-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Work Hours',
+          targetProfileSlug: 'work',
+          priority: 70,
+          type: 'work_hours',
+          startTime: '09:00',
+          endTime: '18:00',
+          daysOfWeek: [1, 2, 3, 4, 5],
+        }),
+      })
+      const createRes = await postDynRule(createReq)
+      expect(createRes.status).toBe(201)
+      const { rule } = await createRes.json()
+
+      // PUT enable config
+      const putReq = new Request('http://localhost:3000/api/pro/dynamic-rules', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: true }),
+      })
+      const putRes = await putDynConfig(putReq)
+      expect(putRes.status).toBe(200)
+
+      // POST preview simulation
+      const previewReq = new Request('http://localhost:3000/api/pro/dynamic-rules/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          simulatedDate: '2026-09-01T14:00:00',
+          simulatedTimezone: 'UTC',
+        }),
+      })
+      const previewRes = await postDynPreview(previewReq)
+      expect(previewRes.status).toBe(200)
+      const previewData = await previewRes.json()
+      expect(previewData.selectedProfileSlug).toBe('work')
+
+      // PATCH rule
+      const patchReq = new Request(`http://localhost:3000/api/pro/dynamic-rules/${rule.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priority: 80 }),
+      })
+      const patchRes = await patchDynRule(patchReq, {
+        params: Promise.resolve({ ruleId: rule.id }),
+      })
+      expect(patchRes.status).toBe(200)
+
+      // DELETE rule
+      const delReq = new Request(`http://localhost:3000/api/pro/dynamic-rules/${rule.id}`, {
+        method: 'DELETE',
+      })
+      const delRes = await deleteDynRule(delReq, {
+        params: Promise.resolve({ ruleId: rule.id }),
+      })
+      expect(delRes.status).toBe(200)
+    })
+  })
+
+  describe('GitAscii Health API routes', () => {
+    it('returns overall health, widget breakdown, history, and simulation', async () => {
+      mockedGetSession.mockResolvedValue({
+        username: 'HealthTester',
+        githubId: 303,
+      } as any)
+
+      const { GET: getHealth } = await import('@/app/api/pro/health/route')
+      const { GET: getHealthWidgets } = await import('@/app/api/pro/health/widgets/route')
+      const { GET: getHealthHistory } = await import('@/app/api/pro/health/history/route')
+      const { POST: postHealthSimulate } = await import('@/app/api/pro/health/simulate/route')
+
+      // GET health
+      const healthRes = await getHealth()
+      expect(healthRes.status).toBe(200)
+      const healthData = await healthRes.json()
+      expect(healthData.status).toBe('operational')
+
+      // GET widgets
+      const widgetsReq = new Request('http://localhost:3000/api/pro/health/widgets')
+      const widgetsRes = await getHealthWidgets(widgetsReq)
+      expect(widgetsRes.status).toBe(200)
+
+      // GET history
+      const historyReq = new Request('http://localhost:3000/api/pro/health/history?days=30')
+      const historyRes = await getHealthHistory(historyReq)
+      expect(historyRes.status).toBe(200)
+
+      // POST simulate
+      const simReq = new Request('http://localhost:3000/api/pro/health/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          widgetId: 'stats',
+          widgetName: 'Stats Cards',
+          errorType: 'FETCH_TIMEOUT',
+          message: 'Timeout during render',
+        }),
+      })
+      const simRes = await postHealthSimulate(simReq)
+      expect(simRes.status).toBe(200)
+
+      // Test README as a Service (RaaS) Health Badge SVG endpoint
+      const { GET: getHealthBadge } = await import('@/app/api/[username]/health-badge/route')
+      const badgeReq = new Request('http://localhost:3000/api/HealthTester/health-badge')
+      const badgeRes = await getHealthBadge(badgeReq, {
+        params: Promise.resolve({ username: 'HealthTester' }),
+      })
+      expect(badgeRes.status).toBe(200)
+      expect(badgeRes.headers.get('Content-Type')).toContain('image/svg+xml')
+      const svgText = await badgeRes.text()
+      expect(svgText).toContain('GitAscii Health')
+    })
+  })
 })

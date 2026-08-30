@@ -1,4 +1,6 @@
 import type { SavedConfiguration } from '@/engine/types'
+import { REDIS_KEYS } from '@/features/pro/server/analyticsStore'
+import { getProRedisClient } from '@/features/pro/server/redisClient'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { invalidateSvgCache } from '@/services/profileSvgService'
 
@@ -14,6 +16,11 @@ export function invalidateProfileConfig(username: string, slug: string = 'defaul
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   memoryCache.delete(`${usernameLower}_${slugLower}`)
+  try {
+    const redis = getProRedisClient()
+    const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
+    void redis.del(configKey).catch(() => {})
+  } catch {}
   invalidateSvgCache(usernameLower)
 }
 
@@ -31,6 +38,15 @@ export function cacheProfileConfig(config: SavedConfiguration): void {
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
   cacheProfileConfig(config)
+  try {
+    const redis = getProRedisClient()
+    const username = config.username.toLowerCase()
+    const slug = (config.profileSlug || 'default').toLowerCase()
+    const configKey = REDIS_KEYS.profileConfig(username, slug)
+    await redis.set(configKey, JSON.stringify(config))
+  } catch (err) {
+    console.warn('[ProfileStorage] Failed to persist config to Redis:', err)
+  }
 }
 
 async function fetchConfigFromGitHub(
@@ -88,6 +104,25 @@ export async function loadProfileConfig(
     return cached.config
   }
 
+  try {
+    const redis = getProRedisClient()
+    const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
+    const redisData = await redis.get<string | SavedConfiguration>(configKey)
+    if (redisData) {
+      const parsedConfig =
+        typeof redisData === 'string' ? (JSON.parse(redisData) as SavedConfiguration) : redisData
+      if (parsedConfig && Array.isArray(parsedConfig.widgets)) {
+        memoryCache.set(cacheKey, {
+          config: parsedConfig,
+          expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+        })
+        return parsedConfig
+      }
+    }
+  } catch (err) {
+    console.warn('[ProfileStorage] Error reading config from Redis:', err)
+  }
+
   const config = await fetchConfigFromGitHub(username, slugLower)
 
   if (config) {
@@ -95,6 +130,12 @@ export async function loadProfileConfig(
       config,
       expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
     })
+
+    try {
+      const redis = getProRedisClient()
+      const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
+      void redis.set(configKey, JSON.stringify(config)).catch(() => {})
+    } catch {}
   } else {
     memoryCache.delete(cacheKey)
   }

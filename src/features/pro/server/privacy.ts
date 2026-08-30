@@ -15,8 +15,9 @@ export function generateAnonymizedVisitorId(
   return crypto.createHmac('sha256', salt).update(rawData).digest('hex').slice(0, 16)
 }
 
-export function sanitizeReferrer(referrerUrl: string | null | undefined): string {
-  if (!referrerUrl) return 'Direct / GitHub README'
+export function sanitizeReferrer(referrerUrl: string | null | undefined, isCamo?: boolean): string {
+  if (isCamo) return 'GitHub README (Camo Proxy)'
+  if (!referrerUrl) return 'Direct / No Referrer'
 
   try {
     const parsed = new URL(referrerUrl)
@@ -50,12 +51,12 @@ export function sanitizeReferrer(referrerUrl: string | null | undefined): string
 
     return hostname
   } catch {
-    return 'Other'
+    return 'Other Referrer'
   }
 }
 
 export function parseDeviceType(ua: string | null | undefined, isCamo: boolean): string {
-  if (isCamo) return 'GitHub Camo'
+  if (isCamo) return 'GitHub Camo Proxy'
   if (!ua) return 'Desktop'
 
   const lower = ua.toLowerCase()
@@ -68,7 +69,7 @@ export function parseDeviceType(ua: string | null | undefined, isCamo: boolean):
 }
 
 export function parseBrowser(ua: string | null | undefined, isCamo: boolean): string {
-  if (isCamo) return 'GitHub Proxy'
+  if (isCamo) return 'GitHub Image Proxy'
   if (!ua) return 'Other'
 
   const lower = ua.toLowerCase()
@@ -89,7 +90,7 @@ export function parseBrowser(ua: string | null | undefined, isCamo: boolean): st
 }
 
 export function parseOperatingSystem(ua: string | null | undefined, isCamo: boolean): string {
-  if (isCamo) return 'GitHub Cloud'
+  if (isCamo) return 'GitHub Cloud (Proxy)'
   if (!ua) return 'Other'
 
   const lower = ua.toLowerCase()

@@ -34,6 +34,8 @@ export async function GET(request: Request) {
         totalViews: analytics.totalViews,
         uniqueVisitors: analytics.uniqueVisitors,
         cacheHitRatio: `${analytics.cacheHitRatio}%`,
+        camoRatio: `${analytics.camoRatio}%`,
+        directRatio: `${analytics.directRatio}%`,
         avgDailyViews: analytics.avgDailyViews,
         growthRateViews: `${analytics.growthRateViews}%`,
         growthRateUniques: `${analytics.growthRateUniques}%`,
@@ -42,7 +44,21 @@ export async function GET(request: Request) {
         peakDay: analytics.peakDay,
         peakHour: analytics.peakHour,
       },
-      topCountries: analytics.topCountries.slice(0, 5),
+      camoDelivery: [
+        {
+          name: 'GitHub Camo Proxy (README)',
+          key: 'camo',
+          count: Math.round((analytics.totalViews * analytics.camoRatio) / 100),
+          percentage: analytics.camoRatio,
+        },
+        {
+          name: 'Direct HTTP Embeds',
+          key: 'direct',
+          count: Math.round((analytics.totalViews * analytics.directRatio) / 100),
+          percentage: analytics.directRatio,
+        },
+      ],
+      statusCodes: analytics.statusCodes.slice(0, 5),
       topSources: analytics.topSources.slice(0, 5),
       topDevices: analytics.topDevices.slice(0, 5),
       topBrowsers: analytics.topBrowsers.slice(0, 5),
@@ -59,6 +75,7 @@ export async function GET(request: Request) {
         active: errors.filter((e) => e.status !== 'resolved').length,
         resolved: errors.filter((e) => e.status === 'resolved').length,
       },
+      hourlyDistribution: analytics.hourlyDistribution,
       timeSeries: analytics.timeSeries,
     }
 

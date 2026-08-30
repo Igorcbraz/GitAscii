@@ -62,6 +62,26 @@ export const REDIS_KEYS = {
   emailItem: (u: string, id: string) => `gitascii:pro:${u.toLowerCase()}:emails:${id}`,
   testDigestCooldown: (u: string) => `gitascii:pro:${u.toLowerCase()}:test_digest:cooldown`,
   userSettings: (u: string) => `gitascii:pro:${u.toLowerCase()}:settings`,
+
+  profileConfig: (u: string, slug: string) =>
+    `gitascii:pro:${u.toLowerCase()}:profile:${slug.toLowerCase()}:config`,
+  profileVersions: (u: string, slug: string) =>
+    `gitascii:pro:${u.toLowerCase()}:profile:${slug.toLowerCase()}:versions`,
+  profileVersionItem: (u: string, slug: string, versionId: string) =>
+    `gitascii:pro:${u.toLowerCase()}:profile:${slug.toLowerCase()}:version:${versionId}`,
+
+  dynamicRulesConfig: (u: string) => `gitascii:pro:${u.toLowerCase()}:dynamic:config`,
+  dynamicRulesList: (u: string) => `gitascii:pro:${u.toLowerCase()}:dynamic:rules`,
+  dynamicRuleItem: (u: string, ruleId: string) =>
+    `gitascii:pro:${u.toLowerCase()}:dynamic:rule:${ruleId}`,
+
+  healthProfileDaily: (u: string, slug: string, date: string) =>
+    `gitascii:pro:${u.toLowerCase()}:${slug.toLowerCase()}:health:${date}`,
+  healthWidgetDaily: (u: string, widgetId: string, date: string) =>
+    `gitascii:pro:${u.toLowerCase()}:widget:${widgetId.toLowerCase()}:health:${date}`,
+  healthWidgetMeta: (u: string, widgetId: string) =>
+    `gitascii:pro:${u.toLowerCase()}:widget:${widgetId.toLowerCase()}:meta`,
+  healthHistoryList: (u: string) => `gitascii:pro:${u.toLowerCase()}:health:history`,
 }
 
 function formatDate(date: Date): string {
@@ -115,12 +135,11 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     const city = sanitizeCity(payload.city)
     const timezone = sanitizeTimezone(payload.timezone)
     const language = parseLanguage(payload.language)
-    const source = sanitizeReferrer(payload.referrer)
+    const source = sanitizeReferrer(payload.referrer, payload.isCamoProxy)
     const device = parseDeviceType(payload.userAgent, payload.isCamoProxy)
     const browser = parseBrowser(payload.userAgent, payload.isCamoProxy)
     const os = parseOperatingSystem(payload.userAgent, payload.isCamoProxy)
     const trafficType = parseTrafficType(payload.userAgent, payload.isCamoProxy, payload.referrer)
-    const theme = payload.theme || 'dark'
     const latency = Math.max(1, Math.round(payload.renderTimeMs || 25))
 
     const hllKey = REDIS_KEYS.dailyHll(username, slug, dateStr)
@@ -142,7 +161,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     }
     await redis.hincrby(dailyKey, 'totalLatencyMs', latency)
     await redis.hincrby(dailyKey, 'latencyCount', 1)
-    await redis.hincrby(dailyKey, `theme_${theme}`, 1)
     await redis.expire(dailyKey, RETENTION_TTL_SECONDS)
 
     const hourlyKey = REDIS_KEYS.hourlyMetrics(username, slug, dateStr)
@@ -169,7 +187,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
       ['browsers', browser],
       ['os', os],
       ['traffic_types', trafficType],
-      ['themes', theme],
       ['status_codes', String(statusCode)],
     ]
 
@@ -210,7 +227,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
       status: statusCode,
       isCacheHit: payload.isCacheHit,
       latencyMs: latency,
-      theme,
     }
 
     await redis.zadd(activityKey, {
@@ -357,42 +373,38 @@ export async function getAnalyticsSummary(
       totalLatencyMs += latMs
       totalLatencyCount += latCount
 
-      const [cDim, contDim, lDim, tzDim, sDim, dDim, bDim, oDim, ttDim, thDim, scDim] =
-        await Promise.all([
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'countries', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'continents', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'languages', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'timezones', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'sources', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'devices', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'browsers', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'os', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'traffic_types', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'themes', dateStr)
-          ),
-          redis.hgetall<Record<string, string | number>>(
-            REDIS_KEYS.dimension(u, slug, 'status_codes', dateStr)
-          ),
-        ])
+      const [cDim, contDim, lDim, tzDim, sDim, dDim, bDim, oDim, ttDim, scDim] = await Promise.all([
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'countries', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'continents', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'languages', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'timezones', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'sources', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'devices', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'browsers', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'os', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'traffic_types', dateStr)
+        ),
+        redis.hgetall<Record<string, string | number>>(
+          REDIS_KEYS.dimension(u, slug, 'status_codes', dateStr)
+        ),
+      ])
 
       const mergeMap = (
         src: Record<string, string | number> | null,
@@ -413,7 +425,6 @@ export async function getAnalyticsSummary(
       mergeMap(bDim, browserCounts)
       mergeMap(oDim, osCounts)
       mergeMap(ttDim, trafficTypeCounts)
-      mergeMap(thDim, themeCounts)
       mergeMap(scDim, statusCodeCounts)
     }
   }
@@ -632,7 +643,6 @@ export async function getAnalyticsSummary(
   const topBrowsers = formatGenericDim(browserCounts)
   const topOs = formatGenericDim(osCounts)
   const trafficTypes = formatGenericDim(trafficTypeCounts)
-  const themes = formatGenericDim(themeCounts)
   const statusCodes = formatGenericDim(statusCodeCounts)
   const topTimezones = formatGenericDim(timezoneCounts)
 
@@ -763,34 +773,35 @@ export async function getAnalyticsSummary(
     topSources.length > 0
       ? topSources
       : [
-          { name: 'GitHub', key: 'GitHub', count: 0, percentage: 0 },
-          { name: 'Direct / GitHub README', key: 'Direct', count: 0, percentage: 0 },
-          { name: 'Google Search', key: 'Google', count: 0, percentage: 0 },
+          { name: 'GitHub README (Camo Proxy)', key: 'GitHub Camo', count: 0, percentage: 0 },
+          { name: 'Direct / Portfolio Embed', key: 'Direct', count: 0, percentage: 0 },
+          { name: 'Direct / No Referrer', key: 'No Referrer', count: 0, percentage: 0 },
         ]
 
   const effectiveTopDevices =
     topDevices.length > 0
       ? topDevices
       : [
+          { name: 'GitHub Camo Proxy', key: 'GitHub Camo Proxy', count: 0, percentage: 0 },
           { name: 'Desktop', key: 'Desktop', count: 0, percentage: 0 },
           { name: 'Mobile', key: 'Mobile', count: 0, percentage: 0 },
-          { name: 'GitHub Camo', key: 'GitHub Camo', count: 0, percentage: 0 },
         ]
 
   const effectiveTopBrowsers =
     topBrowsers.length > 0
       ? topBrowsers
       : [
+          { name: 'GitHub Image Proxy', key: 'GitHub Image Proxy', count: 0, percentage: 0 },
           { name: 'Chrome', key: 'Chrome', count: 0, percentage: 0 },
           { name: 'Safari', key: 'Safari', count: 0, percentage: 0 },
           { name: 'Firefox', key: 'Firefox', count: 0, percentage: 0 },
-          { name: 'Edge', key: 'Edge', count: 0, percentage: 0 },
         ]
 
   const effectiveTopOs =
     topOs.length > 0
       ? topOs
       : [
+          { name: 'GitHub Cloud (Proxy)', key: 'GitHub Cloud (Proxy)', count: 0, percentage: 0 },
           { name: 'macOS', key: 'macOS', count: 0, percentage: 0 },
           { name: 'Windows', key: 'Windows', count: 0, percentage: 0 },
           { name: 'Linux', key: 'Linux', count: 0, percentage: 0 },
@@ -798,9 +809,14 @@ export async function getAnalyticsSummary(
 
   return {
     totalViews,
+    totalRequests: totalViews,
     uniqueVisitors: totalUniques,
+    uniqueSources: totalUniques,
+    estimatedUniqueSources: totalUniques,
     viewsToday,
+    requestsToday: viewsToday,
     uniquesToday,
+    uniqueSourcesToday: uniquesToday,
     viewsPreviousPeriod: prevViews,
     uniquesPreviousPeriod: prevUniques,
     growthRateViews,
@@ -809,9 +825,11 @@ export async function getAnalyticsSummary(
     cacheHitsPreviousPeriod: prevCacheHits,
     growthRateCacheHits,
     avgDailyViews,
+    avgDailyRequests: avgDailyViews,
     avgLatencyMs,
     latencyPreviousPeriod: prevAvgLatency,
     growthRateLatency,
+    requestsLast30m: activeLast30m,
     activeViewersLast30m: activeLast30m,
     camoRatio,
     directRatio,
@@ -829,7 +847,7 @@ export async function getAnalyticsSummary(
     topBrowsers: effectiveTopBrowsers,
     topOs: effectiveTopOs,
     trafficTypes,
-    themes,
+    themes: [],
     statusCodes,
     topProfiles,
     recentActivity,

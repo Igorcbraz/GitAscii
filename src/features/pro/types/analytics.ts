@@ -11,7 +11,6 @@ export type DimensionType =
   | 'browsers'
   | 'os'
   | 'traffic_types'
-  | 'themes'
   | 'status_codes'
 
 export interface DailyDataPoint {
@@ -81,7 +80,7 @@ export interface TelemetryStreamEvent {
   status: number
   isCacheHit: boolean
   latencyMs: number
-  theme: 'dark' | 'light'
+  theme?: 'dark' | 'light'
 }
 
 export interface ProfilePerformanceMetric {
@@ -98,9 +97,14 @@ export interface ProfilePerformanceMetric {
 
 export interface AnalyticsSummary {
   totalViews: number
+  totalRequests?: number
   uniqueVisitors: number
+  uniqueSources?: number
+  estimatedUniqueSources?: number
   viewsToday: number
+  requestsToday?: number
   uniquesToday: number
+  uniqueSourcesToday?: number
   viewsPreviousPeriod: number
   uniquesPreviousPeriod: number
   growthRateViews: number
@@ -109,9 +113,11 @@ export interface AnalyticsSummary {
   cacheHitsPreviousPeriod: number
   growthRateCacheHits: number
   avgDailyViews: number
+  avgDailyRequests?: number
   avgLatencyMs: number
   latencyPreviousPeriod: number
   growthRateLatency: number
+  requestsLast30m: number
   activeViewersLast30m: number
   camoRatio: number
   directRatio: number
@@ -132,7 +138,7 @@ export interface AnalyticsSummary {
   topBrowsers: DimensionMetric[]
   topOs: DimensionMetric[]
   trafficTypes: DimensionMetric[]
-  themes: DimensionMetric[]
+  themes?: DimensionMetric[]
   statusCodes: DimensionMetric[]
 
   topProfiles: ProfilePerformanceMetric[]
@@ -146,7 +152,7 @@ export interface AnalyticsSummary {
 export interface IngestViewPayload {
   username: string
   profileSlug: string
-  theme: 'dark' | 'light'
+  theme?: 'dark' | 'light'
   renderTimeMs: number
   isCamoProxy: boolean
   isCacheHit: boolean

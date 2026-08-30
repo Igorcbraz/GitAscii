@@ -67,6 +67,8 @@ export async function GET() {
     const overviewData: ProOverviewData = {
       totalViews: analytics.totalViews,
       uniqueVisitors: analytics.uniqueVisitors,
+      totalRequests: analytics.totalRequests ?? analytics.totalViews,
+      uniqueSources: analytics.uniqueSources ?? analytics.uniqueVisitors,
       activeProfilesCount: profiles.length,
       activeErrorsCount: activeErrors.length,
       emailsSentCount: emails.length,
@@ -80,7 +82,9 @@ export async function GET() {
       cacheHitRatio: analytics.cacheHitRatio,
       avgLatencyMs: analytics.avgLatencyMs,
       activeViewersLast30m: analytics.activeViewersLast30m,
+      requestsLast30m: analytics.requestsLast30m ?? analytics.activeViewersLast30m,
       avgDailyViews: analytics.avgDailyViews,
+      avgDailyRequests: analytics.avgDailyRequests ?? analytics.avgDailyViews,
       peakDay: analytics.peakDay,
       peakHour: analytics.peakHour,
       topCountry: analytics.topCountries?.[0]

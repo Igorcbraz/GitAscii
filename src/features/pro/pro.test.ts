@@ -62,7 +62,8 @@ describe('GitAscii Pro Ecosystem Test Suite', () => {
       expect(sanitizeReferrer('https://github.com/torvalds/linux?token=secret#top')).toBe('GitHub')
       expect(sanitizeReferrer('https://www.google.com/search?q=gitascii')).toBe('Google Search')
       expect(sanitizeReferrer('https://t.co/xyz123')).toBe('X / Twitter')
-      expect(sanitizeReferrer(null)).toBe('Direct / GitHub README')
+      expect(sanitizeReferrer(null)).toBe('Direct / No Referrer')
+      expect(sanitizeReferrer(null, true)).toBe('GitHub README (Camo Proxy)')
     })
 
     it('classifies browser, device, and operating system without invasive fingerprinting', () => {
@@ -73,8 +74,8 @@ describe('GitAscii Pro Ecosystem Test Suite', () => {
       expect(parseDeviceType(macChromeUa, false)).toBe('Desktop')
 
       const camoProxyUa = 'github-camo (0.1)'
-      expect(parseDeviceType(camoProxyUa, true)).toBe('GitHub Camo')
-      expect(parseBrowser(camoProxyUa, true)).toBe('GitHub Proxy')
+      expect(parseDeviceType(camoProxyUa, true)).toBe('GitHub Camo Proxy')
+      expect(parseBrowser(camoProxyUa, true)).toBe('GitHub Image Proxy')
     })
 
     it('sanitizes country codes to ISO 3166 alpha-2 format', () => {

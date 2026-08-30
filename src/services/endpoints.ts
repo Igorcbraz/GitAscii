@@ -137,21 +137,39 @@ export const API_ENDPOINTS = {
       profile && profile !== 'all'
         ? `/api/pro/overview?profile=${encodeURIComponent(profile)}`
         : '/api/pro/overview',
-    ANALYTICS: (profile?: string, range?: string, compare?: boolean) => {
+    ANALYTICS: (profile?: string, range?: string, compare?: boolean, exportCsv?: boolean) => {
       const params = new URLSearchParams()
       if (profile && profile !== 'all') params.set('profile', profile)
       if (range) params.set('range', range)
       if (compare !== undefined) params.set('compare', String(compare))
+      if (exportCsv) params.set('export', 'csv')
       const qs = params.toString()
       return qs ? `/api/pro/analytics?${qs}` : '/api/pro/analytics'
     },
     PROFILES: '/api/pro/profiles',
     PROFILE: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}`,
+    PROFILE_DUPLICATE: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/duplicate`,
+    PROFILE_DEFAULT: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/default`,
+    PROFILE_VERSIONS: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/versions`,
+    PROFILE_VERSION_RESTORE: (slug: string, versionId: string) =>
+      `/api/pro/profiles/${encodeURIComponent(slug)}/versions/${encodeURIComponent(versionId)}/restore`,
+    DYNAMIC_RULES: '/api/pro/dynamic-rules',
+    DYNAMIC_RULE: (id: string) => `/api/pro/dynamic-rules/${encodeURIComponent(id)}`,
+    DYNAMIC_PREVIEW: '/api/pro/dynamic-rules/preview',
+    HEALTH: '/api/pro/health',
+    HEALTH_WIDGETS: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/health/widgets?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/health/widgets',
+    HEALTH_HISTORY: (days?: number) =>
+      days ? `/api/pro/health/history?days=${days}` : '/api/pro/health/history',
+    HEALTH_SIMULATE: '/api/pro/health/simulate',
     ERRORS: (profile?: string) =>
       profile && profile !== 'all'
         ? `/api/pro/errors?profile=${encodeURIComponent(profile)}`
         : '/api/pro/errors',
     ERROR_STATUS: (errorId: string) => `/api/pro/errors/${encodeURIComponent(errorId)}`,
+    ERROR_DELETE: (errorId: string) => `/api/pro/errors/${encodeURIComponent(errorId)}`,
     EMAILS: '/api/pro/emails',
     REPORTS: (range?: string, profile?: string) => {
       const params = new URLSearchParams()

@@ -21,6 +21,8 @@ export interface ActivityEvent {
 export interface ProOverviewData {
   totalViews: number
   uniqueVisitors: number
+  totalRequests?: number
+  uniqueSources?: number
   activeProfilesCount: number
   activeErrorsCount: number
   emailsSentCount: number
@@ -34,7 +36,9 @@ export interface ProOverviewData {
   cacheHitRatio?: number
   avgLatencyMs?: number
   activeViewersLast30m?: number
+  requestsLast30m?: number
   avgDailyViews?: number
+  avgDailyRequests?: number
   peakDay?: { day: string; views: number }
   peakHour?: { hour: number; views: number }
   topCountry?: { code: string; name: string; views: number }

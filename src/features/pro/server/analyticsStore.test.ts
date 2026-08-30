@@ -61,10 +61,14 @@ describe('AnalyticsStore Comprehensive Unit Tests', () => {
 
       const summary = await getAnalyticsSummary(username, 'stats', '7d')
       expect(summary.totalViews).toBe(1)
+      expect(summary.totalRequests).toBe(1)
+      expect(summary.uniqueSources).toBe(1)
+      expect(summary.requestsLast30m).toBe(1)
       expect(summary.cacheHitRatio).toBe(100)
       expect(summary.camoRatio).toBe(100)
       expect(summary.directRatio).toBe(0)
-      expect(summary.topDevices.find((d) => d.name === 'GitHub Camo')?.count).toBe(1)
+      expect(summary.topDevices.find((d) => d.name === 'GitHub Camo Proxy')?.count).toBe(1)
+      expect(summary.topSources.find((s) => s.name.includes('GitHub'))?.count).toBe(1)
     })
 
     it('limits recent activity stream to 50 items and sorts descending', async () => {
