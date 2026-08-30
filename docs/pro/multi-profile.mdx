@@ -6,6 +6,7 @@ description: 'Manage multiple isolated profile configurations, embed endpoints, 
 # Multi-Profile Architecture
 
 Many developers want different README designs for different contexts:
+
 - A rich, comprehensive dashboard for their primary personal GitHub profile (`default`).
 - A sleek, minimal monochrome widget for technical project READMEs (`minimal`).
 - A specialized metrics-only card for client proposals or portfolio embeds (`stats`).
@@ -22,12 +23,15 @@ Each profile is identified by a URL slug (e.g. `default`, `minimal`, `dark-mode`
 
 ```markdown
 <!-- Primary / Default Profile -->
+
 ![GitAscii Profile](https://gitascii.com/api/username/default)
 
 <!-- Custom Profile Slug (e.g. minimal) -->
+
 ![GitAscii Minimal](https://gitascii.com/api/username/minimal)
 
 <!-- Direct Root Fallback (Serves default profile) -->
+
 ![GitAscii Profile](https://gitascii.com/api/username)
 ```
 
@@ -47,6 +51,7 @@ gitascii:pro:{username}:{slug}:dim:...             -> Technology & geography bre
 ### Global vs. Scoped Analytics
 
 In the GitAscii Pro dashboard (`/pro/analytics`):
+
 - **"All Profiles" Scope**: Combines metrics across all your profiles to give an aggregated overview of your developer reach.
 - **Specific Profile Scope**: Filters charts, heatmaps, and error logs exclusively for the selected profile slug.
 
@@ -55,6 +60,7 @@ In the GitAscii Pro dashboard (`/pro/analytics`):
 ## 3. Managing Profiles in the Dashboard
 
 In `/pro/profiles`, you can:
+
 - **Create New Profile**: Assign a custom slug, friendly name, and description.
 - **Copy Embed Markdown**: Instantly copy formatted `![GitAscii](...)` markdown snippets with one click.
 - **Set Default Profile**: Choose which configuration is returned when someone accesses the root endpoint `/api/username`.

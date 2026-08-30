@@ -56,6 +56,7 @@ Views (Spline)
 ```
 
 ### What It Displays:
+
 - **Total Views Line (Lime)**: Daily volume of SVG requests.
 - **Unique Visitors Line (Cyan)**: Daily unique visitor counts.
 - **GitHub Camo Proxy Area**: Differentiates views coming through GitHub's proxy vs direct hits.
@@ -80,6 +81,7 @@ Volume
 ```
 
 ### How to Use This Data:
+
 - Shows which hours of the day receive peak traffic.
 - Helps developers determine **when to push major README updates, release open-source projects, or publish articles** to maximize initial impressions.
 - Displays both direct browser traffic and proxy pings.
@@ -89,6 +91,7 @@ Volume
 ## 4. Weekday × Hour Activity Grid (Heatmap Matrix)
 
 A 7-day $\times$ 24-hour matrix (168 cells) color-coded by visitor intensity:
+
 - **Rows**: Days of the week (Sunday through Saturday).
 - **Columns**: Hours of the day (0 to 23 UTC).
 - **Cell Color**: Gradient from dark background to vibrant lime (`#c5ff4a`) based on normalized density:
@@ -99,12 +102,15 @@ A 7-day $\times$ 24-hour matrix (168 cells) color-coded by visitor intensity:
 ## 5. Geographic Demographics & World Map
 
 ### How Country Geolocation Works
+
 When an SVG request arrives at the edge:
+
 1. The server extracts the standard ISO 3166-1 alpha-2 country code from edge headers (`cf-ipcountry` or `x-vercel-ip-country`).
 2. The country code is recorded in a Redis dimension hash for that date.
 3. The raw IP address is discarded immediately without writing to disk.
 
 ### Map Visualizations:
+
 - **World Map Chloropleth**: Continents and countries shaded according to their relative share of total profile views.
 - **Top Countries Ranking**: Country names, ISO flags, view count, and percentage share.
 - **Continent Breakdown**: Donut chart grouping traffic across North America, Europe, Asia, South America, Africa, and Oceania.
@@ -116,19 +122,20 @@ When an SVG request arrives at the edge:
 
 GitAscii Pro parses coarse User-Agent headers to provide audience technology insights:
 
-| Dimension | Categories | Explanation |
-| :--- | :--- | :--- |
-| **Device Types** | Desktop, Mobile, Tablet, GitHub Camo, Bot/Crawler | Identifies whether recruiters and developers are browsing on desktop machines or mobile devices. |
-| **Browsers** | Chrome, Safari, Firefox, Edge, Arc/Brave, Opera, CLI/Script | Aggregated browser engine distribution. |
-| **Operating Systems** | macOS, Windows, Linux, iOS, Android, ChromeOS | Operating system breakdown. |
-| **Traffic Types** | Direct, Camo Proxy, GitAscii App, Bot | Transparent delivery channels. |
-| **Theme Preference** | Dark Theme, Light Theme | Whether visitors rendered your SVG against dark or light background themes. |
+| Dimension             | Categories                                                  | Explanation                                                                                      |
+| :-------------------- | :---------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| **Device Types**      | Desktop, Mobile, Tablet, GitHub Camo, Bot/Crawler           | Identifies whether recruiters and developers are browsing on desktop machines or mobile devices. |
+| **Browsers**          | Chrome, Safari, Firefox, Edge, Arc/Brave, Opera, CLI/Script | Aggregated browser engine distribution.                                                          |
+| **Operating Systems** | macOS, Windows, Linux, iOS, Android, ChromeOS               | Operating system breakdown.                                                                      |
+| **Traffic Types**     | Direct, Camo Proxy, GitAscii App, Bot                       | Transparent delivery channels.                                                                   |
+| **Theme Preference**  | Dark Theme, Light Theme                                     | Whether visitors rendered your SVG against dark or light background themes.                      |
 
 ---
 
 ## 7. Multi-Profile Performance Comparison
 
 If you manage multiple profile configurations (e.g. `default`, `minimal`, `stats`):
+
 - The **Profiles Table** aggregates metrics side-by-side:
   - Total Views per slug
   - Unique Visitors per slug
@@ -142,12 +149,19 @@ If you manage multiple profile configurations (e.g. `default`, `minimal`, `stats
 
 <AccordionGroup>
   <Accordion title="Why do my GitAscii views differ from GitHub repository traffic?">
-    GitHub repository traffic (`/traffic` tab) only counts visits to repository source code pages. GitAscii measures impressions of your **Profile README** (`github.com/username`), which typically receives significantly more views from social media, GitHub search, issue discussions, and PR reviews.
+    GitHub repository traffic (`/traffic` tab) only counts visits to repository source code pages.
+    GitAscii measures impressions of your **Profile README** (`github.com/username`), which
+    typically receives significantly more views from social media, GitHub search, issue discussions,
+    and PR reviews.
   </Accordion>
   <Accordion title="Does GitHub caching affect my numbers?">
-    GitAscii sends proper `Cache-Control` headers and handles `If-None-Match` / `ETag` validations. Whenever GitHub's Camo proxy revalidates an SVG with a conditional request (`304 Not Modified`), GitAscii records the view and increments the cache-hit metric.
+    GitAscii sends proper `Cache-Control` headers and handles `If-None-Match` / `ETag` validations.
+    Whenever GitHub's Camo proxy revalidates an SVG with a conditional request (`304 Not Modified`),
+    GitAscii records the view and increments the cache-hit metric.
   </Accordion>
   <Accordion title="Are bots and crawlers filtered out?">
-    Known search engine crawlers (Googlebot, Bingbot, GitHub-Hookshot) are tagged separately under the **Bot / Crawler** device dimension so they do not artificially distort developer engagement insights.
+    Known search engine crawlers (Googlebot, Bingbot, GitHub-Hookshot) are tagged separately under
+    the **Bot / Crawler** device dimension so they do not artificially distort developer engagement
+    insights.
   </Accordion>
 </AccordionGroup>

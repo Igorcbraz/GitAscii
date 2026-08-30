@@ -68,7 +68,9 @@ $$\text{VisitorToken} = \text{HMAC-SHA256}(\text{IP} \parallel \text{UserAgent},
 To calculate unique visitors over time ranges (e.g. 7 days, 30 days, or 90 days), GitAscii uses Redis **HyperLogLog** registers (`PFADD` / `PFCOUNT`).
 
 ### What is HyperLogLog?
+
 HyperLogLog is an advanced probabilistic cardinality estimator:
+
 - **Constant Memory Footprint**: Each HyperLogLog key consumes at most **12 KB of memory**, regardless of whether you have 10 views or 10,000,000 views.
 - **High Accuracy**: Provides a standard error rate of $\le 1.04 / \sqrt{m}$ (typically $< 0.81\%$).
 - **Arbitrary Date Range Merging**: Multiple daily HyperLogLog keys are combined on-the-fly (`PFCOUNT hll:2026-08-01 hll:2026-08-02 ...`) without retaining individual visitor logs.
@@ -96,6 +98,7 @@ Web browsers send a `Referer` header indicating where the image was loaded. To p
 GitHub routes external README images through an anonymizing proxy called **GitHub Camo** to prevent IP leakage between third-party servers and GitHub users.
 
 GitAscii explicitly detects and tags Camo proxy requests via HTTP headers:
+
 - `via: ... github-camo` or `user-agent: ... github-camo`
 - Camo requests are marked in your dashboard as `GitHub Camo Proxy` so you understand why browser/device granularity may be grouped into GitHub's cloud infrastructure.
 - Direct visits (e.g., from personal portfolio sites, embeds, or local testing) preserve full browser and OS breakdown.
@@ -104,10 +107,10 @@ GitAscii explicitly detects and tags Camo proxy requests via HTTP headers:
 
 ## 6. Privacy & LGPD / GDPR Compliance Matrix
 
-| Guarantee | GitAscii Pro Implementation | Legal Standard |
-| :--- | :--- | :--- |
-| **No Raw IP Storage** | Raw IP is discarded in-memory immediately after salt hashing. | LGPD Art. 13 / GDPR Recital 26 |
-| **No Third-Party Trackers** | No Google Analytics, no Facebook Pixels, no client-side tracking cookies. | ePrivacy Directive |
-| **No Persistent Fingerprints** | Rotating 24h salt destroys token continuity across days. | GDPR Privacy by Design |
-| **Automated TTL Eviction** | All Redis keys expire automatically after **90 days**. | Data Minimization Principle |
-| **Zero Cross-Site Profiling** | Data is isolated under `gitascii:pro:{username}:...` namespaces. | LGPD Art. 6 (Security) |
+| Guarantee                      | GitAscii Pro Implementation                                               | Legal Standard                 |
+| :----------------------------- | :------------------------------------------------------------------------ | :----------------------------- |
+| **No Raw IP Storage**          | Raw IP is discarded in-memory immediately after salt hashing.             | LGPD Art. 13 / GDPR Recital 26 |
+| **No Third-Party Trackers**    | No Google Analytics, no Facebook Pixels, no client-side tracking cookies. | ePrivacy Directive             |
+| **No Persistent Fingerprints** | Rotating 24h salt destroys token continuity across days.                  | GDPR Privacy by Design         |
+| **Automated TTL Eviction**     | All Redis keys expire automatically after **90 days**.                    | Data Minimization Principle    |
+| **Zero Cross-Site Profiling**  | Data is isolated under `gitascii:pro:{username}:...` namespaces.          | LGPD Art. 6 (Security)         |

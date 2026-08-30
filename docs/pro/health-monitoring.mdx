@@ -13,11 +13,11 @@ description: 'Real-time uptime tracking, per-widget latency metrics, 24h error s
 
 Every profile and widget is continuously evaluated and assigned a normalized **Health Score (0–100%)** alongside one of three operational states:
 
-| Status | Health Score Range | Indicator | Description |
-| :--- | :--- | :--- | :--- |
-| `operational` | **95% – 100%** | Green | All external APIs and widget renderers are responding within expected latency thresholds (< 50ms) with zero recent errors. |
-| `warning` | **70% – 94%** | Amber | Intermittent upstream errors or elevated render latencies detected in the last 24 hours. |
-| `failed` | **< 70%** | Red | Consecutive widget render failures or persistent third-party API outages requiring resolution. |
+| Status        | Health Score Range | Indicator | Description                                                                                                                |
+| :------------ | :----------------- | :-------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `operational` | **95% – 100%**     | Green     | All external APIs and widget renderers are responding within expected latency thresholds (< 50ms) with zero recent errors. |
+| `warning`     | **70% – 94%**      | Amber     | Intermittent upstream errors or elevated render latencies detected in the last 24 hours.                                   |
+| `failed`      | **< 70%**          | Red       | Consecutive widget render failures or persistent third-party API outages requiring resolution.                             |
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -51,6 +51,7 @@ You can embed a live, real-time SVG health badge directly in your GitHub profile
 ```
 
 ### Badge Features:
+
 - **Dynamic Render**: Renders directly as a crisp vector SVG badge matching standard shield/badge aesthetics.
 - **Real-time Status**: Automatically reflects live uptime and health score (`operational`, `warning`, `degraded`).
 - **Zero Configuration**: Generated instantly for your username without complex webhook setups.
@@ -60,5 +61,6 @@ You can embed a live, real-time SVG health badge directly in your GitHub profile
 ## 4. Health Incident Simulator
 
 To test alert pipelines and verify how degraded widgets affect your profile:
+
 - Use the built-in **Health Simulator** in `/pro/health` or via `POST /api/pro/health/simulate`.
 - Simulate transient timeout errors, rate-limit drops, and upstream service recoveries without affecting your production visitors.
