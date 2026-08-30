@@ -246,6 +246,67 @@ const MOCK_PRO_REPORTS = {
   timeSeries: MOCK_PRO_OVERVIEW.recentViewsChart,
 }
 
+const MOCK_PRO_HEALTH = {
+  status: 'operational',
+  overallHealthScore: 99,
+  totalRenders24h: 3240,
+  errorsLast24h: 0,
+  activeIncidentsCount: 0,
+  operationalProfilesCount: 2,
+  warningProfilesCount: 0,
+  failedProfilesCount: 0,
+  avgRenderTimeMs: 24,
+  lastRenderAt: new Date().toISOString(),
+  profiles: [
+    {
+      profileSlug: 'default',
+      profileName: 'Primary GitHub Profile',
+      isDefault: true,
+      status: 'operational',
+      healthScore: 100,
+      totalRenders: 2100,
+      successfulRenders: 2100,
+      failedRenders: 0,
+      errorsLast24h: 0,
+      avgRenderDurationMs: 22,
+      lastRenderAt: new Date().toISOString(),
+      widgetsCount: 5,
+      operationalWidgetsCount: 5,
+      warningWidgetsCount: 0,
+      failedWidgetsCount: 0,
+    },
+  ],
+  widgets: [
+    {
+      widgetId: 'stats',
+      widgetName: 'GitHub Stats Card',
+      profileSlug: 'default',
+      status: 'operational',
+      lastRenderAt: new Date().toISOString(),
+      lastRenderDurationMs: 18,
+      avgRenderDurationMs: 20,
+      totalRenders: 2100,
+      totalErrors: 0,
+      errorsLast24h: 0,
+      successRate: 100,
+    },
+  ],
+  healthHistory: Array.from({ length: 14 }, (_, i) => ({
+    timestamp: new Date(Date.now() - i * 86400000).toISOString(),
+    date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
+    healthScore: 100,
+    totalRenders: 150,
+    failedRenders: 0,
+    avgDurationMs: 22,
+    status: 'operational' as const,
+  })),
+  emailAlertsConfig: {
+    enabled: true,
+    recipientEmail: 'igor@gitascii.com',
+    lastNotifiedAt: null,
+  },
+}
+
 test.describe('GitAscii Pro Area E2E Tests', () => {
   test.use({ sessionState: 'logged-in' })
 
@@ -299,6 +360,14 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
       })
     })
 
+    await page.route('**/api/pro/health*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_PRO_HEALTH),
+      })
+    })
+
     await page.route('**/api/pro/reports*', async (route) => {
       await route.fulfill({
         status: 200,
@@ -322,6 +391,7 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
     await expect(page.locator('aside a[href="/pro/analytics"]')).toBeVisible()
     await expect(page.locator('aside a[href="/pro/reports"]')).toBeVisible()
     await expect(page.locator('aside a[href="/pro/profiles"]')).toBeVisible()
+    await expect(page.locator('aside a[href="/pro/health"]')).toBeVisible()
     await expect(page.locator('aside a[href="/pro/errors"]')).toBeVisible()
     await expect(page.locator('aside a[href="/pro/emails"]')).toBeVisible()
     await expect(page.locator('aside a[href*="docs"]')).toBeVisible()
@@ -356,6 +426,17 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
       .locator('button:has-text("Create New Profile"), button:has-text("Criar Novo Perfil")')
       .first()
     await expect(createBtn).toBeVisible()
+  })
+
+  test('should navigate to Health dashboard and render health status overview', async ({
+    page,
+  }) => {
+    await page.goto('/pro/health')
+    await page.waitForTimeout(500)
+
+    await expect(page.locator('h1')).toContainText(/Health|Saúde/i)
+    await expect(page.locator('text=99%').first()).toBeVisible()
+    await expect(page.locator('text=Primary GitHub Profile').first()).toBeVisible()
   })
 
   test('should navigate to Widget Errors dashboard and display active failure', async ({
