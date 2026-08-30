@@ -13,6 +13,8 @@ const LANDING_COMPARISON: {
   feature: string
   free: string | boolean
   pro: string | boolean
+  freeKey?: string
+  proKey?: string
 }[] = [
   { id: 'editor', feature: 'Visual Drag-and-Drop Editor', free: true, pro: true },
   { id: 'templates', feature: 'Templates Catalog (13+)', free: true, pro: true },
@@ -20,27 +22,67 @@ const LANDING_COMPARISON: {
   { id: 'themes', feature: 'Light/Dark Auto-Toggle', free: true, pro: true },
   { id: 'ascii', feature: 'ASCII Art Engine', free: true, pro: true },
   { id: 'open_source', feature: 'MIT Open Source & Self-Hostable', free: true, pro: true },
-  { id: 'profiles', feature: 'Active Profiles', free: '1 Profile', pro: 'Up to 10 Profiles' },
+  {
+    id: 'profiles',
+    feature: 'Active Profiles (AWS Summit, OSS launch, Sponsors…)',
+    free: '1 Profile',
+    pro: 'Up to 10 Profiles',
+    freeKey: 'landing.pricing.cell.1_profile',
+    proKey: 'landing.pricing.cell.up_to_10_profiles',
+  },
   {
     id: 'analytics',
-    feature: 'Profile Analytics & Insights',
+    feature: 'Who viewed your profile & when',
     free: false,
-    pro: '90-Day Full Retention',
+    pro: '90 Days of History',
+    proKey: 'landing.pricing.cell.90_days_history',
   },
-  { id: 'geo', feature: 'Country & Referrer Breakdown', free: false, pro: true },
-  { id: 'alerts', feature: '24/7 Widget Break Alerts (Email)', free: false, pro: true },
-  { id: 'email_history', feature: 'Email History & Milestones Archive', free: false, pro: true },
-  { id: 'camo', feature: 'Instant GitHub Camo Cache Bypass', free: false, pro: true },
-  { id: 'edge', feature: 'Priority Edge CDN (sub-10ms)', free: false, pro: true },
-  { id: 'reports', feature: 'PDF, CSV & Social Share Cards', free: false, pro: true },
-  { id: 'updates', feature: 'Lifetime Updates & Priority Support', free: false, pro: true },
-  { id: 'fees', feature: 'Monthly / Recurring Fees', free: '$0', pro: '$0 (Pay Once)' },
+  { id: 'geo', feature: 'Where visitors come from (country & source)', free: false, pro: true },
+  {
+    id: 'alerts',
+    feature: 'Broken widget alerts before someone else tells you',
+    free: false,
+    pro: true,
+  },
+  {
+    id: 'email_history',
+    feature: 'View milestone emails & profile history',
+    free: false,
+    pro: true,
+  },
+  {
+    id: 'camo',
+    feature: 'Instant widget refresh (no stale cache on GitHub)',
+    free: false,
+    pro: true,
+  },
+  { id: 'edge', feature: 'Fast global delivery (sub-10ms)', free: false, pro: true },
+  {
+    id: 'reports',
+    feature: 'Sponsor-ready reports (PDF, CSV, shareable cards)',
+    free: false,
+    pro: true,
+  },
+  {
+    id: 'updates',
+    feature: 'Every new feature, forever. Priority support.',
+    free: false,
+    pro: true,
+  },
+  {
+    id: 'fees',
+    feature: 'Monthly / Recurring Fees',
+    free: '$0',
+    pro: '$0 (Pay Once)',
+    freeKey: 'landing.pricing.cell.free_0',
+    proKey: 'landing.pricing.cell.pro_0_pay_once',
+  },
 ]
 
 export function ProPricingSection() {
   const { t } = useI18n()
 
-  const renderCell = (value: string | boolean, isPro: boolean) => {
+  const renderCell = (value: string | boolean, isPro: boolean, key?: string) => {
     if (typeof value === 'boolean') {
       return value ? (
         <Check className={`w-4 h-4 mx-auto ${isPro ? 'text-signal-lime' : 'text-bone/70'}`} />
@@ -48,13 +90,14 @@ export function ProPricingSection() {
         <Minus className="w-4 h-4 mx-auto text-graphite" />
       )
     }
+    const displayValue = key ? t(key, value) : value
     return (
       <span
         className={`font-inter-tight text-[12px] sm:text-[13px] ${
           isPro ? 'text-signal-lime font-medium' : 'text-ash'
         }`}
       >
-        {value}
+        {displayValue}
       </span>
     )
   }
@@ -92,30 +135,30 @@ export function ProPricingSection() {
           <div className="relative grid grid-cols-1 lg:grid-cols-5 gap-0">
             <div className="lg:col-span-3 px-6 sm:px-10 lg:px-12 py-10 sm:py-14 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-graphite/30">
               <h2 className="font-pt-serif font-light text-3xl sm:text-4xl lg:text-[46px] leading-[0.95] tracking-[-0.02em] text-chalk mb-5">
-                {t('landing.pricing.title_start', 'Your Profile, ')}
+                {t('landing.pricing.title_start', 'Stop guessing if anyone sees your work. ')}
                 <em className="italic text-signal-lime">
-                  {t('landing.pricing.title_highlight', 'Upgraded.')}
+                  {t('landing.pricing.title_highlight', 'Now you know.')}
                 </em>
               </h2>
               <p className="font-inter-tight text-body text-bone/80 leading-relaxed max-w-lg mb-6">
                 {t(
                   'landing.pricing.subtitle',
-                  'Multi-profile architecture, real-time analytics, widget health monitoring, and edge delivery. One payment — yours forever.'
+                  "You built a beautiful README. Now find out who's actually reading it — and never discover a broken widget from a recruiter. Create separate profiles for the AWS Summit, an open source launch, GitHub Sponsors pitch decks. Pay once, own it forever."
                 )}
               </p>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <span className="inline-flex items-center gap-1.5 font-jetbrains-mono text-[10px] uppercase tracking-wider text-ash">
                   <ShieldCheck className="w-3 h-3 text-signal-lime/70" />
-                  {t('landing.pricing.guarantee', '14-Day Money-Back')}
+                  {t('landing.pricing.guarantee', '14-Day Full Refund')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 font-jetbrains-mono text-[10px] uppercase tracking-wider text-ash">
                   <Sparkles className="w-3 h-3 text-signal-lime/70" />
-                  {t('landing.pricing.lifetime', 'Lifetime Updates')}
+                  {t('landing.pricing.lifetime', 'Every Future Feature Included')}
                 </span>
                 <span className="inline-flex items-center gap-1.5 font-jetbrains-mono text-[10px] uppercase tracking-wider text-ash">
                   <Check className="w-3 h-3 text-signal-lime/70" />
-                  {t('landing.pricing.no_recurring', '$0/month Forever')}
+                  {t('landing.pricing.no_recurring', 'No Subscription. Ever.')}
                 </span>
               </div>
             </div>
@@ -201,10 +244,10 @@ export function ProPricingSection() {
                         {t(`landing.pricing.row.${row.id}`, row.feature)}
                       </td>
                       <td className="py-3 px-4 sm:px-6 text-center">
-                        {renderCell(row.free, false)}
+                        {renderCell(row.free, false, row.freeKey)}
                       </td>
                       <td className="py-3 px-4 sm:px-6 text-center bg-signal-lime/[0.03]">
-                        {renderCell(row.pro, true)}
+                        {renderCell(row.pro, true, row.proKey)}
                       </td>
                     </motion.tr>
                   ))}
@@ -219,7 +262,7 @@ export function ProPricingSection() {
               <span className="font-inter-tight text-[13px] text-bone/70">
                 {t(
                   'landing.pricing.bottom_text',
-                  'Lifetime updates, zero monthly fees, 90-day full analytics retention.'
+                  'The only README platform with analytics. Pay $19 once — every new feature ships to you, free, forever.'
                 )}
               </span>
             </div>

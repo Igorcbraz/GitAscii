@@ -64,7 +64,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
     }
   }
 
-  const renderCell = (value: string | boolean, isPro: boolean) => {
+  const renderCell = (value: string | boolean, isPro: boolean, key?: string) => {
     if (typeof value === 'boolean') {
       return value ? (
         <Check className={`w-4 h-4 mx-auto ${isPro ? 'text-signal-lime' : 'text-bone/70'}`} />
@@ -72,13 +72,14 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
         <Minus className="w-4 h-4 mx-auto text-graphite" />
       )
     }
+    const displayValue = key ? t(key, value) : value
     return (
       <span
         className={`font-inter-tight text-[12px] sm:text-[13px] ${
           isPro ? 'text-signal-lime font-medium' : 'text-ash'
         }`}
       >
-        {value}
+        {displayValue}
       </span>
     )
   }
@@ -117,20 +118,22 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-signal-lime/10 border border-signal-lime/30 text-[11px] font-jetbrains-mono text-signal-lime tracking-wider uppercase">
                   <Terminal className="w-3 h-3 text-signal-lime" />
-                  <span>{t('pro.pricing.tier_name', 'GITASCII PRO ECOSYSTEM')}</span>
+                  <span>
+                    {t('pro.pricing.tier_name', 'GITASCII PRO · TREAT YOUR README LIKE A PRODUCT')}
+                  </span>
                 </div>
 
                 <h1 className="font-pt-serif font-light text-3xl sm:text-4xl lg:text-[44px] leading-[1.02] tracking-[-0.02em] text-chalk">
-                  {t('pro.pricing.hero_title_part1', 'Complete Telemetry & ')}
+                  {t('pro.pricing.hero_title_part1', 'Your README is already a product. ')}
                   <em className="italic text-signal-lime">
-                    {t('pro.pricing.hero_title_part2', 'Multi-Profile Architecture.')}
+                    {t('pro.pricing.hero_title_part2', 'Start treating it like one.')}
                   </em>
                 </h1>
 
                 <p className="font-inter-tight text-body text-bone/80 leading-relaxed max-w-xl text-[14px] sm:text-[15px]">
                   {t(
                     'pro.pricing.hero_desc_extended',
-                    'Upgrade your developer presence with real-time cookieless analytics, 24/7 automated widget error monitoring, up to 10 isolated profiles, and instant GitHub Camo edge invalidation. One single payment — yours forever.'
+                    'Know exactly who reads your profile, get alerted before a badge breaks, create dedicated versions for sponsors and events — and track each one with real analytics. One payment. No subscriptions. Yours forever.'
                   )}
                 </p>
 
@@ -141,12 +144,12 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     <span>
                       <strong className="text-chalk font-semibold">
-                        {t('pro.pricing.bullet1_title', 'Cookieless Telemetry & 90-Day Retention:')}
+                        {t('pro.pricing.bullet1_title', 'Know exactly who sees your profile:')}
                       </strong>{' '}
                       <span className="text-ash">
                         {t(
                           'pro.pricing.bullet1_desc',
-                          'Real-time unique visitors, interactive 7x24 heatmaps, country maps, and referrer analytics.'
+                          "Real visitors, where they're from, and what brought them here — no cookies, no GDPR friction, 90 days of history."
                         )}
                       </span>
                     </span>
@@ -158,12 +161,15 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     <span>
                       <strong className="text-chalk font-semibold">
-                        {t('pro.pricing.bullet2_title', '24/7 Sentinel Health & Email Alerts:')}
+                        {t(
+                          'pro.pricing.bullet2_title',
+                          'Never lose a recruiter to a broken badge:'
+                        )}
                       </strong>{' '}
                       <span className="text-ash">
                         {t(
                           'pro.pricing.bullet2_desc',
-                          'Automated background health checks alert you immediately when external badges or APIs break.'
+                          "We watch every widget 24/7 and email you before anyone else notices it's broken."
                         )}
                       </span>
                     </span>
@@ -175,12 +181,15 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     <span>
                       <strong className="text-chalk font-semibold">
-                        {t('pro.pricing.bullet3_title', '10 Profiles & Instant Camo Purge:')}
+                        {t(
+                          'pro.pricing.bullet3_title',
+                          'Create a special profile for each moment:'
+                        )}
                       </strong>{' '}
                       <span className="text-ash">
                         {t(
                           'pro.pricing.bullet3_desc',
-                          'Deploy dedicated profiles for Work, OSS, and Personal with sub-10ms global edge cache purging.'
+                          'From your main README to a custom page for your next conference talk or OSS launch — each with its own analytics.'
                         )}
                       </span>
                     </span>
@@ -256,7 +265,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   ) : (
                     <>
                       <Zap className="w-3.5 h-3.5 fill-carbon shrink-0" />
-                      <span>{t('pro.pricing.cta_button', 'Get GitAscii Pro Lifetime')}</span>
+                      <span>{t('pro.pricing.cta_button', 'Unlock My Profile Analytics')}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform shrink-0" />
                     </>
                   )}
@@ -268,10 +277,13 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     {username
                       ? t(
                           'pro.pricing.cta_footer_note',
-                          'Instant unlock for @{username}. No subscriptions.',
+                          'Instant access for @{username} · Pay once, no subscriptions.',
                           { username }
                         )
-                      : t('landing.pricing.cta_note', 'GitHub login required. Instant activation.')}
+                      : t(
+                          'landing.pricing.cta_note',
+                          'GitHub login required · No recurring fees, ever.'
+                        )}
                   </span>
                 </div>
               </div>
@@ -279,96 +291,24 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
           </div>
         </motion.div>
 
-        <div className="relative overflow-hidden border border-graphite/40 bg-onyx/30 p-6 sm:p-8">
-          <div className="flex items-center gap-3 pb-6 border-b border-graphite/30">
-            <Cpu className="w-4 h-4 text-signal-lime" />
-            <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.2em] text-signal-lime font-medium">
-              {t('pro.pricing.arch_badge', '[ ARCHITECTURE & DATA PIPELINE ]')}
-            </span>
-            <span className="flex-1 h-px bg-graphite/30" />
-            <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash hidden md:block">
-              {t('pro.pricing.arch_latency', 'SUB-10MS EDGE LATENCY · ZERO RUNTIME DB LOCK-IN')}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                01 / EDGE SVG RUNTIME
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_1_title', 'Dynamic Global Edge Rendering')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_1_desc',
-                  'GitHub profile SVGs are generated directly at low-latency edge regions closest to your profile visitors with ETag 304 caching.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                02 / COOKIELESS TELEMETRY
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_2_title', 'Salt-Hashed Traffic Ingestion')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_2_desc',
-                  'IPs and user agents are hashed daily with rotating salt seeds. Delivers granular country and referrer metrics without GDPR banners.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                03 / SENTINEL CRON MONITOR
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_3_title', '24/7 External Badges Health')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_3_desc',
-                  'Continuous background health probes monitor every external badge and third-party API in your profile, alerting you on timeouts.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                04 / CAMO PURGE WEBHOOK
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_4_title', 'Instant GitHub Camo Invalidation')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_4_desc',
-                  'Instantly purge stale GitHub proxy caches when you change themes, layouts, or switch active profiles.'
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-graphite/30">
             <div>
               <div className="inline-flex items-center gap-1.5 font-jetbrains-mono text-[10px] uppercase tracking-[0.2em] text-signal-lime mb-1">
                 <Sparkles className="w-3 h-3 text-signal-lime" />
-                <span>{t('pro.pricing.feat_badge', '[ DEEP-DIVE CAPABILITIES ]')}</span>
+                <span>{t('pro.pricing.feat_badge', '[ COMPLETE SOLUTION ]')}</span>
               </div>
               <h2 className="font-pt-serif font-light text-2xl sm:text-3xl text-chalk tracking-tight">
-                {t('pro.pricing.benefits_title', 'Everything included in your Lifetime License')}
+                {t(
+                  'pro.pricing.benefits_title',
+                  'Everything you get to turn your README into an active asset'
+                )}
               </h2>
             </div>
             <p className="font-inter-tight text-ash text-xs sm:text-sm max-w-md">
               {t(
                 'pro.pricing.benefits_subtitle',
-                'Engineered for developers who take their GitHub brand, reliability, and telemetry seriously.'
+                'Stop guessing if your profile works. Get real audience numbers, prevent broken badges, and customize layouts for any event.'
               )}
             </p>
           </div>
@@ -386,7 +326,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     {feat.tag && (
                       <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash group-hover:text-signal-lime transition-colors">
-                        {feat.tag}
+                        {feat.tagKey ? t(feat.tagKey, feat.tag) : feat.tag}
                       </span>
                     )}
                   </div>
@@ -402,22 +342,26 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
 
                   {feat.specs && feat.specs.length > 0 && (
                     <div className="pt-3 border-t border-graphite/20 space-y-1.5">
-                      {feat.specs.map((spec, sIdx) => (
-                        <div
-                          key={sIdx}
-                          className="flex items-center gap-2 text-[11px] font-jetbrains-mono text-bone/80"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-signal-lime/70" />
-                          <span>{spec}</span>
-                        </div>
-                      ))}
+                      {feat.specs.map((spec, sIdx) => {
+                        const specKey = feat.specKeys?.[sIdx]
+                        const specText = specKey ? t(specKey, spec) : spec
+                        return (
+                          <div
+                            key={sIdx}
+                            className="flex items-center gap-2 text-[11px] font-jetbrains-mono text-bone/80"
+                          >
+                            <span className="w-1 h-1 rounded-full bg-signal-lime/70" />
+                            <span>{specText}</span>
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </div>
 
                 <div className="pt-3 border-t border-graphite/20 flex items-center justify-between">
                   <span className="inline-flex items-center gap-1 font-jetbrains-mono text-[10px] uppercase tracking-wider text-signal-lime font-medium">
-                    {feat.badge}
+                    {feat.badgeKey ? t(feat.badgeKey, feat.badge || '') : feat.badge}
                   </span>
                   <span className="font-jetbrains-mono text-[9px] uppercase text-graphite">
                     {t('pro.pricing.pro_tier_only', 'PRO TIER ONLY')}
@@ -431,11 +375,11 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
         <div className="relative overflow-hidden border border-graphite/40 bg-gradient-to-b from-onyx/40 via-carbon to-void-black">
           <div className="flex items-center gap-3 px-6 sm:px-8 py-4 bg-void-black/60 border-b border-graphite/30">
             <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.22em] text-signal-lime font-medium">
-              {t('landing.pricing.table_badge', '[ FREE VS PRO COMPARISON MATRIX ]')}
+              {t('landing.pricing.table_badge', '[ FREE VS PRO PLAN COMPARISON ]')}
             </span>
             <span className="flex-1 h-px bg-graphite/30" />
             <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash hidden sm:block">
-              {t('pro.pricing.table_count', '12 DETAILED SPECIFICATIONS')}
+              {t('pro.pricing.table_count', '12 CLEAR DIFFERENCES')}
             </span>
           </div>
 
@@ -457,7 +401,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {PRO_PRICING_CONFIG.comparison.map((row, idx) => (
+                {PRO_PRICING_CONFIG.comparison.map((row) => (
                   <tr
                     key={row.id}
                     className="border-b border-graphite/20 hover:bg-onyx/30 transition-colors"
@@ -466,10 +410,10 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                       {t(row.featureKey, row.featureDefault)}
                     </td>
                     <td className="py-3.5 px-4 sm:px-6 text-center">
-                      {renderCell(row.free, false)}
+                      {renderCell(row.free, false, row.freeKey)}
                     </td>
                     <td className="py-3.5 px-4 sm:px-6 text-center bg-signal-lime/[0.03]">
-                      {renderCell(row.pro, true)}
+                      {renderCell(row.pro, true, row.proKey)}
                     </td>
                   </tr>
                 ))}
@@ -518,6 +462,81 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
           </div>
         </div>
 
+        <div className="relative overflow-hidden border border-graphite/40 bg-onyx/30 p-6 sm:p-8">
+          <div className="flex items-center gap-3 pb-6 border-b border-graphite/30">
+            <Cpu className="w-4 h-4 text-signal-lime" />
+            <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.2em] text-signal-lime font-medium">
+              {t('pro.pricing.arch_badge', '[ RELIABILITY & PRIVACY ASSURANCE ]')}
+            </span>
+            <span className="flex-1 h-px bg-graphite/30" />
+            <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash hidden md:block">
+              {t('pro.pricing.arch_latency', 'ZERO DATABASE LOCK-IN · 99.9% UPTIME')}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+            <div className="space-y-2 relative">
+              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
+                {t('pro.pricing.arch_1_num', '01 / FAST WORLDWIDE')}
+              </div>
+              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
+                {t('pro.pricing.arch_1_title', 'Loads Instantly Anywhere')}
+              </h4>
+              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
+                {t(
+                  'pro.pricing.arch_1_desc',
+                  'Your profile SVGs render in milliseconds worldwide so visitors never experience slow loading or empty placeholders.'
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-2 relative">
+              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
+                {t('pro.pricing.arch_2_num', '02 / PRIVACY FIRST')}
+              </div>
+              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
+                {t('pro.pricing.arch_2_title', '100% Cookieless Tracking')}
+              </h4>
+              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
+                {t(
+                  'pro.pricing.arch_2_desc',
+                  'Granular visitor metrics without annoying cookie banners, trackers, or GDPR headache for you or your audience.'
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-2 relative">
+              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
+                {t('pro.pricing.arch_3_num', '03 / SENTINEL GUARD')}
+              </div>
+              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
+                {t('pro.pricing.arch_3_title', '24/7 Automated Probing')}
+              </h4>
+              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
+                {t(
+                  'pro.pricing.arch_3_desc',
+                  'Constant background pings ensure external APIs and badges are alive, alerting you before anyone notices an issue.'
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-2 relative">
+              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
+                {t('pro.pricing.arch_4_num', '04 / INSTANT SYNC')}
+              </div>
+              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
+                {t('pro.pricing.arch_4_title', 'Zero Cache Lag')}
+              </h4>
+              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
+                {t(
+                  'pro.pricing.arch_4_desc',
+                  'Save edits and see them live on GitHub in seconds. Switch profiles or themes without waiting for cache timers.'
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="border-t border-graphite/30 pt-8 pb-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3 text-left">
             <div className="w-8 h-8 rounded-sm bg-signal-lime/10 border border-signal-lime/30 flex items-center justify-center text-signal-lime shrink-0">
@@ -525,12 +544,15 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
             </div>
             <div>
               <p className="font-inter-tight font-semibold text-[13px] text-chalk">
-                {t('pro.pricing.guarantee_title', '100% Risk-Free 14-Day Money-Back Guarantee')}
+                {t(
+                  'pro.pricing.guarantee_title',
+                  "Try it for 14 days. If you don't learn something new about who sees your profile, we refund everything."
+                )}
               </p>
               <p className="font-inter-tight text-[11px] text-ash">
                 {t(
                   'pro.pricing.guarantee_desc',
-                  'If GitAscii Pro does not elevate your profile, email us for an unconditional refund.'
+                  "Open Pro, explore your analytics, and if you haven't discovered anything interesting in 14 days — email us for a full refund. No questions, no hoops."
                 )}
               </p>
             </div>
