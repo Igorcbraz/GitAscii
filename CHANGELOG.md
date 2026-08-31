@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.17.0](https://github.com/Igorcbraz/GitAscii/compare/v1.16.0...v1.17.0) (2026-08-31)
+
+
+### Features
+
+* **billing:** integrate stripe checkout, webhooks and legal compliance pages ([799f33e](https://github.com/Igorcbraz/GitAscii/commit/799f33e511a935fbee8c351f917c30b13bb242a1))
+* **i18n:** add comprehensive locale translations for Pro features ([894a221](https://github.com/Igorcbraz/GitAscii/commit/894a2217784c54d682fa94732c5795001aff428e))
+* **pro:** implement GitAscii Pro tier, paywall, checkout integration, docs, and i18n ([c7a7658](https://github.com/Igorcbraz/GitAscii/commit/c7a765859f1c1ec796e1f0bc19302a2d10f461e7))
+* **pro:** implement health monitoring, dynamic rules, versions and profile storage ([300a751](https://github.com/Igorcbraz/GitAscii/commit/300a7518ef2203d66d454f078c70fde50878b1c8))
+* **pro:** modularize dashboards, add health monitoring UI, dynamic rule simulator and subcomponents ([aad4b5a](https://github.com/Igorcbraz/GitAscii/commit/aad4b5ac8e5e34731401f15977cec4e2b055066d))
+* **pro:** polish Pro paywall, subscription plans, analytics, and i18n translations ([baf7124](https://github.com/Igorcbraz/GitAscii/commit/baf71246063ef813e964541ded1597483348c96c))
+
+
+### Bug Fixes
+
+* **ci:** restore compatible lucide-react & eslint versions and trigger codeql on dev ([b241189](https://github.com/Igorcbraz/GitAscii/commit/b241189c124e61ff9e72e35e3c2cfc0e6d41cdab))
+* **i18n:** complete internationalization for ProPaywall, ComparisonTable and pricing constants ([08b46e7](https://github.com/Igorcbraz/GitAscii/commit/08b46e7c63c85a49cc3ee5daa65904a461114700))
+* **security:** eliminate ReDoS by replacing regex trimming with string slices in duplicateProfile ([d03e850](https://github.com/Igorcbraz/GitAscii/commit/d03e8506164a38120a65fa2cee55a937dc6f20fe))
+* **security:** prevent SSRF in commit route by sanitizing profileSlug and path ([29fb122](https://github.com/Igorcbraz/GitAscii/commit/29fb122a4317da2ab1fcc4449cba71b7abe69d33))
+* **security:** resolve CodeQL alerts for ReDoS, URL sanitization, log injection and regex anchors ([19bd26c](https://github.com/Igorcbraz/GitAscii/commit/19bd26c001285321398b06aa9a359b634ddcffbc))
+
 ## [1.16.0](https://github.com/Igorcbraz/GitAscii/compare/v1.15.0...v1.16.0) (2026-08-27)
 
 ### Features
