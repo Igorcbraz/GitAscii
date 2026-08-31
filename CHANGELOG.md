@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.19.0](https://github.com/Igorcbraz/GitAscii/compare/v1.18.0...v1.19.0) (2026-08-31)
+
+
+### Features
+
+* **editor:** add drag-and-drop widget placement from sidebar to canvas ([c5afce6](https://github.com/Igorcbraz/GitAscii/commit/c5afce6ddf92ad16029e610001e5054b6975dd1c))
+* **editor:** add profile switcher, git commit metadata, dirty tracking, and export modal updates ([0f904cb](https://github.com/Igorcbraz/GitAscii/commit/0f904cb8d770a501f1aca77234020f1ea18784e4))
+* **widgets:** implement native SVG developer quote renderer ([0958458](https://github.com/Igorcbraz/GitAscii/commit/0958458d21d380f34188711bbd97159cf62e61cf))
+
 ## [1.18.0](https://github.com/Igorcbraz/GitAscii/compare/v1.17.0...v1.18.0) (2026-08-31)
 
 
