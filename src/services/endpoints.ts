@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
     USER_PROFILE: (username: string) => `https://github.com/${encodeURIComponent(username)}`,
     REPO_CONTENTS: (owner: string, repo: string, path: string) =>
-      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`,
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
     RAW_USER_CONTENT: (owner: string, repo: string, branch: string, path: string) =>
       `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${path}`,
     RAW_PROFILE_README: (username: string, branch: 'main' | 'master' = 'main') =>

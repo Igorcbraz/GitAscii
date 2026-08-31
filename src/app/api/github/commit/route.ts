@@ -25,11 +25,8 @@ export async function POST(request: Request) {
     const host = request.headers.get('host') || 'localhost:3000'
     const protocol = request.headers.get('x-forwarded-proto') || 'https'
     const v = Date.now()
-    const rawSlug = exportData?.profileSlug || 'default'
-    const profileSlug =
-      typeof rawSlug === 'string'
-        ? rawSlug.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'default'
-        : 'default'
+    const rawSlug = typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default'
+    const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug : 'default'
 
     if (exportData && typeof exportData === 'object') {
       exportData.username = username
@@ -130,9 +127,13 @@ export async function POST(request: Request) {
     let incomingJsonStr = ''
 
     const isDefaultProfile = profileSlug === 'default'
-    const jsonFileName = isDefaultProfile
-      ? 'gitascii.json'
-      : `gitascii_${profileSlug.toLowerCase()}.json`
+    const safeProfileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(profileSlug)
+      ? profileSlug.toLowerCase()
+      : 'default'
+    const jsonFileName =
+      isDefaultProfile || safeProfileSlug === 'default'
+        ? 'gitascii.json'
+        : `gitascii_${safeProfileSlug}.json`
 
     if (exportData) {
       const jsonRes = await fetch(
