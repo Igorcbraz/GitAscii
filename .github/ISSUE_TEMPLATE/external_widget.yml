@@ -1,0 +1,71 @@
+name: 🧩 External / Community Widget
+description: Propose or submit a new external or community-contributed widget
+title: '[Widget]: '
+labels: ['widget', 'external-widget', 'community']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thank you for contributing a widget to GitAscii!
+        GitAscii allows single external widgets to be placed in the **External** tab, or kits of 2+ widgets to form their own category.
+  - type: input
+    id: widget-name
+    attributes:
+      label: Widget Name
+      description: What is the display name and ID for this widget?
+      placeholder: 'e.g. Spotify Now Playing (widgetId: spotify-now-playing)'
+    validations:
+      required: true
+  - type: dropdown
+    id: widget-destination
+    attributes:
+      label: Widget Placement
+      description: Where should this widget live in the editor catalog?
+      options:
+        - 'Single Widget (Tab: External & Community)'
+        - 'Widget Kit (2+ widgets forming a custom category)'
+    validations:
+      required: true
+  - type: textarea
+    id: widget-description
+    attributes:
+      label: Widget Concept & Visual Purpose
+      description: Describe what this widget displays and why it enhances a developer profile.
+      placeholder: 'Displays live listening status with an animated visualizer and album art...'
+    validations:
+      required: true
+  - type: textarea
+    id: widget-inputs
+    attributes:
+      label: Configurable Properties & Inputs
+      description: What inputs/controls should be exposed in the Properties panel (`src/features/editor/components/Properties/`)?
+      placeholder: 'e.g. username, accentColor, showVisualizer (boolean), themeMode (auto/dark/light)'
+    validations:
+      required: true
+  - type: textarea
+    id: widget-data-sources
+    attributes:
+      label: Data Sources & APIs
+      description: Does this widget depend on any external APIs (e.g. GitHub API, Spotify, WakaTime, etc.)?
+      placeholder: 'e.g. Fetches data via server-side endpoint in src/app/api/...'
+    validations:
+      required: false
+  - type: textarea
+    id: visual-mockup
+    attributes:
+      label: Visual Preview or ASCII Mockup
+      description: Attach a screenshot, ASCII mockup, or SVG code showing how the widget renders in dark and light modes.
+      placeholder: 'Paste ASCII art or drop an image/SVG here'
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Contributor Checklist
+      options:
+        - label: I will adhere to the project's coding standards in `CONTRIBUTING.md`.
+          required: true
+        - label: I understand that endpoints must be declared in `src/services/endpoints.ts`.
+          required: true
+        - label: The widget design conforms to `design.md` tokens (dark/light themes, clean typography).
+          required: true

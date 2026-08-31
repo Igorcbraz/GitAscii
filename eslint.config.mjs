@@ -1,19 +1,8 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import nextConfig from 'eslint-config-next'
 import prettierConfig from 'eslint-config-prettier'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import storybook from 'eslint-plugin-storybook'
 import unusedImports from 'eslint-plugin-unused-imports'
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-import { fixupConfigRules } from '@eslint/compat'
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
 
 const eslintConfig = [
   {
@@ -24,13 +13,11 @@ const eslintConfig = [
       'playwright-report/**',
       'test-results/**',
       '.agents/**',
+      'scratch/**',
+      'next-env.d.ts',
     ],
   },
-  ...fixupConfigRules(
-    compat.config({
-      extends: ['next/core-web-vitals'],
-    })
-  ),
+  ...nextConfig,
   prettierConfig,
   {
     plugins: {
@@ -42,6 +29,11 @@ const eslintConfig = [
       'no-debugger': 'error',
       'prefer-const': 'error',
       eqeqeq: ['error', 'always'],
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/immutability': 'warn',
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'unused-imports/no-unused-imports': 'error',

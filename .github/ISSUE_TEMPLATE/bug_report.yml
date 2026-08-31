@@ -1,0 +1,76 @@
+name: 🐛 Bug Report
+description: Create a report to help us fix a bug or unexpected behavior in GitAscii
+title: '[Bug]: '
+labels: ['bug', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for reporting an issue!
+        Please fill out the details below to help us diagnose and fix the problem quickly.
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected Component / Area
+      description: Where is the bug occurring?
+      options:
+        - 'Visual Editor Canvas & Drag-and-Drop'
+        - 'Properties Sidebar & Widget Controls'
+        - 'Dynamic SVG Generation API (/api/...)'
+        - 'ASCII Conversion Engine / Canvas'
+        - 'Export / Special Repo Sync (gitascii.json)'
+        - 'Landing Page & Template Gallery'
+        - 'Other'
+    validations:
+      required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+      placeholder: 'When resizing the terminal widget on the canvas, the border clips unexpectedly...'
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the behavior.
+      placeholder: |
+        1. Go to 'https://gitascii.com/editor'
+        2. Add 'Terminal Info' widget
+        3. Change color to #c5ff4a
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots-or-svg
+    attributes:
+      label: Screenshots, Screen Recording, or Broken SVG
+      description: Drag and drop screenshots or videos showing the issue.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Browser, OS version, device (e.g. Chrome 124 on macOS 14 / Firefox on Windows 11).
+      placeholder: 'e.g. Chrome 124 on Windows 11'
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have checked that this issue is not already reported in [GitHub Issues](https://github.com/Igorcbraz/GitAscii/issues).
+          required: true
+        - label: This is not a security vulnerability (security issues must be reported privately via `SECURITY.md`).
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 GitAscii Documentation
+    url: https://gitascii.com/docs
+    about: Read the official guides and API reference before opening an issue.
+  - name: 🔒 Report a Security Vulnerability
+    url: https://github.com/Igorcbraz/GitAscii/security/advisories/new
+    about: Please report security vulnerabilities privately according to our Security Policy.
+  - name: 💬 Discussions & Q&A
+    url: https://github.com/Igorcbraz/GitAscii/discussions
+    about: Ask questions, share your profile showcase, and chat with the community.

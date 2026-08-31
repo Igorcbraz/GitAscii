@@ -1,0 +1,63 @@
+name: ✨ Featured Widget (Espaço em Destaque)
+description: Propose or submit a featured widget with custom visual identity (e.g. Pokémon Card, GitFest, Surveillance)
+title: '[Featured Widget]: '
+labels: ['widget', 'featured-widget', 'creative']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Featured Widgets in GitAscii
+        The **Featured Space** is reserved for widgets with unique creative identity, custom typography, animations, or experimental graphics (like *Pokémon Card*, *GitFest*, *GitFut*, *Surveillance*, or *GodProfile*).
+  - type: input
+    id: featured-name
+    attributes:
+      label: Widget Name
+      description: Name of the featured widget.
+      placeholder: 'e.g. Cyberpunk Holo Deck (widgetId: cyberpunk-holo-deck)'
+    validations:
+      required: true
+  - type: textarea
+    id: aesthetic-concept
+    attributes:
+      label: Creative Concept & Visual Theme
+      description: Describe the aesthetic concept, inspirations, and what makes this widget visually distinctive.
+      placeholder: 'A futuristic holographic card with custom scanline shaders, glitch text, and neon borders...'
+    validations:
+      required: true
+  - type: textarea
+    id: interactive-properties
+    attributes:
+      label: Interactive Controls & Customization Options
+      description: What settings can the user tweak in the editor properties sidebar?
+      placeholder: 'e.g. Holo sheen intensity, custom badge rarity, color matrix, animated grain toggle'
+    validations:
+      required: true
+  - type: textarea
+    id: implementation-details
+    attributes:
+      label: Proposed Implementation Files
+      description: Outline the intended structure across `src/features/widgets/`, `src/features/editor/`, etc.
+      placeholder: |
+        - Renderer: src/features/widgets/renderers/MyFeaturedWidget.tsx
+        - Controls: src/features/editor/components/Properties/MyFeaturedControls.tsx
+        - Config: src/features/editor/config/widgets.ts
+    validations:
+      required: false
+  - type: textarea
+    id: visual-assets
+    attributes:
+      label: Visual Previews / Mockups / References
+      description: Please attach images, designs, or GIF animations showing how it looks in action.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Quality & Performance Checklist
+      options:
+        - label: The widget supports both Dark and Light theme rendering (or explicit theme locks).
+          required: true
+        - label: The SVG output is lightweight and optimized for GitHub's image proxy.
+          required: true
+        - label: I will provide a Storybook story (`*.stories.tsx`) for isolated testing.
+          required: true
