@@ -1,10 +1,11 @@
-export const LEGAL_LAST_UPDATED = '2026-08-09'
+export const LEGAL_LAST_UPDATED = '2026-08-30'
 
 export const PRIVACY_DATA_PRACTICES: string[] = [
-  'We do not have user accounts — no email, password, or profile database.',
-  'GitHub login is used only to authorise README commits on your behalf. We do not store your GitHub credentials.',
-  'The GitHub username you type in the generator is sent to the GitHub public API to fetch public profile data (avatar, stats, etc.). We do not log or store it.',
-  'We do not sell, rent, or trade any personal data.',
+  'We do not store passwords — authentication is performed securely via GitHub OAuth.',
+  'GitHub login is used to identify your account, authorise README commits on your behalf, and manage Pro entitlements.',
+  'Payment transactions are processed securely by Stripe Inc. We never receive or store your credit card numbers.',
+  'Your email address is used solely for transactional receipts, Pro entitlement delivery, and opt-in alerts.',
+  'We do not sell, rent, or trade any personal data to third parties.',
 ]
 
 export interface CookieInventoryItem {

@@ -48,17 +48,30 @@ export interface ProPricingConfig {
   faqs: ProFaqItem[]
 }
 
+export function getProPricing(lang?: string): ProPricingConfig {
+  const isPt = lang === 'pt'
+  return {
+    ...PRO_PRICING_CONFIG,
+    priceUsd: isPt ? 19.9 : 3.0,
+    priceFormatted: isPt ? 'R$ 19,90' : '$3',
+    originalPriceUsd: isPt ? 49.9 : 9.0,
+    originalPriceFormatted: isPt ? 'R$ 49,90' : '$9',
+    currency: isPt ? 'BRL' : 'USD',
+    currencySymbol: isPt ? 'R$' : '$',
+  }
+}
+
 export const PRO_PRICING_CONFIG: ProPricingConfig = {
   planId: 'gitascii-pro-lifetime',
   planName: 'GitAscii Pro Lifetime',
   billingModel: 'lifetime',
-  priceUsd: 19,
-  priceFormatted: '$19',
-  originalPriceUsd: 49,
-  originalPriceFormatted: '$49',
+  priceUsd: 19.9,
+  priceFormatted: 'R$ 19,90',
+  originalPriceUsd: 49.9,
+  originalPriceFormatted: 'R$ 49,90',
   discountPercentage: 60,
-  currency: 'USD',
-  currencySymbol: '$',
+  currency: 'BRL',
+  currencySymbol: 'R$',
   guaranteeDays: 14,
   badge: '[ GITASCII PRO · LIFETIME UPGRADE ]',
 
@@ -186,7 +199,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
     {
       id: 'updates',
       titleKey: 'pro.pricing.feat.updates.title',
-      titleDefault: 'Pay $19 Once. Keep Every Feature Forever.',
+      titleDefault: 'Pay R$ 19,90 Once. Keep Every Feature Forever.',
       descKey: 'pro.pricing.feat.updates.desc',
       descDefault:
         'No monthly subscriptions draining your wallet. Pay once and get full lifetime access, plus every future widget, template, and feature we ever build, delivered automatically at no extra charge.',
@@ -296,7 +309,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       featureKey: 'pro.pricing.comp.recurring_fees',
       featureDefault: 'Monthly Subscriptions',
       free: '$0',
-      pro: '$0 (Pay $19 Once, Own Forever)',
+      pro: 'R$ 0/mês (Pague R$ 19,90 Uma Vez, Tenha Para Sempre)',
       freeKey: 'landing.pricing.cell.free_0',
       proKey: 'pro.pricing.comp.pro_recurring_val',
     },
@@ -309,7 +322,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       questionDefault: 'Is it truly a one-time payment with no subscriptions?',
       answerKey: 'pro.pricing.faq.lifetime_a',
       answerDefault:
-        "Yes — $19 once, yours forever. No monthly billing, no annual renewals, no price increases. We're building a tool we'd want to use ourselves, and that means no subscription traps.",
+        "Yes — R$ 19,90 once, yours forever. No monthly billing, no annual renewals, no price increases. We're building a tool we'd want to use ourselves, and that means no subscription traps.",
     },
     {
       id: 'faq_camo',

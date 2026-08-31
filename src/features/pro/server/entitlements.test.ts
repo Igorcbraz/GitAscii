@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { getProEntitlements, getUserSettings, isProUser, updateUserSettings } from './entitlements'
+import {
+  getProEntitlements,
+  getUserByStripeCustomer,
+  getUserSettings,
+  isProUser,
+  updateUserSettings,
+} from './entitlements'
 import { resetProRedisMemoryStoreForTesting } from './redisClient'
 
 describe('Entitlements Comprehensive Unit Tests', () => {
@@ -62,5 +68,53 @@ describe('Entitlements Comprehensive Unit Tests', () => {
 
     const proStatus = await isProUser(username)
     expect(proStatus).toBe(true)
+  })
+
+  it('persists and looks up users by Stripe customer id', async () => {
+    const username = 'stripe_customer_user'
+    const customerId = 'cus_test_99998888'
+
+    await updateUserSettings(username, {
+      planTier: 'pro',
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: 'sub_12345',
+      stripeSubscriptionStatus: 'active',
+    })
+
+    const foundUser = await getUserByStripeCustomer(customerId)
+    expect(foundUser).toBe(username.toLowerCase())
+
+    const settings = await getUserSettings(username)
+    expect(settings.stripeCustomerId).toBe(customerId)
+    expect(settings.stripeSubscriptionId).toBe('sub_12345')
+    expect(settings.stripeSubscriptionStatus).toBe('active')
+  })
+
+  it('correctly handles subscription lifecycle (downgrade on cancellation and active renewal)', async () => {
+    const username = 'subscription_lifecycle_user'
+    const customerId = 'cus_sub_lifecycle_123'
+
+    await updateUserSettings(username, {
+      planTier: 'pro',
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: 'sub_active_123',
+      stripeSubscriptionStatus: 'active',
+    })
+    expect(await isProUser(username)).toBe(true)
+
+    await updateUserSettings(username, {
+      planTier: 'free',
+      stripeSubscriptionStatus: 'canceled',
+    })
+    expect(await isProUser(username)).toBe(false)
+    const afterCancel = await getUserSettings(username)
+    expect(afterCancel.planTier).toBe('free')
+    expect(afterCancel.stripeSubscriptionStatus).toBe('canceled')
+
+    await updateUserSettings(username, {
+      planTier: 'pro',
+      stripeSubscriptionStatus: 'active',
+    })
+    expect(await isProUser(username)).toBe(true)
   })
 })

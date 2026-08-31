@@ -714,3 +714,50 @@ export const LANDING_FAQS: readonly FaqItemRaw[] = [
       'We offer an unconditional 14-day 100% money-back guarantee. If GitAscii Pro is not the right fit for you, we refund your payment with no questions asked.',
   },
 ]
+
+export interface LandingComparisonRow {
+  id: string
+  feature: string
+  free: string | boolean
+  pro: string | boolean
+  freeKey?: string
+  proKey?: string
+}
+
+export const LANDING_COMPARISON: readonly LandingComparisonRow[] = [
+  { id: 'editor', feature: 'Visual Drag-and-Drop Editor', free: true, pro: true },
+  { id: 'templates', feature: 'Templates Catalog (13+)', free: true, pro: true },
+  { id: 'widgets', feature: 'Dynamic SVG Widgets (30+)', free: true, pro: true },
+  { id: 'themes', feature: 'Light/Dark Auto-Toggle', free: true, pro: true },
+  { id: 'ascii', feature: 'ASCII Art Engine', free: true, pro: true },
+  { id: 'open_source', feature: 'MIT Open Source & Self-Hostable', free: true, pro: true },
+  {
+    id: 'profiles',
+    feature: 'Active Profiles (AWS Summit, OSS launch, Sponsors…)',
+    free: '1 Profile',
+    pro: 'Up to 10 Profiles',
+    freeKey: 'landing.pricing.cell.1_profile',
+    proKey: 'landing.pricing.cell.up_to_10_profiles',
+  },
+  {
+    id: 'analytics',
+    feature: 'Who viewed your profile & when',
+    free: false,
+    pro: '90 Days of History',
+    proKey: 'landing.pricing.cell.90_days_history',
+  },
+  { id: 'geo', feature: 'Where visitors come from (country & source)', free: false, pro: true },
+  { id: 'alerts', feature: 'Broken widget & badge error alerts (24/7)', free: false, pro: true },
+  { id: 'camo', feature: 'Instant GitHub cache-purge on save', free: false, pro: true },
+  { id: 'speed', feature: 'Global edge-cached SVG delivery (sub-50ms)', free: false, pro: true },
+  { id: 'export', feature: 'Audience reports (PDF, CSV, 1200x630 cards)', free: false, pro: true },
+  { id: 'future', feature: 'All future widgets & updates included', free: false, pro: true },
+  {
+    id: 'price',
+    feature: 'Price & Billing Model',
+    free: '$0 Forever',
+    pro: '$0/month Forever',
+    freeKey: 'landing.pricing.cell.free_0',
+    proKey: 'landing.pricing.no_recurring',
+  },
+]

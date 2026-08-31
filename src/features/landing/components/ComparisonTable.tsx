@@ -3,84 +3,13 @@
 import { ArrowRight, Check, Minus, ShieldCheck, Sparkles, Zap } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import React from 'react'
 
-import { PRO_PRICING_CONFIG } from '@/constants'
+import { getProPricing, LANDING_COMPARISON, PRO_PRICING_CONFIG } from '@/constants'
 import { useI18n } from '@/i18n'
 
-const LANDING_COMPARISON: {
-  id: string
-  feature: string
-  free: string | boolean
-  pro: string | boolean
-  freeKey?: string
-  proKey?: string
-}[] = [
-  { id: 'editor', feature: 'Visual Drag-and-Drop Editor', free: true, pro: true },
-  { id: 'templates', feature: 'Templates Catalog (13+)', free: true, pro: true },
-  { id: 'widgets', feature: 'Dynamic SVG Widgets (30+)', free: true, pro: true },
-  { id: 'themes', feature: 'Light/Dark Auto-Toggle', free: true, pro: true },
-  { id: 'ascii', feature: 'ASCII Art Engine', free: true, pro: true },
-  { id: 'open_source', feature: 'MIT Open Source & Self-Hostable', free: true, pro: true },
-  {
-    id: 'profiles',
-    feature: 'Active Profiles (AWS Summit, OSS launch, Sponsors…)',
-    free: '1 Profile',
-    pro: 'Up to 10 Profiles',
-    freeKey: 'landing.pricing.cell.1_profile',
-    proKey: 'landing.pricing.cell.up_to_10_profiles',
-  },
-  {
-    id: 'analytics',
-    feature: 'Who viewed your profile & when',
-    free: false,
-    pro: '90 Days of History',
-    proKey: 'landing.pricing.cell.90_days_history',
-  },
-  { id: 'geo', feature: 'Where visitors come from (country & source)', free: false, pro: true },
-  {
-    id: 'alerts',
-    feature: 'Broken widget alerts before someone else tells you',
-    free: false,
-    pro: true,
-  },
-  {
-    id: 'email_history',
-    feature: 'View milestone emails & profile history',
-    free: false,
-    pro: true,
-  },
-  {
-    id: 'camo',
-    feature: 'Instant widget refresh (no stale cache on GitHub)',
-    free: false,
-    pro: true,
-  },
-  { id: 'edge', feature: 'Fast global delivery (sub-10ms)', free: false, pro: true },
-  {
-    id: 'reports',
-    feature: 'Sponsor-ready reports (PDF, CSV, shareable cards)',
-    free: false,
-    pro: true,
-  },
-  {
-    id: 'updates',
-    feature: 'Every new feature, forever. Priority support.',
-    free: false,
-    pro: true,
-  },
-  {
-    id: 'fees',
-    feature: 'Monthly / Recurring Fees',
-    free: '$0',
-    pro: '$0 (Pay Once)',
-    freeKey: 'landing.pricing.cell.free_0',
-    proKey: 'landing.pricing.cell.pro_0_pay_once',
-  },
-]
-
 export function ProPricingSection() {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
+  const pricing = getProPricing(language)
 
   const renderCell = (value: string | boolean, isPro: boolean, key?: string) => {
     if (typeof value === 'boolean') {
@@ -175,10 +104,10 @@ export function ProPricingSection() {
 
               <div className="flex items-baseline gap-2 mb-1">
                 <span className="text-ash line-through font-inter-tight text-lg">
-                  {PRO_PRICING_CONFIG.originalPriceFormatted}
+                  {pricing.originalPriceFormatted}
                 </span>
                 <span className="text-chalk font-inter-tight text-6xl sm:text-7xl font-bold tracking-tight leading-none">
-                  {PRO_PRICING_CONFIG.priceFormatted}
+                  {pricing.priceFormatted}
                 </span>
               </div>
               <p className="font-jetbrains-mono text-[11px] text-ash uppercase tracking-wider mb-7">
@@ -225,7 +154,7 @@ export function ProPricingSection() {
                     </th>
                     <th className="py-3.5 px-4 sm:px-6 font-jetbrains-mono text-[10px] uppercase tracking-[0.18em] text-signal-lime text-center w-[25%] bg-signal-lime/[0.03]">
                       {t('landing.pricing.th_pro', 'Pro · {price}', {
-                        price: PRO_PRICING_CONFIG.priceFormatted,
+                        price: pricing.priceFormatted,
                       })}
                     </th>
                   </tr>

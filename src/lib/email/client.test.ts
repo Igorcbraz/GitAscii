@@ -53,7 +53,7 @@ describe('Email Client Configuration Suite', () => {
   describe('getEmailSender', () => {
     it('returns default sender when EMAIL_FROM is unset', () => {
       delete process.env.EMAIL_FROM
-      expect(getEmailSender()).toBe('GitAscii <team@gitascii.com>')
+      expect(getEmailSender()).toBe('GitAscii <support@gitascii.com>')
     })
 
     it('returns custom sender when EMAIL_FROM is configured', () => {

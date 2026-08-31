@@ -9,7 +9,7 @@ import AsciiHands from '@/components/ui/ascii-hands'
 import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import { useToast } from '@/components/ui/toast'
-import { PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
+import { getProPricing, PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -27,7 +27,8 @@ export default function Hero() {
   const [isGithubLoading, setIsGithubLoading] = useState(false)
   const [session, setSession] = useState<UserSession | null>(null)
   const router = useRouter()
-  const { t } = useI18n()
+  const { t, language } = useI18n()
+  const pricing = getProPricing(language)
   const { error } = useToast()
 
   const isProUser = Boolean(session?.isPro || session?.tier === 'pro')
@@ -177,10 +178,10 @@ export default function Hero() {
                     <div className="flex items-center gap-2 shrink-0 z-10">
                       <div className="flex flex-col items-end">
                         <span className="text-[10px] font-jetbrains-mono text-ash/60 line-through leading-none">
-                          {PRO_PRICING_CONFIG.originalPriceFormatted}
+                          {pricing.originalPriceFormatted}
                         </span>
                         <span className="text-[14px] font-jetbrains-mono font-bold text-signal-lime leading-tight">
-                          {PRO_PRICING_CONFIG.priceFormatted}
+                          {pricing.priceFormatted}
                         </span>
                       </div>
                       <ArrowRight className="size-4 text-ash group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all" />
@@ -267,10 +268,10 @@ export default function Hero() {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] font-jetbrains-mono text-ash/50 line-through">
-                      {PRO_PRICING_CONFIG.originalPriceFormatted}
+                      {pricing.originalPriceFormatted}
                     </span>
                     <span className="text-[12px] font-jetbrains-mono font-bold text-signal-lime">
-                      {PRO_PRICING_CONFIG.priceFormatted}
+                      {pricing.priceFormatted}
                     </span>
                     <ArrowRight className="size-3 text-ash/60 group-hover:text-signal-lime group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>

@@ -25,4 +25,9 @@ export interface ProUserSettings {
   themePreference: 'system' | 'dark' | 'light'
   anonymizeReferrers: boolean
   planTier?: ProPlanTier
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+  stripePriceId?: string
+  stripeSubscriptionStatus?: string
+  stripeCurrentPeriodEnd?: number
 }

@@ -24,7 +24,7 @@ import React, { useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
-import { PRO_PRICING_CONFIG, type ProFeatureItem } from '../constants/pricing'
+import { getProPricing, PRO_PRICING_CONFIG, type ProFeatureItem } from '../constants/pricing'
 
 export interface ProPaywallProps {
   username?: string
@@ -39,7 +39,8 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
   upgradeSuccess,
   onUpgrade,
 }) => {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
+  const pricing = getProPricing(language)
   const [openFaq, setOpenFaq] = useState<string | null>(null)
 
   const toggleFaq = (id: string) => {
@@ -222,20 +223,20 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                 <Zap className="w-3 h-3 fill-carbon" />
                 <span>
                   {t('pro.pricing.discount_badge', 'SPECIAL OFFER — {pct}% OFF', {
-                    pct: String(PRO_PRICING_CONFIG.discountPercentage),
+                    pct: String(pricing.discountPercentage),
                   })}
                 </span>
               </div>
 
               <div className="flex items-baseline justify-center gap-2 mb-1">
                 <span className="text-ash line-through font-inter-tight text-xl">
-                  {PRO_PRICING_CONFIG.originalPriceFormatted}
+                  {pricing.originalPriceFormatted}
                 </span>
                 <span className="text-chalk font-inter-tight text-6xl sm:text-7xl font-bold tracking-tight leading-none">
-                  {PRO_PRICING_CONFIG.priceFormatted}
+                  {pricing.priceFormatted}
                 </span>
                 <span className="text-xs font-jetbrains-mono uppercase text-signal-lime font-bold bg-signal-lime/10 px-2 py-0.5 rounded-sm">
-                  {PRO_PRICING_CONFIG.currency}
+                  {pricing.currency}
                 </span>
               </div>
 
@@ -395,13 +396,13 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 font-jetbrains-mono text-[10px] uppercase tracking-[0.18em] text-signal-lime text-center w-[25%] bg-signal-lime/[0.03]">
                     {t('pro.pricing.table_pro', 'GitAscii Pro (Lifetime · {price})', {
-                      price: PRO_PRICING_CONFIG.priceFormatted,
+                      price: pricing.priceFormatted,
                     })}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {PRO_PRICING_CONFIG.comparison.map((row) => (
+                {pricing.comparison.map((row) => (
                   <tr
                     key={row.id}
                     className="border-b border-graphite/20 hover:bg-onyx/30 transition-colors"
@@ -432,7 +433,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {PRO_PRICING_CONFIG.faqs.map((faq) => {
+            {pricing.faqs.map((faq) => {
               const isOpen = openFaq === faq.id
               return (
                 <div
@@ -577,7 +578,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
               <Zap className="w-3.5 h-3.5 fill-carbon" />
               <span>
                 {t('pro.pricing.cta_button_short', 'Get Lifetime Access · {price}', {
-                  price: PRO_PRICING_CONFIG.priceFormatted,
+                  price: pricing.priceFormatted,
                 })}
               </span>
             </button>

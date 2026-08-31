@@ -66,6 +66,13 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
     themePreference: (raw?.themePreference as any) || 'system',
     anonymizeReferrers: raw?.anonymizeReferrers !== 'false',
     planTier: isEnvPro ? 'pro' : (raw?.planTier as ProPlanTier) || 'free',
+    stripeCustomerId: raw?.stripeCustomerId || undefined,
+    stripeSubscriptionId: raw?.stripeSubscriptionId || undefined,
+    stripePriceId: raw?.stripePriceId || undefined,
+    stripeSubscriptionStatus: raw?.stripeSubscriptionStatus || undefined,
+    stripeCurrentPeriodEnd: raw?.stripeCurrentPeriodEnd
+      ? Number(raw.stripeCurrentPeriodEnd)
+      : undefined,
   }
 }
 
@@ -96,7 +103,31 @@ export async function updateUserSettings(
   if (settings.planTier !== undefined) {
     payload.planTier = settings.planTier
   }
+  if (settings.stripeCustomerId !== undefined) {
+    payload.stripeCustomerId = settings.stripeCustomerId
+    await redis.set(`gitascii:stripe:customer:${settings.stripeCustomerId}`, u)
+  }
+  if (settings.stripeSubscriptionId !== undefined) {
+    payload.stripeSubscriptionId = settings.stripeSubscriptionId
+  }
+  if (settings.stripePriceId !== undefined) {
+    payload.stripePriceId = settings.stripePriceId
+  }
+  if (settings.stripeSubscriptionStatus !== undefined) {
+    payload.stripeSubscriptionStatus = settings.stripeSubscriptionStatus
+  }
+  if (settings.stripeCurrentPeriodEnd !== undefined) {
+    payload.stripeCurrentPeriodEnd = String(settings.stripeCurrentPeriodEnd)
+  }
 
-  await redis.hset(key, payload)
+  if (Object.keys(payload).length > 0) {
+    await redis.hset(key, payload)
+  }
   return getUserSettings(username)
+}
+
+export async function getUserByStripeCustomer(customerId: string): Promise<string | null> {
+  if (!customerId) return null
+  const redis = getProRedisClient()
+  return await redis.get<string>(`gitascii:stripe:customer:${customerId}`)
 }

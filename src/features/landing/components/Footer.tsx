@@ -159,6 +159,16 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/refund" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.refund_policy', 'Refund Policy')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/support" className="transition-colors hover:text-signal-lime">
+                    {t('landing.footer.item.support_center', 'Support Center')}
+                  </Link>
+                </li>
+                <li>
                   <PrivacySettingsButton />
                 </li>
               </ul>

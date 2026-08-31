@@ -36,7 +36,7 @@ export class EmailService {
   private buildHeaders(email: string, username: string) {
     const unsubUrl = getUnsubscribeUrl(email, username)
     return {
-      'List-Unsubscribe': `<${unsubUrl}>, <mailto:unsubscribe@gitascii.com?subject=unsubscribe>`,
+      'List-Unsubscribe': `<${unsubUrl}>, <mailto:support@gitascii.com?subject=unsubscribe>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     }
   }

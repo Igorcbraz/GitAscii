@@ -20,7 +20,7 @@ export function isEmailConfigured(): boolean {
 }
 
 export function getEmailSender(): string {
-  return process.env.EMAIL_FROM?.trim() || 'GitAscii <team@gitascii.com>'
+  return process.env.EMAIL_FROM?.trim() || 'GitAscii <support@gitascii.com>'
 }
 
 export function getEmailReplyTo(): string {

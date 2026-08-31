@@ -179,8 +179,43 @@ export function PrivacyPolicyClient() {
               <li className="flex gap-3 items-start">
                 <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
                 <div>
-                  <strong className="text-chalk">Vercel:</strong> Hosts the application and Edge
-                  functions. Processes incoming HTTP requests to deliver the Service.
+                  <strong className="text-chalk">Stripe (Payments &amp; Billing):</strong> Processes
+                  payments for GitAscii Pro. All payment information (credit card numbers, billing
+                  details) is handled directly by Stripe in compliance with PCI-DSS standards. We
+                  never store or process sensitive credit card data on our servers. Subject to{' '}
+                  <a
+                    href="https://stripe.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-signal-lime hover:brightness-110 transition-colors"
+                  >
+                    Stripe&rsquo;s Privacy Policy ↗
+                  </a>
+                  .
+                </div>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
+                <div>
+                  <strong className="text-chalk">Resend (Transactional Emails):</strong> Used to
+                  deliver payment receipts, Pro activation confirmations, and optional widget error
+                  alerts. Subject to{' '}
+                  <a
+                    href="https://resend.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-signal-lime hover:brightness-110 transition-colors"
+                  >
+                    Resend&rsquo;s Privacy Policy ↗
+                  </a>
+                  .
+                </div>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
+                <div>
+                  <strong className="text-chalk">Vercel &amp; Upstash Redis:</strong> Hosts the
+                  application, Edge functions, and caches visitor metrics and Pro settings.
                 </div>
               </li>
             </ul>

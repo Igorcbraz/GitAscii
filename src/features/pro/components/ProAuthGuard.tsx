@@ -28,7 +28,7 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<UserSessionState | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
-  const [upgradeSuccess, setUpgradeSuccess] = useState(false)
+  const upgradeSuccess = false
 
   const checkAuth = async () => {
     try {
@@ -64,16 +64,14 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
-      if (res.ok) {
-        setUpgradeSuccess(true)
-        setTimeout(async () => {
-          await checkAuth()
-          setIsUpgrading(false)
-          window.dispatchEvent(new Event('gitascii:pro-upgrade'))
-        }, 1200)
-      } else {
-        setIsUpgrading(false)
+      const data = await res.json()
+
+      if (res.ok && data?.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+        return
       }
+
+      setIsUpgrading(false)
     } catch (err) {
       console.error('Upgrade error:', err)
       setIsUpgrading(false)
