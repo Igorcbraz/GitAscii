@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import React, { useState } from 'react'
 
 import type { WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 interface WinXPCardItemProps {
   item: WidgetCatalogItem
@@ -74,6 +75,9 @@ export function WinXPCardItem({ item, onAdd, onHover, onLeave }: WinXPCardItemPr
   return (
     <div
       key={item.id}
+      draggable
+      onDragStart={(e) => handleWidgetDragStart(e, item)}
+      onDragEnd={handleWidgetDragEnd}
       onClick={() => onAdd(item.id)}
       data-testid={`add-widget-${item.id}`}
       onMouseEnter={(e) => onHover(item, e.currentTarget.getBoundingClientRect())}

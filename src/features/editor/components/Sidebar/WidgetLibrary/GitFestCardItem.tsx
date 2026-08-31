@@ -5,6 +5,7 @@ import Image from 'next/image'
 import React from 'react'
 
 import type { WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 interface GitFestCardItemProps {
   item: WidgetCatalogItem
@@ -18,6 +19,9 @@ export function GitFestCardItem({ item, onAdd, onHover, onLeave }: GitFestCardIt
     <div
       role="button"
       tabIndex={0}
+      draggable
+      onDragStart={(e) => handleWidgetDragStart(e, item)}
+      onDragEnd={handleWidgetDragEnd}
       onClick={() => onAdd(item.id)}
       data-testid="add-widget-gitfest-lineup"
       onMouseEnter={(e) => onHover(item, e.currentTarget.getBoundingClientRect())}
