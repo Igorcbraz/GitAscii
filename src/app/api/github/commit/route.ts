@@ -243,7 +243,8 @@ export async function POST(request: Request) {
       )
 
       if (!updateJsonRes.ok) {
-        console.error(`Failed to upload ${jsonFileName}:`, await updateJsonRes.text())
+        const errorText = (await updateJsonRes.text()).replace(/[\r\n]/g, ' ')
+        console.error('[Commit Route] Failed to upload JSON config: %s', errorText)
       } else {
         const { invalidateProfileConfig } = await import('@/lib/profileStorage')
         invalidateProfileConfig(username, profileSlug)

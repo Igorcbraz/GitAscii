@@ -221,7 +221,8 @@ export async function duplicateProfile(
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9_-]/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
 
   if (!cleanSlug) {
     throw new Error('Valid target profile slug is required.')

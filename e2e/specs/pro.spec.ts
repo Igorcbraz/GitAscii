@@ -397,7 +397,7 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
     await expect(page.locator('aside a[href*="docs"]')).toBeVisible()
     const docsLink = page.locator('aside a[href*="docs"]').first()
     await expect(docsLink).toHaveAttribute('target', '_blank')
-    await expect(docsLink).toHaveAttribute('href', /docs\.gitascii\.com/)
+    await expect(docsLink).toHaveAttribute('href', /^https:\/\/docs\.gitascii\.com(\/.*)?$/)
   })
 
   test('should navigate to Analytics dashboard and display telemetry dimensions', async ({

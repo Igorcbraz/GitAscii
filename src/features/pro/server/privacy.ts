@@ -23,29 +23,40 @@ export function sanitizeReferrer(referrerUrl: string | null | undefined, isCamo?
     const parsed = new URL(referrerUrl)
     const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '')
 
-    if (hostname.includes('github.com')) {
+    const isDomainMatch = (domain: string) => hostname === domain || hostname.endsWith(`.${domain}`)
+
+    if (isDomainMatch('github.com')) {
       return 'GitHub'
     }
-    if (hostname.includes('google.')) {
+    if (
+      hostname === 'google.com' ||
+      hostname.endsWith('.google.com') ||
+      hostname.startsWith('google.')
+    ) {
       return 'Google Search'
     }
-    if (
-      hostname.includes('twitter.com') ||
-      hostname.includes('x.com') ||
-      hostname.includes('t.co')
-    ) {
+    if (isDomainMatch('twitter.com') || isDomainMatch('x.com') || isDomainMatch('t.co')) {
       return 'X / Twitter'
     }
-    if (hostname.includes('linkedin.com')) {
+    if (isDomainMatch('linkedin.com')) {
       return 'LinkedIn'
     }
-    if (hostname.includes('reddit.com')) {
+    if (isDomainMatch('reddit.com')) {
       return 'Reddit'
     }
-    if (hostname.includes('dev.to') || hostname.includes('hashnode.')) {
+    if (
+      isDomainMatch('dev.to') ||
+      hostname === 'hashnode.com' ||
+      hostname.endsWith('.hashnode.com') ||
+      hostname.startsWith('hashnode.')
+    ) {
       return 'Dev Community'
     }
-    if (hostname.includes('gitascii.com') || hostname.includes('localhost')) {
+    if (
+      isDomainMatch('gitascii.com') ||
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost')
+    ) {
       return 'GitAscii App'
     }
 
@@ -130,9 +141,21 @@ export function parseTrafficType(
   ) {
     return 'bot'
   }
-  const ref = (referrer || '').toLowerCase()
-  if (ref.includes('gitascii.com') || ref.includes('localhost')) {
-    return 'app'
+  if (referrer) {
+    try {
+      const parsed = new URL(referrer)
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, '')
+      if (
+        host === 'gitascii.com' ||
+        host.endsWith('.gitascii.com') ||
+        host === 'localhost' ||
+        host.endsWith('.localhost')
+      ) {
+        return 'app'
+      }
+    } catch {
+      // Ignore URL parse error for referrer
+    }
   }
   return 'direct'
 }
