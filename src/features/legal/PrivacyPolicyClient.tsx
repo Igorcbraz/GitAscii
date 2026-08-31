@@ -252,8 +252,9 @@ export function PrivacyPolicyClient() {
               5. Open Source Transparency
             </h2>
             <p>
-              GitAscii is open-source software under the MIT License. You can inspect the entire
-              source code, including analytics tracking and consent logic, on GitHub at{' '}
+              GitAscii is open-source software under the GNU General Public License v3.0 (GPLv3).
+              You can inspect the entire source code, including analytics tracking and consent
+              logic, on GitHub at{' '}
               <a
                 href={EXTERNAL_LINKS.GITHUB_REPO}
                 target="_blank"

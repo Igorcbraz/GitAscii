@@ -120,10 +120,10 @@ export function TermsOfUseClient() {
                 rel="noopener noreferrer"
                 className="text-signal-lime hover:brightness-110 transition-colors"
               >
-                MIT License
+                GNU General Public License v3.0 (GPLv3)
               </a>
-              . You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or
-              sell copies of the software, subject to the conditions of the MIT License.
+              . You are free to use, copy, modify, and distribute the software subject to the
+              conditions of the GPLv3.
             </p>
             <p className="mt-4">
               SVG widgets and README templates generated using GitAscii are yours to use freely in

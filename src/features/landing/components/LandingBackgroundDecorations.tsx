@@ -119,7 +119,7 @@ headers: {
       </pre>
 
       <div className="absolute top-[96%] right-6 lg:right-16 font-jetbrains-mono text-[11px] text-pearl/50 hidden md:block">
-        <span>[ 100% OPEN SOURCE &bull; MIT LICENSED ]</span>
+        <span>[ 100% OPEN SOURCE &bull; GPLv3 LICENSED ]</span>
       </div>
 
       <span className="absolute top-[5%] left-[12%] font-jetbrains-mono text-sm text-signal-lime/30 select-none hidden md:block">
