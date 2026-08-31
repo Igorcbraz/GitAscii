@@ -1,4 +1,3 @@
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
@@ -31,7 +30,7 @@ function resolvePriceId(acceptLanguage: string | null): string | undefined {
   return priceBrl || priceUsd
 }
 
-export async function POST() {
+export async function POST(request?: Request) {
   const session = await getSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized. Please login with GitHub.' }, { status: 401 })
@@ -39,16 +38,16 @@ export async function POST() {
 
   const username = session.username.toLowerCase().trim()
   const userEmail = session.email && session.email.includes('@') ? session.email.trim() : undefined
-  const headerList = await headers()
-  const acceptLanguage = headerList.get('accept-language')
+  const headers = request?.headers
+  const acceptLanguage = headers?.get('accept-language') ?? null
   const priceId = resolvePriceId(acceptLanguage)
   const secretKey = process.env.STRIPE_SECRET_KEY
   const directCheckoutUrl = process.env.PRO_CHECKOUT_URL || process.env.STRIPE_CHECKOUT_URL
 
   const origin =
     process.env.NEXT_PUBLIC_APP_URL ||
-    headerList.get('origin') ||
-    headerList.get('referer')?.split('/').slice(0, 3).join('/') ||
+    headers?.get('origin') ||
+    headers?.get('referer')?.split('/').slice(0, 3).join('/') ||
     'http://localhost:3000'
 
   if (secretKey && priceId) {

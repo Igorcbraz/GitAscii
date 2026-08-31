@@ -504,13 +504,15 @@ describe('Pro API Route Handlers Test Suite', () => {
 
       vi.doMock('stripe', () => {
         return {
-          default: vi.fn().mockImplementation(() => ({
-            checkout: {
-              sessions: {
-                create: createSessionSpy,
+          default: vi.fn().mockImplementation(function () {
+            return {
+              checkout: {
+                sessions: {
+                  create: createSessionSpy,
+                },
               },
-            },
-          })),
+            }
+          }),
         }
       })
 
