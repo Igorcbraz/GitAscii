@@ -1,5 +1,6 @@
 import { EXTERNAL_LINKS } from '@/constants'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { renderDeveloperQuoteSvg } from '@/features/widgets/renderers/DeveloperQuoteRenderer'
 import { renderExternalWidgetSvg } from '@/features/widgets/renderers/externalWidgetHelper'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -322,27 +323,13 @@ export function renderExternalWidgets(
     }
 
     case 'readme-quotes': {
-      const quoteType = (cfg.quoteType as string) || 'random'
-      const theme = (cfg.theme as string) || 'dark'
-      const layout = (cfg.layout as string) || 'horizontal'
-
-      const showTitle = cfg.showTitle !== false
-      const customTitle = (cfg.customTitle as string) || '[ DEVELOPER QUOTE ]'
-
-      const quoteUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.QUOTES(
-        quoteType === 'quote-day' ? 'quote-day' : layout,
-        theme
-      )
-
-      return renderExternalWidgetSvg(
-        quoteUrl,
+      return renderDeveloperQuoteSvg(
+        cfg,
         width,
         height,
-        customTitle,
-        showTitle,
         globalStyles,
         accent,
-        'contain'
+        data.user?.login || 'user'
       )
     }
 

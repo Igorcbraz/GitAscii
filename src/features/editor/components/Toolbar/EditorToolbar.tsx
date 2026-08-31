@@ -26,6 +26,7 @@ import { useViewModeStore } from '../../store/viewModeStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
 import { ExportGuideModal } from './ExportGuideModal'
 import { GuestLoginModal } from './GuestLoginModal'
+import { ProfileSwitcher } from './ProfileSwitcher'
 import { StarPromptModal } from './StarPromptModal'
 import { ViewModeToggle } from './ViewModeToggle'
 
@@ -48,6 +49,8 @@ export function EditorToolbar({
   const profileSlug = propProfileSlug || storeProfileSlug || 'default'
   const hasData = useEditorStore((state) => Boolean(state.config && state.githubData))
   const session = useEditorStore((state) => state.session)
+  const isDirty = useEditorStore((state) => state.isDirty)
+  const markClean = useEditorStore((state) => state.markClean)
   const triggerPreviewNudge = useViewModeStore((state) => state.triggerPreviewNudge)
   const showPreviewNudge = useViewModeStore((state) => state.showPreviewNudge)
 
@@ -148,18 +151,11 @@ export function EditorToolbar({
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      const skipGuide = safeStorage.getItem('gitascii_skip_export_guide') === 'true'
-      if (!skipGuide) {
-        setShowExportGuide(true)
-      } else {
-        setTimeout(() => {
-          handleExportFinished()
-        }, 500)
-      }
+      setShowExportGuide(true)
     } catch (err) {
       console.error('Failed to export layout:', err)
     }
-  }, [profileSlug, handleExportFinished])
+  }, [profileSlug])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -401,6 +397,7 @@ export function EditorToolbar({
         throw new Error(data.error || 'Failed to commit')
       }
 
+      markClean()
       setCommitStatus('success')
       setTimeout(() => setCommitStatus('idle'), 2500)
       setTimeout(() => {
@@ -417,13 +414,19 @@ export function EditorToolbar({
   }
 
   const renderUpdateReadmeButton = () => {
+    const isCommitDisabled = commitStatus === 'committing' || (!isDirty && commitStatus === 'idle')
+    const buttonTitle =
+      !isDirty && commitStatus === 'idle'
+        ? t('editor.toolbar.no_changes_title', 'README is up to date (no pending changes)')
+        : undefined
+
     const baseLabel =
       commitStatus === 'committing'
-        ? t('editor.toolbar.updating', 'Atualizando...')
+        ? t('editor.toolbar.updating', 'Updating...')
         : commitStatus === 'success'
-          ? t('editor.toolbar.updated', 'Atualizado!')
+          ? t('editor.toolbar.updated', 'Updated!')
           : commitStatus === 'error'
-            ? t('editor.toolbar.error', 'Erro ao salvar')
+            ? t('editor.toolbar.error', 'Failed to save')
             : t('editor.toolbar.update_readme', 'Update README')
 
     const baseIcon =
@@ -435,12 +438,14 @@ export function EditorToolbar({
         <Github size={12} />
       )
 
-    const btnClass = `flex items-center gap-1.5 px-2.5 h-[30px] font-inter-tight font-medium text-[10px] uppercase tracking-[0.08em] transition-all cursor-pointer ${
+    const btnClass = `flex items-center gap-1.5 px-2.5 h-[30px] font-inter-tight font-medium text-[10px] uppercase tracking-[0.08em] transition-all ${
       commitStatus === 'success'
         ? 'bg-signal-lime text-black glow-lime'
         : commitStatus === 'error'
           ? 'bg-red-500 text-white'
-          : 'bg-signal-lime text-black glow-lime hover:brightness-110'
+          : isCommitDisabled
+            ? 'bg-graphite/60 text-ash/60 border border-graphite/60 opacity-60 cursor-not-allowed'
+            : 'bg-signal-lime text-black glow-lime hover:brightness-110 cursor-pointer'
     }`
 
     if (!isDev) {
@@ -448,7 +453,8 @@ export function EditorToolbar({
         <button
           onClick={handleCommitToGithub}
           data-testid="commit-github-btn"
-          disabled={commitStatus === 'committing'}
+          disabled={isCommitDisabled}
+          title={buttonTitle}
           className={`${btnClass} rounded-sm`}
         >
           {baseIcon}
@@ -458,12 +464,16 @@ export function EditorToolbar({
     }
 
     return (
-      <div className="relative flex items-stretch" data-testid="commit-github-btn">
+      <div
+        className="relative flex items-stretch"
+        data-testid="commit-github-btn"
+        title={buttonTitle}
+      >
         <button
           onClick={handleCommitToGithub}
-          disabled={commitStatus === 'committing'}
+          disabled={isCommitDisabled}
           className={`${btnClass} rounded-l-sm border-r border-black/20`}
-          title={t('editor.toolbar.dev_commit_real_title', 'Commit real no GitHub')}
+          title={buttonTitle || t('editor.toolbar.dev_commit_real_title', 'Real commit to GitHub')}
         >
           {baseIcon}
           <span className="hidden sm:inline">{baseLabel}</span>
@@ -473,7 +483,7 @@ export function EditorToolbar({
           onClick={() => setShowDevDropdown((v) => !v)}
           disabled={commitStatus === 'committing'}
           className={`${btnClass} px-1.5 rounded-r-sm`}
-          title={t('editor.toolbar.dev_options_title', 'Opções de dev')}
+          title={t('editor.toolbar.dev_options_title', 'Dev options')}
         >
           <ChevronDown
             size={12}
@@ -499,10 +509,10 @@ export function EditorToolbar({
               <Github size={13} className="text-ash shrink-0" />
               <div>
                 <div className="font-medium leading-tight">
-                  {t('editor.toolbar.dev_real_commit', 'Commit real')}
+                  {t('editor.toolbar.dev_real_commit', 'Real commit')}
                 </div>
                 <div className="text-caption text-ash leading-tight">
-                  {t('editor.toolbar.dev_real_commit_desc', 'Envia para o GitHub')}
+                  {t('editor.toolbar.dev_real_commit_desc', 'Sends directly to GitHub')}
                 </div>
               </div>
             </button>
@@ -514,12 +524,12 @@ export function EditorToolbar({
               <Check size={13} className="text-signal-lime shrink-0" />
               <div>
                 <div className="font-medium leading-tight">
-                  {t('editor.toolbar.dev_fake_commit', 'Commit fictício')}
+                  {t('editor.toolbar.dev_fake_commit', 'Mock commit')}
                 </div>
                 <div className="text-caption text-ash leading-tight">
                   {t(
                     'editor.toolbar.dev_fake_commit_desc',
-                    'Simula sucesso · testa o Preview nudge'
+                    'Simulates success · tests preview nudge'
                   )}
                 </div>
               </div>
@@ -629,8 +639,9 @@ export function EditorToolbar({
       </div>
 
       {!embedded ? (
-        <div className="flex items-center h-full ml-auto pr-3 pl-2 gap-0" id="tour-export-buttons">
-          <span className="h-5 w-px bg-graphite/80 shrink-0 mr-3" />
+        <div className="flex items-center h-full ml-auto pr-3 pl-2 gap-2" id="tour-export-buttons">
+          <ProfileSwitcher username={username} currentProfileSlug={profileSlug} />
+          <span className="h-5 w-px bg-graphite/80 shrink-0" />
 
           <div className="flex items-center gap-2">
             <button

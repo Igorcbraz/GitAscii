@@ -76,7 +76,7 @@ export interface EditorStore {
   renameWidget: (instanceId: string, name: string) => void
   removeWidget: (instanceId: string) => void
   removeWidgets: (instanceIds: string[]) => void
-  addWidget: (widgetId: string) => void
+  addWidget: (widgetId: string, position?: { x: number; y: number }) => void
   duplicateWidget: (instanceId: string) => void
   reorderWidgets: (fromIndex: number, toIndex: number) => void
   moveWidgetLayer: (instanceId: string, direction: 'up' | 'down' | 'top' | 'bottom') => void
@@ -92,11 +92,23 @@ export interface EditorStore {
   redo: () => void
   canUndo: boolean
   canRedo: boolean
+  initialConfigSnapshot: string | null
+  isDirty: boolean
+  markClean: () => void
   importLayout: (
     widgets: WidgetInstance[],
     globalStyles?: SavedConfiguration['globalStyles'],
     templateId?: string
   ) => void
+}
+
+function getConfigSignature(config: SavedConfiguration | null): string {
+  if (!config) return ''
+  return JSON.stringify({
+    widgets: config.widgets,
+    globalStyles: config.globalStyles,
+    templateId: config.templateId,
+  })
 }
 
 export const useEditorStore = create<EditorStore>((set, get) => {
@@ -110,7 +122,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   }
 
   const applyConfigChange = (newConfig: SavedConfiguration, saveSnapshot = true) => {
-    const { history } = get()
+    const { history, initialConfigSnapshot } = get()
     let newPast = history.past
 
     if (saveSnapshot) {
@@ -118,11 +130,15 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       newPast = res.newPast
     }
 
+    const currentSig = getConfigSignature(newConfig)
+    const isDirty = initialConfigSnapshot !== null && currentSig !== initialConfigSnapshot
+
     set({
       config: newConfig,
       history: { past: newPast, future: saveSnapshot ? [] : history.future },
       canUndo: newPast.length > 0,
       canRedo: saveSnapshot ? false : get().canRedo,
+      isDirty,
     })
 
     saveToLocalStorage(newConfig)
@@ -140,6 +156,8 @@ export const useEditorStore = create<EditorStore>((set, get) => {
     session: null,
     clipboard: [],
     activeMobilePanel: 'canvas',
+    initialConfigSnapshot: null,
+    isDirty: false,
 
     setSession: (session) => set({ session }),
     setActiveMobilePanel: (panel) => set({ activeMobilePanel: panel }),
@@ -160,14 +178,26 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       }),
 
     initEditor: (config, data) => {
+      const snapshot = getConfigSignature(config)
       set({
         config,
         githubData: data,
+        initialConfigSnapshot: snapshot,
+        isDirty: false,
         selectedInstanceId: config.widgets[0]?.instanceId || null,
         selectedInstanceIds: config.widgets[0]?.instanceId ? [config.widgets[0].instanceId] : [],
         history: { past: [], future: [] },
         canUndo: false,
         canRedo: false,
+      })
+    },
+
+    markClean: () => {
+      const { config } = get()
+      const snapshot = getConfigSignature(config)
+      set({
+        initialConfigSnapshot: snapshot,
+        isDirty: false,
       })
     },
 
@@ -774,7 +804,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       set({ selectedInstanceId: null, selectedInstanceIds: [] })
     },
 
-    addWidget: (widgetId) => {
+    addWidget: (widgetId, position) => {
       const { config, githubData } = get()
       if (!config) return
 
@@ -811,6 +841,13 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         defaultSizeMap[widgetId] || { width: 800, height: 120 }
       const maxY = config.widgets.reduce((acc, w) => Math.max(acc, w.position.y + w.size.height), 0)
 
+      const targetX =
+        position !== undefined
+          ? Math.max(0, Math.min(800 - widgetSize.width, Math.round(position.x)))
+          : 0
+      const targetY =
+        position !== undefined ? Math.max(0, Math.round(position.y)) : maxY > 0 ? maxY + 16 : 0
+
       const detectedSocials =
         widgetId === 'social-media' || widgetId === 'codeweb-social-badge'
           ? detectSocialsFromProfile(githubData)
@@ -824,7 +861,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
         instanceId: `widget_${Date.now()}`,
         widgetId,
         name: `${widgetId.charAt(0).toUpperCase() + widgetId.slice(1)} Widget`,
-        position: { x: 0, y: maxY > 0 ? maxY + 16 : 0 },
+        position: { x: targetX, y: targetY },
         size: widgetSize,
         config: {
           ...(widgetId === 'social-media' && detectedSocials

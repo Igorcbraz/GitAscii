@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import React from 'react'
 
 import { WidgetBadgeType, type WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 function renderWidgetBadge(badge?: { text: string; type: WidgetBadgeType }) {
   if (!badge) return null
@@ -32,6 +33,9 @@ export function DefaultWidgetCardItem({
 
   return (
     <div
+      draggable
+      onDragStart={(e) => handleWidgetDragStart(e, item)}
+      onDragEnd={handleWidgetDragEnd}
       onClick={() => onAdd(item.id)}
       data-testid={`add-widget-${item.id}`}
       onMouseEnter={(e) => onHover(item, e.currentTarget.getBoundingClientRect())}

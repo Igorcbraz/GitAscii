@@ -21,6 +21,7 @@ import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
 import { GitHubModeLayout } from './GitHubMode'
 import { ProfileErrorScreen } from './ProfileErrorScreen'
 import { PropertiesPanel } from './Properties/PropertiesPanel'
+import { WidgetDragOverlay } from './Sidebar/WidgetDragOverlay'
 import { WidgetLibrary } from './Sidebar/WidgetLibrary'
 import { EditorToolbar } from './Toolbar/EditorToolbar'
 import { EditorTour } from './Tour/EditorTour'
@@ -64,22 +65,22 @@ export function EditorLayout({
   const initialSteps: LoadStep[] = [
     {
       id: 'session',
-      label: t('editor.loading.step_session', 'Verificando sessão'),
+      label: t('editor.loading.step_session', 'Verifying session'),
       status: 'pending',
     },
     {
       id: 'github',
-      label: t('editor.loading.step_github', 'Buscando dados do GitHub'),
+      label: t('editor.loading.step_github', 'Fetching GitHub data'),
       status: 'pending',
     },
     {
       id: 'profile',
-      label: t('editor.loading.step_profile', 'Analisando perfil'),
+      label: t('editor.loading.step_profile', 'Analyzing profile'),
       status: 'pending',
     },
     {
       id: 'editor',
-      label: t('editor.loading.step_editor', 'Inicializando editor'),
+      label: t('editor.loading.step_editor', 'Initializing editor'),
       status: 'pending',
     },
   ]
@@ -101,22 +102,22 @@ export function EditorLayout({
         setSteps([
           {
             id: 'session',
-            label: t('editor.loading.step_session', 'Verificando sessão'),
+            label: t('editor.loading.step_session', 'Verifying session'),
             status: 'pending',
           },
           {
             id: 'github',
-            label: t('editor.loading.step_github', 'Buscando dados do GitHub'),
+            label: t('editor.loading.step_github', 'Fetching GitHub data'),
             status: 'pending',
           },
           {
             id: 'profile',
-            label: t('editor.loading.step_profile', 'Analisando perfil'),
+            label: t('editor.loading.step_profile', 'Analyzing profile'),
             status: 'pending',
           },
           {
             id: 'editor',
-            label: t('editor.loading.step_editor', 'Inicializando editor'),
+            label: t('editor.loading.step_editor', 'Initializing editor'),
             status: 'pending',
           },
         ])
@@ -133,15 +134,15 @@ export function EditorLayout({
                 'done',
                 sessionData.session
                   ? `@${sessionData.session.username}`
-                  : t('editor.loading.unauthenticated', 'Não autenticado')
+                  : t('editor.loading.unauthenticated', 'Unauthenticated')
               )
             }
           } else {
-            setStep('session', 'done', t('editor.loading.unauthenticated', 'Não autenticado'))
+            setStep('session', 'done', t('editor.loading.unauthenticated', 'Unauthenticated'))
           }
         } catch (e) {
           console.warn('Failed to fetch session', e)
-          setStep('session', 'done', t('editor.loading.unauthenticated', 'Não autenticado'))
+          setStep('session', 'done', t('editor.loading.unauthenticated', 'Unauthenticated'))
         }
 
         setStep('github', 'active', `api.github.com/users/${username}`)
@@ -217,17 +218,17 @@ export function EditorLayout({
         if (savedDraft) {
           try {
             initialConfig = JSON.parse(savedDraft)
-            setStep('profile', 'done', t('editor.loading.draft_found', 'Rascunho salvo encontrado'))
+            setStep('profile', 'done', t('editor.loading.draft_found', 'Saved draft found'))
           } catch {
             initialConfig = serverConfig || (autoGenerate ? generateBestProfile(data) : null)
             setStep(
               'profile',
               'done',
               serverConfig
-                ? t('editor.loading.config_loaded', 'Configuração carregada')
+                ? t('editor.loading.config_loaded', 'Configuration loaded')
                 : autoGenerate
-                  ? t('editor.loading.auto_generated', 'Gerado automaticamente')
-                  : t('editor.loading.no_prev_config', 'Sem configuração prévia')
+                  ? t('editor.loading.auto_generated', 'Auto-generated')
+                  : t('editor.loading.no_prev_config', 'No previous configuration')
             )
           }
         } else if (serverConfig) {
@@ -235,21 +236,21 @@ export function EditorLayout({
           setStep(
             'profile',
             'done',
-            t('editor.loading.repo_loaded', 'Perfil carregado do repositório')
+            t('editor.loading.repo_loaded', 'Profile loaded from repository')
           )
         } else if (autoGenerate) {
           initialConfig = generateBestProfile(data)
           setStep(
             'profile',
             'done',
-            t('editor.loading.profile_auto_generated', 'Perfil gerado automaticamente')
+            t('editor.loading.profile_auto_generated', 'Profile auto-generated')
           )
         } else {
           initialConfig = null
           setStep(
             'profile',
             'done',
-            t('editor.loading.waiting_template', 'Aguardando escolha de template')
+            t('editor.loading.waiting_template', 'Waiting for template choice')
           )
         }
 
@@ -257,7 +258,7 @@ export function EditorLayout({
         await new Promise((r) => setTimeout(r, 260))
 
         if (isMounted) {
-          setStep('editor', 'done', t('editor.loading.ready', 'Pronto'))
+          setStep('editor', 'done', t('editor.loading.ready', 'Ready'))
           await new Promise((r) => setTimeout(r, 180))
 
           if (initialConfig) {
@@ -397,14 +398,14 @@ export function EditorLayout({
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100 mb-8">
               <span className="flex items-center gap-2 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.22em] text-ash">
                 <Terminal size={11} className="text-signal-lime shrink-0" />
-                {t('editor.onboarding.eyebrow', '[ GITASCII · NOVO PERFIL ]')}
+                {t('editor.onboarding.eyebrow', '[ GITASCII · NEW PROFILE ]')}
               </span>
             </div>
 
             <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-250 font-inter-tight font-light text-white text-4xl md:text-[52px] leading-heading tracking-[-1.2px] text-center mb-4">
-              {t('editor.onboarding.title_prefix', 'Como deseja ')}
+              {t('editor.onboarding.title_prefix', 'How would you like to ')}
               <span className="italic text-signal-lime">
-                {t('editor.onboarding.title_italic', 'começar,')}
+                {t('editor.onboarding.title_italic', 'start,')}
               </span>{' '}
               <span className="text-white/80">@{username}?</span>
             </h1>
@@ -412,7 +413,7 @@ export function EditorLayout({
             <p className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-350 font-inter-tight text-body leading-body text-ash text-center max-w-md mb-10">
               {t(
                 'editor.onboarding.subtitle',
-                'Escolha como montar seu README. Você poderá personalizar tudo depois.'
+                'Choose how to build your README. You can customize everything later.'
               )}
             </p>
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-500 flex flex-col gap-3 w-full">
@@ -431,12 +432,12 @@ export function EditorLayout({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-inter-tight font-semibold text-body leading-tight tracking-[0.01em] mb-0.5">
-                    {t('editor.onboarding.start_template_title', 'Começar com um Template')}
+                    {t('editor.onboarding.start_template_title', 'Start with a Template')}
                   </div>
                   <div className="font-inter-tight text-note text-black/60 leading-snug">
                     {t(
                       'editor.onboarding.start_template_desc',
-                      'Layouts prontos pensados para diferentes tipos de perfil'
+                      'Pre-configured layouts designed for different profile styles'
                     )}
                   </div>
                 </div>
@@ -471,12 +472,12 @@ export function EditorLayout({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-inter-tight font-semibold text-body text-white leading-tight tracking-[0.01em] mb-0.5">
-                    {t('editor.onboarding.start_blank_title', 'Começar do Zero')}
+                    {t('editor.onboarding.start_blank_title', 'Start from Scratch')}
                   </div>
                   <div className="font-inter-tight text-note text-ash leading-snug">
                     {t(
                       'editor.onboarding.start_blank_desc',
-                      'Canvas vazio — total liberdade criativa'
+                      'Blank canvas — total creative freedom'
                     )}
                   </div>
                 </div>
@@ -524,24 +525,24 @@ export function EditorLayout({
             <span className="text-eyebrow leading-none">
               {session ? (
                 <>
-                  {t('editor.banner.logged_in_as_prefix', 'Você está logado como')}{' '}
+                  {t('editor.banner.logged_in_as_prefix', 'You are logged in as')}{' '}
                   <strong className="text-white">@{session.username}</strong>
-                  {t('editor.banner.logged_in_as_middle', ', mas editando o perfil de')}{' '}
+                  {t('editor.banner.logged_in_as_middle', ', but editing the profile of')}{' '}
                   <strong className="text-white">@{username}</strong>
                   {t(
                     'editor.banner.logged_in_as_suffix',
-                    '. Suas alterações não serão salvas no servidor.'
+                    '. Your changes will not be saved to the server.'
                   )}
                 </>
               ) : (
                 <>
                   <span className="text-signal-lime font-semibold uppercase tracking-wider mr-1">
-                    {t('editor.guest_banner.badge', '[ MODO VISITANTE ]')}
+                    {t('editor.guest_banner.badge', '[ GUEST MODE ]')}
                   </span>
                   <span className="text-pearl">
                     {t(
                       'editor.guest_banner.message',
-                      'Você pode exportar manualmente ou conectar sua conta para sincronizar seu README do GitHub automaticamente em 1 clique.'
+                      'You can export manually or connect your account to sync your GitHub README automatically in 1 click.'
                     )}
                   </span>
                 </>
@@ -556,14 +557,14 @@ export function EditorLayout({
                 }}
                 className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-signal-lime text-black font-bold text-caption uppercase tracking-wider glow-lime hover:brightness-110 cursor-pointer transition-all"
               >
-                <span>{t('editor.guest_banner.btn_connect', 'Conectar GitHub')}</span>
+                <span>{t('editor.guest_banner.btn_connect', 'Connect GitHub')}</span>
               </button>
             )}
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('openExportGuide'))}
               className="flex items-center gap-1 text-caption text-ash hover:text-white transition-colors cursor-pointer"
             >
-              {t('editor.banner.view_tutorial', 'Ver Tutorial')}
+              {t('editor.banner.view_tutorial', 'View Tutorial')}
             </button>
           </div>
         </div>
@@ -638,6 +639,7 @@ export function EditorLayout({
       </div>
 
       <EditorTour embedded={embedded} />
+      <WidgetDragOverlay />
     </div>
   )
 }

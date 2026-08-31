@@ -21,7 +21,6 @@ import { EXPORT_GUIDE_STEPS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { copyToClipboard } from '@/utils/clipboard'
-import { safeStorage } from '@/utils/storage'
 
 interface ExportGuideModalProps {
   isOpen: boolean
@@ -60,38 +59,38 @@ export function ExportGuideModal({
   const steps = [
     {
       ...STEPS[0],
-      title: t('editor.guide.export.step1_title', 'Baixe o Arquivo de Configuração'),
+      title: t('editor.guide.export.step1_title', 'Download Configuration File'),
       description: t(
         'editor.guide.export.step1_desc',
-        'O arquivo de configuração contém toda a estrutura de layout e widgets do seu perfil.'
+        'The configuration file contains all layout and widget structures for your profile.'
       ),
       warning: t(
         'editor.guide.export.step1_warning',
-        'NÃO altere o nome do arquivo. Mantenha estritamente como {fileName}, pois o GitAscii busca exatamente por este nome na raiz do seu repositório.'
+        'DO NOT rename the file. Keep it strictly as {fileName} as GitAscii looks for this exact name in your repository root.'
       ).replace('{fileName}', fileName),
     },
     {
       ...STEPS[1],
       icon: Github,
-      title: t('editor.guide.export.step2_title', 'Upload em {repo}').replace('{repo}', repoName),
+      title: t('editor.guide.export.step2_title', 'Upload to {repo}').replace('{repo}', repoName),
       description: t(
         'editor.guide.export.step2_desc',
-        'Faça o upload do arquivo {fileName} na raiz do seu repositório especial {repo} no GitHub.'
+        'Upload the {fileName} file to the root of your special repository {repo} on GitHub.'
       )
         .replace('{fileName}', fileName)
         .replace('{repo}', repoName),
-      linkLabel: t('editor.guide.export.step2_link', 'Fazer upload no GitHub'),
+      linkLabel: t('editor.guide.export.step2_link', 'Upload to GitHub'),
       getLinkUrl: (user: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_UPLOAD(user),
     },
     {
       ...STEPS[2],
       icon: Sparkles,
-      title: t('editor.guide.export.step3_title', 'Adicione ao seu README.md'),
+      title: t('editor.guide.export.step3_title', 'Add to your README.md'),
       description: t(
         'editor.guide.export.step3_desc',
-        'Copie o código HTML formatado abaixo e cole no arquivo README.md do seu repositório {repo}:'
+        'Copy the formatted HTML code below and paste it into the README.md file of your repository {repo}:'
       ).replace('{repo}', repoName),
-      linkLabel: t('editor.guide.export.step3_link', 'Editar README.md no GitHub'),
+      linkLabel: t('editor.guide.export.step3_link', 'Edit README.md on GitHub'),
       getLinkUrl: (user: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_EDIT_README(user),
     },
   ]
@@ -134,14 +133,6 @@ export function ExportGuideModal({
     }
   }
 
-  const [dontShowAgain, setDontShowAgain] = useState(false)
-
-  useEffect(() => {
-    if (isOpen) {
-      setDontShowAgain(safeStorage.getItem('gitascii_skip_export_guide') === 'true')
-    }
-  }, [isOpen])
-
   const nextStep = () => {
     if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1)
   }
@@ -176,12 +167,12 @@ export function ExportGuideModal({
                 </div>
                 <div>
                   <h2 className="font-inter-tight font-semibold text-body text-chalk">
-                    {t('editor.guide.export.title', 'Guia de Exportação Manual')}
+                    {t('editor.guide.export.title', 'Manual Export Guide')}
                   </h2>
                   <p className="text-caption text-ash mt-0.5">
                     {t(
                       'editor.guide.export.subtitle',
-                      'Siga os passos para configurar o seu perfil manualmente'
+                      'Follow the steps to configure your profile manually'
                     )}
                   </p>
                 </div>
@@ -190,7 +181,7 @@ export function ExportGuideModal({
               <button
                 onClick={handleClose}
                 className="p-1.5 rounded-md hover:bg-graphite text-ash hover:text-chalk transition-colors cursor-pointer"
-                title={t('common.close', 'Fechar')}
+                title={t('common.close', 'Close')}
               >
                 <X size={16} />
               </button>
@@ -237,18 +228,18 @@ export function ExportGuideModal({
                       <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
                       <div className="text-caption text-amber-200/90 leading-relaxed font-inter-tight">
                         <strong className="font-semibold text-amber-300">
-                          {t('editor.export.file_warning_title', 'NÃO altere o nome do arquivo:')}
+                          {t('editor.export.file_warning_title', 'DO NOT rename this file:')}
                         </strong>{' '}
                         {t(
                           'editor.export.file_warning_desc_1',
-                          'Mantenha o arquivo com o nome exato'
+                          'Keep the file with the exact name'
                         )}{' '}
                         <code className="bg-amber-950/70 border border-amber-500/30 px-1.5 py-0.5 rounded text-amber-200 font-jetbrains-mono text-eyebrow font-semibold">
                           {fileName}
                         </code>
                         {t(
                           'editor.export.file_warning_desc_2',
-                          '. O GitAscii busca estritamente por este nome na raiz do repositório.'
+                          '. GitAscii strictly looks for this file in your repository root.'
                         )}
                       </div>
                     </div>
@@ -260,10 +251,10 @@ export function ExportGuideModal({
                       >
                         <Download size={14} />
                         <span>
-                          {t('editor.guide.export.step1_download_btn', 'Baixar {fileName}').replace(
-                            '{fileName}',
-                            fileName
-                          )}
+                          {t(
+                            'editor.guide.export.step1_download_btn',
+                            'Download {fileName}'
+                          ).replace('{fileName}', fileName)}
                         </span>
                       </button>
                     </div>
@@ -309,9 +300,7 @@ export function ExportGuideModal({
                       <button
                         onClick={handleCopy}
                         className="absolute top-2.5 right-2.5 p-1.5 rounded-md hover:bg-iron text-ash hover:text-white transition-all cursor-pointer bg-onyx/90 border border-graphite/80 backdrop-blur-sm"
-                        title={
-                          reCopied ? t('common.copied', 'Copiado!') : t('common.copy', 'Copiar')
-                        }
+                        title={reCopied ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
                       >
                         {reCopied ? (
                           <Check size={14} className="text-signal-lime" />
@@ -325,11 +314,11 @@ export function ExportGuideModal({
                       <Zap size={15} className="text-signal-lime shrink-0" />
                       <div className="text-caption text-pearl leading-tight font-inter-tight">
                         <strong className="font-semibold text-signal-lime">
-                          {t('editor.guide.export.step3_cache_title', 'Cache do GitHub')}:
+                          {t('editor.guide.export.step3_cache_title', 'GitHub Cache')}:
                         </strong>{' '}
                         {t(
                           'editor.guide.export.step3_cache_desc',
-                          'Ao alterar o JSON, mude o valor de ?v= no README para forçar a atualização da imagem.'
+                          'When updating the JSON, bump the ?v= parameter in your README to force image refresh.'
                         )}
                       </div>
                     </div>
@@ -348,7 +337,7 @@ export function ExportGuideModal({
                       )}
                       <button
                         onClick={handleCopy}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-graphite hover:bg-iron border border-iron rounded-md text-note text-chalk font-inter-tight font-medium transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-graphite hover:bg-iron border border-iron rounded-md text-note text-chalk font-inter-tight font-medium transition-colors cursor-pointer"
                       >
                         {reCopied ? (
                           <Check size={14} className="text-signal-lime" />
@@ -357,8 +346,8 @@ export function ExportGuideModal({
                         )}
                         <span>
                           {reCopied
-                            ? t('common.copied', 'Copiado!')
-                            : t('common.copy', 'Copiar código')}
+                            ? t('common.copied', 'Copied!')
+                            : t('common.copy_code', 'Copy code')}
                         </span>
                       </button>
                     </div>
@@ -367,36 +356,10 @@ export function ExportGuideModal({
               </div>
             </div>
           </div>
-          <div className="px-6 pb-4 shrink-0">
-            <button
-              onClick={() => {
-                const newValue = !dontShowAgain
-                setDontShowAgain(newValue)
-                if (newValue) {
-                  safeStorage.setItem('gitascii_skip_export_guide', 'true')
-                } else {
-                  safeStorage.removeItem('gitascii_skip_export_guide')
-                }
-              }}
-              className="inline-flex items-center gap-2.5 text-ash hover:text-chalk transition-colors cursor-pointer select-none group"
-            >
-              <div
-                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-                  dontShowAgain
-                    ? 'bg-signal-lime border-signal-lime text-black'
-                    : 'bg-void-black border-graphite group-hover:border-ash'
-                }`}
-              >
-                {dontShowAgain && <Check size={10} strokeWidth={3.5} />}
-              </div>
-              <span className="font-inter-tight font-medium text-label">
-                {t('editor.guide.dont_show_again', 'Não mostrar este guia novamente')}
-              </span>
-            </button>
-          </div>
+
           <div className="px-6 py-4 border-t border-graphite flex items-center justify-between shrink-0">
             <div className="text-caption text-ash font-inter-tight">
-              {t('common.step', 'Passo')} {currentStep + 1} {t('common.of', 'de')} {steps.length}
+              {t('common.step', 'Step')} {currentStep + 1} {t('common.of', 'of')} {steps.length}
             </div>
 
             <div className="flex items-center gap-2">
@@ -406,7 +369,7 @@ export function ExportGuideModal({
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-graphite hover:bg-iron border border-iron rounded-md text-note text-chalk font-inter-tight font-medium transition-colors cursor-pointer"
                 >
                   <ChevronLeft size={14} />
-                  <span>{t('common.back', 'Voltar')}</span>
+                  <span>{t('common.back', 'Back')}</span>
                 </button>
               )}
 
@@ -415,7 +378,7 @@ export function ExportGuideModal({
                   onClick={nextStep}
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-signal-lime text-black rounded-md text-note font-inter-tight font-semibold glow-lime hover:brightness-110 transition-all cursor-pointer"
                 >
-                  <span>{t('common.next', 'Próximo')}</span>
+                  <span>{t('common.next', 'Next')}</span>
                   <ChevronRight size={14} />
                 </button>
               ) : (
@@ -424,7 +387,7 @@ export function ExportGuideModal({
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-signal-lime text-black rounded-md text-note font-inter-tight font-semibold glow-lime hover:brightness-110 transition-all cursor-pointer"
                 >
                   <Check size={14} />
-                  <span>{t('common.finish', 'Concluir')}</span>
+                  <span>{t('common.finish', 'Finish')}</span>
                 </button>
               )}
             </div>

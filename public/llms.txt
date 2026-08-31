@@ -60,7 +60,7 @@ GitAscii transforms boring markdown profiles into aesthetic, interactive develop
 Traditional cards require long URL query strings that are difficult to customize and preview. GitAscii provides a full visual UI, instant real-time live preview, custom ASCII art dithering, and decoupled edge rendering for ultra-low latency under GitHub Camo CDN.
 
 ### Is GitAscii free to use?
-Yes, GitAscii is 100% free and open-source under the MIT License, with no watermarks or required paywalls.
+Yes, GitAscii is 100% free and open-source under the GNU General Public License v3.0 (GPLv3), with no watermarks or required paywalls.
 
 ### How does GitAscii handle GitHub Camo image caching?
 GitAscii serves appropriate HTTP Cache-Control headers (`public, max-age=14400, s-maxage=14400, stale-while-revalidate=86400`) ensuring stats remain fresh without causing GitHub Camo timeout errors.

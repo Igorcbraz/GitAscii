@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import React, { useEffect, useRef, useState } from 'react'
 
 import type { WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 function easeOutQuart(t: number): number {
   return 1 - Math.pow(1 - t, 4)
@@ -95,6 +96,9 @@ export function GitFutCardItem({ item, onAdd, onHover, onLeave }: GitFutCardItem
       <div
         role="button"
         tabIndex={0}
+        draggable
+        onDragStart={(e) => handleWidgetDragStart(e, item)}
+        onDragEnd={handleWidgetDragEnd}
         onClick={() => onAdd(item.id)}
         data-testid="add-widget-gitfut-card"
         onMouseEnter={handleMouseEnter}

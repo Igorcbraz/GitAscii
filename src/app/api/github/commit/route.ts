@@ -154,6 +154,18 @@ export async function POST(request: Request) {
       }
     }
 
+    const authorName = session.name || session.username
+    const authorEmail = session.email || `${session.username}@users.noreply.github.com`
+    const coAuthorTrailer = `\n\nCo-authored-by: ${authorName} <${authorEmail}>`
+    const commitAuthor = {
+      name: authorName,
+      email: authorEmail,
+    }
+    const commitCommitter = {
+      name: 'gitascii[bot]',
+      email: '169212000+gitascii[bot]@users.noreply.github.com',
+    }
+
     if (isDefaultProfile) {
       const readmeRes = await fetch(
         API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
@@ -182,9 +194,11 @@ export async function POST(request: Request) {
             method: 'PUT',
             headers,
             body: JSON.stringify({
-              message: 'Update profile README via GitAscii',
+              message: `Update profile README via GitAscii${coAuthorTrailer}`,
               content: Buffer.from(newContent, 'utf8').toString('base64'),
               sha,
+              author: commitAuthor,
+              committer: commitCommitter,
             }),
           }
         )
@@ -220,9 +234,11 @@ export async function POST(request: Request) {
             method: 'PUT',
             headers,
             body: JSON.stringify({
-              message: `Update ${profileSlug} section in README via GitAscii`,
+              message: `Update ${profileSlug} section in README via GitAscii${coAuthorTrailer}`,
               content: Buffer.from(updatedContent, 'utf8').toString('base64'),
               sha,
+              author: commitAuthor,
+              committer: commitCommitter,
             }),
           })
         }
@@ -236,9 +252,11 @@ export async function POST(request: Request) {
           method: 'PUT',
           headers,
           body: JSON.stringify({
-            message: `Update GitAscii layout export (${jsonFileName})`,
+            message: `Update GitAscii layout export (${jsonFileName})${coAuthorTrailer}`,
             content: Buffer.from(incomingJsonStr, 'utf8').toString('base64'),
             sha: jsonSha,
+            author: commitAuthor,
+            committer: commitCommitter,
           }),
         }
       )
@@ -251,7 +269,10 @@ export async function POST(request: Request) {
         invalidateProfileConfig(username, profileSlug)
       }
 
-      const hasSnakeWidget = exportData?.widgets?.some((w: any) => w.id === 'contribution-snake')
+      const hasSnakeWidget = exportData?.widgets?.some(
+        (w: { id?: string; widgetId?: string }) =>
+          w.id === 'contribution-snake' || w.widgetId === 'contribution-snake'
+      )
 
       if (hasSnakeWidget) {
         try {
@@ -307,9 +328,11 @@ jobs:
               method: 'PUT',
               headers,
               body: JSON.stringify({
-                message: 'Configure Contribution Snake GitHub Action',
+                message: `Configure Contribution Snake GitHub Action${coAuthorTrailer}`,
                 content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
                 sha: actionSha,
+                author: commitAuthor,
+                committer: commitCommitter,
               }),
               signal: AbortSignal.timeout(6000),
             }

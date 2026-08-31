@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import React from 'react'
 
 import type { WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 interface PokemonCardItemProps {
   item: WidgetCatalogItem
@@ -17,6 +18,9 @@ export function PokemonCardItem({ item, onAdd, onHover, onLeave }: PokemonCardIt
     <div
       role="button"
       tabIndex={0}
+      draggable
+      onDragStart={(e) => handleWidgetDragStart(e, item)}
+      onDragEnd={handleWidgetDragEnd}
       onClick={() => onAdd(item.id)}
       data-testid="add-widget-pokemon-card"
       onMouseEnter={(e) => onHover(item, e.currentTarget.getBoundingClientRect())}

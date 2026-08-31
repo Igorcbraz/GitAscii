@@ -6,6 +6,7 @@ import React from 'react'
 import { WIDGET_IDS } from '@/constants'
 
 import type { WidgetCatalogItem } from '../../../config/widgets'
+import { handleWidgetDragEnd, handleWidgetDragStart } from '../widgetDragHelper'
 
 interface AsciiProfileCardItemProps {
   item: WidgetCatalogItem
@@ -26,6 +27,9 @@ export function AsciiProfileCardItem({ item, onAdd, onHover, onLeave }: AsciiPro
   return (
     <div
       key={item.id}
+      draggable
+      onDragStart={(e) => handleWidgetDragStart(e, item)}
+      onDragEnd={handleWidgetDragEnd}
       onClick={() => onAdd(item.id)}
       data-testid={`add-widget-${item.id}`}
       onMouseEnter={(e) => onHover(item, e.currentTarget.getBoundingClientRect())}

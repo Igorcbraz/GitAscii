@@ -9,6 +9,7 @@ import { getWidgetMinSize } from '@/engine/core/WidgetRenderer'
 import { useI18n } from '@/i18n'
 
 import { useEditorStore } from '../../store/editorStore'
+import { useWidgetDragStore } from '../../store/widgetDragStore'
 import {
   type AlignmentGuide,
   CANVAS_WIDTH,
@@ -20,6 +21,7 @@ import {
 } from '../../utils/smartGuides'
 import { LayersPanel } from '../Sidebar/LayersPanel'
 import { CanvasAlignmentGuides } from './CanvasAlignmentGuides'
+import { CanvasDropGhost } from './CanvasDropGhost'
 import { CanvasMarquee } from './CanvasMarquee'
 import { WidgetNode } from './WidgetNode'
 
@@ -253,7 +255,7 @@ export function SVGCanvas() {
 
         const startY = parent.scrollTop
         const distance = targetY - startY
-        const duration = 400 // ms
+        const duration = 400
         let start: number | null = null
 
         const step = (timestamp: number) => {
@@ -727,10 +729,38 @@ export function SVGCanvas() {
     }
   }, [githubData, scheduleDragPreview])
 
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (
+      e.dataTransfer.types.includes('application/gitascii-widget') ||
+      e.dataTransfer.types.includes('text/plain')
+    ) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'copy'
+    }
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      const widgetId =
+        e.dataTransfer.getData('application/gitascii-widget') ||
+        e.dataTransfer.getData('text/plain')
+      if (!widgetId) return
+
+      e.preventDefault()
+      const rect = containerRef.current?.getBoundingClientRect()
+      const rawX = rect ? (e.clientX - rect.left) / zoom : 0
+      const rawY = rect ? (e.clientY - rect.top) / zoom : 0
+
+      useEditorStore.getState().addWidget(widgetId, { x: rawX, y: rawY })
+      useWidgetDragStore.getState().endDrag()
+    },
+    [zoom]
+  )
+
   if (!config || !githubData) {
     return (
       <div className="flex-1 h-full bg-carbon flex items-center justify-center text-ash">
-        Carregando canvas...
+        {t('editor.canvas.loading', 'Loading canvas...')}
       </div>
     )
   }
@@ -748,6 +778,8 @@ export function SVGCanvas() {
       id="svg-canvas-viewport"
       data-canvas-container="true"
       className="flex-1 h-full bg-carbon overflow-auto p-4 sm:p-8 flex flex-col items-center justify-start relative select-none touch-none"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       onMouseDown={(e) => {
         const target = e.target as HTMLElement
         if (
@@ -946,6 +978,8 @@ export function SVGCanvas() {
           </div>
         )}
 
+        <CanvasDropGhost containerRef={containerRef} zoom={zoom} />
+
         <div className="absolute inset-0 pointer-events-auto">
           <CanvasMarquee marquee={marquee && containerRef.current ? marquee : null} />
           {config.widgets.map((widget) => {
@@ -1137,10 +1171,7 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -right-1 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title={t(
-                        'editor.canvas.resize_width',
-                        'Arraste para ajustar largura (Width)'
-                      )}
+                      title={t('editor.canvas.resize_width', 'Drag to adjust width')}
                     >
                       <div className="w-1 h-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>
@@ -1176,10 +1207,7 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -bottom-1 left-0 right-0 h-2 cursor-ns-resize hover:bg-signal-lime/60 z-30 flex items-center justify-center"
-                      title={t(
-                        'editor.canvas.resize_height',
-                        'Arraste para ajustar altura (Height)'
-                      )}
+                      title={t('editor.canvas.resize_height', 'Drag to adjust height')}
                     >
                       <div className="h-1 w-6 bg-signal-lime rounded-[1px] shadow-sm" />
                     </div>
@@ -1215,7 +1243,7 @@ export function SVGCanvas() {
                         })
                       }}
                       className="absolute -right-1.5 -bottom-1.5 w-3.5 h-3.5 bg-signal-lime border-2 border-black rounded-xs cursor-nwse-resize hover:scale-125 transition-transform z-40 shadow-sm"
-                      title={t('editor.canvas.resize_drag', 'Arraste para redimensionar ambos')}
+                      title={t('editor.canvas.resize_drag', 'Drag to resize')}
                     />
                   </>
                 )}
@@ -1253,7 +1281,7 @@ export function SVGCanvas() {
                     <div className="text-center text-xs text-ash font-inter-tight mt-2">
                       {t(
                         'editor.canvas.edit_hint',
-                        'Enter para salvar, Shift+Enter para nova linha, Esc para cancelar'
+                        'Enter to save, Shift+Enter for new line, Esc to cancel'
                       )}
                     </div>
                   </div>
@@ -1274,7 +1302,7 @@ export function SVGCanvas() {
               <div className="flex items-center gap-2">
                 <Layers size={14} className="text-signal-lime" />
                 <span className="font-inter-tight text-eyebrow font-semibold text-chalk uppercase tracking-[0.12em]">
-                  {t('editor.canvas.layers', 'Camadas')}
+                  {t('editor.canvas.layers', 'Layers')}
                 </span>
                 <span className="text-caption font-jetbrains-mono bg-graphite text-ash px-1.5 py-0.5 rounded-xs">
                   {config.widgets.length}
@@ -1283,7 +1311,7 @@ export function SVGCanvas() {
               <button
                 onClick={() => setIsLayersOpen(false)}
                 className="text-ash hover:text-chalk p-1 rounded hover:bg-graphite transition-colors cursor-pointer"
-                title={t('editor.canvas.close_layers', 'Fechar painel de camadas')}
+                title={t('editor.canvas.close_layers', 'Close layers panel')}
               >
                 <X size={14} />
               </button>
@@ -1308,8 +1336,8 @@ export function SVGCanvas() {
           }`}
           title={
             isLayersOpen
-              ? t('editor.canvas.close_layers', 'Fechar camadas')
-              : t('editor.canvas.view_reorder_layers', 'Camadas (Ver e reordenar)')
+              ? t('editor.canvas.close_layers', 'Close layers panel')
+              : t('editor.canvas.view_reorder_layers', 'Layers (View and reorder)')
           }
         >
           <Layers size={20} className="transition-transform group-hover:scale-110" />

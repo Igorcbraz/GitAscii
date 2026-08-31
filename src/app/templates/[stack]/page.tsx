@@ -80,7 +80,7 @@ const stacks: Record<string, StackData> = {
     faqs: [
       {
         question: 'Is this Next.js template free?',
-        answer: 'Yes, 100% free and open-source under the MIT license.',
+        answer: 'Yes, 100% free and open-source under the GPLv3 license.',
       },
     ],
   },
