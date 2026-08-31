@@ -217,12 +217,17 @@ export async function duplicateProfile(
   const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const srcSlug = (sourceSlug || 'default').toLowerCase().trim()
-  const cleanSlug = target.slug
+  let cleanSlug = target.slug
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9_-]/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '')
+
+  while (cleanSlug.startsWith('-')) {
+    cleanSlug = cleanSlug.slice(1)
+  }
+  while (cleanSlug.endsWith('-')) {
+    cleanSlug = cleanSlug.slice(0, -1)
+  }
 
   if (!cleanSlug) {
     throw new Error('Valid target profile slug is required.')
