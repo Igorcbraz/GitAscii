@@ -229,8 +229,8 @@ After gathering information, create `.agents/product-marketing.md` with this str
   **Words to avoid:**
   **Glossary:**
   | Term | Meaning |
-  |------|---------|
-  | | |
+  | ---- | ------- |
+  |      |         |
 
 ## Brand Voice
 
@@ -246,9 +246,10 @@ After gathering information, create `.agents/product-marketing.md` with this str
 
 > "[quote]" — [who]
 > **Value themes:**
+>
 > | Theme | Proof |
-> |-------|-------|
-> | | |
+> | ----- | ----- |
+> |       |       |
 
 ## Goals
 
