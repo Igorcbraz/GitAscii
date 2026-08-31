@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.18.0](https://github.com/Igorcbraz/GitAscii/compare/v1.17.0...v1.18.0) (2026-08-31)
+
+
+### Features
+
+* **billing:** enable promotion codes and vouchers in stripe checkout ([a7d7030](https://github.com/Igorcbraz/GitAscii/commit/a7d703096f0cb32ca443e82763a53b6fca2939bf))
+
+
+### Bug Fixes
+
+* **pro:** avoid next/headers context error in subscribe route and fix stripe mock ([3656c3e](https://github.com/Igorcbraz/GitAscii/commit/3656c3eba1c3df99c0b610b132a4d41eef48e9a5))
+
 ## [1.17.0](https://github.com/Igorcbraz/GitAscii/compare/v1.16.0...v1.17.0) (2026-08-31)
 
 
