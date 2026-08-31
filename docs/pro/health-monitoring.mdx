@@ -1,0 +1,66 @@
+---
+title: 'Health Monitoring & Badges'
+description: 'Real-time uptime tracking, per-widget latency metrics, 24h error stats, and embeddable live SVG health badges.'
+---
+
+# Health Monitoring & Live Badges
+
+**GitAscii Pro** provides a dedicated, real-time **Health Monitoring Console** (`/pro/health`) and dynamic status badges to monitor the availability, render latency, and error rates of every widget embedded across your GitHub README profiles.
+
+---
+
+## 1. Health Statuses & Health Score
+
+Every profile and widget is continuously evaluated and assigned a normalized **Health Score (0–100%)** alongside one of three operational states:
+
+| Status        | Health Score Range | Indicator | Description                                                                                                                |
+| :------------ | :----------------- | :-------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `operational` | **95% – 100%**     | Green     | All external APIs and widget renderers are responding within expected latency thresholds (< 50ms) with zero recent errors. |
+| `warning`     | **70% – 94%**      | Amber     | Intermittent upstream errors or elevated render latencies detected in the last 24 hours.                                   |
+| `failed`      | **< 70%**          | Red       | Consecutive widget render failures or persistent third-party API outages requiring resolution.                             |
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ OVERALL HEALTH SCORE : 99.4%                 [ OPERATIONAL ]│
+├─────────────────────────────────────────────────────────────┤
+│ 24h Total Renders: 14,820   │ Avg Latency: 22.4ms           │
+│ Errors Last 24h: 2          │ Active Incidents: 0           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Per-Widget Latency & Success Tracking
+
+Within the Health Console, each widget configuration is individually tracked:
+
+- **Average Render Latency**: Execution time (in milliseconds) required to fetch data and generate ASCII graphics.
+- **Last Render Duration**: Latency of the most recent profile request.
+- **24-Hour Success Rate**: Calculated as:
+  $$\text{Success Rate} = \left(\frac{\text{Successful Renders}}{\text{Total Requests}}\right) \times 100$$
+- **Last Error Diagnostics**: If a widget encounters a failure, the exact error type, message, timestamp, and payload details are linked directly for rapid debugging.
+
+---
+
+## 3. Embeddable Live SVG Health Badge
+
+You can embed a live, real-time SVG health badge directly in your GitHub profile or project documentation:
+
+```markdown
+![GitAscii Profile Health](https://gitascii.com/api/username/health-badge)
+```
+
+### Badge Features:
+
+- **Dynamic Render**: Renders directly as a crisp vector SVG badge matching standard shield/badge aesthetics.
+- **Real-time Status**: Automatically reflects live uptime and health score (`operational`, `warning`, `degraded`).
+- **Zero Configuration**: Generated instantly for your username without complex webhook setups.
+
+---
+
+## 4. Health Incident Simulator
+
+To test alert pipelines and verify how degraded widgets affect your profile:
+
+- Use the built-in **Health Simulator** in `/pro/health` or via `POST /api/pro/health/simulate`.
+- Simulate transient timeout errors, rate-limit drops, and upstream service recoveries without affecting your production visitors.

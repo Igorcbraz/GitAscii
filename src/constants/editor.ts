@@ -972,7 +972,6 @@ export interface GlobalColorTheme {
   secondary: string
   text: string
   border: string
-  // terminal specific fields
   headerColor?: string
   labelColor?: string
   dotColor?: string

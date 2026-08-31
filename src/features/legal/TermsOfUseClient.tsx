@@ -1,12 +1,13 @@
 'use client'
 
-import React from 'react'
+import Link from 'next/link'
 
 import {
   APP_DOMAIN,
   APP_URL,
   EXTERNAL_LINKS,
   LEGAL_LAST_UPDATED,
+  SUPPORT_EMAIL,
   TERMS_ACCEPTABLE_USE_RULES,
 } from '@/constants'
 import { Footer } from '@/features/landing/components/Footer'
@@ -133,44 +134,76 @@ export function TermsOfUseClient() {
 
           <section>
             <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
-              4. Disclaimer of Warranties
-            </h2>
-            <p className="uppercase text-note font-jetbrains-mono text-ash leading-relaxed">
-              THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE,&rdquo; WITHOUT
-              WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-              OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT
-              SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-              LIABILITY.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
-              5. Third-Party Services &amp; APIs
+              4. GitAscii Pro &amp; Payments
             </h2>
             <p>
-              The Service depends on third-party APIs, primarily GitHub&rsquo;s public REST and
-              GraphQL APIs. We are not responsible for:
+              GitAscii offers an optional paid upgrade (&ldquo;GitAscii Pro&rdquo;). GitAscii Pro is
+              sold as a lifetime digital license for an individual GitHub account.
             </p>
             <ul className="list-none mt-4 space-y-2">
               <li className="flex gap-3 items-start">
                 <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
-                <span>Downtime or rate-limiting caused by GitHub API availability.</span>
+                <span>
+                  <strong className="text-chalk">Billing:</strong> Payments are processed securely
+                  by Stripe. Prices are clearly displayed before purchase in BRL or USD depending on
+                  your region.
+                </span>
               </li>
               <li className="flex gap-3 items-start">
                 <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
-                <span>Accuracy of statistics provided by external GitHub endpoints.</span>
-              </li>
-              <li className="flex gap-3 items-start">
-                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
-                <span>Third-party widget availability or content.</span>
+                <span>
+                  <strong className="text-chalk">Refunds &amp; 14-Day Guarantee:</strong> All
+                  purchases are backed by our 14-day 100% money-back guarantee. Please review our
+                  full{' '}
+                  <Link href="/refund" className="text-signal-lime hover:underline">
+                    Refund &amp; Return Policy
+                  </Link>
+                  .
+                </span>
               </li>
             </ul>
           </section>
 
           <section>
             <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
-              6. Limitation of Liability
+              5. Disclaimer of Warranties
+            </h2>
+            <p className="uppercase text-note font-jetbrains-mono text-ash leading-relaxed">
+              THE SERVICE IS PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE,&rdquo; WITHOUT
+              WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
+              MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
+              6. Third-Party Services &amp; APIs
+            </h2>
+            <p>
+              The Service depends on third-party APIs, primarily GitHub&rsquo;s public REST and
+              GraphQL APIs, and Stripe for payments. We are not responsible for:
+            </p>
+            <ul className="list-none mt-4 space-y-2">
+              <li className="flex gap-3 items-start">
+                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
+                <span>GitHub API rate limits, outages, or changes to their service.</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
+                <span>
+                  External image proxy caching behaviors (e.g., GitHub&rsquo;s Camo proxy).
+                </span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-signal-lime font-jetbrains-mono mt-0.5 shrink-0">→</span>
+                <span>Inaccuracies in data returned by third-party APIs.</span>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
+              7. Limitation of Liability
             </h2>
             <p>
               To the fullest extent permitted by applicable law, in no event shall GitAscii, its
@@ -182,7 +215,7 @@ export function TermsOfUseClient() {
 
           <section>
             <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
-              7. Governing Law
+              8. Governing Law
             </h2>
             <p>
               These Terms shall be governed and construed in accordance with the laws applicable to
@@ -193,18 +226,17 @@ export function TermsOfUseClient() {
 
           <section>
             <h2 className="font-pt-serif font-light text-subheading text-chalk mb-4">
-              8. Contact &amp; Community
+              9. Contact &amp; Support
             </h2>
             <p>
-              If you have questions about these Terms, you can open an issue on our GitHub
-              repository:{' '}
-              <a
-                href={`${EXTERNAL_LINKS.GITHUB_REPO}/issues`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-signal-lime hover:brightness-110 transition-colors"
-              >
-                {EXTERNAL_LINKS.GITHUB_REPO}/issues ↗
+              If you have questions about these Terms, need billing assistance, or wish to report an
+              issue, please visit our{' '}
+              <Link href="/support" className="text-signal-lime hover:underline">
+                Support Center
+              </Link>{' '}
+              or email{' '}
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-signal-lime hover:underline">
+                {SUPPORT_EMAIL}
               </a>
               .
             </p>

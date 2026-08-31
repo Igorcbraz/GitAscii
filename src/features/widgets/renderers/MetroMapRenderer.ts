@@ -56,7 +56,6 @@ export function renderMetroMap(
   const height = Math.max(100, Number(widget?.size?.height) || 400)
   const cfg = widget?.config || {}
 
-  // Palette from examples-output metro-output
   const bg = '#0E1420'
   const ink = '#F2F5FA'
   const muted = '#7C8698'
@@ -70,21 +69,14 @@ export function renderMetroMap(
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
   const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
-  // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
   const sortBy = (cfg.repoSortBy as string) || 'stars'
   const maxRepos = Number(cfg.maxRepos) || 12
 
   if (layoutType === 'hero') {
-    // 1200x360 layout adapted for widgets width x height
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(12, maxRepos))
     const totalInterchanges = layers.length
     const titleVal = escapeXml(customTitle).toLowerCase()
-
-    // Place stations along the three lines
-    // Line A (accent): M40 236H240L300 176H760L830 246H1094
-    // Line B (purple): M40 296H420L500 216H972
-    // Line C (secondary): M40 186H140L220 266H600L670 196H1094
 
     const stationsHtml = layers
       .map((layer, index) => {
@@ -132,7 +124,7 @@ export function renderMetroMap(
           .train{stroke-dasharray:1 99;animation:train 7s linear infinite}
           @keyframes flow{to{stroke-dashoffset:-260}}@keyframes train{to{stroke-dashoffset:-100}}
         </style>
-        
+
         <rect width="1200" height="360" fill="${bg}"/>
 
         <!-- Header -->
@@ -150,7 +142,7 @@ export function renderMetroMap(
         <path d="M40 236H240L300 176H760L830 246H1094" fill="none" stroke="${primary}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
         <path d="M40 296H420L500 216H972" fill="none" stroke="${purpleLine}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
         <path d="M40 186H140L220 266H600L670 196H1094" fill="none" stroke="${secondary}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
-        
+
         <!-- Flow animations -->
         <path class="flow" d="M40 236H240L300 176H760L830 246H1094" fill="none" stroke="${bg}" stroke-width="3" stroke-linecap="round" opacity=".55"/>
         <path class="train" style="animation-duration:6.2s" pathLength="100" d="M40 236H240L300 176H760L830 246H1094" fill="none" stroke="${ink}" stroke-width="5" stroke-linecap="round"/>
@@ -171,10 +163,8 @@ export function renderMetroMap(
       </svg>
     `
   } else {
-    // 1200x330 Closed-loop metro network map from examples-output/metro-output/assets/closed-loop-dark.svg
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(15, maxRepos))
 
-    // Place station circles along the tracks
     const stationsHtml = layers
       .map((layer, index) => {
         let cx = 430
@@ -250,7 +240,7 @@ export function renderMetroMap(
         <!-- Line Tracks -->
         <path d="M84 130H130L174.0 86H1150" fill="none" stroke="${primary}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
         <path class="train" style="animation-duration:6.8s" pathLength="100" d="M84 130H130L174.0 86H1150" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/>
-        
+
         <path d="M84 146H170L276.0 252H1150" fill="none" stroke="${purpleLine}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
         <path class="train" style="animation-duration:7.7s;animation-delay:-1.4s" pathLength="100" d="M84 146H170L276.0 252H1150" fill="none" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/>
 
@@ -269,10 +259,10 @@ export function renderMetroMap(
           <text x="42" y="256" class="sans" font-size="8" font-weight="700" letter-spacing="2" fill="${muted}">LINE DIRECTORY</text>
           <rect x="42" y="262" width="18" height="6" rx="3" fill="${primary}"/>
           <text x="68" y="270" class="sans" font-size="9" font-weight="700" fill="${ink}">Core loop</text>
-          
+
           <rect x="42" y="278" width="18" height="6" rx="3" fill="${purpleLine}"/>
           <text x="68" y="286" class="sans" font-size="9" font-weight="700" fill="${ink}">Rust systems</text>
-          
+
           <rect x="42" y="294" width="18" height="6" rx="3" fill="${secondary}"/>
           <text x="68" y="302" class="sans" font-size="9" font-weight="700" fill="${ink}">Agent tooling</text>
         </g>

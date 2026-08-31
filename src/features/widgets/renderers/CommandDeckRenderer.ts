@@ -55,7 +55,6 @@ export function renderCommandDeck(
   const height = Math.max(100, Number(widget?.size?.height) || 400)
   const cfg = widget?.config || {}
 
-  // Industrial palette values
   const bg1 = '#07131A'
   const bg2 = '#10141F'
   const panel = '#0C1C24'
@@ -69,13 +68,11 @@ export function renderCommandDeck(
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
   const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
-  // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
   const sortBy = (cfg.repoSortBy as string) || 'stars'
   const maxRepos = Number(cfg.maxRepos) || 8
 
   if (layoutType === 'hero') {
-    // 1200x360 layout adapted for widgets width x height
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(8, maxRepos))
     const flagships = layers.slice(0, 3)
     const userTitle = escapeXml(customTitle).toUpperCase()
@@ -154,7 +151,7 @@ export function renderCommandDeck(
 
         <rect width="1200" height="360" rx="18" fill="url(#industrial-bg-${widget.instanceId})"/>
         <rect width="1200" height="360" rx="18" fill="url(#industrial-grid-${widget.instanceId})" opacity=".68"/>
-        
+
         <path d="M0 1H1200" stroke="url(#industrial-accent-${widget.instanceId})" stroke-width="2"/>
         <path d="M720 44V344" stroke="${border}"/>
         <path d="M730 44V344" stroke="#17313C"/>
@@ -222,7 +219,6 @@ export function renderCommandDeck(
       </svg>
     `
   } else {
-    // 1200x330 Closed-loop layout matching execution deck/closed-loop-dark.svg
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(8, maxRepos))
     const userTitle = escapeXml(customTitle).toUpperCase()
     const activeCount = String(layers.length).padStart(2, '0')
@@ -230,7 +226,7 @@ export function renderCommandDeck(
     const listModules = layers
       .map((layer, index) => {
         const isBottom = index % 2 !== 0
-        const slot = Math.floor(index / 2) // 0, 1, 2, 3
+        const slot = Math.floor(index / 2)
         const x = 100 + slot * 333.3
 
         const yLine = isBottom ? 'V 208' : 'V 122'
@@ -286,10 +282,10 @@ export function renderCommandDeck(
 
         <rect width="1200" height="330" rx="18" fill="url(#industrial-bg-${widget.instanceId})"/>
         <rect width="1200" height="330" rx="18" fill="url(#industrial-grid-${widget.instanceId})" opacity=".68"/>
-        
+
         <text x="28" y="33" class="label" fill="${primary}">${userTitle} / EXECUTION DECK</text>
         <text x="1170" y="33" text-anchor="end" class="micro" fill="${muted}">${activeCount} CHANNELS · STATUS READY</text>
-        
+
         <path d="M42 164H1158" stroke="#2B4A57" stroke-width="5"/>
         <path class="flow" d="M42 164H1158" stroke="url(#industrial-accent-${widget.instanceId})" stroke-width="2"/>
         <path d="M42 151V177M1158 151V177" stroke="${primary}"/>
@@ -299,7 +295,7 @@ export function renderCommandDeck(
 
         <rect x="542" y="153" width="116" height="22" rx="4" fill="${bg1}" stroke="${border}"/>
         <text x="600" y="168" text-anchor="middle" font-size="8" font-weight="700" letter-spacing="2" fill="${muted}">COMMAND BUS</text>
-        
+
         <rect x="1" y="1" width="1198" height="328" rx="18" fill="none" stroke="${secondary}" stroke-opacity=".6"/>
       </svg>
     `

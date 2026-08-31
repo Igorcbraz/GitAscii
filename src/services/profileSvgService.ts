@@ -16,6 +16,7 @@ export interface ProfileSvgRequestOptions {
   theme?: 'dark' | 'light'
   template?: string | null
   widgets?: string[] | null
+  isExplicitSlug?: boolean
 }
 
 interface SvgCacheEntry {
@@ -26,7 +27,7 @@ interface SvgCacheEntry {
 }
 
 const svgResponseCache = new Map<string, SvgCacheEntry>()
-const SVG_CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes cache
+const SVG_CACHE_TTL_MS = 10 * 60 * 1000
 const MAX_CACHE_ENTRIES = 300
 
 function getCachedSvg(key: string): SvgCacheEntry | null {
@@ -86,8 +87,6 @@ export async function generateProfileSvgResponse(
   const startTime = Date.now()
   const rawUsername = options.username || ''
   const username = rawUsername.replace(/[^a-zA-Z0-9_-]/g, '')
-  const rawSlug = options.profileSlug || 'default'
-  const profileSlug = rawSlug.replace(/[^a-zA-Z0-9_-]/g, '') || 'default'
 
   if (!username) {
     return new NextResponse('Username is required', { status: 400 })
@@ -95,6 +94,32 @@ export async function generateProfileSvgResponse(
 
   try {
     const { searchParams } = new URL(request.url)
+    const previewDateParam = searchParams.get('preview_date') || searchParams.get('date')
+    const timezoneParam = searchParams.get('timezone') || searchParams.get('tz')
+
+    let profileSlug = (options.profileSlug || 'default').replace(/[^a-zA-Z0-9_-]/g, '') || 'default'
+    let isDynamicResolved = false
+
+    if (!options.isExplicitSlug && (!options.profileSlug || options.profileSlug === 'default')) {
+      try {
+        const { evaluateDynamicProfile } = await import('@/features/pro/server/dynamicRulesStore')
+        const dynamicResult = await evaluateDynamicProfile(username, {
+          simulatedDate: previewDateParam || undefined,
+          simulatedTimezone: timezoneParam || undefined,
+          requestHeaders: request.headers,
+        })
+        if (dynamicResult?.selectedProfileSlug) {
+          profileSlug = dynamicResult.selectedProfileSlug
+          isDynamicResolved = !dynamicResult.isFallback
+        }
+      } catch (dynErr) {
+        console.warn(
+          '[ProfileSvgService] Dynamic profile evaluation failed, using default:',
+          dynErr
+        )
+      }
+    }
+
     const queryTheme = searchParams.get('theme')
     const theme: 'dark' | 'light' =
       queryTheme === 'light' || queryTheme === 'dark' ? queryTheme : options.theme || 'dark'
@@ -116,6 +141,7 @@ export async function generateProfileSvgResponse(
     let svgContent: string
     let etag: string
     let hasErrors: boolean
+    let renderedWidgetIds: string[] = []
 
     const cachedEntry = getCachedSvg(cacheKey)
     if (cachedEntry) {
@@ -160,9 +186,10 @@ export async function generateProfileSvgResponse(
         }
       }
 
+      renderedWidgetIds = config.widgets.map((w: any) => w.widgetId || 'widget')
+
       const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
       const embedResult = await embedExternalImages(rawSvgContent)
-      // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
       svgContent = sanitizeSvg(embedResult.svg)
       etag = computeEtag(svgContent)
       hasErrors = embedResult.hasErrors
@@ -176,15 +203,17 @@ export async function generateProfileSvgResponse(
     }
     const ifNoneMatch = request.headers.get('if-none-match')
 
-    // Healthy cache: 1 hour fresh, 2 hours stale-while-revalidate
-    // Degraded/error cache: 5 minutes fresh, 10 minutes stale-while-revalidate
     const cacheControl = hasErrors
-      ? 'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
-      : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200'
+      ? 'public, max-age=0, s-maxage=120, stale-while-revalidate=300'
+      : isDynamicResolved
+        ? 'public, max-age=0, s-maxage=60, stale-while-revalidate=180'
+        : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200'
 
     const cdnCacheControl = hasErrors
-      ? 'public, s-maxage=300, stale-while-revalidate=600'
-      : 'public, s-maxage=3600, stale-while-revalidate=7200'
+      ? 'public, s-maxage=120, stale-while-revalidate=300'
+      : isDynamicResolved
+        ? 'public, s-maxage=60, stale-while-revalidate=180'
+        : 'public, s-maxage=3600, stale-while-revalidate=7200'
 
     const headers: Record<string, string> = {
       'Content-Type': 'image/svg+xml; charset=utf-8',
@@ -200,7 +229,6 @@ export async function generateProfileSvgResponse(
     const renderTimeMs = Date.now() - startTime
     const viewerMeta = parseViewerMetadata(request)
 
-    // Non-blocking telemetry ingestion
     try {
       const metricPayload = {
         username,
@@ -212,21 +240,54 @@ export async function generateProfileSvgResponse(
         userAgent: viewerMeta.userAgent,
         referrer: viewerMeta.referrer,
         country: viewerMeta.country,
+        region: viewerMeta.region,
+        city: viewerMeta.city,
+        timezone: viewerMeta.timezone,
+        continent: viewerMeta.continent,
+        language: viewerMeta.language,
         ip: viewerMeta.ip,
+        statusCode: isCacheHit ? 304 : 200,
         timestamp: new Date().toISOString(),
       }
 
-      if (typeof after === 'function') {
-        after(async () => {
-          await recordProfileView(metricPayload)
-        })
-      } else {
-        // Fallback fire-and-forget
-        void recordProfileView(metricPayload)
+      const telemetryHandler = async () => {
+        await recordProfileView(metricPayload)
+
+        try {
+          const { recordRenderTelemetry } =
+            await import('@/features/pro/server/healthMonitoringStore')
+          await recordRenderTelemetry({
+            username,
+            profileSlug,
+            durationMs: renderTimeMs,
+            statusCode: isCacheHit ? 304 : 200,
+            hasErrors,
+            renderedWidgets:
+              renderedWidgetIds.length > 0
+                ? renderedWidgetIds
+                : ['avatar-card', 'stats-cards', 'streak-graph'],
+            widgetErrors: hasErrors
+              ? [
+                  {
+                    username,
+                    profileSlug,
+                    widgetId: 'external-widget',
+                    widgetName: 'External Dynamic Embed',
+                    errorType: 'FETCH_TIMEOUT',
+                    message: 'External widget or image asset timed out or failed to load',
+                  },
+                ]
+              : undefined,
+          })
+        } catch {}
       }
-    } catch {
-      // Ignore background telemetry errors
-    }
+
+      if (typeof after === 'function') {
+        after(telemetryHandler)
+      } else {
+        void telemetryHandler()
+      }
+    } catch {}
 
     if (isCacheHit) {
       return new NextResponse(null, {
@@ -235,7 +296,6 @@ export async function generateProfileSvgResponse(
       })
     }
 
-    // codeql[js/reflected-xss] Content is sanitized by sanitizeSvg
     return new NextResponse(svgContent, {
       status: 200,
       headers,

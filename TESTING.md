@@ -26,9 +26,43 @@ gitascii/
 │   ├── main.ts              # Configuração do Storybook (addons, vite, staticDirs)
 │   └── preview.tsx          # Decorator de i18n e importação de globals.css
 ├── e2e/
-│   └── editor.spec.ts       # Testes E2E cobrindo os 7 fluxos críticos
+│   ├── editor.spec.ts       # Testes E2E cobrindo os fluxos do editor
+│   ├── specs/
+│   │   ├── explore.spec.ts  # Testes E2E da galeria da comunidade
+│   │   ├── landing.spec.ts  # Testes E2E da landing page e auth
+│   │   ├── pro.spec.ts      # Testes E2E completos da Área Pro e Dashboards
+│   │   ├── templates.spec.ts# Testes E2E de templates
+│   │   └── widgets.spec.ts  # Testes E2E de catálogo de widgets
 ├── playwright.config.ts     # Configuração de portas, navegador e webServer local
 ├── TESTING.md               # Este arquivo de documentação
+├── COVERAGE.md              # Matriz completa de cobertura de testes
+├── src/features/pro/
+│   ├── pro.test.ts          # Testes de integração do ecossistema Pro
+│   ├── server/
+│   │   ├── analyticsStore.test.ts
+│   │   ├── errorTrackerStore.test.ts
+│   │   ├── profileManagerStore.test.ts
+│   │   ├── entitlements.test.ts
+│   │   └── emailLogStore.test.ts
+│   ├── api/
+│   │   └── proRoutes.test.ts# Testes unitários de todas as rotas /api/pro/*
+│   └── components/
+│       ├── ProBadge.stories.tsx
+│       ├── ProStatCard.stories.tsx
+│       ├── ProEmptyState.stories.tsx
+│       ├── CountryFlag.stories.tsx
+│       ├── ConfirmDialog.stories.tsx
+│       ├── ProfileScopeSelect.stories.tsx
+│       ├── ProHeader.stories.tsx
+│       ├── ProSidebar.stories.tsx
+│       ├── charts/Charts.stories.tsx
+│       ├── overview/OverviewDashboard.stories.tsx
+│       ├── analytics/AnalyticsDashboard.stories.tsx
+│       ├── reports/ReportsDashboard.stories.tsx
+│       ├── reports/ShareReportModal.stories.tsx
+│       ├── errors/WidgetErrorsDashboard.stories.tsx
+│       ├── emails/EmailNotificationsDashboard.stories.tsx
+│       └── profiles/ProfilesDashboard.stories.tsx
 └── src/features/editor/components/
     ├── stories/
     │   └── mockData.ts      # Dados compartilhados de mock para os stories

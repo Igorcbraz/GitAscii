@@ -1,0 +1,70 @@
+---
+title: 'Multi-Profile Architecture'
+description: 'Manage multiple isolated profile configurations, embed endpoints, and segregated telemetry.'
+---
+
+# Multi-Profile Architecture
+
+Many developers want different README designs for different contexts:
+
+- A rich, comprehensive dashboard for their primary personal GitHub profile (`default`).
+- A sleek, minimal monochrome widget for technical project READMEs (`minimal`).
+- A specialized metrics-only card for client proposals or portfolio embeds (`stats`).
+
+**GitAscii Pro** provides native support for **Multiple Profiles** with completely segregated telemetry streams and independent embed URLs.
+
+---
+
+## 1. Embed URL Structure & Slug Routing
+
+Each profile is identified by a URL slug (e.g. `default`, `minimal`, `dark-mode`, `compact`).
+
+### URL Formats:
+
+```markdown
+<!-- Primary / Default Profile -->
+
+![GitAscii Profile](https://gitascii.com/api/username/default)
+
+<!-- Custom Profile Slug (e.g. minimal) -->
+
+![GitAscii Minimal](https://gitascii.com/api/username/minimal)
+
+<!-- Direct Root Fallback (Serves default profile) -->
+
+![GitAscii Profile](https://gitascii.com/api/username)
+```
+
+---
+
+## 2. Segregated Telemetry & Redis Keys
+
+Every view, unique visitor, error event, and dimension metric is scoped by both `username` and `slug`:
+
+```
+gitascii:pro:{username}:{slug}:daily:{YYYY-MM-DD}  -> Daily views & cache hits
+gitascii:pro:{username}:{slug}:hll:{YYYY-MM-DD}    -> HyperLogLog unique visitors
+gitascii:pro:{username}:{slug}:hourly:{YYYY-MM-DD} -> 24-hour histogram
+gitascii:pro:{username}:{slug}:dim:...             -> Technology & geography breakdowns
+```
+
+### Global vs. Scoped Analytics
+
+In the GitAscii Pro dashboard (`/pro/analytics`):
+
+- **"All Profiles" Scope**: Combines metrics across all your profiles to give an aggregated overview of your developer reach.
+- **Specific Profile Scope**: Filters charts, heatmaps, and error logs exclusively for the selected profile slug.
+
+---
+
+## 3. Managing Profiles in the Dashboard
+
+In `/pro/profiles`, you can:
+
+- **Create New Profile**: Assign a custom slug, friendly name, and description.
+- **Copy Embed Markdown**: Instantly copy formatted `![GitAscii](...)` markdown snippets with one click.
+- **Set Default Profile**: Choose which configuration is returned when someone accesses the root endpoint `/api/username`.
+- **Dynamic Rules & Scheduling**: Configure automated rule switching (time-of-day, day-of-week, event dates) with the visual Rule Simulator.
+- **Version History & Rollback**: Browse automated revision snapshots, view widget counts and timestamps, and rollback with one click.
+- **Duplicate Profiles**: Clone an existing profile structure to iterate safely on new design experiments.
+- **Safe Deletion**: Delete obsolete profiles (retaining data safety safeguards for active default profiles).

@@ -72,13 +72,11 @@ function calculateStreaks(weeks: any[]): StreakStats {
     }
   }
 
-  // Calculate current streak from end
   let cs = 0
   const reversedDays = [...days].reverse()
   let foundStart = false
   for (let i = 0; i < reversedDays.length; i++) {
     const d = reversedDays[i]
-    // Allow today or yesterday as start
     if (i <= 1 && d.count === 0 && !foundStart) {
       continue
     }
@@ -125,26 +123,22 @@ export function renderAsciiHeatmap(
 
   const username = data?.user?.login || 'user'
 
-  // GitHub contribution weeks or mock fallback
   const weeks = Array.isArray(data?.contributions?.weeks) ? data.contributions.weeks : []
 
-  // Calculate stats
   const stats = calculateStreaks(weeks)
 
-  // Layout parameters dynamically scaled based on width
   const PAD = 22
   const LEFT_LABEL_W = 30
   const TOP_LABEL_H = 20
   const TITLEBAR_H = 30
 
   const availableGridWidth = Math.max(100, width - PAD * 2 - LEFT_LABEL_W)
-  const numWeeks = Math.max(weeks.length, 53) // default to 53 weeks
+  const numWeeks = Math.max(weeks.length, 53)
 
   const CELL = availableGridWidth / (1.25 * (numWeeks - 1) + 1)
   const GAP = CELL * 0.25
   const STEP = CELL + GAP
 
-  // Colors
   const PALETTE = (cfg.palette as string[]) || [
     '#161b22',
     '#0e4429',
@@ -161,13 +155,11 @@ export function renderAsciiHeatmap(
   const greenColor = '#39d353'
   const goldColor = '#f2cc60'
 
-  // Animations
   const COL_T = 0.018
   const ROW_T = 0.045
   const CELL_DUR = 0.42
   const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
 
-  // Build grid columns from weeks
   const grid: Array<Array<{ date: string; count: number; level: number } | null>> = weeks.map(
     (week) => {
       const col: Array<{ date: string; count: number; level: number } | null> = new Array(7).fill(
@@ -177,7 +169,7 @@ export function renderAsciiHeatmap(
       daysList.forEach((day: any) => {
         if (!day?.date) return
         const date = new Date(day.date + 'T00:00:00')
-        const weekday = isNaN(date.getTime()) ? 0 : date.getDay() // 0 is Sunday
+        const weekday = isNaN(date.getTime()) ? 0 : date.getDay()
         col[weekday] = {
           date: day.date,
           count: Number(day.contributionCount) || 0,
@@ -188,7 +180,6 @@ export function renderAsciiHeatmap(
     }
   )
 
-  // Extract month labels
   const monthLabels: Array<{ ci: number; label: string }> = []
   const seenMonths = new Set<string>()
   grid.forEach((column, ci) => {
@@ -234,7 +225,6 @@ export function renderAsciiHeatmap(
       `</defs>`
   )
 
-  // Background
   parts.push(
     `<rect width="${width}" height="${height}" rx="${globalStyles.borderRadius || 12}" fill="url(#heatmap-bg-${widget.instanceId})"/>`
   )
@@ -246,7 +236,6 @@ export function renderAsciiHeatmap(
     `<line x1="0" y1="${TITLEBAR_H}" x2="${width}" y2="${TITLEBAR_H}" stroke="${frameColor}" stroke-opacity="0.35"/>`
   )
 
-  // Title bar dots & title
   const dotcols = ['#ff5f56', '#ffbd2e', '#27c93f']
   for (let i = 0; i < 3; i++) {
     parts.push(`<circle cx="${PAD + i * 16}" cy="${TITLEBAR_H / 2}" r="5" fill="${dotcols[i]}"/>`)
@@ -256,7 +245,6 @@ export function renderAsciiHeatmap(
       `text-anchor="middle">${escapeXml(username)}@github: ~/contributions --graph</text>`
   )
 
-  // Month labels
   monthLabels.forEach(({ ci, label }) => {
     const x = gridLeft + ci * STEP
     parts.push(
@@ -264,7 +252,6 @@ export function renderAsciiHeatmap(
     )
   })
 
-  // Weekday labels
   const weekdays = [
     { wi: 1, name: 'Mon' },
     { wi: 3, name: 'Wed' },
@@ -277,7 +264,6 @@ export function renderAsciiHeatmap(
     )
   })
 
-  // Contribution grid cells
   grid.forEach((column, ci) => {
     const gx = gridLeft + ci * STEP
     column.forEach((cell, ri) => {
@@ -298,44 +284,17 @@ export function renderAsciiHeatmap(
     })
   })
 
-  // Legend
   const legY = gridTop + artH + 6
-  // Align "More" to the right edge (width - PAD)
   const rightBound = width - PAD
-  // The text "More" takes about 28px of width. Let's use text-anchor="end" at rightBound.
-  // And the PALETTE boxes should finish just before the "More" text.
-  // Let's place "More" at x=rightBound (with text-anchor="end").
-  // Wait, if it has text-anchor="end" at rightBound, the text grows to the left.
-  // To keep it simple: Let's draw the legend components right-aligned:
-  // "More" text is anchored at rightBound. It needs some width. Let's say we set the text at rightBound,
-  // but if we anchor it to the end, it ends exactly at rightBound.
-  // So:
-  // [Less] [■][■][■][■][■][■] [More] (ends at rightBound)
-  // Let's define the position of the blocks relative to rightBound:
-  // "More" ends at rightBound. If we set text-anchor="start" for "More", we need to know where it starts.
-  // If we set text-anchor="end" for "More" at rightBound:
-  // parts.push(`<text x="${rightBound}" y="${(legY + CELL * 0.8).toFixed(1)}" fill="${mutedColor}" font-size="10" text-anchor="end">More</text>`)
-  // Then the blocks must end before the start of "More". "More" (at font-size 10) is roughly 26px wide.
-  // Let's leave a 6px gap, so the last block is at rightBound - 32.
-  // The blocks start at: rightBound - 32 - (PALETTE.length * STEP - GAP).
-  // Let's do this mathematically:
-  // Let lx_end = rightBound - 32
-  // We have PALETTE.length blocks, each of width CELL, with GAP between them.
-  // So the total width of the blocks is PALETTE.length * CELL + (PALETTE.length - 1) * GAP = PALETTE.length * STEP - GAP.
-  // So the first block start position lx = lx_end - (PALETTE.length * STEP - GAP).
-  // Then "Less" text will be placed before the first block. Let's anchor "Less" at text-anchor="end" with a 6px gap:
-  // x = lx - 6.
   const moreTextWidth = 28
   const textGap = 6
   const legendBlocksWidth = PALETTE.length * STEP - GAP
   const lx_start = rightBound - moreTextWidth - textGap - legendBlocksWidth
 
-  // Render "Less" text ending before blocks
   parts.push(
     `<text x="${lx_start - textGap}" y="${(legY + CELL * 0.8).toFixed(1)}" fill="${mutedColor}" font-size="10" text-anchor="end">Less</text>`
   )
 
-  // Render blocks
   let lx = lx_start
   PALETTE.forEach((color) => {
     parts.push(
@@ -344,12 +303,10 @@ export function renderAsciiHeatmap(
     lx += STEP
   })
 
-  // Render "More" text ending exactly at rightBound
   parts.push(
     `<text x="${rightBound}" y="${(legY + CELL * 0.8).toFixed(1)}" fill="${mutedColor}" font-size="10" text-anchor="end">More</text>`
   )
 
-  // Streak details footer
   const sepY = legY + CELL + 14
   parts.push(
     `<line x1="0" y1="${sepY}" x2="${width}" y2="${sepY}" stroke="${frameColor}" stroke-opacity="0.25"/>`

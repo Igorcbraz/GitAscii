@@ -55,7 +55,6 @@ export function EditorLayout({
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [githubData, setGithubData] = useState<NormalizedGitHubData | null>(null)
 
-  // Auto-dismiss the preview nudge callout after 10 seconds
   useEffect(() => {
     if (!showPreviewNudge) return
     const timer = setTimeout(() => dismissPreviewNudge(), 10000)
@@ -262,6 +261,8 @@ export function EditorLayout({
           await new Promise((r) => setTimeout(r, 180))
 
           if (initialConfig) {
+            initialConfig.username = username
+            initialConfig.profileSlug = profileSlug
             initEditor(initialConfig, data)
             setLoading(false)
           } else {
@@ -299,7 +300,7 @@ export function EditorLayout({
     return () => {
       isMounted = false
     }
-  }, [username, profileSlug, autoGenerate, reloadKey, initEditor, setSession, setStep, t])
+  }, [username, profileSlug, autoGenerate, embedded, reloadKey, initEditor, setSession, setStep, t])
 
   const handleStartBlank = useCallback(() => {
     const fallbackData: NormalizedGitHubData = {
@@ -414,11 +415,12 @@ export function EditorLayout({
                 'Escolha como montar seu README. Você poderá personalizar tudo depois.'
               )}
             </p>
-
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-500 flex flex-col gap-3 w-full">
               <button
                 onClick={() => {
                   const config = generateBestProfile(githubData)
+                  config.username = username
+                  config.profileSlug = profileSlug
                   initEditor(config, githubData)
                   setShowOnboarding(false)
                 }}
@@ -454,6 +456,8 @@ export function EditorLayout({
                     profileSlug === 'default' ? 'Default' : profileSlug.toUpperCase(),
                     githubData
                   )
+                  config.username = username
+                  config.profileSlug = profileSlug
                   initEditor(config, githubData)
                   setShowOnboarding(false)
                 }}
@@ -512,7 +516,7 @@ export function EditorLayout({
     <div
       className={`${embedded ? 'w-full h-full min-h-[760px] relative' : 'h-screen w-screen'} flex flex-col overflow-hidden bg-carbon`}
     >
-      <EditorToolbar embedded={embedded} />
+      <EditorToolbar embedded={embedded} username={username} profileSlug={profileSlug} />
       {!isOwner && !embedded && (
         <div className="bg-onyx border-b border-graphite px-4 py-2 flex items-center justify-between text-note text-ash font-inter-tight select-none">
           <div className="flex items-center gap-2">

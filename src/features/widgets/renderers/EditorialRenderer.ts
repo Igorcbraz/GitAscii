@@ -111,7 +111,6 @@ export function renderEditorial(
     </svg>`
   }
 
-  // Fallback to closed-loop layout
   const layers = repos.slice(0, 10)
 
   const rows = layers

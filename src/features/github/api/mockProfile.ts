@@ -1,4 +1,4 @@
-import { APP_URL } from '../../../constants'
+export const APP_URL = 'https://gitascii.com'
 import type { NormalizedGitHubData } from '../types/github'
 
 export function getMockGitHubData(username: string): NormalizedGitHubData {

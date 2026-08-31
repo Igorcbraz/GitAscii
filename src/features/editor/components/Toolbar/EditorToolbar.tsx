@@ -9,14 +9,13 @@ import {
   Info,
   Loader2,
   LogIn,
-  LogOut,
   Search,
-  User,
 } from 'lucide-react'
 import Link from 'next/link'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
@@ -32,13 +31,21 @@ import { ViewModeToggle } from './ViewModeToggle'
 
 interface EditorToolbarProps {
   embedded?: boolean
+  username?: string
+  profileSlug?: string
 }
 
-export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
+export function EditorToolbar({
+  embedded = false,
+  username: propUsername,
+  profileSlug: propProfileSlug = 'default',
+}: EditorToolbarProps) {
   const { t } = useI18n()
 
-  const username = useEditorStore((state) => state.config?.username)
-  const profileSlug = useEditorStore((state) => state.config?.profileSlug || 'default')
+  const storeUsername = useEditorStore((state) => state.config?.username)
+  const storeProfileSlug = useEditorStore((state) => state.config?.profileSlug)
+  const username = propUsername || storeUsername
+  const profileSlug = propProfileSlug || storeProfileSlug || 'default'
   const hasData = useEditorStore((state) => Boolean(state.config && state.githubData))
   const session = useEditorStore((state) => state.session)
   const triggerPreviewNudge = useViewModeStore((state) => state.triggerPreviewNudge)
@@ -558,26 +565,7 @@ export function EditorToolbar({ embedded = false }: EditorToolbarProps) {
         {!embedded && (
           <div className="flex items-center pl-2 z-10">
             {session ? (
-              <div className="inline-flex items-center rounded-sm border border-graphite/60 bg-onyx h-[30px] w-[126px] overflow-hidden group hover:border-graphite transition-all duration-200">
-                <Link
-                  href={`/${session.username}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 h-full font-inter-tight text-[11px] font-medium text-white hover:text-signal-lime hover:bg-carbon transition-colors min-w-0"
-                  title={`Profile @${session.username}`}
-                >
-                  <User className="size-3 text-ash group-hover:text-signal-lime transition-colors shrink-0" />
-                  <span className="truncate max-w-[65px] font-inter-tight">
-                    @{session.username}
-                  </span>
-                </Link>
-                <span className="h-4 w-px bg-graphite/70 shrink-0" />
-                <button
-                  onClick={handleLogout}
-                  className="px-2 h-full flex items-center justify-center text-ash hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
-                  title={t('editor.toolbar.logout', 'Sair da conta')}
-                >
-                  <LogOut className="size-3" />
-                </button>
-              </div>
+              <UserMenuDropdown username={session.username} align="left" onLogout={handleLogout} />
             ) : (
               <button
                 onClick={() => {

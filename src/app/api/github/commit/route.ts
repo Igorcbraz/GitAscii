@@ -22,6 +22,17 @@ export async function POST(request: Request) {
     let appToken = null
     let finalEmbedCode = embedCode
 
+    const host = request.headers.get('host') || 'localhost:3000'
+    const protocol = request.headers.get('x-forwarded-proto') || 'https'
+    const v = Date.now()
+    const rawSlug = typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default'
+    const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug : 'default'
+
+    if (exportData && typeof exportData === 'object') {
+      exportData.username = username
+      exportData.profileSlug = profileSlug
+    }
+
     if (installation_id) {
       const { token, username: instUsername } = await getInstallationTokenById(installation_id)
       if (
@@ -36,14 +47,6 @@ export async function POST(request: Request) {
       }
       appToken = token
 
-      const host = request.headers.get('host') || 'localhost:3000'
-      const protocol = request.headers.get('x-forwarded-proto') || 'https'
-      const v = Date.now()
-      const rawSlug = exportData?.profileSlug || exportData?.templateId || 'default'
-      const profileSlug =
-        typeof rawSlug === 'string'
-          ? rawSlug.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'default'
-          : 'default'
       const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
       finalEmbedCode = `<a href="${protocol}://${host}">
   <img
@@ -52,11 +55,6 @@ export async function POST(request: Request) {
     width="100%"
   />
 </a>`
-
-      if (exportData && typeof exportData === 'object') {
-        exportData.username = username
-        exportData.profileSlug = profileSlug
-      }
     } else {
       const { token, installUrl } = await getInstallationTokenForUser(username)
       if (!token) {
@@ -128,9 +126,18 @@ export async function POST(request: Request) {
     let hasJsonChanged = true
     let incomingJsonStr = ''
 
+    const isDefaultProfile = profileSlug === 'default'
+    const safeProfileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(profileSlug)
+      ? profileSlug.toLowerCase()
+      : 'default'
+    const jsonFileName =
+      isDefaultProfile || safeProfileSlug === 'default'
+        ? 'gitascii.json'
+        : `gitascii_${safeProfileSlug}.json`
+
     if (exportData) {
       const jsonRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, jsonFileName),
         { headers }
       )
       if (jsonRes.status === 200) {
@@ -147,56 +154,89 @@ export async function POST(request: Request) {
       }
     }
 
-    const readmeRes = await fetch(
-      API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
-      { headers }
-    )
-
-    let sha = undefined
-    let currentContent = ''
-
-    if (readmeRes.status === 200) {
-      const readmeData = await readmeRes.json()
-      sha = readmeData.sha
-      currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
-    }
-
-    const widgetRegex =
-      /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
-    const isWidgetMissing = !currentContent.match(widgetRegex)
-
-    if (hasJsonChanged || isWidgetMissing || currentContent.trim() !== finalEmbedCode.trim()) {
-      const newContent = finalEmbedCode
-
-      const updateRes = await fetch(
+    if (isDefaultProfile) {
+      const readmeRes = await fetch(
         API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
-        {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({
-            message: 'Update profile README via GitAscii',
-            content: Buffer.from(newContent, 'utf8').toString('base64'),
-            sha,
-          }),
-        }
+        { headers }
       )
 
-      if (!updateRes.ok) {
-        return NextResponse.json(
-          { error: 'Failed to update README', details: await updateRes.text() },
-          { status: 500 }
+      let sha = undefined
+      let currentContent = ''
+
+      if (readmeRes.status === 200) {
+        const readmeData = await readmeRes.json()
+        sha = readmeData.sha
+        currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
+      }
+
+      const widgetRegex =
+        /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
+      const isWidgetMissing = !currentContent.match(widgetRegex)
+
+      if (hasJsonChanged || isWidgetMissing || currentContent.trim() !== finalEmbedCode.trim()) {
+        const newContent = finalEmbedCode
+
+        const updateRes = await fetch(
+          API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
+          {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({
+              message: 'Update profile README via GitAscii',
+              content: Buffer.from(newContent, 'utf8').toString('base64'),
+              sha,
+            }),
+          }
         )
+
+        if (!updateRes.ok) {
+          return NextResponse.json(
+            { error: 'Failed to update README', details: await updateRes.text() },
+            { status: 500 }
+          )
+        }
+      }
+    } else {
+      const readmeRes = await fetch(
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
+        { headers }
+      )
+
+      if (readmeRes.status === 200) {
+        const readmeData = await readmeRes.json()
+        const sha = readmeData.sha
+        const currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
+        const markerStart = `<!-- GITASCII:${profileSlug}:START -->`
+        const markerEnd = `<!-- GITASCII:${profileSlug}:END -->`
+
+        if (currentContent.includes(markerStart) && currentContent.includes(markerEnd)) {
+          const markerRegex = new RegExp(`${markerStart}[\\s\\S]*?${markerEnd}`, 'g')
+          const updatedContent = currentContent.replace(
+            markerRegex,
+            `${markerStart}\n${finalEmbedCode}\n${markerEnd}`
+          )
+
+          await fetch(API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'), {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({
+              message: `Update ${profileSlug} section in README via GitAscii`,
+              content: Buffer.from(updatedContent, 'utf8').toString('base64'),
+              sha,
+            }),
+          })
+        }
       }
     }
 
     if (exportData && hasJsonChanged) {
       const updateJsonRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'gitascii.json'),
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, jsonFileName),
         {
           method: 'PUT',
           headers,
           body: JSON.stringify({
-            message: 'Update GitAscii layout export',
+            message: `Update GitAscii layout export (${jsonFileName})`,
             content: Buffer.from(incomingJsonStr, 'utf8').toString('base64'),
             sha: jsonSha,
           }),
@@ -204,7 +244,11 @@ export async function POST(request: Request) {
       )
 
       if (!updateJsonRes.ok) {
-        console.error('Failed to upload JSON:', await updateJsonRes.text())
+        const errorText = (await updateJsonRes.text()).replace(/[\r\n]/g, ' ')
+        console.error('[Commit Route] Failed to upload JSON config: %s', errorText)
+      } else {
+        const { invalidateProfileConfig } = await import('@/lib/profileStorage')
+        invalidateProfileConfig(username, profileSlug)
       }
 
       const hasSnakeWidget = exportData?.widgets?.some((w: any) => w.id === 'contribution-snake')

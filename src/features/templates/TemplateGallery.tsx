@@ -2,7 +2,7 @@
 
 import { ArrowRight, Check, Copy, Filter, Search } from 'lucide-react'
 import Link from 'next/link'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { TechIcon } from '@/components/ui/TechIcon'
 import { useToast } from '@/components/ui/toast'
@@ -12,6 +12,7 @@ import { renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration, TEMPLATE_PRESETS } from '@/engine/core/TemplateRenderer'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 import { copyToClipboard } from '@/utils/clipboard'
 
 export function TemplateGallery() {
@@ -20,7 +21,19 @@ export function TemplateGallery() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+  const [sessionUsername, setSessionUsername] = useState<string>('Igorcbraz')
   const { success } = useToast()
+
+  useEffect(() => {
+    fetch(API_ENDPOINTS.AUTH.SESSION)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.session?.username) {
+          setSessionUsername(d.session.username)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const renderedSvgMap = useMemo(() => {
     const map: Record<string, string> = {}
@@ -192,7 +205,7 @@ export function TemplateGallery() {
 
             <div className="space-y-2 pt-4 border-t border-graphite/60">
               <Link
-                href={`/?template=${tpl.slug}`}
+                href={`/${sessionUsername}?template=${tpl.slug}`}
                 className="w-full inline-flex items-center justify-center gap-2 bg-signal-lime text-black font-medium text-label py-3 transition-all uppercase tracking-wider hover:brightness-110 shadow-[0_0_8px_rgba(197,255,74,0.25)]"
               >
                 <span>{t('template_gallery.use_in_editor', 'Use in Visual Editor')}</span>

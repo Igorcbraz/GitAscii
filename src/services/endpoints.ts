@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,
     USER_PROFILE: (username: string) => `https://github.com/${encodeURIComponent(username)}`,
     REPO_CONTENTS: (owner: string, repo: string, path: string) =>
-      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`,
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
     RAW_USER_CONTENT: (owner: string, repo: string, branch: string, path: string) =>
       `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${path}`,
     RAW_PROFILE_README: (username: string, branch: 'main' | 'master' = 'main') =>
@@ -131,5 +131,55 @@ export const API_ENDPOINTS = {
       `/api/${encodeURIComponent(username)}?template=${encodeURIComponent(templateId)}`,
     CARD_WITH_QUERY: (username: string, queryString: string) =>
       `/api/${encodeURIComponent(username)}?${queryString}`,
+  },
+  PRO: {
+    OVERVIEW: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/overview?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/overview',
+    ANALYTICS: (profile?: string, range?: string, compare?: boolean, exportCsv?: boolean) => {
+      const params = new URLSearchParams()
+      if (profile && profile !== 'all') params.set('profile', profile)
+      if (range) params.set('range', range)
+      if (compare !== undefined) params.set('compare', String(compare))
+      if (exportCsv) params.set('export', 'csv')
+      const qs = params.toString()
+      return qs ? `/api/pro/analytics?${qs}` : '/api/pro/analytics'
+    },
+    PROFILES: '/api/pro/profiles',
+    PROFILE: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}`,
+    PROFILE_DUPLICATE: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/duplicate`,
+    PROFILE_DEFAULT: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/default`,
+    PROFILE_VERSIONS: (slug: string) => `/api/pro/profiles/${encodeURIComponent(slug)}/versions`,
+    PROFILE_VERSION_RESTORE: (slug: string, versionId: string) =>
+      `/api/pro/profiles/${encodeURIComponent(slug)}/versions/${encodeURIComponent(versionId)}/restore`,
+    DYNAMIC_RULES: '/api/pro/dynamic-rules',
+    DYNAMIC_RULE: (id: string) => `/api/pro/dynamic-rules/${encodeURIComponent(id)}`,
+    DYNAMIC_PREVIEW: '/api/pro/dynamic-rules/preview',
+    HEALTH: '/api/pro/health',
+    HEALTH_WIDGETS: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/health/widgets?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/health/widgets',
+    HEALTH_HISTORY: (days?: number) =>
+      days ? `/api/pro/health/history?days=${days}` : '/api/pro/health/history',
+    HEALTH_SIMULATE: '/api/pro/health/simulate',
+    ERRORS: (profile?: string) =>
+      profile && profile !== 'all'
+        ? `/api/pro/errors?profile=${encodeURIComponent(profile)}`
+        : '/api/pro/errors',
+    ERROR_STATUS: (errorId: string) => `/api/pro/errors/${encodeURIComponent(errorId)}`,
+    ERROR_DELETE: (errorId: string) => `/api/pro/errors/${encodeURIComponent(errorId)}`,
+    EMAILS: '/api/pro/emails',
+    REPORTS: (range?: string, profile?: string) => {
+      const params = new URLSearchParams()
+      if (range) params.set('range', range)
+      if (profile && profile !== 'all') params.set('profile', profile)
+      const qs = params.toString()
+      return qs ? `/api/pro/reports?${qs}` : '/api/pro/reports'
+    },
+    SUBSCRIBE: '/api/pro/subscribe',
+    DEV_TOGGLE: '/api/pro/dev-toggle',
+    ADMIN_GRANT: '/api/pro/admin/grant',
   },
 } as const

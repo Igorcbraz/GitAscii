@@ -286,7 +286,6 @@ function wrapSvg(
   `
 }
 
-// ===========================================================================
 export function renderSurveillanceHeader(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
@@ -312,7 +311,7 @@ export function renderSurveillanceHeader(
     (cfg.avatarUrl as string) || data.user.avatar_url || `https://github.com/${username}.png`
 
   const fw = Math.min(300, Math.max(200, Math.round(w * 0.38)))
-  const fh = Math.round(fw * 0.75) // 4:3 ratio
+  const fh = Math.round(fw * 0.75)
   const rowY = 176
   const h = widget.size.height || rowY + fh + 16
 
@@ -327,7 +326,6 @@ export function renderSurveillanceHeader(
 
   const b: string[] = []
 
-  // status bar
   b.push(
     `<text x="8" y="14" font-size="10" letter-spacing="1.5" fill="${pal.dim}">NODE//${esc(username)}  ·  SIG:<tspan fill="${pal.green}">${esc(sigStatus)}</tspan>  ·  ${esc(modeTag)}</text>`
   )
@@ -342,7 +340,6 @@ export function renderSurveillanceHeader(
     `<text x="${cx}" y="52" font-size="10.5" letter-spacing="2.4" text-anchor="middle" fill="${pal.primary}" opacity=".8">[ SYSTEM :: OXIDE TERMINAL PROFILE :: ${esc(modeTag)} ]</text>`
   )
 
-  // namemark with chromatic split
   const nm = `&gt; ${esc(name)}`
   if (!forceStatic) {
     b.push(
@@ -362,7 +359,6 @@ export function renderSurveillanceHeader(
     `<text x="${cx}" y="152" font-size="13" letter-spacing="2.6" text-anchor="middle" fill="${pal.primary}">${esc(roleTag)} <tspan fill="${pal.secondary}">//</tspan> Terminal Purist</text>`
   )
 
-  // Identity row: boot log (left) + surveillance feed (right)
   const fx = w - 8 - fw
   const fy = rowY
   const bx = 8
@@ -393,7 +389,6 @@ export function renderSurveillanceHeader(
     y += 16
   }
 
-  // Surveillance feed (right column)
   const iy = fy + 4
   const ih = fh - 4
   const barCols = ['#ffffff', '#ffff55', '#55ffff', '#55ff55', '#ff55ff', '#ff5555', '#5555ff']
@@ -422,7 +417,6 @@ export function renderSurveillanceHeader(
     `<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="none" stroke="${pal.bc}" stroke-width="2"/>`
   )
 
-  // top OSD strip
   b.push(`<rect x="${fx}" y="${iy}" width="${fw}" height="17" fill="rgba(0,0,0,.55)"/>`)
   b.push(led(fx + 9, iy + 8.5, pal.led, !forceStatic, id))
   b.push(
@@ -432,7 +426,6 @@ export function renderSurveillanceHeader(
     `<text x="${fx + fw - 8}" y="${iy + 12}" font-size="8" letter-spacing="1.2" text-anchor="end" fill="${pal.red}">LIVE</text>`
   )
 
-  // bottom OSD
   b.push(
     `<rect x="${fx}" y="${iy + ih - 34}" width="${fw}" height="34" fill="url(#nmfade-${id})"/>`
   )
@@ -568,7 +561,6 @@ export function renderSurveillanceLoadout(
       } else if (displayMode === 'name') {
         wc = Math.max(Math.round(label.length * 7.4 + 18), 38)
       } else {
-        // 'both'
         wc = Math.max(Math.round(16 + 6 + label.length * 7.0 + 16), 52)
       }
 
@@ -587,7 +579,6 @@ export function renderSurveillanceLoadout(
           `<text x="${xPos + 9}" y="${yPos + 16}" font-size="10.5" letter-spacing=".5" fill="${txtcol}">${esc(label)}</text>`
         )
       } else {
-        // 'both'
         out.push(
           `<image x="${xPos + 6}" y="${yPos + 4}" width="16" height="16" href="${iconUrl}"/>`
         )
@@ -665,7 +656,6 @@ export function renderSurveillanceTelemetry(
   const c: string[] = []
   let cy = cardTop + hdH + 20
 
-  // Shell prompt
   c.push(
     `<text x="${ix}" y="${cy}" font-size="12.5" fill="${pal.text}"><tspan fill="${pal.primary}">~/${esc(username)}</tspan> <tspan fill="${pal.secondary}">(main)</tspan> <tspan fill="${pal.dim}">$</tspan> <tspan fill="${pal.bright}">./metrics --generate</tspan><tspan class="cur" fill="${pal.primary}">█</tspan></text>`
   )
@@ -679,7 +669,6 @@ export function renderSurveillanceTelemetry(
     return s
   }
 
-  // Core stats
   c.push(seclabel('core stats'))
   cy += 12
   const boxes = [
@@ -703,7 +692,6 @@ export function renderSurveillanceTelemetry(
   }
   cy += 42 + 18
 
-  // Languages Breakdown
   c.push(seclabel('most used languages', 'colorblind-safe'))
   cy += 12
   const langEntries = Object.entries(
@@ -742,7 +730,6 @@ export function renderSurveillanceTelemetry(
   }
   cy += 26
 
-  // Legend flow
   let lx = ix
   const lrowH = 18
   for (let i = 0; i < rawLangs.length; i++) {
@@ -761,7 +748,6 @@ export function renderSurveillanceTelemetry(
   }
   cy += 22
 
-  // 2D Contribution Heatmap Matrix
   c.push(seclabel('contribution activity · last year'))
   cy += 12
 
@@ -783,7 +769,6 @@ export function renderSurveillanceTelemetry(
   }
   cy += 7 * (cell + gap) + 6
 
-  // Scale key
   const kx = ix + iw - 12 - 5 * 12 - 30
   c.push(`<text x="${kx}" y="${cy}" font-size="10" fill="${pal.dim}">less</text>`)
   for (let i = 0; i < pal.calShades.length; i++) {

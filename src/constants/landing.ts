@@ -251,6 +251,17 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
     defaultLabel: 'PLATFORM',
     items: [
       {
+        key: 'pricing',
+        defaultTitle: 'GitAscii Pro',
+        titleNormal: 'GitAscii ',
+        titleHighlight: 'Pro',
+        titleEnd: '',
+        defaultDesc: 'Lifetime analytics, 24/7 monitoring, multi-profile & edge CDN. Pay once.',
+        href: '/pro',
+        badge: 'LIFETIME ACCESS',
+        featured: true,
+      },
+      {
         key: 'templates',
         defaultTitle: 'Templates Catalog',
         titleNormal: 'Explore ',
@@ -258,8 +269,7 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
         titleEnd: ' Catalog',
         defaultDesc: '13+ battle-tested layout presets ready to clone & customize.',
         href: '/templates',
-        badge: 'FEATURED',
-        featured: true,
+        badge: '13+',
       },
       {
         key: 'widgets',
@@ -289,9 +299,9 @@ export const NAVBAR_DROPDOWN_SECTIONS: readonly NavbarMenuSectionRaw[] = [
       },
     ],
     footerLink: {
-      key: 'landing.navbar.platform_compare',
-      defaultLabel: 'Compare GitAscii vs Alternatives',
-      href: '/vs',
+      key: 'landing.navbar.platform_pricing',
+      defaultLabel: 'View Full Pricing & Features',
+      href: '/pro',
     },
   },
   {
@@ -682,5 +692,72 @@ export const LANDING_FAQS: readonly FaqItemRaw[] = [
     question: 'Can I customize everything?',
     answer:
       'Yes. While templates give you a great starting point, every single widget property (colors, fonts, sizes, positions) can be customized in the visual editor.',
+  },
+  {
+    question: 'What is GitAscii Pro and how does the lifetime access work?',
+    answer:
+      'GitAscii Pro unlocks privacy-friendly real-time telemetry (unique visitors, countries, referrers), 24/7 widget error alerts via email, up to 10 dynamic profiles, instant GitHub Camo cache purging, priority sub-10ms Edge CDN, and lifetime updates. You pay once and own it forever with zero monthly or renewal fees.',
+  },
+  {
+    question: 'How does payment and instant activation work?',
+    answer:
+      'Payments are processed securely via Stripe/Polar with 256-bit encryption. As soon as checkout completes, your GitHub account is instantly upgraded to Pro lifetime access.',
+  },
+  {
+    question: 'What payment methods are supported?',
+    answer:
+      'We accept all major credit and debit cards (Visa, Mastercard, American Express, Discover), along with digital wallets like Apple Pay and Google Pay.',
+  },
+  {
+    question: 'How does the 14-day refund guarantee work?',
+    answer:
+      'We offer an unconditional 14-day 100% money-back guarantee. If GitAscii Pro is not the right fit for you, we refund your payment with no questions asked.',
+  },
+]
+
+export interface LandingComparisonRow {
+  id: string
+  feature: string
+  free: string | boolean
+  pro: string | boolean
+  freeKey?: string
+  proKey?: string
+}
+
+export const LANDING_COMPARISON: readonly LandingComparisonRow[] = [
+  { id: 'editor', feature: 'Visual Drag-and-Drop Editor', free: true, pro: true },
+  { id: 'templates', feature: 'Templates Catalog (13+)', free: true, pro: true },
+  { id: 'widgets', feature: 'Dynamic SVG Widgets (30+)', free: true, pro: true },
+  { id: 'themes', feature: 'Light/Dark Auto-Toggle', free: true, pro: true },
+  { id: 'ascii', feature: 'ASCII Art Engine', free: true, pro: true },
+  { id: 'open_source', feature: 'MIT Open Source & Self-Hostable', free: true, pro: true },
+  {
+    id: 'profiles',
+    feature: 'Active Profiles (AWS Summit, OSS launch, Sponsors…)',
+    free: '1 Profile',
+    pro: 'Up to 10 Profiles',
+    freeKey: 'landing.pricing.cell.1_profile',
+    proKey: 'landing.pricing.cell.up_to_10_profiles',
+  },
+  {
+    id: 'analytics',
+    feature: 'Who viewed your profile & when',
+    free: false,
+    pro: '90 Days of History',
+    proKey: 'landing.pricing.cell.90_days_history',
+  },
+  { id: 'geo', feature: 'Where visitors come from (country & source)', free: false, pro: true },
+  { id: 'alerts', feature: 'Broken widget & badge error alerts (24/7)', free: false, pro: true },
+  { id: 'camo', feature: 'Instant GitHub cache-purge on save', free: false, pro: true },
+  { id: 'speed', feature: 'Global edge-cached SVG delivery (sub-50ms)', free: false, pro: true },
+  { id: 'export', feature: 'Audience reports (PDF, CSV, 1200x630 cards)', free: false, pro: true },
+  { id: 'future', feature: 'All future widgets & updates included', free: false, pro: true },
+  {
+    id: 'price',
+    feature: 'Price & Billing Model',
+    free: '$0 Forever',
+    pro: '$0/month Forever',
+    freeKey: 'landing.pricing.cell.free_0',
+    proKey: 'landing.pricing.no_recurring',
   },
 ]

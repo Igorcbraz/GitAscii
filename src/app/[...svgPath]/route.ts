@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { generateProfileSvgResponse } from '@/services/profileSvgService'
+import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,6 +34,8 @@ export async function GET(
     theme = queryTheme
   }
 
+  let isExplicitSlug = false
+
   if (pathSegments.length === 1) {
     const file = pathSegments[0]
     if (file.endsWith('.svg')) {
@@ -46,20 +49,31 @@ export async function GET(
     const file = pathSegments[1]
     if (file.endsWith('.svg')) {
       const variant = file.replace('.svg', '')
-      if (variant === 'light') theme = 'light'
-      else if (variant === 'dark') theme = 'dark'
-      else profileSlug = variant
+      if (variant === 'light') {
+        theme = 'light'
+      } else if (variant === 'dark') {
+        theme = 'dark'
+      } else {
+        profileSlug = variant
+        isExplicitSlug = true
+      }
     } else {
       profileSlug = file
+      isExplicitSlug = true
     }
   } else if (pathSegments.length >= 3) {
     username = pathSegments[0]
     profileSlug = pathSegments[1]
+    isExplicitSlug = true
     const file = pathSegments[2]
     if (file.endsWith('.svg')) {
       const variant = file.replace('.svg', '')
       theme = variant === 'light' ? 'light' : 'dark'
     }
+  }
+
+  if (!username || !isValidGitHubUsername(username)) {
+    return new NextResponse('Invalid or reserved username', { status: 400 })
   }
 
   const widgetsParam = searchParams.get('widgets') || searchParams.get('widget')
@@ -80,5 +94,6 @@ export async function GET(
     theme,
     template: templateParam,
     widgets,
+    isExplicitSlug,
   })
 }

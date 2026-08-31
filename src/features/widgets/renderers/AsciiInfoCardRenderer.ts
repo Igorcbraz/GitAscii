@@ -20,7 +20,7 @@ export function renderAsciiInfoCard(
 ): string {
   const width = Math.max(100, Number(widget?.size?.width) || 370)
   const height = Math.max(100, Number(widget?.size?.height) || 400)
-  // Use fixed internal coordinate space so content scales on resize
+
   const IW = INTERNAL_W
   const IH = INTERNAL_H
   const cfg = widget?.config || {}
@@ -97,17 +97,15 @@ export function renderAsciiInfoCard(
     }
   }
 
-  // Timing
   const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
 
-  // Colors (GitHub dark styling)
   const bg1 = (cfg.backgroundColor as string) || globalStyles.backgroundColor || '#111722'
   const bg2 = '#0d1117'
   const frameColor = (cfg.borderColor as string) || globalStyles.borderColor || '#30363d'
   const mutedColor = '#7d8590'
   const inkColor = '#c9d1d9'
-  const keyColor = (cfg.accentColor as string) || globalStyles.accentColor || '#ffa657' // orange keys
-  const sectionColor = '#58a6ff' // blue headers
+  const keyColor = (cfg.accentColor as string) || globalStyles.accentColor || '#ffa657'
+  const sectionColor = '#58a6ff'
   const greenColor = '#3fb950'
   const accentColor = '#22d3ee'
 
@@ -116,7 +114,6 @@ export function renderAsciiInfoCard(
   const KEY_X = PAD
   const VAL_X = PAD + 92
 
-  // Calculate line spacing dynamically based on row count and widget height
   const nonGapRows = rows.filter((r) => r[0] !== 'gap').length
   const gapRows = rows.filter((r) => r[0] === 'gap').length
   const availableHeight = IH - TITLEBAR_H - 48
@@ -136,7 +133,6 @@ export function renderAsciiInfoCard(
       `</defs>`
   )
 
-  // Background
   parts.push(
     `<rect width="${IW}" height="${IH}" rx="${globalStyles.borderRadius || 12}" fill="url(#infocard-bg-${widget.instanceId})"/>`
   )
@@ -144,7 +140,6 @@ export function renderAsciiInfoCard(
     `<rect x="0.5" y="0.5" width="${IW - 1}" height="${IH - 1}" rx="${globalStyles.borderRadius || 12}" fill="none" stroke="${frameColor}"/>`
   )
 
-  // Title bar
   parts.push(
     `<line x1="0" y1="${TITLEBAR_H}" x2="${IW}" y2="${TITLEBAR_H}" stroke="${frameColor}"/>`
   )
@@ -157,7 +152,6 @@ export function renderAsciiInfoCard(
       `text-anchor="middle">${escapeXml(host)}@github: ~$ neofetch</text>`
   )
 
-  // Stagger helper
   const renderRise = (innerHtml: string, index: number) => {
     if (isStatic) {
       return `<g>${innerHtml}</g>`

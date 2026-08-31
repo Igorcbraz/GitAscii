@@ -68,7 +68,6 @@ async function searchPokemonCards(query: string): Promise<UnifiedPokemonCard[]> 
   const cleanQuery = query.trim().toLowerCase()
   if (!cleanQuery) return []
 
-  // 1. Try TCGdex API first
   try {
     const res = await fetch(API_ENDPOINTS.TCGDEX.CARDS_BY_NAME(cleanQuery), {
       signal: AbortSignal.timeout(3000),
@@ -92,7 +91,6 @@ async function searchPokemonCards(query: string): Promise<UnifiedPokemonCard[]> 
     // Continue to fallback
   }
 
-  // 2. Fallback to PokemonTCG open dataset via jsDelivr CDN
   try {
     if (!cachedPokemonTcgCards) {
       const allResults = await Promise.allSettled(

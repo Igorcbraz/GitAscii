@@ -42,7 +42,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     updateWidgetConfig(instanceId, patch)
   }
 
-  // 1. SURVEILLANCE HEADER
   if (widgetId === WIDGET_IDS.SURVEILLANCE_HEADER) {
     const displayName =
       (config.displayName as string) || githubData?.user.name || githubData?.user.login || ''
@@ -165,7 +164,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 2. SUBJECT DOSSIER
   if (widgetId === WIDGET_IDS.SURVEILLANCE_DOSSIER) {
     const displayName =
       (config.displayName as string) || githubData?.user.name || githubData?.user.login || ''
@@ -276,7 +274,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 3. DAILY LOADOUT (WITH STANDARD TECH STACK SELECTION & DISPLAY MODES)
   if (widgetId === WIDGET_IDS.SURVEILLANCE_LOADOUT) {
     const displayMode = (config.displayMode as 'both' | 'logo' | 'name') || 'both'
     const defaultTools = [
@@ -611,7 +608,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 4. TERMINAL TELEMETRY
   if (widgetId === WIDGET_IDS.SURVEILLANCE_TELEMETRY) {
     const username = (config.username as string) || githubData?.user.login || ''
 
@@ -646,7 +642,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 5. INCOMING TRANSMISSION
   if (widgetId === WIDGET_IDS.SURVEILLANCE_TRANSMISSION) {
     const quoteText =
       (config.quoteText as string) ||
@@ -715,7 +710,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 6. FIELD RECORDING VHS
   if (widgetId === WIDGET_IDS.SURVEILLANCE_FIELD) {
     const quoteText = (config.quoteText as string) || '“If it isn’t riced, it isn’t mine.”'
     const workspaceTag = (config.workspaceTag as string) || 'CAELESTIA // HYPRLAND'
@@ -754,7 +748,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 7. SURVEILLANCE SOCIAL FEEDS
   if (widgetId === WIDGET_IDS.SURVEILLANCE_FEEDS) {
     const renderMode = (config.renderMode as 'grid' | 'single') || 'grid'
     const selectedFeed = (config.selectedFeed as 'linkedin' | 'email' | 'discord') || 'linkedin'
@@ -836,7 +829,6 @@ export function SurveillanceControls({ instanceId, widgetId, config }: Surveilla
     )
   }
 
-  // 8. SURVEILLANCE SECTION TITLE
   if (widgetId === WIDGET_IDS.SURVEILLANCE_TITLE) {
     const title = (config.customTitle as string) || (config.title as string) || 'ESTABLISH UPLINK'
     const ref =

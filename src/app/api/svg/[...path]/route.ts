@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { generateProfileSvgResponse } from '@/services/profileSvgService'
+import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
       const variant = file.replace('.svg', '')
       theme = variant === 'light' ? 'light' : 'dark'
     }
+  }
+
+  if (!username || !isValidGitHubUsername(username)) {
+    return new NextResponse('Invalid or reserved username', { status: 400 })
   }
 
   return generateProfileSvgResponse(request, {

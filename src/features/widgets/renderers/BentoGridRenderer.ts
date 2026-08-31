@@ -56,7 +56,6 @@ export function renderBentoGrid(
   const height = Math.max(100, Number(widget?.size?.height) || 400)
   const cfg = widget?.config || {}
 
-  // Palette from examples-output bento-grid-output
   const bg = '#080B0D'
   const board = '#101619'
   const moduleColor = '#182125'
@@ -71,13 +70,11 @@ export function renderBentoGrid(
   const layoutType = (cfg.layoutType as 'hero' | 'closed-loop') || 'closed-loop'
   const customTitle = (cfg.customTitle as string) || data?.user?.name || data?.user?.login || 'USER'
 
-  // Retrieve sorted/filtered repos
   const selectedRepos = Array.isArray(cfg.selectedRepos) ? (cfg.selectedRepos as string[]) : []
   const sortBy = (cfg.repoSortBy as string) || 'stars'
   const maxRepos = Number(cfg.maxRepos) || 8
 
   if (layoutType === 'hero') {
-    // 1200x360 layout adapted for widgets width x height
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(3, maxRepos))
     const userTitle = escapeXml(customTitle).toUpperCase()
     const bioText = escapeXml(
@@ -192,7 +189,6 @@ export function renderBentoGrid(
       </svg>
     `
   } else {
-    // Render closed-loop bento grid (exactly matches closed-loop-dark.svg)
     const layers = getSortedRepos(data, selectedRepos, sortBy, Math.min(8, maxRepos))
     const userTitle = escapeXml(customTitle).toUpperCase()
     const activeCount = String(layers.length).padStart(2, '0')
@@ -261,13 +257,13 @@ export function renderBentoGrid(
           <text x="51" y="104" class="display" font-size="39" font-weight="900" fill="${textClr}">${activeCount}</text>
           <text x="51" y="123" class="mono" font-size="7" letter-spacing="1.4" fill="${muted}">MODULES ONLINE</text>
           <path d="M51 148H144" stroke="${trace}"/>
-          
+
           <circle cx="58" cy="179" r="4" fill="${primary}"/>
           <text x="73" y="182" class="mono" font-size="7" letter-spacing="1.3" fill="${muted}">PRIMARY</text>
-          
+
           <circle cx="58" cy="207" r="4" fill="${secondary}"/>
           <text x="73" y="210" class="mono" font-size="7" letter-spacing="1.3" fill="${muted}">SECONDARY</text>
-          
+
           <path d="M51 237H144" stroke="${trace}"/>
           <text x="51" y="263" class="mono" font-size="7" letter-spacing="1.2" fill="${textClr}">BUS / 01</text>
           <text x="51" y="283" class="mono" font-size="7" letter-spacing="1.2" fill="${muted}">STATUS / LIVE</text>
@@ -276,7 +272,7 @@ export function renderBentoGrid(
         <!-- Connections Network -->
         <path d="M302 72L520 72L738 72L956 72L326 159L544 159L762 159L980 159" fill="none" stroke="${trace}" stroke-width="5"/>
         <path class="signal" d="M302 72L520 72L738 72L956 72L326 159L544 159L762 159L980 159" fill="none" stroke="${primary}" stroke-width="2"/>
-        
+
         <circle cx="302" cy="72" r="8" fill="${board}" stroke="${primary}"/>
         <circle cx="520" cy="72" r="8" fill="${board}" stroke="${primary}"/>
         <circle cx="738" cy="72" r="8" fill="${board}" stroke="${primary}"/>

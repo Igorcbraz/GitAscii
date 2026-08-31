@@ -1,0 +1,126 @@
+---
+title: 'GitAscii Pro Overview'
+description: 'Real-time telemetry, health monitoring, dynamic rules, and multi-profile intelligence for GitHub READMEs.'
+---
+
+# GitAscii Pro
+
+**GitAscii Pro** is an executive telemetry, diagnostic, dynamic routing, and profile management suite built specifically for developers who use GitAscii SVGs in their GitHub READMEs, portfolios, and project documentations.
+
+While the standard GitAscii engine renders high-performance dynamic ASCII widgets, **GitAscii Pro** provides complete visibility and intelligent control over your developer presence: who views your profile, when traffic peaks, which external widgets fail, real-time widget health scores, automated profile scheduling rules, and revision histories — all with **100% privacy compliance**.
+
+```
+GitHub Profile README (embeds <img src="https://gitascii.com/api/username" />)
+       │
+       ▼
+GitAscii Edge / Serverless Ingest (In-memory metadata parsing & Daily Salt Anonymization)
+       │
+       ├──► Dynamic Rules Engine (Time-of-day, day-of-week, event & custom schedules)
+       │
+       ├──► Upstash Redis (HyperLogLog unique tokens, 90-day daily rollups, error & health sets)
+       │
+       ├──► Resend Alert Pipeline (Instant email notification if upstream widget fails)
+       │
+       ▼
+GitAscii Pro Workspace (/pro, /pro/analytics, /pro/health, /pro/reports, /pro/profiles, /pro/errors)
+```
+
+---
+
+## Key Pillars
+
+<CardGroup cols={2}>
+  <Card title="Privacy-First Telemetry" icon="shield-check" href="/pro/telemetry-and-privacy">
+    Zero raw IP address storage. Ephemeral daily rotating HMAC salts and Redis HyperLogLog registers
+    for cryptographic visitor anonymization.
+  </Card>
+  <Card title="Deep Metrics & Trust" icon="chart-mixed" href="/pro/metrics-and-charts">
+    Comprehensive breakdown of views, unique visitors, hourly distributions, interactive geographic
+    maps, and technology breakdowns.
+  </Card>
+  <Card title="Health Monitoring & Badges" icon="heart-pulse" href="/pro/health-monitoring">
+    Real-time Health Scores (0-100%), per-widget latency tracking, 24h error rates, and embeddable
+    live SVG health status badges.
+  </Card>
+  <Card title="Dynamic Rules & Scheduling" icon="calendar-clock" href="/pro/dynamic-rules">
+    Automatically serve different profile configurations based on time of day, day of week,
+    hackathons, or custom date ranges with built-in rule simulator.
+  </Card>
+  <Card title="Multi-Profile & Versioning" icon="layer-group" href="/pro/multi-profile">
+    Create independent profile variations (`default`, `minimal`, `stats`) with isolated telemetry
+    streams, revision history snapshots, and one-click rollback.
+  </Card>
+  <Card
+    title="Widget Error Diagnostics"
+    icon="triangle-alert"
+    href="/pro/error-monitoring-and-alerts"
+  >
+    Real-time tracking of failed external badges and upstream APIs with automated Resend email
+    alerts and 1-hour anti-spam cooldowns.
+  </Card>
+</CardGroup>
+
+---
+
+## Architectural Principles
+
+<ResponseField name="Integrated Architecture" type="Next.js App Router">
+  Runs natively within the GitAscii Next.js application without requiring auxiliary tracking
+  microservices or slow client-side JavaScript tags.
+</ResponseField>
+
+<ResponseField name="Single Persistence Engine" type="Upstash Redis">
+  All time-series metrics, HyperLogLog registers, dimension hashes, health metrics, dynamic rules,
+  version revisions, and error logs reside in a low-latency Upstash Redis instance with strict
+  90-day TTL eviction.
+</ResponseField>
+
+<ResponseField name="Zero-Overhead Readme Ingest" type="< 25ms Latency">
+  Telemetry extraction and dynamic rule evaluation occur asynchronously during SVG rendering,
+  ensuring no perceptible latency penalty for visitors viewing your GitHub README.
+</ResponseField>
+
+<ResponseField name="Transparent Data Provenance" type="Auditable Verification">
+  Every metric displayed in your dashboard is auditable: direct requests vs. GitHub Camo CDN proxy
+  caches are clearly distinguished so you always understand the exact origin of your traffic.
+</ResponseField>
+
+<ResponseField name="Full Internationalization (i18n)" type="7 Locales">
+  The entire Pro suite is localized into English, Portuguese, Spanish, German, French, Japanese, and
+  Chinese.
+</ResponseField>
+
+---
+
+## Pro Route Structure
+
+| View                  | Route            | Description                                                                                                                                              |
+| :-------------------- | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Overview**          | `/pro`           | Executive summary displaying total views, unique visitors, active profiles, health score glance, error alerts, recent events, and 30-day traffic curves. |
+| **Analytics**         | `/pro/analytics` | Deep-dive telemetry dashboard featuring interactive world maps, 24-hour histograms, weekday activity matrices, and device/browser/OS dimensions.         |
+| **Health Monitoring** | `/pro/health`    | Real-time health console displaying overall health score (0–100%), per-widget render latencies, 24h error stats, and embeddable live SVG badge snippets. |
+| **Profiles & Rules**  | `/pro/profiles`  | Multi-profile workspace with Dynamic Rules scheduling, Dynamic Rule Simulator, revision version history with instant rollback, and embed snippets.       |
+| **Reports**           | `/pro/reports`   | Executive performance summaries with export options (PNG share cards, CSV data, JSON payloads) and uptime statistics.                                    |
+| **Widget Errors**     | `/pro/errors`    | Diagnostic console listing real-time upstream widget failures, response status codes, occurrence counts, incident simulator, and resolve actions.        |
+| **Email Logs**        | `/pro/emails`    | Delivery audit trail of dispatched widget alerts and weekly traffic digests powered by Resend.                                                           |
+| **Documentation**     | `/pro/docs`      | In-app transparency center and methodology guide explaining data collection, algorithms, and metric definitions.                                         |
+
+---
+
+## Embed Endpoints & Badges
+
+GitAscii Pro exposes dynamic SVG endpoints ready to embed in any GitHub profile README or markdown document:
+
+```markdown
+<!-- 1. Dynamic Root Profile (Evaluates Dynamic Rules automatically) -->
+
+![GitAscii Dynamic Profile](https://gitascii.com/api/username)
+
+<!-- 2. Explicit Profile Slug (Bypasses rules for specific READMEs) -->
+
+![GitAscii Minimal Profile](https://gitascii.com/api/username/minimal)
+
+<!-- 3. Live SVG Health Badge (Displays real-time widget uptime & status) -->
+
+![GitAscii Profile Health](https://gitascii.com/api/username/health-badge)
+```

@@ -132,7 +132,6 @@ export default function AsciiHands({ className = '' }: AsciiHandsProps) {
           const cg = Math.round(255 * limeBlend + 200 * (1 - limeBlend))
           const cb = Math.round(74 * limeBlend + 200 * (1 - limeBlend))
 
-          // Draw statically without shimmer
           const alpha = Math.max(0, Math.min(1, brightness * 0.85))
           ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(2)})`
           ctx.fillText(char, x, y)
@@ -140,10 +139,8 @@ export default function AsciiHands({ className = '' }: AsciiHandsProps) {
       }
     }
 
-    // Run once on load
     recomputeCellsAndDraw()
 
-    // Rerun on resize
     window.addEventListener('resize', recomputeCellsAndDraw)
 
     return () => {

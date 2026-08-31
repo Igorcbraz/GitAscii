@@ -1,0 +1,167 @@
+---
+title: 'Metrics & Charts Guide'
+description: 'In-depth guide to understanding, interpreting, and trusting every chart and KPI in the GitAscii Pro dashboard.'
+---
+
+# Metrics & Charts Guide
+
+To trust your analytics, you need to understand exactly how each number is calculated, where the data originates, and how edge caching influences your counts.
+
+This guide provides an exhaustive breakdown of every card, graph, histogram, and breakdown available in **GitAscii Pro**.
+
+---
+
+## 1. Primary KPIs & Stat Cards
+
+### Total Views vs. Unique Visitors
+
+```
+┌────────────────────────┐      ┌────────────────────────┐
+│      TOTAL VIEWS       │      │    UNIQUE VISITORS     │
+│         42,850         │      │         8,420          │
+│   ▲ +18.5% vs prev     │      │    ▲ +12.3% vs prev    │
+└────────────────────────┘      └────────────────────────┘
+```
+
+- **Total Views**: Represents the total number of HTTP requests processed by GitAscii's SVG render API for your profile during the selected time period.
+- **Unique Visitors**: Calculated via Redis HyperLogLog registers (`PFCOUNT`). Each unique device token (computed via daily rotating salt) is counted once per time window. If the same person views your README 15 times in one day, it counts as **15 views** and **1 unique visitor**.
+- **Trend Percentage**: Compares current period performance with the immediately preceding equal time period (e.g. current 30 days vs. previous 30 days):
+  $$\text{Trend } (\%) = \left( \frac{\text{Current Period} - \text{Previous Period}}{\text{Previous Period}} \right) \times 100$$
+
+---
+
+### Cache Hit Ratio & Response Statuses
+
+- **Cache Hit Ratio (e.g. 98.2%)**: The percentage of requests where the client or GitHub Camo proxy had an up-to-date cached SVG and GitAscii responded with `304 Not Modified` (or CDN edge cache hit) instead of re-rendering full SVG trees (`200 OK`).
+- **Why High Cache Ratios Are Good**: Indicates rapid loading speeds for your README visitors and minimal network transfer time.
+
+---
+
+### Average Render Latency
+
+- **Average Latency (ms)**: Measured from the instant the HTTP request arrives at GitAscii's serverless handler to the final SVG stream completion.
+- Typical latencies range from **15ms to 35ms**, ensuring zero perceptible delay for anyone visiting your GitHub profile.
+
+---
+
+## 2. Traffic & Trends Chart (Area Chart)
+
+```
+Views (Spline)
+  │            /\
+  │      /\   /  \    /─  Total Views
+  │  /\ /  \_/    \  /
+  │ /  V           \/     Unique Visitors
+──┴──────────────────────► Time (Days)
+```
+
+### What It Displays:
+
+- **Total Views Line (Lime)**: Daily volume of SVG requests.
+- **Unique Visitors Line (Cyan)**: Daily unique visitor counts.
+- **GitHub Camo Proxy Area**: Differentiates views coming through GitHub's proxy vs direct hits.
+- **Interactive Tooltip**: Hovering over any point displays:
+  - Exact date (YYYY-MM-DD)
+  - Views count
+  - Unique visitors count
+  - Cache hit percentage
+  - Camo proxy vs Direct request split
+
+---
+
+## 3. Hourly Traffic Distribution (24-Hour Histogram)
+
+```
+Volume
+  │               ██
+  │            ██ ██
+  │         ██ ██ ██ ██
+  │      ██ ██ ██ ██ ██ ██
+──┴─────────────────────────► Hour (00:00 - 23:00 UTC)
+```
+
+### How to Use This Data:
+
+- Shows which hours of the day receive peak traffic.
+- Helps developers determine **when to push major README updates, release open-source projects, or publish articles** to maximize initial impressions.
+- Displays both direct browser traffic and proxy pings.
+
+---
+
+## 4. Weekday × Hour Activity Grid (Heatmap Matrix)
+
+A 7-day $\times$ 24-hour matrix (168 cells) color-coded by visitor intensity:
+
+- **Rows**: Days of the week (Sunday through Saturday).
+- **Columns**: Hours of the day (0 to 23 UTC).
+- **Cell Color**: Gradient from dark background to vibrant lime (`#c5ff4a`) based on normalized density:
+  $$\text{Intensity} = \min\left(100, \frac{\text{Views in Cell}}{\text{Max Cell Views}} \times 100\right)$$
+
+---
+
+## 5. Geographic Demographics & World Map
+
+### How Country Geolocation Works
+
+When an SVG request arrives at the edge:
+
+1. The server extracts the standard ISO 3166-1 alpha-2 country code from edge headers (`cf-ipcountry` or `x-vercel-ip-country`).
+2. The country code is recorded in a Redis dimension hash for that date.
+3. The raw IP address is discarded immediately without writing to disk.
+
+### Map Visualizations:
+
+- **World Map Chloropleth**: Continents and countries shaded according to their relative share of total profile views.
+- **Top Countries Ranking**: Country names, ISO flags, view count, and percentage share.
+- **Continent Breakdown**: Donut chart grouping traffic across North America, Europe, Asia, South America, Africa, and Oceania.
+- **Timezone Distribution**: Common timezones represented by your audience.
+
+---
+
+## 6. Technology & Runtime Dimensions
+
+GitAscii Pro parses coarse User-Agent headers to provide audience technology insights:
+
+| Dimension             | Categories                                                  | Explanation                                                                                      |
+| :-------------------- | :---------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| **Device Types**      | Desktop, Mobile, Tablet, GitHub Camo, Bot/Crawler           | Identifies whether recruiters and developers are browsing on desktop machines or mobile devices. |
+| **Browsers**          | Chrome, Safari, Firefox, Edge, Arc/Brave, Opera, CLI/Script | Aggregated browser engine distribution.                                                          |
+| **Operating Systems** | macOS, Windows, Linux, iOS, Android, ChromeOS               | Operating system breakdown.                                                                      |
+| **Traffic Types**     | Direct, Camo Proxy, GitAscii App, Bot                       | Transparent delivery channels.                                                                   |
+| **Theme Preference**  | Dark Theme, Light Theme                                     | Whether visitors rendered your SVG against dark or light background themes.                      |
+
+---
+
+## 7. Multi-Profile Performance Comparison
+
+If you manage multiple profile configurations (e.g. `default`, `minimal`, `stats`):
+
+- The **Profiles Table** aggregates metrics side-by-side:
+  - Total Views per slug
+  - Unique Visitors per slug
+  - Camo vs Direct ratio
+  - Active error status
+  - Relative contribution to total portfolio impressions
+
+---
+
+## 8. Data Reliability & Trust Checklist
+
+<AccordionGroup>
+  <Accordion title="Why do my GitAscii views differ from GitHub repository traffic?">
+    GitHub repository traffic (`/traffic` tab) only counts visits to repository source code pages.
+    GitAscii measures impressions of your **Profile README** (`github.com/username`), which
+    typically receives significantly more views from social media, GitHub search, issue discussions,
+    and PR reviews.
+  </Accordion>
+  <Accordion title="Does GitHub caching affect my numbers?">
+    GitAscii sends proper `Cache-Control` headers and handles `If-None-Match` / `ETag` validations.
+    Whenever GitHub's Camo proxy revalidates an SVG with a conditional request (`304 Not Modified`),
+    GitAscii records the view and increments the cache-hit metric.
+  </Accordion>
+  <Accordion title="Are bots and crawlers filtered out?">
+    Known search engine crawlers (Googlebot, Bingbot, GitHub-Hookshot) are tagged separately under
+    the **Bot / Crawler** device dimension so they do not artificially distort developer engagement
+    insights.
+  </Accordion>
+</AccordionGroup>
