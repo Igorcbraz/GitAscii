@@ -64,6 +64,7 @@ export async function POST() {
             quantity: 1,
           },
         ],
+        allow_promotion_codes: true,
         client_reference_id: username,
         metadata: {
           username,

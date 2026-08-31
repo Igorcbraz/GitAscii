@@ -489,4 +489,54 @@ describe('Pro API Route Handlers Test Suite', () => {
       expect(svgText).toContain('GitAscii Health')
     })
   })
+
+  describe('POST /api/pro/subscribe', () => {
+    it('creates checkout session with allow_promotion_codes enabled for vouchers', async () => {
+      mockedGetSession.mockResolvedValue({
+        username: 'VoucherUser',
+        githubId: 9876,
+        email: 'voucher@test.com',
+      } as any)
+
+      const createSessionSpy = vi.fn().mockResolvedValue({
+        url: 'https://checkout.stripe.com/c/pay/cs_test_123',
+      })
+
+      vi.doMock('stripe', () => {
+        return {
+          default: vi.fn().mockImplementation(() => ({
+            checkout: {
+              sessions: {
+                create: createSessionSpy,
+              },
+            },
+          })),
+        }
+      })
+
+      const prevSecret = process.env.STRIPE_SECRET_KEY
+      const prevPrice = process.env.STRIPE_PRICE_ID
+      process.env.STRIPE_SECRET_KEY = 'sk_test_12345'
+      process.env.STRIPE_PRICE_ID = 'price_12345'
+
+      try {
+        const { POST: postSubscribe } = await import('@/app/api/pro/subscribe/route')
+        const res = await postSubscribe()
+        expect(res.status).toBe(200)
+        const data = await res.json()
+        expect(data.checkoutUrl).toBe('https://checkout.stripe.com/c/pay/cs_test_123')
+        expect(createSessionSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            allow_promotion_codes: true,
+            customer_email: 'voucher@test.com',
+            client_reference_id: 'voucheruser',
+          })
+        )
+      } finally {
+        process.env.STRIPE_SECRET_KEY = prevSecret
+        process.env.STRIPE_PRICE_ID = prevPrice
+        vi.doUnmock('stripe')
+      }
+    })
+  })
 })
