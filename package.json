@@ -42,7 +42,7 @@
     "stripe": "^22.6.0",
     "tailwind-merge": "^3.6.0",
     "topojson-client": "^3.1.0",
-    "undici": "^8.10.0",
+    "undici": "^8.10.1",
     "vidstack": "^1.15.6",
     "world-atlas": "^2.0.2",
     "zustand": "^5.0.14"
