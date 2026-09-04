@@ -38,7 +38,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-joyride": "^3.2.0",
-    "resend": "^6.24.0",
+    "resend": "^6.25.0",
     "stripe": "^22.6.0",
     "tailwind-merge": "^3.6.0",
     "topojson-client": "^3.1.0",
