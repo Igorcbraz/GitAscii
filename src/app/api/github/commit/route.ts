@@ -161,10 +161,6 @@ export async function POST(request: Request) {
       name: authorName,
       email: authorEmail,
     }
-    const commitCommitter = {
-      name: 'gitascii[bot]',
-      email: '169212000+gitascii[bot]@users.noreply.github.com',
-    }
 
     if (isDefaultProfile) {
       const readmeRes = await fetch(
@@ -198,7 +194,6 @@ export async function POST(request: Request) {
               content: Buffer.from(newContent, 'utf8').toString('base64'),
               sha,
               author: commitAuthor,
-              committer: commitCommitter,
             }),
           }
         )
@@ -238,7 +233,6 @@ export async function POST(request: Request) {
               content: Buffer.from(updatedContent, 'utf8').toString('base64'),
               sha,
               author: commitAuthor,
-              committer: commitCommitter,
             }),
           })
         }
@@ -256,7 +250,6 @@ export async function POST(request: Request) {
             content: Buffer.from(incomingJsonStr, 'utf8').toString('base64'),
             sha: jsonSha,
             author: commitAuthor,
-            committer: commitCommitter,
           }),
         }
       )
@@ -332,7 +325,6 @@ jobs:
                 content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
                 sha: actionSha,
                 author: commitAuthor,
-                committer: commitCommitter,
               }),
               signal: AbortSignal.timeout(6000),
             }
