@@ -123,10 +123,14 @@ export async function getWidgetErrors(username: string): Promise<WidgetErrorReco
     return []
   }
 
-  const records: WidgetErrorRecord[] = []
+  const p = redis.pipeline()
   for (const id of errorIds) {
-    const itemKey = REDIS_KEYS.errorItem(u, id)
-    const data = await redis.hgetall<any>(itemKey)
+    p.hgetall(REDIS_KEYS.errorItem(u, id))
+  }
+  const results = await p.exec<any[]>()
+
+  const records: WidgetErrorRecord[] = []
+  for (const data of results) {
     if (data && data.id) {
       records.push({
         id: data.id,

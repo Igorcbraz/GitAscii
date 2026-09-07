@@ -1,5 +1,17 @@
 import { Redis } from '@upstash/redis'
 
+export interface IProRedisPipeline {
+  hgetall(key: string): IProRedisPipeline
+  pfcount(...keys: string[]): IProRedisPipeline
+  hincrby(key: string, field: string, increment: number): IProRedisPipeline
+  hset(key: string, kvMap: Record<string, any>): IProRedisPipeline
+  expire(key: string, seconds: number): IProRedisPipeline
+  pfadd(key: string, ...elements: string[]): IProRedisPipeline
+  sadd(key: string, ...members: string[]): IProRedisPipeline
+  zadd(key: string, ...scoreMembers: { score: number; member: string }[]): IProRedisPipeline
+  exec<T = any[]>(): Promise<T>
+}
+
 export interface IProRedisStore {
   get<T = any>(key: string): Promise<T | null>
   set(key: string, value: any, opts?: { ex?: number }): Promise<any>
@@ -24,6 +36,7 @@ export interface IProRedisStore {
   srem(key: string, ...members: string[]): Promise<number>
   pfadd(key: string, ...elements: string[]): Promise<number>
   pfcount(...keys: string[]): Promise<number>
+  pipeline(): IProRedisPipeline
 }
 
 class UpstashRedisAdapter implements IProRedisStore {
@@ -119,6 +132,56 @@ class UpstashRedisAdapter implements IProRedisStore {
   async pfcount(...keys: string[]): Promise<number> {
     if (keys.length === 0) return 0
     return this.client.pfcount(keys[0], ...keys.slice(1))
+  }
+
+  pipeline(): IProRedisPipeline {
+    const p = this.client.pipeline()
+    const wrapper: IProRedisPipeline = {
+      hgetall(key: string) {
+        p.hgetall(key)
+        return wrapper
+      },
+      pfcount(...keys: string[]) {
+        if (keys.length > 0) {
+          p.pfcount(keys[0], ...keys.slice(1))
+        }
+        return wrapper
+      },
+      hincrby(key: string, field: string, increment: number) {
+        p.hincrby(key, field, increment)
+        return wrapper
+      },
+      hset(key: string, kvMap: Record<string, any>) {
+        p.hset(key, kvMap)
+        return wrapper
+      },
+      expire(key: string, seconds: number) {
+        p.expire(key, seconds)
+        return wrapper
+      },
+      pfadd(key: string, ...elements: string[]) {
+        if (elements.length > 0) {
+          p.pfadd(key, elements[0], ...elements.slice(1))
+        }
+        return wrapper
+      },
+      sadd(key: string, ...members: string[]) {
+        if (members.length > 0) {
+          p.sadd(key, members[0], ...members.slice(1))
+        }
+        return wrapper
+      },
+      zadd(key: string, ...scoreMembers: { score: number; member: string }[]) {
+        for (const sm of scoreMembers) {
+          p.zadd(key, { score: sm.score, member: sm.member })
+        }
+        return wrapper
+      },
+      async exec<T = any[]>(): Promise<T> {
+        return (await p.exec()) as unknown as T
+      },
+    }
+    return wrapper
   }
 }
 
@@ -353,6 +416,52 @@ class MemoryRedisStore implements IProRedisStore {
       }
     }
     return combined.size
+  }
+
+  pipeline(): IProRedisPipeline {
+    const queue: Array<() => Promise<any>> = []
+    const wrapper: IProRedisPipeline = {
+      hgetall: (key: string) => {
+        queue.push(() => this.hgetall(key))
+        return wrapper
+      },
+      pfcount: (...keys: string[]) => {
+        queue.push(() => this.pfcount(...keys))
+        return wrapper
+      },
+      hincrby: (key: string, field: string, increment: number) => {
+        queue.push(() => this.hincrby(key, field, increment))
+        return wrapper
+      },
+      hset: (key: string, kvMap: Record<string, any>) => {
+        queue.push(() => this.hset(key, kvMap))
+        return wrapper
+      },
+      expire: (key: string, seconds: number) => {
+        queue.push(() => this.expire(key, seconds))
+        return wrapper
+      },
+      pfadd: (key: string, ...elements: string[]) => {
+        queue.push(() => this.pfadd(key, ...elements))
+        return wrapper
+      },
+      sadd: (key: string, ...members: string[]) => {
+        queue.push(() => this.sadd(key, ...members))
+        return wrapper
+      },
+      zadd: (key: string, ...scoreMembers: { score: number; member: string }[]) => {
+        queue.push(() => this.zadd(key, ...scoreMembers))
+        return wrapper
+      },
+      exec: async <T = any[]>(): Promise<T> => {
+        const results = []
+        for (const fn of queue) {
+          results.push(await fn())
+        }
+        return results as unknown as T
+      },
+    }
+    return wrapper
   }
 
   clear() {

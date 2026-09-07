@@ -2,6 +2,22 @@ import type { ProEntitlements, ProPlanTier, ProUserSettings } from '../types/sub
 import { REDIS_KEYS } from './analyticsStore'
 import { getProRedisClient } from './redisClient'
 
+interface CachedEntitlements {
+  entitlements: ProEntitlements
+  expiresAt: number
+}
+
+const entitlementsCache = new Map<string, CachedEntitlements>()
+const ENTITLEMENTS_CACHE_TTL_MS = 5 * 60 * 1000
+
+export function invalidateEntitlementsCache(username?: string): void {
+  if (username) {
+    entitlementsCache.delete(username.toLowerCase().trim())
+  } else {
+    entitlementsCache.clear()
+  }
+}
+
 function isEnvProUser(username: string): boolean {
   const allowed = (process.env.PRO_USERNAMES || process.env.PRO_ADMIN_USERS || '')
     .split(',')
@@ -26,14 +42,28 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
     }
   }
 
+  const cached = entitlementsCache.get(u)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.entitlements
+  }
+
   const redis = getProRedisClient()
   const key = REDIS_KEYS.userSettings(u)
 
-  const raw = await redis.hgetall<any>(key).catch(() => null)
+  let raw: any = null
+  try {
+    raw = await redis.hgetall<any>(key)
+  } catch (err) {
+    console.warn(`[Entitlements] Redis read failed for ${u}, checking fallback cache:`, err)
+    if (cached) {
+      return cached.entitlements
+    }
+  }
+
   const tier: ProPlanTier = (raw?.planTier as ProPlanTier) || 'free'
   const isPro = tier !== 'free'
 
-  return {
+  const entitlements: ProEntitlements = {
     tier,
     maxProfiles: isPro ? 10 : 1,
     analyticsRetentionDays: isPro ? 90 : 7,
@@ -43,6 +73,13 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
     prioritySupport: isPro,
     monthlyEmailQuota: isPro ? 1000 : 0,
   }
+
+  entitlementsCache.set(u, {
+    entitlements,
+    expiresAt: Date.now() + (isPro ? ENTITLEMENTS_CACHE_TTL_MS : 60 * 1000),
+  })
+
+  return entitlements
 }
 
 export async function isProUser(username: string): Promise<boolean> {
@@ -123,6 +160,7 @@ export async function updateUserSettings(
   if (Object.keys(payload).length > 0) {
     await redis.hset(key, payload)
   }
+  invalidateEntitlementsCache(username)
   return getUserSettings(username)
 }
 

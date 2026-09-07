@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { getAnalyticsSummary, ingestProfileView, REDIS_KEYS } from './analyticsStore'
+import {
+  getAnalyticsSummary,
+  ingestProfileView,
+  invalidateAnalyticsCache,
+  REDIS_KEYS,
+} from './analyticsStore'
 import { resetProRedisMemoryStoreForTesting } from './redisClient'
 
 describe('AnalyticsStore Comprehensive Unit Tests', () => {
   beforeEach(() => {
     resetProRedisMemoryStoreForTesting()
+    invalidateAnalyticsCache()
   })
 
   describe('ingestProfileView', () => {
