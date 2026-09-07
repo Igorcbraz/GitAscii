@@ -2,25 +2,9 @@ import type { SavedConfiguration } from '@/engine/types'
 import { getAppInstallations } from '@/lib/githubApp'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-export interface CommunityProfileItem {
-  username: string
-  profileSlug: string
-  templateId: string
-  widgetsCount: number
-  hasAsciiArt: boolean
-  tags: string[]
-  isStored: boolean
-}
+import { type CommunityProfileItem, DEFAULT_SEED_USERS, FALLBACK_SEED_PROFILES } from './constants'
 
-const DEFAULT_SEED_USERS = [
-  'Igorcbraz',
-  'shadcn',
-  'leerob',
-  'antfu',
-  'sindresorhus',
-  'developit',
-  'torvalds',
-]
+export type { CommunityProfileItem }
 
 function parseConfigToProfileItem(config: SavedConfiguration): CommunityProfileItem | null {
   if (!config || !config.username) return null
@@ -109,7 +93,11 @@ export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
     }
   })
 
-  await Promise.allSettled(fetchPromises)
+  FALLBACK_SEED_PROFILES.forEach((seed) => {
+    if (!profileMap.has(seed.username.toLowerCase())) {
+      profileMap.set(seed.username.toLowerCase(), seed)
+    }
+  })
 
   const result = Array.from(profileMap.values())
   cachedProfiles = { data: result, timestamp: Date.now() }

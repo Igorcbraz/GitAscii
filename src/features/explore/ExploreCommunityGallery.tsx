@@ -3,7 +3,7 @@
 import { ArrowRight, Github, Search } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import React, { memo, useMemo, useState } from 'react'
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EXPLORE_GALLERY_FILTERS } from '@/constants'
 import { useI18n } from '@/i18n'
@@ -80,17 +80,20 @@ const CommunityProfileCard = memo(function CommunityProfileCard({
 
           {!imageError ? (
             <Image
-              src={`/api/${p.username}?template=${p.templateId}`}
+              src={`/api/${encodeURIComponent(p.username)}?template=${encodeURIComponent(p.templateId)}`}
               alt={`GitAscii Card for @${p.username}`}
               width={800}
-              height={144}
+              height={180}
               loading="lazy"
               unoptimized
-              className={`max-w-full max-h-36 object-contain transition-opacity duration-300 ${
+              className={`max-w-full max-h-40 object-contain transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
+              onError={() => {
+                setImageError(true)
+                setImageLoaded(true)
+              }}
             />
           ) : (
             <div className="py-6 text-center">
@@ -99,22 +102,13 @@ const CommunityProfileCard = memo(function CommunityProfileCard({
               </span>
             </div>
           )}
-
-          <span className="font-jetbrains-mono text-caption text-ash/60 absolute bottom-1 right-2">
-            {t('explore.gallery.live_preview', 'Live Card Preview')}
-          </span>
         </div>
 
-        <div className="flex items-center gap-1.5 mb-6 flex-wrap">
-          {p.isStored && (
-            <span className="px-2 py-0.5 bg-signal-lime/10 border border-signal-lime/30 font-jetbrains-mono text-caption text-signal-lime uppercase tracking-wider">
-              ● {t('explore.gallery.stored_profile', 'Stored Profile')}
-            </span>
-          )}
+        <div className="flex flex-wrap gap-2 mb-6">
           {p.tags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 border border-graphite bg-carbon font-jetbrains-mono text-caption text-ash uppercase tracking-wider"
+              className="font-jetbrains-mono text-caption text-ash bg-carbon px-2.5 py-1 border border-graphite"
             >
               {tag}
             </span>
@@ -122,27 +116,29 @@ const CommunityProfileCard = memo(function CommunityProfileCard({
         </div>
       </div>
 
-      <div className="space-y-2 pt-4 border-t border-graphite/60">
+      <div className="pt-4 border-t border-graphite/60 flex items-center justify-between">
+        <span className="font-jetbrains-mono text-caption text-ash">
+          {p.widgetsCount} {t('explore.gallery.active_widgets', 'active widgets')}
+        </span>
+
         <button
           onClick={() => onInspect(p.username)}
           disabled={isLoading}
-          className="w-full inline-flex items-center justify-center gap-2 bg-signal-lime text-black font-medium text-label py-3 transition-all uppercase tracking-wider hover:brightness-110 shadow-[0_0_8px_rgba(197,255,74,0.25)] disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+          className="inline-flex items-center gap-2 font-jetbrains-mono text-label text-black bg-signal-lime hover:bg-[#b0f530] px-4 py-2 uppercase font-semibold transition-all cursor-pointer disabled:opacity-50"
         >
           <span>
             {isLoading
-              ? t('explore.gallery.loading', 'Loading...')
-              : t('explore.gallery.inspect', 'Inspect & Customize Profile')}
+              ? t('common.loading', 'Loading...')
+              : t('explore.gallery.inspect', 'Inspect')}
           </span>
-          {isLoading ? (
-            <span className="size-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <ArrowRight size={14} />
-          )}
+          <ArrowRight size={14} />
         </button>
       </div>
     </article>
   )
 })
+
+const BATCH_SIZE = 9
 
 export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGalleryProps) {
   const router = useRouter()
@@ -150,6 +146,8 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
   const [loadingProfile, setLoadingProfile] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('all')
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null)
 
   const filteredProfiles = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -166,6 +164,33 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
       return matchesSearch && matchesTemplate
     })
   }, [initialProfiles, searchQuery, selectedTemplate])
+
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE)
+  }, [searchQuery, selectedTemplate])
+
+  const visibleProfiles = useMemo(() => {
+    return filteredProfiles.slice(0, visibleCount)
+  }, [filteredProfiles, visibleCount])
+
+  const hasMore = visibleCount < filteredProfiles.length
+
+  useEffect(() => {
+    const sentinel = loadMoreSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredProfiles.length))
+        }
+      },
+      { rootMargin: '200px' }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasMore, filteredProfiles.length])
 
   const handleInspect = (username: string) => {
     setLoadingProfile(username)
@@ -207,7 +232,7 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredProfiles.map((p) => (
+        {visibleProfiles.map((p) => (
           <CommunityProfileCard
             key={p.username}
             profile={p}
@@ -216,6 +241,20 @@ export function ExploreCommunityGallery({ initialProfiles }: ExploreCommunityGal
           />
         ))}
       </div>
+
+      {hasMore && (
+        <div ref={loadMoreSentinelRef} className="py-8 flex items-center justify-center">
+          <button
+            onClick={() =>
+              setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredProfiles.length))
+            }
+            className="px-6 py-2.5 bg-carbon hover:bg-onyx border border-graphite hover:border-signal-lime text-xs font-mono text-ash hover:text-white uppercase tracking-wider transition-colors cursor-pointer"
+          >
+            {t('explore.gallery.load_more', 'Load More Developers')} (
+            {filteredProfiles.length - visibleCount} {t('explore.gallery.remaining', 'remaining')})
+          </button>
+        </div>
+      )}
 
       {filteredProfiles.length === 0 && (
         <div className="bg-onyx border border-graphite p-12 text-center space-y-4">
