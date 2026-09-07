@@ -14,19 +14,47 @@ interface ColorPickerProps {
   align?: 'left' | 'right'
 }
 
+const RECENT_COLORS_STORAGE_KEY = 'gitascii_recent_colors'
+const MAX_RECENT_COLORS = 12
+
+function getRecentColors(): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(RECENT_COLORS_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function saveRecentColor(color: string): void {
+  if (typeof window === 'undefined') return
+  const normalized = color.trim()
+  if (!normalized) return
+  try {
+    const existing = getRecentColors().filter((c) => c.toLowerCase() !== normalized.toLowerCase())
+    const updated = [normalized, ...existing].slice(0, MAX_RECENT_COLORS)
+    localStorage.setItem(RECENT_COLORS_STORAGE_KEY, JSON.stringify(updated))
+  } catch {
+    // Non-blocking storage error
+  }
+}
+
 const PRESET_SWATCHES = [
-  'transparent', // Clear / Transparent
-  '#c5ff4a', // Signal Lime
-  '#00ffff', // Cyber Cyan
-  '#ff00ff', // Neon Pink
-  '#bd93f9', // Dracula Purple
-  '#88c0d0', // Nord Blue
-  '#ffb800', // Amber Gold
-  '#ff4a4a', // Crimson
-  '#060606', // Carbon Black
-  '#1f1f1f', // Graphite
-  '#7a7a7a', // Ash Gray
-  '#f0f0f0', // Chalk White
+  'transparent',
+  '#c5ff4a',
+  '#00ffff',
+  '#ff00ff',
+  '#bd93f9',
+  '#88c0d0',
+  '#ffb800',
+  '#ff4a4a',
+  '#060606',
+  '#1f1f1f',
+  '#7a7a7a',
+  '#f0f0f0',
 ]
 
 export function ColorPicker({
@@ -39,6 +67,7 @@ export function ColorPicker({
   const [isOpen, setIsOpen] = useState(false)
   const [hexInput, setHexInput] = useState(value)
   const [copied, setCopied] = useState(false)
+  const [recentColors, setRecentColors] = useState<string[]>([])
   const popoverRef = useRef<HTMLDivElement>(null)
 
   const isAuto = isGitHubAdaptiveTheme(value)
@@ -49,6 +78,12 @@ export function ColorPicker({
       setHexInput(value)
     }
   }, [value, hexInput])
+
+  useEffect(() => {
+    if (isOpen) {
+      setRecentColors(getRecentColors())
+    }
+  }, [isOpen])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -64,16 +99,57 @@ export function ColorPicker({
     }
   }, [isOpen])
 
+  const commitColor = (newColor: string) => {
+    onChange(newColor)
+    saveRecentColor(newColor)
+  }
+
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setHexInput(val)
-    const normalized = val.trim().toLowerCase()
+    const rawVal = e.target.value
+    setHexInput(rawVal)
+    const trimmed = rawVal.trim()
+    const normalized = trimmed.toLowerCase()
     const isAdaptive = isGitHubAdaptiveTheme(normalized)
-    if (
-      (/^#([0-9A-F]{3}){1,2}$/i.test(val) || normalized === 'transparent' || isAdaptive) &&
-      normalized !== value.toLowerCase()
-    ) {
-      onChange(isAdaptive ? GITHUB_THEME_KEYS.AUTO : val)
+
+    if (isAdaptive) {
+      commitColor(GITHUB_THEME_KEYS.AUTO)
+      return
+    }
+
+    if (normalized === 'transparent') {
+      commitColor('transparent')
+      return
+    }
+
+    let candidate = trimmed
+    if (!candidate.startsWith('#') && /^[0-9A-Fa-f]{3,8}$/.test(candidate)) {
+      candidate = `#${candidate}`
+    }
+
+    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(candidate)) {
+      if (candidate.toLowerCase() !== value.toLowerCase()) {
+        commitColor(candidate)
+      }
+    }
+  }
+
+  const handleHexBlur = () => {
+    const trimmed = hexInput.trim()
+    let candidate = trimmed
+    if (!candidate.startsWith('#') && /^[0-9A-Fa-f]{3,8}$/.test(candidate)) {
+      candidate = `#${candidate}`
+    }
+    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(candidate)) {
+      setHexInput(candidate)
+      if (candidate.toLowerCase() !== value.toLowerCase()) {
+        commitColor(candidate)
+      }
+    } else if (isGitHubAdaptiveTheme(trimmed)) {
+      setHexInput(GITHUB_THEME_KEYS.AUTO)
+    } else if (trimmed.toLowerCase() === 'transparent') {
+      setHexInput('transparent')
+    } else {
+      setHexInput(value)
     }
   }
 
@@ -167,7 +243,7 @@ export function ColorPicker({
           <button
             type="button"
             onClick={() => {
-              onChange(GITHUB_THEME_KEYS.AUTO)
+              commitColor(GITHUB_THEME_KEYS.AUTO)
               setHexInput(GITHUB_THEME_KEYS.AUTO)
             }}
             className={`w-full p-2 mb-2.5 rounded-sm border transition-all flex items-center justify-between text-left cursor-pointer group ${
@@ -209,7 +285,7 @@ export function ColorPicker({
                     type="button"
                     onClick={() => {
                       if (th.hex.toLowerCase() !== value.toLowerCase()) {
-                        onChange(th.hex)
+                        commitColor(th.hex)
                       }
                       setHexInput(th.hex)
                     }}
@@ -244,7 +320,7 @@ export function ColorPicker({
                 type="button"
                 onClick={() => {
                   if (color.toLowerCase() !== value.toLowerCase()) {
-                    onChange(color)
+                    commitColor(color)
                   }
                   setHexInput(color)
                 }}
@@ -277,6 +353,47 @@ export function ColorPicker({
             ))}
           </div>
 
+          {recentColors.length > 0 && (
+            <>
+              <div className="text-caption uppercase font-inter-tight font-semibold tracking-wider text-ash mb-1.5 pt-2 border-t border-graphite flex items-center justify-between">
+                <span>{t('editor.properties.color_picker.recent', 'Cores Recentes')}</span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                {recentColors.map((color) => (
+                  <button
+                    key={`recent-${color}`}
+                    type="button"
+                    onClick={() => {
+                      if (color.toLowerCase() !== value.toLowerCase()) {
+                        commitColor(color)
+                      }
+                      setHexInput(color)
+                    }}
+                    className={`w-5 h-5 rounded-[3px] border transition-transform hover:scale-110 cursor-pointer relative overflow-hidden ${
+                      value.toLowerCase() === color.toLowerCase()
+                        ? 'border-signal-lime ring-2 ring-signal-lime/40 scale-105'
+                        : 'border-white/10 hover:border-white/40'
+                    }`}
+                    style={
+                      color === 'transparent'
+                        ? {
+                            backgroundImage:
+                              'conic-gradient(#555 25%, #333 25%, #333 50%, #555 50%, #555 75%, #333 75%)',
+                            backgroundSize: '8px 8px',
+                          }
+                        : isGitHubAdaptiveTheme(color)
+                          ? {
+                              background: `linear-gradient(135deg, ${GITHUB_THEME_KEYS.DARK} 50%, ${GITHUB_THEME_KEYS.LIGHT} 50%)`,
+                            }
+                          : { backgroundColor: color }
+                    }
+                    title={color}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
           <div className="flex items-center gap-2 pt-2 border-t border-graphite">
             <div className="relative w-8 h-8 rounded-sm overflow-hidden border border-slate shrink-0 group cursor-pointer">
               <input
@@ -285,7 +402,7 @@ export function ColorPicker({
                 onChange={(e) => {
                   const val = e.target.value
                   if (val.toLowerCase() !== value.toLowerCase()) {
-                    onChange(val)
+                    commitColor(val)
                   }
                   setHexInput(val)
                 }}
@@ -319,6 +436,12 @@ export function ColorPicker({
                 type="text"
                 value={hexInput}
                 onChange={handleHexChange}
+                onBlur={handleHexBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleHexBlur()
+                  }
+                }}
                 placeholder="#000000"
                 className="w-full bg-graphite border border-graphite focus:border-signal-lime px-2 py-1 text-eyebrow font-jetbrains-mono uppercase text-chalk rounded-sm focus:outline-none"
               />
