@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { getProSocialProof } from '@/features/pro/server/socialProofStore'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 600 // 10 minutes ISR
 
 export async function GET() {

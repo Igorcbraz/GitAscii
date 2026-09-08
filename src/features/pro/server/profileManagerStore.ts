@@ -1,4 +1,14 @@
 import type { SavedConfiguration, WidgetInstance } from '@/engine/types'
+import {
+  createProfileInDb,
+  createProfileVersionInDb,
+  deleteProfileFromDb,
+  getProfileVersionByIdFromDb,
+  getProfileVersionsFromDb,
+  getUserProfilesFromDb,
+  setDefaultProfileInDb,
+  updateProfileInDb,
+} from '@/lib/db/repositories/profileRepository'
 import { loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
 
 import type { ProfileVersionRecord, ProProfileRecord } from '../types/profiles'
@@ -13,11 +23,42 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
   const u = username.toLowerCase().trim()
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
 
-  let slugs = await redis.smembers(profilesSetKey)
+  let dbProfiles: ProProfileRecord[] = []
+  try {
+    dbProfiles = await getUserProfilesFromDb(u)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL lookup warning for ${u}:`, dbErr)
+  }
+
+  let slugs = await redis.smembers(profilesSetKey).catch(() => [] as string[])
+
+  if ((!slugs || slugs.length === 0) && dbProfiles.length > 0) {
+    try {
+      const p = redis.pipeline()
+      for (const prof of dbProfiles) {
+        p.sadd(profilesSetKey, prof.slug)
+        p.hset(REDIS_KEYS.profileMeta(u, prof.slug), {
+          id: prof.id,
+          name: prof.name,
+          description: prof.description,
+          status: prof.status,
+          isDefault: String(prof.isDefault),
+          widgetsCount: prof.widgetsCount,
+          totalViews: prof.totalViews,
+          healthStatus: prof.healthStatus,
+          renderSuccessRate: prof.renderSuccessRate,
+          createdAt: prof.createdAt,
+          updatedAt: prof.lastUpdated,
+        })
+      }
+      await p.exec()
+    } catch {}
+    return dbProfiles
+  }
 
   if (!slugs || slugs.length === 0 || !slugs.includes('default')) {
-    await redis.sadd(profilesSetKey, 'default')
-    slugs = await redis.smembers(profilesSetKey)
+    await redis.sadd(profilesSetKey, 'default').catch(() => {})
+    slugs = await redis.smembers(profilesSetKey).catch(() => ['default'])
   }
 
   const profiles: ProProfileRecord[] = []
@@ -28,20 +69,23 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
       p.hgetall(REDIS_KEYS.profileMeta(u, slug))
       p.zrange(REDIS_KEYS.profileVersions(u, slug), 0, -1)
     }
-    const results = await p.exec<any[]>()
+    const results = await p.exec<any[]>().catch(() => [])
 
     for (let i = 0; i < slugs.length; i++) {
       const slug = slugs[i]
       const data = results[i * 2]
       const versionIds = results[i * 2 + 1] || []
 
+      const dbMatch = dbProfiles.find((dp) => dp.slug === slug)
+
       const isDefault =
-        data?.isDefault === 'true' ||
-        data?.isDefault === true ||
-        (slug === 'default' && data?.isDefault !== 'false')
+        data?.isDefault !== undefined
+          ? data.isDefault === 'true' || data.isDefault === true
+          : (dbMatch?.isDefault ?? slug === 'default')
+
       const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
       const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
-      const versionCount = versionIds?.length || 1
+      const versionCount = versionIds?.length || dbMatch?.versionCount || 1
 
       if (data && data.name) {
         profiles.push({
@@ -65,6 +109,8 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           publicUrl,
           rawSvgUrl,
         })
+      } else if (dbMatch) {
+        profiles.push(dbMatch)
       } else {
         const now = new Date().toISOString()
         const defaultRecord: ProProfileRecord = {
@@ -91,17 +137,21 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           rawSvgUrl,
         }
 
-        await redis.hset(REDIS_KEYS.profileMeta(u, slug), {
-          id: defaultRecord.id,
-          name: defaultRecord.name,
-          description: defaultRecord.description,
-          status: defaultRecord.status,
-          isDefault: String(defaultRecord.isDefault),
-          widgetsCount: defaultRecord.widgetsCount,
-          totalViews: defaultRecord.totalViews,
-          createdAt: defaultRecord.createdAt,
-          updatedAt: defaultRecord.lastUpdated,
-        })
+        await redis
+          .hset(REDIS_KEYS.profileMeta(u, slug), {
+            id: defaultRecord.id,
+            name: defaultRecord.name,
+            description: defaultRecord.description,
+            status: defaultRecord.status,
+            isDefault: String(defaultRecord.isDefault),
+            widgetsCount: defaultRecord.widgetsCount,
+            totalViews: defaultRecord.totalViews,
+            createdAt: defaultRecord.createdAt,
+            updatedAt: defaultRecord.lastUpdated,
+          })
+          .catch(() => {})
+
+        void createProfileInDb(u, defaultRecord).catch(() => {})
 
         profiles.push(defaultRecord)
       }
@@ -166,6 +216,12 @@ export async function createProfile(
     lastUpdated: now,
     publicUrl,
     rawSvgUrl,
+  }
+
+  try {
+    await createProfileInDb(u, record)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL createProfile error for @${u}:`, dbErr)
   }
 
   await redis.hset(metaKey, {
@@ -316,6 +372,12 @@ export async function duplicateProfile(
     rawSvgUrl,
   }
 
+  try {
+    await createProfileInDb(u, record, newConfig)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL duplicateProfile error for @${u}:`, dbErr)
+  }
+
   await redis.hset(metaKey, {
     id: record.id,
     name: record.name,
@@ -352,6 +414,12 @@ export async function setDefaultProfile(
     throw new Error(`Profile "${cleanSlug}" not found.`)
   }
 
+  try {
+    await setDefaultProfileInDb(u, cleanSlug)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL setDefaultProfile error for @${u}:`, dbErr)
+  }
+
   for (const p of profiles) {
     const metaKey = REDIS_KEYS.profileMeta(u, p.slug)
     const shouldBeDefault = p.slug === cleanSlug
@@ -376,6 +444,12 @@ export async function updateProfile(
 
   const existing = await redis.hgetall<any>(metaKey)
   if (!existing) return null
+
+  try {
+    await updateProfileInDb(u, cleanSlug, updates)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL updateProfile error for @${u}:`, dbErr)
+  }
 
   const now = new Date().toISOString()
   const payload: Record<string, any> = {
@@ -414,6 +488,12 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
     throw new Error(
       'Cannot delete the currently designated default profile. Set another profile as default first.'
     )
+  }
+
+  try {
+    await deleteProfileFromDb(u, cleanSlug)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL deleteProfile error for @${u}:`, dbErr)
   }
 
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
@@ -469,6 +549,12 @@ export async function createProfileVersion(
     createdBy: snapshot.createdBy || u,
   }
 
+  try {
+    await createProfileVersionInDb(u, cleanSlug, record)
+  } catch (dbErr) {
+    console.warn(`[ProfileManager] PostgreSQL createProfileVersion error for @${u}:`, dbErr)
+  }
+
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
   await redis.set(itemKey, JSON.stringify(record))
   await redis.zadd(versionsListKey, { score: timestamp, member: versionId })
@@ -498,6 +584,18 @@ export async function getProfileVersions(
 
   const versionIds = await redis.zrevrange<string[]>(versionsListKey, 0, -1).catch(() => [])
   if (!versionIds || versionIds.length === 0) {
+    try {
+      const dbVersions = await getProfileVersionsFromDb(u, cleanSlug)
+      if (dbVersions.length > 0) {
+        const p = redis.pipeline()
+        for (const v of dbVersions) {
+          p.set(REDIS_KEYS.profileVersionItem(u, cleanSlug, v.id), JSON.stringify(v))
+          p.zadd(versionsListKey, { score: new Date(v.createdAt).getTime(), member: v.id })
+        }
+        await p.exec().catch(() => {})
+        return dbVersions
+      }
+    } catch {}
     return []
   }
 
@@ -530,7 +628,16 @@ export async function getProfileVersionById(
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
 
   const raw = await redis.get<string | ProfileVersionRecord>(itemKey)
-  if (!raw) return null
+  if (!raw) {
+    try {
+      const dbVersion = await getProfileVersionByIdFromDb(u, cleanSlug, versionId)
+      if (dbVersion) {
+        void redis.set(itemKey, JSON.stringify(dbVersion)).catch(() => {})
+        return dbVersion
+      }
+    } catch {}
+    return null
+  }
   return typeof raw === 'string' ? (JSON.parse(raw) as ProfileVersionRecord) : raw
 }
 

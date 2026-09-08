@@ -56,7 +56,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept Github profile API call
     await page.route('**/api/github/**', async (route) => {
       await route.fulfill({
         status: 200,

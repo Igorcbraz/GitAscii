@@ -1,6 +1,10 @@
 import type { SavedConfiguration } from '@/engine/types'
 import { REDIS_KEYS } from '@/features/pro/server/analyticsStore'
 import { getProRedisClient } from '@/features/pro/server/redisClient'
+import {
+  getProfileConfigFromDb,
+  saveProfileConfigInDb,
+} from '@/lib/db/repositories/profileRepository'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { invalidateSvgCache } from '@/services/profileSvgService'
 
@@ -38,10 +42,17 @@ export function cacheProfileConfig(config: SavedConfiguration): void {
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
   cacheProfileConfig(config)
+  const username = config.username.toLowerCase()
+  const slug = (config.profileSlug || 'default').toLowerCase()
+
+  try {
+    await saveProfileConfigInDb(username, slug, config)
+  } catch (dbErr) {
+    console.warn('[ProfileStorage] Failed to persist config to PostgreSQL:', dbErr)
+  }
+
   try {
     const redis = getProRedisClient()
-    const username = config.username.toLowerCase()
-    const slug = (config.profileSlug || 'default').toLowerCase()
     const configKey = REDIS_KEYS.profileConfig(username, slug)
     await redis.set(configKey, JSON.stringify(config))
   } catch (err) {
@@ -123,6 +134,24 @@ export async function loadProfileConfig(
     console.warn('[ProfileStorage] Error reading config from Redis:', err)
   }
 
+  try {
+    const dbConfig = await getProfileConfigFromDb(usernameLower, slugLower)
+    if (dbConfig && Array.isArray(dbConfig.widgets)) {
+      memoryCache.set(cacheKey, {
+        config: dbConfig,
+        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+      })
+      try {
+        const redis = getProRedisClient()
+        const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
+        await redis.set(configKey, JSON.stringify(dbConfig))
+      } catch {}
+      return dbConfig
+    }
+  } catch (dbErr) {
+    console.warn('[ProfileStorage] Error reading config from PostgreSQL:', dbErr)
+  }
+
   const config = await fetchConfigFromGitHub(username, slugLower)
 
   if (config) {
@@ -131,6 +160,7 @@ export async function loadProfileConfig(
       expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
     })
 
+    void saveProfileConfigInDb(usernameLower, slugLower, config).catch(() => {})
     try {
       const redis = getProRedisClient()
       const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)

@@ -1,3 +1,10 @@
+import {
+  getProEmailLogsFromDb,
+  getTestDigestCountFromDb,
+  logSentEmailInDb,
+  recordTestDigestSentInDb,
+} from '@/lib/db/repositories/emailLogRepository'
+
 import type { EmailStatus, ProEmailLogRecord } from '../types/emails'
 import { REDIS_KEYS } from './analyticsStore'
 import { getProRedisClient } from './redisClient'
@@ -16,29 +23,35 @@ export interface LogEmailParams {
 }
 
 export async function logSentEmail(params: LogEmailParams): Promise<void> {
+  const username = params.username.toLowerCase().trim()
+  const emailId = `eml_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+  const now = new Date().toISOString()
+  const score = Date.now()
+
+  const record: ProEmailLogRecord = {
+    id: emailId,
+    recipientEmail: params.recipientEmail,
+    templateName: params.templateName,
+    subject: params.subject,
+    reason: params.reason,
+    relatedWidget: params.relatedWidget || null,
+    relatedProfile: params.relatedProfile || null,
+    sentAt: now,
+    status: params.status || 'sent',
+    errorMessage: params.errorMessage || null,
+    messageId: params.messageId || null,
+  }
+
+  try {
+    await logSentEmailInDb(username, record)
+  } catch (dbErr) {
+    console.warn('[EmailLogStore] Failed to persist sent email to PostgreSQL:', dbErr)
+  }
+
   try {
     const redis = getProRedisClient()
-    const username = params.username.toLowerCase().trim()
-    const emailId = `eml_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-    const now = new Date().toISOString()
-    const score = Date.now()
-
     const itemKey = REDIS_KEYS.emailItem(username, emailId)
     const listKey = REDIS_KEYS.emailList(username)
-
-    const record: ProEmailLogRecord = {
-      id: emailId,
-      recipientEmail: params.recipientEmail,
-      templateName: params.templateName,
-      subject: params.subject,
-      reason: params.reason,
-      relatedWidget: params.relatedWidget || null,
-      relatedProfile: params.relatedProfile || null,
-      sentAt: now,
-      status: params.status || 'sent',
-      errorMessage: params.errorMessage || null,
-      messageId: params.messageId || null,
-    }
 
     await redis.hset(itemKey, record as unknown as Record<string, any>)
     await redis.zadd(listKey, { score, member: emailId })
@@ -46,7 +59,7 @@ export async function logSentEmail(params: LogEmailParams): Promise<void> {
     await redis.expire(itemKey, 90 * 86400)
     await redis.expire(listKey, 90 * 86400)
   } catch (err) {
-    console.warn('[EmailLogStore] Failed to log sent email:', err)
+    console.warn('[EmailLogStore] Failed to cache sent email in Redis:', err)
   }
 }
 
@@ -55,8 +68,22 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.emailList(u)
 
-  const emailIds = await redis.zrevrange<string[]>(listKey, 0, 50)
+  const emailIds = await redis.zrevrange<string[]>(listKey, 0, 50).catch(() => [])
   if (!emailIds || emailIds.length === 0) {
+    try {
+      const dbLogs = await getProEmailLogsFromDb(u, 50)
+      if (dbLogs.length > 0) {
+        const p = redis.pipeline()
+        for (const log of dbLogs) {
+          p.hset(REDIS_KEYS.emailItem(u, log.id), log as unknown as Record<string, any>)
+          p.zadd(listKey, { score: new Date(log.sentAt).getTime(), member: log.id })
+        }
+        await p.exec().catch(() => {})
+        return dbLogs
+      }
+    } catch (dbErr) {
+      console.warn('[EmailLogStore] PostgreSQL fallback error:', dbErr)
+    }
     return []
   }
 
@@ -64,7 +91,7 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
   for (const id of emailIds) {
     p.hgetall(REDIS_KEYS.emailItem(u, id))
   }
-  const results = await p.exec<any[]>()
+  const results = await p.exec<any[]>().catch(() => [])
 
   const logs: ProEmailLogRecord[] = []
   for (const data of results) {
@@ -91,13 +118,20 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
 export const MAX_TEST_DIGESTS = 3
 
 export async function canSendTestDigest(username: string): Promise<boolean> {
+  const u = username.toLowerCase().trim()
+
   try {
     const redis = getProRedisClient()
-    const u = username.toLowerCase().trim()
-
     const count = Number((await redis.get(REDIS_KEYS.testDigestCooldown(u))) || 0)
     if (count >= MAX_TEST_DIGESTS) {
       return false
+    }
+
+    if (count === 0) {
+      const dbCount = await getTestDigestCountFromDb(u)
+      if (dbCount >= MAX_TEST_DIGESTS) {
+        return false
+      }
     }
 
     const logs = await getProEmailLogs(u)
@@ -113,13 +147,20 @@ export async function canSendTestDigest(username: string): Promise<boolean> {
 }
 
 export async function recordTestDigestSent(username: string): Promise<void> {
+  const u = username.toLowerCase().trim()
+
+  try {
+    await recordTestDigestSentInDb(u)
+  } catch (dbErr) {
+    console.warn('[EmailLogStore] PostgreSQL error recording test digest:', dbErr)
+  }
+
   try {
     const redis = getProRedisClient()
-    const u = username.toLowerCase().trim()
     const key = REDIS_KEYS.testDigestCooldown(u)
     const current = Number((await redis.get(key)) || 0)
     await redis.set(key, String(current + 1), { ex: 90 * 86400 })
   } catch (err) {
-    console.warn('[EmailLogStore] Error recording test digest cooldown:', err)
+    console.warn('[EmailLogStore] Error recording test digest cooldown in Redis:', err)
   }
 }

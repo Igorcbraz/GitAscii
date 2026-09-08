@@ -138,9 +138,6 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
   )
 }
 
-/**
- * Privacy Settings button — placed in the footer so users can revisit their choice.
- */
 export function PrivacySettingsButton() {
   const { t } = useI18n()
 

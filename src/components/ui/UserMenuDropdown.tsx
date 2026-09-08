@@ -42,12 +42,17 @@ export function UserMenuDropdown({
     avatarUrl || (username ? `https://github.com/${username}.png` : undefined)
 
   useEffect(() => {
-    if (isOpen && process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       fetch(API_ENDPOINTS.AUTH.SESSION)
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.session) {
-            setIsProUser(Boolean(data.session.isPro || data.session.tier !== PRO_PLAN_TIERS.FREE))
+            setIsProUser(
+              Boolean(
+                data.session.isPro ||
+                (data.session.tier && data.session.tier !== PRO_PLAN_TIERS.FREE)
+              )
+            )
           }
         })
         .catch(() => {})
@@ -309,7 +314,7 @@ export function UserMenuDropdown({
                 onClick={async (e) => {
                   e.stopPropagation()
                   try {
-                    const currentActive = isProUser ?? isPro
+                    const currentActive = Boolean(isProUser)
                     const nextTier = currentActive ? 'free' : 'pro'
                     await fetch(API_ENDPOINTS.PRO.DEV_TOGGLE, {
                       method: 'POST',
@@ -322,13 +327,13 @@ export function UserMenuDropdown({
                   }
                 }}
                 className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  (isProUser ?? isPro) ? 'bg-signal-lime' : 'bg-graphite'
+                  Boolean(isProUser) ? 'bg-signal-lime' : 'bg-graphite'
                 }`}
-                title={(isProUser ?? isPro) ? 'Disable Pro (Simulate Free)' : 'Enable Pro'}
+                title={Boolean(isProUser) ? 'Disable Pro (Simulate Free)' : 'Enable Pro'}
               >
                 <span
                   className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-void-black shadow-lg ring-0 transition duration-200 ease-in-out ${
-                    (isProUser ?? isPro) ? 'translate-x-4' : 'translate-x-0'
+                    Boolean(isProUser) ? 'translate-x-4' : 'translate-x-0'
                   }`}
                 />
               </button>

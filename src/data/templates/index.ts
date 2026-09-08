@@ -15,7 +15,6 @@ export interface RawTemplateData {
   name?: string
   description?: string
   category?: string
-  /** Widget tab category this template belongs to (matches WidgetCategory values) */
   widgetCategory?: string
   author?: string
   widgets: Array<{

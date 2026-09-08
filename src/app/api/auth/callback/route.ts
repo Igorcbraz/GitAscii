@@ -150,6 +150,17 @@ export async function GET(request: Request) {
     })
 
     try {
+      const { ensureUser } = await import('@/lib/db/repositories/userRepository')
+      await ensureUser(userData.login, {
+        githubId: userData.id,
+        email: userEmail,
+        name: userData.name || userData.login,
+      })
+    } catch (dbErr) {
+      console.warn('[OAuth Callback] Non-blocking DB user creation warning:', dbErr)
+    }
+
+    try {
       const { getProRedisClient } = await import('@/features/pro/server/redisClient')
       const redis = getProRedisClient()
       await redis.sadd('gitascii:all:users', userData.login.toLowerCase())

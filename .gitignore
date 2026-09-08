@@ -54,3 +54,4 @@ coverage/
 *.zip
 # React Email
 .react-email/
+.neon

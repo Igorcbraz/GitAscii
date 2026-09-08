@@ -20,7 +20,6 @@ interface TemplateLibrarySectionProps {
   importLayout: (widgets: any[], globalStyles: any, templateId: string) => void
 }
 
-/** Map of widgetCategory value → human-readable label shown in the picker */
 const WIDGET_CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'Nenhuma (GitAscii Native)' },
   { value: WIDGET_CATEGORIES.SURVEILLANCE, label: 'rugbedbugg' },

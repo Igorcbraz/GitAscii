@@ -1,3 +1,11 @@
+import {
+  clearAllWidgetErrorsInDb,
+  deleteWidgetErrorsInDb,
+  getWidgetErrorsFromDb,
+  recordWidgetErrorInDb,
+  resolveWidgetErrorInDb,
+} from '@/lib/db/repositories/healthRepository'
+
 import type { IngestErrorPayload, WidgetErrorRecord } from '../types/errors'
 import { REDIS_KEYS } from './analyticsStore'
 import { logSentEmail } from './emailLogStore'
@@ -19,45 +27,53 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
     const itemKey = REDIS_KEYS.errorItem(username, errorId)
     const listKey = REDIS_KEYS.errorList(username)
 
-    const existing = await redis.hgetall<Record<string, any>>(itemKey)
+    const existing = await redis.hgetall<Record<string, any>>(itemKey).catch(() => null)
 
-    if (existing && existing.id) {
-      const occurrences = Number(existing.occurrences || 1) + 1
-      await redis.hset(itemKey, {
-        occurrences,
-        lastSeenAt: now,
-        message: payload.message,
-        details: payload.details || existing.details || '',
-        status: 'active',
-      })
-      await redis.zadd(listKey, { score: nowScore, member: errorId })
-    } else {
-      const newRecord: WidgetErrorRecord = {
-        id: errorId,
-        widgetId,
-        widgetName,
-        profileSlug: slug,
-        errorType: payload.errorType,
-        message: payload.message,
-        details: payload.details || '',
-        status: 'active',
-        occurrences: 1,
-        firstSeenAt: now,
-        lastSeenAt: now,
-        resolvedAt: null,
-      }
-      await redis.hset(itemKey, newRecord as unknown as Record<string, any>)
-      await redis.zadd(listKey, { score: nowScore, member: errorId })
+    const recordToSave: WidgetErrorRecord = {
+      id: errorId,
+      widgetId,
+      widgetName,
+      profileSlug: slug,
+      errorType: payload.errorType,
+      message: payload.message,
+      details: payload.details || existing?.details || '',
+      status: 'active',
+      occurrences: existing?.occurrences ? Number(existing.occurrences) + 1 : 1,
+      firstSeenAt: existing?.firstSeenAt || now,
+      lastSeenAt: now,
+      resolvedAt: null,
     }
 
-    await redis.expire(itemKey, 90 * 86400)
-    await redis.expire(listKey, 90 * 86400)
+    try {
+      await recordWidgetErrorInDb(username, recordToSave)
+    } catch (dbErr) {
+      console.warn('[ErrorTrackerStore] PostgreSQL recordWidgetError error:', dbErr)
+    }
+
+    if (existing && existing.id) {
+      await redis
+        .hset(itemKey, {
+          occurrences: recordToSave.occurrences,
+          lastSeenAt: now,
+          message: payload.message,
+          details: payload.details || existing.details || '',
+          status: 'active',
+        })
+        .catch(() => {})
+      await redis.zadd(listKey, { score: nowScore, member: errorId }).catch(() => {})
+    } else {
+      await redis.hset(itemKey, recordToSave as unknown as Record<string, any>).catch(() => {})
+      await redis.zadd(listKey, { score: nowScore, member: errorId }).catch(() => {})
+    }
+
+    await redis.expire(itemKey, 90 * 86400).catch(() => {})
+    await redis.expire(listKey, 90 * 86400).catch(() => {})
 
     const cooldownKey = REDIS_KEYS.errorAlertCooldown(username, widgetId)
-    const isInCooldown = await redis.get(cooldownKey)
+    const isInCooldown = await redis.get(cooldownKey).catch(() => null)
 
     if (!isInCooldown) {
-      await redis.set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS })
+      await redis.set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS }).catch(() => {})
 
       void sendWidgetErrorAlertEmail(username, slug, widgetName, payload.message)
     }
@@ -118,8 +134,22 @@ export async function getWidgetErrors(username: string): Promise<WidgetErrorReco
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.errorList(u)
 
-  const errorIds = await redis.zrevrange<string[]>(listKey, 0, 50)
+  const errorIds = await redis.zrevrange<string[]>(listKey, 0, 50).catch(() => [])
   if (!errorIds || errorIds.length === 0) {
+    try {
+      const dbErrors = await getWidgetErrorsFromDb(u, 50)
+      if (dbErrors.length > 0) {
+        const p = redis.pipeline()
+        for (const err of dbErrors) {
+          p.hset(REDIS_KEYS.errorItem(u, err.id), err as unknown as Record<string, any>)
+          p.zadd(listKey, { score: new Date(err.lastSeenAt).getTime(), member: err.id })
+        }
+        await p.exec().catch(() => {})
+        return dbErrors
+      }
+    } catch (dbErr) {
+      console.warn('[ErrorTrackerStore] PostgreSQL getWidgetErrors fallback error:', dbErr)
+    }
     return []
   }
 
@@ -127,7 +157,7 @@ export async function getWidgetErrors(username: string): Promise<WidgetErrorReco
   for (const id of errorIds) {
     p.hgetall(REDIS_KEYS.errorItem(u, id))
   }
-  const results = await p.exec<any[]>()
+  const results = await p.exec<any[]>().catch(() => [])
 
   const records: WidgetErrorRecord[] = []
   for (const data of results) {
@@ -157,13 +187,21 @@ export async function resolveWidgetError(username: string, errorId: string): Pro
   const u = username.toLowerCase().trim()
   const itemKey = REDIS_KEYS.errorItem(u, errorId)
 
-  const existing = await redis.hgetall<any>(itemKey)
-  if (!existing) return false
+  try {
+    await resolveWidgetErrorInDb(u, errorId)
+  } catch (dbErr) {
+    console.warn('[ErrorTrackerStore] PostgreSQL resolveWidgetError error:', dbErr)
+  }
 
-  await redis.hset(itemKey, {
-    status: 'resolved',
-    resolvedAt: new Date().toISOString(),
-  })
+  const existing = await redis.hgetall<any>(itemKey).catch(() => null)
+  if (!existing) return true
+
+  await redis
+    .hset(itemKey, {
+      status: 'resolved',
+      resolvedAt: new Date().toISOString(),
+    })
+    .catch(() => {})
   return true
 }
 
@@ -174,9 +212,15 @@ export async function deleteWidgetErrors(username: string, errorIds: string[]): 
 
   if (!errorIds || errorIds.length === 0) return
 
+  try {
+    await deleteWidgetErrorsInDb(u, errorIds)
+  } catch (dbErr) {
+    console.warn('[ErrorTrackerStore] PostgreSQL deleteWidgetErrors error:', dbErr)
+  }
+
   const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
-  await redis.del(...itemKeys)
-  await redis.zrem(listKey, ...errorIds)
+  await redis.del(...itemKeys).catch(() => {})
+  await redis.zrem(listKey, ...errorIds).catch(() => {})
 }
 
 export async function clearAllWidgetErrors(username: string): Promise<void> {
@@ -184,10 +228,16 @@ export async function clearAllWidgetErrors(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.errorList(u)
 
-  const errorIds = await redis.zrange<string[]>(listKey, 0, -1)
+  try {
+    await clearAllWidgetErrorsInDb(u)
+  } catch (dbErr) {
+    console.warn('[ErrorTrackerStore] PostgreSQL clearAllWidgetErrors error:', dbErr)
+  }
+
+  const errorIds = await redis.zrange<string[]>(listKey, 0, -1).catch(() => [])
   if (errorIds && errorIds.length > 0) {
     const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
-    await redis.del(...itemKeys)
+    await redis.del(...itemKeys).catch(() => {})
   }
-  await redis.del(listKey)
+  await redis.del(listKey).catch(() => {})
 }

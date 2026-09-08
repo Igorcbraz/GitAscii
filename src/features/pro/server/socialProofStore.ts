@@ -33,6 +33,23 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
   const proUsers: string[] = []
   const proUsersSet = new Set<string>()
 
+  try {
+    const { hasDbConfig } = await import('@/lib/db/client')
+    if (hasDbConfig()) {
+      const { getProUsersFromDb } = await import('@/lib/db/repositories/userRepository')
+      const dbProUsers = await getProUsersFromDb()
+      for (const u of dbProUsers) {
+        const normalized = u.toLowerCase().trim()
+        if (normalized && !proUsersSet.has(normalized)) {
+          proUsersSet.add(normalized)
+          proUsers.push(normalized)
+        }
+      }
+    }
+  } catch (dbErr) {
+    console.warn('[SocialProof] DB fallback lookup warning:', dbErr)
+  }
+
   const envProUsers = (process.env.PRO_USERNAMES || process.env.PRO_ADMIN_USERS || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
