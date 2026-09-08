@@ -283,15 +283,18 @@ export async function getWidgetHealthList(
   ]
 
   const records: WidgetHealthRecord[] = []
-
+  const p = redis.pipeline()
   for (const w of knownWidgets) {
-    const metaKey = REDIS_KEYS.healthWidgetMeta(u, w.id)
-    const dailyKey = REDIS_KEYS.healthWidgetDaily(u, w.id, todayStr)
+    p.hgetall(REDIS_KEYS.healthWidgetMeta(u, w.id))
+    p.hgetall(REDIS_KEYS.healthWidgetDaily(u, w.id, todayStr))
+  }
 
-    const [meta, daily] = await Promise.all([
-      redis.hgetall<any>(metaKey),
-      redis.hgetall<any>(dailyKey),
-    ])
+  const results = await p.exec<any[]>()
+
+  for (let i = 0; i < knownWidgets.length; i++) {
+    const w = knownWidgets[i]
+    const meta = results[i * 2] as any
+    const daily = results[i * 2 + 1] as any
 
     const widgetErr = activeErrors.find((e) => e.widgetId === w.id)
     const renders = Number(daily?.renders || 0)

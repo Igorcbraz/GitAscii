@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis'
 
 export interface IProRedisPipeline {
+  get(key: string): IProRedisPipeline
   hget(key: string, field: string): IProRedisPipeline
   hgetall(key: string): IProRedisPipeline
   pfcount(...keys: string[]): IProRedisPipeline
@@ -10,6 +11,8 @@ export interface IProRedisPipeline {
   pfadd(key: string, ...elements: string[]): IProRedisPipeline
   sadd(key: string, ...members: string[]): IProRedisPipeline
   zadd(key: string, ...scoreMembers: { score: number; member: string }[]): IProRedisPipeline
+  zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }): IProRedisPipeline
+  zrevrange(key: string, start: number, stop: number): IProRedisPipeline
   exec<T = any[]>(): Promise<T>
 }
 
@@ -161,6 +164,10 @@ class UpstashRedisAdapter implements IProRedisStore {
   pipeline(): IProRedisPipeline {
     const p = this.client.pipeline()
     const wrapper: IProRedisPipeline = {
+      get(key: string) {
+        p.get(key)
+        return wrapper
+      },
       hget(key: string, field: string) {
         p.hget(key, field)
         return wrapper
@@ -203,6 +210,14 @@ class UpstashRedisAdapter implements IProRedisStore {
         for (const sm of scoreMembers) {
           p.zadd(key, { score: sm.score, member: sm.member })
         }
+        return wrapper
+      },
+      zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }) {
+        p.zrange(key, start, stop, opts?.rev ? { rev: true } : undefined)
+        return wrapper
+      },
+      zrevrange(key: string, start: number, stop: number) {
+        p.zrange(key, start, stop, { rev: true })
         return wrapper
       },
       async exec<T = any[]>(): Promise<T> {
@@ -480,6 +495,10 @@ class MemoryRedisStore implements IProRedisStore {
   pipeline(): IProRedisPipeline {
     const queue: Array<() => Promise<any>> = []
     const wrapper: IProRedisPipeline = {
+      get: (key: string) => {
+        queue.push(() => this.get(key))
+        return wrapper
+      },
       hget: (key: string, field: string) => {
         queue.push(() => this.hget(key, field))
         return wrapper
@@ -514,6 +533,14 @@ class MemoryRedisStore implements IProRedisStore {
       },
       zadd: (key: string, ...scoreMembers: { score: number; member: string }[]) => {
         queue.push(() => this.zadd(key, ...scoreMembers))
+        return wrapper
+      },
+      zrange: (key: string, start: number, stop: number, opts?: { rev?: boolean }) => {
+        queue.push(() => this.zrange(key, start, stop, opts))
+        return wrapper
+      },
+      zrevrange: (key: string, start: number, stop: number) => {
+        queue.push(() => this.zrevrange(key, start, stop))
         return wrapper
       },
       exec: async <T = any[]>(): Promise<T> => {

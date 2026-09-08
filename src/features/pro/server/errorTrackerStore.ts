@@ -174,10 +174,9 @@ export async function deleteWidgetErrors(username: string, errorIds: string[]): 
 
   if (!errorIds || errorIds.length === 0) return
 
-  for (const id of errorIds) {
-    await redis.del(REDIS_KEYS.errorItem(u, id))
-    await redis.zrem(listKey, id)
-  }
+  const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
+  await redis.del(...itemKeys)
+  await redis.zrem(listKey, ...errorIds)
 }
 
 export async function clearAllWidgetErrors(username: string): Promise<void> {
@@ -187,9 +186,8 @@ export async function clearAllWidgetErrors(username: string): Promise<void> {
 
   const errorIds = await redis.zrange<string[]>(listKey, 0, -1)
   if (errorIds && errorIds.length > 0) {
-    for (const id of errorIds) {
-      await redis.del(REDIS_KEYS.errorItem(u, id))
-    }
+    const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
+    await redis.del(...itemKeys)
   }
   await redis.del(listKey)
 }
