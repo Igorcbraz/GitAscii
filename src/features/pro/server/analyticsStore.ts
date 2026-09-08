@@ -115,6 +115,27 @@ function getDaysInRange(timeRange: TimeRange): { start: Date; end: Date; count: 
   return { start, end, count }
 }
 
+interface CachedAnalyticsSummary {
+  summary: AnalyticsSummary
+  expiresAt: number
+}
+
+const analyticsSummaryCache = new Map<string, CachedAnalyticsSummary>()
+const ANALYTICS_CACHE_TTL_MS = 60 * 1000
+
+export function invalidateAnalyticsCache(username?: string): void {
+  if (username) {
+    const prefix = `${username.toLowerCase().trim()}:`
+    for (const key of analyticsSummaryCache.keys()) {
+      if (key.startsWith(prefix)) {
+        analyticsSummaryCache.delete(key)
+      }
+    }
+  } else {
+    analyticsSummaryCache.clear()
+  }
+}
+
 export async function ingestProfileView(payload: IngestViewPayload): Promise<void> {
   try {
     const redis = getProRedisClient()
@@ -142,40 +163,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     const trafficType = parseTrafficType(payload.userAgent, payload.isCamoProxy, payload.referrer)
     const latency = Math.max(1, Math.round(payload.renderTimeMs || 25))
 
-    const hllKey = REDIS_KEYS.dailyHll(username, slug, dateStr)
-    await redis.pfadd(hllKey, visitorId)
-    await redis.expire(hllKey, RETENTION_TTL_SECONDS)
-
-    const dailyKey = REDIS_KEYS.dailyMetrics(username, slug, dateStr)
-    await redis.hincrby(dailyKey, 'views', 1)
-    if (payload.isCacheHit) {
-      await redis.hincrby(dailyKey, 'cacheHits', 1)
-      await redis.hincrby(dailyKey, 'status304', 1)
-    } else {
-      await redis.hincrby(dailyKey, 'status200', 1)
-    }
-    if (payload.isCamoProxy) {
-      await redis.hincrby(dailyKey, 'camoViews', 1)
-    } else {
-      await redis.hincrby(dailyKey, 'directViews', 1)
-    }
-    await redis.hincrby(dailyKey, 'totalLatencyMs', latency)
-    await redis.hincrby(dailyKey, 'latencyCount', 1)
-    await redis.expire(dailyKey, RETENTION_TTL_SECONDS)
-
-    const hourlyKey = REDIS_KEYS.hourlyMetrics(username, slug, dateStr)
-    await redis.hincrby(hourlyKey, String(hour), 1)
-    if (payload.isCamoProxy) {
-      await redis.hincrby(hourlyKey, `${hour}:camo`, 1)
-    } else {
-      await redis.hincrby(hourlyKey, `${hour}:direct`, 1)
-    }
-    await redis.expire(hourlyKey, RETENTION_TTL_SECONDS)
-
-    const weekdayKey = REDIS_KEYS.weekdayMetrics(username, slug)
-    await redis.hincrby(weekdayKey, `${dayOfWeek}:${hour}`, 1)
-    await redis.expire(weekdayKey, RETENTION_TTL_SECONDS)
-
     const dimensionsToRecord: [string, string][] = [
       ['countries', country],
       ['continents', continent.name],
@@ -190,27 +177,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
       ['status_codes', String(statusCode)],
     ]
 
-    for (const [dimName, dimValue] of dimensionsToRecord) {
-      if (!dimValue) continue
-      const dimKey = REDIS_KEYS.dimension(username, slug, dimName, dateStr)
-      await redis.hincrby(dimKey, dimValue, 1)
-      await redis.expire(dimKey, RETENTION_TTL_SECONDS)
-    }
-
-    const userTotalsKey = REDIS_KEYS.userTotals(username)
-    await redis.hincrby(userTotalsKey, 'totalViews', 1)
-
-    const profilesSetKey = REDIS_KEYS.userProfiles(username)
-    await redis.sadd(profilesSetKey, slug)
-
-    const profileMetaKey = REDIS_KEYS.profileMeta(username, slug)
-    await redis.hincrby(profileMetaKey, 'totalViews', 1)
-    await redis.hset(profileMetaKey, {
-      lastViewAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    })
-
-    const activityKey = REDIS_KEYS.activityStream(username)
     const eventPayload: TelemetryStreamEvent = {
       id: `act_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       timestamp: now.toISOString(),
@@ -229,19 +195,83 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
       latencyMs: latency,
     }
 
-    await redis.zadd(activityKey, {
+    const hllKey = REDIS_KEYS.dailyHll(username, slug, dateStr)
+    const dailyKey = REDIS_KEYS.dailyMetrics(username, slug, dateStr)
+    const hourlyKey = REDIS_KEYS.hourlyMetrics(username, slug, dateStr)
+    const weekdayKey = REDIS_KEYS.weekdayMetrics(username, slug)
+    const userTotalsKey = REDIS_KEYS.userTotals(username)
+    const profilesSetKey = REDIS_KEYS.userProfiles(username)
+    const profileMetaKey = REDIS_KEYS.profileMeta(username, slug)
+    const activityKey = REDIS_KEYS.activityStream(username)
+
+    // Execute all write commands in a single atomic pipeline HTTP request
+    const p = redis.pipeline()
+    p.pfadd(hllKey, visitorId)
+    p.expire(hllKey, RETENTION_TTL_SECONDS)
+
+    p.hincrby(dailyKey, 'views', 1)
+    if (payload.isCacheHit) {
+      p.hincrby(dailyKey, 'cacheHits', 1)
+      p.hincrby(dailyKey, 'status304', 1)
+    } else {
+      p.hincrby(dailyKey, 'status200', 1)
+    }
+    if (payload.isCamoProxy) {
+      p.hincrby(dailyKey, 'camoViews', 1)
+    } else {
+      p.hincrby(dailyKey, 'directViews', 1)
+    }
+    p.hincrby(dailyKey, 'totalLatencyMs', latency)
+    p.hincrby(dailyKey, 'latencyCount', 1)
+    p.expire(dailyKey, RETENTION_TTL_SECONDS)
+
+    p.hincrby(hourlyKey, String(hour), 1)
+    if (payload.isCamoProxy) {
+      p.hincrby(hourlyKey, `${hour}:camo`, 1)
+    } else {
+      p.hincrby(hourlyKey, `${hour}:direct`, 1)
+    }
+    p.expire(hourlyKey, RETENTION_TTL_SECONDS)
+
+    p.hincrby(weekdayKey, `${dayOfWeek}:${hour}`, 1)
+    p.expire(weekdayKey, RETENTION_TTL_SECONDS)
+
+    for (const [dimName, dimValue] of dimensionsToRecord) {
+      if (!dimValue) continue
+      const dimKey = REDIS_KEYS.dimension(username, slug, dimName, dateStr)
+      p.hincrby(dimKey, dimValue, 1)
+      p.expire(dimKey, RETENTION_TTL_SECONDS)
+    }
+
+    p.hincrby(userTotalsKey, 'totalViews', 1)
+    p.sadd(profilesSetKey, slug)
+    p.hincrby(profileMetaKey, 'totalViews', 1)
+    p.hset(profileMetaKey, {
+      lastViewAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    })
+
+    p.zadd(activityKey, {
       score: now.getTime(),
       member: JSON.stringify(eventPayload),
     })
-    await redis.expire(activityKey, RETENTION_TTL_SECONDS)
+    p.expire(activityKey, RETENTION_TTL_SECONDS)
 
-    const totalEvents = await redis.zrange(activityKey, 0, -1)
-    if (Array.isArray(totalEvents) && totalEvents.length > 50) {
-      const itemsToRemove = totalEvents.slice(0, totalEvents.length - 50)
-      if (itemsToRemove.length > 0) {
-        await redis.zrem(activityKey, ...itemsToRemove)
-      }
-    }
+    await p.exec()
+
+    void redis
+      .zrange(activityKey, 0, -1)
+      .then((totalEvents) => {
+        if (Array.isArray(totalEvents) && totalEvents.length > 50) {
+          const itemsToRemove = totalEvents.slice(0, totalEvents.length - 50)
+          if (itemsToRemove.length > 0) {
+            void redis.zrem(activityKey, ...itemsToRemove)
+          }
+        }
+      })
+      .catch(() => {})
+
+    invalidateAnalyticsCache(username)
   } catch (err) {
     console.warn('[AnalyticsStore] Error ingesting profile view:', err)
   }
@@ -253,10 +283,17 @@ export async function getAnalyticsSummary(
   timeRange: TimeRange = '30d',
   compareEnabled = true
 ): Promise<AnalyticsSummary> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const selectedSlug =
     profileSlug && profileSlug !== 'all' ? profileSlug.toLowerCase().trim() : null
+
+  const cacheKey = `${u}:${selectedSlug || 'all'}:${timeRange}:${compareEnabled}`
+  const cached = analyticsSummaryCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.summary
+  }
+
+  const redis = getProRedisClient()
 
   let slugsToQuery: string[] = []
   if (selectedSlug) {
@@ -333,100 +370,91 @@ export async function getAnalyticsSummary(
   const themeCounts: Record<string, number> = {}
   const statusCodeCounts: Record<string, number> = {}
 
+  const currentPipeline = redis.pipeline()
+  const queryMeta: Array<{ slug: string; dateStr: string }> = []
+  const dimsList = [
+    'countries',
+    'continents',
+    'languages',
+    'timezones',
+    'sources',
+    'devices',
+    'browsers',
+    'os',
+    'traffic_types',
+    'status_codes',
+  ]
+
   for (const slug of slugsToQuery) {
     for (const dateStr of currentDateList) {
-      const dailyKey = REDIS_KEYS.dailyMetrics(u, slug, dateStr)
-      const hllKey = REDIS_KEYS.dailyHll(u, slug, dateStr)
-
-      const [dailyData, uniquesCount] = await Promise.all([
-        redis.hgetall<Record<string, string | number>>(dailyKey),
-        redis.pfcount(hllKey).catch(() => 0),
-      ])
-
-      const entry = timeSeriesMap.get(dateStr)!
-      const views = Number(dailyData?.views || 0)
-      const cacheHits = Number(dailyData?.cacheHits || 0)
-      const camoViews = Number(dailyData?.camoViews || 0)
-      const directViews = Number(dailyData?.directViews || views - camoViews)
-      const s200 = Number(dailyData?.status200 || views - cacheHits)
-      const s304 = Number(dailyData?.status304 || cacheHits)
-      const sErr = Number(dailyData?.statusError || 0)
-      const latMs = Number(dailyData?.totalLatencyMs || views * 35)
-      const latCount = Number(dailyData?.latencyCount || views)
-
-      const effectiveUniques = uniquesCount || (views > 0 ? Math.ceil(views * 0.75) : 0)
-
-      entry.views += views
-      entry.uniques += effectiveUniques
-      entry.cacheHits += cacheHits
-      entry.camoViews += camoViews
-      entry.directViews += directViews
-      entry.status200 += s200
-      entry.status304 += s304
-      entry.statusError += sErr
-      entry.totalLatencyMs += latMs
-      entry.latencyCount += latCount
-
-      totalViews += views
-      totalCacheHits += cacheHits
-      totalCamoViews += camoViews
-      totalLatencyMs += latMs
-      totalLatencyCount += latCount
-
-      const [cDim, contDim, lDim, tzDim, sDim, dDim, bDim, oDim, ttDim, scDim] = await Promise.all([
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'countries', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'continents', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'languages', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'timezones', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'sources', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'devices', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'browsers', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'os', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'traffic_types', dateStr)
-        ),
-        redis.hgetall<Record<string, string | number>>(
-          REDIS_KEYS.dimension(u, slug, 'status_codes', dateStr)
-        ),
-      ])
-
-      const mergeMap = (
-        src: Record<string, string | number> | null,
-        target: Record<string, number>
-      ) => {
-        if (!src) return
-        for (const [k, v] of Object.entries(src)) {
-          target[k] = (target[k] || 0) + Number(v)
-        }
+      queryMeta.push({ slug, dateStr })
+      currentPipeline.hgetall(REDIS_KEYS.dailyMetrics(u, slug, dateStr))
+      currentPipeline.pfcount(REDIS_KEYS.dailyHll(u, slug, dateStr))
+      for (const dim of dimsList) {
+        currentPipeline.hgetall(REDIS_KEYS.dimension(u, slug, dim, dateStr))
       }
-
-      mergeMap(cDim, countryCounts)
-      mergeMap(contDim, continentCounts)
-      mergeMap(lDim, languageCounts)
-      mergeMap(tzDim, timezoneCounts)
-      mergeMap(sDim, sourceCounts)
-      mergeMap(dDim, deviceCounts)
-      mergeMap(bDim, browserCounts)
-      mergeMap(oDim, osCounts)
-      mergeMap(ttDim, trafficTypeCounts)
-      mergeMap(scDim, statusCodeCounts)
     }
+  }
+
+  const currentPipelineResults = await currentPipeline.exec<any[]>()
+  const itemsPerQuery = 2 + dimsList.length
+
+  const mergeMap = (
+    src: Record<string, string | number> | null,
+    target: Record<string, number>
+  ) => {
+    if (!src) return
+    for (const [k, v] of Object.entries(src)) {
+      target[k] = (target[k] || 0) + Number(v)
+    }
+  }
+
+  for (let idx = 0; idx < queryMeta.length; idx++) {
+    const { dateStr } = queryMeta[idx]
+    const baseIndex = idx * itemsPerQuery
+    const dailyData = currentPipelineResults[baseIndex] as Record<string, string | number> | null
+    const uniquesCount = Number(currentPipelineResults[baseIndex + 1] || 0)
+
+    const entry = timeSeriesMap.get(dateStr)!
+    const views = Number(dailyData?.views || 0)
+    const cacheHits = Number(dailyData?.cacheHits || 0)
+    const camoViews = Number(dailyData?.camoViews || 0)
+    const directViews = Number(dailyData?.directViews || views - camoViews)
+    const s200 = Number(dailyData?.status200 || views - cacheHits)
+    const s304 = Number(dailyData?.status304 || cacheHits)
+    const sErr = Number(dailyData?.statusError || 0)
+    const latMs = Number(dailyData?.totalLatencyMs || views * 35)
+    const latCount = Number(dailyData?.latencyCount || views)
+
+    const effectiveUniques = uniquesCount || (views > 0 ? Math.ceil(views * 0.75) : 0)
+
+    entry.views += views
+    entry.uniques += effectiveUniques
+    entry.cacheHits += cacheHits
+    entry.camoViews += camoViews
+    entry.directViews += directViews
+    entry.status200 += s200
+    entry.status304 += s304
+    entry.statusError += sErr
+    entry.totalLatencyMs += latMs
+    entry.latencyCount += latCount
+
+    totalViews += views
+    totalCacheHits += cacheHits
+    totalCamoViews += camoViews
+    totalLatencyMs += latMs
+    totalLatencyCount += latCount
+
+    mergeMap(currentPipelineResults[baseIndex + 2], countryCounts)
+    mergeMap(currentPipelineResults[baseIndex + 3], continentCounts)
+    mergeMap(currentPipelineResults[baseIndex + 4], languageCounts)
+    mergeMap(currentPipelineResults[baseIndex + 5], timezoneCounts)
+    mergeMap(currentPipelineResults[baseIndex + 6], sourceCounts)
+    mergeMap(currentPipelineResults[baseIndex + 7], deviceCounts)
+    mergeMap(currentPipelineResults[baseIndex + 8], browserCounts)
+    mergeMap(currentPipelineResults[baseIndex + 9], osCounts)
+    mergeMap(currentPipelineResults[baseIndex + 10], trafficTypeCounts)
+    mergeMap(currentPipelineResults[baseIndex + 11], statusCodeCounts)
   }
 
   let prevViews = 0
@@ -436,24 +464,37 @@ export async function getAnalyticsSummary(
   const prevHllKeys: string[] = []
   const prevTimeSeriesMap = new Map<number, { views: number; uniques: number }>()
 
+  const prevPipeline = redis.pipeline()
+  const prevMeta: Array<{ dayIndex: number; dateStr: string; slug: string }> = []
   for (let i = 0; i < prevDateList.length; i++) {
     const prevDateStr = prevDateList[i]
-    let dayViews = 0
     for (const slug of slugsToQuery) {
       prevHllKeys.push(REDIS_KEYS.dailyHll(u, slug, prevDateStr))
-      const dailyKey = REDIS_KEYS.dailyMetrics(u, slug, prevDateStr)
-      const data = await redis.hgetall<Record<string, string | number>>(dailyKey)
-      const views = Number(data?.views || 0)
-      const cacheHits = Number(data?.cacheHits || 0)
-      const latMs = Number(data?.totalLatencyMs || views * 35)
-      const latCount = Number(data?.latencyCount || views)
-
-      dayViews += views
-      prevViews += views
-      prevCacheHits += cacheHits
-      prevLatencyMs += latMs
-      prevLatencyCount += latCount
+      prevMeta.push({ dayIndex: i, dateStr: prevDateStr, slug })
+      prevPipeline.hgetall(REDIS_KEYS.dailyMetrics(u, slug, prevDateStr))
     }
+  }
+
+  const prevResults = await prevPipeline.exec<any[]>()
+  const prevDailyViews = new Map<number, number>()
+
+  for (let idx = 0; idx < prevMeta.length; idx++) {
+    const { dayIndex } = prevMeta[idx]
+    const data = prevResults[idx] as Record<string, string | number> | null
+    const views = Number(data?.views || 0)
+    const cacheHits = Number(data?.cacheHits || 0)
+    const latMs = Number(data?.totalLatencyMs || views * 35)
+    const latCount = Number(data?.latencyCount || views)
+
+    prevDailyViews.set(dayIndex, (prevDailyViews.get(dayIndex) || 0) + views)
+    prevViews += views
+    prevCacheHits += cacheHits
+    prevLatencyMs += latMs
+    prevLatencyCount += latCount
+  }
+
+  for (let i = 0; i < prevDateList.length; i++) {
+    const dayViews = prevDailyViews.get(i) || 0
     prevTimeSeriesMap.set(i, { views: dayViews, uniques: Math.ceil(dayViews * 0.75) })
   }
 
@@ -517,10 +558,23 @@ export async function getAnalyticsSummary(
     directViews: 0,
   }))
 
+  const miscPipeline = redis.pipeline()
   for (const slug of slugsToQuery) {
-    const hourlyData = await redis.hgetall<Record<string, string | number>>(
-      REDIS_KEYS.hourlyMetrics(u, slug, todayStr)
-    )
+    miscPipeline.hgetall(REDIS_KEYS.hourlyMetrics(u, slug, todayStr))
+    miscPipeline.hgetall(REDIS_KEYS.weekdayMetrics(u, slug))
+  }
+  const miscResults = await miscPipeline.exec<any[]>()
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const heatmapGrid: WeekdayHourPoint[] = []
+  const weekdayTotals: Record<number, number> = {}
+  let maxHeatmapViews = 1
+  const weekdayRawMap = new Map<string, number>()
+
+  for (let sIdx = 0; sIdx < slugsToQuery.length; sIdx++) {
+    const hourlyData = miscResults[sIdx * 2] as Record<string, string | number> | null
+    const weekdayData = miscResults[sIdx * 2 + 1] as Record<string, string | number> | null
+
     if (hourlyData) {
       for (let h = 0; h < 24; h++) {
         const v = Number(hourlyData[String(h)] || 0)
@@ -531,19 +585,7 @@ export async function getAnalyticsSummary(
         hourlyDataPoints[h].directViews += direct
       }
     }
-  }
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const heatmapGrid: WeekdayHourPoint[] = []
-  const weekdayTotals: Record<number, number> = {}
-
-  let maxHeatmapViews = 1
-  const weekdayRawMap = new Map<string, number>()
-
-  for (const slug of slugsToQuery) {
-    const weekdayData = await redis.hgetall<Record<string, string | number>>(
-      REDIS_KEYS.weekdayMetrics(u, slug)
-    )
     if (weekdayData) {
       for (const [k, v] of Object.entries(weekdayData)) {
         const countVal = Number(v)
@@ -650,15 +692,27 @@ export async function getAnalyticsSummary(
   const profileList = allUserSlugs && allUserSlugs.length > 0 ? allUserSlugs : ['default']
   const topProfiles: ProfilePerformanceMetric[] = []
 
+  const profilesPipeline = redis.pipeline()
   for (const slug of profileList) {
-    const meta = await redis.hgetall<any>(REDIS_KEYS.profileMeta(u, slug))
+    profilesPipeline.hgetall(REDIS_KEYS.profileMeta(u, slug))
+    for (const d of currentDateList) {
+      profilesPipeline.hgetall(REDIS_KEYS.dailyMetrics(u, slug, d))
+    }
+  }
+  const profilesResults = await profilesPipeline.exec<any[]>()
+  const itemsPerProfile = 1 + currentDateList.length
+
+  for (let pIdx = 0; pIdx < profileList.length; pIdx++) {
+    const slug = profileList[pIdx]
+    const basePIdx = pIdx * itemsPerProfile
+    const meta = profilesResults[basePIdx] as Record<string, any> | null
     let slugViews = 0
     let slugCacheHits = 0
     let slugLatencyMs = 0
     let slugLatencyCount = 0
 
-    for (const d of currentDateList) {
-      const dData = await redis.hgetall<any>(REDIS_KEYS.dailyMetrics(u, slug, d))
+    for (let dIdx = 0; dIdx < currentDateList.length; dIdx++) {
+      const dData = profilesResults[basePIdx + 1 + dIdx] as Record<string, any> | null
       const v = Number(dData?.views || 0)
       slugViews += v
       slugCacheHits += Number(dData?.cacheHits || 0)
@@ -807,7 +861,7 @@ export async function getAnalyticsSummary(
           { name: 'Linux', key: 'Linux', count: 0, percentage: 0 },
         ]
 
-  return {
+  const summaryResult: AnalyticsSummary = {
     totalViews,
     totalRequests: totalViews,
     uniqueVisitors: totalUniques,
@@ -855,4 +909,11 @@ export async function getAnalyticsSummary(
     compareEnabled,
     updatedAt: new Date().toISOString(),
   }
+
+  analyticsSummaryCache.set(cacheKey, {
+    summary: summaryResult,
+    expiresAt: Date.now() + ANALYTICS_CACHE_TTL_MS,
+  })
+
+  return summaryResult
 }

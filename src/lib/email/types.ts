@@ -7,6 +7,11 @@ export type EmailEventType =
   | 'app_disconnected'
   | 'star_thank_you'
   | 'request_star'
+  | 'pro_welcome'
+  | 'payment_failed'
+  | 'subscription_cancelled'
+  | 'widget_error_alert'
+  | 'daily_digest'
 
 export interface BaseEmailRecipient {
   email: string
@@ -47,6 +52,33 @@ export interface RequestStarEmailPayload extends BaseEmailRecipient {
   repoUrl?: string
   activeDays?: number
   editorUrl?: string
+}
+
+export interface ProWelcomeEmailPayload extends BaseEmailRecipient {
+  dashboardUrl?: string
+}
+
+export interface PaymentFailedEmailPayload extends BaseEmailRecipient {
+  billingUrl?: string
+  amountDue?: string
+}
+
+export interface SubscriptionCancelledEmailPayload extends BaseEmailRecipient {
+  feedbackUrl?: string
+}
+
+export interface WidgetErrorAlertEmailPayload extends BaseEmailRecipient {
+  widgetName: string
+  errorMessage: string
+  profileSlug: string
+  dashboardUrl?: string
+}
+
+export interface DailyDigestEmailPayload extends BaseEmailRecipient {
+  totalViews: number
+  uniqueVisitors: number
+  topWidget?: string
+  dashboardUrl?: string
 }
 
 export interface SendEmailResult {

@@ -13,6 +13,7 @@ import { HealthSkeleton } from './health/HealthSkeleton'
 import { OverviewDashboardSkeleton } from './overview/OverviewSkeleton'
 import { ProAuthGuard } from './ProAuthGuard'
 import { ProfilesDashboardSkeleton } from './profiles/ProfilesSkeleton'
+import { ProNavProvider } from './ProNavContext'
 import { ProSidebar } from './ProSidebar'
 import { ReportsDashboardSkeleton } from './reports/ReportsSkeleton'
 
@@ -86,17 +87,19 @@ export const ProLayout: React.FC<ProLayoutProps> = ({ children }) => {
   }, [])
 
   return (
-    <div className="h-screen bg-[#070707] text-[#e5e5e5] flex overflow-hidden">
-      <ProSidebar
-        username={username}
-        avatarUrl={avatarUrl}
-        isPro={isPro}
-        activeErrorsCount={activeErrorsCount}
-      />
+    <ProNavProvider>
+      <div className="h-screen bg-[#070707] text-[#e5e5e5] flex overflow-hidden relative">
+        <ProSidebar
+          username={username}
+          avatarUrl={avatarUrl}
+          isPro={isPro}
+          activeErrorsCount={activeErrorsCount}
+        />
 
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <ProAuthGuard loadingFallback={getSkeletonForPath(pathname)}>{children}</ProAuthGuard>
-      </main>
-    </div>
+        <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden w-full">
+          <ProAuthGuard loadingFallback={getSkeletonForPath(pathname)}>{children}</ProAuthGuard>
+        </main>
+      </div>
+    </ProNavProvider>
   )
 }

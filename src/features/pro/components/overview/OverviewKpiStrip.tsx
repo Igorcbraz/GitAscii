@@ -19,7 +19,7 @@ export const OverviewKpiStrip: React.FC<OverviewKpiStripProps> = ({ data }) => {
   const activeErrors = data?.activeErrorsCount ?? 0
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-white/[0.05] rounded overflow-hidden border border-white/[0.05]">
+    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-white/[0.05] rounded overflow-hidden border border-white/[0.05]">
       <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1 font-mono">
         <div className="flex items-center justify-between">
           <span className="text-[9px] uppercase tracking-widest text-[#555]">

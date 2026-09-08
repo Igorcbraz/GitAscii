@@ -22,82 +22,89 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
 
   const profiles: ProProfileRecord[] = []
 
-  for (const slug of slugs) {
-    const metaKey = REDIS_KEYS.profileMeta(u, slug)
-    const data = await redis.hgetall<any>(metaKey)
+  if (slugs.length > 0) {
+    const p = redis.pipeline()
+    for (const slug of slugs) {
+      p.hgetall(REDIS_KEYS.profileMeta(u, slug))
+      p.zrange(REDIS_KEYS.profileVersions(u, slug), 0, -1)
+    }
+    const results = await p.exec<any[]>()
 
-    const isDefault =
-      data?.isDefault === 'true' ||
-      data?.isDefault === true ||
-      (slug === 'default' && data?.isDefault !== 'false')
-    const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
-    const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
+    for (let i = 0; i < slugs.length; i++) {
+      const slug = slugs[i]
+      const data = results[i * 2]
+      const versionIds = results[i * 2 + 1] || []
 
-    const versionsListKey = REDIS_KEYS.profileVersions(u, slug)
-    const versionIds = await redis.zrange<string[]>(versionsListKey, 0, -1).catch(() => [])
-    const versionCount = versionIds?.length || 1
+      const isDefault =
+        data?.isDefault === 'true' ||
+        data?.isDefault === true ||
+        (slug === 'default' && data?.isDefault !== 'false')
+      const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
+      const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
+      const versionCount = versionIds?.length || 1
 
-    if (data && data.name) {
-      profiles.push({
-        id: data.id || `prof_${slug}`,
-        slug,
-        name: data.name,
-        description: data.description || '',
-        status: data.status || 'active',
-        isDefault,
-        widgetsCount: Number(data.widgetsCount || 3),
-        totalViews: Number(data.totalViews || 0),
-        versionCount,
-        healthStatus: (data.healthStatus as any) || 'operational',
-        renderSuccessRate: data.renderSuccessRate ? Number(data.renderSuccessRate) : 100,
-        lastRenderDurationMs: data.lastRenderDurationMs
-          ? Number(data.lastRenderDurationMs)
-          : undefined,
-        lastRenderedAt: data.lastRenderedAt || undefined,
-        createdAt: data.createdAt || new Date().toISOString(),
-        lastUpdated: data.updatedAt || data.lastUpdated || new Date().toISOString(),
-        publicUrl,
-        rawSvgUrl,
-      })
-    } else {
-      const now = new Date().toISOString()
-      const defaultRecord: ProProfileRecord = {
-        id: `prof_${slug}`,
-        slug,
-        name:
-          slug === 'default'
-            ? 'Primary GitHub Profile'
-            : `${slug.charAt(0).toUpperCase() + slug.slice(1)} Profile`,
-        description:
-          slug === 'default'
-            ? 'Main README dashboard displayed on your GitHub profile.'
-            : `Custom profile for ${slug}`,
-        status: 'active',
-        isDefault,
-        widgetsCount: 4,
-        totalViews: 0,
-        versionCount: 1,
-        healthStatus: 'operational',
-        renderSuccessRate: 100,
-        createdAt: now,
-        lastUpdated: now,
-        publicUrl,
-        rawSvgUrl,
+      if (data && data.name) {
+        profiles.push({
+          id: data.id || `prof_${slug}`,
+          slug,
+          name: data.name,
+          description: data.description || '',
+          status: data.status || 'active',
+          isDefault,
+          widgetsCount: Number(data.widgetsCount || 3),
+          totalViews: Number(data.totalViews || 0),
+          versionCount,
+          healthStatus: (data.healthStatus as any) || 'operational',
+          renderSuccessRate: data.renderSuccessRate ? Number(data.renderSuccessRate) : 100,
+          lastRenderDurationMs: data.lastRenderDurationMs
+            ? Number(data.lastRenderDurationMs)
+            : undefined,
+          lastRenderedAt: data.lastRenderedAt || undefined,
+          createdAt: data.createdAt || new Date().toISOString(),
+          lastUpdated: data.updatedAt || data.lastUpdated || new Date().toISOString(),
+          publicUrl,
+          rawSvgUrl,
+        })
+      } else {
+        const now = new Date().toISOString()
+        const defaultRecord: ProProfileRecord = {
+          id: `prof_${slug}`,
+          slug,
+          name:
+            slug === 'default'
+              ? 'Primary GitHub Profile'
+              : `${slug.charAt(0).toUpperCase() + slug.slice(1)} Profile`,
+          description:
+            slug === 'default'
+              ? 'Main README dashboard displayed on your GitHub profile.'
+              : `Custom profile for ${slug}`,
+          status: 'active',
+          isDefault,
+          widgetsCount: 4,
+          totalViews: 0,
+          versionCount: 1,
+          healthStatus: 'operational',
+          renderSuccessRate: 100,
+          createdAt: now,
+          lastUpdated: now,
+          publicUrl,
+          rawSvgUrl,
+        }
+
+        await redis.hset(REDIS_KEYS.profileMeta(u, slug), {
+          id: defaultRecord.id,
+          name: defaultRecord.name,
+          description: defaultRecord.description,
+          status: defaultRecord.status,
+          isDefault: String(defaultRecord.isDefault),
+          widgetsCount: defaultRecord.widgetsCount,
+          totalViews: defaultRecord.totalViews,
+          createdAt: defaultRecord.createdAt,
+          updatedAt: defaultRecord.lastUpdated,
+        })
+
+        profiles.push(defaultRecord)
       }
-
-      await redis.hset(metaKey, {
-        id: defaultRecord.id,
-        name: defaultRecord.name,
-        description: defaultRecord.description,
-        status: defaultRecord.status,
-        isDefault: String(defaultRecord.isDefault),
-        widgetsCount: defaultRecord.widgetsCount,
-        totalViews: defaultRecord.totalViews,
-        createdAt: defaultRecord.createdAt,
-        updatedAt: defaultRecord.lastUpdated,
-      })
-
-      profiles.push(defaultRecord)
     }
   }
 
@@ -421,9 +428,8 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)
   const versionIds = await redis.zrange<string[]>(versionsListKey, 0, -1).catch(() => [])
   if (versionIds && versionIds.length > 0) {
-    for (const vId of versionIds) {
-      await redis.del(REDIS_KEYS.profileVersionItem(u, cleanSlug, vId))
-    }
+    const keysToDelete = versionIds.map((vId) => REDIS_KEYS.profileVersionItem(u, cleanSlug, vId))
+    await redis.del(...keysToDelete)
   }
   await redis.del(versionsListKey)
 
@@ -496,12 +502,17 @@ export async function getProfileVersions(
   }
 
   const versions: ProfileVersionRecord[] = []
-  for (const vId of versionIds) {
-    const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, vId)
-    const raw = await redis.get<string | ProfileVersionRecord>(itemKey)
-    if (raw) {
-      const parsed: ProfileVersionRecord = typeof raw === 'string' ? JSON.parse(raw) : raw
-      versions.push(parsed)
+  if (versionIds.length > 0) {
+    const p = redis.pipeline()
+    for (const vId of versionIds) {
+      p.get(REDIS_KEYS.profileVersionItem(u, cleanSlug, vId))
+    }
+    const results = await p.exec<any[]>()
+    for (const raw of results) {
+      if (raw) {
+        const parsed: ProfileVersionRecord = typeof raw === 'string' ? JSON.parse(raw) : raw
+        versions.push(parsed)
+      }
     }
   }
 

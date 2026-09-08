@@ -4,6 +4,7 @@ import {
   getProEntitlements,
   getUserByStripeCustomer,
   getUserSettings,
+  invalidateEntitlementsCache,
   isProUser,
   updateUserSettings,
 } from './entitlements'
@@ -12,6 +13,7 @@ import { resetProRedisMemoryStoreForTesting } from './redisClient'
 describe('Entitlements Comprehensive Unit Tests', () => {
   beforeEach(() => {
     resetProRedisMemoryStoreForTesting()
+    invalidateEntitlementsCache()
   })
 
   it('correctly provides default free entitlements for unconfigured users', async () => {

@@ -20,7 +20,7 @@ export const OverviewQuickInsights: React.FC<OverviewQuickInsightsProps> = ({ da
   const { t, language } = useI18n()
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded overflow-hidden border border-white/[0.05]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded overflow-hidden border border-white/[0.05]">
       <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
         <span className="text-[#666] text-[11px]">{t('pro.insights.peak_day', 'Peak Day:')}</span>
         <span className="text-white font-bold">

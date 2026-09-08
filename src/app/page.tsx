@@ -156,7 +156,7 @@ export default async function LandingPage({
         <TractionBar metrics={metrics} />
         <CommunityProfiles profiles={storedProfiles} usersCount={metrics.users} />
         <TemplatesPreview count={metrics.templates} />
-        <ComparisonTable />
+        <ComparisonTable proCustomers={metrics.proCustomers} proUsernames={metrics.proUsernames} />
         <WidgetsShowcase count={metrics.widgets} />
         <EcosystemHub metrics={metrics} />
         <FAQ />

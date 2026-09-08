@@ -23,12 +23,18 @@ interface UserSessionState {
   tier?: (typeof PRO_PLAN_TIERS)[keyof typeof PRO_PLAN_TIERS]
 }
 
+interface SocialProofState {
+  count: number
+  usernames: string[]
+}
+
 export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFallback }) => {
   const pathname = usePathname() || '/pro'
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<UserSessionState | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
   const upgradeSuccess = false
+  const [socialProof, setSocialProof] = useState<SocialProofState>({ count: 0, usernames: [] })
 
   const checkAuth = async () => {
     try {
@@ -50,6 +56,13 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
 
   useEffect(() => {
     void checkAuth()
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/pro/social-proof')
+      .then((r) => r.json())
+      .then((d: SocialProofState) => setSocialProof(d))
+      .catch(() => {})
   }, [])
 
   const handleUpgradeToPro = async () => {
@@ -89,6 +102,8 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
         isUpgrading={isUpgrading}
         upgradeSuccess={upgradeSuccess}
         onUpgrade={handleUpgradeToPro}
+        proCustomers={socialProof.count}
+        proUsernames={socialProof.usernames}
       />
     )
   }

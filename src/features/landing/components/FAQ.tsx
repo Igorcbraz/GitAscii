@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, HelpCircle } from 'lucide-react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
 import ShinyText from '@/components/ui/ShinyText'
@@ -108,20 +108,24 @@ export function FAQ() {
                     />
                   </button>
                 </h3>
-                <div
-                  id={`faq-answer-${index}`}
-                  className={`grid transition-all duration-300 ease-in-out ${
-                    isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                  }`}
-                >
-                  <div className="overflow-hidden">
-                    <div className="px-6 pb-6 pl-12 sm:pl-14">
-                      <p className="font-inter-tight font-normal text-body text-bone leading-body">
-                        {faq.answer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      id={`faq-answer-${index}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 pb-6 pl-12 sm:pl-14">
+                        <p className="font-inter-tight font-normal text-body text-bone leading-body">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.article>
             )
           })}

@@ -330,12 +330,16 @@ export function renderWinXPMinesweeper(
   const cfg = widget.config || {}
   const pal = resolveWinXPPalette(cfg, globalStyles)
 
+  const commitCount =
+    data.contributions?.totalContributions ??
+    data.activityMetrics?.totalCommits ??
+    (data.totalStars ? data.totalStars * 4 : 382)
+
   const customTitle = (cfg.customTitle as string) || 'Minesweeper - GitHub Activity Mode'
   const customVictoryText =
     (cfg.customVictoryText as string) ||
-    `🏆 Victory! ${data.contributions?.totalContributions || data.totalStars * 4 || 382} Annual Commits Swept without detonating bugs.`
+    `🏆 Victory! ${commitCount} Annual Commits Swept without detonating bugs.`
 
-  const commitCount = data.contributions?.totalContributions || data.totalStars * 4 || 382
   const reposCount = data.user.public_repos ?? data.repos.length
 
   const minesLeft = (cfg.customMinesCount as string)
@@ -352,14 +356,37 @@ export function renderWinXPMinesweeper(
   const startX = Math.round((w - cols * cellSize) / 2)
   const startY = 110
 
-  const cellData = [
-    ['1', '1', '2', 'F', '1', '0', '0', '1', 'F', '1', '0', '1', '1', '1', '0', '0', '1', 'F'],
-    ['F', '1', '2', '2', '2', '1', '1', '2', '2', '2', '0', '1', 'F', '1', '0', '0', '1', '1'],
-    ['1', '1', '1', 'F', '1', '1', 'F', '1', '1', 'F', '1', '2', '2', '2', '1', '1', '1', '0'],
-    ['0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', 'F', '1', '1', 'F', '1', '0'],
-    ['0', '1', '1', '2', '1', '1', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '0'],
-    ['0', '1', 'F', '2', 'F', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'],
-  ]
+  const weeks = data.contributions?.weeks || []
+  const cellData: string[][] = []
+
+  const recentWeeks = weeks.slice(-cols)
+  for (let r = 0; r < rows; r++) {
+    const row: string[] = []
+    for (let c = 0; c < cols; c++) {
+      const week = recentWeeks[c]
+      const day = week?.contributionDays?.[r]
+      const count = day?.contributionCount ?? 0
+
+      if (count > 8) {
+        row.push('F')
+      } else if (count > 5) {
+        row.push('4')
+      } else if (count > 3) {
+        row.push('3')
+      } else if (count > 1) {
+        row.push('2')
+      } else if (count === 1) {
+        row.push('1')
+      } else {
+        const pseudoRand = ((r * 18 + c) * 31 + commitCount) % 17
+        if (pseudoRand === 0) row.push('F')
+        else if (pseudoRand < 3) row.push('1')
+        else if (pseudoRand === 4) row.push('2')
+        else row.push('0')
+      }
+    }
+    cellData.push(row)
+  }
 
   const numColors: Record<string, string> = {
     '1': '#0000ff',

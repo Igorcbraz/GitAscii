@@ -1,5 +1,6 @@
 import { templateList } from '@/data/templatesData'
 import { getStoredProfiles } from '@/features/explore/getCommunityProfiles'
+import { getLoggedInUsersCount, getProSocialProof } from '@/features/pro/server/socialProofStore'
 import { getAppInstallations } from '@/lib/githubApp'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -12,6 +13,9 @@ export interface LandingMetrics {
   templates: number
   widgets: number
   profiles: number
+  proCustomers: number
+  proUsernames: string[]
+  loggedInUsers: number
 }
 
 export const TEMPLATES_COUNT = templateList?.length || 18
@@ -24,6 +28,9 @@ export const DEFAULT_LANDING_METRICS: LandingMetrics = {
   templates: TEMPLATES_COUNT,
   widgets: WIDGETS_COUNT,
   profiles: 7,
+  proCustomers: 0,
+  proUsernames: [],
+  loggedInUsers: 0,
 }
 
 export async function fetchLandingMetrics(): Promise<LandingMetrics> {
@@ -31,20 +38,26 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
   let users = DEFAULT_LANDING_METRICS.users
   let profilesCount = DEFAULT_LANDING_METRICS.profiles
   let readmes = DEFAULT_LANDING_METRICS.readmes
+  let proCustomers = DEFAULT_LANDING_METRICS.proCustomers
+  let proUsernames = DEFAULT_LANDING_METRICS.proUsernames
+  let loggedInUsers = DEFAULT_LANDING_METRICS.loggedInUsers
 
   try {
-    const [starRes, installations, storedProfiles] = await Promise.allSettled([
-      fetch(API_ENDPOINTS.GITHUB.GITASCII_REPO, {
-        headers: {
-          'User-Agent': 'GitAscii-App',
-          Accept: 'application/vnd.github.v3+json',
-        },
-        next: { revalidate: 300 },
-        signal: AbortSignal.timeout(3000),
-      }),
-      getAppInstallations(),
-      getStoredProfiles(),
-    ])
+    const [starRes, installations, storedProfiles, socialProofRes, loggedInRes] =
+      await Promise.allSettled([
+        fetch(API_ENDPOINTS.GITHUB.GITASCII_REPO, {
+          headers: {
+            'User-Agent': 'GitAscii-App',
+            Accept: 'application/vnd.github.v3+json',
+          },
+          next: { revalidate: 300 },
+          signal: AbortSignal.timeout(3000),
+        }),
+        getAppInstallations(),
+        getStoredProfiles(),
+        getProSocialProof(),
+        getLoggedInUsersCount(),
+      ])
 
     if (starRes.status === 'fulfilled' && starRes.value.ok) {
       const repoData = await starRes.value.json()
@@ -68,6 +81,16 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
         users = profilesCount
       }
     }
+
+    if (socialProofRes.status === 'fulfilled') {
+      proCustomers = socialProofRes.value.count
+      proUsernames = socialProofRes.value.usernames
+    }
+
+    if (loggedInRes.status === 'fulfilled' && loggedInRes.value > 0) {
+      loggedInUsers = loggedInRes.value
+      users = Math.max(users, loggedInUsers)
+    }
   } catch (error) {
     console.warn('Failed to fetch dynamic landing metrics, using fallbacks:', error)
   }
@@ -79,5 +102,8 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
     templates: TEMPLATES_COUNT,
     widgets: WIDGETS_COUNT,
     profiles: profilesCount,
+    proCustomers,
+    proUsernames,
+    loggedInUsers,
   }
 }

@@ -110,7 +110,13 @@ export function TemplateLibrarySection({
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `template_${config.templateId || 'custom'}.json`
+      const templateSlug =
+        (config.templateId || 'custom')
+          .toLowerCase()
+          .replace(/[^a-z0-9_-]/g, '_')
+          .replace(/^_+|_+$/g, '') || 'custom'
+
+      link.download = `template_${templateSlug}.json`
       document.body.appendChild(link)
       link.click()
 

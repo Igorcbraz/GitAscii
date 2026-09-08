@@ -1,5 +1,21 @@
 import { Redis } from '@upstash/redis'
 
+export interface IProRedisPipeline {
+  get(key: string): IProRedisPipeline
+  hget(key: string, field: string): IProRedisPipeline
+  hgetall(key: string): IProRedisPipeline
+  pfcount(...keys: string[]): IProRedisPipeline
+  hincrby(key: string, field: string, increment: number): IProRedisPipeline
+  hset(key: string, kvMap: Record<string, any>): IProRedisPipeline
+  expire(key: string, seconds: number): IProRedisPipeline
+  pfadd(key: string, ...elements: string[]): IProRedisPipeline
+  sadd(key: string, ...members: string[]): IProRedisPipeline
+  zadd(key: string, ...scoreMembers: { score: number; member: string }[]): IProRedisPipeline
+  zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }): IProRedisPipeline
+  zrevrange(key: string, start: number, stop: number): IProRedisPipeline
+  exec<T = any[]>(): Promise<T>
+}
+
 export interface IProRedisStore {
   get<T = any>(key: string): Promise<T | null>
   set(key: string, value: any, opts?: { ex?: number }): Promise<any>
@@ -24,6 +40,10 @@ export interface IProRedisStore {
   srem(key: string, ...members: string[]): Promise<number>
   pfadd(key: string, ...elements: string[]): Promise<number>
   pfcount(...keys: string[]): Promise<number>
+  pipeline(): IProRedisPipeline
+  keys(pattern: string): Promise<string[]>
+  scan(cursor: number, opts?: { match?: string; count?: number }): Promise<[number, string[]]>
+  scard(key: string): Promise<number>
 }
 
 class UpstashRedisAdapter implements IProRedisStore {
@@ -119,6 +139,92 @@ class UpstashRedisAdapter implements IProRedisStore {
   async pfcount(...keys: string[]): Promise<number> {
     if (keys.length === 0) return 0
     return this.client.pfcount(keys[0], ...keys.slice(1))
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    const res = await this.client.keys(pattern)
+    return (res || []) as string[]
+  }
+
+  async scan(
+    cursor: number,
+    opts?: { match?: string; count?: number }
+  ): Promise<[number, string[]]> {
+    const res = await this.client.scan(cursor, {
+      match: opts?.match,
+      count: opts?.count ?? 100,
+    })
+    return res as unknown as [number, string[]]
+  }
+
+  async scard(key: string): Promise<number> {
+    return this.client.scard(key)
+  }
+
+  pipeline(): IProRedisPipeline {
+    const p = this.client.pipeline()
+    const wrapper: IProRedisPipeline = {
+      get(key: string) {
+        p.get(key)
+        return wrapper
+      },
+      hget(key: string, field: string) {
+        p.hget(key, field)
+        return wrapper
+      },
+      hgetall(key: string) {
+        p.hgetall(key)
+        return wrapper
+      },
+      pfcount(...keys: string[]) {
+        if (keys.length > 0) {
+          p.pfcount(keys[0], ...keys.slice(1))
+        }
+        return wrapper
+      },
+      hincrby(key: string, field: string, increment: number) {
+        p.hincrby(key, field, increment)
+        return wrapper
+      },
+      hset(key: string, kvMap: Record<string, any>) {
+        p.hset(key, kvMap)
+        return wrapper
+      },
+      expire(key: string, seconds: number) {
+        p.expire(key, seconds)
+        return wrapper
+      },
+      pfadd(key: string, ...elements: string[]) {
+        if (elements.length > 0) {
+          p.pfadd(key, elements[0], ...elements.slice(1))
+        }
+        return wrapper
+      },
+      sadd(key: string, ...members: string[]) {
+        if (members.length > 0) {
+          p.sadd(key, members[0], ...members.slice(1))
+        }
+        return wrapper
+      },
+      zadd(key: string, ...scoreMembers: { score: number; member: string }[]) {
+        for (const sm of scoreMembers) {
+          p.zadd(key, { score: sm.score, member: sm.member })
+        }
+        return wrapper
+      },
+      zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }) {
+        p.zrange(key, start, stop, opts?.rev ? { rev: true } : undefined)
+        return wrapper
+      },
+      zrevrange(key: string, start: number, stop: number) {
+        p.zrange(key, start, stop, { rev: true })
+        return wrapper
+      },
+      async exec<T = any[]>(): Promise<T> {
+        return (await p.exec()) as unknown as T
+      },
+    }
+    return wrapper
   }
 }
 
@@ -353,6 +459,99 @@ class MemoryRedisStore implements IProRedisStore {
       }
     }
     return combined.size
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+    const regex = new RegExp(`^${escaped}$`)
+    const allKeys = [
+      ...this.kv.keys(),
+      ...this.hashes.keys(),
+      ...this.sortedSets.keys(),
+      ...this.sets.keys(),
+    ]
+    const unique = [...new Set(allKeys)]
+    return unique.filter((k) => regex.test(k) && !this.isExpired(k))
+  }
+
+  async scan(
+    cursor: number,
+    opts?: { match?: string; count?: number }
+  ): Promise<[number, string[]]> {
+    const allKeys = await this.keys(opts?.match ?? '*')
+    const count = opts?.count ?? 100
+    const start = cursor
+    const slice = allKeys.slice(start, start + count)
+    const nextCursor = start + slice.length >= allKeys.length ? 0 : start + slice.length
+    return [nextCursor, slice]
+  }
+
+  async scard(key: string): Promise<number> {
+    if (this.isExpired(key)) return 0
+    const set = this.sets.get(key)
+    return set ? set.size : 0
+  }
+
+  pipeline(): IProRedisPipeline {
+    const queue: Array<() => Promise<any>> = []
+    const wrapper: IProRedisPipeline = {
+      get: (key: string) => {
+        queue.push(() => this.get(key))
+        return wrapper
+      },
+      hget: (key: string, field: string) => {
+        queue.push(() => this.hget(key, field))
+        return wrapper
+      },
+      hgetall: (key: string) => {
+        queue.push(() => this.hgetall(key))
+        return wrapper
+      },
+      pfcount: (...keys: string[]) => {
+        queue.push(() => this.pfcount(...keys))
+        return wrapper
+      },
+      hincrby: (key: string, field: string, increment: number) => {
+        queue.push(() => this.hincrby(key, field, increment))
+        return wrapper
+      },
+      hset: (key: string, kvMap: Record<string, any>) => {
+        queue.push(() => this.hset(key, kvMap))
+        return wrapper
+      },
+      expire: (key: string, seconds: number) => {
+        queue.push(() => this.expire(key, seconds))
+        return wrapper
+      },
+      pfadd: (key: string, ...elements: string[]) => {
+        queue.push(() => this.pfadd(key, ...elements))
+        return wrapper
+      },
+      sadd: (key: string, ...members: string[]) => {
+        queue.push(() => this.sadd(key, ...members))
+        return wrapper
+      },
+      zadd: (key: string, ...scoreMembers: { score: number; member: string }[]) => {
+        queue.push(() => this.zadd(key, ...scoreMembers))
+        return wrapper
+      },
+      zrange: (key: string, start: number, stop: number, opts?: { rev?: boolean }) => {
+        queue.push(() => this.zrange(key, start, stop, opts))
+        return wrapper
+      },
+      zrevrange: (key: string, start: number, stop: number) => {
+        queue.push(() => this.zrevrange(key, start, stop))
+        return wrapper
+      },
+      exec: async <T = any[]>(): Promise<T> => {
+        const results = []
+        for (const fn of queue) {
+          results.push(await fn())
+        }
+        return results as unknown as T
+      },
+    }
+    return wrapper
   }
 
   clear() {

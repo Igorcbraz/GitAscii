@@ -60,10 +60,14 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
     return []
   }
 
-  const logs: ProEmailLogRecord[] = []
+  const p = redis.pipeline()
   for (const id of emailIds) {
-    const itemKey = REDIS_KEYS.emailItem(u, id)
-    const data = await redis.hgetall<any>(itemKey)
+    p.hgetall(REDIS_KEYS.emailItem(u, id))
+  }
+  const results = await p.exec<any[]>()
+
+  const logs: ProEmailLogRecord[] = []
+  for (const data of results) {
     if (data && data.id) {
       logs.push({
         id: data.id,
