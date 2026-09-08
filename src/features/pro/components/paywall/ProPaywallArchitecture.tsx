@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
+
 import { PRO_ARCHITECTURE_NODES } from '../../constants/pricing'
 
 export const ProPaywallArchitecture: React.FC = () => {

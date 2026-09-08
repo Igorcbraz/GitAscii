@@ -18,16 +18,16 @@ import {
   Terminal,
   Zap,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
-import { CountryFlag } from './CountryFlag'
-import { ProSocialProof } from './ProSocialProof'
-import { ProPaywallArchitecture } from './paywall/ProPaywallArchitecture'
 import { getProPricing, PRO_PRICING_CONFIG, type ProFeatureItem } from '../constants/pricing'
+import { CountryFlag } from './CountryFlag'
+import { ProPaywallArchitecture } from './paywall/ProPaywallArchitecture'
+import { ProSocialProof } from './ProSocialProof'
 
 export interface ProPaywallProps {
   username?: string
@@ -157,18 +157,25 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     <div>
                       <div className="font-jetbrains-mono text-xl font-bold text-chalk tracking-tight">
-                        +1,420 <span className="text-[10px] font-normal text-signal-lime">unique</span>
+                        +1,420{' '}
+                        <span className="text-[10px] font-normal text-signal-lime">unique</span>
                       </div>
                       <p className="font-inter-tight text-[11px] text-ash line-clamp-1">
                         {t('pro.pricing.bullet1_title', 'Who visits your profile')}
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 text-[10px] font-jetbrains-mono text-bone/60 pt-1 border-t border-graphite/20">
-                      <span className="flex items-center gap-1"><CountryFlag code="US" className="w-3" /> 42%</span>
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="US" className="w-3" /> 42%
+                      </span>
                       <span className="text-graphite">·</span>
-                      <span className="flex items-center gap-1"><CountryFlag code="BR" className="w-3" /> 28%</span>
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="BR" className="w-3" /> 28%
+                      </span>
                       <span className="text-graphite">·</span>
-                      <span className="flex items-center gap-1"><CountryFlag code="DE" className="w-3" /> 14%</span>
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="DE" className="w-3" /> 14%
+                      </span>
                     </div>
                   </div>
 
@@ -184,7 +191,10 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                     </div>
                     <div>
                       <div className="font-jetbrains-mono text-xl font-bold text-chalk tracking-tight">
-                        0 <span className="text-[10px] font-normal text-emerald-400">broken badges</span>
+                        0{' '}
+                        <span className="text-[10px] font-normal text-emerald-400">
+                          broken badges
+                        </span>
                       </div>
                       <p className="font-inter-tight text-[11px] text-ash line-clamp-1">
                         {t('pro.pricing.bullet2_title', 'Never lose visitors to errors')}

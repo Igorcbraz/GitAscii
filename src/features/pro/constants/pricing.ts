@@ -407,4 +407,4 @@ export const PRO_ARCHITECTURE_NODES = [
       'Save edits and see them live on GitHub in seconds. Switch profiles or themes without waiting for cache timers.',
     iconId: 'refresh',
   },
-] as const;
+] as const

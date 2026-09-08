@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronDown, HelpCircle } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
 import ShinyText from '@/components/ui/ShinyText'
