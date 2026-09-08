@@ -12,20 +12,30 @@ import {
   recordSuppression,
 } from './ledger'
 import { AppDisconnectedEmail } from './templates/AppDisconnectedEmail'
+import { DailyDigestEmail } from './templates/DailyDigestEmail'
 import { FirstExportEmail } from './templates/FirstExportEmail'
+import { PaymentFailedEmail } from './templates/PaymentFailedEmail'
+import { ProWelcomeEmail } from './templates/ProWelcomeEmail'
 import { ReengagementEmail } from './templates/ReengagementEmail'
 import { RequestStarEmail } from './templates/RequestStarEmail'
 import { StarThankYouEmail } from './templates/StarThankYouEmail'
+import { SubscriptionCancelledEmail } from './templates/SubscriptionCancelledEmail'
 import { WelcomeEmail } from './templates/WelcomeEmail'
+import { WidgetErrorAlertEmail } from './templates/WidgetErrorAlertEmail'
 import { getUnsubscribeUrl } from './tokens'
 import type {
   AppDisconnectedEmailPayload,
+  DailyDigestEmailPayload,
   FirstExportEmailPayload,
+  PaymentFailedEmailPayload,
+  ProWelcomeEmailPayload,
   ReengagementEmailPayload,
   RequestStarEmailPayload,
   SendEmailResult,
   StarThankYouEmailPayload,
+  SubscriptionCancelledEmailPayload,
   WelcomeEmailPayload,
+  WidgetErrorAlertEmailPayload,
 } from './types'
 
 function safeLog(_val: unknown): string {
@@ -501,6 +511,210 @@ export class EmailService {
         { username: safeLog(username) },
         safeLog(message)
       )
+      Sentry.captureException(err)
+      return { success: false, error: message }
+    }
+  }
+
+  async sendProWelcomeEmail(payload: ProWelcomeEmailPayload): Promise<SendEmailResult> {
+    const { email, username, locale = 'en' } = payload
+    const t = getEmailTranslator(locale)
+
+    if (!email || !username)
+      return { success: false, skipped: true, reason: 'Missing email or username' }
+    if (isSuppressed(email))
+      return { success: false, skipped: true, reason: 'Email is suppressed/unsubscribed' }
+
+    if (hasEventBeenSent(username, 'pro_welcome')) {
+      return { success: false, skipped: true, reason: 'Pro welcome email already sent' }
+    }
+
+    const subject = t('email.pro_welcome.subject', 'Welcome to GitAscii Pro, @{username} 🚀', {
+      username,
+    })
+    const resend = getResendClient()
+    if (!resend || !isEmailConfigured()) {
+      recordEventSent(username, 'pro_welcome')
+      return { success: true, messageId: `dev-simulated-pro-welcome-${Date.now()}` }
+    }
+
+    try {
+      const idempotencyKey = `pro-welcome/${username.toLowerCase().trim()}`
+      const { data, error } = await resend.emails.send(
+        {
+          from: getEmailSender(),
+          replyTo: getEmailReplyTo(),
+          to: [email],
+          subject,
+          react: React.createElement(ProWelcomeEmail, payload),
+          headers: this.buildHeaders(email, username),
+        },
+        { idempotencyKey }
+      )
+      if (error) throw new Error(error.message)
+      recordEventSent(username, 'pro_welcome')
+      return { success: true, messageId: data?.id }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      Sentry.captureException(err)
+      return { success: false, error: message }
+    }
+  }
+
+  async sendPaymentFailedEmail(payload: PaymentFailedEmailPayload): Promise<SendEmailResult> {
+    const { email, username, locale = 'en' } = payload
+    const t = getEmailTranslator(locale)
+
+    if (!email || !username) return { success: false, skipped: true, reason: 'Missing email' }
+
+    const subject = t(
+      'email.payment_failed.subject',
+      'Action Required: Payment failed for GitAscii Pro'
+    )
+    const resend = getResendClient()
+    if (!resend || !isEmailConfigured()) {
+      recordEventSent(username, 'payment_failed')
+      return { success: true, messageId: `dev-simulated-payment-failed-${Date.now()}` }
+    }
+
+    try {
+      const idempotencyKey = `payment-failed/${username.toLowerCase().trim()}/${Date.now()}`
+      const { data, error } = await resend.emails.send(
+        {
+          from: getEmailSender(),
+          replyTo: getEmailReplyTo(),
+          to: [email],
+          subject,
+          react: React.createElement(PaymentFailedEmail, payload),
+          headers: this.buildHeaders(email, username),
+        },
+        { idempotencyKey }
+      )
+      if (error) throw new Error(error.message)
+      recordEventSent(username, 'payment_failed')
+      return { success: true, messageId: data?.id }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      Sentry.captureException(err)
+      return { success: false, error: message }
+    }
+  }
+
+  async sendSubscriptionCancelledEmail(
+    payload: SubscriptionCancelledEmailPayload
+  ): Promise<SendEmailResult> {
+    const { email, username, locale = 'en' } = payload
+    const t = getEmailTranslator(locale)
+
+    if (!email || !username) return { success: false, skipped: true }
+
+    const subject = t(
+      'email.subscription_cancelled.subject',
+      'Your GitAscii Pro subscription has been cancelled'
+    )
+    const resend = getResendClient()
+    if (!resend || !isEmailConfigured()) return { success: true }
+
+    try {
+      const idempotencyKey = `sub-cancelled/${username.toLowerCase().trim()}/${Date.now()}`
+      const { data, error } = await resend.emails.send(
+        {
+          from: getEmailSender(),
+          replyTo: getEmailReplyTo(),
+          to: [email],
+          subject,
+          react: React.createElement(SubscriptionCancelledEmail, payload),
+          headers: this.buildHeaders(email, username),
+        },
+        { idempotencyKey }
+      )
+      if (error) throw new Error(error.message)
+      recordEventSent(username, 'subscription_cancelled')
+      return { success: true, messageId: data?.id }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      Sentry.captureException(err)
+      return { success: false, error: message }
+    }
+  }
+
+  async sendWidgetErrorAlertEmail(payload: WidgetErrorAlertEmailPayload): Promise<SendEmailResult> {
+    const { email, username, widgetName, locale = 'en' } = payload
+    const t = getEmailTranslator(locale)
+
+    if (!email || !username) return { success: false, skipped: true }
+    if (isSuppressed(email)) return { success: false, skipped: true }
+
+    const lastSent = getLastEventTimestamp(username, 'widget_error_alert')
+    if (lastSent && Date.now() - lastSent < 60 * 60 * 1000) {
+      return { success: false, skipped: true, reason: 'Error alert in 1-hour cooldown' }
+    }
+
+    const subject = t('email.widget_error.subject', 'Alert: Widget {widgetName} failed to render', {
+      widgetName,
+    })
+    const resend = getResendClient()
+    if (!resend || !isEmailConfigured()) {
+      recordEventSent(username, 'widget_error_alert')
+      return { success: true }
+    }
+
+    try {
+      const idempotencyKey = `widget-error/${username.toLowerCase().trim()}/${Date.now()}`
+      const { data, error } = await resend.emails.send(
+        {
+          from: getEmailSender(),
+          replyTo: getEmailReplyTo(),
+          to: [email],
+          subject,
+          react: React.createElement(WidgetErrorAlertEmail, payload),
+          headers: this.buildHeaders(email, username),
+        },
+        { idempotencyKey }
+      )
+      if (error) throw new Error(error.message)
+      recordEventSent(username, 'widget_error_alert')
+      return { success: true, messageId: data?.id }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      Sentry.captureException(err)
+      return { success: false, error: message }
+    }
+  }
+
+  async sendDailyDigestEmail(payload: DailyDigestEmailPayload): Promise<SendEmailResult> {
+    const { email, username, locale = 'en' } = payload
+    const t = getEmailTranslator(locale)
+
+    if (!email || !username) return { success: false, skipped: true }
+    if (isSuppressed(email)) return { success: false, skipped: true }
+
+    const subject = t('email.daily_digest.subject', 'Your GitAscii Daily Profile Digest')
+    const resend = getResendClient()
+    if (!resend || !isEmailConfigured()) {
+      recordEventSent(username, 'daily_digest')
+      return { success: true }
+    }
+
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const idempotencyKey = `daily-digest/${username.toLowerCase().trim()}/${today}`
+      const { data, error } = await resend.emails.send(
+        {
+          from: getEmailSender(),
+          replyTo: getEmailReplyTo(),
+          to: [email],
+          subject,
+          react: React.createElement(DailyDigestEmail, payload),
+          headers: this.buildHeaders(email, username),
+        },
+        { idempotencyKey }
+      )
+      if (error) throw new Error(error.message)
+      recordEventSent(username, 'daily_digest')
+      return { success: true, messageId: data?.id }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
       Sentry.captureException(err)
       return { success: false, error: message }
     }
