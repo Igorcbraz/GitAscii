@@ -19,46 +19,10 @@ export interface ProfileSvgRequestOptions {
   isExplicitSlug?: boolean
 }
 
-interface SvgCacheEntry {
-  svgContent: string
-  etag: string
-  hasErrors: boolean
-  timestamp: number
-}
-
-const svgResponseCache = new Map<string, SvgCacheEntry>()
-const SVG_CACHE_TTL_MS = 10 * 60 * 1000
-const MAX_CACHE_ENTRIES = 300
-
-function getCachedSvg(key: string): SvgCacheEntry | null {
-  const entry = svgResponseCache.get(key)
-  if (!entry) return null
-  if (Date.now() - entry.timestamp > SVG_CACHE_TTL_MS) {
-    svgResponseCache.delete(key)
-    return null
-  }
-  return entry
-}
-
-function setCachedSvg(key: string, entry: SvgCacheEntry): void {
-  if (svgResponseCache.size >= MAX_CACHE_ENTRIES) {
-    const oldestKey = svgResponseCache.keys().next().value
-    if (oldestKey) svgResponseCache.delete(oldestKey)
-  }
-  svgResponseCache.set(key, entry)
-}
+import { unstable_cache } from 'next/cache'
 
 export function invalidateSvgCache(username?: string): void {
-  if (!username) {
-    svgResponseCache.clear()
-    return
-  }
-  const prefix = `${username.toLowerCase()}:`
-  for (const key of svgResponseCache.keys()) {
-    if (key.startsWith(prefix)) {
-      svgResponseCache.delete(key)
-    }
-  }
+  console.log('[profileSvgService] invalidateSvgCache called (no-op for unstable_cache)')
 }
 
 function computeEtag(content: string): string {
@@ -79,6 +43,64 @@ function escapeErrorXml(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
 }
+
+const getCachedSvgPayload = unstable_cache(
+  async (
+    username: string,
+    profileSlug: string,
+    theme: 'dark' | 'light',
+    templateParam: string | null,
+    widgetsParam: string[] | undefined
+  ) => {
+    const data = await fetchGitHubProfile(username)
+    let config = await loadProfileConfig(username, profileSlug)
+
+    if (!config) {
+      const templateId = templateParam || 'terminal'
+      config = createConfiguration(
+        data.user.id,
+        data.user.login,
+        templateId,
+        profileSlug,
+        'Default',
+        data
+      )
+    }
+
+    if (widgetsParam && widgetsParam.length > 0) {
+      for (const widgetId of widgetsParam) {
+        const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
+        if (!item) continue
+        const safeWidgetId = item.id
+        const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
+        if (!hasWidget) {
+          config.widgets.push({
+            instanceId: `${safeWidgetId}-query-${Date.now()}`,
+            widgetId: safeWidgetId,
+            position: { x: 20, y: 20 },
+            size: item.defaultSize || { width: 400, height: 200 },
+            config: {},
+            locked: false,
+            visible: true,
+            zIndex: 99,
+          })
+        }
+      }
+    }
+
+    const renderedWidgetIds = config.widgets.map((w: any) => w.widgetId || 'widget')
+
+    const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
+    const embedResult = await embedExternalImages(rawSvgContent)
+    const svgContent = sanitizeSvg(embedResult.svg)
+    const etag = computeEtag(svgContent)
+    const hasErrors = embedResult.hasErrors
+
+    return { svgContent, etag, hasErrors, renderedWidgetIds }
+  },
+  ['profile-svg-generation'],
+  { revalidate: 3600 }
+)
 
 export async function generateProfileSvgResponse(
   request: Request,
@@ -136,71 +158,15 @@ export async function generateProfileSvgResponse(
       : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
     const vParam = searchParams.get('v') || searchParams.get('t') || ''
-    const cacheKey = `${username.toLowerCase()}:${profileSlug}:${theme}:${templateParam || 'default'}:${(widgetsParam || []).sort().join(',')}:${vParam}`
+    const payload = await getCachedSvgPayload(
+      username,
+      profileSlug,
+      theme,
+      templateParam,
+      widgetsParam
+    )
 
-    let svgContent: string
-    let etag: string
-    let hasErrors: boolean
-    let renderedWidgetIds: string[] = []
-
-    const cachedEntry = getCachedSvg(cacheKey)
-    if (cachedEntry) {
-      svgContent = cachedEntry.svgContent
-      etag = cachedEntry.etag
-      hasErrors = cachedEntry.hasErrors
-    } else {
-      const data = await fetchGitHubProfile(username)
-
-      let config = await loadProfileConfig(username, profileSlug)
-
-      if (!config) {
-        const templateId = templateParam || 'terminal'
-        config = createConfiguration(
-          data.user.id,
-          data.user.login,
-          templateId,
-          profileSlug,
-          'Default',
-          data
-        )
-      }
-
-      if (widgetsParam && widgetsParam.length > 0) {
-        for (const widgetId of widgetsParam) {
-          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
-          if (!item) continue
-          const safeWidgetId = item.id
-          const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
-          if (!hasWidget) {
-            config.widgets.push({
-              instanceId: `${safeWidgetId}-query-${Date.now()}`,
-              widgetId: safeWidgetId,
-              position: { x: 20, y: 20 },
-              size: item.defaultSize || { width: 400, height: 200 },
-              config: {},
-              locked: false,
-              visible: true,
-              zIndex: 99,
-            })
-          }
-        }
-      }
-
-      renderedWidgetIds = config.widgets.map((w: any) => w.widgetId || 'widget')
-
-      const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
-      const embedResult = await embedExternalImages(rawSvgContent)
-      svgContent = sanitizeSvg(embedResult.svg)
-      etag = computeEtag(svgContent)
-      hasErrors = embedResult.hasErrors
-
-      setCachedSvg(cacheKey, {
-        svgContent,
-        etag,
-        hasErrors,
-        timestamp: Date.now(),
-      })
-    }
+    const { svgContent, etag, hasErrors, renderedWidgetIds } = payload
     const ifNoneMatch = request.headers.get('if-none-match')
 
     const cacheControl = hasErrors
@@ -251,6 +217,8 @@ export async function generateProfileSvgResponse(
       }
 
       const telemetryHandler = async () => {
+        if (Math.random() > 0.05) return
+
         await recordProfileView(metricPayload)
 
         try {
