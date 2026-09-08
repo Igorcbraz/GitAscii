@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.20.0](https://github.com/Igorcbraz/GitAscii/compare/v1.19.0...v1.20.0) (2026-09-08)
+
+
+### Features
+
+* **editor:** enhance color picker manual input and add recent colors history ([e47fd0f](https://github.com/Igorcbraz/GitAscii/commit/e47fd0fad129155fee84905d580fb0061566f6de))
+* **emails:** more emails templates ([7eb63c5](https://github.com/Igorcbraz/GitAscii/commit/7eb63c5ba34444abc884125f42887b095fc422fb))
+* **explore:** show all community developers with progressive infinite scroll and modularize seeds ([ffc3a48](https://github.com/Igorcbraz/GitAscii/commit/ffc3a4859f287f78218b632bbf12db9d6e0627fe))
+* **pro:** implement social proof metrics and optimize redis caching ([64e6809](https://github.com/Igorcbraz/GitAscii/commit/64e6809acfde1317b95ea00b5ce3bcd084bf72fe))
+* **pro:** make pro workspace responsive for mobile and smaller viewports ([0cc3c6c](https://github.com/Igorcbraz/GitAscii/commit/0cc3c6cf768ecc8b5dcc0ec033ffa1a21561391f))
+* **widgets:** wire live commit activity into windows xp minesweeper grid and timer ([c5f20b4](https://github.com/Igorcbraz/GitAscii/commit/c5f20b49250af3f94bb027197ffe2097cf0bfb12))
+
+
+### Bug Fixes
+
+* **editor:** sanitize template filename on template contribution export ([e1959c5](https://github.com/Igorcbraz/GitAscii/commit/e1959c59bbfa309f9eb558206515ba489d01305c))
+* **github:** preserve bot logo in pair commits by omitting explicit committer override ([966f493](https://github.com/Igorcbraz/GitAscii/commit/966f4933de66521d28f7098c89b33cd0a993ba35))
+* **lint:** format code ([0cbe150](https://github.com/Igorcbraz/GitAscii/commit/0cbe15066c225bdcc0f00a2247c3274a4eecfb61))
+
+
+### Performance Improvements
+
+* **pro:** optimize Redis queries with pipeline batching and in-memory caching ([32640ca](https://github.com/Igorcbraz/GitAscii/commit/32640cac1e3896356eee12ba016f279dc6527f48))
+* **redis:** resolve N+1 queries by adopting pipelines and variadic commands ([51562df](https://github.com/Igorcbraz/GitAscii/commit/51562df46b8675efde0148dc26d0ba23c00a3464))
+
 ## [1.19.0](https://github.com/Igorcbraz/GitAscii/compare/v1.18.0...v1.19.0) (2026-08-31)
 
 ### Features
