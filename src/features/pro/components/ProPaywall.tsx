@@ -18,19 +18,24 @@ import {
   Terminal,
   Zap,
 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
 import { getProPricing, PRO_PRICING_CONFIG, type ProFeatureItem } from '../constants/pricing'
+import { CountryFlag } from './CountryFlag'
+import { ProPaywallArchitecture } from './paywall/ProPaywallArchitecture'
+import { ProSocialProof } from './ProSocialProof'
 
 export interface ProPaywallProps {
   username?: string
   isUpgrading: boolean
   upgradeSuccess: boolean
   onUpgrade: () => void
+  proCustomers?: number
+  proUsernames?: string[]
 }
 
 export const ProPaywall: React.FC<ProPaywallProps> = ({
@@ -38,6 +43,8 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
   isUpgrading,
   upgradeSuccess,
   onUpgrade,
+  proCustomers,
+  proUsernames,
 }) => {
   const { t, language } = useI18n()
   const pricing = getProPricing(language)
@@ -86,8 +93,8 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
   }
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-carbon text-chalk px-4 py-8 sm:px-6 sm:py-12 lg:px-10 select-none">
-      <div className="w-full max-w-7xl mx-auto space-y-12 sm:space-y-16">
+    <div className="w-full h-full overflow-y-auto bg-carbon text-chalk px-4 py-8 sm:px-8 sm:py-12 lg:px-12 xl:px-16 select-none">
+      <div className="w-full max-w-[1480px] mx-auto space-y-12 sm:space-y-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -138,62 +145,89 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   )}
                 </p>
 
-                <div className="space-y-3 pt-2 text-[13px] sm:text-[14px] font-inter-tight text-bone/90">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-sm bg-signal-lime/10 border border-signal-lime/30 flex items-center justify-center text-signal-lime shrink-0 mt-0.5 shadow-[0_0_6px_rgba(197,255,74,0.2)]">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                    <span>
-                      <strong className="text-chalk font-semibold">
-                        {t('pro.pricing.bullet1_title', 'Know exactly who sees your profile:')}
-                      </strong>{' '}
-                      <span className="text-ash">
-                        {t(
-                          'pro.pricing.bullet1_desc',
-                          "Real visitors, where they're from, and what brought them here — no cookies, no GDPR friction, 90 days of history."
-                        )}
+                {/* Visual Telemetry & Capability Badges Preview */}
+                <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 bg-onyx/30 rounded-sm space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-jetbrains-mono text-[10px] text-signal-lime uppercase tracking-wider font-semibold">
+                        <BarChart3 className="w-3.5 h-3.5 text-signal-lime" />
+                        {t('pro.pricing.pill_telemetry', 'Audience')}
                       </span>
-                    </span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-signal-lime animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="font-jetbrains-mono text-xl font-bold text-chalk tracking-tight">
+                        +1,420{' '}
+                        <span className="text-[10px] font-normal text-signal-lime">unique</span>
+                      </div>
+                      <p className="font-inter-tight text-[11px] text-ash line-clamp-1">
+                        {t('pro.pricing.bullet1_title', 'Who visits your profile')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-jetbrains-mono text-bone/60 pt-1 border-t border-graphite/20">
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="US" className="w-3" /> 42%
+                      </span>
+                      <span className="text-graphite">·</span>
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="BR" className="w-3" /> 28%
+                      </span>
+                      <span className="text-graphite">·</span>
+                      <span className="flex items-center gap-1">
+                        <CountryFlag code="DE" className="w-3" /> 14%
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-sm bg-signal-lime/10 border border-signal-lime/30 flex items-center justify-center text-signal-lime shrink-0 mt-0.5 shadow-[0_0_6px_rgba(197,255,74,0.2)]">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                    <span>
-                      <strong className="text-chalk font-semibold">
-                        {t(
-                          'pro.pricing.bullet2_title',
-                          'Never lose a recruiter to a broken badge:'
-                        )}
-                      </strong>{' '}
-                      <span className="text-ash">
-                        {t(
-                          'pro.pricing.bullet2_desc',
-                          "We watch every widget 24/7 and email you before anyone else notices it's broken."
-                        )}
+                  <div className="p-4 bg-onyx/30 rounded-sm space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-jetbrains-mono text-[10px] text-amber-400 uppercase tracking-wider font-semibold">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                        {t('pro.pricing.pill_sentinel', 'Sentinel 24/7')}
                       </span>
-                    </span>
+                      <span className="px-1 py-0.5 bg-emerald-500/10 text-[9px] font-jetbrains-mono text-emerald-400 rounded-xs">
+                        99.9%
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-jetbrains-mono text-xl font-bold text-chalk tracking-tight">
+                        0{' '}
+                        <span className="text-[10px] font-normal text-emerald-400">
+                          broken badges
+                        </span>
+                      </div>
+                      <p className="font-inter-tight text-[11px] text-ash line-clamp-1">
+                        {t('pro.pricing.bullet2_title', 'Never lose visitors to errors')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-jetbrains-mono text-bone/60 pt-1 border-t border-graphite/20">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                      <span>Checks every 10 min</span>
+                    </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-sm bg-signal-lime/10 border border-signal-lime/30 flex items-center justify-center text-signal-lime shrink-0 mt-0.5 shadow-[0_0_6px_rgba(197,255,74,0.2)]">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                    <span>
-                      <strong className="text-chalk font-semibold">
-                        {t(
-                          'pro.pricing.bullet3_title',
-                          'Create a special profile for each moment:'
-                        )}
-                      </strong>{' '}
-                      <span className="text-ash">
-                        {t(
-                          'pro.pricing.bullet3_desc',
-                          'From your main README to a custom page for your next conference talk or OSS launch — each with its own analytics.'
-                        )}
+                  <div className="p-4 bg-onyx/30 rounded-sm space-y-2 relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-jetbrains-mono text-[10px] text-cyan-400 uppercase tracking-wider font-semibold">
+                        <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                        {t('pro.pricing.pill_profiles', 'Profiles')}
                       </span>
-                    </span>
+                      <span className="text-[9px] font-jetbrains-mono text-signal-lime font-bold">
+                        10 Slugs
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-jetbrains-mono text-xl font-bold text-chalk tracking-tight">
+                        /work <span className="text-[10px] font-normal text-ash">· /oss</span>
+                      </div>
+                      <p className="font-inter-tight text-[11px] text-ash line-clamp-1">
+                        {t('pro.pricing.bullet3_title', 'Tailored for events & talks')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-jetbrains-mono text-bone/60 pt-1 border-t border-graphite/20">
+                      <Zap className="w-3 h-3 text-cyan-400" />
+                      <span>Sub-10ms Camo purges</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -288,6 +322,14 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   </span>
                 </div>
               </div>
+
+              <div className="mt-6 pt-5 border-t border-graphite/30 flex justify-center">
+                <ProSocialProof
+                  count={proCustomers ?? 0}
+                  usernames={proUsernames ?? []}
+                  variant="hero"
+                />
+              </div>
             </div>
           </div>
         </motion.div>
@@ -318,22 +360,22 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
             {PRO_PRICING_CONFIG.features.map((feat: ProFeatureItem) => (
               <div
                 key={feat.id}
-                className="p-6 rounded-none bg-gradient-to-b from-onyx/50 to-carbon/80 border border-graphite/40 hover:border-signal-lime/40 transition-all duration-200 flex flex-col justify-between space-y-4 group relative overflow-hidden"
+                className="p-6 rounded-none bg-onyx/30 flex flex-col justify-between space-y-4 relative overflow-hidden"
               >
-                <div className="space-y-3">
+                <div className="space-y-3.5 relative z-10">
                   <div className="flex items-center justify-between">
-                    <div className="p-2 rounded-sm bg-void-black/80 border border-graphite/40 group-hover:border-signal-lime/30 transition-colors">
+                    <div className="p-2.5 rounded-sm bg-void-black/80 border border-graphite/40">
                       {getFeatureIcon(feat.id)}
                     </div>
                     {feat.tag && (
-                      <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash group-hover:text-signal-lime transition-colors">
+                      <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash/80">
                         {feat.tagKey ? t(feat.tagKey, feat.tag) : feat.tag}
                       </span>
                     )}
                   </div>
 
                   <div>
-                    <h3 className="font-inter-tight font-semibold text-[15px] text-chalk group-hover:text-signal-lime transition-colors mb-1.5">
+                    <h3 className="font-inter-tight font-semibold text-[15px] sm:text-[16px] text-chalk mb-1.5 leading-snug">
                       {t(feat.titleKey, feat.titleDefault)}
                     </h3>
                     <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
@@ -342,7 +384,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   </div>
 
                   {feat.specs && feat.specs.length > 0 && (
-                    <div className="pt-3 border-t border-graphite/20 space-y-1.5">
+                    <div className="pt-3 border-t border-graphite/30 space-y-1.5">
                       {feat.specs.map((spec, sIdx) => {
                         const specKey = feat.specKeys?.[sIdx]
                         const specText = specKey ? t(specKey, spec) : spec
@@ -351,8 +393,8 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                             key={sIdx}
                             className="flex items-center gap-2 text-[11px] font-jetbrains-mono text-bone/80"
                           >
-                            <span className="w-1 h-1 rounded-full bg-signal-lime/70" />
-                            <span>{specText}</span>
+                            <span className="w-1 h-1 rounded-full bg-signal-lime/70 shrink-0" />
+                            <span className="truncate">{specText}</span>
                           </div>
                         )
                       })}
@@ -360,11 +402,12 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-graphite/20 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 font-jetbrains-mono text-[10px] uppercase tracking-wider text-signal-lime font-medium">
+                <div className="pt-3 border-t border-graphite/30 flex items-center justify-between relative z-10">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-signal-lime/10 border border-signal-lime/25 font-jetbrains-mono text-[10px] uppercase tracking-wider text-signal-lime font-medium">
+                    <Zap className="w-2.5 h-2.5 fill-signal-lime" />
                     {feat.badgeKey ? t(feat.badgeKey, feat.badge || '') : feat.badge}
                   </span>
-                  <span className="font-jetbrains-mono text-[9px] uppercase text-graphite">
+                  <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash/60">
                     {t('pro.pricing.pro_tier_only', 'PRO TIER ONLY')}
                   </span>
                 </div>
@@ -452,91 +495,28 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
                       }`}
                     />
                   </button>
-                  {isOpen && (
-                    <div className="px-4 pb-5 sm:px-5 sm:pb-5 pt-0 text-[12px] sm:text-[13px] text-ash font-inter-tight leading-relaxed border-t border-graphite/20">
-                      {t(faq.answerKey, faq.answerDefault)}
-                    </div>
-                  )}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-5 sm:px-5 sm:pb-5 pt-0 text-[12px] sm:text-[13px] text-ash font-inter-tight leading-relaxed border-t border-graphite/20">
+                          {t(faq.answerKey, faq.answerDefault)}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )
             })}
           </div>
         </div>
 
-        <div className="relative overflow-hidden border border-graphite/40 bg-onyx/30 p-6 sm:p-8">
-          <div className="flex items-center gap-3 pb-6 border-b border-graphite/30">
-            <Cpu className="w-4 h-4 text-signal-lime" />
-            <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.2em] text-signal-lime font-medium">
-              {t('pro.pricing.arch_badge', '[ RELIABILITY & PRIVACY ASSURANCE ]')}
-            </span>
-            <span className="flex-1 h-px bg-graphite/30" />
-            <span className="font-jetbrains-mono text-[9px] uppercase tracking-widest text-ash hidden md:block">
-              {t('pro.pricing.arch_latency', 'ZERO DATABASE LOCK-IN · 99.9% UPTIME')}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                {t('pro.pricing.arch_1_num', '01 / FAST WORLDWIDE')}
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_1_title', 'Loads Instantly Anywhere')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_1_desc',
-                  'Your profile SVGs render in milliseconds worldwide so visitors never experience slow loading or empty placeholders.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                {t('pro.pricing.arch_2_num', '02 / PRIVACY FIRST')}
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_2_title', '100% Cookieless Tracking')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_2_desc',
-                  'Granular visitor metrics without annoying cookie banners, trackers, or GDPR headache for you or your audience.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                {t('pro.pricing.arch_3_num', '03 / SENTINEL GUARD')}
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_3_title', '24/7 Automated Probing')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_3_desc',
-                  'Constant background pings ensure external APIs and badges are alive, alerting you before anyone notices an issue.'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="font-jetbrains-mono text-[10px] text-signal-lime font-semibold tracking-wider">
-                {t('pro.pricing.arch_4_num', '04 / INSTANT SYNC')}
-              </div>
-              <h4 className="font-inter-tight font-semibold text-[14px] text-chalk">
-                {t('pro.pricing.arch_4_title', 'Zero Cache Lag')}
-              </h4>
-              <p className="font-inter-tight text-[12px] text-ash leading-relaxed">
-                {t(
-                  'pro.pricing.arch_4_desc',
-                  'Save edits and see them live on GitHub in seconds. Switch profiles or themes without waiting for cache timers.'
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
+        <ProPaywallArchitecture />
 
         <div className="border-t border-graphite/30 pt-8 pb-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3 text-left">

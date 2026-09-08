@@ -5,9 +5,16 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 
 import { getProPricing, LANDING_COMPARISON, PRO_PRICING_CONFIG } from '@/constants'
+import { ProSocialProof } from '@/features/pro/components/ProSocialProof'
 import { useI18n } from '@/i18n'
 
-export function ProPricingSection() {
+export function ProPricingSection({
+  proCustomers = 0,
+  proUsernames = [],
+}: {
+  proCustomers?: number
+  proUsernames?: string[]
+}) {
   const { t, language } = useI18n()
   const pricing = getProPricing(language)
 
@@ -114,6 +121,10 @@ export function ProPricingSection() {
                 {t('landing.pricing.one_time', 'One-time payment · Own it forever')}
               </p>
 
+              <div className="w-full flex justify-center mb-5">
+                <ProSocialProof count={proCustomers} usernames={proUsernames} variant="inline" />
+              </div>
+
               <Link
                 href="/pro"
                 className="w-full max-w-xs inline-flex items-center justify-center gap-2.5 py-3.5 px-6 bg-signal-lime text-carbon font-inter-tight font-semibold text-[15px] rounded-sm transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_24px_rgba(197,255,74,0.6)] hover:brightness-110 active:scale-[0.98] cursor-pointer group whitespace-nowrap"
@@ -186,14 +197,20 @@ export function ProPricingSection() {
           </div>
 
           <div className="px-6 sm:px-10 lg:px-12 py-5 bg-void-black/40 border-t border-graphite/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-signal-lime" />
-              <span className="font-inter-tight text-[13px] text-bone/70">
-                {t(
-                  'landing.pricing.bottom_text',
-                  'The only README platform with analytics. Pay $19 once — every new feature ships to you, free, forever.'
-                )}
-              </span>
+            <div className="flex items-center gap-3">
+              {proCustomers > 0 ? (
+                <ProSocialProof count={proCustomers} usernames={proUsernames} variant="inline" />
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5 text-signal-lime" />
+                  <span className="font-inter-tight text-[13px] text-bone/70">
+                    {t(
+                      'landing.pricing.bottom_text',
+                      'The only README platform with analytics. Pay $19 once — every new feature ships to you, free, forever.'
+                    )}
+                  </span>
+                </>
+              )}
             </div>
             <Link
               href="/pro"

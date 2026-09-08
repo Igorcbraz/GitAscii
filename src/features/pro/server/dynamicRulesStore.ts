@@ -112,9 +112,12 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
 
   const rules: DynamicRuleRecord[] = []
   if (ruleIds && ruleIds.length > 0) {
+    const p = redis.pipeline()
     for (const id of ruleIds) {
-      const itemKey = REDIS_KEYS.dynamicRuleItem(u, id)
-      const rawRule = await redis.get<string | DynamicRuleRecord>(itemKey)
+      p.get(REDIS_KEYS.dynamicRuleItem(u, id))
+    }
+    const results = await p.exec<any[]>()
+    for (const rawRule of results) {
       if (rawRule) {
         const parsed: DynamicRuleRecord =
           typeof rawRule === 'string' ? JSON.parse(rawRule) : rawRule

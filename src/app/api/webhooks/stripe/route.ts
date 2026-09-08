@@ -166,6 +166,14 @@ export async function POST(req: Request) {
           stripeSubscriptionStatus: 'active',
         })
 
+        try {
+          const redis = getProRedisClient()
+          await redis.sadd('gitascii:pro:customers', username)
+          await redis.del('gitascii:pro:social_proof_cache')
+        } catch (e) {
+          console.warn('[Stripe Webhook] Failed to update social proof set:', e)
+        }
+
         console.log(`[Stripe Webhook] Verified checkout completed for user: ${username}`)
         break
       }

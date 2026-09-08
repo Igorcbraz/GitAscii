@@ -149,6 +149,14 @@ export async function GET(request: Request) {
       accessToken: accessToken,
     })
 
+    try {
+      const { getProRedisClient } = await import('@/features/pro/server/redisClient')
+      const redis = getProRedisClient()
+      await redis.sadd('gitascii:all:users', userData.login.toLowerCase())
+    } catch {
+      // non-blocking, never fail login over this
+    }
+
     if (userEmail) {
       const { emailService } = await import('@/lib/email/service')
       void emailService

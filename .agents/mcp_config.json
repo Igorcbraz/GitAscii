@@ -5,6 +5,12 @@
     },
     "sentry": {
       "serverUrl": "https://mcp.sentry.dev/mcp"
+    },
+    "resend": {
+      "serverUrl": "https://mcp.resend.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${RESEND_API_KEY}"
+      }
     }
   }
 }

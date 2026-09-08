@@ -34,49 +34,53 @@ export async function recordRenderTelemetry(payload: {
     const isSuccess = payload.statusCode >= 200 && payload.statusCode < 400 && !payload.hasErrors
 
     const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
-    await redis.hincrby(profileHealthKey, 'renders', 1)
-    if (isSuccess) {
-      await redis.hincrby(profileHealthKey, 'successes', 1)
-    } else {
-      await redis.hincrby(profileHealthKey, 'failures', 1)
-    }
-    await redis.hincrby(profileHealthKey, 'durationMs', duration)
-    await redis.hincrby(profileHealthKey, 'durationCount', 1)
-    await redis.expire(profileHealthKey, 90 * 86400)
-
     const metaKey = REDIS_KEYS.profileMeta(u, slug)
-    await redis.hset(metaKey, {
-      lastRenderedAt: now.toISOString(),
-      lastRenderDurationMs: duration,
-      healthStatus: isSuccess ? 'operational' : 'warning',
-    })
 
     const widgetsToRecord =
       payload.renderedWidgets && payload.renderedWidgets.length > 0
         ? payload.renderedWidgets
         : ['avatar-card', 'stats-cards', 'streak-graph']
 
+    const p = redis.pipeline()
+    p.hincrby(profileHealthKey, 'renders', 1)
+    if (isSuccess) {
+      p.hincrby(profileHealthKey, 'successes', 1)
+    } else {
+      p.hincrby(profileHealthKey, 'failures', 1)
+    }
+    p.hincrby(profileHealthKey, 'durationMs', duration)
+    p.hincrby(profileHealthKey, 'durationCount', 1)
+    p.expire(profileHealthKey, 90 * 86400)
+
+    p.hset(metaKey, {
+      lastRenderedAt: now.toISOString(),
+      lastRenderDurationMs: duration,
+      healthStatus: isSuccess ? 'operational' : 'warning',
+    })
+
     for (const rawWidgetId of widgetsToRecord) {
       const widgetId = rawWidgetId.toLowerCase().trim()
       const widgetHealthKey = REDIS_KEYS.healthWidgetDaily(u, widgetId, dateStr)
       const widgetMetaKey = REDIS_KEYS.healthWidgetMeta(u, widgetId)
 
-      await redis.hincrby(widgetHealthKey, 'renders', 1)
+      p.hincrby(widgetHealthKey, 'renders', 1)
       if (isSuccess) {
-        await redis.hincrby(widgetHealthKey, 'successes', 1)
+        p.hincrby(widgetHealthKey, 'successes', 1)
       } else {
-        await redis.hincrby(widgetHealthKey, 'failures', 1)
+        p.hincrby(widgetHealthKey, 'failures', 1)
       }
-      await redis.hincrby(widgetHealthKey, 'durationMs', duration)
-      await redis.hincrby(widgetHealthKey, 'durationCount', 1)
-      await redis.expire(widgetHealthKey, 90 * 86400)
+      p.hincrby(widgetHealthKey, 'durationMs', duration)
+      p.hincrby(widgetHealthKey, 'durationCount', 1)
+      p.expire(widgetHealthKey, 90 * 86400)
 
-      await redis.hset(widgetMetaKey, {
+      p.hset(widgetMetaKey, {
         lastRenderAt: now.toISOString(),
         lastRenderDurationMs: duration,
         status: isSuccess ? 'operational' : 'warning',
       })
     }
+
+    await p.exec()
 
     if (payload.widgetErrors && payload.widgetErrors.length > 0) {
       for (const errPayload of payload.widgetErrors) {
@@ -279,15 +283,18 @@ export async function getWidgetHealthList(
   ]
 
   const records: WidgetHealthRecord[] = []
-
+  const p = redis.pipeline()
   for (const w of knownWidgets) {
-    const metaKey = REDIS_KEYS.healthWidgetMeta(u, w.id)
-    const dailyKey = REDIS_KEYS.healthWidgetDaily(u, w.id, todayStr)
+    p.hgetall(REDIS_KEYS.healthWidgetMeta(u, w.id))
+    p.hgetall(REDIS_KEYS.healthWidgetDaily(u, w.id, todayStr))
+  }
 
-    const [meta, daily] = await Promise.all([
-      redis.hgetall<any>(metaKey),
-      redis.hgetall<any>(dailyKey),
-    ])
+  const results = await p.exec<any[]>()
+
+  for (let i = 0; i < knownWidgets.length; i++) {
+    const w = knownWidgets[i]
+    const meta = results[i * 2] as any
+    const daily = results[i * 2 + 1] as any
 
     const widgetErr = activeErrors.find((e) => e.widgetId === w.id)
     const renders = Number(daily?.renders || 0)
@@ -352,21 +359,35 @@ export async function getHealthHistory(
   const points: HealthHistoryPoint[] = []
   const today = new Date()
 
+  const profiles = await getUserProfiles(u)
+  const historyDates: Array<{ date: Date; dateStr: string }> = []
+
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
-    const dateStr = formatDate(d)
+    historyDates.push({ date: d, dateStr: formatDate(d) })
+  }
 
-    const profiles = await getUserProfiles(u)
+  const p = redis.pipeline()
+  for (const { dateStr } of historyDates) {
+    for (const prof of profiles) {
+      p.hgetall(REDIS_KEYS.healthProfileDaily(u, prof.slug, dateStr))
+    }
+  }
+
+  const results = await p.exec<any[]>()
+  const profCount = profiles.length
+
+  for (let dIdx = 0; dIdx < historyDates.length; dIdx++) {
+    const { date: d, dateStr } = historyDates[dIdx]
     let dayRenders = 0
     let daySuccesses = 0
     let dayFailures = 0
     let dayDurMs = 0
     let dayDurCount = 0
 
-    for (const p of profiles) {
-      const dailyKey = REDIS_KEYS.healthProfileDaily(u, p.slug, dateStr)
-      const data = await redis.hgetall<any>(dailyKey)
+    for (let pIdx = 0; pIdx < profCount; pIdx++) {
+      const data = results[dIdx * profCount + pIdx]
       if (data) {
         dayRenders += Number(data.renders || 0)
         daySuccesses += Number(data.successes || 0)

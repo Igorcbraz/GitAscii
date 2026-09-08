@@ -366,3 +366,45 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
     },
   ],
 }
+export const PRO_ARCHITECTURE_NODES = [
+  {
+    num: 'pro.pricing.arch_1_num',
+    title: 'pro.pricing.arch_1_title',
+    desc: 'pro.pricing.arch_1_desc',
+    defaultNum: '01 / FAST WORLDWIDE',
+    defaultTitle: 'Loads Instantly Anywhere',
+    defaultDesc:
+      'Your profile SVGs render in milliseconds worldwide so visitors never experience slow loading or empty placeholders.',
+    iconId: 'zap',
+  },
+  {
+    num: 'pro.pricing.arch_2_num',
+    title: 'pro.pricing.arch_2_title',
+    desc: 'pro.pricing.arch_2_desc',
+    defaultNum: '02 / PRIVACY FIRST',
+    defaultTitle: '100% Cookieless Tracking',
+    defaultDesc:
+      'Granular visitor metrics without annoying cookie banners, trackers, or GDPR headache for you or your audience.',
+    iconId: 'shield',
+  },
+  {
+    num: 'pro.pricing.arch_3_num',
+    title: 'pro.pricing.arch_3_title',
+    desc: 'pro.pricing.arch_3_desc',
+    defaultNum: '03 / SENTINEL GUARD',
+    defaultTitle: '24/7 Automated Probing',
+    defaultDesc:
+      'Constant background pings ensure external APIs and badges are alive, alerting you before anyone notices an issue.',
+    iconId: 'terminal',
+  },
+  {
+    num: 'pro.pricing.arch_4_num',
+    title: 'pro.pricing.arch_4_title',
+    desc: 'pro.pricing.arch_4_desc',
+    defaultNum: '04 / INSTANT SYNC',
+    defaultTitle: 'Zero Cache Lag',
+    defaultDesc:
+      'Save edits and see them live on GitHub in seconds. Switch profiles or themes without waiting for cache timers.',
+    iconId: 'refresh',
+  },
+] as const

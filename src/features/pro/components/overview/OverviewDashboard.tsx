@@ -12,6 +12,7 @@ import type { ProOverviewData } from '../../types'
 import { AreaChart } from '../charts/AreaChart'
 import { ProBadge } from '../ProBadge'
 import { ProHeader } from '../ProHeader'
+import { ProSocialProof } from '../ProSocialProof'
 import { OverviewActivityCard } from './OverviewActivityCard'
 import { OverviewKpiStrip } from './OverviewKpiStrip'
 import { OverviewProfilesCard } from './OverviewProfilesCard'
@@ -24,6 +25,9 @@ export const OverviewDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [socialProof, setSocialProof] = useState<{ count: number; usernames: string[] } | null>(
+    null
+  )
 
   const fetchData = useCallback(
     async (isBackground = false) => {
@@ -56,6 +60,13 @@ export const OverviewDashboard: React.FC = () => {
     }, OVERVIEW_REFRESH_INTERVAL)
     return () => clearInterval(interval)
   }, [fetchData])
+
+  useEffect(() => {
+    fetch('/api/pro/social-proof')
+      .then((r) => r.json())
+      .then((d) => setSocialProof(d))
+      .catch(() => {})
+  }, [])
 
   if (loading) {
     return <OverviewDashboardSkeleton />
@@ -171,6 +182,16 @@ export const OverviewDashboard: React.FC = () => {
           <OverviewActivityCard data={data} />
           <OverviewProfilesCard data={data} />
         </div>
+
+        {socialProof && socialProof.count > 0 && (
+          <div className="flex items-center justify-center py-3 border border-white/[0.04] bg-[#0a0a0a] rounded">
+            <ProSocialProof
+              count={socialProof.count}
+              usernames={socialProof.usernames}
+              variant="dashboard"
+            />
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-[11px] text-[#666] pt-1 pb-2">
           <div className="flex items-center gap-2 min-w-0">
