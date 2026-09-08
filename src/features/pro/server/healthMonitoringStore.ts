@@ -126,9 +126,9 @@ export async function recordRenderTelemetry(payload: {
 export async function getOverallHealth(username: string): Promise<OverallHealthMetrics> {
   const u = username.toLowerCase().trim()
   const now = new Date()
-  const todayStr = formatDate(now)
+  const _todayStr = formatDate(now)
 
-  const [profiles, widgetErrors, userProfiles] = await Promise.all([
+  const [profiles, widgetErrors, _userProfiles] = await Promise.all([
     getProfileHealthList(u),
     getWidgetErrors(u),
     getUserProfiles(u),

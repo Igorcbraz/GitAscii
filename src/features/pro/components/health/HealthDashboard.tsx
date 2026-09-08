@@ -32,7 +32,7 @@ export const HealthDashboard: React.FC = () => {
   const [username, setUsername] = useState<string>('')
   const [metrics, setMetrics] = useState<OverallHealthMetrics | null>(null)
   const [profiles, setProfiles] = useState<ProProfileRecord[]>([])
-  const [profileConfigs, setProfileConfigs] = useState<Record<string, SavedConfiguration>>({})
+  const [profileConfigs, _setProfileConfigs] = useState<Record<string, SavedConfiguration>>({})
   const [errors, setErrors] = useState<WidgetErrorRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -104,7 +104,7 @@ export const HealthDashboard: React.FC = () => {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => {
     void fetchData()

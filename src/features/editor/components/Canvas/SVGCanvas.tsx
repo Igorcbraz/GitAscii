@@ -229,7 +229,7 @@ export function SVGCanvas() {
         console.warn('Background ASCII Conversion Warning:', err)
       }
     })
-  }, [asciiParamsStr, githubData, updateWidgetConfig])
+  }, [asciiParamsStr, githubData, updateWidgetConfig, config])
 
   useEffect(() => {
     if (!isLayersOpen) return

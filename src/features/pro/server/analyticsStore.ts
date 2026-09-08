@@ -427,7 +427,7 @@ export async function getAnalyticsSummary(
   const browserCounts: Record<string, number> = {}
   const osCounts: Record<string, number> = {}
   const trafficTypeCounts: Record<string, number> = {}
-  const themeCounts: Record<string, number> = {}
+  const _themeCounts: Record<string, number> = {}
   const statusCodeCounts: Record<string, number> = {}
 
   const currentPipeline = redis.pipeline()

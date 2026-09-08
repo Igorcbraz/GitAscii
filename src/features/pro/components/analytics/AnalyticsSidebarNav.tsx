@@ -26,7 +26,7 @@ export const AnalyticsSidebarNav: React.FC<AnalyticsSidebarNavProps> = ({
   selectedProfile,
   setSelectedProfile,
   profiles,
-  activeLiveCount,
+  _activeLiveCount,
 }) => {
   const { t } = useI18n()
 

@@ -143,7 +143,7 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   const editorStartTime = useRef<number | null>(null)
   const previewStartTime = useRef<number | null>(null)
 
-  const [consentGranted, setConsentGranted] = useState<boolean>(false)
+  const [_consentGranted, setConsentGranted] = useState<boolean>(false)
 
   const applyGrantedConsent = useCallback(() => {
     analytics.updateConsent({

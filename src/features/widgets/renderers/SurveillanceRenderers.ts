@@ -114,7 +114,7 @@ export function resolvePalette(
   }
 }
 
-const C = {
+const _C = {
   ground: '#050308',
   black: '#000000',
   text: '#aaaaaa',

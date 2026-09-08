@@ -252,7 +252,7 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({ isOpen, onCl
     ctx.fillStyle = '#71717a'
     ctx.fillText('gitascii.dev/pro • Privacy-First Developer Telemetry', width - 56, height - 42)
     ctx.textAlign = 'left'
-  }, [isOpen, data, theme])
+  }, [isOpen, data, theme, t])
 
   if (!isOpen || !data) return null
 

@@ -114,9 +114,11 @@ export function WidgetPreviewTooltip({
   } | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const size = widgetItem
-    ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 }
-    : { width: 800, height: 120 }
+  const size = useMemo(() => {
+    return widgetItem
+      ? DEFAULT_SIZE_MAP[widgetItem.id] || { width: 800, height: 120 }
+      : { width: 800, height: 120 }
+  }, [widgetItem])
   const data = githubData || getMockGitHubData('Igorcbraz')
 
   const isExternalResource = useMemo(() => {

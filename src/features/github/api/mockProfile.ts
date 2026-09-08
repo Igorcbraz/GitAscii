@@ -80,7 +80,7 @@ export function getMockGitHubData(username: string): NormalizedGitHubData {
     contributions: generateMockContributions(),
   }
 
-  const contributions = result.contributions || generateMockContributions()
+  const _contributions = result.contributions || generateMockContributions()
   const habits = {
     peakDayOfWeek: 'Thursday',
     peakMonth: 'August',

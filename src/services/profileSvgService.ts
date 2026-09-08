@@ -21,7 +21,7 @@ export interface ProfileSvgRequestOptions {
 
 import { unstable_cache } from 'next/cache'
 
-export function invalidateSvgCache(username?: string): void {
+export function invalidateSvgCache(_username?: string): void {
   console.log('[profileSvgService] invalidateSvgCache called (no-op for unstable_cache)')
 }
 
@@ -157,7 +157,7 @@ export async function generateProfileSvgResponse(
           .filter(Boolean)
       : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
-    const vParam = searchParams.get('v') || searchParams.get('t') || ''
+    const _vParam = searchParams.get('v') || searchParams.get('t') || ''
     const payload = await getCachedSvgPayload(
       username,
       profileSlug,

@@ -80,7 +80,7 @@ export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
   const installedUsers = await getAppInstallations()
   const candidateUsers = Array.from(new Set([...installedUsers, ...DEFAULT_SEED_USERS]))
 
-  const fetchPromises = candidateUsers.map(async (username) => {
+  const _fetchPromises = candidateUsers.map(async (username) => {
     try {
       const config = await fetchUserGitAscii(username)
       if (!config) return

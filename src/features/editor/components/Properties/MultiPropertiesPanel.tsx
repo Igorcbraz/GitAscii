@@ -48,7 +48,7 @@ import { WIDGET_CATALOG } from '../../config/widgets'
 import { useEditorStore } from '../../store/editorStore'
 import { ColorPicker } from './ColorPicker'
 
-const WIDTH_PRESETS = [
+const _WIDTH_PRESETS = [
   { label: '100%', val: 800 },
   { label: '75%', val: 600 },
   { label: '50%', val: 392 },
@@ -107,7 +107,7 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
   const globalStyles = useEditorStore((state) => state.config?.globalStyles)
 
   const updateWidgetsConfig = useEditorStore((state) => state.updateWidgetsConfig)
-  const updateWidgetsSize = useEditorStore((state) => state.updateWidgetsSize)
+  const _updateWidgetsSize = useEditorStore((state) => state.updateWidgetsSize)
   const scaleWidgets = useEditorStore((state) => state.scaleWidgets)
   const toggleWidgetsVisibility = useEditorStore((state) => state.toggleWidgetsVisibility)
   const toggleWidgetsLock = useEditorStore((state) => state.toggleWidgetsLock)
@@ -147,10 +147,10 @@ export function MultiPropertiesPanel({ selectedWidgets }: MultiPropertiesPanelPr
       : 1500
   const currentAnimEasing = (representativeCfg.animationEasing as AnimationEasing) || 'ease-out'
 
-  const averageWidth = Math.round(
+  const _averageWidth = Math.round(
     selectedWidgets.reduce((sum, w) => sum + w.size.width, 0) / selectedWidgets.length
   )
-  const averageHeight = Math.round(
+  const _averageHeight = Math.round(
     selectedWidgets.reduce((sum, w) => sum + w.size.height, 0) / selectedWidgets.length
   )
 

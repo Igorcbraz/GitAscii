@@ -53,8 +53,8 @@ export const DynamicProfilesSection: React.FC<DynamicProfilesSectionProps> = ({
     rules: [],
   })
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [savingConfig, setSavingConfig] = useState(false)
+  const [_refreshing, setRefreshing] = useState(false)
+  const [_savingConfig, setSavingConfig] = useState(false)
 
   const [showRuleModal, setShowRuleModal] = useState(false)
   const [editingRule, setEditingRule] = useState<DynamicRuleRecord | null>(null)

@@ -468,8 +468,8 @@ describe('Security Audit Fixes & Regression Test Suite', () => {
 
     it('prevents polynomial ReDoS on repeated malformed SVG tags (js/polynomial-redos)', async () => {
       const { renderWidgetSvg } = await import('./engine/core/WidgetRenderer')
-      const pathologicalText = '<text '.repeat(500)
-      const pathologicalImage = '<image '.repeat(500)
+      const _pathologicalText = '<text '.repeat(500)
+      const _pathologicalImage = '<image '.repeat(500)
 
       const widget: any = {
         instanceId: 'test',

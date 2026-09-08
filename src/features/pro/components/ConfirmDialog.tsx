@@ -34,7 +34,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const [mounted, setMounted] = useState(false)
   const resolvedConfirmLabel = confirmLabel || t('pro.dialog.confirm', 'Confirm')
   const resolvedCancelLabel = cancelLabel || t('pro.dialog.cancel', 'Cancel')
-  const handleClose = onClose || onCancel || (() => {})
+  const handleClose = useCallback(() => {
+    if (onClose) onClose()
+    else if (onCancel) onCancel()
+  }, [onClose, onCancel])
 
   useEffect(() => {
     setMounted(true)

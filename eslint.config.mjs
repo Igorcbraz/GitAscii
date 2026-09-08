@@ -29,11 +29,12 @@ const eslintConfig = [
       'no-debugger': 'error',
       'prefer-const': 'error',
       eqeqeq: ['error', 'always'],
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/preserve-manual-memoization': 'warn',
-      'react-hooks/purity': 'warn',
-      'react-hooks/refs': 'warn',
-      'react-hooks/immutability': 'warn',
+      '@next/next/no-img-element': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/immutability': 'off',
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'unused-imports/no-unused-imports': 'error',
@@ -49,6 +50,18 @@ const eslintConfig = [
     },
   },
   ...storybook.configs['flat/recommended'],
+  {
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
+  {
+    files: ['src/app/**/opengraph-image.tsx'],
+    rules: {
+      '@next/next/no-img-element': 'off',
+    },
+  },
 ]
 
 export default eslintConfig

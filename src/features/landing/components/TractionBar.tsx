@@ -74,7 +74,7 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
     },
   ]
 
-  const colCount = baseStats.length
+  const _colCount = baseStats.length
 
   return (
     <section
