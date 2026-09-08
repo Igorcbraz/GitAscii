@@ -1509,6 +1509,10 @@ export const pt: Record<string, string> = {
   'landing.templates.title_start': 'Layouts Autênticos Gerados pelo ',
   'landing.templates.vector_mode': '[ Modo Vetorial Pixel-Perfect ]',
   'landing.templates.widgets_placed': '{count} Widgets Posicionados',
+  'landing.traction.logged_in': 'Usuários Registrados',
+  'landing.traction.logged_in_sub': 'Logins via GitHub',
+  'landing.traction.pro_customers': 'Membros Pro',
+  'landing.traction.pro_customers_sub': 'Acesso vitalício',
   'landing.traction.readmes': 'READMEs Gerados',
   'landing.traction.readmes_sub': 'SVGs dinâmicos na Edge',
   'landing.traction.stars': 'Estrelas no GitHub',
@@ -2588,6 +2592,10 @@ export const pt: Record<string, string> = {
   'pro.pricing.cta_button_short': 'Obter Acesso Vitalício · {price}',
   'pro.pricing.cta_footer_note': 'Desbloqueio instantâneo para @{username}. Sem assinaturas.',
   'pro.pricing.discount_badge': 'OFERTA ESPECIAL — {pct}% OFF',
+  'pro.social_proof.dashboard':
+    'Você faz parte de um grupo exclusivo de {count} desenvolvedores Pro',
+  'pro.social_proof.first': 'Junte-se ao primeiro desenvolvedor verificado do GitAscii Pro',
+  'pro.social_proof.unlocked': '{count} desenvolvedores já desbloquearam o GitAscii Pro',
   'pro.pricing.faq.camo_a':
     'O GitHub usa um servidor proxy (Camo) que armazena imagens externas em cache por horas. Com o Pro, quando você salva edições ou alterna perfis ativos, nossa invalidação na edge aciona uma atualização forçada para que seus visitantes vejam seu README atualizado imediatamente.',
   'pro.pricing.faq.camo_q': 'Como funciona a limpeza instantânea do cache do GitHub Camo?',

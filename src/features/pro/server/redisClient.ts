@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis'
 
 export interface IProRedisPipeline {
+  hget(key: string, field: string): IProRedisPipeline
   hgetall(key: string): IProRedisPipeline
   pfcount(...keys: string[]): IProRedisPipeline
   hincrby(key: string, field: string, increment: number): IProRedisPipeline
@@ -37,6 +38,9 @@ export interface IProRedisStore {
   pfadd(key: string, ...elements: string[]): Promise<number>
   pfcount(...keys: string[]): Promise<number>
   pipeline(): IProRedisPipeline
+  keys(pattern: string): Promise<string[]>
+  scan(cursor: number, opts?: { match?: string; count?: number }): Promise<[number, string[]]>
+  scard(key: string): Promise<number>
 }
 
 class UpstashRedisAdapter implements IProRedisStore {
@@ -134,9 +138,33 @@ class UpstashRedisAdapter implements IProRedisStore {
     return this.client.pfcount(keys[0], ...keys.slice(1))
   }
 
+  async keys(pattern: string): Promise<string[]> {
+    const res = await this.client.keys(pattern)
+    return (res || []) as string[]
+  }
+
+  async scan(
+    cursor: number,
+    opts?: { match?: string; count?: number }
+  ): Promise<[number, string[]]> {
+    const res = await this.client.scan(cursor, {
+      match: opts?.match,
+      count: opts?.count ?? 100,
+    })
+    return res as unknown as [number, string[]]
+  }
+
+  async scard(key: string): Promise<number> {
+    return this.client.scard(key)
+  }
+
   pipeline(): IProRedisPipeline {
     const p = this.client.pipeline()
     const wrapper: IProRedisPipeline = {
+      hget(key: string, field: string) {
+        p.hget(key, field)
+        return wrapper
+      },
       hgetall(key: string) {
         p.hgetall(key)
         return wrapper
@@ -418,9 +446,44 @@ class MemoryRedisStore implements IProRedisStore {
     return combined.size
   }
 
+  async keys(pattern: string): Promise<string[]> {
+    const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+    const regex = new RegExp(`^${escaped}$`)
+    const allKeys = [
+      ...this.kv.keys(),
+      ...this.hashes.keys(),
+      ...this.sortedSets.keys(),
+      ...this.sets.keys(),
+    ]
+    const unique = [...new Set(allKeys)]
+    return unique.filter((k) => regex.test(k) && !this.isExpired(k))
+  }
+
+  async scan(
+    cursor: number,
+    opts?: { match?: string; count?: number }
+  ): Promise<[number, string[]]> {
+    const allKeys = await this.keys(opts?.match ?? '*')
+    const count = opts?.count ?? 100
+    const start = cursor
+    const slice = allKeys.slice(start, start + count)
+    const nextCursor = start + slice.length >= allKeys.length ? 0 : start + slice.length
+    return [nextCursor, slice]
+  }
+
+  async scard(key: string): Promise<number> {
+    if (this.isExpired(key)) return 0
+    const set = this.sets.get(key)
+    return set ? set.size : 0
+  }
+
   pipeline(): IProRedisPipeline {
     const queue: Array<() => Promise<any>> = []
     const wrapper: IProRedisPipeline = {
+      hget: (key: string, field: string) => {
+        queue.push(() => this.hget(key, field))
+        return wrapper
+      },
       hgetall: (key: string) => {
         queue.push(() => this.hgetall(key))
         return wrapper

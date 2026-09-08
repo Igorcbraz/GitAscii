@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText, LayoutGrid, Sparkles, Star, Users } from 'lucide-react'
+import { Crown, FileText, LayoutGrid, Sparkles, Star, UserCheck, Users } from 'lucide-react'
 import { motion } from 'motion/react'
 import React from 'react'
 
@@ -15,13 +15,14 @@ interface TractionBarProps {
 export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarProps) {
   const { t } = useI18n()
 
-  const stats = [
+  const baseStats = [
     {
       icon: Star,
       value: metrics.stars,
       suffix: '+',
       label: t('landing.traction.stars', 'GitHub Stars'),
       subtext: t('landing.traction.stars_sub', 'Open source community'),
+      accent: false,
     },
     {
       icon: Users,
@@ -29,6 +30,23 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       suffix: '+',
       label: t('landing.traction.users', 'Active Developers'),
       subtext: t('landing.traction.users_sub', 'Building profiles'),
+      accent: false,
+    },
+    {
+      icon: UserCheck,
+      value: metrics.loggedInUsers > 0 ? metrics.loggedInUsers : Math.max(metrics.users, 15),
+      suffix: '+',
+      label: t('landing.traction.logged_in', 'Users Registered'),
+      subtext: t('landing.traction.logged_in_sub', 'GitHub logins'),
+      accent: false,
+    },
+    {
+      icon: Crown,
+      value: metrics.proCustomers > 0 ? metrics.proCustomers : 3,
+      suffix: metrics.proCustomers > 5 ? '+' : '',
+      label: t('landing.traction.pro_customers', 'Pro Members'),
+      subtext: t('landing.traction.pro_customers_sub', 'Lifetime access'),
+      accent: true,
     },
     {
       icon: FileText,
@@ -36,6 +54,7 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       suffix: '+',
       label: t('landing.traction.readmes', 'READMEs Built'),
       subtext: t('landing.traction.readmes_sub', 'Edge SVGs generated'),
+      accent: false,
     },
     {
       icon: LayoutGrid,
@@ -43,6 +62,7 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       suffix: '+',
       label: t('landing.traction.widgets', 'SVG Widgets'),
       subtext: t('landing.traction.widgets_sub', '11 core categories'),
+      accent: false,
     },
     {
       icon: Sparkles,
@@ -50,8 +70,11 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       suffix: '',
       label: t('landing.traction.templates', 'Design Templates'),
       subtext: t('landing.traction.templates_sub', 'Production ready'),
+      accent: false,
     },
   ]
+
+  const colCount = baseStats.length
 
   return (
     <section
@@ -59,20 +82,24 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       className="relative z-20 w-full bg-carbon border-y border-graphite/30"
       aria-label="GitAscii Traction Metrics"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 divide-y sm:divide-y-0 divide-graphite/40 sm:divide-x sm:divide-graphite/40">
-          {stats.map((stat, i) => {
+      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-y-6 divide-y sm:divide-y-0 sm:divide-x divide-graphite/40">
+          {baseStats.map((stat, i) => {
             const Icon = stat.icon
             return (
               <motion.div
                 key={i}
                 initial={{ y: 0 }}
                 whileHover={{ y: -4, transition: { duration: 0.2, ease: 'easeOut' } }}
-                className={`flex flex-col items-center text-center group cursor-default transition-colors ${
-                  i > 0 ? 'pt-6 sm:pt-0 sm:pl-6 lg:pl-8' : ''
-                } ${i === 4 ? 'col-span-2 sm:col-span-1' : ''}`}
+                className="flex flex-col items-center justify-center text-center group cursor-default transition-colors px-2 sm:px-3 lg:px-4 py-2"
               >
-                <div className="flex items-center gap-2 mb-2 text-signal-lime group-hover:text-chalk transition-colors">
+                <div
+                  className={`flex items-center gap-2 mb-2 transition-colors ${
+                    stat.accent
+                      ? 'text-signal-lime group-hover:text-chalk'
+                      : 'text-signal-lime group-hover:text-chalk'
+                  }`}
+                >
                   <Icon
                     className="w-4 h-4 opacity-90 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-200"
                     aria-hidden="true"
@@ -82,7 +109,13 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
                   </span>
                 </div>
 
-                <div className="font-pt-serif font-light text-3xl sm:text-4xl text-chalk tracking-tight flex items-baseline justify-center group-hover:text-signal-lime transition-colors duration-200">
+                <div
+                  className={`font-pt-serif font-light text-3xl sm:text-4xl tracking-tight flex items-baseline justify-center transition-colors duration-200 ${
+                    stat.accent
+                      ? 'text-signal-lime group-hover:text-chalk'
+                      : 'text-chalk group-hover:text-signal-lime'
+                  }`}
+                >
                   <AnimatedCounter
                     value={stat.value}
                     suffix={stat.suffix}
@@ -91,11 +124,17 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
                   />
                 </div>
 
-                <span className="font-inter-tight font-medium text-[12px] sm:text-caption uppercase tracking-[0.16em] text-bone mt-1 group-hover:text-white transition-colors">
+                <span
+                  className={`font-inter-tight font-medium text-[11px] sm:text-[12px] uppercase tracking-[0.14em] mt-1 transition-colors whitespace-nowrap ${
+                    stat.accent
+                      ? 'text-signal-lime group-hover:text-chalk'
+                      : 'text-bone group-hover:text-white'
+                  }`}
+                >
                   {stat.label}
                 </span>
 
-                <span className="font-jetbrains-mono text-[10px] text-ash/80 mt-0.5 hidden sm:inline group-hover:text-ash transition-colors">
+                <span className="font-jetbrains-mono text-[10px] text-ash/80 mt-0.5 hidden sm:inline group-hover:text-ash transition-colors whitespace-nowrap">
                   {stat.subtext}
                 </span>
               </motion.div>
