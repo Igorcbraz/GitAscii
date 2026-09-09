@@ -1,6 +1,6 @@
 {
   "name": "gitascii",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
@@ -9,11 +9,11 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "fix:all": "npm run lint:fix \u0026\u0026 npm run format",
+    "fix:all": "npm run lint:fix && npm run format",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck \u0026\u0026 npm run lint \u0026\u0026 npm run build",
+    "check": "npm run typecheck && npm run lint && npm run build",
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
@@ -21,7 +21,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "email:dev": "email dev -d emails -p 3001",
-    "docs": "cd docs \u0026\u0026 mintlify dev"
+    "docs": "cd docs && mintlify dev"
   },
   "dependencies": {
     "@neon/config": "^1.3.1",
