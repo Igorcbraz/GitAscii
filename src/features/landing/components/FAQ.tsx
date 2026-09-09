@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import ShinyText from '@/components/ui/ShinyText'
 import { LANDING_FAQS } from '@/constants'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 export function FAQ() {
@@ -47,6 +48,19 @@ export function FAQ() {
           </h2>
         </motion.div>
 
+        <div className="relative w-full flex justify-center">
+          <div className="absolute -top-12 right-4 sm:right-10 pointer-events-none z-20">
+            <StrobiAnchor
+              id="faq"
+              size={76}
+              align="center"
+              restingMood="thinking"
+              accessory="detective"
+              float
+            />
+          </div>
+        </div>
+
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -85,6 +99,7 @@ export function FAQ() {
                 <h3 className="m-0 text-[16px] font-normal">
                   <button
                     onClick={() => toggleOpen(index)}
+                    data-faq-trigger="true"
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${index}`}
                     className="w-full py-5 sm:py-6 px-6 flex items-center justify-between text-left group cursor-pointer"

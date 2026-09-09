@@ -6,6 +6,7 @@ import { APP_URL, EXTERNAL_LINKS, fetchLandingMetrics } from '@/constants'
 import { getStoredProfiles } from '@/features/explore/getCommunityProfiles'
 import Hero from '@/features/landing/components/Hero'
 import { LandingBackgroundDecorations } from '@/features/landing/components/LandingBackgroundDecorations'
+import { LandingMascotClient } from '@/features/landing/components/LandingMascotClient'
 import Navbar from '@/features/landing/components/Navbar'
 import { TractionBar } from '@/features/landing/components/TractionBar'
 
@@ -163,6 +164,7 @@ export default async function LandingPage({
         <FinalCTA metrics={metrics} />
         <Footer />
       </div>
+      <LandingMascotClient />
     </main>
   )
 }

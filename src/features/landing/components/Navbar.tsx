@@ -25,6 +25,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { GitAsciiAvatar } from '@/components/avatar'
 import LanguageSelector from '@/components/ui/LanguageSelector'
 import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { EXTERNAL_LINKS, NAVBAR_DROPDOWN_SECTIONS } from '@/constants'
@@ -137,13 +138,18 @@ export default function Navbar() {
       >
         <div className="relative mx-auto flex h-14 md:h-16 max-w-7xl items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3 z-10">
-            <Link href="/" className="flex items-center gap-0 group">
-              <span className="font-inter-tight text-subheading font-medium text-white tracking-tight group-hover:text-chalk transition-colors">
-                Git
-              </span>
-              <span className="font-pt-serif text-subheading font-light italic text-signal-lime tracking-tight">
-                Ascii
-              </span>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="transition-transform duration-200 group-hover:scale-105 flex items-center">
+                <GitAsciiAvatar size={28} />
+              </div>
+              <div className="flex items-center gap-0">
+                <span className="font-inter-tight text-subheading font-medium text-white tracking-tight group-hover:text-chalk transition-colors">
+                  Git
+                </span>
+                <span className="font-pt-serif text-subheading font-light italic text-signal-lime tracking-tight">
+                  Ascii
+                </span>
+              </div>
             </Link>
             <LanguageSelector align="left" className="ml-1" />
           </div>

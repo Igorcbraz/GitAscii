@@ -1,12 +1,13 @@
 'use client'
 
-import { ChevronDown, Layers, LogOut, User, Zap } from 'lucide-react'
+import { ChevronDown, Layers, LogOut, Smile, User, Zap } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { PRO_PLAN_TIERS } from '@/constants'
+import { useStrobi } from '@/features/mascot/hooks/useStrobi'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -36,6 +37,8 @@ export function UserMenuDropdown({
   const [isProUser, setIsProUser] = useState<boolean | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname() || ''
+
+  const { strobe, state: strobiState } = useStrobi()
 
   const finalEditorHref = editorHref || `/${username}`
   const resolvedAvatarUrl =
@@ -297,6 +300,43 @@ export function UserMenuDropdown({
           )}
 
           <div className="h-px bg-graphite/50 my-1" />
+
+          <div className="px-2.5 py-1.5 rounded-sm bg-onyx/40 border border-graphite/40 mb-1 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="size-6 rounded-sm bg-onyx border border-graphite/60 flex items-center justify-center shrink-0">
+                <Smile className="size-3.5 text-signal-lime" />
+              </div>
+              <div className="flex flex-col min-w-0 pr-2">
+                <span className="text-[11px] font-medium text-white leading-tight">
+                  {t('landing.nav.mascot_toggle', 'Strobi Mascot')}
+                </span>
+                <span className="text-[9px] text-ash">
+                  {strobiState.visible ? 'Visible' : 'Hidden'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (strobiState.visible) {
+                  strobe.hide()
+                } else {
+                  strobe.show()
+                }
+              }}
+              className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                strobiState.visible ? 'bg-signal-lime' : 'bg-graphite'
+              }`}
+              title={strobiState.visible ? 'Hide Mascot' : 'Show Mascot'}
+            >
+              <span
+                className={`pointer-events-none inline-block h-3 w-3 transform rounded-full bg-void-black shadow-lg ring-0 transition duration-200 ease-in-out ${
+                  strobiState.visible ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
 
           {process.env.NODE_ENV !== 'production' && (
             <div className="px-2.5 py-1.5 rounded-sm bg-onyx/40 border border-amber-500/20 mb-1 flex items-center justify-between">

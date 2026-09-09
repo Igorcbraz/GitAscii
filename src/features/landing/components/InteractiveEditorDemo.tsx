@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import dynamic from 'next/dynamic'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 const LazyEditorLayout = dynamic(
@@ -217,6 +218,7 @@ export function InteractiveEditorDemo({
                         exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.18 } }}
                         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                         onClick={handleCustomPlay}
+                        data-video-play="true"
                         aria-label={t(
                           'landing.editor_demo.play_aria',
                           'Play GitAscii presentation video'
@@ -238,6 +240,16 @@ export function InteractiveEditorDemo({
                               '0 0 0 1px rgba(197,255,74,0.12), 0 8px 40px rgba(0,0,0,0.8), 0 0 60px rgba(197,255,74,0.08)',
                           }}
                         >
+                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 pointer-events-none z-30">
+                            <StrobiAnchor
+                              id="demo-play"
+                              size={80}
+                              align="center"
+                              restingMood="excited"
+                              accessory="popcorn"
+                              bounce
+                            />
+                          </div>
                           <div
                             className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                             style={{
@@ -307,6 +319,16 @@ export function InteractiveEditorDemo({
           </div>
 
           <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 z-30 pointer-events-auto w-auto max-w-[94vw]">
+            <div className="absolute -top-16 right-3 pointer-events-none z-20">
+              <StrobiAnchor
+                id="demo"
+                size={74}
+                align="center"
+                restingMood="curious"
+                accessory="popcorn"
+                float
+              />
+            </div>
             <div
               className="relative flex items-center p-1 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
               style={{

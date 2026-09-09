@@ -17,6 +17,7 @@ import {
   type TemplatePreset,
 } from '@/engine/core/TemplateRenderer'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 interface TemplatesPreviewProps {
@@ -92,15 +93,25 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 flex flex-col"
+            className="lg:col-span-7 flex flex-col relative"
           >
+            <div className="absolute -top-14 left-6 pointer-events-none z-20">
+              <StrobiAnchor
+                id="templates"
+                size={76}
+                align="center"
+                restingMood="playful"
+                accessory="artist"
+                float
+              />
+            </div>
             <SpotlightCard className="p-6 sm:p-7 flex flex-col justify-between h-full bg-onyx border-graphite">
               <div className="flex flex-col h-full justify-between space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-graphite/80">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-jetbrains-mono text-[11px] text-signal-lime uppercase tracking-wider">
-                        [ tpl://{activeTemplate.id} ]
+                        [ tpl:
                       </span>
                       <span className="px-2 py-0.5 bg-carbon border border-graphite rounded-none font-jetbrains-mono text-[10px] uppercase text-ash">
                         {t(
@@ -211,7 +222,7 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 flex flex-col justify-between gap-3"
           >
-            <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase">
+            <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase relative">
               <span>{t('landing.templates.presets_header', 'Layout Presets')}</span>
               <span>
                 {t(
@@ -230,6 +241,7 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
                 return (
                   <motion.div
                     key={template.id}
+                    data-template-item={template.id}
                     onClick={() => setSelectedId(template.id)}
                     whileHover={{ x: -4 }}
                     transition={{ duration: 0.2 }}
@@ -313,7 +325,7 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
           </motion.div>
         </div>
 
-        <div className="text-center pt-4">
+        <div className="text-center pt-4 relative">
           <Magnet distance={80} strength={0.2}>
             <Link
               href="/templates"

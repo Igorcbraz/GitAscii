@@ -269,6 +269,8 @@ export function SVGCanvas() {
           }
         }
         requestAnimationFrame(step)
+
+        window.dispatchEvent(new CustomEvent('gitascii:widget-added'))
       }
     }
     if (config) {

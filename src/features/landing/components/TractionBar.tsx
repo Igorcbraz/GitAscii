@@ -6,6 +6,7 @@ import React from 'react'
 
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 interface TractionBarProps {
@@ -82,7 +83,17 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       className="relative z-20 w-full bg-carbon border-y border-graphite/30"
       aria-label="GitAscii Traction Metrics"
     >
-      <div className="mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="relative mx-auto w-full max-w-[1720px] px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="absolute -top-12 left-6 sm:left-12 pointer-events-none z-20">
+          <StrobiAnchor
+            id="traction"
+            size={76}
+            align="center"
+            restingMood="focused"
+            accessory="professor"
+            float
+          />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-y-6 divide-y sm:divide-y-0 sm:divide-x divide-graphite/40">
           {baseStats.map((stat, i) => {
             const Icon = stat.icon
