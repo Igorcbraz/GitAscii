@@ -174,7 +174,14 @@ export async function getAppInstallations(): Promise<string[]> {
         signal: AbortSignal.timeout(10000),
       })
 
-      if (!pageRes.ok) break
+      if (!pageRes.ok) {
+        const errText = await pageRes.text().catch(() => '')
+        console.error(
+          `[getAppInstallations] GitHub API error: ${pageRes.status} ${pageRes.statusText}`,
+          errText
+        )
+        break
+      }
 
       const data: unknown = await pageRes.json()
       if (!Array.isArray(data) || data.length === 0) break

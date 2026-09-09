@@ -58,11 +58,9 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', '.github/gitascii.json'),
   ]
 
-  const results = await Promise.allSettled(urls.map((url) => fetchConfigFromUrl(url)))
-  for (const r of results) {
-    if (r.status === 'fulfilled' && r.value) {
-      return r.value
-    }
+  for (const url of urls) {
+    const config = await fetchConfigFromUrl(url)
+    if (config) return config
   }
 
   return null
@@ -72,20 +70,24 @@ export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
   const profileMap = new Map<string, CommunityProfileItem>()
   const installedUsers = await getAppInstallations()
 
-  await Promise.allSettled(
-    installedUsers.map(async (username) => {
-      try {
-        const config = await fetchUserGitAscii(username)
-        if (!config) return
-        const profileItem = parseConfigToProfileItem(config)
-        if (profileItem) {
-          profileMap.set(profileItem.username.toLowerCase(), profileItem)
+  const chunkSize = 10
+  for (let i = 0; i < installedUsers.length; i += chunkSize) {
+    const chunk = installedUsers.slice(i, i + chunkSize)
+    await Promise.allSettled(
+      chunk.map(async (username) => {
+        try {
+          const config = await fetchUserGitAscii(username)
+          if (!config) return
+          const profileItem = parseConfigToProfileItem(config)
+          if (profileItem) {
+            profileMap.set(profileItem.username.toLowerCase(), profileItem)
+          }
+        } catch (e) {
+          console.warn(`Failed to load profile for ${username}:`, e)
         }
-      } catch (e) {
-        console.warn(`Failed to load profile for ${username}:`, e)
-      }
-    })
-  )
+      })
+    )
+  }
 
   return Array.from(profileMap.values())
 }
