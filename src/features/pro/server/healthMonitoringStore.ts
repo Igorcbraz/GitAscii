@@ -1,3 +1,8 @@
+import {
+  recordProfileDailyHealthInDb,
+  recordWidgetDailyHealthInDb,
+} from '@/lib/db/repositories/healthRepository'
+
 import type { IngestErrorPayload, WidgetErrorRecord } from '../types/errors'
 import type {
   HealthHistoryPoint,
@@ -33,6 +38,8 @@ export async function recordRenderTelemetry(payload: {
     const duration = Math.max(1, Math.round(payload.durationMs || 25))
     const isSuccess = payload.statusCode >= 200 && payload.statusCode < 400 && !payload.hasErrors
 
+    void recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration).catch(() => {})
+
     const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
     const metaKey = REDIS_KEYS.profileMeta(u, slug)
 
@@ -40,6 +47,11 @@ export async function recordRenderTelemetry(payload: {
       payload.renderedWidgets && payload.renderedWidgets.length > 0
         ? payload.renderedWidgets
         : ['avatar-card', 'stats-cards', 'streak-graph']
+
+    for (const rawWidgetId of widgetsToRecord) {
+      const widgetId = rawWidgetId.toLowerCase().trim()
+      void recordWidgetDailyHealthInDb(u, widgetId, dateStr, isSuccess, duration).catch(() => {})
+    }
 
     const p = redis.pipeline()
     p.hincrby(profileHealthKey, 'renders', 1)
@@ -114,9 +126,9 @@ export async function recordRenderTelemetry(payload: {
 export async function getOverallHealth(username: string): Promise<OverallHealthMetrics> {
   const u = username.toLowerCase().trim()
   const now = new Date()
-  const todayStr = formatDate(now)
+  const _todayStr = formatDate(now)
 
-  const [profiles, widgetErrors, userProfiles] = await Promise.all([
+  const [profiles, widgetErrors, _userProfiles] = await Promise.all([
     getProfileHealthList(u),
     getWidgetErrors(u),
     getUserProfiles(u),

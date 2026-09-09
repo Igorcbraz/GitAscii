@@ -10,6 +10,8 @@ export interface IProRedisPipeline {
   expire(key: string, seconds: number): IProRedisPipeline
   pfadd(key: string, ...elements: string[]): IProRedisPipeline
   sadd(key: string, ...members: string[]): IProRedisPipeline
+  set(key: string, value: any): IProRedisPipeline
+  del(...keys: string[]): IProRedisPipeline
   zadd(key: string, ...scoreMembers: { score: number; member: string }[]): IProRedisPipeline
   zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }): IProRedisPipeline
   zrevrange(key: string, start: number, stop: number): IProRedisPipeline
@@ -18,7 +20,7 @@ export interface IProRedisPipeline {
 
 export interface IProRedisStore {
   get<T = any>(key: string): Promise<T | null>
-  set(key: string, value: any, opts?: { ex?: number }): Promise<any>
+  set(key: string, value: any, opts?: { ex?: number; nx?: boolean }): Promise<any>
   del(...keys: string[]): Promise<number>
   expire(key: string, seconds: number): Promise<number>
   hget<T = any>(key: string, field: string): Promise<T | null>
@@ -38,12 +40,14 @@ export interface IProRedisStore {
   sadd(key: string, ...members: string[]): Promise<number>
   smembers(key: string): Promise<string[]>
   srem(key: string, ...members: string[]): Promise<number>
+  sismember(key: string, member: string): Promise<number>
   pfadd(key: string, ...elements: string[]): Promise<number>
   pfcount(...keys: string[]): Promise<number>
   pipeline(): IProRedisPipeline
   keys(pattern: string): Promise<string[]>
   scan(cursor: number, opts?: { match?: string; count?: number }): Promise<[number, string[]]>
   scard(key: string): Promise<number>
+  exists(...keys: string[]): Promise<number>
 }
 
 class UpstashRedisAdapter implements IProRedisStore {
@@ -53,15 +57,23 @@ class UpstashRedisAdapter implements IProRedisStore {
     return this.client.get<T>(key)
   }
 
-  async set(key: string, value: any, opts?: { ex?: number }): Promise<any> {
-    if (opts?.ex) {
-      return this.client.set(key, value, { ex: opts.ex })
+  async set(key: string, value: any, opts?: { ex?: number; nx?: boolean }): Promise<any> {
+    const setOpts: any = {}
+    if (opts?.ex) setOpts.ex = opts.ex
+    if (opts?.nx) setOpts.nx = true
+    if (Object.keys(setOpts).length > 0) {
+      return this.client.set(key, value, setOpts)
     }
     return this.client.set(key, value)
   }
 
   async del(...keys: string[]): Promise<number> {
     return this.client.del(...keys)
+  }
+
+  async exists(...keys: string[]): Promise<number> {
+    if (keys.length === 0) return 0
+    return this.client.exists(keys[0], ...keys.slice(1))
   }
 
   async expire(key: string, seconds: number): Promise<number> {
@@ -130,6 +142,11 @@ class UpstashRedisAdapter implements IProRedisStore {
 
   async srem(key: string, ...members: string[]): Promise<number> {
     return this.client.srem(key, members[0], ...members.slice(1))
+  }
+
+  async sismember(key: string, member: string): Promise<number> {
+    const res = await this.client.sismember(key, member)
+    return Number(res)
   }
 
   async pfadd(key: string, ...elements: string[]): Promise<number> {
@@ -206,6 +223,16 @@ class UpstashRedisAdapter implements IProRedisStore {
         }
         return wrapper
       },
+      set(key: string, value: any) {
+        p.set(key, value)
+        return wrapper
+      },
+      del(...keys: string[]) {
+        if (keys.length > 0) {
+          p.del(...keys)
+        }
+        return wrapper
+      },
       zadd(key: string, ...scoreMembers: { score: number; member: string }[]) {
         for (const sm of scoreMembers) {
           p.zadd(key, { score: sm.score, member: sm.member })
@@ -250,7 +277,10 @@ class MemoryRedisStore implements IProRedisStore {
     return this.kv.has(key) ? (this.kv.get(key) as T) : null
   }
 
-  async set(key: string, value: any, opts?: { ex?: number }): Promise<'OK'> {
+  async set(key: string, value: any, opts?: { ex?: number; nx?: boolean }): Promise<any> {
+    if (opts?.nx && this.kv.has(key) && !this.isExpired(key)) {
+      return null
+    }
     this.kv.set(key, value)
     if (opts?.ex) {
       this.expires.set(key, Date.now() + opts.ex * 1000)
@@ -267,6 +297,23 @@ class MemoryRedisStore implements IProRedisStore {
       if (this.sets.delete(key)) count++
       if (this.hll.delete(key)) count++
       this.expires.delete(key)
+    }
+    return count
+  }
+
+  async exists(...keys: string[]): Promise<number> {
+    let count = 0
+    for (const key of keys) {
+      if (this.isExpired(key)) continue
+      if (
+        this.kv.has(key) ||
+        this.hashes.has(key) ||
+        this.sortedSets.has(key) ||
+        this.sets.has(key) ||
+        this.hll.has(key)
+      ) {
+        count++
+      }
     }
     return count
   }
@@ -428,6 +475,12 @@ class MemoryRedisStore implements IProRedisStore {
     return removed
   }
 
+  async sismember(key: string, member: string): Promise<number> {
+    if (this.isExpired(key)) return 0
+    const set = this.sets.get(key)
+    return set && set.has(member) ? 1 : 0
+  }
+
   async pfadd(key: string, ...elements: string[]): Promise<number> {
     if (this.isExpired(key)) {
       this.hll.delete(key)
@@ -529,6 +582,14 @@ class MemoryRedisStore implements IProRedisStore {
       },
       sadd: (key: string, ...members: string[]) => {
         queue.push(() => this.sadd(key, ...members))
+        return wrapper
+      },
+      set: (key: string, value: any) => {
+        queue.push(() => this.set(key, value))
+        return wrapper
+      },
+      del: (...keys: string[]) => {
+        queue.push(() => this.del(...keys))
         return wrapper
       },
       zadd: (key: string, ...scoreMembers: { score: number; member: string }[]) => {

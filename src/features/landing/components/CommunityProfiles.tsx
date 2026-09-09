@@ -141,12 +141,7 @@ export function CommunityProfiles({
     return FEATURED_PROFILES.slice(0, 6)
   }, [profiles])
 
-  const totalCommunityCount = Math.max(
-    resolvedUsersCount,
-    resolvedProfilesCount,
-    profiles?.length || 0
-  )
-  const remainingProfilesCount = Math.max(1, totalCommunityCount - profileList.length)
+  const remainingProfilesCount = Math.max(0, resolvedProfilesCount - profileList.length)
 
   const [activeUsername, setActiveUsername] = useState<string>(
     profileList[0]?.username || 'Igorcbraz'

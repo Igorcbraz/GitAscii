@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertTriangle, Info, Trash2, X } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 
@@ -34,7 +34,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const [mounted, setMounted] = useState(false)
   const resolvedConfirmLabel = confirmLabel || t('pro.dialog.confirm', 'Confirm')
   const resolvedCancelLabel = cancelLabel || t('pro.dialog.cancel', 'Cancel')
-  const handleClose = onClose || onCancel || (() => {})
+  const handleClose = useCallback(() => {
+    if (onClose) onClose()
+    else if (onCancel) onCancel()
+  }, [onClose, onCancel])
 
   useEffect(() => {
     setMounted(true)
@@ -46,9 +49,20 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         handleClose()
       }
     }
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (!mounted || !isOpen || isLoading) return
+      const target = e.target as HTMLElement
+      if (target.classList.contains('bg-black/75')) {
+        handleClose()
+      }
+    }
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, isLoading, handleClose])
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleOutsideClick)
+    }
+  }, [isOpen, isLoading, handleClose, mounted])
 
   if (!isOpen || !mounted) return null
 

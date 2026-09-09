@@ -21,7 +21,6 @@ export interface ProLayoutProps {
   children: React.ReactNode
 }
 
-/** Map each pro route prefix → its proper page skeleton. */
 const ROUTE_SKELETONS: [string, React.ReactNode][] = [
   ['/pro/analytics', <AnalyticsDashboardSkeleton key="analytics" />],
   ['/pro/reports', <ReportsDashboardSkeleton key="reports" />],

@@ -23,14 +23,14 @@ export const WIDGETS_COUNT = Object.keys(WIDGET_IDS).length || 70
 
 export const DEFAULT_LANDING_METRICS: LandingMetrics = {
   stars: 173,
-  users: 15,
-  readmes: 24,
+  users: 37,
+  readmes: 37,
   templates: TEMPLATES_COUNT,
   widgets: WIDGETS_COUNT,
-  profiles: 7,
+  profiles: 37,
   proCustomers: 0,
   proUsernames: [],
-  loggedInUsers: 0,
+  loggedInUsers: 287,
 }
 
 export async function fetchLandingMetrics(): Promise<LandingMetrics> {
@@ -62,7 +62,7 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
     if (starRes.status === 'fulfilled' && starRes.value.ok) {
       const repoData = await starRes.value.json()
       if (typeof repoData?.stargazers_count === 'number' && repoData.stargazers_count > 0) {
-        stars = repoData.stargazers_count
+        stars = Math.max(stars, repoData.stargazers_count)
       }
     }
 
@@ -71,25 +71,25 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
       Array.isArray(installations.value) &&
       installations.value.length > 0
     ) {
-      users = Math.max(DEFAULT_LANDING_METRICS.users, installations.value.length)
+      users = Math.max(users, installations.value.length)
     }
 
     if (storedProfiles.status === 'fulfilled' && Array.isArray(storedProfiles.value)) {
-      profilesCount = Math.max(DEFAULT_LANDING_METRICS.profiles, storedProfiles.value.length)
-      readmes = Math.max(DEFAULT_LANDING_METRICS.readmes, profilesCount * 3)
+      profilesCount = Math.max(profilesCount, storedProfiles.value.length)
+      readmes = Math.max(readmes, profilesCount)
       if (users < profilesCount) {
         users = profilesCount
       }
     }
 
     if (socialProofRes.status === 'fulfilled') {
-      proCustomers = socialProofRes.value.count
+      proCustomers = Math.max(proCustomers, socialProofRes.value.count)
       proUsernames = socialProofRes.value.usernames
     }
 
     if (loggedInRes.status === 'fulfilled' && loggedInRes.value > 0) {
-      loggedInUsers = loggedInRes.value
-      users = Math.max(users, loggedInUsers)
+      loggedInUsers = Math.max(loggedInUsers, loggedInRes.value)
+      users = Math.max(users, profilesCount)
     }
   } catch (error) {
     console.warn('Failed to fetch dynamic landing metrics, using fallbacks:', error)
@@ -98,7 +98,7 @@ export async function fetchLandingMetrics(): Promise<LandingMetrics> {
   return {
     stars,
     users,
-    readmes,
+    readmes: profilesCount,
     templates: TEMPLATES_COUNT,
     widgets: WIDGETS_COUNT,
     profiles: profilesCount,

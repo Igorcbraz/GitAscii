@@ -117,8 +117,8 @@ async function fetchAndProcessExternalImage(
   const contentType = response.headers.get('content-type') || ''
   const buffer = await response.arrayBuffer()
 
-  if (buffer.byteLength > 5 * 1024 * 1024) {
-    throw new Error('Image response too large')
+  if (buffer.byteLength > 150 * 1024) {
+    throw new Error('Image response too large for embedding (max 150KB)')
   }
 
   const isSvg =
@@ -369,7 +369,7 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         continue
       }
       const buffer = await response.arrayBuffer()
-      if (buffer.byteLength > 5 * 1024 * 1024) continue
+      if (buffer.byteLength > 150 * 1024) continue
 
       let mimeType = (response.headers.get('content-type') || 'image/webp').split(';')[0].trim()
       if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'

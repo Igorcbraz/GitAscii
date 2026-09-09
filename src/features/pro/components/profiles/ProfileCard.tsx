@@ -142,19 +142,21 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
                 <History className="w-3.5 h-3.5 text-purple-400" />
                 <span>{t('pro.profiles.version_history', 'Version History')}</span>
               </button>
+              {!isDefault && (
+                <button
+                  onClick={() => {
+                    setOpenDropdownSlug(null)
+                    onDelete(profile.slug)
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-400/90 hover:text-rose-400 hover:bg-rose-500/10 transition-colors text-left cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{t('pro.profiles.delete_title', 'Delete Profile')}</span>
+                </button>
+              )}
             </div>
           )}
         </div>
-
-        {!isDefault && (
-          <button
-            onClick={() => onDelete(profile.slug)}
-            className="p-1.5 rounded-lg text-[#7a7a7a] hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-            title={t('pro.profiles.delete_title', 'Delete profile')}
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
-        )}
 
         <Link
           href={editorUrl}

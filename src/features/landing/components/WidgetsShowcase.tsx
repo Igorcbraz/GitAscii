@@ -514,7 +514,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
             key={activeGroup}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-stretch"
           >
-            {filteredWidgets.map((widget, idx) => (
+            {filteredWidgets.map((widget, _idx) => (
               <motion.div
                 key={widget.id}
                 initial={{ opacity: 0, y: 28, scale: 0.98 }}

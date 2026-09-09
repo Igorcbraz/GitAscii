@@ -1,7 +1,3 @@
-/**
- * XML and SVG formatting utilities for GitAscii renderers.
- */
-
 export function escapeXml(str: string): string {
   if (!str) return ''
   return str

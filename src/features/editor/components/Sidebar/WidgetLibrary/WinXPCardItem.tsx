@@ -13,11 +13,6 @@ interface WinXPCardItemProps {
   onLeave: () => void
 }
 
-/**
- * Paleta de cores autêntica do Windows XP Luna.
- * Cada widget recebe um acento diferente baseado nos tons reais do XP:
- * azul royal, verde floresta, teal, vinho, laranja queimado, roxo, ciano.
- */
 const XP_ACCENT_MAP: Record<string, { strip: string; icon: string; border: string }> = {
   'winxp-window': {
     strip: 'linear-gradient(90deg, #1F4FC6 0%, #3A7BD5 40%, #1245A8 100%)',

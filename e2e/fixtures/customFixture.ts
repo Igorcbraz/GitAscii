@@ -41,7 +41,6 @@ export const test = base.extend<CustomFixtures>({
       const navVisible = await page.locator('nav').first().isVisible()
       expect(mainVisible || navVisible).toBeTruthy()
     }
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(checkA11y)
   },
 
@@ -56,7 +55,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // Intercept Github profile API call
     await page.route('**/api/github/**', async (route) => {
       await route.fulfill({
         status: 200,
@@ -99,7 +97,6 @@ export const test = base.extend<CustomFixtures>({
       })
     })
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(page)
   },
 })

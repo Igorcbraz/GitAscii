@@ -17,7 +17,7 @@ export function ProWelcomeEmail({
 }: ProWelcomeEmailPayload) {
   const t = getEmailTranslator(locale)
   const baseUrl = getAppBaseUrl()
-  const displayName = name || username
+  const _displayName = name || username
   const targetUrl = dashboardUrl || `${baseUrl}/pro`
 
   return (

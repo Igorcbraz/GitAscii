@@ -89,14 +89,31 @@ export const HealthDashboard: React.FC = () => {
         setErrors(errorsData.errors || [])
       }
 
+      let fetchedProfiles: ProProfileRecord[] = []
       if (profilesRes && profilesRes.ok) {
         const pData = await profilesRes.json()
-        setProfiles(pData.profiles || [])
+        fetchedProfiles = pData.profiles || []
+        setProfiles(fetchedProfiles)
       }
 
       const activeUser = sessionRes?.session?.username
       if (activeUser) {
         setUsername(activeUser)
+
+        if (fetchedProfiles.length > 0) {
+          const configsObj: Record<string, SavedConfiguration> = {}
+          await Promise.all(
+            fetchedProfiles.map(async (p) => {
+              try {
+                const res = await fetch(API_ENDPOINTS.CONFIG.GET(activeUser, p.slug))
+                if (res.ok) {
+                  configsObj[p.slug] = await res.json()
+                }
+              } catch {}
+            })
+          )
+          setProfileConfigs(configsObj)
+        }
       }
     } catch (err) {
       console.warn('Error fetching health monitoring data:', err)
@@ -104,7 +121,7 @@ export const HealthDashboard: React.FC = () => {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => {
     void fetchData()

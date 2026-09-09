@@ -24,8 +24,8 @@ export const ProfileVersionHistoryModal: React.FC<ProfileVersionHistoryModalProp
   const { t } = useI18n()
   const [versions, setVersions] = useState<ProfileVersionRecord[]>([])
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedVersion, setSelectedVersion] = useState<ProfileVersionRecord | null>(null)
+  const [_refreshing, setRefreshing] = useState(false)
+  const [_selectedVersion, _setSelectedVersion] = useState<ProfileVersionRecord | null>(null)
 
   const [showCreateSnapshot, setShowCreateSnapshot] = useState(false)
   const [snapshotLabel, setSnapshotLabel] = useState('')

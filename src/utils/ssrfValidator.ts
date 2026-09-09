@@ -323,10 +323,6 @@ function getSsrfSafeDispatcher(): Agent | undefined {
   return ssrfSafeAgent || undefined
 }
 
-/**
- * Safe outbound fetch helper that validates the initial URL and each followed redirect
- * against SSRF filters with redirect: 'manual' and socket-level DNS interception.
- */
 export async function safeFetch(
   initialUrl: string,
   options: RequestInit = {},

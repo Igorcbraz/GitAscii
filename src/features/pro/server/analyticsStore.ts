@@ -1,3 +1,5 @@
+import { flushAnalyticsBatchToDb } from '@/lib/db/repositories/analyticsRepository'
+
 import type {
   AnalyticsSummary,
   ContinentMetric,
@@ -204,7 +206,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     const profileMetaKey = REDIS_KEYS.profileMeta(username, slug)
     const activityKey = REDIS_KEYS.activityStream(username)
 
-    // Execute all write commands in a single atomic pipeline HTTP request
     const p = redis.pipeline()
     p.pfadd(hllKey, visitorId)
     p.expire(hllKey, RETENTION_TTL_SECONDS)
@@ -274,6 +275,65 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     invalidateAnalyticsCache(username)
   } catch (err) {
     console.warn('[AnalyticsStore] Error ingesting profile view:', err)
+  }
+}
+
+export async function flushUserAnalyticsFromRedisToDb(
+  username: string,
+  targetDateStr?: string
+): Promise<void> {
+  try {
+    const redis = getProRedisClient()
+    const cleanUsername = username.toLowerCase().trim()
+    const dateStr = targetDateStr || formatDate(new Date())
+
+    const totalsData = await redis.hgetall<Record<string, unknown>>(
+      REDIS_KEYS.userTotals(cleanUsername)
+    )
+    const totalViews = Number(totalsData?.totalViews || 0)
+
+    const slugs = await redis.smembers(REDIS_KEYS.userProfiles(cleanUsername)).catch(() => [])
+    const dailyItems: Array<{ slug: string; dateStr: string; views: number; uniques: number }> = []
+    const profileViews: Array<{ slug: string; views: number }> = []
+
+    if (Array.isArray(slugs)) {
+      for (const s of slugs) {
+        if (!s) continue
+        const slug = s.toLowerCase().trim()
+        const meta = await redis.hgetall<Record<string, unknown>>(
+          REDIS_KEYS.profileMeta(cleanUsername, slug)
+        )
+        if (meta && meta.totalViews) {
+          profileViews.push({ slug, views: Number(meta.totalViews) })
+        }
+
+        const daily = await redis.hgetall<Record<string, unknown>>(
+          REDIS_KEYS.dailyMetrics(cleanUsername, slug, dateStr)
+        )
+        const hllKey = REDIS_KEYS.dailyHll(cleanUsername, slug, dateStr)
+        const uniques = await redis.pfcount(hllKey).catch(() => 0)
+
+        if (daily && daily.views) {
+          dailyItems.push({
+            slug,
+            dateStr,
+            views: Number(daily.views),
+            uniques: Number(uniques || 0),
+          })
+        }
+      }
+    }
+
+    const totalUniques = dailyItems.reduce((sum, item) => sum + item.uniques, 0)
+
+    await flushAnalyticsBatchToDb(cleanUsername, {
+      totalViews,
+      totalUniques,
+      profileViews,
+      daily: dailyItems,
+    })
+  } catch (err) {
+    console.warn(`[AnalyticsStore] Error flushing analytics for @${username} to PostgreSQL:`, err)
   }
 }
 
@@ -367,7 +427,7 @@ export async function getAnalyticsSummary(
   const browserCounts: Record<string, number> = {}
   const osCounts: Record<string, number> = {}
   const trafficTypeCounts: Record<string, number> = {}
-  const themeCounts: Record<string, number> = {}
+  const _themeCounts: Record<string, number> = {}
   const statusCodeCounts: Record<string, number> = {}
 
   const currentPipeline = redis.pipeline()

@@ -1,3 +1,12 @@
+import {
+  createDynamicRuleInDb,
+  deleteDynamicRuleFromDb,
+  getDynamicRulesConfigFromDb,
+  reorderDynamicRulesInDb,
+  saveDynamicRulesConfigInDb,
+  updateDynamicRuleInDb,
+} from '@/lib/db/repositories/dynamicRulesRepository'
+
 import type {
   DynamicEvaluatedRuleStep,
   DynamicEvaluationResult,
@@ -102,9 +111,31 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
   const [rawConfig, ruleIds] = await Promise.all([
-    redis.hgetall<any>(configKey),
+    redis.hgetall<any>(configKey).catch(() => null),
     redis.zrevrange<string[]>(listKey, 0, -1).catch(() => []),
   ])
+
+  if (!rawConfig && (!ruleIds || ruleIds.length === 0)) {
+    try {
+      const dbConfig = await getDynamicRulesConfigFromDb(u)
+      if (dbConfig) {
+        const p = redis.pipeline()
+        p.hset(configKey, {
+          enabled: String(dbConfig.enabled),
+          fallbackProfileSlug: dbConfig.fallbackProfileSlug,
+          defaultTimezone: dbConfig.defaultTimezone,
+        })
+        for (const r of dbConfig.rules) {
+          p.set(REDIS_KEYS.dynamicRuleItem(u, r.id), JSON.stringify(r))
+          p.zadd(listKey, { score: r.priority, member: r.id })
+        }
+        await p.exec().catch(() => {})
+        return dbConfig
+      }
+    } catch (dbErr) {
+      console.warn(`[DynamicRules] PostgreSQL read error for @${u}:`, dbErr)
+    }
+  }
 
   const enabled = rawConfig?.enabled === 'true'
   const fallbackProfileSlug = rawConfig?.fallbackProfileSlug || 'default'
@@ -116,7 +147,7 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
     for (const id of ruleIds) {
       p.get(REDIS_KEYS.dynamicRuleItem(u, id))
     }
-    const results = await p.exec<any[]>()
+    const results = await p.exec<any[]>().catch(() => [])
     for (const rawRule of results) {
       if (rawRule) {
         const parsed: DynamicRuleRecord =
@@ -147,6 +178,12 @@ export async function saveDynamicRulesConfig(
   const u = username.toLowerCase().trim()
   const configKey = REDIS_KEYS.dynamicRulesConfig(u)
 
+  try {
+    await saveDynamicRulesConfigInDb(u, updates)
+  } catch (dbErr) {
+    console.warn(`[DynamicRules] PostgreSQL saveDynamicRulesConfig error for @${u}:`, dbErr)
+  }
+
   const payload: Record<string, string> = {}
   if (updates.enabled !== undefined) payload.enabled = String(updates.enabled)
   if (updates.fallbackProfileSlug !== undefined)
@@ -154,7 +191,7 @@ export async function saveDynamicRulesConfig(
   if (updates.defaultTimezone !== undefined) payload.defaultTimezone = updates.defaultTimezone
 
   if (Object.keys(payload).length > 0) {
-    await redis.hset(configKey, payload)
+    await redis.hset(configKey, payload).catch(() => {})
   }
 
   return getDynamicRulesConfig(u)
@@ -195,9 +232,15 @@ export async function createDynamicRule(
     updatedAt: now,
   }
 
+  try {
+    await createDynamicRuleInDb(u, newRule)
+  } catch (dbErr) {
+    console.warn(`[DynamicRules] PostgreSQL createDynamicRule error for @${u}:`, dbErr)
+  }
+
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
-  await redis.set(itemKey, JSON.stringify(newRule))
-  await redis.zadd(listKey, { score: priority, member: ruleId })
+  await redis.set(itemKey, JSON.stringify(newRule)).catch(() => {})
+  await redis.zadd(listKey, { score: priority, member: ruleId }).catch(() => {})
 
   return newRule
 }
@@ -212,7 +255,7 @@ export async function updateDynamicRule(
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
-  const raw = await redis.get<string | DynamicRuleRecord>(itemKey)
+  const raw = await redis.get<string | DynamicRuleRecord>(itemKey).catch(() => null)
   if (!raw) return null
 
   const existing: DynamicRuleRecord = typeof raw === 'string' ? JSON.parse(raw) : raw
@@ -225,10 +268,16 @@ export async function updateDynamicRule(
     updatedAt: now,
   }
 
-  await redis.set(itemKey, JSON.stringify(updated))
+  try {
+    await updateDynamicRuleInDb(u, ruleId, updates)
+  } catch (dbErr) {
+    console.warn(`[DynamicRules] PostgreSQL updateDynamicRule error for @${u}:`, dbErr)
+  }
+
+  await redis.set(itemKey, JSON.stringify(updated)).catch(() => {})
 
   if (updates.priority !== undefined && updates.priority !== existing.priority) {
-    await redis.zadd(listKey, { score: updates.priority, member: ruleId })
+    await redis.zadd(listKey, { score: updates.priority, member: ruleId }).catch(() => {})
   }
 
   return updated
@@ -240,8 +289,14 @@ export async function deleteDynamicRule(username: string, ruleId: string): Promi
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
-  await redis.del(itemKey)
-  await redis.zrem(listKey, ruleId)
+  try {
+    await deleteDynamicRuleFromDb(u, ruleId)
+  } catch (dbErr) {
+    console.warn(`[DynamicRules] PostgreSQL deleteDynamicRule error for @${u}:`, dbErr)
+  }
+
+  await redis.del(itemKey).catch(() => {})
+  await redis.zrem(listKey, ruleId).catch(() => {})
 
   return true
 }
@@ -251,6 +306,12 @@ export async function reorderDynamicRules(
   ruleIdsInOrder: string[]
 ): Promise<DynamicRuleRecord[]> {
   const u = username.toLowerCase().trim()
+
+  try {
+    await reorderDynamicRulesInDb(u, ruleIdsInOrder)
+  } catch (dbErr) {
+    console.warn(`[DynamicRules] PostgreSQL reorderDynamicRules error for @${u}:`, dbErr)
+  }
 
   let basePriority = ruleIdsInOrder.length * 10
   for (const id of ruleIdsInOrder) {

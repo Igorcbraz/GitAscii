@@ -52,8 +52,8 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
       icon: FileText,
       value: metrics.readmes,
       suffix: '+',
-      label: t('landing.traction.readmes', 'READMEs Built'),
-      subtext: t('landing.traction.readmes_sub', 'Edge SVGs generated'),
+      label: t('landing.traction.readmes', 'Live Profiles'),
+      subtext: t('landing.traction.readmes_sub', 'Real-time READMEs'),
       accent: false,
     },
     {
@@ -74,7 +74,7 @@ export function TractionBar({ metrics = DEFAULT_LANDING_METRICS }: TractionBarPr
     },
   ]
 
-  const colCount = baseStats.length
+  const _colCount = baseStats.length
 
   return (
     <section
