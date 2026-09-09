@@ -55,6 +55,7 @@ export async function POST(request?: Request) {
       const stripe = getStripeClient()
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: 'payment',
+        customer_creation: 'always',
         payment_method_types: ['card'],
         customer_email: userEmail,
         line_items: [
