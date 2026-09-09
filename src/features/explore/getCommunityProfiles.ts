@@ -1,3 +1,5 @@
+import { unstable_cache } from 'next/cache'
+
 import type { SavedConfiguration } from '@/engine/types'
 import { getAppInstallations } from '@/lib/githubApp'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -66,28 +68,32 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
   return null
 }
 
-export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
-  const profileMap = new Map<string, CommunityProfileItem>()
-  const installedUsers = await getAppInstallations()
+export const getStoredProfiles = unstable_cache(
+  async (): Promise<CommunityProfileItem[]> => {
+    const profileMap = new Map<string, CommunityProfileItem>()
+    const installedUsers = await getAppInstallations()
 
-  const chunkSize = 10
-  for (let i = 0; i < installedUsers.length; i += chunkSize) {
-    const chunk = installedUsers.slice(i, i + chunkSize)
-    await Promise.allSettled(
-      chunk.map(async (username) => {
-        try {
-          const config = await fetchUserGitAscii(username)
-          if (!config) return
-          const profileItem = parseConfigToProfileItem(config)
-          if (profileItem) {
-            profileMap.set(profileItem.username.toLowerCase(), profileItem)
+    const chunkSize = 10
+    for (let i = 0; i < installedUsers.length; i += chunkSize) {
+      const chunk = installedUsers.slice(i, i + chunkSize)
+      await Promise.allSettled(
+        chunk.map(async (username) => {
+          try {
+            const config = await fetchUserGitAscii(username)
+            if (!config) return
+            const profileItem = parseConfigToProfileItem(config)
+            if (profileItem) {
+              profileMap.set(profileItem.username.toLowerCase(), profileItem)
+            }
+          } catch (e) {
+            console.warn(`Failed to load profile for ${username}:`, e)
           }
-        } catch (e) {
-          console.warn(`Failed to load profile for ${username}:`, e)
-        }
-      })
-    )
-  }
+        })
+      )
+    }
 
-  return Array.from(profileMap.values())
-}
+    return Array.from(profileMap.values())
+  },
+  ['community-profiles'],
+  { revalidate: 600 }
+)

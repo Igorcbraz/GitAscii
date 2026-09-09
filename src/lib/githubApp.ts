@@ -155,54 +155,60 @@ export async function getInstallationTokenById(
   }
 }
 
-export async function getAppInstallations(): Promise<string[]> {
-  try {
-    const jwt = generateGitHubAppJWT()
-    const allLogins: string[] = []
+import { unstable_cache } from 'next/cache'
 
-    let url: string | null = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
+export const getAppInstallations = unstable_cache(
+  async (): Promise<string[]> => {
+    try {
+      const jwt = generateGitHubAppJWT()
+      const allLogins: string[] = []
 
-    while (url) {
-      const pageRes: Response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'GitAscii-App',
-        },
-        next: { revalidate: 600 },
+      let url: string | null = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
 
-        signal: AbortSignal.timeout(10000),
-      })
+      while (url) {
+        const pageRes: Response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'GitAscii-App',
+          },
+          next: { revalidate: 600 },
 
-      if (!pageRes.ok) {
-        const errText = await pageRes.text().catch(() => '')
-        console.error(
-          `[getAppInstallations] GitHub API error: ${pageRes.status} ${pageRes.statusText}`,
-          errText
-        )
-        break
+          signal: AbortSignal.timeout(10000),
+        })
+
+        if (!pageRes.ok) {
+          const errText = await pageRes.text().catch(() => '')
+          console.error(
+            `[getAppInstallations] GitHub API error: ${pageRes.status} ${pageRes.statusText}`,
+            errText
+          )
+          break
+        }
+
+        const data: unknown = await pageRes.json()
+        if (!Array.isArray(data) || data.length === 0) break
+
+        const logins = (data as { account?: { login?: string } }[])
+          .map((inst) => inst.account?.login)
+          .filter((login): login is string => typeof login === 'string')
+
+        allLogins.push(...logins)
+
+        const linkHeader: string = pageRes.headers.get('link') ?? ''
+        const nextMatch: RegExpMatchArray | null = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
+        url = nextMatch ? nextMatch[1] : null
       }
 
-      const data: unknown = await pageRes.json()
-      if (!Array.isArray(data) || data.length === 0) break
-
-      const logins = (data as { account?: { login?: string } }[])
-        .map((inst) => inst.account?.login)
-        .filter((login): login is string => typeof login === 'string')
-
-      allLogins.push(...logins)
-
-      const linkHeader: string = pageRes.headers.get('link') ?? ''
-      const nextMatch: RegExpMatchArray | null = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
-      url = nextMatch ? nextMatch[1] : null
+      return allLogins
+    } catch (error) {
+      console.warn('Failed to fetch App installations for Explore:', error)
+      return []
     }
-
-    return allLogins
-  } catch (error) {
-    console.warn('Failed to fetch App installations for Explore:', error)
-    return []
-  }
-}
+  },
+  ['github-app-installations'],
+  { revalidate: 600 }
+)
 
 export async function getAppInstallUrl(): Promise<string> {
   try {

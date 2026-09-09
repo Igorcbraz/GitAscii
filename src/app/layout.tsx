@@ -2,7 +2,6 @@ import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
 import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'next/font/google'
-import { headers } from 'next/headers'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
@@ -216,48 +215,14 @@ const faqLd = {
   })),
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const headersList = await headers()
-  const queryLang = headersList.get('x-lang')
-  const cookieHeader = headersList.get('cookie') || ''
-  const acceptLanguage = headersList.get('accept-language') || ''
-
-  let ssrLang = 'en'
-  if (queryLang === 'pt') {
-    ssrLang = 'pt-BR'
-  } else if (queryLang === 'es') {
-    ssrLang = 'es-ES'
-  } else if (queryLang === 'zh') {
-    ssrLang = 'zh-CN'
-  } else if (queryLang === 'en') {
-    ssrLang = 'en'
-  } else if (cookieHeader.includes('gitascii_lang=pt')) {
-    ssrLang = 'pt-BR'
-  } else if (cookieHeader.includes('gitascii_lang=es')) {
-    ssrLang = 'es-ES'
-  } else if (cookieHeader.includes('gitascii_lang=zh')) {
-    ssrLang = 'zh-CN'
-  } else if (cookieHeader.includes('gitascii_lang=en')) {
-    ssrLang = 'en'
-  } else if (
-    acceptLanguage.startsWith('pt') ||
-    acceptLanguage.includes('pt-BR') ||
-    acceptLanguage.includes('pt-PT')
-  ) {
-    ssrLang = 'pt-BR'
-  } else if (acceptLanguage.startsWith('es')) {
-    ssrLang = 'es-ES'
-  } else if (acceptLanguage.startsWith('zh')) {
-    ssrLang = 'zh-CN'
-  }
-
   return (
     <html
-      lang={ssrLang}
+      lang="pt-BR"
       suppressHydrationWarning
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable} ${teko.variable}`}
     >
