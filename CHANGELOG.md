@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.21.0](https://github.com/Igorcbraz/GitAscii/compare/v1.20.0...v1.21.0) (2026-09-09)
+
+
+### Features
+
+* integrate Neon Postgres and sync Stripe entitlements ([1104073](https://github.com/Igorcbraz/GitAscii/commit/1104073b920ab80eb18bd5fc999668c60f621d92))
+
+
+### Bug Fixes
+
+* downgrade lucide-react to ^0.475.0 to restore missing icons ([30d43ac](https://github.com/Igorcbraz/GitAscii/commit/30d43acef822bcd289fa79bc756287f01d0b07dc))
+
+
+### Performance Improvements
+
+* **core:** optimize SVG generation to reduce CPU and CDN data transfer ([55b3c34](https://github.com/Igorcbraz/GitAscii/commit/55b3c345ca9818e6d8249e50220837e9fe11d751))
+
 ## [1.20.0](https://github.com/Igorcbraz/GitAscii/compare/v1.19.0...v1.20.0) (2026-09-08)
 
 
