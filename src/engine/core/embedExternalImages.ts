@@ -117,8 +117,8 @@ async function fetchAndProcessExternalImage(
   const contentType = response.headers.get('content-type') || ''
   const buffer = await response.arrayBuffer()
 
-  if (buffer.byteLength > 150 * 1024) {
-    throw new Error('Image response too large for embedding (max 150KB)')
+  if (buffer.byteLength > 4 * 1024 * 1024) {
+    throw new Error('Image response too large for embedding (max 4MB)')
   }
 
   const isSvg =
@@ -366,10 +366,20 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
 
       if (!response.ok) {
         hasErrors = true
+        const transparentPixel =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+        const replacement = fullMatch.replace(hrefMatch[0], `href="${transparentPixel}"`)
+        finalSvg = finalSvg.replace(fullMatch, () => replacement)
         continue
       }
       const buffer = await response.arrayBuffer()
-      if (buffer.byteLength > 150 * 1024) continue
+      if (buffer.byteLength > 4 * 1024 * 1024) {
+        const transparentPixel =
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+        const replacement = fullMatch.replace(hrefMatch[0], `href="${transparentPixel}"`)
+        finalSvg = finalSvg.replace(fullMatch, () => replacement)
+        continue
+      }
 
       let mimeType = (response.headers.get('content-type') || 'image/webp').split(';')[0].trim()
       if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
@@ -386,6 +396,10 @@ export async function embedExternalImages(svgContent: string): Promise<Processed
         url.replace(/[\r\n]/g, ''),
         `error=${errorMessage}`
       )
+      const transparentPixel =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+      const replacement = fullMatch.replace(hrefMatch[0], `href="${transparentPixel}"`)
+      finalSvg = finalSvg.replace(fullMatch, () => replacement)
     }
   }
 
