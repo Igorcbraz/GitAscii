@@ -45,6 +45,8 @@ export const API_ENDPOINTS = {
     OAUTH_AUTHORIZE: (clientId: string, state = '/') =>
       `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`,
     OAUTH_ACCESS_TOKEN: 'https://github.com/login/oauth/access_token',
+    OAUTH_GRANTS: (clientId: string) =>
+      `https://api.github.com/applications/${encodeURIComponent(clientId)}/grants?per_page=1`,
     AVATAR: (username: string, size = 150) =>
       `https://github.com/${encodeURIComponent(username)}.png?size=${size}`,
     SPECIAL_REPO_UPLOAD: (username: string) =>

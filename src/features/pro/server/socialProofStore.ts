@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 import { getProRedisClient } from './redisClient'
 
 export interface ProSocialProofData {
@@ -116,9 +118,33 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
 
 export async function getLoggedInUsersCount(): Promise<number> {
   try {
+    const clientId = process.env.GITHUB_CLIENT_ID
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET
+    if (clientId && clientSecret) {
+      const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+      const res = await fetch(API_ENDPOINTS.GITHUB.OAUTH_GRANTS(clientId), {
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'GitAscii-App',
+        },
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
+      })
+      if (res.ok) {
+        const link = res.headers.get('link') ?? ''
+        const lastMatch = link.match(/[?&]page=(\d+)>;\s*rel="last"/)
+        if (lastMatch) return parseInt(lastMatch[1], 10)
+        const data = await res.json()
+        if (Array.isArray(data)) return data.length
+      }
+    }
+  } catch {}
+
+  try {
     const redis = getProRedisClient()
     return await redis.scard('gitascii:all:users')
-  } catch {
-    return 0
-  }
+  } catch {}
+
+  return 0
 }

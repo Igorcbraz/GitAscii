@@ -2,7 +2,7 @@ import type { SavedConfiguration } from '@/engine/types'
 import { getAppInstallations } from '@/lib/githubApp'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-import { type CommunityProfileItem, DEFAULT_SEED_USERS, FALLBACK_SEED_PROFILES } from './constants'
+import type { CommunityProfileItem } from './constants'
 
 export type { CommunityProfileItem }
 
@@ -34,9 +34,10 @@ function parseConfigToProfileItem(config: SavedConfiguration): CommunityProfileI
 async function fetchConfigFromUrl(url: string): Promise<SavedConfiguration | null> {
   try {
     const res = await fetch(url, {
-      next: { revalidate: 1800 },
+      next: { revalidate: 600 },
       signal: AbortSignal.timeout(3000),
     })
+
     if (!res.ok) return null
     const text = await res.text()
     const config = JSON.parse(text)
@@ -67,40 +68,24 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
   return null
 }
 
-let cachedProfiles: { data: CommunityProfileItem[]; timestamp: number } | null = null
-const PROFILES_CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
-
 export async function getStoredProfiles(): Promise<CommunityProfileItem[]> {
-  if (cachedProfiles && Date.now() - cachedProfiles.timestamp < PROFILES_CACHE_TTL_MS) {
-    return cachedProfiles.data
-  }
-
   const profileMap = new Map<string, CommunityProfileItem>()
-
   const installedUsers = await getAppInstallations()
-  const candidateUsers = Array.from(new Set([...installedUsers, ...DEFAULT_SEED_USERS]))
 
-  const _fetchPromises = candidateUsers.map(async (username) => {
-    try {
-      const config = await fetchUserGitAscii(username)
-      if (!config) return
-      const profileItem = parseConfigToProfileItem(config)
-      if (profileItem) {
-        profileMap.set(profileItem.username.toLowerCase(), profileItem)
+  await Promise.allSettled(
+    installedUsers.map(async (username) => {
+      try {
+        const config = await fetchUserGitAscii(username)
+        if (!config) return
+        const profileItem = parseConfigToProfileItem(config)
+        if (profileItem) {
+          profileMap.set(profileItem.username.toLowerCase(), profileItem)
+        }
+      } catch (e) {
+        console.warn(`Failed to load profile for ${username}:`, e)
       }
-    } catch (e) {
-      console.warn(`Failed to load profile for ${username}:`, e)
-    }
-  })
+    })
+  )
 
-  FALLBACK_SEED_PROFILES.forEach((seed) => {
-    if (!profileMap.has(seed.username.toLowerCase())) {
-      profileMap.set(seed.username.toLowerCase(), seed)
-    }
-  })
-
-  const result = Array.from(profileMap.values())
-  cachedProfiles = { data: result, timestamp: Date.now() }
-
-  return result
+  return Array.from(profileMap.values())
 }

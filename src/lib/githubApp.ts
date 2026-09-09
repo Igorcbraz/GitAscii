@@ -18,6 +18,7 @@ export function generateGitHubAppJWT(): string {
     throw new Error('Missing GITHUB_APP_PRIVATE_KEY environment variable')
   }
 
+  privateKey = privateKey.replace(/^["']|["']$/g, '')
   privateKey = privateKey.replace(/\\n/g, '\n')
 
   const header = {
@@ -28,7 +29,7 @@ export function generateGitHubAppJWT(): string {
   const now = Math.floor(Date.now() / 1000)
   const payload = {
     iat: now - 60,
-    exp: now + 10 * 60,
+    exp: now + 5 * 60,
     iss: appId,
   }
 
@@ -157,28 +158,39 @@ export async function getInstallationTokenById(
 export async function getAppInstallations(): Promise<string[]> {
   try {
     const jwt = generateGitHubAppJWT()
-    const res = await fetch(API_ENDPOINTS.GITHUB.APP_INSTALLATIONS, {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'GitAscii-App',
-      },
-      next: { revalidate: 1800 },
-      signal: AbortSignal.timeout(5000),
-    })
+    const allLogins: string[] = []
 
-    if (!res.ok) {
-      return []
+    let url: string | null = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
+
+    while (url) {
+      const pageRes: Response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'GitAscii-App',
+        },
+        next: { revalidate: 600 },
+
+        signal: AbortSignal.timeout(10000),
+      })
+
+      if (!pageRes.ok) break
+
+      const data: unknown = await pageRes.json()
+      if (!Array.isArray(data) || data.length === 0) break
+
+      const logins = (data as { account?: { login?: string } }[])
+        .map((inst) => inst.account?.login)
+        .filter((login): login is string => typeof login === 'string')
+
+      allLogins.push(...logins)
+
+      const linkHeader: string = pageRes.headers.get('link') ?? ''
+      const nextMatch: RegExpMatchArray | null = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
+      url = nextMatch ? nextMatch[1] : null
     }
 
-    const data = await res.json()
-    if (!Array.isArray(data)) {
-      return []
-    }
-
-    return data
-      .map((inst: { account?: { login?: string } }) => inst.account?.login)
-      .filter((login): login is string => typeof login === 'string')
+    return allLogins
   } catch (error) {
     console.warn('Failed to fetch App installations for Explore:', error)
     return []
