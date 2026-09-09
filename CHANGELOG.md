@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/Igorcbraz/GitAscii/compare/v1.21.0...v1.21.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **stripe:** always create customer on checkout session ([622c3fb](https://github.com/Igorcbraz/GitAscii/commit/622c3fb611ac06e5d1669b5a85ef228ddb1fadec))
+
 ## [1.21.0](https://github.com/Igorcbraz/GitAscii/compare/v1.20.0...v1.21.0) (2026-09-09)
 
 
