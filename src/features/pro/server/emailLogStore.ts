@@ -42,11 +42,7 @@ export async function logSentEmail(params: LogEmailParams): Promise<void> {
     messageId: params.messageId || null,
   }
 
-  try {
-    await logSentEmailInDb(username, record)
-  } catch (dbErr) {
-    console.warn('[EmailLogStore] Failed to persist sent email to PostgreSQL:', dbErr)
-  }
+  await logSentEmailInDb(username, record)
 
   try {
     const redis = getProRedisClient()
@@ -149,11 +145,7 @@ export async function canSendTestDigest(username: string): Promise<boolean> {
 export async function recordTestDigestSent(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
 
-  try {
-    await recordTestDigestSentInDb(u)
-  } catch (dbErr) {
-    console.warn('[EmailLogStore] PostgreSQL error recording test digest:', dbErr)
-  }
+  await recordTestDigestSentInDb(u)
 
   try {
     const redis = getProRedisClient()

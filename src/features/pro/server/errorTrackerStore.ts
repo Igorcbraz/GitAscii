@@ -44,11 +44,7 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
       resolvedAt: null,
     }
 
-    try {
-      await recordWidgetErrorInDb(username, recordToSave)
-    } catch (dbErr) {
-      console.warn('[ErrorTrackerStore] PostgreSQL recordWidgetError error:', dbErr)
-    }
+    await recordWidgetErrorInDb(username, recordToSave)
 
     if (existing && existing.id) {
       await redis
@@ -187,11 +183,7 @@ export async function resolveWidgetError(username: string, errorId: string): Pro
   const u = username.toLowerCase().trim()
   const itemKey = REDIS_KEYS.errorItem(u, errorId)
 
-  try {
-    await resolveWidgetErrorInDb(u, errorId)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL resolveWidgetError error:', dbErr)
-  }
+  await resolveWidgetErrorInDb(u, errorId)
 
   const existing = await redis.hgetall<any>(itemKey).catch(() => null)
   if (!existing) return true
@@ -212,11 +204,7 @@ export async function deleteWidgetErrors(username: string, errorIds: string[]): 
 
   if (!errorIds || errorIds.length === 0) return
 
-  try {
-    await deleteWidgetErrorsInDb(u, errorIds)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL deleteWidgetErrors error:', dbErr)
-  }
+  await deleteWidgetErrorsInDb(u, errorIds)
 
   const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
   await redis.del(...itemKeys).catch(() => {})
@@ -228,11 +216,7 @@ export async function clearAllWidgetErrors(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.errorList(u)
 
-  try {
-    await clearAllWidgetErrorsInDb(u)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL clearAllWidgetErrors error:', dbErr)
-  }
+  await clearAllWidgetErrorsInDb(u)
 
   const errorIds = await redis.zrange<string[]>(listKey, 0, -1).catch(() => [])
   if (errorIds && errorIds.length > 0) {

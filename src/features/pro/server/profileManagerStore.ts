@@ -151,7 +151,7 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           })
           .catch(() => {})
 
-        void createProfileInDb(u, defaultRecord).catch(() => {})
+        await createProfileInDb(u, defaultRecord)
 
         profiles.push(defaultRecord)
       }
@@ -218,11 +218,7 @@ export async function createProfile(
     rawSvgUrl,
   }
 
-  try {
-    await createProfileInDb(u, record)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL createProfile error for @${u}:`, dbErr)
-  }
+  await createProfileInDb(u, record)
 
   await redis.hset(metaKey, {
     id: record.id,
@@ -372,11 +368,7 @@ export async function duplicateProfile(
     rawSvgUrl,
   }
 
-  try {
-    await createProfileInDb(u, record, newConfig)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL duplicateProfile error for @${u}:`, dbErr)
-  }
+  await createProfileInDb(u, record, newConfig)
 
   await redis.hset(metaKey, {
     id: record.id,
@@ -414,11 +406,7 @@ export async function setDefaultProfile(
     throw new Error(`Profile "${cleanSlug}" not found.`)
   }
 
-  try {
-    await setDefaultProfileInDb(u, cleanSlug)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL setDefaultProfile error for @${u}:`, dbErr)
-  }
+  await setDefaultProfileInDb(u, cleanSlug)
 
   for (const p of profiles) {
     const metaKey = REDIS_KEYS.profileMeta(u, p.slug)
@@ -445,11 +433,7 @@ export async function updateProfile(
   const existing = await redis.hgetall<any>(metaKey)
   if (!existing) return null
 
-  try {
-    await updateProfileInDb(u, cleanSlug, updates)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL updateProfile error for @${u}:`, dbErr)
-  }
+  await updateProfileInDb(u, cleanSlug, updates)
 
   const now = new Date().toISOString()
   const payload: Record<string, any> = {
@@ -490,11 +474,7 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
     )
   }
 
-  try {
-    await deleteProfileFromDb(u, cleanSlug)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL deleteProfile error for @${u}:`, dbErr)
-  }
+  await deleteProfileFromDb(u, cleanSlug)
 
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
   await redis.srem(profilesSetKey, cleanSlug)
@@ -549,11 +529,7 @@ export async function createProfileVersion(
     createdBy: snapshot.createdBy || u,
   }
 
-  try {
-    await createProfileVersionInDb(u, cleanSlug, record)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL createProfileVersion error for @${u}:`, dbErr)
-  }
+  await createProfileVersionInDb(u, cleanSlug, record)
 
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
   await redis.set(itemKey, JSON.stringify(record))

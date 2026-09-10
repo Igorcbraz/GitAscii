@@ -155,6 +155,12 @@ export async function runRedisToPostgresBackfill(): Promise<BackfillSummary> {
     for (const username of usersToProcess) {
       if (username.startsWith('test_')) continue
       try {
+        const existingUser = await getUserByUsername(username)
+        if (!existingUser) {
+          console.log(`[Backfill] Skipping @${username}: user is not present in PostgreSQL`)
+          continue
+        }
+
         await ensureUser(username)
         summary.usersMigrated++
 

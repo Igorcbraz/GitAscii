@@ -5,6 +5,11 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     EventEmitter.defaultMaxListeners = 30
     await import('../sentry.server.config')
+
+    if (process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED) {
+      const { runMigrations } = await import('./lib/db/migrations')
+      await runMigrations()
+    }
   }
 
   if (process.env.NEXT_RUNTIME === 'edge') {

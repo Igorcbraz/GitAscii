@@ -38,7 +38,7 @@ export async function recordRenderTelemetry(payload: {
     const duration = Math.max(1, Math.round(payload.durationMs || 25))
     const isSuccess = payload.statusCode >= 200 && payload.statusCode < 400 && !payload.hasErrors
 
-    void recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration).catch(() => {})
+    await recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration)
 
     const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
     const metaKey = REDIS_KEYS.profileMeta(u, slug)
@@ -50,7 +50,7 @@ export async function recordRenderTelemetry(payload: {
 
     for (const rawWidgetId of widgetsToRecord) {
       const widgetId = rawWidgetId.toLowerCase().trim()
-      void recordWidgetDailyHealthInDb(u, widgetId, dateStr, isSuccess, duration).catch(() => {})
+      await recordWidgetDailyHealthInDb(u, widgetId, dateStr, isSuccess, duration)
     }
 
     const p = redis.pipeline()

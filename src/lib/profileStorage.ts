@@ -47,11 +47,7 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
   const username = config.username.toLowerCase()
   const slug = (config.profileSlug || 'default').toLowerCase()
 
-  try {
-    await saveProfileConfigInDb(username, slug, config)
-  } catch (dbErr) {
-    console.warn('[ProfileStorage] Failed to persist config to PostgreSQL:', dbErr)
-  }
+  await saveProfileConfigInDb(username, slug, config)
 
   try {
     const redis = getProRedisClient()
@@ -123,9 +119,6 @@ export async function loadProfileConfig(
         expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
       })
       try {
-        await saveProfileConfigInDb(usernameLower, slugLower, githubConfig)
-      } catch {}
-      try {
         const redis = getProRedisClient()
         await redis.set(
           REDIS_KEYS.profileConfig(usernameLower, slugLower),
@@ -186,7 +179,6 @@ export async function loadProfileConfig(
       expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
     })
 
-    void saveProfileConfigInDb(usernameLower, slugLower, config).catch(() => {})
     try {
       const redis = getProRedisClient()
       const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)

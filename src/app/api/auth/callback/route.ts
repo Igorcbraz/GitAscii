@@ -141,6 +141,13 @@ export async function GET(request: Request) {
       } catch {}
     }
 
+    const { ensureUser } = await import('@/lib/db/repositories/userRepository')
+    await ensureUser(userData.login, {
+      githubId: userData.id,
+      email: userEmail,
+      name: userData.name || userData.login,
+    })
+
     await setSession({
       username: userData.login,
       githubId: userData.id,
@@ -148,17 +155,6 @@ export async function GET(request: Request) {
       name: userData.name || userData.login,
       accessToken: accessToken,
     })
-
-    try {
-      const { ensureUser } = await import('@/lib/db/repositories/userRepository')
-      await ensureUser(userData.login, {
-        githubId: userData.id,
-        email: userEmail,
-        name: userData.name || userData.login,
-      })
-    } catch (dbErr) {
-      console.warn('[OAuth Callback] Non-blocking DB user creation warning:', dbErr)
-    }
 
     try {
       const { getProRedisClient } = await import('@/features/pro/server/redisClient')

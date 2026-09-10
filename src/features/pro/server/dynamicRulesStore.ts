@@ -178,11 +178,7 @@ export async function saveDynamicRulesConfig(
   const u = username.toLowerCase().trim()
   const configKey = REDIS_KEYS.dynamicRulesConfig(u)
 
-  try {
-    await saveDynamicRulesConfigInDb(u, updates)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL saveDynamicRulesConfig error for @${u}:`, dbErr)
-  }
+  await saveDynamicRulesConfigInDb(u, updates)
 
   const payload: Record<string, string> = {}
   if (updates.enabled !== undefined) payload.enabled = String(updates.enabled)
@@ -232,11 +228,7 @@ export async function createDynamicRule(
     updatedAt: now,
   }
 
-  try {
-    await createDynamicRuleInDb(u, newRule)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL createDynamicRule error for @${u}:`, dbErr)
-  }
+  await createDynamicRuleInDb(u, newRule)
 
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   await redis.set(itemKey, JSON.stringify(newRule)).catch(() => {})
@@ -268,11 +260,7 @@ export async function updateDynamicRule(
     updatedAt: now,
   }
 
-  try {
-    await updateDynamicRuleInDb(u, ruleId, updates)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL updateDynamicRule error for @${u}:`, dbErr)
-  }
+  await updateDynamicRuleInDb(u, ruleId, updates)
 
   await redis.set(itemKey, JSON.stringify(updated)).catch(() => {})
 
@@ -289,11 +277,7 @@ export async function deleteDynamicRule(username: string, ruleId: string): Promi
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
-  try {
-    await deleteDynamicRuleFromDb(u, ruleId)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL deleteDynamicRule error for @${u}:`, dbErr)
-  }
+  await deleteDynamicRuleFromDb(u, ruleId)
 
   await redis.del(itemKey).catch(() => {})
   await redis.zrem(listKey, ruleId).catch(() => {})
@@ -307,11 +291,7 @@ export async function reorderDynamicRules(
 ): Promise<DynamicRuleRecord[]> {
   const u = username.toLowerCase().trim()
 
-  try {
-    await reorderDynamicRulesInDb(u, ruleIdsInOrder)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL reorderDynamicRules error for @${u}:`, dbErr)
-  }
+  await reorderDynamicRulesInDb(u, ruleIdsInOrder)
 
   let basePriority = ruleIdsInOrder.length * 10
   for (const id of ruleIdsInOrder) {

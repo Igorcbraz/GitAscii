@@ -68,6 +68,18 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
     return computeEntitlements(PRO_PLAN_TIERS.PRO)
   }
 
+  if (hasDbConfig()) {
+    const dbUser = await getUserByUsername(u)
+    const tier = dbUser?.entitlement.plan_tier || PRO_PLAN_TIERS.FREE
+    const entitlements = computeEntitlements(tier)
+    entitlementsCache.set(u, {
+      entitlements,
+      expiresAt:
+        Date.now() + (tier !== PRO_PLAN_TIERS.FREE ? ENTITLEMENTS_CACHE_TTL_MS : 60 * 1000),
+    })
+    return entitlements
+  }
+
   const cached = entitlementsCache.get(u)
   if (cached && cached.expiresAt > Date.now()) {
     return cached.entitlements
@@ -149,6 +161,39 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
   const redis = getProRedisClient()
   const key = REDIS_KEYS.userSettings(u)
 
+  if (hasDbConfig()) {
+    const dbSettings = await getUserSettingsFromDb(u)
+    if (dbSettings) {
+      const result = {
+        ...dbSettings,
+        planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier,
+      }
+      const cachePayload: Record<string, any> = {
+        emailAlertsEnabled: String(result.emailAlertsEnabled),
+        dailyDigestEnabled: String(result.dailyDigestEnabled),
+        themePreference: result.themePreference,
+        anonymizeReferrers: String(result.anonymizeReferrers),
+        planTier: result.planTier,
+      }
+      if (result.alertEmailAddress) cachePayload.alertEmailAddress = result.alertEmailAddress
+      if (result.stripeCustomerId) cachePayload.stripeCustomerId = result.stripeCustomerId
+      if (result.stripeSubscriptionId)
+        cachePayload.stripeSubscriptionId = result.stripeSubscriptionId
+      if (result.stripePriceId) cachePayload.stripePriceId = result.stripePriceId
+      if (result.stripeSubscriptionStatus)
+        cachePayload.stripeSubscriptionStatus = result.stripeSubscriptionStatus
+      if (result.stripeCurrentPeriodEnd)
+        cachePayload.stripeCurrentPeriodEnd = String(result.stripeCurrentPeriodEnd)
+      await redis.hset(key, cachePayload).catch(() => {})
+      if (result.planTier === PRO_PLAN_TIERS.PRO) {
+        await redis.sadd('gitascii:pro:customers', u).catch(() => {})
+      } else {
+        await redis.srem('gitascii:pro:customers', u).catch(() => {})
+      }
+      return result
+    }
+  }
+
   let raw: Record<string, unknown> | null = null
   try {
     raw = await redis.hgetall<Record<string, unknown>>(key)
@@ -227,11 +272,7 @@ export async function updateUserSettings(
 
   let dbResult: ProUserSettings | null = null
   if (hasDbConfig()) {
-    try {
-      dbResult = await updateUserSettingsInDb(u, settings)
-    } catch (dbErr) {
-      console.error(`[Entitlements] Failed to persist settings to PostgreSQL for ${u}:`, dbErr)
-    }
+    dbResult = await updateUserSettingsInDb(u, settings)
   }
 
   const redis = getProRedisClient()

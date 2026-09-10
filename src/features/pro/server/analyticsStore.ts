@@ -1,4 +1,4 @@
-import { flushAnalyticsBatchToDb } from '@/lib/db/repositories/analyticsRepository'
+import { flushAnalyticsBatchToDb, recordViewInDb } from '@/lib/db/repositories/analyticsRepository'
 
 import type {
   AnalyticsSummary,
@@ -258,7 +258,9 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     })
     p.expire(activityKey, RETENTION_TTL_SECONDS)
 
-    await p.exec()
+    const writeResults = await p.exec()
+    const isUnique = Number(writeResults[0] || 0) > 0
+    await recordViewInDb(username, slug, dateStr, isUnique)
 
     void redis
       .zrange(activityKey, 0, -1)

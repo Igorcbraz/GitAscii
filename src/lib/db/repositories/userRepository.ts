@@ -79,6 +79,10 @@ export async function ensureUser(
     return updated[0] as unknown as UserRow
   }
 
+  if (!githubIdStr && process.env.NODE_ENV !== 'test') {
+    throw new Error(`Cannot create user @${username} without a GitHub identity`)
+  }
+
   const insertedUsers = await sql`
     WITH ins_user AS (
       INSERT INTO users (username, github_id, email, name)
@@ -842,6 +846,19 @@ export async function deleteUser(rawUsername: string): Promise<boolean> {
       if (!ruleId) continue
       keysToDelete.add(REDIS_KEYS.dynamicRuleItem(username, ruleId))
     }
+
+    let cursor = 0
+    do {
+      const scanResult = await redis
+        .scan(cursor, { match: `gitascii:pro:${username}:*`, count: 100 })
+        .catch(() => null)
+      if (!scanResult || !Array.isArray(scanResult) || scanResult.length !== 2) break
+      cursor = Number(scanResult[0])
+      const scannedKeys = scanResult[1]
+      if (Array.isArray(scannedKeys)) {
+        scannedKeys.forEach((key) => key && keysToDelete.add(String(key)))
+      }
+    } while (cursor !== 0)
 
     const keyArray = Array.from(keysToDelete).filter(Boolean)
     if (keyArray.length > 0) {

@@ -14,6 +14,22 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
   const redis = getProRedisClient()
 
   try {
+    const { hasDbConfig } = await import('@/lib/db/client')
+    if (hasDbConfig()) {
+      const { getProUsersFromDb } = await import('@/lib/db/repositories/userRepository')
+      const usernames = (await getProUsersFromDb()).map((username) => username.toLowerCase().trim())
+      const result: ProSocialProofData = {
+        count: usernames.length,
+        usernames: usernames.slice(0, 8),
+      }
+      await redis.set(CACHE_KEY, JSON.stringify(result), { ex: CACHE_TTL }).catch(() => {})
+      return result
+    }
+  } catch (error) {
+    console.warn('[SocialProof] Authoritative DB lookup warning:', error)
+  }
+
+  try {
     const cached = await redis.get<string>(CACHE_KEY)
     if (cached) {
       return JSON.parse(cached) as ProSocialProofData

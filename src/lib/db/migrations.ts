@@ -1,4 +1,4 @@
-import { sql } from './client'
+import { directSql as sql } from './client'
 
 export interface Migration {
   version: string
@@ -312,6 +312,145 @@ export const MIGRATIONS: Migration[] = [
       await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1;`
       await sql`ALTER TABLE profile_configurations ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1;`
       await sql`ALTER TABLE dynamic_rules ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1;`
+    },
+  },
+  {
+    version: '009_relational_integrity_and_data_lifecycle',
+    name: 'Harden profile relationships, validation, timestamps and retention support',
+    up: async () => {
+      await sql`
+        DELETE FROM profile_configurations c
+        WHERE NOT EXISTS (
+          SELECT 1 FROM profiles p WHERE p.user_id = c.user_id AND p.slug = c.slug
+        );
+      `
+      await sql`
+        DELETE FROM profile_versions v
+        WHERE NOT EXISTS (
+          SELECT 1 FROM profiles p WHERE p.user_id = v.user_id AND p.slug = v.slug
+        );
+      `
+      await sql`
+        DELETE FROM profile_daily_analytics a
+        WHERE NOT EXISTS (
+          SELECT 1 FROM profiles p WHERE p.user_id = a.user_id AND p.slug = a.slug
+        );
+      `
+      await sql`
+        DELETE FROM profile_daily_health h
+        WHERE NOT EXISTS (
+          SELECT 1 FROM profiles p WHERE p.user_id = h.user_id AND p.slug = h.slug
+        );
+      `
+
+      await sql`ALTER TABLE profile_daily_analytics ALTER COLUMN date_str TYPE DATE USING date_str::date;`
+      await sql`ALTER TABLE profile_daily_health ALTER COLUMN date_str TYPE DATE USING date_str::date;`
+      await sql`ALTER TABLE widget_daily_health ALTER COLUMN date_str TYPE DATE USING date_str::date;`
+
+      await sql`
+        ALTER TABLE profile_configurations
+        ADD CONSTRAINT fk_profile_configurations_profile
+        FOREIGN KEY (user_id, slug) REFERENCES profiles(user_id, slug) ON DELETE CASCADE;
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE profile_versions
+        ADD CONSTRAINT fk_profile_versions_profile
+        FOREIGN KEY (user_id, slug) REFERENCES profiles(user_id, slug) ON DELETE CASCADE;
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE profile_daily_analytics
+        ADD CONSTRAINT fk_profile_daily_analytics_profile
+        FOREIGN KEY (user_id, slug) REFERENCES profiles(user_id, slug) ON DELETE CASCADE;
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE profile_daily_health
+        ADD CONSTRAINT fk_profile_daily_health_profile
+        FOREIGN KEY (user_id, slug) REFERENCES profiles(user_id, slug) ON DELETE CASCADE;
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+
+      await sql`
+        ALTER TABLE user_entitlements
+        ADD CONSTRAINT chk_user_entitlements_plan_tier CHECK (plan_tier IN ('free', 'pro'));
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE user_settings
+        ADD CONSTRAINT chk_user_settings_theme CHECK (theme_preference IN ('system', 'dark', 'light'));
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE profiles
+        ADD CONSTRAINT chk_profiles_status CHECK (status IN ('active', 'draft', 'archived'));
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+      await sql`
+        ALTER TABLE widget_errors
+        ADD CONSTRAINT chk_widget_errors_status CHECK (status IN ('active', 'resolved'));
+      `.catch((err: any) => {
+        if (err?.code !== '42710') throw err
+      })
+
+      await sql`
+        CREATE OR REPLACE FUNCTION set_row_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+      `
+      await sql`DROP TRIGGER IF EXISTS trg_users_updated_at ON users;`
+      await sql`CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_user_entitlements_updated_at ON user_entitlements;`
+      await sql`CREATE TRIGGER trg_user_entitlements_updated_at BEFORE UPDATE ON user_entitlements FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_user_settings_updated_at ON user_settings;`
+      await sql`CREATE TRIGGER trg_user_settings_updated_at BEFORE UPDATE ON user_settings FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_profiles_updated_at ON profiles;`
+      await sql`CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_profile_configurations_updated_at ON profile_configurations;`
+      await sql`CREATE TRIGGER trg_profile_configurations_updated_at BEFORE UPDATE ON profile_configurations FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_dynamic_rules_configs_updated_at ON dynamic_rules_configs;`
+      await sql`CREATE TRIGGER trg_dynamic_rules_configs_updated_at BEFORE UPDATE ON dynamic_rules_configs FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_dynamic_rules_updated_at ON dynamic_rules;`
+      await sql`CREATE TRIGGER trg_dynamic_rules_updated_at BEFORE UPDATE ON dynamic_rules FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_profile_daily_analytics_updated_at ON profile_daily_analytics;`
+      await sql`CREATE TRIGGER trg_profile_daily_analytics_updated_at BEFORE UPDATE ON profile_daily_analytics FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_profile_daily_health_updated_at ON profile_daily_health;`
+      await sql`CREATE TRIGGER trg_profile_daily_health_updated_at BEFORE UPDATE ON profile_daily_health FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_widget_daily_health_updated_at ON widget_daily_health;`
+      await sql`CREATE TRIGGER trg_widget_daily_health_updated_at BEFORE UPDATE ON widget_daily_health FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_user_analytics_totals_updated_at ON user_analytics_totals;`
+      await sql`CREATE TRIGGER trg_user_analytics_totals_updated_at BEFORE UPDATE ON user_analytics_totals FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+      await sql`DROP TRIGGER IF EXISTS trg_user_digest_cooldowns_updated_at ON user_digest_cooldowns;`
+      await sql`CREATE TRIGGER trg_user_digest_cooldowns_updated_at BEFORE UPDATE ON user_digest_cooldowns FOR EACH ROW EXECUTE FUNCTION set_row_updated_at();`
+
+      await sql`DROP INDEX IF EXISTS idx_users_username;`
+      await sql`DROP INDEX IF EXISTS idx_users_stripe_customer_id;`
+      await sql`DROP INDEX IF EXISTS idx_user_entitlements_user_id;`
+      await sql`DROP INDEX IF EXISTS idx_profiles_user_slug;`
+
+      await sql`
+        CREATE OR REPLACE FUNCTION purge_expired_operational_data(retention_days INTEGER DEFAULT 90)
+        RETURNS VOID AS $$
+        BEGIN
+          DELETE FROM email_logs WHERE sent_at < NOW() - make_interval(days => retention_days);
+          DELETE FROM profile_daily_analytics WHERE updated_at < NOW() - make_interval(days => retention_days);
+          DELETE FROM profile_daily_health WHERE updated_at < NOW() - make_interval(days => retention_days);
+          DELETE FROM widget_daily_health WHERE updated_at < NOW() - make_interval(days => retention_days);
+        END;
+        $$ LANGUAGE plpgsql;
+      `
     },
   },
 ]
