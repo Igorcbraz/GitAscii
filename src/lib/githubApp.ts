@@ -162,9 +162,8 @@ export const getAppInstallations = unstable_cache(
     try {
       const jwt = generateGitHubAppJWT()
       const allLogins: string[] = []
+      const url = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
 
-      let url = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
-      
       const firstPageRes = await fetch(url, {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -192,7 +191,7 @@ export const getAppInstallations = unstable_cache(
 
       const linkHeader = firstPageRes.headers.get('link') ?? ''
       const lastMatch = linkHeader.match(/[?&]page=(\d+)>;\s*rel="last"/)
-      
+
       if (lastMatch) {
         const lastPage = parseInt(lastMatch[1], 10)
         if (lastPage > 1) {
@@ -210,15 +209,17 @@ export const getAppInstallations = unstable_cache(
                 },
                 next: { revalidate: 600 },
                 signal: AbortSignal.timeout(10000),
-              }).then(async (res) => {
-                if (res.ok) {
-                  return processPageData(await res.json())
-                }
-                return []
-              }).catch(() => [])
+              })
+                .then(async (res) => {
+                  if (res.ok) {
+                    return processPageData(await res.json())
+                  }
+                  return []
+                })
+                .catch(() => [])
             )
           }
-          
+
           const results = await Promise.all(pagePromises)
           for (const logins of results) {
             allLogins.push(...logins)
