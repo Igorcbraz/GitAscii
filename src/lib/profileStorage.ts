@@ -60,7 +60,7 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
   } catch (err) {
     console.warn('[ProfileStorage] Failed to persist config to Redis:', err)
   }
-  // Publish the new generation only after the configuration is persisted.
+
   await invalidateSvgCache(username)
 }
 
@@ -109,11 +109,32 @@ async function fetchConfigFromGitHub(
 export async function loadProfileConfig(
   username: string,
   slug: string,
-  options: { bypassMemory?: boolean } = {}
+  options: { bypassMemory?: boolean; preferGitHub?: boolean } = {}
 ): Promise<SavedConfiguration | null> {
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   const cacheKey = `${usernameLower}_${slugLower}`
+
+  if (options.preferGitHub) {
+    const githubConfig = await fetchConfigFromGitHub(username, slugLower)
+    if (githubConfig) {
+      memoryCache.set(cacheKey, {
+        config: githubConfig,
+        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+      })
+      try {
+        await saveProfileConfigInDb(usernameLower, slugLower, githubConfig)
+      } catch {}
+      try {
+        const redis = getProRedisClient()
+        await redis.set(
+          REDIS_KEYS.profileConfig(usernameLower, slugLower),
+          JSON.stringify(githubConfig)
+        )
+      } catch {}
+      return githubConfig
+    }
+  }
 
   const cached = memoryCache.get(cacheKey)
   if (!options.bypassMemory && cached && cached.expiresAt > Date.now()) {

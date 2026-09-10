@@ -10,7 +10,7 @@ const MAX_MEMORY_BYTES = 32 * 1024 * 1024
 const MAX_ENTRIES = 64
 // Leave room for the REST command envelope. Oversize output is still served intact.
 const MAX_PERSISTED_BYTES = 8 * 1024 * 1024
-const PREFIX = 'profile-svg:v2'
+const PREFIX = 'profile-svg:v3'
 
 export interface SvgPayload {
   svgContent: string

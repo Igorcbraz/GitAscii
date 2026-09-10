@@ -53,7 +53,10 @@ async function getCachedSvgPayload(
     [profileSlug, theme, templateParam, widgetsParam],
     async () => {
       const data = await fetchGitHubProfile(username, { publicOnly: true })
-      let config = await loadProfileConfig(username, profileSlug, { bypassMemory: true })
+      let config = await loadProfileConfig(username, profileSlug, {
+        bypassMemory: true,
+        preferGitHub: true,
+      })
 
       // Query widgets must not mutate the saved configuration held by another cache.
       if (config) config = structuredClone(config)
