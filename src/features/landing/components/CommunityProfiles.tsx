@@ -449,7 +449,6 @@ export function CommunityProfiles({
                         alt={`GitAscii Card for @${activeProfile.username}`}
                         width={800}
                         height={360}
-                        loading="eager"
                         unoptimized
                         className={`w-full max-w-full h-full max-h-[350px] object-contain shadow-lg transition-opacity duration-200 ${
                           imageLoaded ? 'opacity-100' : 'opacity-0'

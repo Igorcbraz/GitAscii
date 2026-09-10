@@ -45,10 +45,14 @@ export default function AsciiHands({ className = '' }: AsciiHandsProps) {
       img.src = HANDS_SRC
     }
 
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      idleId = (window as any).requestIdleCallback(startProcessing, { timeout: 1500 })
-    } else {
-      timerId = setTimeout(startProcessing, 150)
+    if (typeof window !== 'undefined') {
+      timerId = setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+          idleId = (window as any).requestIdleCallback(startProcessing, { timeout: 1500 })
+        } else {
+          startProcessing()
+        }
+      }, 2500)
     }
 
     return () => {

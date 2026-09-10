@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
 
@@ -183,28 +183,41 @@ export function Particles({
     animate()
     window.addEventListener('resize', resizeCanvas)
 
-    const onMouseMove = (e: MouseEvent) => {
+    let cachedRect = canvasRef.current ? canvasRef.current.getBoundingClientRect() : null
+
+    const updateRect = () => {
       if (canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect()
+        cachedRect = canvasRef.current.getBoundingClientRect()
+      }
+    }
+    window.addEventListener('scroll', updateRect, { passive: true })
+    window.addEventListener('resize', updateRect, { passive: true })
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (canvasRef.current && cachedRect) {
         const { w, h } = canvasSize.current
-        const x = e.clientX - rect.left - w / 2
-        const y = e.clientY - rect.top - h / 2
+        const x = e.clientX - cachedRect.left - w / 2
+        const y = e.clientY - cachedRect.top - h / 2
         const inside =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom
+          e.clientX >= cachedRect.left &&
+          e.clientX <= cachedRect.right &&
+          e.clientY >= cachedRect.top &&
+          e.clientY <= cachedRect.bottom
         if (inside) {
+          mouse.current.x = x
+          mouse.current.y = y
           mousePosition.current.x = x
           mousePosition.current.y = y
         }
       }
     }
 
-    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mousemove', onMouseMove, { passive: true })
 
     return () => {
       window.removeEventListener('resize', resizeCanvas)
+      window.removeEventListener('resize', updateRect)
+      window.removeEventListener('scroll', updateRect)
       window.removeEventListener('mousemove', onMouseMove)
       if (rafId.current) {
         window.cancelAnimationFrame(rafId.current)

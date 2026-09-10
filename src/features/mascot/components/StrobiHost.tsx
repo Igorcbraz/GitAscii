@@ -137,13 +137,17 @@ export function StrobiHost() {
       hasInitializedPos.current = true
       const coords = registry.resolveCoordinates(state.currentAnchorId)
       physics.setPosition(coords.x, coords.y, coords.scale)
+      setSpatial(physics.update(performance.now(), false, false, false))
     }
   }, [state.currentAnchorId, registry, physics])
 
   useEffect(() => {
     let frameId: number
+    let active = false
 
     const tick = (currentTime: number) => {
+      if (!active) return
+
       const currentAnchorConfig = state.currentAnchorId ? registry.get(state.currentAnchorId) : null
       const enableFloat = currentAnchorConfig?.float !== false && !state.isSleeping
       const enableBounce = currentAnchorConfig?.bounce === true || state.currentMood === 'jumping'
@@ -166,8 +170,16 @@ export function StrobiHost() {
       frameId = requestAnimationFrame(tick)
     }
 
-    frameId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frameId)
+    const timerId = setTimeout(() => {
+      active = true
+      frameId = requestAnimationFrame(tick)
+    }, 2500)
+
+    return () => {
+      active = false
+      clearTimeout(timerId)
+      if (frameId) cancelAnimationFrame(frameId)
+    }
   }, [
     physics,
     gazeController,
@@ -276,7 +288,14 @@ export function StrobiHost() {
     }
   }, [state.muted, controller])
 
-  if (!mounted || !state.visible) return null
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 2500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!mounted || !state.visible || !isReady) return null
 
   const guideTargetRect = state.guideTargetElement?.getBoundingClientRect()
   const guideTargetX = guideTargetRect ? guideTargetRect.left + guideTargetRect.width / 2 : 0

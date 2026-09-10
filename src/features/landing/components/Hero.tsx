@@ -43,9 +43,28 @@ export default function Hero() {
         if (data && data.session) {
           setSession(data.session)
         }
+
+        const search = new URLSearchParams(window.location.search)
+        const template = search.get('template')
+        const profile = search.get('profile')
+        if (template || profile) {
+          const targetUsername = data?.session?.username || 'Igorcbraz'
+          const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
+          const query = template ? `?template=${encodeURIComponent(template)}` : ''
+          router.replace(`/${targetUsername}${targetProfileSlug}${query}`)
+        }
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => {
+        const search = new URLSearchParams(window.location.search)
+        const template = search.get('template')
+        const profile = search.get('profile')
+        if (template || profile) {
+          const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
+          const query = template ? `?template=${encodeURIComponent(template)}` : ''
+          router.replace(`/Igorcbraz${targetProfileSlug}${query}`)
+        }
+      })
+  }, [router])
 
   const validateUsername = (val: string) => {
     const clean = val.trim()
@@ -98,7 +117,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-300 font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
+          <h1 className="font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
             {t('landing.hero.title_normal', 'Create ')}
             <span className="italic text-signal-lime">
               {t('landing.hero.title_italic', 'Stunning')}
@@ -106,14 +125,14 @@ export default function Hero() {
             {t('landing.hero.title_end', ' GitHub Profile READMEs.')}
           </h1>
 
-          <p className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-500 font-inter-tight font-normal text-bone text-body leading-body max-w-130 mb-12">
+          <p className="font-inter-tight font-normal text-bone text-body leading-body max-w-130 mb-12">
             {t(
               'landing.hero.subtitle',
               'Premium SVGs. ASCII art. Visual editor. One platform for developers who care about their profile.'
             )}
           </p>
 
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto relative">
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto relative min-h-[240px]">
             <div className="absolute -top-16 -right-4 sm:-right-8 pointer-events-none z-20">
               <StrobiAnchor
                 id="hero-cta"

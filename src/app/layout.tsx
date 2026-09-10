@@ -228,13 +228,35 @@ export default function RootLayout({
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable} ${teko.variable}`}
     >
       <head>
-        <link
-          rel="preconnect"
-          href="https://avatars.githubusercontent.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="preconnect" href="https://img.shields.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.github.com" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var link = document.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = '${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}';
+              link.media = 'print';
+              link.onload = function() { this.media = 'all'; };
+              document.head.appendChild(link);
+            `,
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={EXTERNAL_LINKS.GOOGLE_FONTS_CSS} />
+        </noscript>
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prerender: [
+                {
+                  where: { href_matches: '/*' },
+                  eagerness: 'moderate',
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <I18nProvider>

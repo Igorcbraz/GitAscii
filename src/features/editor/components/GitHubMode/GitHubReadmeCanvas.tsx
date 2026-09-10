@@ -3,7 +3,7 @@
 import { BookOpen, Pencil } from 'lucide-react'
 import React, { useMemo } from 'react'
 
-import { EXTERNAL_LINKS, GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
+import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 
 import { useEditorStore } from '../../store/editorStore'
@@ -41,7 +41,6 @@ export function GitHubReadmeCanvas() {
 
       return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <style>
-    @import url('${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}');
     * { box-sizing: border-box; }
     text { user-select: none; }
     .gitascii-canvas-bg { fill: #0d1117; transition: fill 0.3s ease; }

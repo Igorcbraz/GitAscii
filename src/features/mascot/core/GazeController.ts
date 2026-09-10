@@ -154,9 +154,18 @@ export class GazeController {
       }
     } else if (this.customLookTarget) {
       if ('getBoundingClientRect' in this.customLookTarget) {
-        const rect = (this.customLookTarget as HTMLElement).getBoundingClientRect()
-        targetX = rect.left + rect.width / 2
-        targetY = rect.top + rect.height / 2
+        const target = this.customLookTarget as HTMLElement & {
+          _cachedRect?: DOMRect
+          _lastRectTime?: number
+        }
+        if (!target._lastRectTime || currentTime - target._lastRectTime > 100) {
+          target._cachedRect = target.getBoundingClientRect()
+          target._lastRectTime = currentTime
+        }
+        if (target._cachedRect) {
+          targetX = target._cachedRect.left + target._cachedRect.width / 2
+          targetY = target._cachedRect.top + target._cachedRect.height / 2
+        }
       } else if ('x' in this.customLookTarget && 'y' in this.customLookTarget) {
         targetX = this.customLookTarget.x
         targetY = this.customLookTarget.y

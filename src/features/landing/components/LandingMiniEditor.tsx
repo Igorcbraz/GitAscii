@@ -20,7 +20,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { useMemo, useState } from 'react'
 
-import { APP_URL, EXTERNAL_LINKS, WIDGET_IDS, type WidgetId } from '@/constants'
+import { APP_URL, WIDGET_IDS, type WidgetId } from '@/constants'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
@@ -261,7 +261,6 @@ export function LandingMiniEditor({ readmesCount = 12400 }: { readmesCount?: num
 
     const fullSvg = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${calculatedHeight}" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <style>
-    @import url('${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}');
     * { box-sizing: border-box; }
     text { user-select: none; }
     .gitascii-canvas-bg { fill: ${activeTheme.bg}; }

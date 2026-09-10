@@ -1,10 +1,5 @@
 'use client'
 
-import '@vidstack/react/player/styles/default/theme.css'
-import '@vidstack/react/player/styles/default/layouts/video.css'
-
-import { MediaPlayer, type MediaPlayerInstance, MediaProvider } from '@vidstack/react'
-import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default'
 import { Play, Sparkles, Terminal } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import dynamic from 'next/dynamic'
@@ -37,7 +32,7 @@ export function InteractiveEditorDemo({
 }: InteractiveEditorDemoProps) {
   const { t } = useI18n()
   const sectionRef = useRef<HTMLElement>(null)
-  const playerRef = useRef<MediaPlayerInstance>(null)
+  const playerRef = useRef<HTMLVideoElement>(null)
 
   const [shouldLoadEditor, setShouldLoadEditor] = useState<boolean>(false)
   const [activeView, setActiveView] = useState<'video' | 'demo'>('video')
@@ -47,7 +42,7 @@ export function InteractiveEditorDemo({
 
   useEffect(() => {
     if (activeView !== 'video' && playerRef.current) {
-      playerRef.current.pause().catch(() => {})
+      playerRef.current.pause()
     }
   }, [activeView])
 
@@ -185,29 +180,16 @@ export function InteractiveEditorDemo({
                   onMouseMove={handleVideoInteraction}
                   onClick={handleVideoInteraction}
                 >
-                  <MediaPlayer
-                    ref={playerRef}
-                    title={t('landing.editor_demo.title_video', 'GitAscii Overview')}
+                  <video
+                    ref={playerRef as any}
                     src="/presentation.mp4"
+                    poster="/presentation.png"
                     playsInline
-                    preload="metadata"
-                    className={`w-full h-full object-contain ${
-                      !hasPlayed || !showControls
-                        ? '[&_.vds-controls]:!opacity-0 [&_.vds-controls]:!pointer-events-none'
-                        : ''
-                    }`}
-                  >
-                    <MediaProvider />
-                    <DefaultVideoLayout
-                      icons={defaultLayoutIcons}
-                      slots={{
-                        airPlayButton: null,
-                        googleCastButton: null,
-                        pipButton: null,
-                        settingsMenu: null,
-                      }}
-                    />
-                  </MediaPlayer>
+                    loop
+                    preload="none"
+                    controls={showControls}
+                    className="w-full h-full object-cover bg-black"
+                  />
 
                   <AnimatePresence>
                     {!hasPlayed && (

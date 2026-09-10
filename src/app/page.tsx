@@ -24,60 +24,13 @@ const Footer = dynamic(() =>
   import('@/features/landing/components/Footer').then((mod) => mod.Footer)
 )
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}): Promise<Metadata> {
-  const params = await searchParams
-  const lang = typeof params.lang === 'string' ? params.lang : undefined
-  const isPt = lang === 'pt'
-  const isEs = lang === 'es'
-  const isZh = lang === 'zh'
-  const isJa = lang === 'ja'
-  const isDe = lang === 'de'
-  const isFr = lang === 'fr'
+export async function generateMetadata(): Promise<Metadata> {
+  const ogImage = EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE
 
-  const ogImage = isPt
-    ? EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE_PT
-    : EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE
-
-  let title = 'GitAscii — GitHub Profile README & ASCII Generator'
-  let description =
+  const title = 'GitAscii — GitHub Profile README & ASCII Generator'
+  const description =
     'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.'
-  let canonicalUrl = APP_URL
-
-  if (isPt) {
-    title = 'GitAscii — Gerador de README & Arte ASCII'
-    description =
-      'Crie READMEs impressionantes para seu perfil do GitHub com SVGs dinâmicos, conversor de arte ASCII e editor visual interativo. Totalmente grátis e de código aberto.'
-    canonicalUrl = `${APP_URL}?lang=pt`
-  } else if (isEs) {
-    title = 'GitAscii — Generador de README y Arte ASCII'
-    description =
-      'Crea impresionantes READMEs para tu perfil de GitHub con SVGs dinámicos, motor de arte ASCII y editor visual interactivo. Rápido, gratis y de código abierto para desarrolladores.'
-    canonicalUrl = `${APP_URL}?lang=es`
-  } else if (isZh) {
-    title = 'GitAscii — GitHub 个人主页 README 与 ASCII 艺术生成器'
-    description =
-      '使用动态 SVG 徽章、实时统计卡片、ASCII 艺术引擎和可视化编辑器打造惊艳的 GitHub 主页。完全免费且开源。'
-    canonicalUrl = `${APP_URL}?lang=zh`
-  } else if (isJa) {
-    title = 'GitAscii — GitHubプロフィールREADME & ASCIIアートジェネレーター'
-    description =
-      '動的SVGバッジ、リアルタイム統計カード、ASCIIアートエンジン、インタラクティブエディターで魅力的なGitHubプロフィールを作成。完全無料でオープンソース。'
-    canonicalUrl = `${APP_URL}?lang=ja`
-  } else if (isDe) {
-    title = 'GitAscii — GitHub Profil README & ASCII Generator'
-    description =
-      'Erstellen Sie beeindruckende GitHub Profil-READMEs mit dynamischen SVGs, ASCII-Art-Engine und einem interaktiven visuellen Editor. Schnell, kostenlos und Open Source.'
-    canonicalUrl = `${APP_URL}?lang=de`
-  } else if (isFr) {
-    title = 'GitAscii — Générateur de README GitHub & Art ASCII'
-    description =
-      'Créez de superbes READMEs de profil GitHub avec des SVGs dynamiques, un moteur d’art ASCII et un éditeur visuel interactif. Rapide, gratuit et open source.'
-    canonicalUrl = `${APP_URL}?lang=fr`
-  }
+  const canonicalUrl = APP_URL
 
   return {
     title,
@@ -117,29 +70,9 @@ export async function generateMetadata({
   }
 }
 
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const resolvedParams = searchParams ? await searchParams : undefined
-  const rawTemplate = resolvedParams?.template
-  const rawProfile = resolvedParams?.profile
+export const revalidate = 3600
 
-  const template = typeof rawTemplate === 'string' ? rawTemplate : undefined
-  const profile = typeof rawProfile === 'string' ? rawProfile : undefined
-
-  if (template || profile) {
-    const { getSession } = await import('@/lib/auth')
-    const { redirect } = await import('next/navigation')
-    const session = await getSession()
-    const targetUsername = session?.username || 'Igorcbraz'
-    const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
-    const query = template ? `?template=${encodeURIComponent(template)}` : ''
-
-    redirect(`/${targetUsername}${targetProfileSlug}${query}`)
-  }
-
+export default async function LandingPage() {
   const [metrics, storedProfiles] = await Promise.all([fetchLandingMetrics(), getStoredProfiles()])
 
   return (

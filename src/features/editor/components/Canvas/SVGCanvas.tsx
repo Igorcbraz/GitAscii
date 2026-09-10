@@ -871,7 +871,6 @@ export function SVGCanvas() {
             >
               <style>
                 {`
-                  @import url('${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}');
                   * { box-sizing: border-box; }
 
                   text { user-select: none; }
