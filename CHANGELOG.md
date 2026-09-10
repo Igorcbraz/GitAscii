@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.23.0](https://github.com/Igorcbraz/GitAscii/compare/v1.22.0...v1.23.0) (2026-09-10)
+
+
+### Features
+
+* **template:** improve community template workflow ([fb53f07](https://github.com/Igorcbraz/GitAscii/commit/fb53f078819ef4f85f287942fcc55330266a8b36))
+* **templates:** add dossier, mission-control, and mainframe community templates ([2f6a5e8](https://github.com/Igorcbraz/GitAscii/commit/2f6a5e865f8574affc7a78a05cc8ac831ada571e))
+
+
+### Bug Fixes
+
+* **template:** support automatic registry generation ([37b1265](https://github.com/Igorcbraz/GitAscii/commit/37b126535df1fba94c661616cde535ebc82d14fc))
+
 ## [1.22.0](https://github.com/Igorcbraz/GitAscii/compare/v1.21.1...v1.22.0) (2026-09-10)
 
 
