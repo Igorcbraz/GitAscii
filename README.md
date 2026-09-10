@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://gitascii.com">
-    <img src="src/app/icon-512.png" width="96" height="96" alt="GitAscii Logo" />
+    <img src="public/icon-512.png" width="96" height="96" alt="GitAscii Logo" />
   </a>
 
   <h1>GitAscii</h1>
