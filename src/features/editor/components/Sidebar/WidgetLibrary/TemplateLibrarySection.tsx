@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, GitFork, Sparkles, Upload, X, Zap } from 'lucide-react'
+import { Download, ExternalLink, GitFork, Link, Sparkles, Upload, X, Zap } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -21,6 +21,7 @@ interface TemplateLibrarySectionProps {
 }
 
 const WIDGET_CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'community', label: 'Comunidade' },
   { value: '', label: 'Nenhuma (GitAscii Native)' },
   { value: WIDGET_CATEGORIES.SURVEILLANCE, label: 'rugbedbugg' },
   { value: WIDGET_CATEGORIES.WINDOWS_XP, label: 'Windows XP' },
@@ -42,7 +43,9 @@ export function TemplateLibrarySection({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false)
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
-  const [pendingWidgetCategory, setPendingWidgetCategory] = useState('')
+  const [pendingWidgetCategory, setPendingWidgetCategory] = useState('community')
+  const [pendingCategoryName, setPendingCategoryName] = useState('')
+  const [useUsernameCategory, setUseUsernameCategory] = useState(true)
   const [hoveredTemplate, setHoveredTemplate] = useState<{
     template: TemplatePreset
     rect: DOMRect
@@ -56,7 +59,7 @@ export function TemplateLibrarySection({
     setHoveredTemplate(null)
   }
 
-  const handleExport = (widgetCategory?: string) => {
+  const handleExport = (widgetCategory = 'community') => {
     try {
       const sanitizedWidgets = (config.widgets || []).map((w, idx) => {
         const rawPos = (w.position || {}) as unknown as Record<string, unknown>
@@ -103,6 +106,11 @@ export function TemplateLibrarySection({
       if (widgetCategory) {
         exportData.widgetCategory = widgetCategory
       }
+      const author = githubData?.user.login || 'unknown'
+      exportData.author = author
+      exportData.authorUrl = `https://github.com/${author}`
+      exportData.category = widgetCategory
+      exportData.categoryUrl = `https://github.com/${author}`
 
       const jsonString = JSON.stringify(exportData, null, 2)
       const blob = new Blob([jsonString], { type: 'application/json' })
@@ -328,11 +336,12 @@ export function TemplateLibrarySection({
         const allPresets = Object.values(TEMPLATE_PRESETS)
         const nativePresets = allPresets.filter(
           (p) =>
-            !p.widgetCategory ||
+            (!p.widgetCategory && !p.categoryUrl) ||
             p.widgetCategory === 'essential' ||
             p.widgetCategory === 'native' ||
             p.id === 'blank'
         )
+        const communityPresets = allPresets.filter((p) => Boolean(p.categoryUrl))
         const surveillancePresets = allPresets.filter(
           (p) => p.widgetCategory === WIDGET_CATEGORIES.SURVEILLANCE
         )
@@ -350,7 +359,7 @@ export function TemplateLibrarySection({
         )
 
         return (
-          <div className="space-y-5">
+          <div className="space-y-5 flex flex-col">
             {nativePresets.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2 px-0.5">
@@ -399,6 +408,74 @@ export function TemplateLibrarySection({
                               style={{ backgroundColor: tmpl.colors.accent }}
                             />
                           </div>
+                        )}
+                      </div>
+                      <p className="font-inter-tight text-caption text-ash line-clamp-1">
+                        {tmpl.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {communityPresets.length > 0 && (
+              <div className="order-last">
+                <div className="border-t border-graphite/50 my-3" />
+                <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                  <Sparkles size={10} className="text-violet-400 shrink-0" />
+                  <span className="font-inter-tight text-caption font-medium text-violet-400 uppercase tracking-[0.16em]">
+                    Comunidade
+                  </span>
+                  <span className="ml-auto font-inter-tight text-caption text-ash/50">
+                    {communityPresets.length}
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {communityPresets.map((tmpl) => (
+                    <div
+                      key={tmpl.id}
+                      onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
+                      data-testid={`template-${tmpl.id}`}
+                      className={`group relative p-3 border rounded-xs cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 flex flex-col justify-between ${
+                        config.templateId === tmpl.id
+                          ? 'border-violet-400 bg-violet-400/10 shadow-[0_0_15px_rgba(167,139,250,0.18)]'
+                          : 'border-graphite bg-void-black/60 hover:bg-onyx hover:border-violet-400/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {tmpl.author && (
+                            <img
+                              src={`https://github.com/${tmpl.author}.png?size=32`}
+                              alt={tmpl.author}
+                              className="size-5 rounded-full border border-violet-400/50"
+                            />
+                          )}
+                          <h4 className="font-inter-tight font-medium text-note text-chalk group-hover:text-white transition-colors truncate">
+                            {tmpl.name}
+                          </h4>
+                        </div>
+                        {tmpl.authorUrl && (
+                          <a
+                            href={tmpl.authorUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                            aria-label={`Abrir perfil de ${tmpl.author || 'autor'}`}
+                            className="shrink-0 rounded p-1 text-violet-300 hover:bg-violet-400/15 hover:text-violet-200"
+                          >
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
+                        {config.templateId === tmpl.id && (
+                          <span className="text-[9px] uppercase font-inter-tight font-bold text-violet-300 px-2 py-0.5 border border-violet-400 rounded-[9999px] bg-violet-400/10">
+                            {t('editor.sidebar.active', 'Active')}
+                          </span>
                         )}
                       </div>
                       <p className="font-inter-tight text-caption text-ash line-clamp-1">
@@ -758,7 +835,11 @@ export function TemplateLibrarySection({
       <ContributeTemplateModal
         isOpen={isContributeModalOpen}
         onClose={() => setIsContributeModalOpen(false)}
-        onExportTemplate={(cat) => handleExport(cat)}
+        onExportTemplate={() => {
+          setIsContributeModalOpen(false)
+          setPendingWidgetCategory('community')
+          setShowCategoryPicker(true)
+        }}
       />
 
       {showCategoryPicker &&
@@ -785,21 +866,23 @@ export function TemplateLibrarySection({
                 </button>
               </div>
 
-              <p className="text-note text-ash font-inter-tight mb-4">
+              <p className="text-note text-ash font-inter-tight mb-5 leading-relaxed">
                 {t(
                   'editor.sidebar.export_select_category_desc',
                   'Selecione a categoria correspondente à aba de widgets que melhor representa este template (opcional):'
                 )}
               </p>
 
-              <div className="space-y-2 mb-6 max-h-60 overflow-y-auto">
+              <div className="space-y-2 mb-5 max-h-60 overflow-y-auto pr-1">
                 {WIDGET_CATEGORY_OPTIONS.map((opt) => (
                   <label
                     key={opt.value}
                     onClick={() => setPendingWidgetCategory(opt.value)}
                     className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition-all ${
                       pendingWidgetCategory === opt.value
-                        ? 'border-signal-lime bg-signal-lime/10 text-white'
+                        ? opt.value === 'community'
+                          ? 'border-violet-400 bg-violet-400/15 text-white'
+                          : 'border-signal-lime bg-signal-lime/10 text-white'
                         : 'border-graphite bg-carbon/60 hover:bg-carbon text-ash hover:text-chalk'
                     }`}
                   >
@@ -809,12 +892,78 @@ export function TemplateLibrarySection({
                       value={opt.value}
                       checked={pendingWidgetCategory === opt.value}
                       onChange={() => setPendingWidgetCategory(opt.value)}
-                      className="accent-[#c5ff4a]"
+                      className={
+                        opt.value === 'community' ? 'accent-violet-400' : 'accent-[#c5ff4a]'
+                      }
                     />
                     <span className="font-inter-tight text-label font-medium">{opt.label}</span>
                   </label>
                 ))}
               </div>
+
+              <div className="mb-6" />
+              {false && (
+                <div className="mb-6 space-y-3 border-t border-graphite pt-5">
+                  <div className="flex items-center gap-2 text-note font-inter-tight font-semibold uppercase tracking-[0.12em] text-signal-lime">
+                    <Sparkles size={13} />
+                    Categoria do template
+                  </div>
+                  <label
+                    className={`flex items-start gap-3 rounded-md border p-3 font-inter-tight cursor-pointer transition-colors ${
+                      !useUsernameCategory
+                        ? 'border-graphite bg-carbon text-chalk'
+                        : 'border-graphite/60 bg-void-black/30 text-ash'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="customTemplateCategory"
+                      checked={!useUsernameCategory}
+                      onChange={() => setUseUsernameCategory(false)}
+                      className="accent-[#c5ff4a]"
+                    />
+                    <span>
+                      <span className="block text-note font-medium">Nome customizado</span>
+                      <span className="block mt-0.5 text-caption text-ash">
+                        Crie uma categoria para organizar seus templates.
+                      </span>
+                    </span>
+                  </label>
+                  {!useUsernameCategory && (
+                    <input
+                      value={pendingCategoryName}
+                      onChange={(event) => setPendingCategoryName(event.target.value)}
+                      placeholder="Ex.: Meus templates"
+                      maxLength={50}
+                      className="w-full rounded-md border border-graphite bg-void-black/70 px-3 py-2.5 text-note text-chalk outline-none transition-colors placeholder:text-ash/60 focus:border-signal-lime"
+                    />
+                  )}
+                  <label
+                    className={`flex items-start gap-3 rounded-md border p-3 font-inter-tight cursor-pointer transition-colors ${
+                      useUsernameCategory
+                        ? 'border-signal-lime/60 bg-signal-lime/10 text-chalk'
+                        : 'border-graphite/60 bg-void-black/30 text-ash'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="customTemplateCategory"
+                      checked={useUsernameCategory}
+                      onChange={() => setUseUsernameCategory(true)}
+                      className="accent-[#c5ff4a]"
+                    />
+                    <span>
+                      <span className="flex items-center gap-1.5 text-note font-medium">
+                        {githubData?.user.login || 'username'}
+                        {githubData?.user.login && <Link size={13} className="text-signal-lime" />}
+                      </span>
+                      <span className="block mt-0.5 text-caption text-ash">
+                        Usa seu perfil GitHub como categoria padrão.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-graphite">
                 <button

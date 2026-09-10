@@ -1,0 +1,200 @@
+{
+  "name": "Mainframe",
+  "description": "A green-screen mainframe aesthetic with ASCII identity, system telemetry, activity graphs, contribution history, and developer signals.",
+  "category": "community",
+  "categoryUrl": "https://github.com/mdAslam",
+  "author": "mdAslam",
+  "authorUrl": "https://github.com/mdAslam",
+  "widgets": [
+    {
+      "instanceId": "widget_mf_portrait",
+      "widgetId": "ascii-art",
+      "name": "Ascii-art Widget",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 800, "height": 300 },
+      "config": {
+        "lockAspectRatio": true,
+        "cols": 280,
+        "rows": 105,
+        "accentColor": "#00ff41",
+        "backgroundColor": "#020402",
+        "borderColor": "#0d2e12",
+        "hideDecorations": true,
+        "hideBorder": false,
+        "charset": "blocks",
+        "detail": "high",
+        "invert": false,
+        "contrast": 5,
+        "brightness": -10,
+        "colorMode": "monochrome"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_mf_greeting",
+      "widgetId": "ascii-text",
+      "name": "Ascii-text Widget",
+      "position": { "x": 0, "y": 316 },
+      "size": { "width": 800, "height": 90 },
+      "config": {
+        "customText": "SYSTEM: ONLINE",
+        "asciiFont": "block",
+        "charSpacing": 1,
+        "fontSize": 12,
+        "charset": "default",
+        "customCharset": "",
+        "asciiLines": []
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_mf_data_stream",
+      "widgetId": "godprofile-neural",
+      "name": "Godprofile-neural Widget",
+      "position": { "x": 0, "y": 416 },
+      "size": { "width": 800, "height": 200 },
+      "config": {
+        "accentColor": "#00ff41"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_mf_profile_card",
+      "widgetId": "asciiprofile-info",
+      "name": "Asciiprofile-info Widget",
+      "position": { "x": 0, "y": 632 },
+      "size": { "width": 380, "height": 280 },
+      "config": {
+        "accentColor": "#00ff41",
+        "showTitle": true,
+        "hideDecorations": false,
+        "showNow": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    },
+    {
+      "instanceId": "widget_mf_social_row",
+      "widgetId": "codeweb-social-badge",
+      "name": "Codeweb-social-badge Widget",
+      "position": { "x": 396, "y": 632 },
+      "size": { "width": 404, "height": 40 },
+      "config": {
+        "platforms": ["github", "x", "linkedin", "email", "website"],
+        "renderMode": "multi",
+        "showText": false
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 5
+    },
+    {
+      "instanceId": "widget_mf_status_counter",
+      "widgetId": "views-counter",
+      "name": "Views-counter Widget",
+      "position": { "x": 396, "y": 684 },
+      "size": { "width": 200, "height": 90 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    },
+    {
+      "instanceId": "widget_mf_terminal_log",
+      "widgetId": "controlplane-specimen",
+      "name": "Controlplane-specimen Widget",
+      "position": { "x": 0, "y": 928 },
+      "size": { "width": 800, "height": 220 },
+      "config": {
+        "layoutType": "hero",
+        "accentColor": "#00ff41",
+        "hideBorder": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 7
+    },
+    {
+      "instanceId": "widget_mf_heatmap",
+      "widgetId": "asciiprofile-heatmap",
+      "name": "Asciiprofile-heatmap Widget",
+      "position": { "x": 0, "y": 1164 },
+      "size": { "width": 800, "height": 204 },
+      "config": {
+        "accentColor": "#00ff41"
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 8
+    },
+    {
+      "instanceId": "widget_mf_interests_cards",
+      "widgetId": "codeweb-showcase-cards",
+      "name": "Codeweb-showcase-cards Widget",
+      "position": { "x": 0, "y": 1384 },
+      "size": { "width": 800, "height": 220 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 9
+    },
+    {
+      "instanceId": "widget_mf_contribution_graph",
+      "widgetId": "contribution-snake",
+      "name": "Contribution-snake Widget",
+      "position": { "x": 0, "y": 1620 },
+      "size": { "width": 800, "height": 220 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 10
+    },
+    {
+      "instanceId": "widget_mf_status_ticker",
+      "widgetId": "godprofile-marquee",
+      "name": "Godprofile-marquee Widget",
+      "position": { "x": 0, "y": 1856 },
+      "size": { "width": 800, "height": 68 },
+      "config": {
+        "accentColor": "#00ff41",
+        "animationType": "scroll",
+        "animationPreviewKey": 1
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 11
+    },
+    {
+      "instanceId": "widget_mf_closing_quote",
+      "widgetId": "readme-quotes",
+      "name": "Readme-quotes Widget",
+      "position": { "x": 0, "y": 1940 },
+      "size": { "width": 800, "height": 110 },
+      "config": {
+        "hideBorder": true
+      },
+      "locked": false,
+      "visible": true,
+      "zIndex": 12
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#020402",
+    "textColor": "#c9ffd6",
+    "accentColor": "#00ff41",
+    "borderColor": "#0d2e12",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "mainframe"
+  },
+  "templateId": "mainframe"
+}
