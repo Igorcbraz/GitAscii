@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.22.0](https://github.com/Igorcbraz/GitAscii/compare/v1.21.1...v1.22.0) (2026-09-10)
+
+
+### Features
+
+* **mascot:** integrate strobi interactive mascot and dynamic avatars ([4550ae7](https://github.com/Igorcbraz/GitAscii/commit/4550ae72a79666e1e184f2bb5265aa91819d1660))
+
+
+### Bug Fixes
+
+* **email:** append timestamp to Resend idempotency keys to prevent 409 errors ([7a51703](https://github.com/Igorcbraz/GitAscii/commit/7a517032b0e9b6fb774ffd6093b5a8eb7496848f))
+* **explore:** optimize getAppInstallations and getStoredProfiles concurrency to fix build timeout ([964288a](https://github.com/Igorcbraz/GitAscii/commit/964288aef87a439ac049ad10bccfbfd73a0968a0))
+* **profile:** refresh public configurations from GitHub ([84d45db](https://github.com/Igorcbraz/GitAscii/commit/84d45db9a5b48e64eea0df68e18a82ddb3e0f065))
+* static import for GitAsciiAvatarStatic and persist Strobi node to fix hydration ([da12d78](https://github.com/Igorcbraz/GitAscii/commit/da12d7880ce015719bd5edd3702cb9833080ade7))
+* update vulnerable dependencies ([5b47fab](https://github.com/Igorcbraz/GitAscii/commit/5b47fabde6655e7b51be04f4d99fa4c523bbb8e9))
+
 ## [1.21.1](https://github.com/Igorcbraz/GitAscii/compare/v1.21.0...v1.21.1) (2026-09-09)
 
 
