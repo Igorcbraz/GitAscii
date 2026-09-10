@@ -29,15 +29,18 @@ export class GitHubUserNotFoundError extends Error {
   }
 }
 
-export async function fetchGitHubProfile(username: string): Promise<NormalizedGitHubData> {
-  const cacheKey = username.toLowerCase()
+export async function fetchGitHubProfile(
+  username: string,
+  options: { publicOnly?: boolean } = {}
+): Promise<NormalizedGitHubData> {
+  const cacheKey = `${options.publicOnly ? 'public' : 'session'}:${username.toLowerCase()}`
   const cached = profileCache.get(cacheKey)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return cached.data
   }
 
   try {
-    const session = await getSession().catch(() => null)
+    const session = options.publicOnly ? null : await getSession().catch(() => null)
     const token = session?.accessToken || process.env.GITHUB_TOKEN
 
     const headers: Record<string, string> = {

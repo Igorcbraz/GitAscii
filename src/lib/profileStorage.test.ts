@@ -19,7 +19,12 @@ vi.mock('@/features/pro/server/redisClient', () => ({
   getProRedisClient: () => mockRedis,
 }))
 
-vi.mock('@/services/profileSvgService', () => ({
+vi.mock('@/lib/db/repositories/profileRepository', () => ({
+  getProfileConfigFromDb: vi.fn().mockResolvedValue(null),
+  saveProfileConfigInDb: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock('@/services/profileSvgCache', () => ({
   invalidateSvgCache: vi.fn(),
 }))
 
@@ -60,9 +65,9 @@ const mockConfig: SavedConfiguration = {
 }
 
 describe('profileStorage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
-    invalidateProfileConfig('testuser', 'default')
+    await invalidateProfileConfig('testuser', 'default')
   })
 
   it('saves and reads from in-memory cache directly', async () => {
@@ -82,7 +87,7 @@ describe('profileStorage', () => {
   })
 
   it('loads config from redis when memory cache misses', async () => {
-    invalidateProfileConfig('testuser', 'default')
+    await invalidateProfileConfig('testuser', 'default')
     mockRedis.get.mockResolvedValue(JSON.stringify(mockConfig))
 
     const loaded = await loadProfileConfig('testuser', 'default')
@@ -91,7 +96,7 @@ describe('profileStorage', () => {
   })
 
   it('fetches from github when redis and cache miss and returns null on failure', async () => {
-    invalidateProfileConfig('testuser', 'custom')
+    await invalidateProfileConfig('testuser', 'custom')
     mockRedis.get.mockResolvedValue(null)
 
     global.fetch = vi.fn().mockResolvedValue({
@@ -105,7 +110,7 @@ describe('profileStorage', () => {
   })
 
   it('fetches from github and populates cache when github returns valid JSON config', async () => {
-    invalidateProfileConfig('testuser', 'default')
+    await invalidateProfileConfig('testuser', 'default')
     mockRedis.get.mockResolvedValue(null)
     mockRedis.set.mockResolvedValue('OK')
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
-import { cacheProfileConfig } from '@/lib/profileStorage'
+import { saveProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export async function POST(request: Request) {
@@ -259,7 +259,7 @@ export async function POST(request: Request) {
         console.error('[Commit Route] Failed to upload JSON config: %s', errorText)
       } else {
         const { invalidateProfileConfig } = await import('@/lib/profileStorage')
-        invalidateProfileConfig(username, profileSlug)
+        await invalidateProfileConfig(username, profileSlug)
       }
 
       const hasSnakeWidget = exportData?.widgets?.some(
@@ -341,7 +341,7 @@ jobs:
 
     if (exportData && typeof exportData === 'object') {
       try {
-        cacheProfileConfig(exportData)
+        await saveProfileConfig(exportData)
       } catch (saveErr) {
         console.error('Failed to cache profile configuration in memory:', saveErr)
       }
