@@ -163,41 +163,67 @@ export const getAppInstallations = unstable_cache(
       const jwt = generateGitHubAppJWT()
       const allLogins: string[] = []
 
-      let url: string | null = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
+      let url = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=1`
+      
+      const firstPageRes = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'GitAscii-App',
+        },
+        next: { revalidate: 600 },
+        signal: AbortSignal.timeout(10000),
+      })
 
-      while (url) {
-        const pageRes: Response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'GitAscii-App',
-          },
-          next: { revalidate: 600 },
+      if (!firstPageRes.ok) {
+        console.error(`[getAppInstallations] API error: ${firstPageRes.status}`)
+        return []
+      }
 
-          signal: AbortSignal.timeout(10000),
-        })
-
-        if (!pageRes.ok) {
-          const errText = await pageRes.text().catch(() => '')
-          console.error(
-            `[getAppInstallations] GitHub API error: ${pageRes.status} ${pageRes.statusText}`,
-            errText
-          )
-          break
-        }
-
-        const data: unknown = await pageRes.json()
-        if (!Array.isArray(data) || data.length === 0) break
-
-        const logins = (data as { account?: { login?: string } }[])
-          .map((inst) => inst.account?.login)
+      const processPageData = (data: any) => {
+        if (!Array.isArray(data)) return []
+        return data
+          .map((inst: any) => inst.account?.login)
           .filter((login): login is string => typeof login === 'string')
+      }
 
-        allLogins.push(...logins)
+      const firstData = await firstPageRes.json()
+      allLogins.push(...processPageData(firstData))
 
-        const linkHeader: string = pageRes.headers.get('link') ?? ''
-        const nextMatch: RegExpMatchArray | null = linkHeader.match(/<([^>]+)>;\s*rel="next"/)
-        url = nextMatch ? nextMatch[1] : null
+      const linkHeader = firstPageRes.headers.get('link') ?? ''
+      const lastMatch = linkHeader.match(/[?&]page=(\d+)>;\s*rel="last"/)
+      
+      if (lastMatch) {
+        const lastPage = parseInt(lastMatch[1], 10)
+        if (lastPage > 1) {
+          const pagePromises = []
+          // Limit to max 25 pages to avoid extreme abuse/rate limits during build
+          const maxPages = Math.min(lastPage, 25)
+          for (let p = 2; p <= maxPages; p++) {
+            const pageUrl = `${API_ENDPOINTS.GITHUB.APP_INSTALLATIONS}&page=${p}`
+            pagePromises.push(
+              fetch(pageUrl, {
+                headers: {
+                  Authorization: `Bearer ${jwt}`,
+                  Accept: 'application/vnd.github.v3+json',
+                  'User-Agent': 'GitAscii-App',
+                },
+                next: { revalidate: 600 },
+                signal: AbortSignal.timeout(10000),
+              }).then(async (res) => {
+                if (res.ok) {
+                  return processPageData(await res.json())
+                }
+                return []
+              }).catch(() => [])
+            )
+          }
+          
+          const results = await Promise.all(pagePromises)
+          for (const logins of results) {
+            allLogins.push(...logins)
+          }
+        }
       }
 
       return allLogins
