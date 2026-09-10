@@ -295,7 +295,24 @@ export function StrobiHost() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!mounted || !state.visible || !isReady) return null
+  if (!mounted || !state.visible || !isReady) {
+    return (
+      <div
+        id="strobi-persistent-actor"
+        tabIndex={0}
+        role="region"
+        aria-label="GitAscii Mascote Strobi"
+        suppressHydrationWarning
+        style={{
+          position: 'fixed',
+          width: 0,
+          height: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none',
+        }}
+      />
+    )
+  }
 
   const guideTargetRect = state.guideTargetElement?.getBoundingClientRect()
   const guideTargetX = guideTargetRect ? guideTargetRect.left + guideTargetRect.width / 2 : 0
