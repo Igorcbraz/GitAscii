@@ -13,6 +13,7 @@ import { DEFAULT_POKEMON_CARD_IMAGE, WIDGET_IDS, type WidgetId } from '@/constan
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 interface WidgetsShowcaseProps {
@@ -433,6 +434,19 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
             )}
           </p>
         </motion.div>
+
+        <div className="relative w-full flex justify-center">
+          <div className="absolute -top-16 right-6 sm:right-16 pointer-events-none z-20">
+            <StrobiAnchor
+              id="widgets"
+              size={82}
+              align="center"
+              restingMood="surprised"
+              accessory="dizzy"
+              float
+            />
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
           <button

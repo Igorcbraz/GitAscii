@@ -55,15 +55,15 @@ export const fetchLandingMetrics = unstable_cache(
             },
             next: { revalidate: 300 },
             signal: AbortSignal.timeout(3000),
-          }),
+          }).then((res) => (res.ok ? res.json() : Promise.reject('Not OK'))),
           getAppInstallations(),
           getStoredProfiles(),
           getProSocialProof(),
           getLoggedInUsersCount(),
         ])
 
-      if (starRes.status === 'fulfilled' && starRes.value.ok) {
-        const repoData = await starRes.value.json()
+      if (starRes.status === 'fulfilled' && starRes.value) {
+        const repoData = starRes.value
         if (typeof repoData?.stargazers_count === 'number' && repoData.stargazers_count > 0) {
           stars = Math.max(stars, repoData.stargazers_count)
         }

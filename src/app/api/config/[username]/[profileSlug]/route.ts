@@ -15,7 +15,9 @@ export async function GET(
       return NextResponse.json({ error: 'Username is required' }, { status: 400 })
     }
 
-    const config = await loadProfileConfig(username, profileSlug || 'default')
+    const config = await loadProfileConfig(username, profileSlug || 'default', {
+      preferGitHub: true,
+    })
 
     if (!config) {
       return NextResponse.json({ error: 'Config not found' }, { status: 404 })

@@ -60,12 +60,8 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', '.github/gitascii.json'),
   ]
 
-  for (const url of urls) {
-    const config = await fetchConfigFromUrl(url)
-    if (config) return config
-  }
-
-  return null
+  const results = await Promise.all(urls.map(fetchConfigFromUrl))
+  return results.find((config) => config !== null) || null
 }
 
 export const getStoredProfiles = unstable_cache(
@@ -73,7 +69,7 @@ export const getStoredProfiles = unstable_cache(
     const profileMap = new Map<string, CommunityProfileItem>()
     const installedUsers = await getAppInstallations()
 
-    const chunkSize = 10
+    const chunkSize = 30
     for (let i = 0; i < installedUsers.length; i += chunkSize) {
       const chunk = installedUsers.slice(i, i + chunkSize)
       await Promise.allSettled(

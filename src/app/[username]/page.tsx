@@ -6,7 +6,10 @@ import { EditorLayout } from '@/features/editor/components/EditorLayout'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { isValidGitHubUsername } from '@/utils/githubUsername'
 
-export const dynamic = 'force-dynamic'
+// Profile editor HTML is determined by the route/query and can be cached at the edge.
+// The interactive editor runs on the client, so rendering this shell dynamically
+// only increases Function CPU for crawlers and repeated visitors.
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,

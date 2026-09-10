@@ -188,6 +188,7 @@ export function EditorToolbar({
           if (store.canUndo) {
             e.preventDefault()
             store.undo()
+            window.dispatchEvent(new CustomEvent('gitascii:undo'))
           }
         }
         return
@@ -204,6 +205,7 @@ export function EditorToolbar({
       if (cmdOrCtrl && e.key.toLowerCase() === 'c') {
         e.preventDefault()
         store.copyWidgets()
+        window.dispatchEvent(new CustomEvent('gitascii:copy'))
         return
       }
 
@@ -399,6 +401,7 @@ export function EditorToolbar({
 
       markClean()
       setCommitStatus('success')
+      window.dispatchEvent(new CustomEvent('gitascii:saved'))
       setTimeout(() => setCommitStatus('idle'), 2500)
       setTimeout(() => {
         triggerPreviewNudge()

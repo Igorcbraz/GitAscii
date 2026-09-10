@@ -88,7 +88,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `welcome-email/${username.toLowerCase().trim()}`
+      const idempotencyKey = `welcome-email/${username.toLowerCase().trim()}-${Date.now()}`
       const headers = this.buildHeaders(email, username)
 
       const { data, error } = await resend.emails.send(
@@ -162,7 +162,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `first-export/${username.toLowerCase().trim()}`
+      const idempotencyKey = `first-export/${username.toLowerCase().trim()}-${Date.now()}`
       const headers = this.buildHeaders(email, username)
 
       const { data, error } = await resend.emails.send(
@@ -248,7 +248,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `app-disconnected/${username.toLowerCase().trim()}`
+      const idempotencyKey = `app-disconnected/${username.toLowerCase().trim()}-${Date.now()}`
       const headers = this.buildHeaders(email, username)
 
       const { data, error } = await resend.emails.send(
@@ -317,7 +317,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `star-thank-you/${username.toLowerCase().trim()}`
+      const idempotencyKey = `star-thank-you/${username.toLowerCase().trim()}-${Date.now()}`
       const headers = this.buildHeaders(email, username)
 
       const { data, error } = await resend.emails.send(
@@ -396,7 +396,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `request-star/${username.toLowerCase().trim()}`
+      const idempotencyKey = `request-star/${username.toLowerCase().trim()}-${Date.now()}`
       const headers = this.buildHeaders(email, username)
 
       const { data, error } = await resend.emails.send(
@@ -539,7 +539,7 @@ export class EmailService {
     }
 
     try {
-      const idempotencyKey = `pro-welcome/${username.toLowerCase().trim()}`
+      const idempotencyKey = `pro-welcome/${username.toLowerCase().trim()}-${Date.now()}`
       const { data, error } = await resend.emails.send(
         {
           from: getEmailSender(),

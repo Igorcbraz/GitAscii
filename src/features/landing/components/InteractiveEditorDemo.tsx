@@ -1,15 +1,11 @@
 'use client'
 
-import '@vidstack/react/player/styles/default/theme.css'
-import '@vidstack/react/player/styles/default/layouts/video.css'
-
-import { MediaPlayer, type MediaPlayerInstance, MediaProvider } from '@vidstack/react'
-import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default'
 import { Play, Sparkles, Terminal } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import dynamic from 'next/dynamic'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 const LazyEditorLayout = dynamic(
@@ -36,7 +32,7 @@ export function InteractiveEditorDemo({
 }: InteractiveEditorDemoProps) {
   const { t } = useI18n()
   const sectionRef = useRef<HTMLElement>(null)
-  const playerRef = useRef<MediaPlayerInstance>(null)
+  const playerRef = useRef<HTMLVideoElement>(null)
 
   const [shouldLoadEditor, setShouldLoadEditor] = useState<boolean>(false)
   const [activeView, setActiveView] = useState<'video' | 'demo'>('video')
@@ -46,7 +42,7 @@ export function InteractiveEditorDemo({
 
   useEffect(() => {
     if (activeView !== 'video' && playerRef.current) {
-      playerRef.current.pause().catch(() => {})
+      playerRef.current.pause()
     }
   }, [activeView])
 
@@ -184,29 +180,16 @@ export function InteractiveEditorDemo({
                   onMouseMove={handleVideoInteraction}
                   onClick={handleVideoInteraction}
                 >
-                  <MediaPlayer
-                    ref={playerRef}
-                    title={t('landing.editor_demo.title_video', 'GitAscii Overview')}
+                  <video
+                    ref={playerRef as any}
                     src="/presentation.mp4"
+                    poster="/presentation.png"
                     playsInline
-                    preload="metadata"
-                    className={`w-full h-full object-contain ${
-                      !hasPlayed || !showControls
-                        ? '[&_.vds-controls]:!opacity-0 [&_.vds-controls]:!pointer-events-none'
-                        : ''
-                    }`}
-                  >
-                    <MediaProvider />
-                    <DefaultVideoLayout
-                      icons={defaultLayoutIcons}
-                      slots={{
-                        airPlayButton: null,
-                        googleCastButton: null,
-                        pipButton: null,
-                        settingsMenu: null,
-                      }}
-                    />
-                  </MediaPlayer>
+                    loop
+                    preload="none"
+                    controls={showControls}
+                    className="w-full h-full object-cover bg-black"
+                  />
 
                   <AnimatePresence>
                     {!hasPlayed && (
@@ -217,6 +200,7 @@ export function InteractiveEditorDemo({
                         exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.18 } }}
                         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                         onClick={handleCustomPlay}
+                        data-video-play="true"
                         aria-label={t(
                           'landing.editor_demo.play_aria',
                           'Play GitAscii presentation video'
@@ -238,6 +222,16 @@ export function InteractiveEditorDemo({
                               '0 0 0 1px rgba(197,255,74,0.12), 0 8px 40px rgba(0,0,0,0.8), 0 0 60px rgba(197,255,74,0.08)',
                           }}
                         >
+                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 pointer-events-none z-30">
+                            <StrobiAnchor
+                              id="demo-play"
+                              size={80}
+                              align="center"
+                              restingMood="excited"
+                              accessory="popcorn"
+                              bounce
+                            />
+                          </div>
                           <div
                             className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                             style={{
@@ -307,6 +301,16 @@ export function InteractiveEditorDemo({
           </div>
 
           <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 z-30 pointer-events-auto w-auto max-w-[94vw]">
+            <div className="absolute -top-16 right-3 pointer-events-none z-20">
+              <StrobiAnchor
+                id="demo"
+                size={74}
+                align="center"
+                restingMood="curious"
+                accessory="popcorn"
+                float
+              />
+            </div>
             <div
               className="relative flex items-center p-1 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
               style={{

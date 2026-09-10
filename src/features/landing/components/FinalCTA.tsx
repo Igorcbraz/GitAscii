@@ -9,6 +9,7 @@ import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 interface FinalCTAProps {
@@ -80,7 +81,17 @@ export function FinalCTA({ metrics = DEFAULT_LANDING_METRICS }: FinalCTAProps) {
           )}
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2 relative">
+          <div className="absolute -top-14 right-0 sm:-right-8 pointer-events-none z-20">
+            <StrobiAnchor
+              id="cta"
+              size={76}
+              align="center"
+              restingMood="celebrating"
+              accessory="party"
+              bounce
+            />
+          </div>
           <Magnet distance={80} strength={0.25}>
             <button
               onClick={handleScrollToHero}

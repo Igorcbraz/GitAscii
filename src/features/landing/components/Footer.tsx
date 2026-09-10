@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import React from 'react'
 
+import { GitAsciiAvatar } from '@/components/avatar'
 import { APP_VERSION, EXTERNAL_LINKS } from '@/constants'
 import { useI18n } from '@/i18n'
 import { PrivacySettingsButton } from '@/lib/consent/ConsentBanner'
@@ -16,9 +17,12 @@ export function Footer() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
             <div className="md:col-span-4 flex flex-col items-start">
-              <div className="text-subheading mb-3 flex items-center">
-                <span className="font-inter-tight font-medium text-chalk">Git</span>
-                <span className="font-pt-serif font-light italic text-signal-lime">Ascii</span>
+              <div className="text-subheading mb-3 flex items-center gap-2.5">
+                <GitAsciiAvatar size={24} />
+                <div className="flex items-center">
+                  <span className="font-inter-tight font-medium text-chalk">Git</span>
+                  <span className="font-pt-serif font-light italic text-signal-lime">Ascii</span>
+                </div>
               </div>
               <p className="font-inter-tight text-note text-ash mb-5 max-w-xs leading-relaxed">
                 {t(

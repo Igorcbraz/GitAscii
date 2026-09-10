@@ -6,7 +6,7 @@ import {
   saveProfileConfigInDb,
 } from '@/lib/db/repositories/profileRepository'
 import { API_ENDPOINTS } from '@/services/endpoints'
-import { invalidateSvgCache } from '@/services/profileSvgService'
+import { invalidateSvgCache } from '@/services/profileSvgCache'
 
 interface CacheEntry {
   config: SavedConfiguration
@@ -16,16 +16,19 @@ interface CacheEntry {
 const memoryCache = new Map<string, CacheEntry>()
 const MEMORY_CACHE_TTL_MS = 60 * 1000 // 60 seconds TTL
 
-export function invalidateProfileConfig(username: string, slug: string = 'default'): void {
+export async function invalidateProfileConfig(
+  username: string,
+  slug: string = 'default'
+): Promise<void> {
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   memoryCache.delete(`${usernameLower}_${slugLower}`)
   try {
     const redis = getProRedisClient()
     const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
-    void redis.del(configKey).catch(() => {})
+    await redis.del(configKey)
   } catch {}
-  invalidateSvgCache(usernameLower)
+  await invalidateSvgCache(usernameLower)
 }
 
 export function cacheProfileConfig(config: SavedConfiguration): void {
@@ -37,7 +40,6 @@ export function cacheProfileConfig(config: SavedConfiguration): void {
     config,
     expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
   })
-  invalidateSvgCache(username)
 }
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
@@ -58,6 +60,8 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
   } catch (err) {
     console.warn('[ProfileStorage] Failed to persist config to Redis:', err)
   }
+
+  await invalidateSvgCache(username)
 }
 
 async function fetchConfigFromGitHub(
@@ -104,14 +108,36 @@ async function fetchConfigFromGitHub(
 
 export async function loadProfileConfig(
   username: string,
-  slug: string
+  slug: string,
+  options: { bypassMemory?: boolean; preferGitHub?: boolean } = {}
 ): Promise<SavedConfiguration | null> {
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   const cacheKey = `${usernameLower}_${slugLower}`
 
+  if (options.preferGitHub) {
+    const githubConfig = await fetchConfigFromGitHub(username, slugLower)
+    if (githubConfig) {
+      memoryCache.set(cacheKey, {
+        config: githubConfig,
+        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+      })
+      try {
+        await saveProfileConfigInDb(usernameLower, slugLower, githubConfig)
+      } catch {}
+      try {
+        const redis = getProRedisClient()
+        await redis.set(
+          REDIS_KEYS.profileConfig(usernameLower, slugLower),
+          JSON.stringify(githubConfig)
+        )
+      } catch {}
+      return githubConfig
+    }
+  }
+
   const cached = memoryCache.get(cacheKey)
-  if (cached && cached.expiresAt > Date.now()) {
+  if (!options.bypassMemory && cached && cached.expiresAt > Date.now()) {
     return cached.config
   }
 

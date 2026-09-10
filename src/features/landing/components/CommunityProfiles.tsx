@@ -12,6 +12,7 @@ import ShinyText from '@/components/ui/ShinyText'
 import SpotlightCard from '@/components/ui/SpotlightCard'
 import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
 import type { CommunityProfileItem } from '@/features/explore/getCommunityProfiles'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -210,7 +211,7 @@ export function CommunityProfiles({
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 flex flex-col justify-between gap-3"
           >
-            <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase">
+            <div className="flex items-center justify-between px-1 pb-2 border-b border-graphite text-ash font-jetbrains-mono text-[11px] uppercase relative">
               <span>{t('landing.community.verified_devs', 'Verified Developers')}</span>
               <span>
                 {t(
@@ -231,6 +232,7 @@ export function CommunityProfiles({
                 return (
                   <motion.div
                     key={p.username}
+                    data-profile-item={p.username}
                     onClick={() => handleSelectProfile(p.username)}
                     whileHover={{ x: 4 }}
                     transition={{ duration: 0.15 }}
@@ -346,8 +348,18 @@ export function CommunityProfiles({
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7 flex flex-col"
+            className="lg:col-span-7 flex flex-col relative"
           >
+            <div className="absolute -top-14 right-6 pointer-events-none z-20">
+              <StrobiAnchor
+                id="community"
+                size={76}
+                align="center"
+                restingMood="curious"
+                accessory="detective"
+                float
+              />
+            </div>
             <SpotlightCard className="p-6 sm:p-7 flex flex-col justify-between h-full bg-onyx border-graphite">
               <div className="flex flex-col h-full justify-between space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-graphite/80">
@@ -437,7 +449,6 @@ export function CommunityProfiles({
                         alt={`GitAscii Card for @${activeProfile.username}`}
                         width={800}
                         height={360}
-                        loading="eager"
                         unoptimized
                         className={`w-full max-w-full h-full max-h-[350px] object-contain shadow-lg transition-opacity duration-200 ${
                           imageLoaded ? 'opacity-100' : 'opacity-0'

@@ -5,7 +5,7 @@ import { APP_URL } from '@/constants'
 import { EditorLayout } from '@/features/editor/components/EditorLayout'
 import { isValidGitHubUsername } from '@/utils/githubUsername'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,

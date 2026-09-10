@@ -3,6 +3,10 @@
     "openseo": {
       "serverUrl": "https://app.openseo.so/mcp"
     },
+    "vercel": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp.vercel.com"]
+    },
     "sentry": {
       "serverUrl": "https://mcp.sentry.dev/mcp"
     },

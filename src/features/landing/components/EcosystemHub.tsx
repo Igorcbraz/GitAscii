@@ -9,6 +9,7 @@ import { FeatureCard, type FeatureType } from '@/components/ui/grid-feature-card
 import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 
 interface EcosystemHubProps {
@@ -59,9 +60,7 @@ export function EcosystemHub({ metrics = DEFAULT_LANDING_METRICS }: EcosystemHub
         `Skip painful Markdown formatting. Choose from ${metrics.templates} designer presets tailored for software engineers and customize typography, layout, and colors visually.`,
         { count: String(metrics.templates) }
       ),
-      tag: t('landing.why.tag_presets', `// 03 · ${metrics.templates} PRESETS`, {
-        count: String(metrics.templates),
-      }),
+      tag: t('landing.why.tag_presets', '// 03 · PRESETS'),
       actionText: t('landing.why.action_templates', 'Browse Templates'),
     },
     {
@@ -73,9 +72,7 @@ export function EcosystemHub({ metrics = DEFAULT_LANDING_METRICS }: EcosystemHub
         'landing.why.widgets_desc',
         'From live stats and vector ASCII portraits to collectible Pokémon developer cards, FIFA FUT scouting cards, and circadian night-owl telemetry.'
       ),
-      tag: t('landing.why.tag_widgets', `// 04 · ${metrics.widgets}+ WIDGETS`, {
-        count: String(metrics.widgets),
-      }),
+      tag: t('landing.why.tag_widgets', '// 04 · WIDGETS'),
       actionText: t('landing.why.action_widgets', 'Explore Widgets'),
     },
     {
@@ -129,6 +126,19 @@ export function EcosystemHub({ metrics = DEFAULT_LANDING_METRICS }: EcosystemHub
               'Static Markdown tables break easily and go stale. GitAscii turns your developer profile into an interactive, high-craft visual statement that stays up to date forever.'
             )}
           </p>
+        </div>
+
+        <div className="relative w-full flex justify-center">
+          <div className="absolute -top-14 right-6 sm:right-12 pointer-events-none z-20">
+            <StrobiAnchor
+              id="ecosystem"
+              size={76}
+              align="center"
+              restingMood="excited"
+              accessory="astronaut"
+              float
+            />
+          </div>
         </div>
 
         <motion.div

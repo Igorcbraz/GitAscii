@@ -38,9 +38,12 @@ export function renderExternalWidgetSvg(
       ? 'height:32px; width:auto; max-width:100%; object-fit:contain; object-position:left center;'
       : 'width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center center;'
 
+  const attrW = mode === 'badge' ? Math.round(imgW) : Math.round(imgW)
+  const attrH = mode === 'badge' ? 32 : Math.round(imgH)
+
   const imgHtml = safeFallbackUrl
-    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(safeFallbackUrl)}';" />`
-    : `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" style="${imgStyle}" />`
+    ? `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" width="${attrW}" height="${attrH}" style="${imgStyle}" onerror="this.onerror=null;this.src='${escapeXml(safeFallbackUrl)}';" />`
+    : `<img src="${escapeXml(processedUrl)}" alt="${escapeXml(title)}" width="${attrW}" height="${attrH}" style="${imgStyle}" />`
   const innerContentHtml = safeTargetUrl
     ? `<a href="${escapeXml(safeTargetUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;max-width:100%;max-height:100%;">${imgHtml}</a>`
     : imgHtml

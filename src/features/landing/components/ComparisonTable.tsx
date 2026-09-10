@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 
 import { getProPricing, LANDING_COMPARISON, PRO_PRICING_CONFIG } from '@/constants'
+import { StrobiAnchor } from '@/features/mascot'
 import { ProSocialProof } from '@/features/pro/components/ProSocialProof'
 import { useI18n } from '@/i18n'
 
@@ -123,6 +124,17 @@ export function ProPricingSection({
 
               <div className="w-full flex justify-center mb-5">
                 <ProSocialProof count={proCustomers} usernames={proUsernames} variant="inline" />
+              </div>
+
+              <div className="absolute top-4 right-4 sm:right-6 pointer-events-none z-20">
+                <StrobiAnchor
+                  id="pricing"
+                  size={78}
+                  align="center"
+                  restingMood="focused"
+                  accessory="businessman"
+                  float
+                />
               </div>
 
               <Link

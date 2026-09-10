@@ -5,6 +5,7 @@ import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'n
 
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
+import { StrobiRoot } from '@/features/mascot/components/StrobiRoot'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
@@ -227,13 +228,35 @@ export default function RootLayout({
       className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable} ${teko.variable}`}
     >
       <head>
-        <link
-          rel="preconnect"
-          href="https://avatars.githubusercontent.com"
-          crossOrigin="anonymous"
-        />
-        <link rel="preconnect" href="https://img.shields.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.github.com" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var link = document.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = '${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}';
+              link.media = 'print';
+              link.onload = function() { this.media = 'all'; };
+              document.head.appendChild(link);
+            `,
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={EXTERNAL_LINKS.GOOGLE_FONTS_CSS} />
+        </noscript>
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prerender: [
+                {
+                  where: { href_matches: '/*' },
+                  eagerness: 'moderate',
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body suppressHydrationWarning>
         <I18nProvider>
@@ -256,7 +279,7 @@ export default function RootLayout({
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
               />
-              {children}
+              <StrobiRoot>{children}</StrobiRoot>
             </AutoAnalyticsTracker>
           </ToastProvider>
         </I18nProvider>

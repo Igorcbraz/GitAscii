@@ -10,6 +10,7 @@ import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import { useToast } from '@/components/ui/toast'
 import { getProPricing, PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
+import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -42,9 +43,28 @@ export default function Hero() {
         if (data && data.session) {
           setSession(data.session)
         }
+
+        const search = new URLSearchParams(window.location.search)
+        const template = search.get('template')
+        const profile = search.get('profile')
+        if (template || profile) {
+          const targetUsername = data?.session?.username || 'Igorcbraz'
+          const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
+          const query = template ? `?template=${encodeURIComponent(template)}` : ''
+          router.replace(`/${targetUsername}${targetProfileSlug}${query}`)
+        }
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => {
+        const search = new URLSearchParams(window.location.search)
+        const template = search.get('template')
+        const profile = search.get('profile')
+        if (template || profile) {
+          const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
+          const query = template ? `?template=${encodeURIComponent(template)}` : ''
+          router.replace(`/Igorcbraz${targetProfileSlug}${query}`)
+        }
+      })
+  }, [router])
 
   const validateUsername = (val: string) => {
     const clean = val.trim()
@@ -78,7 +98,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative min-h-screen">
+    <section id="hero" className="relative min-h-screen">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {mounted && <AsciiHands className="absolute inset-0 opacity-60" />}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
@@ -86,6 +106,8 @@ export default function Hero() {
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pb-24 md:pb-32 pt-16">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100 mb-6 flex flex-col items-center"></div>
+
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 font-jetbrains-mono text-[11px] uppercase tracking-[0.22em] text-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.15)]">
               <Sparkles className="w-3.5 h-3.5" />
@@ -95,7 +117,7 @@ export default function Hero() {
             </div>
           </div>
 
-          <h1 className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-300 font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
+          <h1 className="font-pt-serif font-light text-white text-5xl md:text-heading-lg leading-hero md:leading-heading-lg tracking-heading-lg mb-8">
             {t('landing.hero.title_normal', 'Create ')}
             <span className="italic text-signal-lime">
               {t('landing.hero.title_italic', 'Stunning')}
@@ -103,14 +125,25 @@ export default function Hero() {
             {t('landing.hero.title_end', ' GitHub Profile READMEs.')}
           </h1>
 
-          <p className="animate-in fade-in slide-in-from-bottom-6 duration-700 fill-mode-both delay-500 font-inter-tight font-normal text-bone text-body leading-body max-w-130 mb-12">
+          <p className="font-inter-tight font-normal text-bone text-body leading-body max-w-130 mb-12">
             {t(
               'landing.hero.subtitle',
               'Premium SVGs. ASCII art. Visual editor. One platform for developers who care about their profile.'
             )}
           </p>
 
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto">
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-700 flex flex-col items-center gap-4 w-full max-w-md mx-auto relative min-h-[240px]">
+            <div className="absolute -top-16 -right-4 sm:-right-8 pointer-events-none z-20">
+              <StrobiAnchor
+                id="hero-cta"
+                size={84}
+                align="center"
+                restingMood="idle"
+                accessory="none"
+                defaultAnchor
+                float
+              />
+            </div>
             {session ? (
               <div className="w-full flex flex-col items-center gap-3">
                 <Magnet distance={60} strength={0.25} className="w-full">

@@ -8,7 +8,10 @@ import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
 import { loadProfileConfig } from '@/lib/profileStorage'
-import { sanitizeSvg } from '@/utils/svgSanitizer'
+
+import { getCachedProfileSvg } from './profileSvgCache'
+
+export { invalidateSvgCache } from './profileSvgCache'
 
 export interface ProfileSvgRequestOptions {
   username: string
@@ -17,12 +20,6 @@ export interface ProfileSvgRequestOptions {
   template?: string | null
   widgets?: string[] | null
   isExplicitSlug?: boolean
-}
-
-import { unstable_cache } from 'next/cache'
-
-export function invalidateSvgCache(_username?: string): void {
-  console.log('[profileSvgService] invalidateSvgCache called (no-op for unstable_cache)')
 }
 
 function computeEtag(content: string): string {
@@ -44,63 +41,72 @@ function escapeErrorXml(str: string): string {
     .replace(/'/g, '&apos;')
 }
 
-const getCachedSvgPayload = unstable_cache(
-  async (
-    username: string,
-    profileSlug: string,
-    theme: 'dark' | 'light',
-    templateParam: string | null,
-    widgetsParam: string[] | undefined
-  ) => {
-    const data = await fetchGitHubProfile(username)
-    let config = await loadProfileConfig(username, profileSlug)
+async function getCachedSvgPayload(
+  username: string,
+  profileSlug: string,
+  theme: 'dark' | 'light',
+  templateParam: string | null,
+  widgetsParam: string[] | undefined
+) {
+  return getCachedProfileSvg(
+    username,
+    [profileSlug, theme, templateParam, widgetsParam],
+    async () => {
+      const data = await fetchGitHubProfile(username, { publicOnly: true })
+      let config = await loadProfileConfig(username, profileSlug, {
+        bypassMemory: true,
+        preferGitHub: true,
+      })
 
-    if (!config) {
-      const templateId = templateParam || 'terminal'
-      config = createConfiguration(
-        data.user.id,
-        data.user.login,
-        templateId,
-        profileSlug,
-        'Default',
-        data
-      )
-    }
+      // Query widgets must not mutate the saved configuration held by another cache.
+      if (config) config = structuredClone(config)
 
-    if (widgetsParam && widgetsParam.length > 0) {
-      for (const widgetId of widgetsParam) {
-        const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
-        if (!item) continue
-        const safeWidgetId = item.id
-        const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
-        if (!hasWidget) {
-          config.widgets.push({
-            instanceId: `${safeWidgetId}-query-${Date.now()}`,
-            widgetId: safeWidgetId,
-            position: { x: 20, y: 20 },
-            size: item.defaultSize || { width: 400, height: 200 },
-            config: {},
-            locked: false,
-            visible: true,
-            zIndex: 99,
-          })
+      if (!config) {
+        const templateId = templateParam || 'terminal'
+        config = createConfiguration(
+          data.user.id,
+          data.user.login,
+          templateId,
+          profileSlug,
+          'Default',
+          data
+        )
+      }
+
+      if (widgetsParam && widgetsParam.length > 0) {
+        for (const widgetId of widgetsParam) {
+          const item = WIDGET_CATALOG.find((w) => w.id === widgetId)
+          if (!item) continue
+          const safeWidgetId = item.id
+          const hasWidget = config.widgets.some((w: any) => w.widgetId === safeWidgetId)
+          if (!hasWidget) {
+            config.widgets.push({
+              instanceId: `${safeWidgetId}-query`,
+              widgetId: safeWidgetId,
+              position: { x: 20, y: 20 },
+              size: item.defaultSize || { width: 400, height: 200 },
+              config: {},
+              locked: false,
+              visible: true,
+              zIndex: 99,
+            })
+          }
         }
       }
+
+      const renderedWidgetIds = config.widgets.map((w: any) => w.widgetId || 'widget')
+
+      const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
+      const embedResult = await embedExternalImages(rawSvgContent)
+      // embedExternalImages already sanitizes the complete result.
+      const svgContent = embedResult.svg
+      const etag = computeEtag(svgContent)
+      const hasErrors = embedResult.hasErrors
+
+      return { svgContent, etag, hasErrors, renderedWidgetIds }
     }
-
-    const renderedWidgetIds = config.widgets.map((w: any) => w.widgetId || 'widget')
-
-    const rawSvgContent = renderSvg(config, data, { theme, widgets: widgetsParam || undefined })
-    const embedResult = await embedExternalImages(rawSvgContent)
-    const svgContent = sanitizeSvg(embedResult.svg)
-    const etag = computeEtag(svgContent)
-    const hasErrors = embedResult.hasErrors
-
-    return { svgContent, etag, hasErrors, renderedWidgetIds }
-  },
-  ['profile-svg-generation'],
-  { revalidate: 3600 }
-)
+  )
+}
 
 export async function generateProfileSvgResponse(
   request: Request,
@@ -108,7 +114,7 @@ export async function generateProfileSvgResponse(
 ): Promise<NextResponse> {
   const startTime = Date.now()
   const rawUsername = options.username || ''
-  const username = rawUsername.replace(/[^a-zA-Z0-9_-]/g, '')
+  const username = rawUsername.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
 
   if (!username) {
     return new NextResponse('Username is required', { status: 400 })
@@ -119,7 +125,8 @@ export async function generateProfileSvgResponse(
     const previewDateParam = searchParams.get('preview_date') || searchParams.get('date')
     const timezoneParam = searchParams.get('timezone') || searchParams.get('tz')
 
-    let profileSlug = (options.profileSlug || 'default').replace(/[^a-zA-Z0-9_-]/g, '') || 'default'
+    let profileSlug =
+      (options.profileSlug || 'default').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'default'
     let isDynamicResolved = false
 
     if (!options.isExplicitSlug && (!options.profileSlug || options.profileSlug === 'default')) {
@@ -157,7 +164,6 @@ export async function generateProfileSvgResponse(
           .filter(Boolean)
       : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
-    const _vParam = searchParams.get('v') || searchParams.get('t') || ''
     const payload = await getCachedSvgPayload(
       username,
       profileSlug,
@@ -191,7 +197,13 @@ export async function generateProfileSvgResponse(
         "default-src 'none'; style-src 'unsafe-inline'; img-src data: https:;",
     }
 
-    const isCacheHit = ifNoneMatch === etag
+    const isCacheHit =
+      ifNoneMatch
+        ?.split(',')
+        .some(
+          (value) =>
+            value.trim() === '*' || value.trim().replace(/^W\//, '') === etag.replace(/^W\//, '')
+        ) ?? false
     const renderTimeMs = Date.now() - startTime
     const viewerMeta = parseViewerMetadata(request)
 
