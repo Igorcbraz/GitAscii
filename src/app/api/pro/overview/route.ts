@@ -5,12 +5,12 @@ import { getProEmailLogs } from '@/features/pro/server/emailLogStore'
 import { getWidgetErrors } from '@/features/pro/server/errorTrackerStore'
 import { getUserProfiles } from '@/features/pro/server/profileManagerStore'
 import type { ActivityEvent, ProOverviewData } from '@/features/pro/types'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

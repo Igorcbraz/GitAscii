@@ -14,11 +14,14 @@ import { resetProRedisMemoryStoreForTesting } from '@/features/pro/server/redisC
 
 vi.mock('@/lib/auth', () => ({
   getSession: vi.fn(),
+  getProSession: vi.fn(),
 }))
 
-import { getSession } from '@/lib/auth'
+import { getProSession, getSession } from '@/lib/auth'
 
 const mockedGetSession = vi.mocked(getSession)
+const mockedGetProSession = vi.mocked(getProSession)
+mockedGetProSession.mockImplementation(() => mockedGetSession())
 
 describe('Pro API Route Handlers Test Suite', () => {
   beforeEach(() => {

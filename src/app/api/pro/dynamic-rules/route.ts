@@ -5,12 +5,12 @@ import {
   getDynamicRulesConfig,
   saveDynamicRulesConfig,
 } from '@/features/pro/server/dynamicRulesStore'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

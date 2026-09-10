@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { setDefaultProfile } from '@/features/pro/server/profileManagerStore'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

@@ -53,7 +53,10 @@ Sentry.init({
     return event
   },
 
-  dataCollection: {},
+  beforeBreadcrumb(breadcrumb) {
+    if (breadcrumb.category === 'console' || breadcrumb.category === 'ui') return null
+    return breadcrumb
+  },
 })
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart

@@ -7,12 +7,12 @@ import {
   recordTestDigestSent,
 } from '@/features/pro/server/emailLogStore'
 import { getUserSettings } from '@/features/pro/server/entitlements'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -43,7 +43,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

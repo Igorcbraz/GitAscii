@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 
 import { createProfileVersion, getProfileVersions } from '@/features/pro/server/profileManagerStore'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 import { loadProfileConfig } from '@/lib/profileStorage'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -24,7 +24,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

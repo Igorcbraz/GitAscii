@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { deleteDynamicRule, updateDynamicRule } from '@/features/pro/server/dynamicRulesStore'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ ruleId: string }> }) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -30,7 +30,7 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ ruleId: string }> }
 ) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

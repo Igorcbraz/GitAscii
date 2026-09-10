@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { getWidgetHealthList } from '@/features/pro/server/healthMonitoringStore'
-import { getSession } from '@/lib/auth'
+import { getProSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const session = await getSession()
+  const session = await getProSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

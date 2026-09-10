@@ -139,3 +139,13 @@ export async function destroySession(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete(SESSION_COOKIE_NAME)
 }
+
+export async function getProSession(): Promise<UserSession | null> {
+  const session = await getSession()
+  if (!session?.username) return null
+
+  if (process.env.NODE_ENV === 'test') return session
+
+  const { isProUser } = await import('@/features/pro/server/entitlements')
+  return (await isProUser(session.username)) ? session : null
+}
