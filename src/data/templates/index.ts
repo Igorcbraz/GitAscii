@@ -1,3 +1,5 @@
+import { GENERATED_TEMPLATES } from './generated'
+
 export interface RawTemplateData {
   id?: string
   templateId?: string
@@ -30,35 +32,13 @@ export interface RawTemplateData {
   }
 }
 
-declare const require: {
-  context: (
-    directory: string,
-    useSubdirectories: boolean,
-    filePattern: RegExp
-  ) => {
-    keys: () => string[]
-    <T>(path: string): T
+const loadedTemplates: RawTemplateData[] = GENERATED_TEMPLATES.map(({ file, template }) => {
+  const rawTemplate = template as unknown as RawTemplateData
+  return {
+    ...rawTemplate,
+    id: rawTemplate.id || rawTemplate.templateId || file,
   }
-}
-
-// Webpack discovers every JSON file in this directory at build time. Adding a
-// template only requires dropping the file here; no registry edit is needed.
-const templateFiles = require.context('./', false, /\.json$/)
-
-const loadedTemplates = templateFiles
-  .keys()
-  .sort()
-  .map((file) => {
-    const template = templateFiles<RawTemplateData>(file)
-    const filename = file.replace(/^\.\//, '').replace(/\.json$/, '')
-
-    return {
-      ...template,
-      // Exported templates may leave `id` empty. Keep IDs stable without
-      // requiring contributors to edit a registry by hand.
-      id: template.id || template.templateId || filename,
-    }
-  })
+})
 
 const templateIds = loadedTemplates.map((template) => template.id)
 const duplicateTemplateIds = templateIds.filter((id, index) => templateIds.indexOf(id) !== index)
@@ -67,4 +47,4 @@ if (duplicateTemplateIds.length > 0) {
   throw new Error(`Duplicate template ID(s): ${[...new Set(duplicateTemplateIds)].join(', ')}`)
 }
 
-export const RAW_TEMPLATES: RawTemplateData[] = loadedTemplates
+export const RAW_TEMPLATES = loadedTemplates

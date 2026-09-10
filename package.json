@@ -4,6 +4,10 @@
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
+    "generate:templates": "node scripts/generate-template-registry.mjs",
+    "predev": "npm run generate:templates",
+    "prebuild": "npm run generate:templates",
+    "pretest": "npm run generate:templates",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
