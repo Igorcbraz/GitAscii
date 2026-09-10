@@ -1,22 +1,13 @@
-import ascii_native from './ascii_native.json'
-import bento_grid from './bento_grid.json'
-import codeweb from './codeweb.json'
-import hacker from './hacker.json'
-import minimal_luxe from './minimal_luxe.json'
-import Native from './Native.json'
-import native_advanced from './native_advanced.json'
-import native_simple from './native_simple.json'
-import rugbedbugg from './rugbedbugg.json'
-import windows_xp from './windows_xp.json'
-
 export interface RawTemplateData {
   id?: string
   templateId?: string
   name?: string
   description?: string
   category?: string
+  categoryUrl?: string
   widgetCategory?: string
   author?: string
+  authorUrl?: string
   widgets: Array<{
     widgetId: string
     position?: { x: number; y: number }
@@ -39,15 +30,41 @@ export interface RawTemplateData {
   }
 }
 
-export const RAW_TEMPLATES: RawTemplateData[] = [
-  Native as unknown as RawTemplateData,
-  native_simple as unknown as RawTemplateData,
-  native_advanced as unknown as RawTemplateData,
-  ascii_native as unknown as RawTemplateData,
-  bento_grid as unknown as RawTemplateData,
-  codeweb as unknown as RawTemplateData,
-  hacker as unknown as RawTemplateData,
-  minimal_luxe as unknown as RawTemplateData,
-  rugbedbugg as unknown as RawTemplateData,
-  windows_xp as unknown as RawTemplateData,
-]
+declare const require: {
+  context: (
+    directory: string,
+    useSubdirectories: boolean,
+    filePattern: RegExp
+  ) => {
+    keys: () => string[]
+    <T>(path: string): T
+  }
+}
+
+// Webpack discovers every JSON file in this directory at build time. Adding a
+// template only requires dropping the file here; no registry edit is needed.
+const templateFiles = require.context('./', false, /\.json$/)
+
+const loadedTemplates = templateFiles
+  .keys()
+  .sort()
+  .map((file) => {
+    const template = templateFiles<RawTemplateData>(file)
+    const filename = file.replace(/^\.\//, '').replace(/\.json$/, '')
+
+    return {
+      ...template,
+      // Exported templates may leave `id` empty. Keep IDs stable without
+      // requiring contributors to edit a registry by hand.
+      id: template.id || template.templateId || filename,
+    }
+  })
+
+const templateIds = loadedTemplates.map((template) => template.id)
+const duplicateTemplateIds = templateIds.filter((id, index) => templateIds.indexOf(id) !== index)
+
+if (duplicateTemplateIds.length > 0) {
+  throw new Error(`Duplicate template ID(s): ${[...new Set(duplicateTemplateIds)].join(', ')}`)
+}
+
+export const RAW_TEMPLATES: RawTemplateData[] = loadedTemplates

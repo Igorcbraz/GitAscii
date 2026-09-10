@@ -1,4 +1,10 @@
 {
+  "name": "Mainframe",
+  "description": "A green-screen mainframe aesthetic with ASCII identity, system telemetry, activity graphs, contribution history, and developer signals.",
+  "category": "community",
+  "categoryUrl": "https://github.com/mdAslam",
+  "author": "mdAslam",
+  "authorUrl": "https://github.com/mdAslam",
   "widgets": [
     {
       "instanceId": "widget_mf_portrait",

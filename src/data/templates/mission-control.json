@@ -1,4 +1,10 @@
 {
+  "name": "Mission Control",
+  "description": "A command-center profile layout combining mission telemetry, neural stats, activity, contributions, and social signals.",
+  "category": "community",
+  "categoryUrl": "https://github.com/mdAslam",
+  "author": "mdAslam",
+  "authorUrl": "https://github.com/mdAslam",
   "widgets": [
     {
       "instanceId": "widget_mc_banner_art",

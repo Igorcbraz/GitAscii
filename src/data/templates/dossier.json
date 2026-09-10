@@ -1,4 +1,10 @@
 {
+  "name": "Dossier",
+  "description": "A classified developer profile dossier with telemetry, showcase cards, activity, quotes, and contribution history.",
+  "category": "community",
+  "categoryUrl": "https://github.com/mdAslam",
+  "author": "mdAslam",
+  "authorUrl": "https://github.com/mdAslam",
   "widgets": [
     {
       "instanceId": "widget_dossier_ascii_header",
