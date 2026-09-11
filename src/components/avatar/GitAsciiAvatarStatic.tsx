@@ -1,8 +1,67 @@
-import { renderAvatarDefinition } from '@bible-strong/avatar-core'
+import type { AvatarDefinition } from '@bible-strong/avatar-core'
+import type { BodyNode } from '@bible-strong/avatar-core/body'
+import {
+  type Expression,
+  poseFromExpression,
+  renderAvatar,
+} from '@bible-strong/avatar-core/geometry'
 import React, { useId } from 'react'
 
 import { getGitAsciiAvatarDefinition, resolveGitAsciiExpression } from './avatarDefinition'
 import type { GitAsciiAvatarProps } from './types'
+
+/**
+ * Render a trusted, bundled avatar definition without importing avatar-core's
+ * root entry point. The root eagerly compiles its AJV schema with `new Function`,
+ * which Cloudflare Workers correctly rejects during request-time SSR.
+ */
+function renderTrustedAvatarDefinition(definition: AvatarDefinition, expressionKey: string) {
+  const definitionExpression = definition.expressions[expressionKey]
+  if (!definitionExpression) {
+    throw new Error(`Unknown expression '${expressionKey}'`)
+  }
+
+  const expression: Expression = {
+    id: expressionKey,
+    semanticKey: expressionKey,
+    headX: definitionExpression.head.x,
+    headY: definitionExpression.head.y,
+    headZ: definitionExpression.head.z,
+    widthLeft: definitionExpression.eyes.left.width,
+    widthRight: definitionExpression.eyes.right.width,
+    heightLeft: definitionExpression.eyes.left.height,
+    heightRight: definitionExpression.eyes.right.height,
+    spacing: definitionExpression.eyes.spacing,
+    positionXLeft: definitionExpression.eyes.left.x,
+    positionXRight: definitionExpression.eyes.right.x,
+    positionYLeft: definitionExpression.eyes.left.y,
+    positionYRight: definitionExpression.eyes.right.y,
+    leftAngle: definitionExpression.eyes.left.angle,
+    rightAngle: definitionExpression.eyes.right.angle,
+    perspective: definitionExpression.perspective,
+    eyeMotion: definitionExpression.motion.eyes,
+    bodyMotion: definitionExpression.motion.body,
+    ...(definitionExpression.colors?.body ? { bodyColor: definitionExpression.colors.body } : {}),
+    ...(definitionExpression.colors?.eyes ? { eyeColor: definitionExpression.colors.eyes } : {}),
+  }
+  const bodyNodes: BodyNode[] = definition.body.nodes.map((node, index) => ({
+    id: `runtime-node-${index}`,
+    name: `Runtime node ${index + 1}`,
+    surface: { ...node.surface },
+    position: [...node.position],
+    rotation: [...node.rotation],
+  }))
+
+  return {
+    geometry: renderAvatar(poseFromExpression(expression), definition.body.primary, 1, {
+      bodyNodes,
+    }),
+    colors: {
+      body: definitionExpression.colors?.body ?? expression.bodyColor ?? definition.colors.body,
+      eyes: definitionExpression.colors?.eyes ?? expression.eyeColor ?? definition.colors.eyes,
+    },
+  }
+}
 
 export function GitAsciiAvatarStatic({
   size = 120,
@@ -18,7 +77,7 @@ export function GitAsciiAvatarStatic({
   const clipId = useId()
   const resolvedKey = resolveGitAsciiExpression(expression)
   const definition = getGitAsciiAvatarDefinition(variant, theme, colors)
-  const scene = renderAvatarDefinition(definition, resolvedKey)
+  const scene = renderTrustedAvatarDefinition(definition, resolvedKey)
 
   const sizeStyle = {
     width: typeof size === 'number' ? `${size}px` : size,
