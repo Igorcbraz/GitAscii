@@ -67,7 +67,14 @@ async function fetchUserGitAscii(username: string): Promise<SavedConfiguration |
 export const getStoredProfiles = unstable_cache(
   async (): Promise<CommunityProfileItem[]> => {
     const profileMap = new Map<string, CommunityProfileItem>()
-    const installedUsers = await getAppInstallations()
+    let installedUsers: string[] = []
+
+    try {
+      installedUsers = await getAppInstallations()
+    } catch (error) {
+      console.warn('Failed to load GitHub App installations:', error)
+      return []
+    }
 
     const chunkSize = 30
     for (let i = 0; i < installedUsers.length; i += chunkSize) {
