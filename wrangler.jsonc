@@ -18,7 +18,7 @@
     "binding": "CF_VERSION_METADATA"
   },
   "routes": [
-    { "pattern": "gitascii.com/*", "custom_domain": true },
-    { "pattern": "www.gitascii.com/*", "custom_domain": true }
+    { "pattern": "gitascii.com", "custom_domain": true },
+    { "pattern": "www.gitascii.com", "custom_domain": true }
   ]
 }
