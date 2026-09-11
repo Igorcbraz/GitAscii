@@ -1,13 +1,4 @@
-import ascii_native from './ascii_native.json'
-import bento_grid from './bento_grid.json'
-import codeweb from './codeweb.json'
-import hacker from './hacker.json'
-import minimal_luxe from './minimal_luxe.json'
-import Native from './Native.json'
-import native_advanced from './native_advanced.json'
-import native_simple from './native_simple.json'
-import rugbedbugg from './rugbedbugg.json'
-import windows_xp from './windows_xp.json'
+import { GENERATED_TEMPLATES } from './generated'
 
 export interface RawTemplateData {
   id?: string
@@ -15,8 +6,10 @@ export interface RawTemplateData {
   name?: string
   description?: string
   category?: string
+  categoryUrl?: string
   widgetCategory?: string
   author?: string
+  authorUrl?: string
   widgets: Array<{
     widgetId: string
     position?: { x: number; y: number }
@@ -39,15 +32,19 @@ export interface RawTemplateData {
   }
 }
 
-export const RAW_TEMPLATES: RawTemplateData[] = [
-  Native as unknown as RawTemplateData,
-  native_simple as unknown as RawTemplateData,
-  native_advanced as unknown as RawTemplateData,
-  ascii_native as unknown as RawTemplateData,
-  bento_grid as unknown as RawTemplateData,
-  codeweb as unknown as RawTemplateData,
-  hacker as unknown as RawTemplateData,
-  minimal_luxe as unknown as RawTemplateData,
-  rugbedbugg as unknown as RawTemplateData,
-  windows_xp as unknown as RawTemplateData,
-]
+const loadedTemplates: RawTemplateData[] = GENERATED_TEMPLATES.map(({ file, template }) => {
+  const rawTemplate = template as unknown as RawTemplateData
+  return {
+    ...rawTemplate,
+    id: rawTemplate.id || rawTemplate.templateId || file,
+  }
+})
+
+const templateIds = loadedTemplates.map((template) => template.id)
+const duplicateTemplateIds = templateIds.filter((id, index) => templateIds.indexOf(id) !== index)
+
+if (duplicateTemplateIds.length > 0) {
+  throw new Error(`Duplicate template ID(s): ${[...new Set(duplicateTemplateIds)].join(', ')}`)
+}
+
+export const RAW_TEMPLATES = loadedTemplates

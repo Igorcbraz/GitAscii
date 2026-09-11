@@ -16,8 +16,10 @@ export interface TemplatePreset {
   name: string
   description: string
   category?: string
+  categoryUrl?: string
   widgetCategory?: string
   author?: string
+  authorUrl?: string
   colors: {
     background: string
     cardBackground: string
@@ -68,8 +70,10 @@ function loadAllTemplatePresets(): Record<string, TemplatePreset> {
         name,
         description,
         category: raw.category,
+        categoryUrl: raw.categoryUrl,
         widgetCategory: raw.widgetCategory,
         author: raw.author,
+        authorUrl: raw.authorUrl,
         colors: {
           background: styles.backgroundColor || '#060606',
           cardBackground: '#121212',
@@ -106,8 +110,10 @@ function loadAllTemplatePresets(): Record<string, TemplatePreset> {
       name,
       description,
       category: raw.category,
+      categoryUrl: raw.categoryUrl,
       widgetCategory: raw.widgetCategory,
       author: raw.author,
+      authorUrl: raw.authorUrl,
       colors: {
         background: styles.backgroundColor || '#060606',
         cardBackground: '#121212',

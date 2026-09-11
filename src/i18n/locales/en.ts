@@ -471,13 +471,13 @@ export const en: Record<string, string> = {
   'editor.guide.step3_title': 'Save and check',
   'editor.guide.template.fork_repo_btn': 'Fork on GitHub',
   'editor.guide.template.step1_desc':
-    'Click the button below to download the clean JSON template file. All your personal information (social links, custom bio, portrait matrices) will be automatically stripped, preserving only layout structure and visual styling.',
+    'Use the Export Template button to choose Community or an existing category and download the JSON. The author GitHub username is saved automatically, while personal data is removed.',
   'editor.guide.template.step1_tip_desc':
     'The template exporter removes personal references so new users get their own GitHub data automatically.',
   'editor.guide.template.step1_tip_title': 'No personal data:',
-  'editor.guide.template.step1_title': '1. Export your Template Structure',
+  'editor.guide.template.step1_title': '1. Export and choose a category',
   'editor.guide.template.step2_desc':
-    'Fork GitAscii on GitHub and upload your exported .json file into the src/data/templates/ directory. Then, open a Pull Request so anyone can use it!',
+    'Fork GitAscii and upload the .json file to src/data/templates/. Exported templates use Community or the selected existing category. Creating a new category requires a code change. Then open a Pull Request!',
   'editor.guide.template.step2_link': 'Open folder on GitHub',
   'editor.guide.template.step2_title': '2. Upload to src/data/templates',
   'editor.guide.template.subtitle':

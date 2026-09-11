@@ -40,10 +40,10 @@ export function ContributeTemplateModal({
   const steps = [
     {
       icon: Download,
-      title: t('editor.guide.template.step1_title', '1. Exporte a estrutura do seu Template'),
+      title: t('editor.guide.template.step1_title', '1. Exporte e escolha a categoria'),
       description: t(
         'editor.guide.template.step1_desc',
-        'Clique no botão abaixo para baixar o arquivo JSON limpo. Todos os seus dados pessoais (links sociais, bio, fotos/ASCII) serão automaticamente removidos, preservando apenas a diagramação e configurações visuais.'
+        'No botão Exportar Template, escolha Comunidade ou uma categoria existente e baixe o JSON. O username do GitHub do autor será salvo automaticamente, enquanto seus dados pessoais serão removidos.'
       ),
     },
     {
@@ -51,7 +51,7 @@ export function ContributeTemplateModal({
       title: t('editor.guide.template.step2_title', '2. Adicione na pasta src/data/templates'),
       description: t(
         'editor.guide.template.step2_desc',
-        'Faça um Fork do GitAscii no GitHub e faça o upload do arquivo .json baixado dentro do diretório src/data/templates/. Depois, abra um Pull Request para que todos possam usar!'
+        'Faça um Fork do GitAscii e envie o arquivo .json para src/data/templates/. Para criar uma categoria nova, é necessário alterar o código do projeto. Depois, abra um Pull Request!'
       ),
       linkLabel: t('editor.guide.template.step2_link', 'Abrir pasta no GitHub'),
       linkUrl: repoFolderUrl,

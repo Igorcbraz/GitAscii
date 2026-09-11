@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { ExternalLink, Sparkles } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 import { renderSvg } from '@/engine/core/SVGEngine'
@@ -66,7 +66,7 @@ export function TemplatePreviewTooltip({
 
   return (
     <div
-      className="fixed z-100 w-92 bg-onyx border border-signal-lime/40 rounded-xs shadow-[0_12px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(197,255,74,0.12)] p-3.5 animate-fade-in pointer-events-none"
+      className="fixed z-100 w-92 bg-onyx border border-signal-lime/40 rounded-xs shadow-[0_12px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(197,255,74,0.12)] p-3.5 animate-fade-in pointer-events-auto"
       style={{
         left: `${leftPosition}px`,
         top: `${topPosition}px`,
@@ -85,9 +85,22 @@ export function TemplatePreviewTooltip({
           <span className="font-inter-tight text-caption font-medium uppercase tracking-[0.16em] text-signal-lime truncate">
             [ {t('editor.sidebar.preview', 'PREVIEW')}: {template.name} ]
           </span>
-          <span className="text-[9px] font-jetbrains-mono font-semibold px-1.5 py-0.5 rounded-xs border bg-carbon text-ash border-graphite uppercase tracking-wider shrink-0">
-            {categoryLabel}
-          </span>
+          {template.categoryUrl ? (
+            <a
+              href={template.categoryUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Abrir perfil de ${categoryLabel}`}
+              className="inline-flex items-center gap-1 text-[9px] font-jetbrains-mono font-semibold px-1.5 py-0.5 rounded-xs border bg-carbon text-ash border-graphite uppercase tracking-wider shrink-0 hover:border-signal-lime hover:text-signal-lime"
+            >
+              {categoryLabel}
+              <ExternalLink size={9} />
+            </a>
+          ) : (
+            <span className="text-[9px] font-jetbrains-mono font-semibold px-1.5 py-0.5 rounded-xs border bg-carbon text-ash border-graphite uppercase tracking-wider shrink-0">
+              {categoryLabel}
+            </span>
+          )}
         </div>
         <span className="font-jetbrains-mono text-caption text-ash bg-carbon px-1.5 py-0.5 rounded-xs border border-graphite shrink-0">
           800×{calculatedHeight}px
