@@ -89,7 +89,7 @@
     "@types/react-dom": "^19.2.5",
     "@types/topojson-client": "^3.1.5",
     "@vitest/browser-playwright": "^4.1.11",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "eslint": "^9.0.0",
