@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.24.0](https://github.com/Igorcbraz/GitAscii/compare/v1.23.0...v1.24.0) (2026-09-11)
+
+
+### Features
+
+* migrate deployment to cloudflare workers ([9ccfeef](https://github.com/Igorcbraz/GitAscii/commit/9ccfeef46ac9b383ee457f58eb8345da29565d6f))
+
+
+### Bug Fixes
+
+* allow production installs without husky ([0244281](https://github.com/Igorcbraz/GitAscii/commit/0244281d9390f2171013b094de5bb93998673c82))
+* expose stripe public key during cloudflare build ([14df8dd](https://github.com/Igorcbraz/GitAscii/commit/14df8dd98af4caed8f34da3691c3ccd9d8643684))
+* install cloudflare build tools in production ([eb313ee](https://github.com/Igorcbraz/GitAscii/commit/eb313ee7549190def6893353fac396b829515c7b))
+* keep landing page available when github app is unavailable ([d4579a2](https://github.com/Igorcbraz/GitAscii/commit/d4579a20f9df0d87844e63a9d8a05202762890c2))
+* make avatar SSR compatible with Cloudflare Workers ([599fee4](https://github.com/Igorcbraz/GitAscii/commit/599fee4814fa0407afca543a19872f8319a5f941))
+* sync cloudflare dependencies lockfile ([25a8415](https://github.com/Igorcbraz/GitAscii/commit/25a84152aebae0e05a1bc8c211d4e975dfe78ef6))
+* use valid custom domain routes ([8c4e0b2](https://github.com/Igorcbraz/GitAscii/commit/8c4e0b25ef63905b52c15a859dc75d61a55d887d))
+
+
+### Performance Improvements
+
+* optimize Cloudflare Worker runtime ([00c519f](https://github.com/Igorcbraz/GitAscii/commit/00c519f597505fe627cb2417309069fc7a0ea301))
+
 ## [1.23.0](https://github.com/Igorcbraz/GitAscii/compare/v1.22.0...v1.23.0) (2026-09-10)
 
 
