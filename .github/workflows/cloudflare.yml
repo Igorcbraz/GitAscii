@@ -40,6 +40,7 @@ jobs:
           NEXT_PUBLIC_GITFEST_URL: ${{ vars.NEXT_PUBLIC_GITFEST_URL }}
           NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
 
       - name: Deploy Worker
         run: npx wrangler deploy --config dist/server/wrangler.json
