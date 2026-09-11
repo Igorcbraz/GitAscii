@@ -102,7 +102,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "playwright": "^1.62.1",
-    "postcss": "^8.5.25",
+    "postcss": "^8.5.28",
     "prettier": "^3.9.6",
     "react-email": "^6.9.3",
     "storybook": "^10.5.10",
