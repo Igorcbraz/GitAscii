@@ -77,7 +77,7 @@ describe('Email Client Configuration Suite', () => {
   describe('getAppBaseUrl', () => {
     it('returns default https://gitascii.com when no env vars are set', () => {
       delete process.env.NEXT_PUBLIC_APP_URL
-      delete process.env.VERCEL_PROJECT_PRODUCTION_URL
+      delete process.env.CF_PAGES_URL
       expect(getAppBaseUrl()).toBe('https://gitascii.com')
     })
 
@@ -91,10 +91,10 @@ describe('Email Client Configuration Suite', () => {
       expect(getAppBaseUrl()).toBe('https://preview.gitascii.com')
     })
 
-    it('falls back to VERCEL_PROJECT_PRODUCTION_URL if NEXT_PUBLIC_APP_URL is unset', () => {
+    it('uses CF_PAGES_URL when the public app URL is unset', () => {
       delete process.env.NEXT_PUBLIC_APP_URL
-      process.env.VERCEL_PROJECT_PRODUCTION_URL = 'gitascii.vercel.app'
-      expect(getAppBaseUrl()).toBe('https://gitascii.vercel.app')
+      process.env.CF_PAGES_URL = 'preview.gitascii.com'
+      expect(getAppBaseUrl()).toBe('https://preview.gitascii.com')
     })
   })
 })

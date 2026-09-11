@@ -81,7 +81,12 @@ export async function getCachedProfileSvg(
     return generate()
   }
   const digest = createHash('sha256')
-    .update(JSON.stringify([process.env.VERCEL_GIT_COMMIT_SHA || 'local', ...variant]))
+    .update(
+      JSON.stringify([
+        process.env.CF_VERSION_METADATA || process.env.CF_COMMIT_SHA || 'local',
+        ...variant,
+      ])
+    )
     .digest('hex')
   const key = `${PREFIX}:${user}:${generation ?? 0}:${digest}`
   const cached = memory.get(key)

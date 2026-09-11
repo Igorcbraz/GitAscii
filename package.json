@@ -25,7 +25,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "email:dev": "email dev -d emails -p 3001",
-    "docs": "cd docs && mintlify dev"
+    "docs": "cd docs && mintlify dev",
+    "dev:vinext": "vinext dev --port 3001",
+    "build:vinext": "vinext build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
     "@bible-strong/avatar-core": "^0.1.0",
@@ -59,6 +63,8 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@chromatic-com/storybook": "^5.2.1",
+    "@cloudflare/vite-plugin": "^1.54.7",
+    "@cloudflare/workers-types": "^5.20260911.1",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/compat": "^2.1.0",
@@ -77,6 +83,9 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@types/topojson-client": "^3.1.5",
+    "@vinext/cloudflare": "^1.0.0-beta.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-rsc": "^0.5.34",
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
     "ajv": "^8.20.0",
@@ -98,8 +107,10 @@
     "tailwindcss": "^4.0.0",
     "tsx": "^4.23.13",
     "typescript": "^5.7.0",
+    "vinext": "^1.0.0-beta.9",
     "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.131.0"
   },
   "browserslist": [
     "> 0.5%",
@@ -107,5 +118,6 @@
     "not dead",
     "not IE 11",
     "not op_mini all"
-  ]
+  ],
+  "type": "module"
 }

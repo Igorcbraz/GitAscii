@@ -55,3 +55,7 @@ coverage/
 # React Email
 .react-email/
 .neon
+/dist/
+.vinext/
+.wrangler/
+.env.prod

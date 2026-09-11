@@ -28,7 +28,7 @@ export function getEmailReplyTo(): string {
 }
 
 export function getAppBaseUrl(): string {
-  const envUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.CF_PAGES_URL
   if (envUrl) {
     return envUrl.startsWith('http') ? envUrl : `https://${envUrl}`
   }
