@@ -617,7 +617,15 @@ export async function getUserSettingsFromDb(rawUsername: string): Promise<ProUse
   if (!user) return null
 
   const settingsRows = await sql`
-    SELECT * FROM user_settings WHERE user_id = ${user.user.id} LIMIT 1
+    SELECT
+      email_alerts_enabled,
+      alert_email_address,
+      daily_digest_enabled,
+      theme_preference,
+      anonymize_referrers
+    FROM user_settings
+    WHERE user_id = ${user.user.id}
+    LIMIT 1
   `
   const s = settingsRows[0] || {}
   const e = user.entitlement

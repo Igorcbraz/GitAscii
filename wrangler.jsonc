@@ -2,23 +2,28 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "gitascii",
   "compatibility_date": "2026-09-11",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "main": "vinext/server/fetch-handler",
   "assets": {
     "directory": "dist/client",
     "not_found_handling": "none",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "cache": {
-    "enabled": true
+    "enabled": true,
+  },
+  "placement": {
+    "mode": "smart",
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.05,
   },
   "version_metadata": {
-    "binding": "CF_VERSION_METADATA"
+    "binding": "CF_VERSION_METADATA",
   },
   "routes": [
     { "pattern": "gitascii.com", "custom_domain": true },
-    { "pattern": "www.gitascii.com", "custom_domain": true }
-  ]
+    { "pattern": "www.gitascii.com", "custom_domain": true },
+  ],
 }

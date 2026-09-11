@@ -19,7 +19,7 @@ export const COMPETITORS_MAP: Record<string, CompetitorData> = {
     summary:
       'While Readme.so is a popular section-based markdown builder, GitAscii provides live SVG rendering, dynamic stats widgets, an image-to-ASCII converter, and dark/light mode automatic theme adaptation.',
     prosGitAscii: [
-      'Live SVG Widget Endpoints served on Vercel Edge Serverless functions.',
+      'Live SVG Widget Endpoints served on Cloudflare Workers with edge caching.',
       'Built-in Image-to-ASCII Art Converter Engine.',
       'Support for multiple named profiles per GitHub username.',
       'Automatic dark and light theme switching via HTML <picture> elements.',

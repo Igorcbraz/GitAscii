@@ -10,6 +10,7 @@ import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import { useToast } from '@/components/ui/toast'
 import { getProPricing, PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
+import { getClientSession } from '@/features/auth/clientSession'
 import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -37,18 +38,17 @@ export default function Hero() {
   useEffect(() => {
     setMounted(true)
 
-    fetch(API_ENDPOINTS.AUTH.SESSION)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && data.session) {
-          setSession(data.session)
+    getClientSession()
+      .then((currentSession) => {
+        if (currentSession) {
+          setSession(currentSession as UserSession)
         }
 
         const search = new URLSearchParams(window.location.search)
         const template = search.get('template')
         const profile = search.get('profile')
         if (template || profile) {
-          const targetUsername = data?.session?.username || 'Igorcbraz'
+          const targetUsername = currentSession?.username || 'Igorcbraz'
           const targetProfileSlug = profile && profile !== 'default' ? `/${profile}` : ''
           const query = template ? `?template=${encodeURIComponent(template)}` : ''
           router.replace(`/${targetUsername}${targetProfileSlug}${query}`)

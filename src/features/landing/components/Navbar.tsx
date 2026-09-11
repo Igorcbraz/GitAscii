@@ -29,6 +29,7 @@ import { GitAsciiAvatar } from '@/components/avatar'
 import LanguageSelector from '@/components/ui/LanguageSelector'
 import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { EXTERNAL_LINKS, NAVBAR_DROPDOWN_SECTIONS } from '@/constants'
+import { clearClientSession, getClientSession } from '@/features/auth/clientSession'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -87,11 +88,10 @@ export default function Navbar() {
       })
       .catch(() => {})
 
-    fetch(API_ENDPOINTS.AUTH.SESSION)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && data.session) {
-          setSession(data.session)
+    getClientSession()
+      .then((currentSession) => {
+        if (currentSession) {
+          setSession(currentSession)
         }
       })
       .catch(() => {})
@@ -105,6 +105,7 @@ export default function Navbar() {
     try {
       const res = await fetch(API_ENDPOINTS.AUTH.LOGOUT, { method: 'POST' })
       if (res.ok) {
+        clearClientSession()
         setSession(null)
         window.location.reload()
       } else {

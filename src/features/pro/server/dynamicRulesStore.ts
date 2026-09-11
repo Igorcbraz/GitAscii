@@ -17,6 +17,13 @@ import { REDIS_KEYS } from './analyticsStore'
 import { getUserProfiles } from './profileManagerStore'
 import { getProRedisClient } from './redisClient'
 
+const RULES_CACHE_TTL_MS = 30_000
+const rulesCache = new Map<string, { config: DynamicRulesConfig; expiresAt: number }>()
+
+function invalidateRulesCache(username: string): void {
+  rulesCache.delete(username.toLowerCase().trim())
+}
+
 function parseTimeInMinutes(timeStr?: string): number {
   if (!timeStr) return 0
   const [h, m] = timeStr.split(':').map((x) => parseInt(x, 10))
@@ -107,6 +114,8 @@ export function getDateInfoInTimezone(
 export async function getDynamicRulesConfig(username: string): Promise<DynamicRulesConfig> {
   const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
+  const cached = rulesCache.get(u)
+  if (cached && cached.expiresAt > Date.now()) return cached.config
   const configKey = REDIS_KEYS.dynamicRulesConfig(u)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
@@ -130,6 +139,7 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
           p.zadd(listKey, { score: r.priority, member: r.id })
         }
         await p.exec().catch(() => {})
+        rulesCache.set(u, { config: dbConfig, expiresAt: Date.now() + RULES_CACHE_TTL_MS })
         return dbConfig
       }
     } catch (dbErr) {
@@ -162,12 +172,14 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   })
 
-  return {
+  const config = {
     enabled,
     fallbackProfileSlug,
     defaultTimezone,
     rules,
   }
+  rulesCache.set(u, { config, expiresAt: Date.now() + RULES_CACHE_TTL_MS })
+  return config
 }
 
 export async function saveDynamicRulesConfig(
@@ -194,6 +206,7 @@ export async function saveDynamicRulesConfig(
     await redis.hset(configKey, payload).catch(() => {})
   }
 
+  invalidateRulesCache(u)
   return getDynamicRulesConfig(u)
 }
 
@@ -242,6 +255,7 @@ export async function createDynamicRule(
   await redis.set(itemKey, JSON.stringify(newRule)).catch(() => {})
   await redis.zadd(listKey, { score: priority, member: ruleId }).catch(() => {})
 
+  invalidateRulesCache(u)
   return newRule
 }
 
@@ -280,6 +294,7 @@ export async function updateDynamicRule(
     await redis.zadd(listKey, { score: updates.priority, member: ruleId }).catch(() => {})
   }
 
+  invalidateRulesCache(u)
   return updated
 }
 
@@ -298,6 +313,7 @@ export async function deleteDynamicRule(username: string, ruleId: string): Promi
   await redis.del(itemKey).catch(() => {})
   await redis.zrem(listKey, ruleId).catch(() => {})
 
+  invalidateRulesCache(u)
   return true
 }
 
@@ -306,6 +322,7 @@ export async function reorderDynamicRules(
   ruleIdsInOrder: string[]
 ): Promise<DynamicRuleRecord[]> {
   const u = username.toLowerCase().trim()
+  invalidateRulesCache(u)
 
   try {
     await reorderDynamicRulesInDb(u, ruleIdsInOrder)

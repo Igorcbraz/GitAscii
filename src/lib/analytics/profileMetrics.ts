@@ -31,6 +31,17 @@ export function parseViewerMetadata(request: Request): {
   ip: string | null
 } {
   const headers = request.headers
+  const cf = (
+    request as Request & {
+      cf?: {
+        country?: string
+        region?: string
+        city?: string
+        timezone?: string
+        continent?: string
+      }
+    }
+  ).cf
   const userAgent = headers.get('user-agent') || ''
   const uaLower = userAgent.toLowerCase()
   const uaTokens = uaLower.split(/[\s();,]+/)
@@ -40,14 +51,17 @@ export function parseViewerMetadata(request: Request): {
     uaTokens.some((t) => t === 'camo.githubusercontent.com')
 
   const referrer = headers.get('referer') || null
-  const country = headers.get('x-vercel-ip-country') || headers.get('cf-ipcountry') || null
-  const region = headers.get('x-vercel-ip-country-region') || headers.get('cf-region') || null
-  const city = headers.get('x-vercel-ip-city') || null
-  const timezone = headers.get('x-vercel-ip-timezone') || headers.get('cf-timezone') || null
-  const continent = headers.get('x-vercel-ip-continent') || headers.get('cf-ipcontinent') || null
+  const country = cf?.country || headers.get('cf-ipcountry') || null
+  const region = cf?.region || null
+  const city = cf?.city || null
+  const timezone = cf?.timezone || null
+  const continent = cf?.continent || null
   const language = headers.get('accept-language') || null
   const ip =
-    headers.get('x-forwarded-for')?.split(',')[0].trim() || headers.get('x-real-ip') || null
+    headers.get('cf-connecting-ip') ||
+    headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    headers.get('x-real-ip') ||
+    null
 
   return {
     isCamoProxy,

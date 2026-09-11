@@ -6,7 +6,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     vinext({
-      cache: { cdn: cdnAdapter() },
+      cache: {
+        cdn: cdnAdapter(),
+      },
     }),
     cloudflare({
       viteEnvironment: {

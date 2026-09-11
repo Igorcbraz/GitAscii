@@ -43,17 +43,29 @@ export function Footer() {
               </span>
               <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
                 <li>
-                  <Link href="/templates" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/templates"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.templates_catalog', 'Templates Catalog')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/widgets" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/widgets"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.dynamic_widgets', 'Dynamic Widgets')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/explore" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/explore"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.explore_profiles', 'Explore Profiles')}
                   </Link>
                 </li>
@@ -84,7 +96,11 @@ export function Footer() {
                   </a>
                 </li>
                 <li>
-                  <Link href="/guides" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/guides"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.guides', 'Guides & Tutorials')}
                   </Link>
                 </li>
@@ -153,22 +169,38 @@ export function Footer() {
               </span>
               <ul className="flex flex-col gap-4 font-inter-tight text-body text-pearl">
                 <li>
-                  <Link href="/privacy" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/privacy"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.privacy_policy', 'Privacy Policy')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/terms"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.terms_of_use', 'Terms of Use')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/refund" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/refund"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.refund_policy', 'Refund Policy')}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/support" className="transition-colors hover:text-signal-lime">
+                  <Link
+                    prefetch={false}
+                    href="/support"
+                    className="transition-colors hover:text-signal-lime"
+                  >
                     {t('landing.footer.item.support_center', 'Support Center')}
                   </Link>
                 </li>

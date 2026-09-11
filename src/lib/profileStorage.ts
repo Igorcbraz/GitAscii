@@ -14,7 +14,27 @@ interface CacheEntry {
 }
 
 const memoryCache = new Map<string, CacheEntry>()
-const MEMORY_CACHE_TTL_MS = 60 * 1000 // 60 seconds TTL
+const MEMORY_CACHE_TTL_MS = 5 * 60 * 1000
+const GITHUB_CACHE_TTL_SECONDS = 15 * 60
+
+async function purgeCommonEdgeSvgEntries(username: string, slug: string): Promise<void> {
+  if (typeof caches === 'undefined') return
+  const edgeCache = (caches as CacheStorage & { default?: Cache }).default
+  if (!edgeCache) return
+  const suffix = slug === 'default' ? '' : `/${slug}`
+  const paths = [
+    `/api/${username}${suffix}`,
+    `/api/svg/${username}${suffix}`,
+    `/${username}${suffix}.svg`,
+  ]
+  await Promise.all(
+    paths.map((path) => {
+      const url = new URL(path, 'https://gitascii.com')
+      url.searchParams.set('__gitascii_user', username)
+      return edgeCache.delete(new Request(url))
+    })
+  )
+}
 
 export async function invalidateProfileConfig(
   username: string,
@@ -29,6 +49,7 @@ export async function invalidateProfileConfig(
     await redis.del(configKey)
   } catch {}
   await invalidateSvgCache(usernameLower)
+  await purgeCommonEdgeSvgEntries(usernameLower, slugLower).catch(() => {})
 }
 
 export function cacheProfileConfig(config: SavedConfiguration): void {
@@ -69,22 +90,17 @@ async function fetchConfigFromGitHub(
   slug: string
 ): Promise<SavedConfiguration | null> {
   const filename = slug === 'default' ? 'gitascii.json' : `gitascii_${slug.toLowerCase()}.json`
-  const timestamp = Date.now()
   const urls = [
-    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename)}?t=${timestamp}`,
-    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`)}?t=${timestamp}`,
-    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename)}?t=${timestamp}`,
-    `${API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', `.github/${filename}`)}?t=${timestamp}`,
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename),
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', `.github/${filename}`),
   ]
 
   for (const url of urls) {
     try {
       const res = await fetch(url, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
-        cache: 'no-store',
+        next: { revalidate: GITHUB_CACHE_TTL_SECONDS },
         signal: AbortSignal.timeout(3000),
       })
       if (!res.ok) {
@@ -114,27 +130,6 @@ export async function loadProfileConfig(
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   const cacheKey = `${usernameLower}_${slugLower}`
-
-  if (options.preferGitHub) {
-    const githubConfig = await fetchConfigFromGitHub(username, slugLower)
-    if (githubConfig) {
-      memoryCache.set(cacheKey, {
-        config: githubConfig,
-        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
-      })
-      try {
-        await saveProfileConfigInDb(usernameLower, slugLower, githubConfig)
-      } catch {}
-      try {
-        const redis = getProRedisClient()
-        await redis.set(
-          REDIS_KEYS.profileConfig(usernameLower, slugLower),
-          JSON.stringify(githubConfig)
-        )
-      } catch {}
-      return githubConfig
-    }
-  }
 
   const cached = memoryCache.get(cacheKey)
   if (!options.bypassMemory && cached && cached.expiresAt > Date.now()) {

@@ -53,8 +53,8 @@ export const EXTERNAL_LINKS: ExternalLinksDef = {
   GITHUB_RAW_BASE: 'https://raw.githubusercontent.com',
   DEFAULT_GITHUB_AVATAR: 'https://github.com/github.png',
   DEFAULT_GHOST_AVATAR: 'https://github.com/ghost.png',
-  DEFAULT_APP_OG_IMAGE: 'https://git-ascii.vercel.app/og-image.png',
-  DEFAULT_APP_OG_IMAGE_PT: 'https://git-ascii.vercel.app/og-image-pt-br.png',
+  DEFAULT_APP_OG_IMAGE: 'https://gitascii.com/og-image.png',
+  DEFAULT_APP_OG_IMAGE_PT: 'https://gitascii.com/og-image-pt-br.png',
   GOOGLE_FONTS_CSS:
     'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap',
   GOOGLE_PRIVACY: 'https://policies.google.com/privacy',

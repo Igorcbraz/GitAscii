@@ -101,7 +101,7 @@ export default function WidgetsPage() {
               • <strong>{t('widgets.adv_2_strong', 'Global Serverless Edge:')}</strong>{' '}
               {t(
                 'widgets.adv_2_text',
-                'Rendered on Vercel Edge functions with 4-hour automatic caching.'
+                'Rendered on Cloudflare Workers with automatic edge caching.'
               )}
             </li>
             <li>

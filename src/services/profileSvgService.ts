@@ -41,6 +41,36 @@ function escapeErrorXml(str: string): string {
     .replace(/'/g, '&apos;')
 }
 
+type CloudflareCacheStorage = CacheStorage & { default?: Cache }
+
+function getEdgeCacheRequest(request: Request, username: string): Request | null {
+  if (request.method !== 'GET' || typeof caches === 'undefined') return null
+  const url = new URL(request.url)
+  if (
+    url.searchParams.has('preview_date') ||
+    url.searchParams.has('date') ||
+    url.searchParams.has('timezone') ||
+    url.searchParams.has('tz')
+  ) {
+    return null
+  }
+
+  const normalized = new URL(url.origin)
+  normalized.pathname = url.pathname.toLowerCase()
+  for (const key of ['theme', 'template', 'widgets', 'widget']) {
+    const value = url.searchParams.get(key)
+    if (value) normalized.searchParams.set(key, value.toLowerCase())
+  }
+  normalized.searchParams.sort()
+  normalized.searchParams.set('__gitascii_user', username)
+  return new Request(normalized, { method: 'GET' })
+}
+
+function getDefaultEdgeCache(): Cache | null {
+  if (typeof caches === 'undefined') return null
+  return (caches as CloudflareCacheStorage).default ?? null
+}
+
 async function getCachedSvgPayload(
   username: string,
   profileSlug: string,
@@ -54,8 +84,7 @@ async function getCachedSvgPayload(
     async () => {
       const data = await fetchGitHubProfile(username, { publicOnly: true })
       let config = await loadProfileConfig(username, profileSlug, {
-        bypassMemory: true,
-        preferGitHub: true,
+        bypassMemory: false,
       })
 
       // Query widgets must not mutate the saved configuration held by another cache.
@@ -121,6 +150,17 @@ export async function generateProfileSvgResponse(
   }
 
   try {
+    const edgeCache = getDefaultEdgeCache()
+    const edgeCacheRequest = getEdgeCacheRequest(request, username)
+    if (edgeCache && edgeCacheRequest) {
+      const cachedResponse = await edgeCache.match(edgeCacheRequest)
+      if (cachedResponse) {
+        const response = new NextResponse(cachedResponse.body, cachedResponse)
+        response.headers.set('X-GitAscii-Cache', 'HIT')
+        return response
+      }
+    }
+
     const { searchParams } = new URL(request.url)
     const previewDateParam = searchParams.get('preview_date') || searchParams.get('date')
     const timezoneParam = searchParams.get('timezone') || searchParams.get('tz')
@@ -164,37 +204,46 @@ export async function generateProfileSvgResponse(
           .filter(Boolean)
       : options.widgets?.map((w) => w.replace(/[^a-zA-Z0-9_-]/g, '')).filter(Boolean)
 
+    const normalizedWidgets = widgetsParam
+      ? [...new Set(widgetsParam)]
+          .filter((widgetId) => WIDGET_CATALOG.some((widget) => widget.id === widgetId))
+          .sort()
+          .slice(0, 12)
+      : undefined
+
     const payload = await getCachedSvgPayload(
       username,
       profileSlug,
       theme,
       templateParam,
-      widgetsParam
+      normalizedWidgets
     )
 
     const { svgContent, etag, hasErrors, renderedWidgetIds } = payload
     const ifNoneMatch = request.headers.get('if-none-match')
 
     const cacheControl = hasErrors
-      ? 'public, max-age=0, s-maxage=120, stale-while-revalidate=300'
+      ? 'public, max-age=60'
       : isDynamicResolved
-        ? 'public, max-age=0, s-maxage=60, stale-while-revalidate=180'
-        : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=7200'
+        ? 'public, max-age=30'
+        : 'public, max-age=300'
 
     const cdnCacheControl = hasErrors
-      ? 'public, s-maxage=120, stale-while-revalidate=300'
+      ? 'public, max-age=120, stale-while-revalidate=300'
       : isDynamicResolved
-        ? 'public, s-maxage=60, stale-while-revalidate=180'
-        : 'public, s-maxage=3600, stale-while-revalidate=7200'
+        ? 'public, max-age=60, stale-while-revalidate=180'
+        : 'public, max-age=300, stale-while-revalidate=3600'
 
     const headers: Record<string, string> = {
       'Content-Type': 'image/svg+xml; charset=utf-8',
       'Cache-Control': cacheControl,
       'CDN-Cache-Control': cdnCacheControl,
+      'Cloudflare-CDN-Cache-Control': cdnCacheControl,
       ETag: etag,
       'X-Content-Type-Options': 'nosniff',
       'Content-Security-Policy':
         "default-src 'none'; style-src 'unsafe-inline'; img-src data: https:;",
+      'X-GitAscii-Cache': 'MISS',
     }
 
     const isCacheHit =
@@ -229,7 +278,8 @@ export async function generateProfileSvgResponse(
       }
 
       const telemetryHandler = async () => {
-        if (Math.random() > 0.05) return
+        const sampleRate = Number(process.env.PROFILE_TELEMETRY_SAMPLE_RATE || '0.01')
+        if (!Number.isFinite(sampleRate) || sampleRate <= 0 || Math.random() > sampleRate) return
 
         await recordProfileView(metricPayload)
 
@@ -276,10 +326,21 @@ export async function generateProfileSvgResponse(
       })
     }
 
-    return new NextResponse(svgContent, {
+    const response = new NextResponse(svgContent, {
       status: 200,
       headers,
     })
+    if (edgeCache && edgeCacheRequest && !hasErrors) {
+      // Vinext marks dynamic route responses as `no-store` before they leave the
+      // Worker. Store an independent, cacheable Response so that framework
+      // headers cannot make the Cache API silently reject this entry.
+      const cacheResponse = new Response(svgContent, {
+        status: 200,
+        headers: new Headers(headers),
+      })
+      await edgeCache.put(edgeCacheRequest, cacheResponse)
+    }
+    return response
   } catch (error: unknown) {
     const isNotFound =
       error instanceof GitHubUserNotFoundError ||

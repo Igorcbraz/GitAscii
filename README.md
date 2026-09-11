@@ -24,7 +24,7 @@
     <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind-4.0-060606?style=flat-square&logo=tailwindcss&logoColor=c5ff4a" alt="Tailwind" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-060606?style=flat-square&logo=typescript&logoColor=c5ff4a" alt="TypeScript" /></a>
     <a href="https://storybook.js.org/"><img src="https://img.shields.io/badge/Storybook-10.5-060606?style=flat-square&logo=storybook&logoColor=c5ff4a" alt="Storybook" /></a>
-    <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Vercel-Edge%20Ready-060606?style=flat-square&logo=vercel&logoColor=c5ff4a" alt="Vercel" /></a>
+    <a href="https://www.cloudflare.com/developer-platform/products/workers/"><img src="https://img.shields.io/badge/Cloudflare-Workers-f38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare Workers" /></a>
   </p>
 
   <p>
