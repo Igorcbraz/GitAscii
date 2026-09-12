@@ -338,7 +338,18 @@ export async function generateProfileSvgResponse(
         status: 200,
         headers: new Headers(headers),
       })
-      await edgeCache.put(edgeCacheRequest, cacheResponse)
+      // Cache writes can involve a remote Cloudflare data center. Keeping this
+      // write on the response path made cold renders slow enough for GitHub's
+      // Camo proxy to return 504 even though the SVG was generated correctly.
+      // `after` maps to the Worker execution context and keeps the write alive
+      // without delaying delivery of the image.
+      after(async () => {
+        try {
+          await edgeCache.put(edgeCacheRequest, cacheResponse)
+        } catch (cacheError) {
+          Sentry.captureException(cacheError)
+        }
+      })
     }
     return response
   } catch (error: unknown) {
