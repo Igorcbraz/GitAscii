@@ -46,7 +46,7 @@ export function renderLanguages(
 
   let filteredLangs = Object.entries(
     data?.languages && typeof data.languages === 'object' ? data.languages : {}
-  )
+  ).sort(([, countA], [, countB]) => (Number(countB) || 0) - (Number(countA) || 0))
   if (hideLangs.length > 0) {
     filteredLangs = filteredLangs.filter(([lang]) => !hideLangs.includes(lang.toLowerCase()))
   }

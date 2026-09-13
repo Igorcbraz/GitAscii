@@ -69,7 +69,8 @@ export async function invalidateSvgCache(username?: string): Promise<void> {
 export async function getCachedProfileSvg(
   username: string,
   variant: unknown[],
-  generate: () => Promise<SvgPayload>
+  generate: () => Promise<SvgPayload>,
+  options: { defer?: (task: () => Promise<void>) => void } = {}
 ): Promise<SvgPayload> {
   const redis = getProRedisClient()
   const user = username.toLowerCase()
@@ -123,16 +124,20 @@ export async function getCachedProfileSvg(
     const ttl = payload.hasErrors ? 120 : 3600
     const expiresAt = Date.now() + ttl * 1000
     remember(key, payload, expiresAt)
-    try {
-      const packed = (
-        await compress(JSON.stringify({ payload, expiresAt }), { level: 1 })
-      ).toString('base64')
-      if (packed.length <= MAX_PERSISTED_BYTES) {
-        await redis.set(key, packed, { ex: ttl })
+    const persist = async () => {
+      try {
+        const packed = (
+          await compress(JSON.stringify({ payload, expiresAt }), { level: 1 })
+        ).toString('base64')
+        if (packed.length <= MAX_PERSISTED_BYTES) {
+          await redis.set(key, packed, { ex: ttl })
+        }
+      } catch {
+        // The bounded local cache still avoids repeated work on this instance.
       }
-    } catch {
-      // The bounded local cache still avoids repeated work on this instance.
     }
+    if (options.defer) options.defer(persist)
+    else await persist()
     return payload
   })()
   pending.set(key, work)

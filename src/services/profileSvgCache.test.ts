@@ -56,6 +56,20 @@ describe('profile SVG cache', () => {
     expect(generate).toHaveBeenCalledTimes(1)
   })
 
+  it('can persist a cold render after returning the response', async () => {
+    const { getCachedProfileSvg } = await import('./profileSvgCache')
+    const deferred: Array<() => Promise<void>> = []
+    const result = await getCachedProfileSvg('user', ['fast'], async () => payload('ready'), {
+      defer: (task) => deferred.push(task),
+    })
+
+    expect(result.svgContent).toBe('ready')
+    expect(redis.set).not.toHaveBeenCalled()
+    expect(deferred).toHaveLength(1)
+    await deferred[0]()
+    expect(redis.set).toHaveBeenCalledWith(expect.any(String), expect.any(String), { ex: 3600 })
+  })
+
   it('invalidates all profile variants across warm instances', async () => {
     const first = await import('./profileSvgCache')
     const generate = vi.fn(async () => payload())

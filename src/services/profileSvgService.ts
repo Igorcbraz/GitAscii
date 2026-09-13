@@ -130,10 +130,14 @@ async function getCachedSvgPayload(
       // embedExternalImages already sanitizes the complete result.
       const svgContent = embedResult.svg
       const etag = computeEtag(svgContent)
-      const hasErrors = embedResult.hasErrors
+      const hasIncompleteGitHubData =
+        Number(data.user.public_repos || 0) > 0 &&
+        (data.repos.length === 0 || Object.keys(data.languages).length === 0)
+      const hasErrors = embedResult.hasErrors || hasIncompleteGitHubData
 
       return { svgContent, etag, hasErrors, renderedWidgetIds }
-    }
+    },
+    { defer: (task) => after(task) }
   )
 }
 
