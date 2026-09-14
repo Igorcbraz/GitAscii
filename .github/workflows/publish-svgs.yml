@@ -1,0 +1,50 @@
+name: Publish profile SVGs
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+    inputs:
+      bootstrap:
+        description: First publication only; requires no existing snapshot
+        type: boolean
+        default: false
+      profiles:
+        description: Source records to refresh (1–200; use 1 for a rollout check)
+        type: number
+        default: 200
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-profile-svgs
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.repository.private == false && vars.SVG_PUBLICATION_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URL: ${{ secrets.SVG_DATABASE_URL }}
+      GITHUB_TOKEN: ${{ github.token }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.SVG_CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.SVG_CLOUDFLARE_API_TOKEN }}
+      PUBLICATION_READ_TOKEN: ${{ secrets.SVG_PUBLICATION_READ_TOKEN }}
+      PUBLICATION_ORIGIN: ${{ vars.SVG_PUBLICATION_ORIGIN }}
+      PUBLICATION_BOOTSTRAP: ${{ inputs.bootstrap && '1' || '0' }}
+      PUBLICATION_MAX_PROFILES: ${{ inputs.profiles || 200 }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Generate template registry
+        run: npm run generate:templates
+      - name: Build a complete snapshot, retaining previous images on render failures
+        run: npm run publish:svgs
+      - name: Deploy the complete snapshot
+        run: npm run deploy:svgs

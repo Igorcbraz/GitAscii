@@ -1,7 +1,6 @@
 import { getProRedisClient } from '@/features/pro/server/redisClient'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-import { getSession } from '../../../lib/auth'
 import type { GitHubRepo, GitHubUser, NormalizedGitHubData } from '../types/github'
 import {
   calculateDerivedInsights,
@@ -69,22 +68,25 @@ export class GitHubUserNotFoundError extends Error {
 
 export async function fetchGitHubProfile(
   username: string,
-  options: { publicOnly?: boolean } = {}
+  options: { publicOnly?: boolean; fresh?: boolean } = {}
 ): Promise<NormalizedGitHubData> {
   const cacheKey = `${options.publicOnly ? 'public' : 'session'}:${username.toLowerCase()}`
   const cached = profileCache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+  if (!options.fresh && cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return cached.data
   }
 
-  const persistent = options.publicOnly ? await readPersistentProfile(username) : null
+  const persistent =
+    options.publicOnly && !options.fresh ? await readPersistentProfile(username) : null
   if (persistent && Date.now() - persistent.timestamp < CACHE_TTL_MS) {
     profileCache.set(cacheKey, persistent)
     return persistent.data
   }
 
   try {
-    const session = options.publicOnly ? null : await getSession().catch(() => null)
+    const session = options.publicOnly
+      ? null
+      : await (await import('../../../lib/auth')).getSession().catch(() => null)
     const token = session?.accessToken || process.env.GITHUB_TOKEN
 
     const headers: Record<string, string> = {
@@ -151,7 +153,9 @@ export async function fetchGitHubProfile(
       totalForks,
       readmeContent: null,
       socialAccounts: [],
-      contributions: generateMockContributions(),
+      contributions: options.publicOnly
+        ? { totalContributions: 0, weeks: [] }
+        : generateMockContributions(),
     }
 
     const loadSocial = async () => {
@@ -177,7 +181,10 @@ export async function fetchGitHubProfile(
     }
 
     const loadGraphql = async () => {
-      if (!token) return
+      if (!token) {
+        if (options.fresh) throw new Error('GitHub token required for complete publication data')
+        return
+      }
       try {
         const gqlQuery = {
           query: `
@@ -189,7 +196,7 @@ export async function fetchGitHubProfile(
                     url
                   }
                 }
-                repositories(first: 100, ownerAffiliations: [OWNER], orderBy: {field: UPDATED_AT, direction: DESC}) {
+                repositories(first: 100, privacy: PUBLIC, ownerAffiliations: [OWNER], orderBy: {field: UPDATED_AT, direction: DESC}) {
                   nodes {
                     name
                     description
@@ -237,8 +244,17 @@ export async function fetchGitHubProfile(
           signal: AbortSignal.timeout(8000),
         })
 
+        if (options.fresh && !gqlRes.ok)
+          throw new Error(`GitHub GraphQL failed with HTTP ${gqlRes.status}`)
         if (gqlRes.ok) {
           const gqlData = await gqlRes.json()
+          if (
+            options.fresh &&
+            (gqlData.errors?.length ||
+              !gqlData.data?.user?.contributionsCollection?.contributionCalendar)
+          ) {
+            throw new Error('Incomplete GitHub contributions; retaining published image')
+          }
           const gqlSocials = gqlData?.data?.user?.socialAccounts?.nodes
           if (
             Array.isArray(gqlSocials) &&
@@ -277,6 +293,7 @@ export async function fetchGitHubProfile(
           }
         }
       } catch (gqlErr) {
+        if (options.fresh) throw gqlErr
         console.warn('Failed to fetch contributions via GraphQL:', gqlErr)
       }
     }
@@ -359,7 +376,7 @@ export async function fetchGitHubProfile(
       data: result,
       timestamp: Date.now(),
     })
-    if (options.publicOnly) await persistProfile(username, result)
+    if (options.publicOnly && !options.fresh) await persistProfile(username, result)
 
     return result
   } catch (error) {
@@ -367,6 +384,7 @@ export async function fetchGitHubProfile(
       throw error
     }
     if (persistent) return persistent.data
+    if (options.publicOnly) throw error
     console.warn("Falling back to mock data for user '%s':", username.replace(/[\r\n]/g, ''), error)
     return getMockGitHubData(username)
   }

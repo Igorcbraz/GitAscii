@@ -82,4 +82,14 @@ describe('fetchGitHubProfile public resilience', () => {
     expect(result.repos).toHaveLength(1)
     expect(result.languages).toEqual({ TypeScript: 1 })
   })
+
+  it('never substitutes mock or cached data for a failed publication refresh', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('rate limited', { status: 429 })))
+    const { fetchGitHubProfile } = await import('./fetchProfile')
+    await expect(fetchGitHubProfile('Octocat', { publicOnly: true, fresh: true })).rejects.toThrow(
+      '429'
+    )
+    expect(redis.get).not.toHaveBeenCalled()
+    expect(redis.set).not.toHaveBeenCalled()
+  })
 })

@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gitascii-images",
+  "main": "src/features/svg-publication/server/imageWorker.ts",
+  "compatibility_date": "2026-09-11",
+  "assets": {
+    "directory": "dist/publication",
+    "binding": "ASSETS",
+    "run_worker_first": ["/__publication/*", "/api/*"],
+    "not_found_handling": "none",
+    "html_handling": "none",
+  },
+  "services": [{ "binding": "APP", "service": "gitascii" }],
+  "kv_namespaces": [
+    {
+      "binding": "PUBLICATION_REQUESTS",
+      "id": "aa39ee1dad3f495fa61b08307ea6a590",
+    },
+  ],
+  "observability": { "enabled": true, "head_sampling_rate": 0.01 },
+}

@@ -1,4 +1,14 @@
 export const API_ENDPOINTS = {
+  PUBLICATION: {
+    ASSET: (origin: string, key: string) =>
+      new URL(`/${key.replace(/^\/+/, '')}`, origin).toString(),
+    SNAPSHOT_FILE: (origin: string, key: string) =>
+      new URL(`/__publication/read?key=${encodeURIComponent(key)}`, origin).toString(),
+    SNAPSHOT_INDEX: '/__publication/index.json',
+    HEALTH: '/__publication/health',
+    QUEUE: (origin: string, cursor: string) =>
+      new URL(`/__publication/queue?cursor=${encodeURIComponent(cursor)}`, origin).toString(),
+  },
   AUTH: {
     SESSION: '/api/auth/session',
     LOGOUT: '/api/auth/logout',

@@ -29,7 +29,9 @@
     "dev:vinext": "vinext dev --port 3001",
     "build:vinext": "vinext build",
     "start:vinext": "wrangler dev --config dist/server/wrangler.json",
-    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "publish:svgs": "node --import tsx scripts/publish-profile-svgs.ts",
+    "deploy:svgs": "wrangler deploy --config wrangler.images.jsonc"
   },
   "dependencies": {
     "@bible-strong/avatar-core": "^0.1.0",
