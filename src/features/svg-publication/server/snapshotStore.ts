@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -16,6 +16,18 @@ interface SnapshotEntry {
 export interface SnapshotIndex {
   schemaVersion: 1
   files: SnapshotEntry[]
+  signature: string
+}
+
+function signFiles(files: SnapshotEntry[], token: string): string {
+  return createHmac('sha256', token).update(JSON.stringify(files)).digest('hex')
+}
+
+function verifyIndex(index: SnapshotIndex, token: string): boolean {
+  if (!/^[a-f0-9]{64}$/.test(index.signature)) return false
+  const actual = Buffer.from(index.signature, 'hex')
+  const expected = Buffer.from(signFiles(index.files, token), 'hex')
+  return actual.length === expected.length && timingSafeEqual(actual, expected)
 }
 
 export class SnapshotStore implements PublicationStore {
@@ -62,6 +74,8 @@ export class SnapshotStore implements PublicationStore {
       throw new Error('Free publication capacity reached; keeping the deployed snapshot')
     }
     await mkdir(path.dirname(filename), { recursive: true })
+    // codeql[js/http-to-file-access] Restored bytes require an authenticated index,
+    // a constrained destination, a strict size and their signed SHA-256 before this sink.
     await writeFile(filename, body)
     this.totalBytes = nextBytes
     this.files.set(key, {
@@ -109,7 +123,8 @@ export class SnapshotStore implements PublicationStore {
     if (
       index.schemaVersion !== 1 ||
       !Array.isArray(index.files) ||
-      index.files.length > PUBLICATION.maxSnapshotFiles
+      index.files.length > PUBLICATION.maxSnapshotFiles ||
+      !verifyIndex(index, token)
     ) {
       throw new Error('Invalid deployed snapshot index')
     }
@@ -159,22 +174,25 @@ export class SnapshotStore implements PublicationStore {
     }
   }
 
-  async finalize() {
+  async finalize(signingToken = process.env.PUBLICATION_READ_TOKEN) {
+    if (!signingToken) throw new Error('Publication signing token is required')
     if (![...this.files.keys()].some((key) => key.startsWith('profiles/'))) {
       throw new Error('Refusing to deploy an empty image snapshot')
     }
+    const files = await Promise.all(
+      [...this.files.values()]
+        .filter((entry) => entry.key !== '__publication/index.json')
+        .sort((a, b) => a.key.localeCompare(b.key))
+        .map(async (entry) =>
+          entry.key.startsWith('__publication/')
+            ? { ...entry, content: await readFile(this.filename(entry.key), 'utf8') }
+            : entry
+        )
+    )
     const index: SnapshotIndex = {
       schemaVersion: 1,
-      files: await Promise.all(
-        [...this.files.values()]
-          .filter((entry) => entry.key !== '__publication/index.json')
-          .sort((a, b) => a.key.localeCompare(b.key))
-          .map(async (entry) =>
-            entry.key.startsWith('__publication/')
-              ? { ...entry, content: await readFile(this.filename(entry.key), 'utf8') }
-              : entry
-          )
-      ),
+      files,
+      signature: signFiles(files, signingToken),
     }
     await this.writeJson('__publication/index.json', index)
     await writeFile(

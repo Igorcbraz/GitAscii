@@ -8,7 +8,10 @@ The confirmed incident was a render terminated at 10 ms CPU (`exceededCpu`), inc
 - `gitascii-images` resolves legacy image URLs and dynamic rules using published manifests. It never calls the renderer, GitHub, Redis or the database when serving a recognized profile image.
 - `/profiles/<username>/<slug>/<variant>.svg` serves static assets directly, bypassing script execution. Legacy `/api/...` URLs still consume Worker requests.
 - GitHub Actions reads existing layouts and public GitHub data, then runs the existing SVG engine in isolated Node processes. Database schemas do not change.
-- Each run restores and verifies the complete previous snapshot, refreshes a bounded batch and deploys the whole snapshot atomically. Failed renders preserve the previous image. Failed restoration or deployment leaves production untouched.
+- Each run authenticates the previous snapshot index with HMAC, verifies every file's
+  SHA-256 and size, refreshes a bounded batch and deploys the whole snapshot atomically.
+  Failed renders preserve the previous image. Failed restoration or deployment leaves
+  production untouched.
 - Private metadata travels in an authenticated snapshot index. SVG restoration uses public static URLs to avoid per-file Worker invocations.
 - Missing variants enter an optional Workers KV queue. Queue quota failures do not prevent delivery of an existing image. A first unpublished profile gets a branded placeholder; a pending custom variant uses the saved base image.
 
