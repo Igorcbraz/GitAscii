@@ -74,8 +74,8 @@ export class SnapshotStore implements PublicationStore {
       throw new Error('Free publication capacity reached; keeping the deployed snapshot')
     }
     await mkdir(path.dirname(filename), { recursive: true })
-    // codeql[js/http-to-file-access] Restored bytes require an authenticated index,
-    // a constrained destination, a strict size and their signed SHA-256 before this sink.
+    // Restored bytes require an HMAC-authenticated index, a constrained path, size and SHA-256.
+    // codeql[js/http-to-file-access]
     await writeFile(filename, body)
     this.totalBytes = nextBytes
     this.files.set(key, {
