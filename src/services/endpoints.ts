@@ -55,9 +55,29 @@ export const API_ENDPOINTS = {
       `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/edit/main/README.md`,
     GITASCII_REPO: 'https://api.github.com/repos/Igorcbraz/GitAscii',
     GITASCII_STAR_STATUS: 'https://api.github.com/user/starred/Igorcbraz/GitAscii',
-    USER_STARRED_REPO: (owner: string, repo: string) =>
-      `https://api.github.com/user/starred/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
     STAR: '/api/github/star',
+    REPO_BRANCHES: (owner: string, repo: string, branch: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches/${encodeURIComponent(branch)}`,
+    GIT_BLOBS: (owner: string, repo: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/blobs`,
+    GIT_COMMITS: (owner: string, repo: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/commits`,
+    GIT_TREES: (owner: string, repo: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees`,
+    GIT_REFS: (owner: string, repo: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/refs`,
+    GIT_REFS_HEADS: (owner: string, repo: string, branch: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/refs/heads/${encodeURIComponent(branch)}`,
+    REPO_PULLS: (owner: string, repo: string, query?: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls${query ? `?${query}` : ''}`,
+    WORKFLOW_DISPATCH: (owner: string, repo: string, workflowId: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`,
+    RATE_LIMIT: 'https://api.github.com/rate_limit',
+  },
+  BADGE: {
+    GET: (username: string) => `/api/badge/${encodeURIComponent(username)}`,
+    PUBLIC_URL: (username: string) =>
+      `https://gitascii.com/api/badge/${encodeURIComponent(username)}`,
   },
   CONFIG: {
     GET: (username: string, profileSlug: string) =>

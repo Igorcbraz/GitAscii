@@ -15,6 +15,7 @@ const eslintConfig = [
       '.agents/**',
       'scratch/**',
       'next-env.d.ts',
+      'action/dist/**',
     ],
   },
   ...nextConfig,

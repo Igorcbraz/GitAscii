@@ -314,6 +314,35 @@ export const MIGRATIONS: Migration[] = [
       await sql`ALTER TABLE dynamic_rules ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1;`
     },
   },
+  {
+    version: '009_migration_installations',
+    name: 'Create migration_installations table for V2 automated migration campaign',
+    up: async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS migration_installations (
+          id BIGSERIAL PRIMARY KEY,
+          user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+          installation_id BIGINT NOT NULL,
+          repository_owner VARCHAR(100) NOT NULL,
+          repository_name VARCHAR(100) NOT NULL,
+          migration_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+          migration_version INTEGER NOT NULL DEFAULT 1,
+          pr_number INTEGER,
+          deployed_action_sha VARCHAR(100),
+          attempts INTEGER NOT NULL DEFAULT 0,
+          last_error TEXT,
+          last_attempt_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          CONSTRAINT uq_migration_repo UNIQUE (repository_owner, repository_name)
+        );
+      `
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_migration_queue 
+        ON migration_installations (migration_status, attempts, last_attempt_at);
+      `
+    },
+  },
 ]
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {

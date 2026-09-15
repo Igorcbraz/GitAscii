@@ -314,11 +314,11 @@ export function ExportGuideModal({
                       <Zap size={15} className="text-signal-lime shrink-0" />
                       <div className="text-caption text-pearl leading-tight font-inter-tight">
                         <strong className="font-semibold text-signal-lime">
-                          {t('editor.guide.export.step3_cache_title', 'GitHub Cache')}:
+                          {t('editor.guide.export.step3_cache_title', 'GitHub Native SVGs')}:
                         </strong>{' '}
                         {t(
                           'editor.guide.export.step3_cache_desc',
-                          'When updating the JSON, bump the ?v= parameter in your README to force image refresh.'
+                          'Your SVGs are served directly from GitHub raw content with automatic dark/light mode switching.'
                         )}
                       </div>
                     </div>

@@ -11,6 +11,9 @@ export async function recordWidgetErrorInDb(
   const u = username.toLowerCase().trim()
   const user = await ensureUser(u)
 
+  const cleanSlug = (record.profileSlug || 'default').toLowerCase().trim()
+  const errorId = `err_${user.id}_${cleanSlug}_${record.widgetId}`
+
   await sql`
     INSERT INTO widget_errors (
       id,
@@ -27,7 +30,7 @@ export async function recordWidgetErrorInDb(
       last_seen_at,
       resolved_at
     ) VALUES (
-      ${record.id},
+      ${errorId},
       ${user.id},
       ${record.widgetId},
       ${record.widgetName},

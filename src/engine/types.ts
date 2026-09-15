@@ -84,6 +84,8 @@ export interface SavedConfiguration {
     updatedAt: string
     schemaVersion: number
     generatedBy?: 'manual' | 'auto'
+    revision?: string
+    publishedAt?: string
   }
 }
 

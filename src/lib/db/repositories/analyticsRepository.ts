@@ -73,6 +73,14 @@ export async function flushAnalyticsBatchToDb(
       const slug = (item.slug || 'default').toLowerCase().trim()
       const views = Math.max(0, item.views)
       const uniques = Math.max(0, item.uniques)
+
+      const profileId = `prof_${user.id}_${slug}`
+      await sql`
+        INSERT INTO profiles (id, user_id, slug, name, description, is_default, created_at, updated_at)
+        VALUES (${profileId}, ${user.id}, ${slug}, ${slug === 'default' ? 'Default' : slug}, '', ${slug === 'default'}, NOW(), NOW())
+        ON CONFLICT (user_id, slug) DO NOTHING;
+      `
+
       await sql`
         INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
         VALUES (${user.id}, ${slug}, ${item.dateStr}, ${views}, ${uniques}, NOW())
