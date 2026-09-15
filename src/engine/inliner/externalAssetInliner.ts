@@ -229,7 +229,8 @@ export async function processExternalAssets(
       try {
         const text = Buffer.from(buffer).toString('utf-8')
         return inlineSvgContent(text, x, y, width, height, preserve)
-      } catch {
+      } catch (err) {
+        console.warn('Failed to inline SVG as text, falling back to base64 image:', err)
         const base64 = Buffer.from(buffer).toString('base64')
         return `<image href="data:image/svg+xml;base64,${base64}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${preserve}" />`
       }
@@ -273,7 +274,9 @@ export async function processExternalAssets(
                 preserve
               )
               return { replacement: res }
-            } catch {}
+            } catch (fallbackErr) {
+              console.warn('Fallback URL also failed:', fallbackErr)
+            }
           }
 
           const isSnake = url.includes('contribution-grid-snake') || url.includes('platane')
@@ -293,7 +296,8 @@ export async function processExternalAssets(
 
           return { replacement: fallbackPlaceholder, error: url }
         }
-      } catch {
+      } catch (err) {
+        console.warn('Invalid JSON marker for widget:', err)
         return { replacement: '', error: 'invalid_json_marker' }
       }
     }
@@ -326,12 +330,14 @@ export async function processExternalAssets(
       if (
         (parsedUrl.hostname === 'assets.tcgdex.net' ||
           parsedUrl.hostname.endsWith('.tcgdex.net')) &&
-        parsedUrl.pathname.endsWith('/high.webp')
+        (parsedUrl.pathname.endsWith('.webp') || parsedUrl.pathname.endsWith('/high.webp') || parsedUrl.pathname.endsWith('/low.webp'))
       ) {
-        parsedUrl.pathname = parsedUrl.pathname.replace(/\/high\.webp$/, '/low.webp')
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\.webp$/, '.png')
         targetUrl = parsedUrl.toString()
       }
-    } catch {}
+    } catch (urlErr) {
+      console.debug('Failed to parse URL for tcgdex replacement:', urlErr)
+    }
 
     try {
       let response: Response
@@ -355,7 +361,9 @@ export async function processExternalAssets(
       if (!response.ok) {
         return {
           fullTag: cand.fullTag,
-          replacement: cand.fullTag.replace(/href="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`),
+          replacement: cand.fullTag
+            .replace(/\bhref="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`)
+            .replace(/\bxlink:href="[^"]+"/, `xlink:href="${TRANSPARENT_PIXEL}"`),
           error: targetUrl,
         }
       }
@@ -364,24 +372,31 @@ export async function processExternalAssets(
       if (buffer.byteLength > maxSizeBytes) {
         return {
           fullTag: cand.fullTag,
-          replacement: cand.fullTag.replace(/href="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`),
+          replacement: cand.fullTag
+            .replace(/\bhref="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`)
+            .replace(/\bxlink:href="[^"]+"/, `xlink:href="${TRANSPARENT_PIXEL}"`),
           error: targetUrl,
         }
       }
 
-      let mimeType = (response.headers.get('content-type') || 'image/webp').split(';')[0].trim()
+      let mimeType = (response.headers.get('content-type') || 'image/png').split(';')[0].trim()
       if (!mimeType || !mimeType.startsWith('image/')) mimeType = 'image/png'
       const base64 = Buffer.from(buffer).toString('base64')
       const dataUri = `data:${mimeType};base64,${base64}`
 
       return {
         fullTag: cand.fullTag,
-        replacement: cand.fullTag.replace(/href="[^"]+"/, `href="${dataUri}"`),
+        replacement: cand.fullTag
+          .replace(/\bhref="[^"]+"/, `href="${dataUri}"`)
+          .replace(/\bxlink:href="[^"]+"/, `xlink:href="${dataUri}"`),
       }
-    } catch {
+    } catch (err) {
+      console.warn('Failed to fetch or inline image:', err)
       return {
         fullTag: cand.fullTag,
-        replacement: cand.fullTag.replace(/href="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`),
+        replacement: cand.fullTag
+          .replace(/\bhref="[^"]+"/, `href="${TRANSPARENT_PIXEL}"`)
+          .replace(/\bxlink:href="[^"]+"/, `xlink:href="${TRANSPARENT_PIXEL}"`),
         error: targetUrl,
       }
     }

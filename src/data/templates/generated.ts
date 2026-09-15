@@ -25,5 +25,5 @@ export const GENERATED_TEMPLATES = [
   { file: 'native_simple', template: template9 },
   { file: 'Native', template: template10 },
   { file: 'rugbedbugg', template: template11 },
-  { file: 'windows_xp', template: template12 },
+  { file: 'windows_xp', template: template12 }
 ] as const

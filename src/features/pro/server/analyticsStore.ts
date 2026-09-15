@@ -1,4 +1,9 @@
-import { flushAnalyticsBatchToDb } from '@/lib/db/repositories/analyticsRepository'
+import {
+  flushAnalyticsBatchToDb,
+  getDimensionCountsFromDb,
+  getTimeSeriesFromDb,
+  recordViewInDb,
+} from '@/lib/db/repositories/analyticsRepository'
 
 import type {
   AnalyticsSummary,
@@ -39,6 +44,7 @@ const RETENTION_TTL_SECONDS = 90 * 24 * 60 * 60
 export const REDIS_KEYS = {
   userTotals: (u: string) => `gitascii:pro:${u.toLowerCase()}:totals`,
   userProfiles: (u: string) => `gitascii:pro:${u.toLowerCase()}:profiles`,
+  userTrackedSlugs: (u: string) => `gitascii:pro:${u.toLowerCase()}:analytics_slugs`,
   profileMeta: (u: string, slug: string) =>
     `gitascii:pro:${u.toLowerCase()}:profile:${slug.toLowerCase()}`,
 
@@ -202,7 +208,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     const hourlyKey = REDIS_KEYS.hourlyMetrics(username, slug, dateStr)
     const weekdayKey = REDIS_KEYS.weekdayMetrics(username, slug)
     const userTotalsKey = REDIS_KEYS.userTotals(username)
-    const profilesSetKey = REDIS_KEYS.userProfiles(username)
     const profileMetaKey = REDIS_KEYS.profileMeta(username, slug)
     const activityKey = REDIS_KEYS.activityStream(username)
 
@@ -245,7 +250,7 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     }
 
     p.hincrby(userTotalsKey, 'totalViews', 1)
-    p.sadd(profilesSetKey, slug)
+    p.sadd(REDIS_KEYS.userTrackedSlugs(username), slug)
     p.hincrby(profileMetaKey, 'totalViews', 1)
     p.hset(profileMetaKey, {
       lastViewAt: now.toISOString(),
@@ -260,6 +265,10 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
 
     await p.exec()
 
+    void recordViewInDb(username, slug, dateStr, true, dimensionsToRecord).catch((err) => {
+      console.warn('[AnalyticsStore] Non-blocking PostgreSQL recordViewInDb warning:', err)
+    })
+
     void redis
       .zrange(activityKey, 0, -1)
       .then((totalEvents) => {
@@ -270,7 +279,9 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
           }
         }
       })
-      .catch(() => {})
+      .catch((error) => {
+        console.warn('[AnalyticsStore] Failed to trim the activity stream:', error)
+      })
 
     invalidateAnalyticsCache(username)
   } catch (err) {
@@ -292,7 +303,15 @@ export async function flushUserAnalyticsFromRedisToDb(
     )
     const totalViews = Number(totalsData?.totalViews || 0)
 
-    const slugs = await redis.smembers(REDIS_KEYS.userProfiles(cleanUsername)).catch(() => [])
+    const trackedSlugs = await redis
+      .smembers(REDIS_KEYS.userTrackedSlugs(cleanUsername))
+      .catch(() => [])
+    const profileSlugs = await redis
+      .smembers(REDIS_KEYS.userProfiles(cleanUsername))
+      .catch(() => [])
+    const slugs = Array.from(
+      new Set([...(trackedSlugs || []), ...(profileSlugs || []), 'default'])
+    ).filter(Boolean)
     const dailyItems: Array<{ slug: string; dateStr: string; views: number; uniques: number }> = []
     const profileViews: Array<{ slug: string; views: number }> = []
 
@@ -359,8 +378,12 @@ export async function getAnalyticsSummary(
   if (selectedSlug) {
     slugsToQuery = [selectedSlug]
   } else {
-    const allSlugs = await redis.smembers(REDIS_KEYS.userProfiles(u))
-    slugsToQuery = allSlugs && allSlugs.length > 0 ? allSlugs : ['default']
+    const trackedSlugs = await redis.smembers(REDIS_KEYS.userTrackedSlugs(u)).catch(() => [])
+    const profileSlugs = await redis.smembers(REDIS_KEYS.userProfiles(u)).catch(() => [])
+    const combinedSlugs = Array.from(
+      new Set([...(trackedSlugs || []), ...(profileSlugs || []), 'default'])
+    ).filter(Boolean)
+    slugsToQuery = combinedSlugs.length > 0 ? combinedSlugs : ['default']
   }
 
   const { start, count } = getDaysInRange(timeRange)
@@ -588,6 +611,73 @@ export async function getAnalyticsSummary(
     totalUniques = Math.ceil(totalViews * 0.75)
   }
 
+  if (totalViews === 0) {
+    try {
+      const dbTimeSeries = await getTimeSeriesFromDb(u, currentDateList, selectedSlug || undefined)
+      if (dbTimeSeries.length > 0) {
+        let dbTotalViews = 0
+        let dbTotalUniques = 0
+        for (const pt of dbTimeSeries) {
+          if (pt.views > 0) {
+            dbTotalViews += pt.views
+            dbTotalUniques += pt.uniques || Math.ceil(pt.views * 0.75)
+            const entry = timeSeriesMap.get(pt.date)
+            if (entry) {
+              entry.views = pt.views
+              entry.uniques = pt.uniques || Math.ceil(pt.views * 0.75)
+              entry.directViews = pt.views
+              entry.status200 = pt.views
+            }
+          }
+        }
+        if (dbTotalViews > 0) {
+          totalViews = dbTotalViews
+          totalUniques = dbTotalUniques
+        }
+      }
+
+      if (Object.keys(countryCounts).length === 0) {
+        const dbCountries = await getDimensionCountsFromDb(
+          u,
+          'countries',
+          currentDateList,
+          selectedSlug || undefined
+        )
+        mergeMap(dbCountries, countryCounts)
+        const dbSources = await getDimensionCountsFromDb(
+          u,
+          'sources',
+          currentDateList,
+          selectedSlug || undefined
+        )
+        mergeMap(dbSources, sourceCounts)
+        const dbDevices = await getDimensionCountsFromDb(
+          u,
+          'devices',
+          currentDateList,
+          selectedSlug || undefined
+        )
+        mergeMap(dbDevices, deviceCounts)
+        const dbBrowsers = await getDimensionCountsFromDb(
+          u,
+          'browsers',
+          currentDateList,
+          selectedSlug || undefined
+        )
+        mergeMap(dbBrowsers, browserCounts)
+        const dbOs = await getDimensionCountsFromDb(
+          u,
+          'os',
+          currentDateList,
+          selectedSlug || undefined
+        )
+        mergeMap(dbOs, osCounts)
+      }
+    } catch (error) {
+      console.warn('[AnalyticsStore] Failed to load analytics dimensions from PostgreSQL:', error)
+    }
+  }
+
   const timeSeries: DailyDataPoint[] = currentDateList.map((d, index) => {
     const entry = timeSeriesMap.get(d)!
     const prevPoint = prevTimeSeriesMap.get(index)
@@ -748,8 +838,11 @@ export async function getAnalyticsSummary(
   const statusCodes = formatGenericDim(statusCodeCounts)
   const topTimezones = formatGenericDim(timezoneCounts)
 
-  const allUserSlugs = await redis.smembers(REDIS_KEYS.userProfiles(u))
-  const profileList = allUserSlugs && allUserSlugs.length > 0 ? allUserSlugs : ['default']
+  const trackedSlugsForTop = await redis.smembers(REDIS_KEYS.userTrackedSlugs(u)).catch(() => [])
+  const profileSlugsForTop = await redis.smembers(REDIS_KEYS.userProfiles(u)).catch(() => [])
+  const profileList = Array.from(
+    new Set([...(trackedSlugsForTop || []), ...(profileSlugsForTop || []), 'default'])
+  ).filter(Boolean)
   const topProfiles: ProfilePerformanceMetric[] = []
 
   const profilesPipeline = redis.pipeline()
@@ -816,7 +909,9 @@ export async function getAnalyticsSummary(
           }
           recentActivity.push(ev)
         }
-      } catch {}
+      } catch (error) {
+        console.warn('[AnalyticsStore] Ignoring malformed activity entry:', error)
+      }
     }
   }
 

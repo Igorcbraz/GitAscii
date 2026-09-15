@@ -592,7 +592,7 @@ export const zh: Record<string, string> = {
   'editor.preview_nudge.title_prefix': '更改已',
   'editor.preview_nudge.title_suffix': 'successfully',
   'editor.profile_switcher.name_placeholder': '名称（可选）',
-  'editor.profile_switcher.new_profile': '+ 新建个人主页',
+  'editor.profile_switcher.new_profile': '新建个人主页',
   'editor.profile_switcher.pro_only_tooltip': '多个人主页功能为 GitAscii Pro 专享。点击解锁！',
   'editor.profile_switcher.pro_profiles': 'Pro 个人主页',
   'editor.profile_switcher.profile_label': '个人主页',

@@ -10,6 +10,7 @@ import {
   updateProfileInDb,
 } from '@/lib/db/repositories/profileRepository'
 import { loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { ProfileVersionRecord, ProProfileRecord } from '../types/profiles'
 import { REDIS_KEYS } from './analyticsStore'
@@ -17,6 +18,17 @@ import { getProRedisClient } from './redisClient'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://gitascii.com'
 const MAX_VERSIONS_PER_PROFILE = 20
+const GITHUB_HISTORY_TIMEOUT_MS = 3_000
+const GITHUB_VERSION_TIMEOUT_MS = 4_000
+
+interface GitHubCommitHistoryItem {
+  sha: string
+  author?: { login?: string }
+  commit?: {
+    message?: string
+    author?: { name?: string; date?: string }
+  }
+}
 
 export async function getUserProfiles(username: string): Promise<ProProfileRecord[]> {
   const redis = getProRedisClient()
@@ -71,12 +83,22 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     }
     const results = await p.exec<any[]>().catch(() => [])
 
+    const gitVersionsList = await Promise.allSettled(
+      slugs.map((slug) => getGitCommitsVersionHistory(u, slug))
+    )
+
     for (let i = 0; i < slugs.length; i++) {
       const slug = slugs[i]
       const data = results[i * 2]
       const versionIds = results[i * 2 + 1] || []
-
+      const settled = gitVersionsList[i]
+      const gitVersions = settled && settled.status === 'fulfilled' ? settled.value : []
       const dbMatch = dbProfiles.find((dp) => dp.slug === slug)
+      const isSynced =
+        gitVersions.length > 0 ||
+        dbMatch?.isSynced ||
+        data?.isSynced === 'true' ||
+        data?.isSynced === true
 
       const isDefault =
         data?.isDefault !== undefined
@@ -85,7 +107,11 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
 
       const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
       const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
-      const versionCount = versionIds?.length || dbMatch?.versionCount || 1
+      const versionCount =
+        gitVersions.length || versionIds?.length || dbMatch?.versionCount || (isSynced ? 1 : 0)
+
+      const storedStatus = data?.status || dbMatch?.status
+      const status = storedStatus === 'active' ? 'active' : versionCount > 0 ? 'active' : 'draft'
 
       if (data && data.name) {
         profiles.push({
@@ -93,8 +119,9 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           slug,
           name: data.name,
           description: data.description || '',
-          status: data.status || 'active',
+          status,
           isDefault,
+          isSynced,
           widgetsCount: Number(data.widgetsCount || 3),
           totalViews: Number(data.totalViews || 0),
           versionCount,
@@ -110,7 +137,12 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           rawSvgUrl,
         })
       } else if (dbMatch) {
-        profiles.push(dbMatch)
+        profiles.push({
+          ...dbMatch,
+          isSynced,
+          versionCount,
+          status,
+        })
       } else {
         const now = new Date().toISOString()
         const defaultRecord: ProProfileRecord = {
@@ -124,11 +156,12 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
             slug === 'default'
               ? 'Main README dashboard displayed on your GitHub profile.'
               : `Custom profile for ${slug}`,
-          status: 'active',
+          status,
           isDefault,
+          isSynced,
           widgetsCount: 4,
           totalViews: 0,
-          versionCount: 1,
+          versionCount,
           healthStatus: 'operational',
           renderSuccessRate: 100,
           createdAt: now,
@@ -573,13 +606,95 @@ export async function createProfileVersion(
   return record
 }
 
+export async function getGitCommitsVersionHistory(
+  username: string,
+  slug: string
+): Promise<ProfileVersionRecord[]> {
+  try {
+    const u = username.toLowerCase().trim()
+    const cleanSlug = slug.toLowerCase().trim()
+    const filePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+
+    let res = await fetch(API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath, 'gitascii'), {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'GitAscii-App',
+      },
+      signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+    })
+
+    if (!res.ok) {
+      res = await fetch(API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath), {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'GitAscii-App',
+        },
+        signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+      })
+    }
+
+    if (!res.ok) {
+      return []
+    }
+
+    const commits: unknown = await res.json()
+    if (!Array.isArray(commits) || commits.length === 0) {
+      return []
+    }
+
+    let defaultWidgetsCount = 3
+    try {
+      const dbProfiles = await getUserProfilesFromDb(u)
+      const matched = dbProfiles.find((dp) => dp.slug === cleanSlug)
+      if (matched && matched.widgetsCount > 0) {
+        defaultWidgetsCount = matched.widgetsCount
+      }
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the baseline widget count:', error)
+    }
+
+    return (commits as GitHubCommitHistoryItem[]).map((commit, index) => {
+      const sha = String(commit.sha)
+      const message = String(commit.commit?.message || `Commit ${sha.slice(0, 7)}`)
+      const firstLine = message.split('\n')[0]
+      const author = commit.author?.login || commit.commit?.author?.name || u
+      const date = commit.commit?.author?.date || new Date().toISOString()
+
+      const widgetMatch =
+        message.match(/(?:with\s+|(?:\(|\[))(\d+)\s+widgets?/i) ||
+        message.match(/(\d+)\s+widgets?/i)
+      const widgetsCount = widgetMatch ? parseInt(widgetMatch[1], 10) : defaultWidgetsCount
+
+      return {
+        id: sha,
+        profileSlug: cleanSlug,
+        versionNumber: commits.length - index,
+        label: firstLine,
+        description: message,
+        widgetsCount,
+        createdAt: date,
+        createdBy: author,
+      }
+    })
+  } catch (error) {
+    console.warn('[ProfileManager] Failed to load Git commit history:', error)
+    return []
+  }
+}
+
 export async function getProfileVersions(
   username: string,
   slug: string
 ): Promise<ProfileVersionRecord[]> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
+
+  const gitVersions = await getGitCommitsVersionHistory(u, cleanSlug)
+  if (gitVersions.length > 0) {
+    return gitVersions
+  }
+
+  const redis = getProRedisClient()
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)
 
   const versionIds = await redis.zrevrange<string[]>(versionsListKey, 0, -1).catch(() => [])
@@ -592,10 +707,12 @@ export async function getProfileVersions(
           p.set(REDIS_KEYS.profileVersionItem(u, cleanSlug, v.id), JSON.stringify(v))
           p.zadd(versionsListKey, { score: new Date(v.createdAt).getTime(), member: v.id })
         }
-        await p.exec().catch(() => {})
+        await p.exec()
         return dbVersions
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to hydrate profile versions from PostgreSQL:', error)
+    }
     return []
   }
 
@@ -622,9 +739,35 @@ export async function getProfileVersionById(
   slug: string,
   versionId: string
 ): Promise<ProfileVersionRecord | null> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
+
+  if (/^[0-9a-f]{40}$/i.test(versionId)) {
+    try {
+      const filePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+      const res = await fetch(API_ENDPOINTS.GITHUB.RAW_USER_CONTENT(u, u, versionId, filePath), {
+        signal: AbortSignal.timeout(GITHUB_VERSION_TIMEOUT_MS),
+      })
+      if (res.ok) {
+        const config: SavedConfiguration = await res.json()
+        return {
+          id: versionId,
+          profileSlug: cleanSlug,
+          versionNumber: 1,
+          label: `Commit ${versionId.slice(0, 7)}`,
+          description: `Git version snapshot from ${versionId.slice(0, 7)}`,
+          config,
+          widgetsCount: config?.widgets?.length || 0,
+          createdAt: config?.metadata?.updatedAt || new Date().toISOString(),
+          createdBy: u,
+        }
+      }
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the Git profile version:', error)
+    }
+  }
+
+  const redis = getProRedisClient()
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
 
   const raw = await redis.get<string | ProfileVersionRecord>(itemKey)
@@ -632,10 +775,14 @@ export async function getProfileVersionById(
     try {
       const dbVersion = await getProfileVersionByIdFromDb(u, cleanSlug, versionId)
       if (dbVersion) {
-        void redis.set(itemKey, JSON.stringify(dbVersion)).catch(() => {})
+        void redis.set(itemKey, JSON.stringify(dbVersion)).catch((error) => {
+          console.warn('[ProfileManager] Failed to cache the profile version:', error)
+        })
         return dbVersion
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the profile version from PostgreSQL:', error)
+    }
     return null
   }
   return typeof raw === 'string' ? (JSON.parse(raw) as ProfileVersionRecord) : raw
@@ -672,8 +819,8 @@ export async function restoreProfileVersion(
 
   const newSnapshot = await createProfileVersion(u, cleanSlug, {
     config: restoredConfig,
-    label: `Restored to v${targetVersion.versionNumber}`,
-    description: `Rolled back to snapshot from ${new Date(targetVersion.createdAt).toLocaleDateString()}`,
+    label: `Restored to v${targetVersion.versionNumber || versionId.slice(0, 7)}`,
+    description: `Rolled back to snapshot ${versionId.slice(0, 7)} from ${new Date(targetVersion.createdAt).toLocaleDateString()}`,
     createdBy: u,
   })
 

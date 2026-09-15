@@ -619,7 +619,7 @@ export const ja: Record<string, string> = {
   'editor.preview_nudge.title_prefix': '変更点',
   'editor.preview_nudge.title_suffix': '無事に',
   'editor.profile_switcher.name_placeholder': '名前（任意）',
-  'editor.profile_switcher.new_profile': '+ 新規プロフィール',
+  'editor.profile_switcher.new_profile': '新規プロフィール',
   'editor.profile_switcher.pro_only_tooltip':
     'マルチプロフィールはGitAscii Pro限定機能です。クリックしてロック解除！',
   'editor.profile_switcher.pro_profiles': 'Proプロフィール',

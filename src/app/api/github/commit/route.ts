@@ -98,6 +98,14 @@ export async function POST(request: Request) {
       )
     }
 
+    let defaultBranch = 'main'
+    if (repoRes.status === 200) {
+      const repoData = await repoRes.json()
+      if (repoData?.default_branch) {
+        defaultBranch = repoData.default_branch
+      }
+    }
+
     if (repoRes.status === 404) {
       const createRes = await fetch(API_ENDPOINTS.GITHUB.USER_REPOS, {
         method: 'POST',
@@ -117,12 +125,19 @@ export async function POST(request: Request) {
         )
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const REPO_CREATION_DELAY_MS = 1000
+      await new Promise((resolve) => setTimeout(resolve, REPO_CREATION_DELAY_MS))
     }
 
     const [profileData, entitlements] = await Promise.all([
-      fetchGitHubProfile(username, { fresh: true }).catch(() => null),
-      getProEntitlements(username).catch(() => null),
+      fetchGitHubProfile(username, { fresh: true }).catch((error) => {
+        console.error('[Commit Route] Failed to fetch GitHub profile:', error)
+        return null
+      }),
+      getProEntitlements(username).catch((error) => {
+        console.error('[Commit Route] Failed to fetch Pro entitlements:', error)
+        return null
+      }),
     ])
 
     const isPro = entitlements?.tier && entitlements.tier !== 'free'
@@ -260,7 +275,7 @@ export async function POST(request: Request) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          ref: 'main',
+          ref: defaultBranch,
         }),
       })
     } catch (dispatchErr) {

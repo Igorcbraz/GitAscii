@@ -2,6 +2,13 @@ import crypto from 'node:crypto'
 
 import type { SavedConfiguration } from '@/engine/types'
 
+export interface ProfileConfigFile {
+  slug: string
+  path: string
+  sha: string
+  config: SavedConfiguration
+}
+
 export interface BranchState {
   exists: boolean
   latestCommitSha?: string
@@ -103,6 +110,82 @@ export class GitOpsService {
       configSha,
       existingSvgHashes,
     }
+  }
+
+  async getAllProfileConfigs(branchName = 'gitascii'): Promise<{
+    exists: boolean
+    branchState: BranchState
+    configs: ProfileConfigFile[]
+  }> {
+    const branchState = await this.getBranchState(branchName)
+    if (!branchState.exists || !branchState.treeSha) {
+      return { exists: false, branchState, configs: [] }
+    }
+
+    const treeRes = await fetch(
+      `https://api.github.com/repos/${this.owner}/${this.repo}/git/trees/${branchState.treeSha}?recursive=1`,
+      { headers: this.headers }
+    )
+
+    const configs: ProfileConfigFile[] = []
+    const configFilesToFetch: Array<{ path: string; sha: string; slug: string }> = []
+
+    if (treeRes.ok) {
+      const treeData = await treeRes.json()
+      if (Array.isArray(treeData.tree)) {
+        for (const item of treeData.tree) {
+          if (item.type === 'blob' && typeof item.path === 'string') {
+            const fileName = item.path.split('/').pop() || item.path
+            if (fileName === 'gitascii.json') {
+              configFilesToFetch.push({ path: item.path, sha: item.sha, slug: 'default' })
+            } else {
+              const multiMatch = fileName.match(/^gitascii_([a-zA-Z0-9_-]+)\.json$/)
+              if (multiMatch) {
+                configFilesToFetch.push({
+                  path: item.path,
+                  sha: item.sha,
+                  slug: multiMatch[1].toLowerCase(),
+                })
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (configFilesToFetch.length === 0 && branchState.config) {
+      configs.push({
+        slug: branchState.config.profileSlug || 'default',
+        path: 'gitascii.json',
+        sha: branchState.configSha || '',
+        config: branchState.config,
+      })
+      return { exists: true, branchState, configs }
+    }
+
+    for (const f of configFilesToFetch) {
+      try {
+        const blobRes = await fetch(
+          `https://api.github.com/repos/${this.owner}/${this.repo}/git/blobs/${f.sha}`,
+          { headers: this.headers }
+        )
+        if (blobRes.ok) {
+          const blobData = await blobRes.json()
+          const decoded = Buffer.from(blobData.content, 'base64').toString('utf8')
+          const parsed = JSON.parse(decoded) as SavedConfiguration
+          configs.push({
+            slug: parsed.profileSlug || f.slug,
+            path: f.path,
+            sha: f.sha,
+            config: parsed,
+          })
+        }
+      } catch (err) {
+        console.warn(`[GitOps] Failed to fetch/parse config file ${f.path}:`, err)
+      }
+    }
+
+    return { exists: true, branchState, configs }
   }
 
   async publishAtomic(

@@ -5,6 +5,11 @@ import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
 
+const DEFAULT_RENDER_TIME_MS = 1
+const CACHE_MAX_AGE = 0
+const CACHE_S_MAXAGE = 300
+const CACHE_STALE_WHILE_REVALIDATE = 600
+
 export async function GET(request: Request, { params }: { params: Promise<{ username: string }> }) {
   const { username } = await params
   const cleanUsername = (username || '').toLowerCase().trim()
@@ -14,12 +19,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   }
 
   try {
+    const { searchParams } = new URL(request.url)
+    const rawSlug = searchParams.get('slug') || searchParams.get('profile') || 'default'
+    const profileSlug = rawSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'default'
+
     const viewerMeta = parseViewerMetadata(request)
     const metricPayload = {
       username: cleanUsername,
-      profileSlug: 'default',
+      profileSlug,
       theme: 'dark' as const,
-      renderTimeMs: 1,
+      renderTimeMs: DEFAULT_RENDER_TIME_MS,
       isCamoProxy: viewerMeta.isCamoProxy,
       isCacheHit: false,
       userAgent: viewerMeta.userAgent,
@@ -34,8 +43,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       statusCode: 200,
       timestamp: new Date().toISOString(),
     }
-    recordProfileView(metricPayload).catch(() => {})
-  } catch {}
+    recordProfileView(metricPayload).catch((error) => {
+      console.error('Failed to record profile view metric:', error)
+    })
+  } catch (error) {
+    console.error('Failed to process viewer metadata:', error)
+  }
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="24" viewBox="0 0 800 24" fill="none" role="img" aria-label="Made with GitAscii">
@@ -55,8 +68,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   return new NextResponse(svg, {
     headers: {
       'Content-Type': 'image/svg+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
-      'CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      'Cache-Control': `public, max-age=${CACHE_MAX_AGE}, s-maxage=${CACHE_S_MAXAGE}, stale-while-revalidate=${CACHE_STALE_WHILE_REVALIDATE}`,
+      'CDN-Cache-Control': `public, s-maxage=${CACHE_S_MAXAGE}, stale-while-revalidate=${CACHE_STALE_WHILE_REVALIDATE}`,
       'X-Content-Type-Options': 'nosniff',
     },
   })

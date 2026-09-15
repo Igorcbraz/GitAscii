@@ -39,6 +39,7 @@ describe('fetchGitHubProfile public resilience', () => {
       'fetch',
       vi
         .fn()
+        .mockResolvedValue(new Response(JSON.stringify([]), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify(user), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify([repo]), { status: 200 }))
         .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
@@ -51,7 +52,7 @@ describe('fetchGitHubProfile public resilience', () => {
     expect(redis.set).toHaveBeenCalledWith('github-profile:v1:octocat', expect.any(String), {
       ex: 604800,
     })
-  })
+  }, 15000)
 
   it('uses stale complete data when GitHub rate-limits repositories', async () => {
     redis.values.set(

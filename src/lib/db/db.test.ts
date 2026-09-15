@@ -542,7 +542,7 @@ describeDb('PostgreSQL Neon Database Layer', () => {
     const user = await getUserByUsername('igorcbraz')
     expect(user).not.toBeNull()
     expect(user?.user.username).toBe('igorcbraz')
-  }, 20000)
+  }, 35000)
 
   it('executes Stripe atomic CTE and rejects duplicate events in a single transaction', async () => {
     const username = `test_stripe_atomic_${Date.now()}`

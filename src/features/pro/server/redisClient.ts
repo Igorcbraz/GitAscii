@@ -1,5 +1,7 @@
 import { Redis } from '@upstash/redis'
 
+const REDIS_WARNING_INTERVAL_MS = 60_000
+
 export interface IProRedisPipeline {
   get(key: string): IProRedisPipeline
   hget(key: string, field: string): IProRedisPipeline
@@ -51,66 +53,138 @@ export interface IProRedisStore {
 }
 
 class UpstashRedisAdapter implements IProRedisStore {
-  constructor(private client: Redis) {}
+  private lastWarning = 0
+
+  constructor(
+    private client: Redis,
+    private fallback: IProRedisStore
+  ) {}
+
+  private logError(operation: string, error: unknown): void {
+    const now = Date.now()
+    if (now - this.lastWarning > REDIS_WARNING_INTERVAL_MS) {
+      const errorDetails = error instanceof Error ? error.message : error
+      console.warn(
+        `[ProRedis] Upstash Redis operation '${operation}' failed (rate limit/quota/connectivity). Falling back to memory store.`,
+        errorDetails
+      )
+      this.lastWarning = now
+    }
+  }
 
   async get<T = any>(key: string): Promise<T | null> {
-    return this.client.get<T>(key)
+    try {
+      return await this.client.get<T>(key)
+    } catch (err) {
+      this.logError('get', err)
+      return this.fallback.get<T>(key)
+    }
   }
 
   async set(key: string, value: any, opts?: { ex?: number; nx?: boolean }): Promise<any> {
-    const setOpts: any = {}
-    if (opts?.ex) setOpts.ex = opts.ex
-    if (opts?.nx) setOpts.nx = true
-    if (Object.keys(setOpts).length > 0) {
-      return this.client.set(key, value, setOpts)
+    try {
+      const setOpts: any = {}
+      if (opts?.ex) setOpts.ex = opts.ex
+      if (opts?.nx) setOpts.nx = true
+      if (Object.keys(setOpts).length > 0) {
+        return await this.client.set(key, value, setOpts)
+      }
+      return await this.client.set(key, value)
+    } catch (err) {
+      this.logError('set', err)
+      return this.fallback.set(key, value, opts)
     }
-    return this.client.set(key, value)
   }
 
   async del(...keys: string[]): Promise<number> {
-    return this.client.del(...keys)
+    try {
+      return await this.client.del(...keys)
+    } catch (err) {
+      this.logError('del', err)
+      return this.fallback.del(...keys)
+    }
   }
 
   async exists(...keys: string[]): Promise<number> {
-    if (keys.length === 0) return 0
-    return this.client.exists(keys[0], ...keys.slice(1))
+    try {
+      if (keys.length === 0) return 0
+      return await this.client.exists(keys[0], ...keys.slice(1))
+    } catch (err) {
+      this.logError('exists', err)
+      return this.fallback.exists(...keys)
+    }
   }
 
   async expire(key: string, seconds: number): Promise<number> {
-    return this.client.expire(key, seconds)
+    try {
+      return await this.client.expire(key, seconds)
+    } catch (err) {
+      this.logError('expire', err)
+      return this.fallback.expire(key, seconds)
+    }
   }
 
   async hget<T = any>(key: string, field: string): Promise<T | null> {
-    return this.client.hget<T>(key, field)
+    try {
+      return await this.client.hget<T>(key, field)
+    } catch (err) {
+      this.logError('hget', err)
+      return this.fallback.hget<T>(key, field)
+    }
   }
 
   async hset(key: string, kvMap: Record<string, any>): Promise<number> {
-    return this.client.hset(key, kvMap)
+    try {
+      return await this.client.hset(key, kvMap)
+    } catch (err) {
+      this.logError('hset', err)
+      return this.fallback.hset(key, kvMap)
+    }
   }
 
   async hgetall<T extends Record<string, any> = Record<string, any>>(
     key: string
   ): Promise<T | null> {
-    const res = await this.client.hgetall<T>(key)
-    return res as T | null
+    try {
+      const res = await this.client.hgetall<T>(key)
+      return res as T | null
+    } catch (err) {
+      this.logError('hgetall', err)
+      return this.fallback.hgetall<T>(key)
+    }
   }
 
   async hincrby(key: string, field: string, increment: number): Promise<number> {
-    return this.client.hincrby(key, field, increment)
+    try {
+      return await this.client.hincrby(key, field, increment)
+    } catch (err) {
+      this.logError('hincrby', err)
+      return this.fallback.hincrby(key, field, increment)
+    }
   }
 
   async incr(key: string): Promise<number> {
-    return this.client.incr(key)
+    try {
+      return await this.client.incr(key)
+    } catch (err) {
+      this.logError('incr', err)
+      return this.fallback.incr(key)
+    }
   }
 
   async zadd(key: string, ...scoreMembers: { score: number; member: string }[]): Promise<number> {
-    if (scoreMembers.length === 0) return 0
-    let added = 0
-    for (const sm of scoreMembers) {
-      await this.client.zadd(key, { score: sm.score, member: sm.member })
-      added++
+    try {
+      if (scoreMembers.length === 0) return 0
+      let added = 0
+      for (const sm of scoreMembers) {
+        await this.client.zadd(key, { score: sm.score, member: sm.member })
+        added++
+      }
+      return added
+    } catch (err) {
+      this.logError('zadd', err)
+      return this.fallback.zadd(key, ...scoreMembers)
     }
-    return added
   }
 
   async zrange<T = string[]>(
@@ -119,8 +193,13 @@ class UpstashRedisAdapter implements IProRedisStore {
     stop: number,
     opts?: { rev?: boolean }
   ): Promise<T> {
-    const res = await this.client.zrange(key, start, stop, opts?.rev ? { rev: true } : undefined)
-    return res as unknown as T
+    try {
+      const res = await this.client.zrange(key, start, stop, opts?.rev ? { rev: true } : undefined)
+      return res as unknown as T
+    } catch (err) {
+      this.logError('zrange', err)
+      return this.fallback.zrange<T>(key, start, stop, opts)
+    }
   }
 
   async zrevrange<T = string[]>(key: string, start: number, stop: number): Promise<T> {
@@ -128,127 +207,199 @@ class UpstashRedisAdapter implements IProRedisStore {
   }
 
   async zrem(key: string, ...members: string[]): Promise<number> {
-    return this.client.zrem(key, ...members)
+    try {
+      return await this.client.zrem(key, ...members)
+    } catch (err) {
+      this.logError('zrem', err)
+      return this.fallback.zrem(key, ...members)
+    }
   }
 
   async sadd(key: string, ...members: string[]): Promise<number> {
-    return this.client.sadd(key, members[0], ...members.slice(1))
+    try {
+      return await this.client.sadd(key, members[0], ...members.slice(1))
+    } catch (err) {
+      this.logError('sadd', err)
+      return this.fallback.sadd(key, ...members)
+    }
   }
 
   async smembers(key: string): Promise<string[]> {
-    const res = await this.client.smembers(key)
-    return (res || []) as string[]
+    try {
+      const res = await this.client.smembers(key)
+      return (res || []) as string[]
+    } catch (err) {
+      this.logError('smembers', err)
+      return this.fallback.smembers(key)
+    }
   }
 
   async srem(key: string, ...members: string[]): Promise<number> {
-    return this.client.srem(key, members[0], ...members.slice(1))
+    try {
+      return await this.client.srem(key, members[0], ...members.slice(1))
+    } catch (err) {
+      this.logError('srem', err)
+      return this.fallback.srem(key, ...members)
+    }
   }
 
   async sismember(key: string, member: string): Promise<number> {
-    const res = await this.client.sismember(key, member)
-    return Number(res)
+    try {
+      const res = await this.client.sismember(key, member)
+      return Number(res)
+    } catch (err) {
+      this.logError('sismember', err)
+      return this.fallback.sismember(key, member)
+    }
   }
 
   async pfadd(key: string, ...elements: string[]): Promise<number> {
-    return this.client.pfadd(key, elements[0], ...elements.slice(1))
+    try {
+      return await this.client.pfadd(key, elements[0], ...elements.slice(1))
+    } catch (err) {
+      this.logError('pfadd', err)
+      return this.fallback.pfadd(key, ...elements)
+    }
   }
 
   async pfcount(...keys: string[]): Promise<number> {
-    if (keys.length === 0) return 0
-    return this.client.pfcount(keys[0], ...keys.slice(1))
+    try {
+      if (keys.length === 0) return 0
+      return await this.client.pfcount(keys[0], ...keys.slice(1))
+    } catch (err) {
+      this.logError('pfcount', err)
+      return this.fallback.pfcount(...keys)
+    }
   }
 
   async keys(pattern: string): Promise<string[]> {
-    const res = await this.client.keys(pattern)
-    return (res || []) as string[]
+    try {
+      const res = await this.client.keys(pattern)
+      return (res || []) as string[]
+    } catch (err) {
+      this.logError('keys', err)
+      return this.fallback.keys(pattern)
+    }
   }
 
   async scan(
     cursor: number,
     opts?: { match?: string; count?: number }
   ): Promise<[number, string[]]> {
-    const res = await this.client.scan(cursor, {
-      match: opts?.match,
-      count: opts?.count ?? 100,
-    })
-    return res as unknown as [number, string[]]
+    try {
+      const res = await this.client.scan(cursor, {
+        match: opts?.match,
+        count: opts?.count ?? 100,
+      })
+      return res as unknown as [number, string[]]
+    } catch (err) {
+      this.logError('scan', err)
+      return this.fallback.scan(cursor, opts)
+    }
   }
 
   async scard(key: string): Promise<number> {
-    return this.client.scard(key)
+    try {
+      return await this.client.scard(key)
+    } catch (err) {
+      this.logError('scard', err)
+      return this.fallback.scard(key)
+    }
   }
 
   pipeline(): IProRedisPipeline {
     const p = this.client.pipeline()
+    const memPipeline = this.fallback.pipeline()
+    const self = this
+
     const wrapper: IProRedisPipeline = {
       get(key: string) {
         p.get(key)
+        memPipeline.get(key)
         return wrapper
       },
       hget(key: string, field: string) {
         p.hget(key, field)
+        memPipeline.hget(key, field)
         return wrapper
       },
       hgetall(key: string) {
         p.hgetall(key)
+        memPipeline.hgetall(key)
         return wrapper
       },
       pfcount(...keys: string[]) {
         if (keys.length > 0) {
           p.pfcount(keys[0], ...keys.slice(1))
         }
+        memPipeline.pfcount(...keys)
         return wrapper
       },
       hincrby(key: string, field: string, increment: number) {
         p.hincrby(key, field, increment)
+        memPipeline.hincrby(key, field, increment)
         return wrapper
       },
       hset(key: string, kvMap: Record<string, any>) {
         p.hset(key, kvMap)
+        memPipeline.hset(key, kvMap)
         return wrapper
       },
       expire(key: string, seconds: number) {
         p.expire(key, seconds)
+        memPipeline.expire(key, seconds)
         return wrapper
       },
       pfadd(key: string, ...elements: string[]) {
         if (elements.length > 0) {
           p.pfadd(key, elements[0], ...elements.slice(1))
         }
+        memPipeline.pfadd(key, ...elements)
         return wrapper
       },
       sadd(key: string, ...members: string[]) {
         if (members.length > 0) {
           p.sadd(key, members[0], ...members.slice(1))
         }
+        memPipeline.sadd(key, ...members)
         return wrapper
       },
       set(key: string, value: any) {
         p.set(key, value)
+        memPipeline.set(key, value)
         return wrapper
       },
       del(...keys: string[]) {
         if (keys.length > 0) {
           p.del(...keys)
         }
+        memPipeline.del(...keys)
         return wrapper
       },
       zadd(key: string, ...scoreMembers: { score: number; member: string }[]) {
-        for (const sm of scoreMembers) {
-          p.zadd(key, { score: sm.score, member: sm.member })
+        for (const scoreMember of scoreMembers) {
+          p.zadd(key, { score: scoreMember.score, member: scoreMember.member })
         }
+        memPipeline.zadd(key, ...scoreMembers)
         return wrapper
       },
       zrange(key: string, start: number, stop: number, opts?: { rev?: boolean }) {
         p.zrange(key, start, stop, opts?.rev ? { rev: true } : undefined)
+        memPipeline.zrange(key, start, stop, opts)
         return wrapper
       },
       zrevrange(key: string, start: number, stop: number) {
         p.zrange(key, start, stop, { rev: true })
+        memPipeline.zrevrange(key, start, stop)
         return wrapper
       },
       async exec<T = any[]>(): Promise<T> {
-        return (await p.exec()) as unknown as T
+        try {
+          return (await p.exec()) as unknown as T
+        } catch (err) {
+          self.logError('pipeline.exec', err)
+          return memPipeline.exec<T>()
+        }
       },
     }
     return wrapper
@@ -648,7 +799,7 @@ export function getProRedisClient(): IProRedisStore {
         url: url.trim(),
         token: token.trim(),
       })
-      globalAdapterInstance = new UpstashRedisAdapter(upstashRedis)
+      globalAdapterInstance = new UpstashRedisAdapter(upstashRedis, memoryStoreInstance)
       return globalAdapterInstance
     } catch (err) {
       console.warn(

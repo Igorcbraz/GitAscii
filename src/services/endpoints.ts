@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
     RAW_USER_CONTENT: (owner: string, repo: string, branch: string, path: string) =>
       `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${path}`,
+    COMMITS_FOR_PATH: (owner: string, repo: string, path: string, branch?: string) =>
+      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits?path=${encodeURIComponent(path)}${branch ? `&sha=${encodeURIComponent(branch)}` : ''}&per_page=30`,
     RAW_PROFILE_README: (username: string, branch: 'main' | 'master' = 'main') =>
       `https://raw.githubusercontent.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/${branch}/README.md`,
     RAW_PROFILE_FILE: (username: string, branch: string, path: string) =>
@@ -203,5 +205,6 @@ export const API_ENDPOINTS = {
     SUBSCRIBE: '/api/pro/subscribe',
     DEV_TOGGLE: '/api/pro/dev-toggle',
     ADMIN_GRANT: '/api/pro/admin/grant',
+    TELEMETRY: '/api/pro/telemetry',
   },
 } as const

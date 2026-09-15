@@ -626,7 +626,7 @@ export const fr: Record<string, string> = {
   'editor.preview_nudge.title_prefix': 'Changements',
   'editor.preview_nudge.title_suffix': 'avec succès',
   'editor.profile_switcher.name_placeholder': 'Nom (facultatif)',
-  'editor.profile_switcher.new_profile': '+ Nouveau profil',
+  'editor.profile_switcher.new_profile': 'Nouveau profil',
   'editor.profile_switcher.pro_only_tooltip':
     'Multi-profils est réservé à GitAscii Pro. Cliquez pour débloquer !',
   'editor.profile_switcher.pro_profiles': 'Profils Pro',

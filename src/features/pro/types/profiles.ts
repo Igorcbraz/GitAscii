@@ -1,3 +1,5 @@
+import type { SavedConfiguration } from '@/engine/types'
+
 export type ProfileStatus = 'active' | 'draft' | 'archived'
 
 export interface ProProfileRecord {
@@ -7,6 +9,7 @@ export interface ProProfileRecord {
   description?: string
   status: ProfileStatus
   isDefault: boolean
+  isSynced?: boolean
   widgetsCount: number
   totalViews: number
   versionCount?: number
@@ -26,7 +29,7 @@ export interface ProfileVersionRecord {
   versionNumber: number
   label?: string
   description?: string
-  config: any
+  config?: SavedConfiguration
   widgetsCount: number
   createdAt: string
   createdBy?: string

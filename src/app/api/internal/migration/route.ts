@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { getProEntitlements } from '@/features/pro/server/entitlements'
 import {
   getMigrationCandidateBatch,
   updateMigrationStatus,
@@ -8,6 +9,13 @@ import { getInstallationTokenById } from '@/lib/githubApp'
 import { checkGitHubRateLimit, processCandidateMigration } from '@/lib/migration/migrationEngine'
 
 export const dynamic = 'force-dynamic'
+
+const DEFAULT_LIMIT_STR = '20'
+const DEFAULT_BATCH_LIMIT = 20
+const MIN_BATCH_LIMIT = 1
+const MAX_BATCH_LIMIT = 50
+const MIN_RATE_LIMIT_REMAINING = 5
+const DECIMAL_RADIX = 10
 
 export async function POST(request: Request) {
   try {
@@ -19,8 +27,8 @@ export async function POST(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
-    const limitParam = parseInt(searchParams.get('limit') || '20', 10)
-    const batchLimit = Math.min(Math.max(1, isNaN(limitParam) ? 20 : limitParam), 50)
+    const limitParam = parseInt(searchParams.get('limit') || DEFAULT_LIMIT_STR, DECIMAL_RADIX)
+    const batchLimit = Math.min(Math.max(MIN_BATCH_LIMIT, isNaN(limitParam) ? DEFAULT_BATCH_LIMIT : limitParam), MAX_BATCH_LIMIT)
 
     const candidates = await getMigrationCandidateBatch(batchLimit)
 
@@ -53,13 +61,19 @@ export async function POST(request: Request) {
           continue
         }
 
-        const rateLimit = await checkGitHubRateLimit(token, 5)
+        const rateLimit = await checkGitHubRateLimit(token, MIN_RATE_LIMIT_REMAINING)
         if (!rateLimit.canProceed) {
           console.warn(
             `[Migration Cron] Rate limit low (${rateLimit.remaining}/${rateLimit.limit}). Pausing campaign loop.`
           )
           break
         }
+
+        const entitlements = await getProEntitlements(cand.repository_owner).catch((error) => {
+          console.error('[Migration] Failed to fetch Pro entitlements:', error)
+          return null
+        })
+        const isPro = Boolean(entitlements?.tier && entitlements.tier !== 'free')
 
         const outcome = await processCandidateMigration(
           {
@@ -69,7 +83,8 @@ export async function POST(request: Request) {
             userId: cand.user_id || undefined,
             attempts: cand.attempts,
           },
-          token
+          token,
+          { isPro }
         )
 
         await updateMigrationStatus(cand.repository_owner, cand.repository_name, outcome.status, {

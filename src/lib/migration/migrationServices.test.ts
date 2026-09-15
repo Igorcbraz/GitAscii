@@ -94,8 +94,8 @@ describe('V2 Migration Services Suite', () => {
   })
 
   describe('Markdown Generator', () => {
-    it('generates standard <picture> tag pointing to raw.githubusercontent.com', () => {
-      const code = generateV2EmbedCode({ username: 'carol', profileSlug: 'default' })
+    it('generates standard <picture> tag and telemetry comment block', () => {
+      const code = generateV2EmbedCode({ username: 'carol', profileSlug: 'default', includeBadge: true })
       expect(code).toContain('<picture>')
       expect(code).toContain(
         'https://raw.githubusercontent.com/carol/carol/gitascii/profiles/default/dark.svg'
@@ -103,6 +103,9 @@ describe('V2 Migration Services Suite', () => {
       expect(code).toContain(
         'https://raw.githubusercontent.com/carol/carol/gitascii/profiles/default/light.svg'
       )
+      expect(code).toContain('<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->')
+      expect(code).toContain('https://gitascii.com/api/badge/carol?slug=default')
+      expect(code).toContain('<!-- GITASCII:TELEMETRY:END -->')
     })
 
     it('replaces legacy V1 widget URL in existing README content cleanly', () => {
@@ -129,11 +132,13 @@ Thanks for visiting!`
   <img alt="GitAscii Profile" src="https://raw.githubusercontent.com/igor/igor/gitascii/profiles/default/dark.svg" width="100%">
 </picture>
 
+<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->
 <p align="center">
   <a href="https://gitascii.com">
     <img alt="Made with GitAscii" src="https://gitascii.com/api/badge/igor" width="100%">
   </a>
 </p>
+<!-- GITASCII:TELEMETRY:END -->
 <p align="right"><a href="https://gitascii.com"><img alt="Powered by GitAscii" src="https://gitascii.com/api/badge/igor" height="20"></a></p>`
 
       const newEmbed = generateV2EmbedCode({ username: 'igor', includeBadge: true })
@@ -144,6 +149,7 @@ Thanks for visiting!`
       expect(occurrences).toBe(1)
       expect(updated).not.toContain('align="right"')
       expect(updated).toContain('align="center"')
+      expect(updated).toContain('GITASCII:TELEMETRY:START')
     })
   })
 })

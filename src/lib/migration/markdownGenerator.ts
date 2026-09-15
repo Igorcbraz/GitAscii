@@ -17,7 +17,7 @@ export function generateV2EmbedCode(options: EmbedOptions): string {
 </picture>`
 
   if (options.includeBadge) {
-    const badgeBlock = `\n<p align="center">\n  <a href="https://gitascii.com">\n    <img alt="Made with GitAscii" src="https://gitascii.com/api/badge/${username}" width="100%">\n  </a>\n</p>`
+    const badgeBlock = `\n<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->\n<p align="center">\n  <a href="https://gitascii.com">\n    <img alt="GitAscii Profile Insights" src="https://gitascii.com/api/badge/${username}?slug=${slug}" width="100%">\n  </a>\n</p>\n<!-- GITASCII:TELEMETRY:END -->`
     return `${pictureBlock}\n${badgeBlock}`
   }
 
@@ -44,7 +44,7 @@ export function updateReadmeContent(
   }
 
   const legacyWidgetRegex =
-    /<picture>[\s\S]*?<\/picture>(?:\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
+    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)*<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
 
   if (currentContent.match(legacyWidgetRegex)) {
     return currentContent.replace(legacyWidgetRegex, newEmbedCode)

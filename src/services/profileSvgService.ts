@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 
-import { embedExternalImages } from '@/engine/core/embedExternalImages'
 import { renderSvg } from '@/engine/core/SVGEngine'
 import { createConfiguration } from '@/engine/core/TemplateRenderer'
+import { processExternalAssets as embedExternalImages } from '@/engine/inliner/externalAssetInliner'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
 import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
@@ -20,6 +20,15 @@ export interface ProfileSvgRequestOptions {
   template?: string | null
   widgets?: string[] | null
   isExplicitSlug?: boolean
+}
+
+const RAW_GITHUB_CONTENT_BASE_URL = 'https://raw.githubusercontent.com'
+const RAW_SVG_CHECK_TIMEOUT_MS = 1_500
+const RAW_SVG_EXISTS_CACHE_TTL_MS = 10 * 60 * 1_000
+const RAW_SVG_MISSING_CACHE_TTL_MS = 60 * 1_000
+
+function getRawProfileSvgUrl(username: string, slug: string, theme: string): string {
+  return `${RAW_GITHUB_CONTENT_BASE_URL}/${username}/${username}/gitascii/profiles/${slug}/${theme}.svg`
 }
 
 function computeEtag(content: string): string {
@@ -141,6 +150,36 @@ async function getCachedSvgPayload(
   )
 }
 
+const v2RawSvgCache = new Map<string, { exists: boolean; expiresAt: number }>()
+
+async function checkV2RawSvgExists(
+  username: string,
+  slug: string,
+  theme: string
+): Promise<boolean> {
+  const key = `${username}:${slug}:${theme}`
+  const now = Date.now()
+  const cached = v2RawSvgCache.get(key)
+  if (cached && cached.expiresAt > now) {
+    return cached.exists
+  }
+
+  try {
+    const rawUrl = getRawProfileSvgUrl(username, slug, theme)
+    const res = await fetch(rawUrl, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(RAW_SVG_CHECK_TIMEOUT_MS),
+    })
+    const exists = res.status === 200
+    const cacheTtl = exists ? RAW_SVG_EXISTS_CACHE_TTL_MS : RAW_SVG_MISSING_CACHE_TTL_MS
+    v2RawSvgCache.set(key, { exists, expiresAt: now + cacheTtl })
+    return exists
+  } catch (error) {
+    console.warn('[ProfileSvgService] Failed to check the published profile SVG:', error)
+    return false
+  }
+}
+
 export async function generateProfileSvgResponse(
   request: Request,
   options: ProfileSvgRequestOptions
@@ -214,6 +253,25 @@ export async function generateProfileSvgResponse(
           .sort()
           .slice(0, 12)
       : undefined
+
+    const hasOverrides = Boolean(
+      templateParam || widgetsParam || previewDateParam || isDynamicResolved
+    )
+    if (!hasOverrides) {
+      const v2Exists = await checkV2RawSvgExists(username, profileSlug, theme)
+      if (v2Exists) {
+        const rawUrl = getRawProfileSvgUrl(username, profileSlug, theme)
+        return new NextResponse(null, {
+          status: 302,
+          headers: {
+            Location: rawUrl,
+            'Cache-Control': 'public, max-age=300, s-maxage=3600',
+            'CDN-Cache-Control': 'public, s-maxage=3600',
+            'X-GitAscii-V2-Offload': 'true',
+          },
+        })
+      }
+    }
 
     const payload = await getCachedSvgPayload(
       username,
@@ -313,7 +371,9 @@ export async function generateProfileSvgResponse(
                 ]
               : undefined,
           })
-        } catch {}
+        } catch (error) {
+          console.warn('[ProfileSvgService] Failed to record profile telemetry:', error)
+        }
       }
 
       if (typeof after === 'function') {
@@ -321,7 +381,9 @@ export async function generateProfileSvgResponse(
       } else {
         void telemetryHandler()
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileSvgService] Failed to schedule profile telemetry:', error)
+    }
 
     if (isCacheHit) {
       return new NextResponse(null, {

@@ -343,6 +343,28 @@ export const MIGRATIONS: Migration[] = [
       `
     },
   },
+  {
+    version: '010_profile_daily_dimensions',
+    name: 'Create profile daily dimensions table for lean PostgreSQL analytics',
+    up: async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS profile_daily_dimensions (
+          user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          slug VARCHAR(100) NOT NULL DEFAULT 'default',
+          date_str VARCHAR(15) NOT NULL,
+          dimension VARCHAR(50) NOT NULL,
+          dimension_key VARCHAR(255) NOT NULL,
+          count INTEGER NOT NULL DEFAULT 1,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, slug, date_str, dimension, dimension_key)
+        );
+      `
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_profile_daily_dim
+        ON profile_daily_dimensions (user_id, dimension, date_str);
+      `
+    },
+  },
 ]
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {
@@ -407,9 +429,13 @@ export async function runMigrations(): Promise<{ applied: string[]; alreadyAppli
 
     return result
   } finally {
-    await sql`
-      DELETE FROM system_locks
-      WHERE lock_name = 'schema_migrations' AND locked_by = ${instanceId};
-    `.catch(() => {})
+    try {
+      await sql`
+        DELETE FROM system_locks
+        WHERE lock_name = 'schema_migrations' AND locked_by = ${instanceId};
+      `
+    } catch (error) {
+      console.warn('[Migrations] Failed to release the schema migration lock:', error)
+    }
   }
 }

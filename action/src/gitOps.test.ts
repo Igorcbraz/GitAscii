@@ -195,4 +195,56 @@ describe('GitOpsService Suite', () => {
     expect(result.unchanged).toBe(false)
     expect(result.staleSkipped).toBe(false)
   })
+
+  it('discovers all multi-profile configuration files in branch tree', async () => {
+    const mockBranchData = {
+      commit: { sha: 'commit_sha_123', commit: { tree: { sha: 'tree_sha_456' } } },
+    }
+    const mockTreeData = {
+      tree: [
+        { path: 'gitascii.json', type: 'blob', sha: 'sha_default_cfg' },
+        { path: 'gitascii_work.json', type: 'blob', sha: 'sha_work_cfg' },
+        { path: 'profiles/default/dark.svg', type: 'blob', sha: 'blob_dark' },
+      ],
+    }
+
+    const defaultCfg = { version: 1, profileSlug: 'default', templateId: 'terminal' }
+    const workCfg = { version: 1, profileSlug: 'work', templateId: 'retro' }
+
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify(mockBranchData), { status: 200 })) // getBranchState -> branch
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            content: Buffer.from(JSON.stringify(defaultCfg)).toString('base64'),
+            sha: 'sha_default_cfg',
+          }),
+          { status: 200 }
+        )
+      ) // getBranchState -> contents/gitascii.json
+      .mockResolvedValueOnce(new Response(JSON.stringify(mockTreeData), { status: 200 })) // getBranchState -> trees
+      .mockResolvedValueOnce(new Response(JSON.stringify(mockTreeData), { status: 200 })) // getAllProfileConfigs -> trees
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            content: Buffer.from(JSON.stringify(defaultCfg)).toString('base64'),
+          }),
+          { status: 200 }
+        )
+      ) // blob default
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            content: Buffer.from(JSON.stringify(workCfg)).toString('base64'),
+          }),
+          { status: 200 }
+        )
+      ) // blob work
+
+    const res = await gitOps.getAllProfileConfigs('gitascii')
+    expect(res.exists).toBe(true)
+    expect(res.configs).toHaveLength(2)
+    expect(res.configs[0].slug).toBe('default')
+    expect(res.configs[1].slug).toBe('work')
+  })
 })

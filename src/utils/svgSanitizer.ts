@@ -86,16 +86,22 @@ export function sanitizeSvg(svgContent: string): string {
   cleaned = cleaned.replace(attrRegex, (match, _prefix, valDouble, valSingle, valUnquoted) => {
     const rawVal =
       valDouble !== undefined ? valDouble : valSingle !== undefined ? valSingle : valUnquoted || ''
+    if (rawVal.startsWith('data:image/')) {
+      const isSafeDataImage =
+        /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml)(?:;[a-z0-9._=-]+)*;base64,/i.test(
+          rawVal.slice(0, 100)
+        )
+      return isSafeDataImage ? match : ' href="#"'
+    }
+
     const decoded = decodeXmlEntities(rawVal)
       .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '')
       .toLowerCase()
 
-    const isSafeDataImage =
-      /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml)(?:;[a-z0-9._=-]+)*;base64,/i.test(decoded)
     if (
       decoded.startsWith('javascript:') ||
       decoded.startsWith('vbscript:') ||
-      (decoded.startsWith('data:') && !isSafeDataImage) ||
+      decoded.startsWith('data:') ||
       decoded.startsWith('//')
     ) {
       return ' href="#"'

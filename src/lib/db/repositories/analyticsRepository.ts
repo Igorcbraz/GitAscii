@@ -97,7 +97,8 @@ export async function recordViewInDb(
   username: string,
   slug: string,
   dateStr: string,
-  isUnique: boolean
+  isUnique: boolean,
+  dimensions?: [string, string][]
 ): Promise<void> {
   if (!hasDbConfig()) return
   const u = username.toLowerCase().trim()
@@ -127,6 +128,26 @@ export async function recordViewInDb(
       uniques = profile_daily_analytics.uniques + ${isUnique ? 1 : 0},
       updated_at = NOW();
   `
+
+  if (dimensions && dimensions.length > 0) {
+    for (const [dim, key] of dimensions) {
+      if (!key) continue
+      try {
+        await sql`
+          INSERT INTO profile_daily_dimensions (user_id, slug, date_str, dimension, dimension_key, count, updated_at)
+          VALUES (${user.id}, ${cleanSlug}, ${dateStr}, ${dim}, ${key}, 1, NOW())
+          ON CONFLICT (user_id, slug, date_str, dimension, dimension_key) DO UPDATE SET
+            count = profile_daily_dimensions.count + 1,
+            updated_at = NOW();
+        `
+      } catch (error) {
+        console.warn('[AnalyticsRepository] Failed to persist profile dimension', {
+          dimension: dim,
+          error,
+        })
+      }
+    }
+  }
 }
 
 export async function getDailyAnalyticsFromDb(
@@ -150,4 +171,81 @@ export async function getDailyAnalyticsFromDb(
     views: Number(rows[0].views || 0),
     uniques: Number(rows[0].uniques || 0),
   }
+}
+
+export async function getTimeSeriesFromDb(
+  username: string,
+  dateList: string[],
+  slug?: string
+): Promise<Array<{ date: string; views: number; uniques: number }>> {
+  if (!hasDbConfig() || dateList.length === 0) return []
+  const u = username.toLowerCase().trim()
+  const cleanSlug = slug && slug !== 'all' ? slug.toLowerCase().trim() : null
+
+  const rows = cleanSlug
+    ? await sql`
+        SELECT a.date_str, SUM(a.views) as views, SUM(a.uniques) as uniques
+        FROM profile_daily_analytics a
+        JOIN users u ON u.id = a.user_id
+        WHERE u.username = ${u} AND a.slug = ${cleanSlug} AND a.date_str = ANY(${dateList})
+        GROUP BY a.date_str;
+      `
+    : await sql`
+        SELECT a.date_str, SUM(a.views) as views, SUM(a.uniques) as uniques
+        FROM profile_daily_analytics a
+        JOIN users u ON u.id = a.user_id
+        WHERE u.username = ${u} AND a.date_str = ANY(${dateList})
+        GROUP BY a.date_str;
+      `
+
+  const map = new Map<string, { views: number; uniques: number }>()
+  for (const r of rows) {
+    map.set(r.date_str, {
+      views: Number(r.views || 0),
+      uniques: Number(r.uniques || 0),
+    })
+  }
+
+  return dateList.map((d) => ({
+    date: d,
+    views: map.get(d)?.views || 0,
+    uniques: map.get(d)?.uniques || 0,
+  }))
+}
+
+export async function getDimensionCountsFromDb(
+  username: string,
+  dimension: string,
+  dateList: string[],
+  slug?: string
+): Promise<Record<string, number>> {
+  if (!hasDbConfig() || dateList.length === 0) return {}
+  const u = username.toLowerCase().trim()
+  const cleanSlug = slug && slug !== 'all' ? slug.toLowerCase().trim() : null
+
+  const rows = cleanSlug
+    ? await sql`
+        SELECT d.dimension_key, SUM(d.count) as total_count
+        FROM profile_daily_dimensions d
+        JOIN users u ON u.id = d.user_id
+        WHERE u.username = ${u} AND d.dimension = ${dimension} AND d.slug = ${cleanSlug} AND d.date_str = ANY(${dateList})
+        GROUP BY d.dimension_key
+        ORDER BY total_count DESC
+        LIMIT 50;
+      `
+    : await sql`
+        SELECT d.dimension_key, SUM(d.count) as total_count
+        FROM profile_daily_dimensions d
+        JOIN users u ON u.id = d.user_id
+        WHERE u.username = ${u} AND d.dimension = ${dimension} AND d.date_str = ANY(${dateList})
+        GROUP BY d.dimension_key
+        ORDER BY total_count DESC
+        LIMIT 50;
+      `
+
+  const result: Record<string, number> = {}
+  for (const r of rows) {
+    result[r.dimension_key] = Number(r.total_count || 0)
+  }
+  return result
 }
