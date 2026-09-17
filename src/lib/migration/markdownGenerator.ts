@@ -49,7 +49,7 @@ export function updateReadmeContent(
   }
 
   const legacyWidgetRegex =
-    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)*<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/i
+    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)?<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/i
 
   if (currentContent.match(legacyWidgetRegex)) {
     return currentContent.replace(legacyWidgetRegex, newEmbedCode)

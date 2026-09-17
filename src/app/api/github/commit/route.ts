@@ -301,8 +301,9 @@ export async function POST(request: Request) {
     })
   } catch (error: unknown) {
     Sentry.captureException(error)
-    console.error('Commit error:', error)
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    const rawMessage = error instanceof Error ? error.message : 'Internal Server Error'
+    const message = rawMessage.replace(/[\r\n]+/g, ' ')
+    console.error(`Commit error: ${message}`)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

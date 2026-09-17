@@ -1,0 +1,14 @@
+﻿name: 'GitAscii CodeQL Configuration'
+
+paths:
+  - src/
+
+paths-ignore:
+  - action/dist/
+  - node_modules/
+  - '**/test/**'
+  - '**/*.test.ts'
+  - '**/*.spec.ts'
+
+queries:
+  - uses: security-extended
