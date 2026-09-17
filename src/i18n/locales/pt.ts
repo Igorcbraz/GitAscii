@@ -1037,6 +1037,52 @@ export const pt: Record<string, string> = {
     'Novos widgets e layouts estão esperando pelo seu README no GitHub, @{username}.',
   'email.reengagement.subject':
     'Eleve o nível do seu README no GitHub com novos recursos do GitAscii',
+  'email.v2_announcement.badge': '[ ATUALIZAÇÃO IMPORTANTE · GITASCII V2 ]',
+  'email.v2_announcement.cta': 'Abrir Studio e Migrar para v2',
+  'email.v2_announcement.disclaimer':
+    'Você está recebendo este comunicado porque tem uma conta ativa no GitAscii.',
+  'email.v2_announcement.explore_link': 'Explorar galeria de perfis da comunidade',
+  'email.v2_announcement.feature1_desc':
+    'SVGs e configurações agora ficam diretamente no seu repositório em uma branch dedicada (gitascii) com carregamento instantâneo.',
+  'email.v2_announcement.feature1_title': 'Branch de Dados com Zero Latência',
+  'email.v2_announcement.feature2_desc':
+    'Estamos abrindo Pull Requests de atualização aos poucos em todos os repositórios v1 para automatizar a transição.',
+  'email.v2_announcement.feature2_title': 'Migração Automatizada via PR',
+  'email.v2_announcement.feature3_desc':
+    'Quer migrar na hora? Basta abrir o estúdio, fazer qualquer leve alteração em um widget ou estilo e dar o commit automático.',
+  'email.v2_announcement.feature3_title': 'Migração Imediata e Rápida',
+  'email.v2_announcement.headline': 'O GitAscii v2 foi lançado oficialmente,',
+  'email.v2_announcement.intro':
+    'Olá {displayName}, devido ao alto tráfego e crescimento exponencial de visualizações de perfis, reconstruímos toda a arquitetura do GitAscii para entregar renderização instantânea e máxima estabilidade.',
+  'email.v2_announcement.subject':
+    '⚡ GitAscii v2 está no ar — O que muda no seu perfil e como migrar',
+  'v2tour.step1.badge': 'NOVA VERSÃO · GITASCII V2',
+  'v2tour.step1.title_prefix': 'O ',
+  'v2tour.step1.title_highlight': 'GitAscii v2',
+  'v2tour.step1.title_suffix': ' chegou! 🚀',
+  'v2tour.step1.desc':
+    'Reconstruímos toda a infraestrutura da plataforma. Seus SVGs agora vivem diretamente em uma branch dedicada (gitascii) com carregamento instantâneo, zero latência e 100% de disponibilidade.',
+  'v2tour.step1.tip_label': 'Passo 1 de 3: Migração Expressa',
+  'v2tour.step1.tip_text':
+    'Você não precisa esperar a fila de PRs. Migre em menos de 10 segundos seguindo os próximos 2 passos!',
+  'v2tour.step2.badge': 'PASSO 2 · AJUSTE O CANVAS',
+  'v2tour.step2.title_prefix': 'Mova ou edite ',
+  'v2tour.step2.title_highlight': 'qualquer widget',
+  'v2tour.step2.title_suffix': '',
+  'v2tour.step2.desc':
+    'Para gerar a nova estrutura da v2, basta arrastar qualquer widget 1px para o lado, alterar uma cor ou fazer um leve ajuste no layout.',
+  'v2tour.step2.tip_label': 'Ação Necessária',
+  'v2tour.step2.tip_text':
+    'Arraste um widget ou altere uma propriedade na barra lateral para registrar alterações pendentes.',
+  'v2tour.step3.badge': 'PASSO 3 · COMMIT AUTOMÁTICO',
+  'v2tour.step3.title_prefix': 'Clique em ',
+  'v2tour.step3.title_highlight': 'Update README',
+  'v2tour.step3.title_suffix': '',
+  'v2tour.step3.desc':
+    'Ao clicar no botão de commit, o GitAscii criará automaticamente a branch gitascii, salvará seus SVGs Dark/Light e atualizará o README com o workflow da v2.',
+  'v2tour.step3.tip_label': 'Tudo Automático',
+  'v2tour.step3.tip_text':
+    'Seu perfil estará 100% migrado para a v2 e pronto para receber atualizações automáticas via GitHub Actions!',
   'email.request_star.badge': '[ APOIO DA COMUNIDADE · CÓDIGO ABERTO ]',
   'email.request_star.continue_link': 'Ou continue personalizando mais widgets no estúdio',
   'email.request_star.cta': 'Dar Estrela no GitHub',

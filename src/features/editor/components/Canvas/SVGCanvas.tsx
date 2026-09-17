@@ -828,6 +828,7 @@ export function SVGCanvas() {
     >
       <div
         ref={containerRef}
+        id="tour-canvas-area"
         data-zoom={zoom}
         data-canvas-width={800}
         data-canvas-height={canvasHeight}
