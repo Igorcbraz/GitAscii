@@ -332,20 +332,8 @@ export function useScrollJourney(enabled = true) {
           if (focalDocY >= a.centerDocY && focalDocY <= b.centerDocY) {
             const span = b.centerDocY - a.centerDocY
 
-            // Limit the transition distance so he doesn't drift slowly across massive sections
-            const maxTransition = window.innerHeight * 0.8
-            const mid = a.centerDocY + span / 2
-            const start = mid - maxTransition / 2
-            const end = mid + maxTransition / 2
-
-            let tRaw = 0
-            if (focalDocY <= start) {
-              tRaw = 0
-            } else if (focalDocY >= end) {
-              tRaw = 1
-            } else {
-              tRaw = (focalDocY - start) / maxTransition
-            }
+            // Linear normalized progression across the entire distance between both sections
+            const tRaw = span > 0 ? Math.max(0, Math.min(1, (focalDocY - a.centerDocY) / span)) : 0
 
             // Smooth hermite / smoothstep interpolation
             const t = tRaw * tRaw * (3 - 2 * tRaw)
@@ -374,6 +362,9 @@ export function useScrollJourney(enabled = true) {
 
       // Update physics target continuously with scroll
       if (resolvedTargetCoords && !physics.isDraggingActive()) {
+        if (physics.isTravelingActive()) {
+          physics.stopTravel()
+        }
         physics.updateAnchorTarget(
           resolvedTargetCoords.x,
           resolvedTargetCoords.y,

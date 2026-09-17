@@ -116,6 +116,26 @@ export class LocomotionPhysics {
     return this.isDragging
   }
 
+  public isTravelingActive(): boolean {
+    return this.isTraveling
+  }
+
+  public stopTravel(): void {
+    if (this.isTraveling) {
+      this.isTraveling = false
+      this.targetX = this.currentX
+      this.targetY = this.currentY
+      this.targetScale = this.currentScale
+      this.currentElevation = 0
+      this.currentRotation = 0
+      if (this.onArrivalCallback) {
+        const cb = this.onArrivalCallback
+        this.onArrivalCallback = null
+        cb()
+      }
+    }
+  }
+
   public travelTo(
     targetX: number,
     targetY: number,

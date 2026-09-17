@@ -143,11 +143,8 @@ export function StrobiHost() {
 
   useEffect(() => {
     let frameId: number
-    let active = false
 
     const tick = (currentTime: number) => {
-      if (!active) return
-
       const currentAnchorConfig = state.currentAnchorId ? registry.get(state.currentAnchorId) : null
       const enableFloat = currentAnchorConfig?.float !== false && !state.isSleeping
       const enableBounce = currentAnchorConfig?.bounce === true || state.currentMood === 'jumping'
@@ -170,14 +167,9 @@ export function StrobiHost() {
       frameId = requestAnimationFrame(tick)
     }
 
-    const timerId = setTimeout(() => {
-      active = true
-      frameId = requestAnimationFrame(tick)
-    }, 2500)
+    frameId = requestAnimationFrame(tick)
 
     return () => {
-      active = false
-      clearTimeout(timerId)
       if (frameId) cancelAnimationFrame(frameId)
     }
   }, [
@@ -288,14 +280,7 @@ export function StrobiHost() {
     }
   }, [state.muted, controller])
 
-  const [isReady, setIsReady] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 2500)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (!mounted || !state.visible || !isReady) {
+  if (!mounted || !state.visible) {
     return (
       <div
         id="strobi-persistent-actor"
