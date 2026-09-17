@@ -26,6 +26,7 @@ import { WidgetDragOverlay } from './Sidebar/WidgetDragOverlay'
 import { WidgetLibrary } from './Sidebar/WidgetLibrary'
 import { EditorToolbar } from './Toolbar/EditorToolbar'
 import { EditorTour } from './Tour/EditorTour'
+import { V2MigrationTour } from './Tour/V2MigrationTour'
 
 interface EditorLayoutProps {
   username: string
@@ -640,6 +641,7 @@ export function EditorLayout({
       </div>
 
       <EditorTour embedded={embedded} />
+      <V2MigrationTour embedded={embedded} />
       <div className="fixed bottom-6 right-6 z-[180] pointer-events-none">
         <StrobiAnchor id="editor" size={68} align="bottom-right" scene="editor" float />
       </div>

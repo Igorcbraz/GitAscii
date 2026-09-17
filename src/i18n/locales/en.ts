@@ -1027,9 +1027,53 @@ export const en: Record<string, string> = {
   'email.reengagement.headline': 'Level up your GitHub README,',
   'email.reengagement.intro':
     "Hi {displayName}, it's been {inactiveDays} days since you last updated your profile. We've added new community widgets and theme customization options to the studio.",
-  'email.reengagement.preview':
-    'New widgets and layouts are waiting for your GitHub README, @{username}.',
   'email.reengagement.subject': 'Level up your GitHub README with new GitAscii features',
+  'email.v2_announcement.badge': '[ INFRASTRUCTURE UPGRADE · GITASCII V2 ]',
+  'email.v2_announcement.cta': 'Open Studio & Upgrade to v2',
+  'email.v2_announcement.disclaimer':
+    'You are receiving this product announcement because you have an active GitAscii account.',
+  'email.v2_announcement.explore_link': 'Explore community README profiles',
+  'email.v2_announcement.feature1_desc':
+    'SVGs and configuration now reside directly in your repository on an isolated gitascii branch for instant loading.',
+  'email.v2_announcement.feature1_title': 'Zero-Latency Data Branch',
+  'email.v2_announcement.feature2_desc':
+    'We are progressively opening upgrade Pull Requests across all v1 repositories to automate this transition.',
+  'email.v2_announcement.feature2_title': 'Automated PR Migration',
+  'email.v2_announcement.feature3_desc':
+    'Want to upgrade immediately? Simply open the studio, tweak any widget or style, and hit automatic commit.',
+  'email.v2_announcement.feature3_title': 'Fast-Track Instant Migration',
+  'email.v2_announcement.headline': 'GitAscii v2 is officially live,',
+  'email.v2_announcement.intro':
+    'Hi {displayName}, due to high traffic and surging profile views, we completely re-architected GitAscii to deliver instant rendering and 99.9% uptime with zero latency.',
+  'email.v2_announcement.subject':
+    '⚡ GitAscii v2 is Live — What changes and how to upgrade your profile',
+  'v2tour.step1.badge': 'NEW RELEASE · GITASCII V2',
+  'v2tour.step1.title_prefix': 'GitAscii ',
+  'v2tour.step1.title_highlight': 'v2 Architecture',
+  'v2tour.step1.title_suffix': ' is here! 🚀',
+  'v2tour.step1.desc':
+    'We completely overhauled GitAscii. Your profile SVGs and data now live directly in an isolated gitascii branch for zero latency, instant loading, and maximum reliability.',
+  'v2tour.step1.tip_label': 'Step 1 of 3: Fast-Track Migration',
+  'v2tour.step1.tip_text':
+    'No need to wait for our background PR queue. Follow the next 2 steps to upgrade your profile in 10 seconds!',
+  'v2tour.step2.badge': 'STEP 2 · TWEAK THE CANVAS',
+  'v2tour.step2.title_prefix': 'Move or tweak ',
+  'v2tour.step2.title_highlight': 'any widget',
+  'v2tour.step2.title_suffix': '',
+  'v2tour.step2.desc':
+    'To prepare your new v2 structure, simply drag any widget slightly, change a color, or adjust a style on the canvas.',
+  'v2tour.step2.tip_label': 'Action Required',
+  'v2tour.step2.tip_text':
+    'Drag any widget 1px or modify any property in the sidebar to mark pending changes.',
+  'v2tour.step3.badge': 'STEP 3 · 1-CLICK COMMIT',
+  'v2tour.step3.title_prefix': 'Click ',
+  'v2tour.step3.title_highlight': 'Update README',
+  'v2tour.step3.title_suffix': '',
+  'v2tour.step3.desc':
+    'Clicking the commit button automatically provisions your gitascii data branch, saves your Dark/Light SVGs, and configures the automated v2 GitHub Action.',
+  'v2tour.step3.tip_label': 'Fully Automated',
+  'v2tour.step3.tip_text':
+    'Your profile is now 100% migrated to v2 and will auto-refresh seamlessly via GitHub Actions!',
   'email.request_star.badge': '[ COMMUNITY SUPPORT · OPEN SOURCE ]',
   'email.request_star.continue_link': 'Or continue customizing more widgets in the studio',
   'email.request_star.cta': 'Star on GitHub',

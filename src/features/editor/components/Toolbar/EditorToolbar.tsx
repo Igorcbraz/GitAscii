@@ -425,6 +425,7 @@ export function EditorToolbar({
       return (
         <button
           onClick={handleCommitToGithub}
+          id="tour-commit-button"
           data-testid="commit-github-btn"
           disabled={isCommitDisabled}
           title={buttonTitle}
@@ -438,6 +439,7 @@ export function EditorToolbar({
 
     return (
       <div
+        id="tour-commit-button"
         className="relative flex items-stretch"
         data-testid="commit-github-btn"
         title={buttonTitle}
