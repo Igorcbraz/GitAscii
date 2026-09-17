@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.0.0](https://github.com/Igorcbraz/GitAscii/compare/v1.24.0...v2.0.0) (2026-09-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **v2:** Transition profile rendering to GitHub-Native publishing architecture (V2).
+
+### Features
+
+* add profile telemetry and multi-profile publishing ([e75dccc](https://github.com/Igorcbraz/GitAscii/commit/e75dccc34d3e26438f81ca93a9b235fb1f3ad8ef))
+* **billing:** prevent duplicate pro subscriptions and double charging ([0e397f9](https://github.com/Igorcbraz/GitAscii/commit/0e397f99d4d21bf4a57cb1080e6c1e7330545cc1))
+* **editor:** add 3-step V2 Migration Tour onboarding flow ([70b80b1](https://github.com/Igorcbraz/GitAscii/commit/70b80b1c9456b4daef185c0231cf9812173d4b03))
+* improve profile publishing and pro dashboards ([8647e0b](https://github.com/Igorcbraz/GitAscii/commit/8647e0b29b320c43e33646974827935083b170f8))
+* **pro-analytics:** make Postgres the source of truth ([3f7d39f](https://github.com/Igorcbraz/GitAscii/commit/3f7d39f174d346d2250ef64af300bf72ce2d1ca6))
+* **pro:** update pricing tiers, localization, and harden test cleanup ([cd062e5](https://github.com/Igorcbraz/GitAscii/commit/cd062e570046f5710bbde1178cdfe94bf0aeccf1))
+* **v2:** implement github-native publishing and migrations ([36091d3](https://github.com/Igorcbraz/GitAscii/commit/36091d3c3e108becbfe001961b3d18f5a745c305))
+* **widgets:** add Minecraft and Pokemon Trainer widgets, remove 8-bit GitHub theme ([e4c3c49](https://github.com/Igorcbraz/GitAscii/commit/e4c3c4974c351c0e2137f0fda686063062128768))
+
+
+### Bug Fixes
+
+* **editor:** show preview nudge only once ([26847a1](https://github.com/Igorcbraz/GitAscii/commit/26847a17f7ba11d8827f1a0aa000e5249dbcab60))
+* **engine:** correct parameter count for Minecraft renderers in WidgetRegistry ([7a8a982](https://github.com/Igorcbraz/GitAscii/commit/7a8a9827f83d4349f029498b3564cc1e3a191aa4))
+* **lint:** eliminate all unused variable and argument warnings ([2c95bf3](https://github.com/Igorcbraz/GitAscii/commit/2c95bf30f05a18225cf2528c87435cdaceb742be))
+* **mascot:** restore continuous landing scroll journey and anchor positioning ([4cdd2bd](https://github.com/Igorcbraz/GitAscii/commit/4cdd2bdd662575b6e4e442c581e7e37d9671dc86))
+* **security:** resolve CodeQL alerts and scope scanning with config file ([c7a1e01](https://github.com/Igorcbraz/GitAscii/commit/c7a1e019f5e1273f632b9e9c0c9ab3f222cff3ad))
+* **stripe:** use constructEventAsync for subtle crypto compatibility ([7187ea4](https://github.com/Igorcbraz/GitAscii/commit/7187ea4b5e287040aea7a6cdc81260dcf3bf3c50))
+
 ## [1.24.0](https://github.com/Igorcbraz/GitAscii/compare/v1.23.0...v1.24.0) (2026-09-13)
 
 
