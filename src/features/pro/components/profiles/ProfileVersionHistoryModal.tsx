@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, History, Layers, Plus, RefreshCw, RotateCcw, Sparkles, X } from 'lucide-react'
+import { History, Plus, RefreshCw, Sparkles, X } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useI18n } from '@/i18n'
@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { ProfileVersionRecord, ProProfileRecord } from '../../types'
 import { ConfirmDialog } from '../ConfirmDialog'
-import { ProBadge } from '../ProBadge'
+import { ProfileVersionItem } from './ProfileVersionItem'
 
 interface ProfileVersionHistoryModalProps {
   profile: ProProfileRecord
@@ -42,10 +42,14 @@ export const ProfileVersionHistoryModal: React.FC<ProfileVersionHistoryModalProp
   })
   const [restoring, setRestoring] = useState(false)
 
+  const [loadedPreviews, setLoadedPreviews] = useState<Record<string, boolean>>({})
+
   const fetchVersions = useCallback(async () => {
     try {
       setRefreshing(true)
-      const res = await fetch(API_ENDPOINTS.PRO.PROFILE_VERSIONS(profile.slug))
+      const res = await fetch(
+        API_ENDPOINTS.PRO.PROFILE_VERSIONS(profile.slug) + '?_t=' + Date.now()
+      )
       if (!res.ok) throw new Error(t('pro.versions.fetch_error', 'Failed to fetch version history'))
       const data = await res.json()
       setVersions(data.versions || [])
@@ -122,7 +126,7 @@ export const ProfileVersionHistoryModal: React.FC<ProfileVersionHistoryModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fade-in">
-      <div className="w-full max-w-2xl max-h-[85vh] flex flex-col p-6 rounded-2xl bg-[#111111] border border-white/10 shadow-2xl relative">
+      <div className="w-full max-w-4xl max-h-[85vh] flex flex-col p-6 rounded-2xl bg-[#111111] border border-white/10 shadow-2xl relative">
         <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg bg-[#c5ff4a]/10 text-[#c5ff4a] border border-[#c5ff4a]/20">
@@ -258,66 +262,18 @@ export const ProfileVersionHistoryModal: React.FC<ProfileVersionHistoryModalProp
             </div>
           ) : (
             <div className="space-y-2">
-              {versions.map((ver, idx) => {
-                const isLatest = idx === 0
-                return (
-                  <div
-                    key={ver.id}
-                    className={`p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                      isLatest
-                        ? 'bg-white/[0.04] border-[#c5ff4a]/40 shadow-xs'
-                        : 'bg-[#141414] border-white/[0.08] hover:border-white/20'
-                    }`}
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-white/10 text-white border border-white/10">
-                          v{ver.versionNumber}
-                        </span>
-                        <h4 className="text-xs font-semibold text-white truncate">
-                          {ver.label ||
-                            t('pro.profiles.version_number', 'Version {num}', {
-                              num: String(ver.versionNumber),
-                            })}
-                        </h4>
-                        {isLatest && (
-                          <ProBadge variant="lime" size="sm">
-                            {t('pro.versions.current_active', 'Current Active')}
-                          </ProBadge>
-                        )}
-                      </div>
-
-                      {ver.description && (
-                        <p className="text-[11px] text-[#8a8a8a] line-clamp-2">{ver.description}</p>
-                      )}
-
-                      <div className="flex items-center gap-3 text-[10px] font-mono text-[#7a7a7a]">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(ver.createdAt).toLocaleString()}
-                        </span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Layers className="w-3 h-3 text-[#c5ff4a]" />
-                          {ver.widgetsCount} {t('pro.common.widgets', 'widgets')}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!isLatest && (
-                        <button
-                          onClick={() => setConfirmRestore({ isOpen: true, version: ver })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-all cursor-pointer hover:border-[#c5ff4a]/50"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5 text-[#c5ff4a]" />
-                          <span>{t('pro.versions.restore_btn', 'Restore')}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
+              {versions.map((ver, idx) => (
+                <ProfileVersionItem
+                  key={ver.id}
+                  version={ver}
+                  index={idx}
+                  profile={profile}
+                  isPreviewLoaded={!!loadedPreviews[ver.id]}
+                  onLoadPreview={() => setLoadedPreviews((prev) => ({ ...prev, [ver.id]: true }))}
+                  onRestore={() => setConfirmRestore({ isOpen: true, version: ver })}
+                  translate={t}
+                />
+              ))}
             </div>
           )}
         </div>

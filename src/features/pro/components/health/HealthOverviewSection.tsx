@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  ImageIcon,
   Layers,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -150,38 +151,7 @@ export const HealthOverviewSection: React.FC<HealthOverviewSectionProps> = ({
               : `/${effectiveUsername}/${prof.profileSlug}`
 
             const profileConfig = profileConfigs[prof.profileSlug]
-            const widgetsList: WidgetInstance[] = profileConfig?.widgets || [
-              {
-                instanceId: 'inst_bio',
-                widgetId: 'bio',
-                position: { x: 0, y: 0 },
-                size: { width: 800, height: 130 },
-                config: { title: 'Developer Bio & Avatar' },
-                locked: false,
-                visible: true,
-                zIndex: 1,
-              },
-              {
-                instanceId: 'inst_stats',
-                widgetId: 'stats',
-                position: { x: 0, y: 140 },
-                size: { width: 800, height: 180 },
-                config: { title: 'GitHub Stats Cards' },
-                locked: false,
-                visible: true,
-                zIndex: 2,
-              },
-              {
-                instanceId: 'inst_snake',
-                widgetId: 'contribution-snake',
-                position: { x: 0, y: 330 },
-                size: { width: 800, height: 160 },
-                config: { title: 'Contribution Snake Game' },
-                locked: false,
-                visible: true,
-                zIndex: 3,
-              },
-            ]
+            const widgetsList: WidgetInstance[] = profileConfig?.widgets || []
 
             const maxX = Math.max(
               800,
@@ -191,6 +161,8 @@ export const HealthOverviewSection: React.FC<HealthOverviewSectionProps> = ({
               340,
               ...widgetsList.map((w) => (w.position?.y || 0) + (w.size?.height || 120))
             )
+
+            const isEmpty = widgetsList.length === 0
 
             return (
               <div
@@ -268,13 +240,13 @@ export const HealthOverviewSection: React.FC<HealthOverviewSectionProps> = ({
                   </div>
                   <div className="bg-[#0c0c0c] py-2">
                     <span className="text-[10px] text-[#7a7a7a] block uppercase">
-                      {t('pro.health.th_renders', 'Renders')}
+                      {t('pro.health.th_renders', 'Publish Runs')}
                     </span>
                     <span className="font-bold text-white">{prof.totalRenders || 0}</span>
                   </div>
                   <div className="bg-[#0c0c0c] py-2">
                     <span className="text-[10px] text-[#7a7a7a] block uppercase">
-                      {t('pro.health.th_latency', 'Latency')}
+                      {t('pro.health.th_latency', 'Publish Time')}
                     </span>
                     <span className="font-bold text-white">{prof.avgRenderDurationMs || 24}ms</span>
                   </div>
@@ -296,110 +268,136 @@ export const HealthOverviewSection: React.FC<HealthOverviewSectionProps> = ({
                   <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
 
                   <div className="relative z-10 w-full h-full flex items-center justify-center overflow-hidden">
-                    <svg
-                      width="100%"
-                      height="100%"
-                      viewBox={`0 0 ${maxX} ${maxY + 20}`}
-                      preserveAspectRatio="xMidYMid meet"
-                      className="w-full h-full max-h-[260px] select-none"
-                    >
-                      <defs>
-                        <pattern
-                          id={`grid-pat-${prof.profileSlug}`}
-                          width="20"
-                          height="20"
-                          patternUnits="userSpaceOnUse"
+                    {isEmpty ? (
+                      <div className="relative z-10 flex flex-col items-center justify-center text-center p-6 space-y-2">
+                        <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                          <ImageIcon className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs font-semibold text-white">
+                          {t('pro.profiles.preview_rendering', 'Preview Rendering')}
+                        </p>
+                        <p className="text-[11px] text-[#8a8a8a] max-w-sm">
+                          {t(
+                            'pro.profiles.preview_rendering_desc',
+                            'Open this profile in the Visual Editor to customize widgets and initial layout.'
+                          )}
+                        </p>
+                        <Link
+                          href={editorUrl}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-white transition-colors mt-2 cursor-pointer"
                         >
-                          <circle cx="2" cy="2" r="0.75" fill="#333" opacity="0.3" />
-                        </pattern>
-                      </defs>
+                          <span>
+                            {t('pro.profiles.open_visual_editor', 'Open in Visual Editor')}
+                          </span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    ) : (
+                      <svg
+                        width="100%"
+                        height="100%"
+                        viewBox={`0 0 ${maxX} ${maxY + 20}`}
+                        preserveAspectRatio="xMidYMid meet"
+                        className="w-full h-full max-h-[260px] select-none"
+                      >
+                        <defs>
+                          <pattern
+                            id={`grid-pat-${prof.profileSlug}`}
+                            width="20"
+                            height="20"
+                            patternUnits="userSpaceOnUse"
+                          >
+                            <circle cx="2" cy="2" r="0.75" fill="#333" opacity="0.3" />
+                          </pattern>
+                        </defs>
 
-                      <rect
-                        width={maxX}
-                        height={maxY + 20}
-                        fill={profileConfig?.globalStyles?.backgroundColor || '#0d1117'}
-                        rx={profileConfig?.globalStyles?.borderRadius || 12}
-                      />
-                      <rect
-                        width={maxX}
-                        height={maxY + 20}
-                        fill={`url(#grid-pat-${prof.profileSlug})`}
-                        rx={profileConfig?.globalStyles?.borderRadius || 12}
-                      />
+                        <rect
+                          width={maxX}
+                          height={maxY + 20}
+                          fill={profileConfig?.globalStyles?.backgroundColor || '#0d1117'}
+                          rx={profileConfig?.globalStyles?.borderRadius || 12}
+                        />
+                        <rect
+                          width={maxX}
+                          height={maxY + 20}
+                          fill={`url(#grid-pat-${prof.profileSlug})`}
+                          rx={profileConfig?.globalStyles?.borderRadius || 12}
+                        />
 
-                      {widgetsList
-                        .filter((w) => w.visible !== false)
-                        .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
-                        .map((widget) => {
-                          const widgetErr = profileActiveErrs.find(
-                            (e) =>
-                              e.widgetId === widget.widgetId ||
-                              (e.widgetId === 'contribution-snake' &&
-                                widget.widgetId.includes('snake')) ||
-                              (e.widgetId === 'avatar-card' && widget.widgetId === 'bio') ||
-                              (e.widgetId === 'stats-cards' && widget.widgetId === 'stats')
-                          )
-                          const isFailing = Boolean(widgetErr)
-                          const wx = Number(widget.position?.x) || 0
-                          const wy = Number(widget.position?.y) || 0
-                          const ww = Math.max(10, Number(widget.size?.width) || 380)
-                          const wh = Math.max(10, Number(widget.size?.height) || 120)
+                        {widgetsList
+                          .filter((w) => w.visible !== false)
+                          .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+                          .map((widget) => {
+                            const widgetErr = profileActiveErrs.find(
+                              (e) =>
+                                e.widgetId === widget.widgetId ||
+                                (e.widgetId === 'contribution-snake' &&
+                                  widget.widgetId.includes('snake')) ||
+                                (e.widgetId === 'avatar-card' && widget.widgetId === 'bio') ||
+                                (e.widgetId === 'stats-cards' && widget.widgetId === 'stats')
+                            )
+                            const isFailing = Boolean(widgetErr)
+                            const wx = Number(widget.position?.x) || 0
+                            const wy = Number(widget.position?.y) || 0
+                            const ww = Math.max(10, Number(widget.size?.width) || 380)
+                            const wh = Math.max(10, Number(widget.size?.height) || 120)
 
-                          const innerSvg = renderWidgetSvg(
-                            widget,
-                            mockData,
-                            profileConfig?.globalStyles || DEFAULT_GLOBAL_STYLES,
-                            false,
-                            true
-                          )
+                            const innerSvg = renderWidgetSvg(
+                              widget,
+                              mockData,
+                              profileConfig?.globalStyles || DEFAULT_GLOBAL_STYLES,
+                              false,
+                              true
+                            )
 
-                          return (
-                            <g
-                              key={widget.instanceId}
-                              transform={`translate(${wx}, ${wy})`}
-                              className="transition-all"
-                            >
-                              <g dangerouslySetInnerHTML={{ __html: innerSvg }} />
+                            return (
+                              <g
+                                key={widget.instanceId}
+                                transform={`translate(${wx}, ${wy})`}
+                                className="transition-all"
+                              >
+                                <g dangerouslySetInnerHTML={{ __html: innerSvg }} />
 
-                              {isFailing && (
-                                <g>
-                                  <rect
-                                    x={-2}
-                                    y={-2}
-                                    width={ww + 4}
-                                    height={wh + 4}
-                                    fill="rgba(225, 29, 72, 0.14)"
-                                    stroke="#f43f5e"
-                                    strokeWidth="2.5"
-                                    strokeDasharray="6,4"
-                                    rx={8}
-                                  />
-                                  <g transform={`translate(${Math.max(8, ww - 180)}, -10)`}>
+                                {isFailing && (
+                                  <g>
                                     <rect
-                                      width="170"
-                                      height="22"
-                                      rx="4"
-                                      fill="#e11d48"
-                                      stroke="#ffffff"
-                                      strokeWidth="1"
+                                      x={-2}
+                                      y={-2}
+                                      width={ww + 4}
+                                      height={wh + 4}
+                                      fill="rgba(225, 29, 72, 0.14)"
+                                      stroke="#f43f5e"
+                                      strokeWidth="2.5"
+                                      strokeDasharray="6,4"
+                                      rx={8}
                                     />
-                                    <text
-                                      x="8"
-                                      y="15"
-                                      fill="#ffffff"
-                                      fontSize="10"
-                                      fontFamily="monospace"
-                                      fontWeight="bold"
-                                    >
-                                      ⚠ ERROR: {widget.widgetId.substring(0, 14)}
-                                    </text>
+                                    <g transform={`translate(${Math.max(8, ww - 180)}, -10)`}>
+                                      <rect
+                                        width="170"
+                                        height="22"
+                                        rx="4"
+                                        fill="#e11d48"
+                                        stroke="#ffffff"
+                                        strokeWidth="1"
+                                      />
+                                      <text
+                                        x="8"
+                                        y="15"
+                                        fill="#ffffff"
+                                        fontSize="10"
+                                        fontFamily="monospace"
+                                        fontWeight="bold"
+                                      >
+                                        ⚠ ERROR: {widget.widgetId.substring(0, 14)}
+                                      </text>
+                                    </g>
                                   </g>
-                                </g>
-                              )}
-                            </g>
-                          )
-                        })}
-                    </svg>
+                                )}
+                              </g>
+                            )
+                          })}
+                      </svg>
+                    )}
                   </div>
                 </div>
 

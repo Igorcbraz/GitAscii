@@ -1,4 +1,5 @@
 import type { SavedConfiguration, WidgetInstance } from '@/engine/types'
+import { hasDbConfig } from '@/lib/db/client'
 import {
   createProfileInDb,
   createProfileVersionInDb,
@@ -6,17 +7,41 @@ import {
   getProfileVersionByIdFromDb,
   getProfileVersionsFromDb,
   getUserProfilesFromDb,
-  setDefaultProfileInDb,
   updateProfileInDb,
 } from '@/lib/db/repositories/profileRepository'
+import { getInstallationTokenForUser } from '@/lib/githubApp'
 import { loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
-import type { ProfileVersionRecord, ProProfileRecord } from '../types/profiles'
+import {
+  DEFAULT_PROFILE_SLUG,
+  MAX_PROFILES_PER_USER,
+  PROFILE_STATUS,
+  type ProfileVersionRecord,
+  type ProProfileRecord,
+} from '../types/profiles'
 import { REDIS_KEYS } from './analyticsStore'
 import { getProRedisClient } from './redisClient'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://gitascii.com'
 const MAX_VERSIONS_PER_PROFILE = 20
+
+function getPublishedProfileUrls(username: string, slug: string) {
+  return {
+    publicUrl: API_ENDPOINTS.GITHUB.PROFILE_FILE_PAGE(username, slug, 'dark'),
+    rawSvgUrl: API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(username, slug, 'dark'),
+  }
+}
+const GITHUB_HISTORY_TIMEOUT_MS = 10_000
+const GITHUB_VERSION_TIMEOUT_MS = 10_000
+
+interface GitHubCommitHistoryItem {
+  sha: string
+  author?: { login?: string }
+  commit?: {
+    message?: string
+    author?: { name?: string; date?: string }
+  }
+}
 
 export async function getUserProfiles(username: string): Promise<ProProfileRecord[]> {
   const redis = getProRedisClient()
@@ -28,6 +53,53 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     dbProfiles = await getUserProfilesFromDb(u)
   } catch (dbErr) {
     console.warn(`[ProfileManager] PostgreSQL lookup warning for ${u}:`, dbErr)
+  }
+
+  if (hasDbConfig() && dbProfiles.length === 0) {
+    const now = new Date().toISOString()
+    const defaultProfile: ProProfileRecord = {
+      id: `prof_${u}_default`,
+      slug: DEFAULT_PROFILE_SLUG,
+      name: 'Default Profile',
+      description: 'Your primary GitHub profile README',
+      status: PROFILE_STATUS.ACTIVE,
+      isDefault: true,
+      widgetsCount: 1,
+      totalViews: 0,
+      versionCount: 1,
+      healthStatus: 'operational',
+      renderSuccessRate: 100,
+      createdAt: now,
+      lastUpdated: now,
+      ...getPublishedProfileUrls(u, DEFAULT_PROFILE_SLUG),
+    }
+    await createProfileInDb(u, defaultProfile)
+    dbProfiles = await getUserProfilesFromDb(u)
+  }
+
+  if (hasDbConfig()) {
+    const p = redis.pipeline()
+    for (const profile of dbProfiles) {
+      p.sadd(profilesSetKey, profile.slug)
+      p.hset(REDIS_KEYS.profileMeta(u, profile.slug), {
+        id: profile.id,
+        name: profile.name,
+        description: profile.description,
+        status: profile.status,
+        isDefault: String(profile.isDefault),
+        widgetsCount: profile.widgetsCount,
+        totalViews: profile.totalViews,
+        healthStatus: profile.healthStatus,
+        renderSuccessRate: profile.renderSuccessRate,
+        createdAt: profile.createdAt,
+        updatedAt: profile.lastUpdated,
+      })
+    }
+    void p.exec().catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+    return dbProfiles.map((profile) => ({
+      ...profile,
+      ...getPublishedProfileUrls(u, profile.slug),
+    }))
   }
 
   let slugs = await redis.smembers(profilesSetKey).catch(() => [] as string[])
@@ -52,12 +124,16 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
         })
       }
       await p.exec()
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to hydrate Redis profile cache:', error)
+    }
     return dbProfiles
   }
 
   if (!slugs || slugs.length === 0 || !slugs.includes('default')) {
-    await redis.sadd(profilesSetKey, 'default').catch(() => {})
+    await redis
+      .sadd(profilesSetKey, 'default')
+      .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
     slugs = await redis.smembers(profilesSetKey).catch(() => ['default'])
   }
 
@@ -71,21 +147,39 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     }
     const results = await p.exec<any[]>().catch(() => [])
 
+    const gitVersionsList = await Promise.allSettled(
+      slugs.map((slug) => getGitCommitsVersionHistory(u, slug))
+    )
+
     for (let i = 0; i < slugs.length; i++) {
       const slug = slugs[i]
       const data = results[i * 2]
       const versionIds = results[i * 2 + 1] || []
-
+      const settled = gitVersionsList[i]
+      const gitVersions = settled && settled.status === 'fulfilled' ? settled.value : []
       const dbMatch = dbProfiles.find((dp) => dp.slug === slug)
+      const isSynced =
+        gitVersions.length > 0 ||
+        dbMatch?.isSynced ||
+        data?.isSynced === 'true' ||
+        data?.isSynced === true
 
       const isDefault =
         data?.isDefault !== undefined
           ? data.isDefault === 'true' || data.isDefault === true
           : (dbMatch?.isDefault ?? slug === 'default')
 
-      const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
-      const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
-      const versionCount = versionIds?.length || dbMatch?.versionCount || 1
+      const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, slug)
+      const versionCount =
+        gitVersions.length || versionIds?.length || dbMatch?.versionCount || (isSynced ? 1 : 0)
+
+      const storedStatus = data?.status || dbMatch?.status
+      const status =
+        storedStatus === PROFILE_STATUS.ACTIVE || storedStatus === PROFILE_STATUS.DRAFT
+          ? storedStatus
+          : versionCount > 0
+            ? PROFILE_STATUS.ACTIVE
+            : PROFILE_STATUS.DRAFT
 
       if (data && data.name) {
         profiles.push({
@@ -93,8 +187,9 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           slug,
           name: data.name,
           description: data.description || '',
-          status: data.status || 'active',
+          status,
           isDefault,
+          isSynced,
           widgetsCount: Number(data.widgetsCount || 3),
           totalViews: Number(data.totalViews || 0),
           versionCount,
@@ -110,7 +205,12 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           rawSvgUrl,
         })
       } else if (dbMatch) {
-        profiles.push(dbMatch)
+        profiles.push({
+          ...dbMatch,
+          isSynced,
+          versionCount,
+          status,
+        })
       } else {
         const now = new Date().toISOString()
         const defaultRecord: ProProfileRecord = {
@@ -124,11 +224,12 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
             slug === 'default'
               ? 'Main README dashboard displayed on your GitHub profile.'
               : `Custom profile for ${slug}`,
-          status: 'active',
+          status,
           isDefault,
+          isSynced,
           widgetsCount: 4,
           totalViews: 0,
-          versionCount: 1,
+          versionCount,
           healthStatus: 'operational',
           renderSuccessRate: 100,
           createdAt: now,
@@ -149,9 +250,11 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
             createdAt: defaultRecord.createdAt,
             updatedAt: defaultRecord.lastUpdated,
           })
-          .catch(() => {})
+          .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
-        void createProfileInDb(u, defaultRecord).catch(() => {})
+        void createProfileInDb(u, defaultRecord).catch((error) =>
+          console.warn('[ProfileManager cache operation] Failed:', error)
+        )
 
         profiles.push(defaultRecord)
       }
@@ -180,10 +283,9 @@ export async function createProfile(
     throw new Error('Invalid profile identifier/slug.')
   }
 
-  const MAX_PROFILES_LIMIT = 10
   const existingProfiles = await getUserProfiles(u)
-  if (existingProfiles.length >= MAX_PROFILES_LIMIT) {
-    throw new Error(`Maximum profile limit (${MAX_PROFILES_LIMIT}) reached.`)
+  if (existingProfiles.length >= MAX_PROFILES_PER_USER) {
+    throw new Error(`Maximum profile limit (${MAX_PROFILES_PER_USER}) reached.`)
   }
 
   if (existingProfiles.some((p) => p.slug === cleanSlug)) {
@@ -191,14 +293,14 @@ export async function createProfile(
   }
 
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
-  await redis.sadd(profilesSetKey, cleanSlug)
+  await redis
+    .sadd(profilesSetKey, cleanSlug)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const now = new Date().toISOString()
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
 
-  const publicUrl = cleanSlug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${cleanSlug}`
-  const rawSvgUrl =
-    cleanSlug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${cleanSlug}.svg`
+  const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, cleanSlug)
 
   const record: ProProfileRecord = {
     id: `prof_${cleanSlug}`,
@@ -218,23 +320,21 @@ export async function createProfile(
     rawSvgUrl,
   }
 
-  try {
-    await createProfileInDb(u, record)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL createProfile error for @${u}:`, dbErr)
-  }
+  await createProfileInDb(u, record)
 
-  await redis.hset(metaKey, {
-    id: record.id,
-    name: record.name,
-    description: record.description,
-    status: record.status,
-    isDefault: 'false',
-    widgetsCount: record.widgetsCount,
-    totalViews: 0,
-    createdAt: now,
-    updatedAt: now,
-  })
+  await redis
+    .hset(metaKey, {
+      id: record.id,
+      name: record.name,
+      description: record.description,
+      status: record.status,
+      isDefault: 'false',
+      widgetsCount: record.widgetsCount,
+      totalViews: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const initialConfig: SavedConfiguration = {
     version: 1,
@@ -302,9 +402,8 @@ export async function duplicateProfile(
     throw new Error(`Source profile "${srcSlug}" does not exist.`)
   }
 
-  const MAX_PROFILES_LIMIT = 10
-  if (existing.length >= MAX_PROFILES_LIMIT) {
-    throw new Error(`Maximum profile limit (${MAX_PROFILES_LIMIT}) reached.`)
+  if (existing.length >= MAX_PROFILES_PER_USER) {
+    throw new Error(`Maximum profile limit (${MAX_PROFILES_PER_USER}) reached.`)
   }
 
   if (existing.some((p) => p.slug === cleanSlug)) {
@@ -348,11 +447,12 @@ export async function duplicateProfile(
   await saveProfileConfig(newConfig)
 
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
-  await redis.sadd(profilesSetKey, cleanSlug)
+  await redis
+    .sadd(profilesSetKey, cleanSlug)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
-  const publicUrl = `${APP_URL}/${u}/${cleanSlug}`
-  const rawSvgUrl = `${APP_URL}/${u}/${cleanSlug}.svg`
+  const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, cleanSlug)
 
   const record: ProProfileRecord = {
     id: `prof_${cleanSlug}`,
@@ -372,23 +472,21 @@ export async function duplicateProfile(
     rawSvgUrl,
   }
 
-  try {
-    await createProfileInDb(u, record, newConfig)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL duplicateProfile error for @${u}:`, dbErr)
-  }
+  await createProfileInDb(u, record, newConfig)
 
-  await redis.hset(metaKey, {
-    id: record.id,
-    name: record.name,
-    description: record.description,
-    status: record.status,
-    isDefault: 'false',
-    widgetsCount: record.widgetsCount,
-    totalViews: 0,
-    createdAt: now,
-    updatedAt: now,
-  })
+  await redis
+    .hset(metaKey, {
+      id: record.id,
+      name: record.name,
+      description: record.description,
+      status: record.status,
+      isDefault: 'false',
+      widgetsCount: record.widgetsCount,
+      totalViews: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   await createProfileVersion(u, cleanSlug, {
     config: newConfig,
@@ -400,7 +498,7 @@ export async function duplicateProfile(
   return record
 }
 
-export async function setDefaultProfile(
+export async function promoteProfileToCanonicalDefault(
   username: string,
   targetSlug: string
 ): Promise<ProProfileRecord[]> {
@@ -409,25 +507,76 @@ export async function setDefaultProfile(
   const cleanSlug = targetSlug.toLowerCase().trim()
 
   const profiles = await getUserProfiles(u)
-  const targetExists = profiles.some((p) => p.slug === cleanSlug)
-  if (!targetExists) {
-    throw new Error(`Profile "${cleanSlug}" not found.`)
+  const target = profiles.find((p) => p.slug === cleanSlug)
+  const currentDefault = profiles.find((p) => p.slug === DEFAULT_PROFILE_SLUG)
+
+  if (!target || !currentDefault) {
+    throw new Error(`Profile "${cleanSlug}" or "default" not found.`)
   }
 
-  try {
-    await setDefaultProfileInDb(u, cleanSlug)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL setDefaultProfile error for @${u}:`, dbErr)
+  const sourceConfig = await loadProfileConfig(u, cleanSlug, { bypassMemory: true })
+  const oldDefaultConfig = await loadProfileConfig(u, DEFAULT_PROFILE_SLUG, { bypassMemory: true })
+
+  if (!sourceConfig) throw new Error(`Profile configuration "${cleanSlug}" not found.`)
+
+  const now = new Date().toISOString()
+
+  const canonicalConfig: SavedConfiguration = {
+    ...sourceConfig,
+    profileSlug: DEFAULT_PROFILE_SLUG,
+    profileName: target.name,
+    metadata: {
+      ...sourceConfig.metadata,
+      updatedAt: now,
+      revision: `rev_${Date.now()}`,
+    },
+  }
+  await saveProfileConfig(canonicalConfig)
+  await createProfileVersion(u, DEFAULT_PROFILE_SLUG, {
+    config: canonicalConfig,
+    label: `Promoted from /${cleanSlug}`,
+    description: `Canonical default updated from "${target.name}"`,
+    createdBy: u,
+  })
+
+  if (oldDefaultConfig) {
+    const backupConfig: SavedConfiguration = {
+      ...oldDefaultConfig,
+      profileSlug: cleanSlug,
+      profileName: currentDefault.name,
+      metadata: {
+        ...oldDefaultConfig.metadata,
+        updatedAt: now,
+        revision: `rev_${Date.now()}_backup`,
+      },
+    }
+    await saveProfileConfig(backupConfig)
   }
 
-  for (const p of profiles) {
-    const metaKey = REDIS_KEYS.profileMeta(u, p.slug)
-    const shouldBeDefault = p.slug === cleanSlug
-    await redis.hset(metaKey, {
-      isDefault: String(shouldBeDefault),
-      updatedAt: new Date().toISOString(),
+  await updateProfileInDb(u, DEFAULT_PROFILE_SLUG, {
+    name: target.name,
+    description: target.description,
+  })
+  await updateProfileInDb(u, cleanSlug, {
+    name: currentDefault.name,
+    description: currentDefault.description,
+  })
+
+  await redis
+    .hset(REDIS_KEYS.profileMeta(u, DEFAULT_PROFILE_SLUG), {
+      name: target.name,
+      description: target.description,
+      updatedAt: now,
     })
-  }
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+
+  await redis
+    .hset(REDIS_KEYS.profileMeta(u, cleanSlug), {
+      name: currentDefault.name,
+      description: currentDefault.description,
+      updatedAt: now,
+    })
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   return getUserProfiles(u)
 }
@@ -442,14 +591,12 @@ export async function updateProfile(
   const cleanSlug = slug.toLowerCase().trim()
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
 
-  const existing = await redis.hgetall<any>(metaKey)
-  if (!existing) return null
-
-  try {
-    await updateProfileInDb(u, cleanSlug, updates)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL updateProfile error for @${u}:`, dbErr)
+  if (!hasDbConfig()) {
+    const existing = await redis.hgetall<Record<string, unknown>>(metaKey).catch(() => null)
+    if (!existing || Object.keys(existing).length === 0) return null
   }
+
+  const dbUpdated = await updateProfileInDb(u, cleanSlug, updates)
 
   const now = new Date().toISOString()
   const payload: Record<string, any> = {
@@ -467,10 +614,11 @@ export async function updateProfile(
   if (updates.lastRenderedAt !== undefined) payload.lastRenderedAt = updates.lastRenderedAt
   if (updates.isDefault !== undefined) payload.isDefault = String(updates.isDefault)
 
-  await redis.hset(metaKey, payload)
+  await redis
+    .hset(metaKey, payload)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
-  const profiles = await getUserProfiles(username)
-  return profiles.find((p) => p.slug === cleanSlug) || null
+  return dbUpdated
 }
 
 export async function deleteProfile(username: string, slug: string): Promise<boolean> {
@@ -490,28 +638,35 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
     )
   }
 
-  try {
-    await deleteProfileFromDb(u, cleanSlug)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL deleteProfile error for @${u}:`, dbErr)
-  }
+  const deleted = await deleteProfileFromDb(u, cleanSlug)
+  if (!deleted && hasDbConfig()) return false
 
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
-  await redis.srem(profilesSetKey, cleanSlug)
+  await redis
+    .srem(profilesSetKey, cleanSlug)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
-  await redis.del(metaKey)
+  await redis
+    .del(metaKey)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const configKey = REDIS_KEYS.profileConfig(u, cleanSlug)
-  await redis.del(configKey)
+  await redis
+    .del(configKey)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)
   const versionIds = await redis.zrange<string[]>(versionsListKey, 0, -1).catch(() => [])
   if (versionIds && versionIds.length > 0) {
     const keysToDelete = versionIds.map((vId) => REDIS_KEYS.profileVersionItem(u, cleanSlug, vId))
-    await redis.del(...keysToDelete)
+    await redis
+      .del(...keysToDelete)
+      .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
   }
-  await redis.del(versionsListKey)
+  await redis
+    .del(versionsListKey)
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   return true
 }
@@ -533,8 +688,14 @@ export async function createProfileVersion(
   const timestamp = Date.now()
 
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)
-  const existingVersionIds = await redis.zrange<string[]>(versionsListKey, 0, -1).catch(() => [])
-  const nextVersionNumber = (existingVersionIds?.length || 0) + 1
+  const dbVersions = hasDbConfig() ? await getProfileVersionsFromDb(u, cleanSlug) : []
+  const existingVersionIds = hasDbConfig()
+    ? dbVersions.map((version) => version.id)
+    : await redis.zrange<string[]>(versionsListKey, 0, -1).catch(() => [])
+  const nextVersionNumber =
+    (dbVersions.length > 0
+      ? Math.max(...dbVersions.map((version) => version.versionNumber))
+      : existingVersionIds?.length || 0) + 1
 
   const versionId = `ver_${timestamp}_${Math.random().toString(36).slice(2, 7)}`
   const record: ProfileVersionRecord = {
@@ -549,15 +710,15 @@ export async function createProfileVersion(
     createdBy: snapshot.createdBy || u,
   }
 
-  try {
-    await createProfileVersionInDb(u, cleanSlug, record)
-  } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL createProfileVersion error for @${u}:`, dbErr)
-  }
+  await createProfileVersionInDb(u, cleanSlug, record)
 
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
-  await redis.set(itemKey, JSON.stringify(record))
-  await redis.zadd(versionsListKey, { score: timestamp, member: versionId })
+  await redis
+    .set(itemKey, JSON.stringify(record))
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+  await redis
+    .zadd(versionsListKey, { score: timestamp, member: versionId })
+    .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
   if (existingVersionIds && existingVersionIds.length >= MAX_VERSIONS_PER_PROFILE) {
     const toRemove = existingVersionIds.slice(
@@ -565,22 +726,160 @@ export async function createProfileVersion(
       existingVersionIds.length - MAX_VERSIONS_PER_PROFILE + 1
     )
     for (const oldId of toRemove) {
-      await redis.del(REDIS_KEYS.profileVersionItem(u, cleanSlug, oldId))
-      await redis.zrem(versionsListKey, oldId)
+      await redis
+        .del(REDIS_KEYS.profileVersionItem(u, cleanSlug, oldId))
+        .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+      await redis
+        .zrem(versionsListKey, oldId)
+        .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
     }
   }
 
   return record
 }
 
+export async function getGitCommitsVersionHistory(
+  username: string,
+  slug: string
+): Promise<ProfileVersionRecord[]> {
+  try {
+    const u = username.toLowerCase().trim()
+    const cleanSlug = slug.toLowerCase().trim()
+    if (!u || !cleanSlug) return []
+
+    const filePath = `profiles/${cleanSlug}/dark.svg`
+    const legacyFilePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+
+    const authHeaders: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'GitAscii-App',
+    }
+
+    try {
+      const { token } = await getInstallationTokenForUser(u)
+      if (token) {
+        authHeaders['Authorization'] = `Bearer ${token}`
+      }
+    } catch (tokenErr) {
+      console.warn('[ProfileManager] Failed to get installation token for history fetch:', tokenErr)
+    }
+
+    let res = await fetch(
+      API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath, 'gitascii') + '&_t=' + Date.now(),
+      {
+        headers: authHeaders,
+        signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+        cache: 'no-store',
+      }
+    )
+
+    let commits: unknown = []
+    if (res.ok) {
+      commits = await res.json()
+    } else {
+      console.error(
+        '[ProfileManager] GitHub API error (primary):',
+        res.status,
+        await res.text().catch(() => '')
+      )
+    }
+
+    if (!res.ok || !Array.isArray(commits) || commits.length === 0) {
+      res = await fetch(
+        API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, legacyFilePath) + '&_t=' + Date.now(),
+        {
+          headers: authHeaders,
+          signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+          cache: 'no-store',
+        }
+      )
+      if (res.ok) {
+        commits = await res.json()
+      } else {
+        console.error(
+          '[ProfileManager] GitHub API error (legacy):',
+          res.status,
+          await res.text().catch(() => '')
+        )
+      }
+    }
+
+    if (!Array.isArray(commits) || commits.length === 0) {
+      return []
+    }
+
+    let defaultWidgetsCount = 3
+    try {
+      const dbProfiles = await getUserProfilesFromDb(u)
+      const matched = dbProfiles.find((dp) => dp.slug === cleanSlug)
+      if (matched && matched.widgetsCount > 0) {
+        defaultWidgetsCount = matched.widgetsCount
+      }
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the baseline widget count:', error)
+    }
+
+    return (commits as GitHubCommitHistoryItem[]).map((commit, index) => {
+      const sha = String(commit.sha)
+      const message = String(commit.commit?.message || `Commit ${sha.slice(0, 7)}`)
+      const firstLine = message.split('\n')[0]
+      const author = commit.author?.login || commit.commit?.author?.name || u
+      const date = commit.commit?.author?.date || new Date().toISOString()
+
+      const widgetMatch =
+        message.match(/(?:with\s+|(?:\(|\[))(\d+)\s+widgets?/i) ||
+        message.match(/(\d+)\s+widgets?/i)
+      const widgetsCount = widgetMatch ? parseInt(widgetMatch[1], 10) : defaultWidgetsCount
+
+      return {
+        id: sha,
+        profileSlug: cleanSlug,
+        versionNumber: commits.length - index,
+        label: firstLine,
+        description: message,
+        widgetsCount,
+        createdAt: date,
+        createdBy: author,
+      }
+    })
+  } catch (error) {
+    console.warn('[ProfileManager] Failed to load Git commit history:', error)
+    return []
+  }
+}
+
 export async function getProfileVersions(
   username: string,
   slug: string
 ): Promise<ProfileVersionRecord[]> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
+
+  const gitVersions = await getGitCommitsVersionHistory(u, cleanSlug)
+  if (gitVersions.length > 0) {
+    return gitVersions
+  }
+
+  const redis = getProRedisClient()
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)
+
+  if (hasDbConfig()) {
+    const dbVersions = await getProfileVersionsFromDb(u, cleanSlug)
+    if (dbVersions.length > 0) {
+      const p = redis.pipeline()
+      for (const version of dbVersions) {
+        p.set(REDIS_KEYS.profileVersionItem(u, cleanSlug, version.id), JSON.stringify(version))
+        p.zadd(versionsListKey, {
+          score: new Date(version.createdAt).getTime(),
+          member: version.id,
+        })
+      }
+      void p
+        .exec()
+        .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+    }
+    return dbVersions
+  }
 
   const versionIds = await redis.zrevrange<string[]>(versionsListKey, 0, -1).catch(() => [])
   if (!versionIds || versionIds.length === 0) {
@@ -592,10 +891,12 @@ export async function getProfileVersions(
           p.set(REDIS_KEYS.profileVersionItem(u, cleanSlug, v.id), JSON.stringify(v))
           p.zadd(versionsListKey, { score: new Date(v.createdAt).getTime(), member: v.id })
         }
-        await p.exec().catch(() => {})
+        await p.exec()
         return dbVersions
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to hydrate profile versions from PostgreSQL:', error)
+    }
     return []
   }
 
@@ -622,20 +923,59 @@ export async function getProfileVersionById(
   slug: string,
   versionId: string
 ): Promise<ProfileVersionRecord | null> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
+
+  if (/^[0-9a-f]{40}$/i.test(versionId)) {
+    try {
+      const filePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+      const res = await fetch(API_ENDPOINTS.GITHUB.RAW_USER_CONTENT(u, u, versionId, filePath), {
+        signal: AbortSignal.timeout(GITHUB_VERSION_TIMEOUT_MS),
+      })
+      if (res.ok) {
+        const config: SavedConfiguration = await res.json()
+        return {
+          id: versionId,
+          profileSlug: cleanSlug,
+          versionNumber: 1,
+          label: `Commit ${versionId.slice(0, 7)}`,
+          description: `Git version snapshot from ${versionId.slice(0, 7)}`,
+          config,
+          widgetsCount: config?.widgets?.length || 0,
+          createdAt: config?.metadata?.updatedAt || new Date().toISOString(),
+          createdBy: u,
+        }
+      }
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the Git profile version:', error)
+    }
+  }
+
+  const redis = getProRedisClient()
   const itemKey = REDIS_KEYS.profileVersionItem(u, cleanSlug, versionId)
 
-  const raw = await redis.get<string | ProfileVersionRecord>(itemKey)
+  if (hasDbConfig()) {
+    const dbVersion = await getProfileVersionByIdFromDb(u, cleanSlug, versionId)
+    if (dbVersion)
+      void redis
+        .set(itemKey, JSON.stringify(dbVersion))
+        .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
+    return dbVersion
+  }
+
+  const raw = await redis.get<string | ProfileVersionRecord>(itemKey).catch(() => null)
   if (!raw) {
     try {
       const dbVersion = await getProfileVersionByIdFromDb(u, cleanSlug, versionId)
       if (dbVersion) {
-        void redis.set(itemKey, JSON.stringify(dbVersion)).catch(() => {})
+        void redis.set(itemKey, JSON.stringify(dbVersion)).catch((error) => {
+          console.warn('[ProfileManager] Failed to cache the profile version:', error)
+        })
         return dbVersion
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ProfileManager] Failed to load the profile version from PostgreSQL:', error)
+    }
     return null
   }
   return typeof raw === 'string' ? (JSON.parse(raw) as ProfileVersionRecord) : raw
@@ -672,8 +1012,8 @@ export async function restoreProfileVersion(
 
   const newSnapshot = await createProfileVersion(u, cleanSlug, {
     config: restoredConfig,
-    label: `Restored to v${targetVersion.versionNumber}`,
-    description: `Rolled back to snapshot from ${new Date(targetVersion.createdAt).toLocaleDateString()}`,
+    label: `Restored to v${targetVersion.versionNumber || versionId.slice(0, 7)}`,
+    description: `Rolled back to snapshot ${versionId.slice(0, 7)} from ${new Date(targetVersion.createdAt).toLocaleDateString()}`,
     createdBy: u,
   })
 

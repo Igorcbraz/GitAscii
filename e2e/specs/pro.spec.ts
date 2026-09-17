@@ -121,37 +121,14 @@ const MOCK_PRO_ANALYTICS = {
     views: 12,
     intensity: 45,
   })),
-  topCountries: [
-    {
-      code: 'US',
-      name: 'United States',
-      key: 'US',
-      continent: 'North America',
-      continentCode: 'NA',
-      flagEmoji: '🇺🇸',
-      count: 18500,
-      percentage: 43,
-    },
-    {
-      code: 'BR',
-      name: 'Brazil',
-      key: 'BR',
-      continent: 'South America',
-      continentCode: 'SA',
-      flagEmoji: '🇧🇷',
-      count: 9800,
-      percentage: 23,
-    },
-  ],
-  topContinents: [{ name: 'North America', key: 'NA', count: 18500, percentage: 43 }],
-  topLanguages: [{ name: 'English', key: 'en', count: 25000, percentage: 58 }],
-  topTimezones: [
-    { name: 'America/New_York', key: 'America/New_York', count: 12000, percentage: 28 },
-  ],
+  topCountries: [],
+  topContinents: [],
+  topLanguages: [],
+  topTimezones: [],
   topSources: [{ name: 'GitHub', key: 'GitHub', count: 28000, percentage: 65 }],
-  topDevices: [{ name: 'Desktop', key: 'Desktop', count: 32000, percentage: 75 }],
-  topBrowsers: [{ name: 'Chrome', key: 'Chrome', count: 24000, percentage: 56 }],
-  topOs: [{ name: 'macOS', key: 'macOS', count: 20000, percentage: 47 }],
+  topDevices: [],
+  topBrowsers: [],
+  topOs: [],
   trafficTypes: [{ name: 'Direct', key: 'direct', count: 30000, percentage: 70 }],
   themes: [{ name: 'dark', key: 'dark', count: 40000, percentage: 93 }],
   statusCodes: [{ name: '200 OK', key: '200', count: 42000, percentage: 98 }],
@@ -400,7 +377,7 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
     await expect(docsLink).toHaveAttribute('href', /^https:\/\/docs\.gitascii\.com(\/.*)?$/)
   })
 
-  test('should navigate to Analytics dashboard and display telemetry dimensions', async ({
+  test('should display real badge-fetch analytics without invented visitor dimensions', async ({
     page,
   }) => {
     await page.goto('/pro/analytics')
@@ -408,9 +385,12 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
 
     await expect(page.locator('h1')).toContainText(/Analytics|Métricas/i)
 
-    // Verify time-series area chart and world map exist
     await expect(page.locator('svg')).not.toHaveCount(0)
-    await expect(page.locator('text=United States').first()).toBeVisible()
+    await expect(page.getByText(/Badge Fetches|Buscas do Badge/i).first()).toBeVisible()
+    await expect(
+      page.getByText(/No geographic data collected yet|Nenhum dado geográfico/i)
+    ).toBeVisible()
+    await expect(page.getByText('United States')).toHaveCount(0)
   })
 
   test('should navigate to Profiles dashboard and allow creating a profile', async ({ page }) => {

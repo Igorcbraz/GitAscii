@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import { isProUser } from '@/features/pro/server/entitlements'
 import { getSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
@@ -38,6 +39,15 @@ export async function POST(request?: Request) {
 
   const username = session.username.toLowerCase().trim()
   const userEmail = session.email && session.email.includes('@') ? session.email.trim() : undefined
+
+  const isAlreadyPro = await isProUser(username)
+  if (isAlreadyPro) {
+    return NextResponse.json(
+      { error: 'You are already subscribed to Pro. No need to upgrade again.' },
+      { status: 400 }
+    )
+  }
+
   const headers = request?.headers
   const acceptLanguage = headers?.get('accept-language') ?? null
   const priceId = resolvePriceId(acceptLanguage)

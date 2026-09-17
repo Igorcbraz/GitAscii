@@ -19,6 +19,7 @@ export const HealthKpiStrip: React.FC<HealthKpiStripProps> = ({ metrics, errors 
   const activeErrorsCount = errors.filter((e) => e.status !== 'resolved').length
   const successRate = metrics?.overallHealthScore !== undefined ? metrics.overallHealthScore : 100
   const avgLatency = metrics?.avgRenderTimeMs || 24
+  const hasRuns = (metrics?.totalRenders24h || 0) > 0
 
   return (
     <div className="space-y-4">
@@ -58,7 +59,7 @@ export const HealthKpiStrip: React.FC<HealthKpiStripProps> = ({ metrics, errors 
                   : 'text-rose-400'
             }`}
           >
-            {systemStatus}
+            {hasRuns ? systemStatus : t('pro.health.awaiting_run', 'Awaiting run')}
           </p>
           <span className="text-[10px] text-[#555] block">
             {activeErrorsCount} {t('pro.health.active_incidents', 'active incidents')}
@@ -68,26 +69,26 @@ export const HealthKpiStrip: React.FC<HealthKpiStripProps> = ({ metrics, errors 
         <div className="bg-[#0c0c0c] px-5 py-4 space-y-1 font-mono">
           <div className="flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-widest text-[#555]">
-              {t('pro.health.th_success_rate', 'Success Rate')}
+              {t('pro.health.th_success_rate', 'Publish Success Rate')}
             </span>
             <Activity className="w-3 h-3 text-[#c5ff4a]" />
           </div>
-          <p className="text-xl font-bold text-white">{successRate}%</p>
+          <p className="text-xl font-bold text-white">{hasRuns ? `${successRate}%` : '—'}</p>
           <span className="text-[10px] text-[#555] block">
-            {t('pro.health.telemetry_24h', '24h telemetry')}
+            {t('pro.health.telemetry_24h', '24h workflow runs')}
           </span>
         </div>
 
         <div className="bg-[#0c0c0c] px-5 py-4 space-y-1 font-mono">
           <div className="flex items-center justify-between">
             <span className="text-[9px] uppercase tracking-widest text-[#555]">
-              {t('pro.health.kpi_avg_render', 'Avg Render Time')}
+              {t('pro.health.kpi_avg_render', 'Avg Publish Time')}
             </span>
             <Clock className="w-3 h-3 text-[#555]" />
           </div>
-          <p className="text-xl font-bold text-white">{avgLatency}ms</p>
+          <p className="text-xl font-bold text-white">{hasRuns ? `${avgLatency}ms` : '—'}</p>
           <span className="text-[10px] text-[#555] block truncate">
-            {t('pro.health.last_render_now', 'Last: Just now')}
+            {t('pro.health.last_render_now', 'Last run: Just now')}
           </span>
         </div>
 

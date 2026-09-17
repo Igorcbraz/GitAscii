@@ -8,8 +8,8 @@ import {
   Copy,
   Download,
   ExternalLink,
-  FileJson,
-  Github,
+  FileCode,
+  GitBranch,
   Sparkles,
   X,
   Zap,
@@ -17,8 +17,8 @@ import {
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { EXPORT_GUIDE_STEPS } from '@/constants'
 import { useI18n } from '@/i18n'
+import { generateWorkflowYaml } from '@/lib/migration/workflowGenerator'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { copyToClipboard } from '@/utils/clipboard'
 
@@ -31,8 +31,6 @@ interface ExportGuideModalProps {
   profileSlug?: string
   onFinished?: () => void
 }
-
-const STEPS = EXPORT_GUIDE_STEPS
 
 export function ExportGuideModal({
   isOpen,
@@ -47,6 +45,7 @@ export function ExportGuideModal({
   const [isClosing, setIsClosing] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [reCopied, setReCopied] = useState(false)
+  const [copiedWorkflow, setCopiedWorkflow] = useState(false)
   const { t } = useI18n()
 
   const fileName =
@@ -56,9 +55,13 @@ export function ExportGuideModal({
 
   const repoName = `${username}/${username}`
 
+  const workflowYaml = generateWorkflowYaml(username, undefined, {
+    profileSlug: profileSlug !== 'default' ? profileSlug : undefined,
+  })
+
   const steps = [
     {
-      ...STEPS[0],
+      icon: Download,
       title: t('editor.guide.export.step1_title', 'Download Configuration File'),
       description: t(
         'editor.guide.export.step1_desc',
@@ -66,30 +69,38 @@ export function ExportGuideModal({
       ),
       warning: t(
         'editor.guide.export.step1_warning',
-        'DO NOT rename the file. Keep it strictly as {fileName} as GitAscii looks for this exact name in your repository root.'
+        'DO NOT rename the file. Keep it strictly as {fileName} as GitAscii looks for this exact name in your repository.'
       ).replace('{fileName}', fileName),
     },
     {
-      ...STEPS[1],
-      icon: Github,
-      title: t('editor.guide.export.step2_title', 'Upload to {repo}').replace('{repo}', repoName),
+      icon: GitBranch,
+      title: t('editor.guide.export.step2_title_v2', 'Upload to "gitascii" branch'),
       description: t(
-        'editor.guide.export.step2_desc',
-        'Upload the {fileName} file to the root of your special repository {repo} on GitHub.'
+        'editor.guide.export.step2_desc_v2',
+        'Push or upload {fileName} to the orphan branch "gitascii" in your repository {repo}.'
       )
         .replace('{fileName}', fileName)
         .replace('{repo}', repoName),
-      linkLabel: t('editor.guide.export.step2_link', 'Upload to GitHub'),
-      getLinkUrl: (user: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_UPLOAD(user),
+      linkLabel: t('editor.guide.export.step2_link', 'View Repository on GitHub'),
+      getLinkUrl: (user: string) => `https://github.com/${user}/${user}/tree/gitascii`,
     },
     {
-      ...STEPS[2],
-      icon: Sparkles,
-      title: t('editor.guide.export.step3_title', 'Add to your README.md'),
+      icon: FileCode,
+      title: t('editor.guide.export.step3_title_v2', 'Configure GitHub Action Workflow'),
       description: t(
-        'editor.guide.export.step3_desc',
-        'Copy the formatted HTML code below and paste it into the README.md file of your repository {repo}:'
-      ).replace('{repo}', repoName),
+        'editor.guide.export.step3_desc_v2',
+        'Create .github/workflows/gitascii.yml in your main branch to enable automated SVG builds.'
+      ),
+      linkLabel: t('editor.guide.export.step3_link_v2', 'Create workflow on GitHub'),
+      getLinkUrl: (user: string) => `https://github.com/${user}/${user}/new/main?filename=.github/workflows/gitascii.yml`,
+    },
+    {
+      icon: Sparkles,
+      title: t('editor.guide.export.step4_title_v2', 'Add V2 Embed to your README.md'),
+      description: t(
+        'editor.guide.export.step4_desc_v2',
+        'Copy the Picture + Telemetry badge snippet and paste it into your README.md:'
+      ),
       linkLabel: t('editor.guide.export.step3_link', 'Edit README.md on GitHub'),
       getLinkUrl: (user: string) => API_ENDPOINTS.GITHUB.SPECIAL_REPO_EDIT_README(user),
     },
@@ -265,13 +276,13 @@ export function ExportGuideModal({
                   <div className="space-y-3">
                     <div className="p-3 rounded-md bg-void-black border border-graphite flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
-                        <FileJson size={16} className="text-signal-lime shrink-0" />
+                        <GitBranch size={16} className="text-signal-lime shrink-0" />
                         <span className="text-caption font-jetbrains-mono text-chalk font-semibold truncate">
-                          {repoName}/{fileName}
+                          {repoName} (branch: gitascii)
                         </span>
                       </div>
-                      <span className="text-caption font-jetbrains-mono text-ash bg-graphite/60 px-2 py-0.5 rounded shrink-0">
-                        root
+                      <span className="text-caption font-jetbrains-mono text-signal-lime bg-signal-lime/10 px-2 py-0.5 rounded shrink-0 border border-signal-lime/20">
+                        {fileName}
                       </span>
                     </div>
 
@@ -294,6 +305,68 @@ export function ExportGuideModal({
                 {currentStep === 2 && (
                   <div className="space-y-3">
                     <div className="relative group">
+                      <pre className="bg-void-black border border-graphite rounded-md p-3.5 pr-12 text-note font-jetbrains-mono text-pearl overflow-x-auto whitespace-pre leading-relaxed select-all max-h-48">
+                        <code>{workflowYaml}</code>
+                      </pre>
+                      <button
+                        onClick={async () => {
+                          const ok = await copyToClipboard(workflowYaml)
+                          if (ok) {
+                            setCopiedWorkflow(true)
+                            setTimeout(() => setCopiedWorkflow(false), 2000)
+                          }
+                        }}
+                        className="absolute top-2.5 right-2.5 p-1.5 rounded-md hover:bg-iron text-ash hover:text-white transition-all cursor-pointer bg-onyx/90 border border-graphite/80 backdrop-blur-sm"
+                        title={copiedWorkflow ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
+                      >
+                        {copiedWorkflow ? (
+                          <Check size={14} className="text-signal-lime" />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      {step.linkLabel && linkUrl && (
+                        <a
+                          href={linkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-signal-lime text-black rounded-md text-note font-inter-tight font-semibold glow-lime hover:brightness-110 transition-all cursor-pointer"
+                        >
+                          <ExternalLink size={14} />
+                          <span>{step.linkLabel}</span>
+                        </a>
+                      )}
+                      <button
+                        onClick={async () => {
+                          const ok = await copyToClipboard(workflowYaml)
+                          if (ok) {
+                            setCopiedWorkflow(true)
+                            setTimeout(() => setCopiedWorkflow(false), 2000)
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-graphite hover:bg-iron border border-iron rounded-md text-note text-chalk font-inter-tight font-medium transition-colors cursor-pointer"
+                      >
+                        {copiedWorkflow ? (
+                          <Check size={14} className="text-signal-lime" />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                        <span>
+                          {copiedWorkflow
+                            ? t('common.copied', 'Copied!')
+                            : t('common.copy_code', 'Copy workflow')}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div className="space-y-3">
+                    <div className="relative group">
                       <pre className="bg-void-black border border-graphite rounded-md p-3.5 pr-12 text-note font-jetbrains-mono text-pearl overflow-x-auto whitespace-pre leading-relaxed select-all">
                         <code>{embedCode}</code>
                       </pre>
@@ -314,11 +387,11 @@ export function ExportGuideModal({
                       <Zap size={15} className="text-signal-lime shrink-0" />
                       <div className="text-caption text-pearl leading-tight font-inter-tight">
                         <strong className="font-semibold text-signal-lime">
-                          {t('editor.guide.export.step3_cache_title', 'GitHub Cache')}:
+                          {t('editor.guide.export.step3_cache_title', 'GitHub Native SVGs')}:
                         </strong>{' '}
                         {t(
                           'editor.guide.export.step3_cache_desc',
-                          'When updating the JSON, bump the ?v= parameter in your README to force image refresh.'
+                          'Your SVGs are served directly from GitHub raw content with automatic dark/light mode switching.'
                         )}
                       </div>
                     </div>

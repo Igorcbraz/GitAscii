@@ -1,6 +1,6 @@
 import type { ProPlanTier, ProUserSettings } from '@/features/pro/types/subscription'
 
-import { sql } from '../client'
+import { hasDbConfig, sql } from '../client'
 
 export interface UserRow {
   id: string
@@ -622,7 +622,8 @@ export async function getUserSettingsFromDb(rawUsername: string): Promise<ProUse
       alert_email_address,
       daily_digest_enabled,
       theme_preference,
-      anonymize_referrers
+      anonymize_referrers,
+      publish_interval_minutes
     FROM user_settings
     WHERE user_id = ${user.user.id}
     LIMIT 1
@@ -636,6 +637,7 @@ export async function getUserSettingsFromDb(rawUsername: string): Promise<ProUse
     dailyDigestEnabled: s.daily_digest_enabled === true,
     themePreference: (s.theme_preference as 'system' | 'dark' | 'light') || 'system',
     anonymizeReferrers: s.anonymize_referrers !== false,
+    publishIntervalMinutes: Math.max(60, Number(s.publish_interval_minutes || 1440)),
     planTier: e.plan_tier,
     stripeCustomerId: user.user.stripe_customer_id || undefined,
     stripeSubscriptionId: e.stripe_subscription_id || undefined,
@@ -661,6 +663,7 @@ export async function updateUserSettingsInDb(
       daily_digest_enabled,
       theme_preference,
       anonymize_referrers,
+      publish_interval_minutes,
       updated_at
     ) VALUES (
       ${user.id},
@@ -669,6 +672,7 @@ export async function updateUserSettingsInDb(
       ${settings.dailyDigestEnabled !== undefined ? settings.dailyDigestEnabled : false},
       ${settings.themePreference || 'system'},
       ${settings.anonymizeReferrers !== undefined ? settings.anonymizeReferrers : true},
+      ${Math.max(60, settings.publishIntervalMinutes || 1440)},
       NOW()
     )
     ON CONFLICT (user_id) DO UPDATE SET
@@ -691,6 +695,11 @@ export async function updateUserSettingsInDb(
       anonymize_referrers = CASE
         WHEN ${settings.anonymizeReferrers !== undefined} THEN ${settings.anonymizeReferrers}
         ELSE user_settings.anonymize_referrers
+      END,
+      publish_interval_minutes = CASE
+        WHEN ${settings.publishIntervalMinutes !== undefined}
+          THEN ${Math.max(60, settings.publishIntervalMinutes || 1440)}
+        ELSE user_settings.publish_interval_minutes
       END,
       updated_at = NOW()
   `
@@ -743,14 +752,11 @@ export async function tryRecordStripeEvent(
 
 export async function isStripeEventProcessed(eventId: string): Promise<boolean> {
   if (!eventId) return false
-  try {
-    const res = await sql`
-      SELECT event_id FROM stripe_processed_events WHERE event_id = ${eventId} LIMIT 1
-    `
-    return res.length > 0
-  } catch {
-    return false
-  }
+  if (!hasDbConfig()) return false
+  const res = await sql`
+    SELECT event_id FROM stripe_processed_events WHERE event_id = ${eventId} LIMIT 1
+  `
+  return res.length > 0
 }
 
 export async function getProUsersFromDb(): Promise<string[]> {
@@ -769,6 +775,12 @@ export async function getProUsersFromDb(): Promise<string[]> {
   }
 }
 
+export async function getUserCountFromDb(): Promise<number> {
+  if (!hasDbConfig()) return 0
+  const rows = await sql`SELECT COUNT(*)::int AS count FROM users;`
+  return Number(rows[0]?.count || 0)
+}
+
 export async function deleteUser(rawUsername: string): Promise<boolean> {
   const username = rawUsername.toLowerCase().trim()
   if (!username) return false
@@ -784,18 +796,27 @@ export async function deleteUser(rawUsername: string): Promise<boolean> {
     try {
       const profileRows = await sql`SELECT slug FROM profiles WHERE user_id = ${user.user.id};`
       profileRows.forEach((r: any) => pgProfileSlugs.push(String(r.slug).toLowerCase().trim()))
-    } catch {}
+    } catch (error) {
+      console.warn(`[UserRepository] Failed to list profiles for @${username}:`, error)
+    }
 
     try {
       const configRows =
         await sql`SELECT slug FROM profile_configurations WHERE user_id = ${user.user.id};`
       configRows.forEach((r: any) => pgProfileSlugs.push(String(r.slug).toLowerCase().trim()))
-    } catch {}
+    } catch (error) {
+      console.warn(
+        `[UserRepository] Failed to list profile configurations for @${username}:`,
+        error
+      )
+    }
 
     try {
       const ruleRows = await sql`SELECT id FROM dynamic_rules WHERE user_id = ${user.user.id};`
       ruleRows.forEach((r: any) => pgDynamicRuleIds.push(String(r.id)))
-    } catch {}
+    } catch (error) {
+      console.warn(`[UserRepository] Failed to list dynamic rules for @${username}:`, error)
+    }
 
     await sql`
       DELETE FROM users WHERE id = ${user.user.id};
@@ -853,12 +874,18 @@ export async function deleteUser(rawUsername: string): Promise<boolean> {
 
     const keyArray = Array.from(keysToDelete).filter(Boolean)
     if (keyArray.length > 0) {
-      await redis.del(...keyArray).catch(() => {})
+      await redis
+        .del(...keyArray)
+        .catch((error) => console.warn('[UserRepository cache cleanup] Failed:', error))
     }
 
     await Promise.all([
-      redis.srem('gitascii:pro:customers', username).catch(() => {}),
-      redis.srem('gitascii:all:users', username).catch(() => {}),
+      redis
+        .srem('gitascii:pro:customers', username)
+        .catch((error) => console.warn('[UserRepository cache cleanup] Failed:', error)),
+      redis
+        .srem('gitascii:all:users', username)
+        .catch((error) => console.warn('[UserRepository cache cleanup] Failed:', error)),
     ])
   } catch (redisErr) {
     console.warn(`[UserRepository] Redis purge warning during deleteUser(@${username}):`, redisErr)
@@ -867,7 +894,9 @@ export async function deleteUser(rawUsername: string): Promise<boolean> {
   try {
     const { invalidateEntitlementsCache } = await import('@/features/pro/server/entitlements')
     invalidateEntitlementsCache(username)
-  } catch {}
+  } catch (error) {
+    console.warn(`[UserRepository] Failed to invalidate entitlement cache for @${username}:`, error)
+  }
 
   return true
 }
@@ -903,13 +932,19 @@ export async function anonymizeUser(rawUsername: string): Promise<boolean> {
     const { getProRedisClient } = await import('@/features/pro/server/redisClient')
     const { REDIS_KEYS } = await import('@/features/pro/server/analyticsStore')
     const redis = getProRedisClient()
-    await redis.del(REDIS_KEYS.userSettings(username)).catch(() => {})
-  } catch {}
+    await redis
+      .del(REDIS_KEYS.userSettings(username))
+      .catch((error) => console.warn('[UserRepository cache cleanup] Failed:', error))
+  } catch (error) {
+    console.warn(`[UserRepository] Failed to clear Redis settings for @${username}:`, error)
+  }
 
   try {
     const { invalidateEntitlementsCache } = await import('@/features/pro/server/entitlements')
     invalidateEntitlementsCache(username)
-  } catch {}
+  } catch (error) {
+    console.warn(`[UserRepository] Failed to invalidate entitlement cache for @${username}:`, error)
+  }
 
   return true
 }

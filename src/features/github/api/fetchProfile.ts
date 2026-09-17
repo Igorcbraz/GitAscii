@@ -69,11 +69,11 @@ export class GitHubUserNotFoundError extends Error {
 
 export async function fetchGitHubProfile(
   username: string,
-  options: { publicOnly?: boolean } = {}
+  options: { publicOnly?: boolean; fresh?: boolean } = {}
 ): Promise<NormalizedGitHubData> {
   const cacheKey = `${options.publicOnly ? 'public' : 'session'}:${username.toLowerCase()}`
   const cached = profileCache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+  if (!options.fresh && cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return cached.data
   }
 

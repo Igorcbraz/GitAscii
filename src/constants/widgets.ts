@@ -11,7 +11,7 @@ export const RECOMMENDED_PROFILE_WIDGETS: string[] = [
   WIDGET_IDS.FOOTER,
 ]
 
-export const DEFAULT_POKEMON_CARD_IMAGE = 'https://assets.tcgdex.net/en/base/base1/4/high.webp'
+export const DEFAULT_POKEMON_CARD_IMAGE = 'https://assets.tcgdex.net/en/base/base1/4/high.png'
 export const DEFAULT_GITFUT_BASE_URL = 'https://gitfut.com'
 export const DEFAULT_GITFUT_FALLBACK_IMAGE = 'https://gitfut.com/user.png'
 

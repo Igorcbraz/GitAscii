@@ -76,6 +76,13 @@ export const WIDGET_IDS = {
   WINXP_ERROR_DIALOG: 'winxp-error-dialog',
   WINXP_SYSTEM_PROPERTIES: 'winxp-system-properties',
   WINXP_BLISS: 'winxp-bliss',
+  MINECRAFT_HUD: 'minecraft-hud',
+  MINECRAFT_INVENTORY: 'minecraft-inventory',
+  MINECRAFT_CHAT: 'minecraft-chat',
+  MINECRAFT_ACHIEVEMENT: 'minecraft-achievement',
+  MINECRAFT_SERVER: 'minecraft-server',
+  MINECRAFT_DEATH_SCREEN: 'minecraft-death-screen',
+  POKEMON_TRAINER_CARD: 'pokemon-trainer-card',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
@@ -93,6 +100,7 @@ export const WIDGET_CATEGORIES = {
   SURVEILLANCE: 'surveillance',
   PREMIUM_ASCII: 'premium-ascii',
   WINDOWS_XP: 'windows-xp',
+  MINECRAFT: 'minecraft',
 } as const
 
 export type WidgetCategory = (typeof WIDGET_CATEGORIES)[keyof typeof WIDGET_CATEGORIES]

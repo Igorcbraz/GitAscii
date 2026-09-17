@@ -1,6 +1,6 @@
 'use client'
 
-import { Compass, Cpu } from 'lucide-react'
+import { Compass } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
@@ -21,10 +21,10 @@ export const AnalyticsTechSourcesSection: React.FC<AnalyticsTechSourcesSectionPr
 
   return (
     <>
-      <section id="technology" className="space-y-6 scroll-mt-6">
+      <section className="space-y-6 scroll-mt-6">
         <div className="flex items-center justify-between border-b border-white/5 pb-2">
           <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-[#c5ff4a]" />
+            <Compass className="w-4 h-4 text-[#c5ff4a]" />
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
               {t('pro.analytics.tech_title', 'Observed Request Metadata')}
             </h2>
@@ -34,7 +34,7 @@ export const AnalyticsTechSourcesSection: React.FC<AnalyticsTechSourcesSectionPr
           </ProBadge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-white">
@@ -82,73 +82,6 @@ export const AnalyticsTechSourcesSection: React.FC<AnalyticsTechSourcesSectionPr
                 colorLeft="#c084fc"
                 colorRight="#c5ff4a"
               />
-            </div>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  {t('pro.analytics.os_title', 'Observed Platform / Environment')}
-                </h3>
-                <span className="text-[10px] font-mono text-[#8a8a8a] bg-white/5 px-1.5 py-0.5 rounded">
-                  {t('pro.analytics.estimated', 'Estimated')}
-                </span>
-              </div>
-              <p className="text-xs text-[#8a8a8a] mt-0.5">
-                {t(
-                  'pro.analytics.os_desc',
-                  'Environment reported in headers (GitHub Cloud for Camo, client OS for direct).'
-                )}
-              </p>
-            </div>
-
-            <div className="pt-2">
-              <DimensionRanking
-                items={summary?.topOs || []}
-                label={t('pro.analytics.os_title', 'Operating Systems')}
-                maxItems={5}
-              />
-            </div>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white">
-                  {t('pro.analytics.browsers_title', 'Observed Clients & Locales')}
-                </h3>
-                <span className="text-[10px] font-mono text-[#8a8a8a] bg-white/5 px-1.5 py-0.5 rounded">
-                  {t('pro.analytics.estimated', 'Estimated')}
-                </span>
-              </div>
-              <p className="text-xs text-[#8a8a8a] mt-0.5">
-                {t(
-                  'pro.analytics.browsers_desc',
-                  'Client user-agents and preferred languages (proxy headers vs direct client headers).'
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-4 pt-1">
-              <DimensionRanking
-                items={summary?.topBrowsers || []}
-                label={t('pro.analytics.browsers_label', 'Clients')}
-                maxItems={3}
-              />
-
-              {summary?.topLanguages && summary.topLanguages.length > 0 && (
-                <div className="pt-3 border-t border-white/5">
-                  <span className="text-xs font-semibold text-white block mb-2">
-                    {t('pro.analytics.languages_title', 'Observed Languages')}
-                  </span>
-                  <DimensionRanking
-                    items={summary.topLanguages}
-                    label={t('pro.analytics.languages_label', 'Languages')}
-                    maxItems={3}
-                  />
-                </div>
-              )}
             </div>
           </div>
         </div>

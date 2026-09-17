@@ -11,6 +11,9 @@ export async function recordWidgetErrorInDb(
   const u = username.toLowerCase().trim()
   const user = await ensureUser(u)
 
+  const cleanSlug = (record.profileSlug || 'default').toLowerCase().trim()
+  const errorId = `err_${user.id}_${cleanSlug}_${record.widgetId}`
+
   await sql`
     INSERT INTO widget_errors (
       id,
@@ -27,7 +30,7 @@ export async function recordWidgetErrorInDb(
       last_seen_at,
       resolved_at
     ) VALUES (
-      ${record.id},
+      ${errorId},
       ${user.id},
       ${record.widgetId},
       ${record.widgetName},
@@ -249,4 +252,51 @@ export async function getProfileDailyHealthFromDb(
     durationMs: Number(r.duration_ms || 0),
     durationCount: Number(r.duration_count || 0),
   }
+}
+
+export interface ProfileDailyHealthRow {
+  slug: string
+  dateStr: string
+  renders: number
+  successes: number
+  failures: number
+  durationMs: number
+  durationCount: number
+}
+
+interface ProfileDailyHealthDbRow {
+  slug: unknown
+  date_str: unknown
+  renders: unknown
+  successes: unknown
+  failures: unknown
+  duration_ms: unknown
+  duration_count: unknown
+}
+
+export async function getProfileHealthRangeFromDb(
+  username: string,
+  startDate: string,
+  endDate: string
+): Promise<ProfileDailyHealthRow[]> {
+  if (!hasDbConfig()) return []
+  const rows = await sql`
+    SELECT h.slug, h.date_str, h.renders, h.successes, h.failures,
+           h.duration_ms, h.duration_count
+    FROM profile_daily_health h
+    JOIN users u ON u.id = h.user_id
+    WHERE u.username = ${username.toLowerCase().trim()}
+      AND h.date_str >= ${startDate}
+      AND h.date_str <= ${endDate}
+    ORDER BY h.date_str ASC;
+  `
+  return (rows as ProfileDailyHealthDbRow[]).map((row) => ({
+    slug: String(row.slug),
+    dateStr: String(row.date_str),
+    renders: Number(row.renders || 0),
+    successes: Number(row.successes || 0),
+    failures: Number(row.failures || 0),
+    durationMs: Number(row.duration_ms || 0),
+    durationCount: Number(row.duration_count || 0),
+  }))
 }

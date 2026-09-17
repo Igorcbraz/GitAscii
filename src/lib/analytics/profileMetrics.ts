@@ -22,26 +22,8 @@ export function parseViewerMetadata(request: Request): {
   isCamoProxy: boolean
   userAgent: string | null
   referrer: string | null
-  country: string | null
-  region: string | null
-  city: string | null
-  timezone: string | null
-  continent: string | null
-  language: string | null
-  ip: string | null
 } {
   const headers = request.headers
-  const cf = (
-    request as Request & {
-      cf?: {
-        country?: string
-        region?: string
-        city?: string
-        timezone?: string
-        continent?: string
-      }
-    }
-  ).cf
   const userAgent = headers.get('user-agent') || ''
   const uaLower = userAgent.toLowerCase()
   const uaTokens = uaLower.split(/[\s();,]+/)
@@ -51,34 +33,19 @@ export function parseViewerMetadata(request: Request): {
     uaTokens.some((t) => t === 'camo.githubusercontent.com')
 
   const referrer = headers.get('referer') || null
-  const country = cf?.country || headers.get('cf-ipcountry') || null
-  const region = cf?.region || null
-  const city = cf?.city || null
-  const timezone = cf?.timezone || null
-  const continent = cf?.continent || null
-  const language = headers.get('accept-language') || null
-  const ip =
-    headers.get('cf-connecting-ip') ||
-    headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-    headers.get('x-real-ip') ||
-    null
 
   return {
     isCamoProxy,
     userAgent: userAgent || null,
     referrer,
-    country,
-    region,
-    city,
-    timezone,
-    continent,
-    language,
-    ip,
   }
 }
 
 export async function recordProfileView(metric: ProfileViewMetric): Promise<void> {
   try {
+    const { isProUser } = await import('@/features/pro/server/entitlements')
+    if (!(await isProUser(metric.username))) return
+
     const { ingestProfileView } = await import('@/features/pro/server/analyticsStore')
     await ingestProfileView(metric)
   } catch (error) {

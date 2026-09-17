@@ -20,6 +20,7 @@ import { ContributeCommunityWidgetModal } from './WidgetLibrary/ContributeCommun
 import { ContributeFeaturedWidgetModal } from './WidgetLibrary/ContributeFeaturedWidgetModal'
 import { ControlPlaneCardItem } from './WidgetLibrary/ControlPlaneCardItem'
 import { GodProfileCardItem } from './WidgetLibrary/GodProfileCardItem'
+import { MinecraftCardItem } from './WidgetLibrary/MinecraftCardItem'
 import { PremiumAsciiWidgetCardItem } from './WidgetLibrary/PremiumAsciiWidgetCardItem'
 import { SurveillanceCardItem } from './WidgetLibrary/SurveillanceCardItem'
 import { TemplateLibrarySection } from './WidgetLibrary/TemplateLibrarySection'
@@ -1027,6 +1028,96 @@ export function WidgetLibrary() {
                                 className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
                               >
                                 {expandedLists['windows-xp']
+                                  ? t('editor.sidebar.show_less', 'Mostrar menos')
+                                  : t('editor.sidebar.load_more', 'Carregar mais')}
+                              </button>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-graphite/50" />
+
+                <div>
+                  <button
+                    onClick={() => toggleSection('minecraft')}
+                    className="w-full flex items-center gap-1.5 mb-2 px-0.5 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-1 p-0.5 rounded-sm bg-[#555] border border-b-[#373737] border-r-[#373737] border-t-white border-l-white">
+                      <Sparkles size={10} className="text-[#80e040] shrink-0" />
+                    </div>
+                    <span
+                      className="font-mono text-caption font-bold text-white uppercase tracking-widest group-hover:text-gray-200 transition-colors"
+                      style={{ textShadow: '1px 1px 0 #3f3f3f' }}
+                    >
+                      Minecraft
+                    </span>
+                    <span className="ml-auto font-inter-tight text-caption text-ash">
+                      {
+                        filteredWidgets.filter((w) => w.category === WIDGET_CATEGORIES.MINECRAFT)
+                          .length
+                      }
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`text-[#c6c6c6] transition-transform duration-200 ${collapsedSections['minecraft'] ? '-rotate-90' : ''}`}
+                    />
+                  </button>
+                  {!collapsedSections['minecraft'] && (
+                    <div className="space-y-1.5">
+                      {(() => {
+                        const items = filteredWidgets.filter(
+                          (w) => w.category === WIDGET_CATEGORIES.MINECRAFT
+                        )
+                        const baseItems = items.slice(0, 3)
+                        const extraItems = items.slice(3)
+                        return (
+                          <>
+                            {baseItems.map((item) => (
+                              <MinecraftCardItem
+                                key={item.id}
+                                item={item}
+                                onAdd={addWidget}
+                                onHover={handleHover}
+                                onLeave={handleLeave}
+                              />
+                            ))}
+                            <AnimatePresence initial={false}>
+                              {expandedLists['minecraft'] && extraItems.length > 0 && (
+                                <motion.div
+                                  key="extra-minecraft"
+                                  initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  animate={{ height: 'auto', opacity: 1, marginTop: '0.375rem' }}
+                                  exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                  className="space-y-1.5 overflow-hidden"
+                                >
+                                  {extraItems.map((item) => (
+                                    <MinecraftCardItem
+                                      key={item.id}
+                                      item={item}
+                                      onAdd={addWidget}
+                                      onHover={handleHover}
+                                      onLeave={handleLeave}
+                                    />
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                            {items.length > 3 && (
+                              <button
+                                onClick={() =>
+                                  setExpandedLists((prev) => ({
+                                    ...prev,
+                                    minecraft: !prev.minecraft,
+                                  }))
+                                }
+                                className="group w-full py-2.5 mt-2 cursor-pointer flex items-center justify-center gap-2 text-caption font-inter-tight font-medium text-ash hover:text-signal-lime uppercase tracking-[0.16em] border border-dashed border-graphite hover:border-signal-lime/40 bg-void-black/40 hover:bg-signal-lime/5 rounded-xs transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5"
+                              >
+                                {expandedLists['minecraft']
                                   ? t('editor.sidebar.show_less', 'Mostrar menos')
                                   : t('editor.sidebar.load_more', 'Carregar mais')}
                               </button>

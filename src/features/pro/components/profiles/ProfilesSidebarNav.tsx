@@ -25,7 +25,6 @@ export const ProfilesSidebarNav: React.FC<ProfilesSidebarNavProps> = ({
   profiles,
   selectedSlug,
   setSelectedSlug,
-  onCreateNew,
 }) => {
   const { t } = useI18n()
 

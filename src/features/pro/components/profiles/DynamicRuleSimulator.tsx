@@ -43,7 +43,7 @@ export const DynamicRuleSimulator: React.FC<DynamicRuleSimulatorProps> = ({
 
   const previewSvgUrl = simResult?.selectedProfileSlug
     ? `/api/${encodeURIComponent(username || 'user')}/${encodeURIComponent(simResult.selectedProfileSlug)}?t=${Date.now()}`
-    : `/api/${encodeURIComponent(username || 'user')}?t=${Date.now()}`
+    : `/api/${encodeURIComponent(username || 'user')}?dynamic=1&t=${Date.now()}`
 
   return (
     <div className="p-4 sm:p-5 rounded-2xl bg-[#111111] border border-white/[0.08] space-y-4">

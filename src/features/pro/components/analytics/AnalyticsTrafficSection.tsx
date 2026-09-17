@@ -30,7 +30,7 @@ export const AnalyticsTrafficSection: React.FC<AnalyticsTrafficSectionProps> = (
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-[#c5ff4a]" />
           <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-            {t('pro.overview.chart_title', 'Traffic & Engagement Trends')}
+            {t('pro.overview.chart_title', 'README Badge Fetch Trends')}
           </h2>
         </div>
         <ProBadge variant="lime">{t('pro.analytics.time_series', 'Time Series')}</ProBadge>
@@ -54,7 +54,7 @@ export const AnalyticsTrafficSection: React.FC<AnalyticsTrafficSectionProps> = (
             <p className="text-xs text-[#8a8a8a] mt-0.5">
               {t(
                 'pro.analytics.daily_traffic_desc',
-                'Interactive multi-layer breakdown of profile views, unique visitors, cache hits, and proxy views.'
+                'Observed requests for the analytics badge. GitHub Camo caching means these are samples, not exact human views.'
               )}
             </p>
           </div>
@@ -75,13 +75,13 @@ export const AnalyticsTrafficSection: React.FC<AnalyticsTrafficSectionProps> = (
           <div className="flex items-center gap-2">
             <Flame className="w-4 h-4 text-[#c5ff4a]" />
             <h3 className="text-sm font-semibold text-white">
-              {t('pro.analytics.heatmap_title', '24x7 Weekly Activity Matrix')}
+              {t('pro.analytics.heatmap_title', '24x7 Badge Fetch Matrix')}
             </h3>
           </div>
           <p className="text-xs text-[#8a8a8a]">
             {t(
               'pro.analytics.heatmap_desc',
-              'Audience density mapped by weekday and hour of day. Spot prime time slots for GitHub profile updates.'
+              'Observed badge fetches by weekday and UTC hour. This reflects proxy refresh timing, not individual viewers.'
             )}
           </p>
 
@@ -103,10 +103,7 @@ export const AnalyticsTrafficSection: React.FC<AnalyticsTrafficSectionProps> = (
               </h3>
             </div>
             <p className="text-xs text-[#8a8a8a] mt-0.5">
-              {t(
-                'pro.analytics.hourly_desc',
-                '24-hour volume split by Direct traffic vs Camo Proxy.'
-              )}
+              {t('pro.analytics.hourly_desc', 'Observed badge fetch volume by UTC hour.')}
             </p>
           </div>
 

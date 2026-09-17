@@ -618,7 +618,7 @@ export const es: Record<string, string> = {
   'editor.preview_nudge.title_prefix': 'Cambios',
   'editor.preview_nudge.title_suffix': 'con éxito',
   'editor.profile_switcher.name_placeholder': 'Nombre (opcional)',
-  'editor.profile_switcher.new_profile': '+ Nuevo Perfil',
+  'editor.profile_switcher.new_profile': 'Nuevo Perfil',
   'editor.profile_switcher.pro_only_tooltip':
     '¡Multi-Profiles es exclusivo de GitAscii Pro. Haz clic para desbloquear!',
   'editor.profile_switcher.pro_profiles': 'Perfiles Pro',
@@ -2584,7 +2584,7 @@ export const es: Record<string, string> = {
   'pro.pricing.comp.future_updates': 'Futuros Widgets y Lanzamientos Pro Incluidos',
   'pro.pricing.comp.geo_referrers': 'Desglose por País ISO y Referencias',
   'pro.pricing.comp.pro_90_days_history': '90 Días de Historial Completo',
-  'pro.pricing.comp.pro_recurring_val': '0 € (Paga 19 € una vez, tuyo para siempre)',
+  'pro.pricing.comp.pro_recurring_val': '0 € (Paga 9 € una vez, tuyo para siempre)',
   'pro.pricing.comp.profiles': 'Perfiles Activos Soportados',
   'pro.pricing.comp.recurring_fees': 'Tarifas Mensuales Recurrentes',
   'pro.pricing.comp.retention': 'Retención del Historial de Analítica',
@@ -2605,7 +2605,7 @@ export const es: Record<string, string> = {
     'Respaldamos GitAscii Pro con una garantía de devolución del 100% del dinero durante 14 días. Si Pro no eleva tu portafolio de desarrollador o no satisface tus necesidades, contáctanos y emitiremos un reembolso completo de inmediato.',
   'pro.pricing.faq.guarantee_q': '¿Cómo funciona la garantía de reembolso de 14 días?',
   'pro.pricing.faq.lifetime_a':
-    'Sí. Realizas un único pago de $19 USD y recibes acceso permanente de por vida a GitAscii Pro para tu cuenta de GitHub. Sin facturación mensual, sin renovaciones anuales y sin sorpresas.',
+    'Sí. Realizas un único pago de 9 € y recibes acceso permanente de por vida a GitAscii Pro para tu cuenta de GitHub. Sin facturación mensual, sin renovaciones anuales y sin sorpresas.',
   'pro.pricing.faq.lifetime_q': '¿Es realmente un pago único sin suscripciones?',
   'pro.pricing.faq.profiles_a':
     'Puedes crear hasta 10 slugs de perfil independientes (ej. /usuario para el perfil principal, /usuario/work para reclutadores, /usuario/oss para patrocinadores). Cada perfil mantiene su propia configuración de widgets, tema y analítica.',

@@ -1,0 +1,37 @@
+name: 'GitAscii Publisher'
+description: 'Renders and publishes GitAscii profile SVGs directly to your gitascii branch'
+author: 'Igorcbraz'
+
+inputs:
+  github_token:
+    description: 'GitHub Token for authentication and committing to the gitascii branch'
+    required: false
+    default: ${{ github.token }}
+  profile_slug:
+    description: 'Specific profile slug to build (leave empty to render all configured profiles)'
+    required: false
+    default: ''
+  pro_telemetry:
+    description: 'Whether to send performance/health telemetry to GitAscii Pro'
+    required: false
+    default: 'false'
+  telemetry_url:
+    description: 'Endpoint URL for Pro telemetry'
+    required: false
+    default: 'https://gitascii.com/api/pro/telemetry'
+  refresh_minutes:
+    description: 'Requested refresh interval. Free is enforced at 1440 minutes; Pro minimum is 60.'
+    required: false
+    default: '1440'
+
+outputs:
+  published_revision:
+    description: 'The published revision ID'
+  svg_changed:
+    description: 'Whether SVGs were modified and committed (true/false)'
+  status:
+    description: 'Status of execution (published, svg_unchanged, skipped_stale, skipped_interval, failed)'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

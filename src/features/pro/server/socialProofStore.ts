@@ -1,3 +1,5 @@
+import { hasDbConfig } from '@/lib/db/client'
+import { getProUsersFromDb, getUserCountFromDb } from '@/lib/db/repositories/userRepository'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { getProRedisClient } from './redisClient'
@@ -18,27 +20,15 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
     if (cached) {
       return JSON.parse(cached) as ProSocialProofData
     }
-  } catch {}
-
-  try {
-    const members = await redis.smembers('gitascii:pro:customers')
-    if (members && members.length > 0) {
-      const result: ProSocialProofData = {
-        count: members.length,
-        usernames: members.slice(0, 8),
-      }
-      await redis.set(CACHE_KEY, JSON.stringify(result), { ex: CACHE_TTL }).catch(() => {})
-      return result
-    }
-  } catch {}
+  } catch (error) {
+    console.warn('[SocialProof] Redis cache read failed:', error)
+  }
 
   const proUsers: string[] = []
   const proUsersSet = new Set<string>()
 
   try {
-    const { hasDbConfig } = await import('@/lib/db/client')
     if (hasDbConfig()) {
-      const { getProUsersFromDb } = await import('@/lib/db/repositories/userRepository')
       const dbProUsers = await getProUsersFromDb()
       for (const u of dbProUsers) {
         const normalized = u.toLowerCase().trim()
@@ -64,40 +54,41 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
     }
   }
 
-  try {
-    let cursor = 0
-    do {
-      const [nextCursor, keys] = await redis.scan(cursor, {
-        match: 'gitascii:pro:*:settings',
-        count: 100,
-      })
-      cursor = nextCursor
+  if (!hasDbConfig())
+    try {
+      let cursor = 0
+      do {
+        const [nextCursor, keys] = await redis.scan(cursor, {
+          match: 'gitascii:pro:*:settings',
+          count: 100,
+        })
+        cursor = nextCursor
 
-      if (keys.length > 0) {
-        const pipeline = redis.pipeline()
-        for (const key of keys) {
-          pipeline.hget(key, 'planTier')
-        }
-        const results = await pipeline.exec()
+        if (keys.length > 0) {
+          const pipeline = redis.pipeline()
+          for (const key of keys) {
+            pipeline.hget(key, 'planTier')
+          }
+          const results = await pipeline.exec()
 
-        for (let i = 0; i < keys.length; i++) {
-          const planTier = results[i]
-          if (planTier === 'pro') {
-            const parts = keys[i].split(':')
-            if (parts.length >= 4) {
-              const extracted = parts[2].toLowerCase()
-              if (!proUsersSet.has(extracted)) {
-                proUsersSet.add(extracted)
-                proUsers.push(extracted)
+          for (let i = 0; i < keys.length; i++) {
+            const planTier = results[i]
+            if (planTier === 'pro') {
+              const parts = keys[i].split(':')
+              if (parts.length >= 4) {
+                const extracted = parts[2].toLowerCase()
+                if (!proUsersSet.has(extracted)) {
+                  proUsersSet.add(extracted)
+                  proUsers.push(extracted)
+                }
               }
             }
           }
         }
-      }
-    } while (cursor !== 0)
-  } catch (err) {
-    console.warn('[SocialProof] Fallback scan failed:', err)
-  }
+      } while (cursor !== 0)
+    } catch (err) {
+      console.warn('[SocialProof] Fallback scan failed:', err)
+    }
 
   const result: ProSocialProofData = {
     count: proUsers.length,
@@ -139,12 +130,18 @@ export async function getLoggedInUsersCount(): Promise<number> {
         if (Array.isArray(data)) return data.length
       }
     }
-  } catch {}
+  } catch (error) {
+    console.warn('[SocialProof] GitHub OAuth grants lookup failed:', error)
+  }
+
+  if (hasDbConfig()) return getUserCountFromDb()
 
   try {
     const redis = getProRedisClient()
     return await redis.scard('gitascii:all:users')
-  } catch {}
+  } catch (error) {
+    console.warn('[SocialProof] Redis user count fallback failed:', error)
+  }
 
   return 0
 }

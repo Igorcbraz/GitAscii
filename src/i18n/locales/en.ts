@@ -612,7 +612,7 @@ export const en: Record<string, string> = {
   'editor.preview_nudge.title_prefix': 'Changes',
   'editor.preview_nudge.title_suffix': 'successfully',
   'editor.profile_switcher.name_placeholder': 'Name (optional)',
-  'editor.profile_switcher.new_profile': '+ New Profile',
+  'editor.profile_switcher.new_profile': 'New Profile',
   'editor.profile_switcher.pro_only_tooltip':
     'Multi-Profiles is exclusive to GitAscii Pro. Click to unlock!',
   'editor.profile_switcher.pro_profiles': 'Pro Profiles',
@@ -2563,7 +2563,7 @@ export const en: Record<string, string> = {
   'pro.pricing.comp.future_updates': 'Future Pro Widgets & Releases Included',
   'pro.pricing.comp.geo_referrers': 'Country ISO & Referrer Breakdown',
   'pro.pricing.comp.pro_90_days_history': '90 Days Full History',
-  'pro.pricing.comp.pro_recurring_val': '$0 (Pay $19 Once, Own Forever)',
+  'pro.pricing.comp.pro_recurring_val': '$0 (Pay $9 Once, Own Forever)',
   'pro.pricing.comp.profiles': 'Active Profiles Supported',
   'pro.pricing.comp.recurring_fees': 'Monthly Recurring Fees',
   'pro.pricing.comp.retention': 'Analytics History Retention',
@@ -2587,7 +2587,7 @@ export const en: Record<string, string> = {
     'We stand behind GitAscii Pro with a 14-day 100% money-back guarantee. If Pro does not elevate your developer portfolio or meet your needs, contact us and we will promptly issue a full refund.',
   'pro.pricing.faq.guarantee_q': 'How does the 14-day refund guarantee work?',
   'pro.pricing.faq.lifetime_a':
-    'Yes. You make a single one-time payment of $19 USD and receive permanent lifetime access to GitAscii Pro for your GitHub account. No monthly billing, no annual renewals, and no surprise lock-ins.',
+    'Yes. You make a single one-time payment of $9 USD and receive permanent lifetime access to GitAscii Pro for your GitHub account. No monthly billing, no annual renewals, and no surprise lock-ins.',
   'pro.pricing.faq.lifetime_q': 'Is it truly a one-time payment with no subscriptions?',
   'pro.pricing.faq.profiles_a':
     'You can create up to 10 separate profile slugs (e.g. /username for main profile, /username/work for recruiter views, /username/oss for open source sponsors). Each profile maintains its own widget configuration, theme, and analytics metrics.',

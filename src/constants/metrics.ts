@@ -101,7 +101,7 @@ export const fetchLandingMetrics = unstable_cache(
     return {
       stars,
       users,
-      readmes: profilesCount,
+      readmes,
       templates: TEMPLATES_COUNT,
       widgets: WIDGETS_COUNT,
       profiles: profilesCount,

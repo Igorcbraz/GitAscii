@@ -22,6 +22,18 @@ export async function saveProfileConfigInDb(
       ? new Date(config.metadata.updatedAt)
       : new Date()
 
+  const profileId = `prof_${user.id}_${cleanSlug}`
+  await sql`
+    INSERT INTO profiles (
+      id, user_id, slug, name, description, is_default, widgets_count, created_at, updated_at
+    ) VALUES (
+      ${profileId}, ${user.id}, ${cleanSlug}, ${config.profileName || 'Default'}, '', ${cleanSlug === 'default'}, ${config.widgets?.length || 1}, ${incomingDate}, ${incomingDate}
+    )
+    ON CONFLICT (user_id, slug) DO UPDATE
+    SET widgets_count = ${config.widgets?.length || 1}, updated_at = EXCLUDED.updated_at
+    WHERE profiles.updated_at <= EXCLUDED.updated_at;
+  `
+
   await sql`
     INSERT INTO profile_configurations (user_id, slug, config, version, updated_at)
     VALUES (${user.id}, ${cleanSlug}, ${JSON.stringify(config)}::jsonb, 1, ${incomingDate})
@@ -299,6 +311,13 @@ export async function createProfileVersionInDb(
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
   const user = await ensureUser(u)
+
+  const profileId = `prof_${user.id}_${cleanSlug}`
+  await sql`
+    INSERT INTO profiles (id, user_id, slug, name, description, is_default, created_at, updated_at)
+    VALUES (${profileId}, ${user.id}, ${cleanSlug}, ${cleanSlug === 'default' ? 'Default' : cleanSlug}, '', ${cleanSlug === 'default'}, NOW(), NOW())
+    ON CONFLICT (user_id, slug) DO NOTHING;
+  `
 
   await sql`
     INSERT INTO profile_versions (

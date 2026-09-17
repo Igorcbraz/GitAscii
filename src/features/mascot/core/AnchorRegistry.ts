@@ -83,6 +83,16 @@ export class AnchorRegistry {
       }
     }
 
+    if (el && el.tagName.toUpperCase() === 'SECTION') {
+      const nestedAnchor = el.querySelector(`[data-strobi-anchor="${id}"]`) as HTMLElement | null
+      if (nestedAnchor) {
+        el = nestedAnchor
+        if (config) {
+          config.element = nestedAnchor
+        }
+      }
+    }
+
     let isFallbackSection = false
     if (!el) {
       const sectionFallbacks: Record<string, string> = {

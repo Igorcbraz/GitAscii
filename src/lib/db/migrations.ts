@@ -314,6 +314,76 @@ export const MIGRATIONS: Migration[] = [
       await sql`ALTER TABLE dynamic_rules ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1;`
     },
   },
+  {
+    version: '009_migration_installations',
+    name: 'Create migration_installations table for V2 automated migration campaign',
+    up: async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS migration_installations (
+          id BIGSERIAL PRIMARY KEY,
+          user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+          installation_id BIGINT NOT NULL,
+          repository_owner VARCHAR(100) NOT NULL,
+          repository_name VARCHAR(100) NOT NULL,
+          migration_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+          migration_version INTEGER NOT NULL DEFAULT 1,
+          pr_number INTEGER,
+          deployed_action_sha VARCHAR(100),
+          attempts INTEGER NOT NULL DEFAULT 0,
+          last_error TEXT,
+          last_attempt_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          CONSTRAINT uq_migration_repo UNIQUE (repository_owner, repository_name)
+        );
+      `
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_migration_queue 
+        ON migration_installations (migration_status, attempts, last_attempt_at);
+      `
+    },
+  },
+  {
+    version: '010_profile_daily_dimensions',
+    name: 'Create profile daily dimensions table for lean PostgreSQL analytics',
+    up: async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS profile_daily_dimensions (
+          user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          slug VARCHAR(100) NOT NULL DEFAULT 'default',
+          date_str VARCHAR(15) NOT NULL,
+          dimension VARCHAR(50) NOT NULL,
+          dimension_key VARCHAR(255) NOT NULL,
+          count INTEGER NOT NULL DEFAULT 1,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (user_id, slug, date_str, dimension, dimension_key)
+        );
+      `
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_profile_daily_dim
+        ON profile_daily_dimensions (user_id, dimension, date_str);
+      `
+    },
+  },
+  {
+    version: '011_publish_interval',
+    name: 'Persist server-enforced v2 publication interval',
+    up: async () => {
+      await sql`
+        ALTER TABLE user_settings
+        ADD COLUMN IF NOT EXISTS publish_interval_minutes INTEGER NOT NULL DEFAULT 1440;
+      `
+      await sql`
+        ALTER TABLE user_settings
+        DROP CONSTRAINT IF EXISTS chk_publish_interval_minutes;
+      `
+      await sql`
+        ALTER TABLE user_settings
+        ADD CONSTRAINT chk_publish_interval_minutes
+        CHECK (publish_interval_minutes >= 60);
+      `
+    },
+  },
 ]
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {
@@ -378,9 +448,13 @@ export async function runMigrations(): Promise<{ applied: string[]; alreadyAppli
 
     return result
   } finally {
-    await sql`
-      DELETE FROM system_locks
-      WHERE lock_name = 'schema_migrations' AND locked_by = ${instanceId};
-    `.catch(() => {})
+    try {
+      await sql`
+        DELETE FROM system_locks
+        WHERE lock_name = 'schema_migrations' AND locked_by = ${instanceId};
+      `
+    } catch (error) {
+      console.warn('[Migrations] Failed to release the schema migration lock:', error)
+    }
   }
 }

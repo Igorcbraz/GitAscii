@@ -1,38 +1,29 @@
 ---
 title: 'Quickstart'
-description: 'Start rendering standalone and composite widgets programmatically'
+description: 'Publish a GitAscii v2 profile with GitHub-native SVG delivery'
 ---
 
 # Quickstart
 
-Get up and running with GitAscii in under 5 minutes. You can either call the live HTTP endpoint or run the core TypeScript rendering engine directly inside your Node.js or edge application.
+Get up and running with GitAscii v2 in under 5 minutes. Profile README delivery uses SVG files published to your own `gitascii` branch. The HTTP API remains available for previews and programmatic rendering, but is not the primary production embed.
 
-## 1. HTTP Endpoint Rendering
+## 1. GitHub-native profile publishing
 
-GitAscii exposes dynamic SVG endpoints that can be embedded directly in your GitHub `README.md`.
+Open the visual editor, authorize the GitHub App, and select **Publish to GitHub**. The generated README embed uses these stable files:
 
 <CodeGroup>
 
 ```markdown GitHub Markdown (Full Profile)
 <!-- Embed Full Profile SVG -->
 
-![GitAscii Profile](https://gitascii.com/api/YOUR_USERNAME?theme=dark)
-```
-
-```markdown GitHub Markdown (Standalone Widget)
-<!-- Embed Specific Standalone Widget (e.g. Stats, Streak, or Languages) -->
-
-![GitHub Live Stats](https://gitascii.com/api/YOUR_USERNAME?widgets=stats)
-![Language Breakdown](https://gitascii.com/api/YOUR_USERNAME?widgets=languages)
-![Neofetch Terminal Card](https://gitascii.com/api/YOUR_USERNAME?widgets=terminal-info)
+![GitAscii Profile](https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg)
 ```
 
 ```markdown GitHub Markdown (HTML Picture Theme Switching)
-<!-- Automatic Light/Dark Mode Rendering with GitHub Camo -->
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://gitascii.com/api/YOUR_USERNAME?theme=dark" />
-  <source media="(prefers-color-scheme: light)" srcset="https://gitascii.com/api/YOUR_USERNAME?theme=light" />
-  <img src="https://gitascii.com/api/YOUR_USERNAME" alt="GitAscii Profile" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/light.svg" />
+  <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg" alt="GitAscii Profile" />
 </picture>
 ```
 

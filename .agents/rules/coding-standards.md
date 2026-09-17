@@ -1,91 +1,134 @@
-# Regras de Qualidade Técnica de Código — GitAscii
+## Regras obrigatórias de código
 
-Siga estritamente estas diretrizes ao criar, refatorar ou editar código no projeto:
+Estas regras são **obrigatórias para qualquer código criado, alterado ou refatorado**. Antes de considerar uma tarefa concluída, revise **todos os arquivos modificados** e corrija qualquer violação encontrada.
 
----
+### Constants e valores fixos
 
-## 1. Comentários e Limpeza de Código
+- Nunca comparar valores de domínio diretamente com strings literais.
 
-- **HTML / JSX**: Nunca utilize comentários dentro do JSX/HTML (ex: `{/* Header */}`, `{/* Live Badge Preview */}`). O JSX deve ser autoexplicativo através de nomes de componentes e tags semânticas.
-- **TypeScript / Lógica**: Apenas utilize comentários em trechos com complexidade algorítmica ou comportamentos não-óbvios. Nunca adicione comentários redundantes ou óbvios (ex: `// Top 6 repos by stars`, `// Fallback data`, `// Close modal`).
-- **Código Morto**: Nunca deixe blocos de código comentados ou imports não utilizados nos arquivos.
+Evitar:
+`status === 'active'`
 
----
+Preferir:
+`status === USER_STATUS.ACTIVE`
 
-## 2. Componentização e Arquitetura (Coordinator Pattern)
+- Strings de status, tipos, categorias, roles, actions, eventos, mensagens reutilizadas e outros valores de domínio devem ficar em arquivos apropriados dentro de `constants`.
+- Magic numbers devem ser extraídos para constantes quando representam timeout, limite, quantidade, configuração ou regra de negócio.
+- Arrays e objetos grandes ou estáticos não devem permanecer dentro de components, controllers, services ou funções. Devem ser movidos para `constants`, `config` ou arquivo específico conforme sua responsabilidade.
+- Não criar uma constante apenas para substituir um valor trivial usado uma única vez quando isso não melhora legibilidade ou domínio.
 
-- **Evite Mega-Arquivos**: Componentes com mais de 300–400 linhas devem ser decompostos em subcomponentes com responsabilidade única (Single Responsibility Principle).
-- **Padrão Coordinator / Orchestrator**: Telas e dashboards complexos devem atuar como coordenadores enxutos, gerenciando estado superior, busca de dados e orquestração de modais, delegando a apresentação visual para subcomponentes isolados:
-  - `*KpiStrip.tsx`: Faixas de cards de KPI e métricas principais.
-  - `*Section.tsx` / `*Card.tsx`: Seções temáticas de gráficos, listas ou tabelas.
-  - `*Table.tsx`: Tabelas com paginação e ações de linha.
-  - `*Modal.tsx` / `*Editor.tsx`: Modais e formulários isolados.
-  - `*SidebarNav.tsx`: Navegação lateral e seletores de escopo.
-- **Skeletons Espelhados**: Componentes de carregamento (`*Skeleton.tsx`) devem espelhar fielmente a estrutura visual do componente real, mantendo os mesmos grids e proporções, sem nenhum comentário JSX.
+### URLs e integrações
 
----
+- URLs externas, endpoints e construção de URLs de APIs devem ficar exclusivamente na camada `service` ou configuração específica da integração.
+- Components, controllers, hooks e regras de negócio não devem conhecer URLs externas.
+- Credenciais, tokens, secrets e configurações dependentes de ambiente devem vir de configuração/env, nunca hardcoded.
+- Centralizar clientes HTTP e evitar configurações duplicadas de `fetch`, `axios` ou equivalentes.
 
-## 3. Organização de Diretórios e Estrutura de Features (`src/features/*`)
+### Modularização
 
-- Mantenha a separação de responsabilidades modularizada por domínio em `src/features/<feature>/`:
-  - `components/`: Componentes visuais e subcomponentes da feature.
-  - `constants/`: Constantes estáticas e opções de formulários do domínio, exportadas pelo barrel `index.ts`.
-  - `types/`: Tipos TypeScript e interfaces de dados do domínio.
-  - `server/` ou `store/`: Singletons, stores de persistência (Redis/Upstash) e lógica de backend.
-  - `utils/`: Funções utilitárias e formatadores específicos da feature.
-  - `api/`: Testes de integração de rotas e helpers de API.
+- Manter apenas um component principal por arquivo.
+- Components auxiliares relevantes devem possuir seus próprios arquivos.
+- Hooks reutilizáveis devem ficar separados dos components.
+- Funções utilitárias reutilizáveis devem ser extraídas para `utils`, `helpers` ou módulo equivalente existente no projeto.
+- Não criar arquivos que concentrem responsabilidades não relacionadas.
+- Quebrar funções grandes em funções menores quando existirem responsabilidades claramente separáveis.
+- Evitar components, controllers ou services excessivamente grandes.
+- Antes de criar um novo módulo, verificar a estrutura existente e seguir o padrão já adotado pelo projeto.
 
----
+### Separação de responsabilidades
 
-## 4. Constantes e Configurações Globais
+- Components devem cuidar principalmente de apresentação e interação.
+- Hooks devem encapsular comportamento reutilizável e estado quando apropriado.
+- Controllers devem coordenar entrada/saída, não concentrar regra de negócio.
+- Services devem concentrar integrações e operações próprias da camada de serviço.
+- Regras de negócio devem permanecer desacopladas de UI, transporte HTTP e detalhes de infraestrutura sempre que possível.
+- Queries e acesso ao banco não devem ser espalhados por components ou controllers quando existir uma camada apropriada para isso.
 
-- **Constantes Globais**: Dados estáticos, dicionários de cores, mapas de linguagem e listas de datas/meses (ex: `LANGUAGE_COLORS`, `MONTH_NAMES`, `GITHUB_CONTRIBUTION_COLORS`) devem residir em `src/constants/` e ser exportadas por `src/constants/index.ts`.
-- **Constantes de Domínio**: Constantes específicas de features (ex: opções de regras dinâmicas, filtros de tempo, listas de escopo) devem residir em `src/features/<feature>/constants/`.
-- **Validação Tipada**: Validações de nomes de temas, chaves de cor HEX ou identificadores de widgets/estilos devem ser feitas diretamente contra as constantes e tipos do sistema (ex: `GITHUB_THEME_KEYS`, `WIDGET_IDS`, `LANGUAGE_COLORS`) em vez de strings literais soltas no código.
+### Comentários
 
----
+- Não adicionar comentários que apenas expliquem o que o código já deixa claro.
+- Preferir nomes claros e código autoexplicativo em vez de comentários.
+- Remover comentários obsoletos, código comentado, TODOs desnecessários e explicações geradas automaticamente.
+- Comentários são permitidos somente quando explicam algo que não pode ser representado claramente pelo próprio código, como:
 
-## 5. URLs e Chamadas de API / Serviços
+  - decisões técnicas não óbvias;
+  - limitações externas;
+  - comportamento estranho de biblioteca/API;
+  - conversões específicas, por exemplo `300_000 // 5 minutos`;
+  - workaround cujo motivo seria perdido sem contexto.
 
-- **Centralização em `API_ENDPOINTS`**: Qualquer URL de requisição ou endpoint de serviço deve ser declarada e consumida a partir de `src/services/endpoints.ts` (`API_ENDPOINTS`).
-- **Zero URLs Hard-Coded**: Nunca escreva strings de rota diretamente em chamadas de `fetch` ou redirecionamentos (ex: proibido `fetch('/api/pro/analytics')` ou `fetch('/api/auth/login')`). Sempre utilize `API_ENDPOINTS.PRO.*` ou `API_ENDPOINTS.AUTH.*`.
+### Duplicação
 
----
+- Não duplicar lógica existente.
+- Antes de implementar uma nova função, helper, constant, service ou component, procurar se já existe algo equivalente.
+- Quando duas ou mais partes modificadas possuem a mesma lógica relevante, extrair uma abstração compartilhada quando isso realmente reduzir duplicação.
+- Não criar abstrações prematuras para código trivial.
 
-## 6. Internacionalização (i18n)
+### Legibilidade
 
-- **Todo Texto Visível Traduzido**: Nenhum texto visível para o usuário deve ficar hard-coded em inglês ou português. Sempre envolva strings com o hook `useI18n()` fornecendo uma chave semântica e um fallback padrão em inglês:
-  ```tsx
-  const { t } = useI18n()
-  <span>{t('pro.analytics.kpi_total_views', 'Total Views')}</span>
-  ```
-- **Interpolação de Variáveis**: Utilize a sintaxe de chaves para interpolação:
-  ```tsx
-  t('pro.analytics.page_of', 'Page {current} of {total}', {
-    current: String(page),
-    total: String(totalPages),
-  })
-  ```
+- Usar nomes que expressem intenção.
+- Evitar nomes genéricos como `data`, `item`, `obj`, `temp`, `value` quando houver um nome de domínio mais claro.
+- Evitar condicionais complexas inline.
+- Extrair condições extensas para funções ou variáveis com nomes semânticos.
+- Preferir early return quando reduzir níveis de indentação.
+- Evitar ternários aninhados.
+- Evitar funções com muitos parâmetros; quando fizer sentido, utilizar objeto de parâmetros.
+- Remover imports, variáveis, funções e código não utilizados.
 
----
+### Tipagem e contratos
 
-## 7. Ícones e Elementos Gráficos
+Quando TypeScript estiver sendo utilizado:
 
-- **Uso Exclusivo de `lucide-react`**: Sempre utilize a biblioteca padrão do projeto (`lucide-react`) em vez de SVGs manuais inline para ícones de UI (botões, tabs, menus, notificações, status, etc.).
-- **Proporção e Acessibilidade**: Ícones sem texto adjacente devem possuir `aria-label` ou `title` no botão/container pai para leitores de tela e acessibilidade.
+- Não utilizar `any` sem necessidade comprovada.
+- Não utilizar casts (`as`) apenas para silenciar erros de TypeScript.
+- Reutilizar tipos existentes antes de criar novos.
+- Interfaces/types compartilhados devem ficar em arquivos próprios quando apropriado.
+- Tipar explicitamente contratos externos, respostas de APIs e estruturas relevantes de domínio.
 
----
+### Tratamento de erros
 
-## 8. Modais, Diálogos de Confirmação e Feedback Visual
+- Não deixar `catch` vazio.
+- Não esconder erros silenciosamente.
+- Não duplicar tratamento de erro quando já existir uma estratégia centralizada.
+- Mensagens internas e mensagens exibidas ao usuário devem respeitar as responsabilidades de cada camada.
+- Erros de integrações externas devem possuir contexto suficiente para diagnóstico sem expor secrets.
 
-- **Diálogos Destrutivos / Confirmações**: Ações de exclusão, redefinição ou alterações críticas devem utilizar o componente padronizado [`ConfirmDialog`](file:///C:/Repos/GitAscii/src/features/pro/components/ConfirmDialog.tsx) com suporte a `isOpen`, `title`, `description`, `confirmLabel`, `variant` (`'danger'` | `'warning'` | `'primary'`) e `isLoading`.
-- **Manipulação de Teclado e Backdrop**: Dropdowns e modais devem fechar ao pressionar a tecla `Escape` e ao clicar fora do elemento (listener de `mousedown` no `document` com cleanup no `useEffect`).
-- **Estados de Carregamento**: Todas as operações assíncronas devem fornecer feedback visual (indicadores de `loading`, `disabled`, spinners com `animate-spin`).
+### Configuração
 
----
+- Não hardcodar valores que variam entre ambientes.
+- Usar `env`, `config` ou constants conforme a natureza do valor.
+- Não acessar `process.env` indiscriminadamente por toda a aplicação se o projeto já possuir camada de configuração.
 
-## 9. Tipagem Estrita e TypeScript
+### Escopo da alteração
 
-- **Zero `any` Desnecessário**: Todas as respostas de API, payloads de mutação, registros de banco/Redis e props de componentes devem ser devidamente tipados em `types/`.
-- **Props Opcionais**: Propriedades opcionais booleanas devem receber valor padrão na desestruturação dos parâmetros do componente (ex: `pageSize = 8`, `compareEnabled = true`).
-- **Validação com `tsc`**: Todo código novo ou refatorado deve passar com zero erros na execução de `npx tsc --noEmit`.
+Ao receber uma tarefa:
+
+1. Primeiro entenda a estrutura e os padrões existentes.
+2. Implemente a alteração solicitada.
+3. Revise os arquivos diretamente relacionados que foram modificados.
+4. Aplique estas regras também ao código existente que você tocou, não apenas às novas linhas.
+5. Não faça refatorações grandes e não relacionadas à tarefa apenas para satisfazer preferências arquiteturais.
+6. Preserve comportamento existente que não faça parte da solicitação.
+
+### Validação obrigatória antes de finalizar
+
+Antes de declarar a tarefa concluída, faça uma revisão final dos arquivos alterados procurando explicitamente por:
+
+- strings de domínio hardcoded;
+- magic numbers;
+- arrays/objetos grandes inline;
+- URLs fora de services/config;
+- código duplicado;
+- comentários desnecessários;
+- código comentado;
+- imports/código morto;
+- funções excessivamente grandes;
+- múltiplos components relevantes no mesmo arquivo;
+- responsabilidades misturadas;
+- `any` ou casts desnecessários;
+- tratamento de erros vazio ou silencioso;
+- lógica que já deveria ter sido extraída para constant, helper, hook ou service.
+
+Se encontrar qualquer um desses problemas nos arquivos modificados, **corrija antes de finalizar**.
+
+Não apenas informe que encontrou uma violação. A regra padrão é **corrigir a violação diretamente** sempre que ela estiver dentro do escopo dos arquivos modificados.

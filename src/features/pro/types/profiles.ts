@@ -1,4 +1,15 @@
+import type { SavedConfiguration } from '@/engine/types'
+
 export type ProfileStatus = 'active' | 'draft' | 'archived'
+
+export const PROFILE_STATUS = {
+  ACTIVE: 'active',
+  DRAFT: 'draft',
+  ARCHIVED: 'archived',
+} as const satisfies Record<string, ProfileStatus>
+
+export const DEFAULT_PROFILE_SLUG = 'default'
+export const MAX_PROFILES_PER_USER = 10
 
 export interface ProProfileRecord {
   id: string
@@ -7,6 +18,7 @@ export interface ProProfileRecord {
   description?: string
   status: ProfileStatus
   isDefault: boolean
+  isSynced?: boolean
   widgetsCount: number
   totalViews: number
   versionCount?: number
@@ -26,7 +38,7 @@ export interface ProfileVersionRecord {
   versionNumber: number
   label?: string
   description?: string
-  config: any
+  config?: SavedConfiguration
   widgetsCount: number
   createdAt: string
   createdBy?: string

@@ -20,14 +20,8 @@ import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { AnalyticsSummary, ProProfileRecord, TimeRange } from '../../types'
-import {
-  formatLocalizedCountry,
-  formatLocalizedDay,
-  formatUtcHourToLocal,
-} from '../../utils/proFormatters'
-import { CountryFlag } from '../CountryFlag'
+import { formatLocalizedDay, formatUtcHourToLocal } from '../../utils/proFormatters'
 import { ProHeader } from '../ProHeader'
-import { AnalyticsGeoSection } from './AnalyticsGeoSection'
 import { AnalyticsProfilesSection } from './AnalyticsProfilesSection'
 import { AnalyticsSidebarNav, type SectionId } from './AnalyticsSidebarNav'
 import { AnalyticsDashboardSkeleton } from './AnalyticsSkeleton'
@@ -42,7 +36,6 @@ export const AnalyticsDashboard: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<string>('all')
   const [compareEnabled, setCompareEnabled] = useState(true)
   const [activeSection, setActiveSection] = useState<SectionId>('overview')
-  const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -146,7 +139,14 @@ export const AnalyticsDashboard: React.FC = () => {
       mime = 'application/json'
     } else {
       const rows = [
-        ['Date', 'Views', 'Unique Visitors', 'Cache Hits', 'Camo Proxy Views', 'Direct Views'],
+        [
+          'Date',
+          'Badge Fetches',
+          'Unavailable Uniques',
+          'Cache Hits',
+          'Camo Fetches',
+          'Direct Fetches',
+        ],
         ...(summary.timeSeries || []).map((t) => [
           t.date,
           t.views,
@@ -460,33 +460,10 @@ export const AnalyticsDashboard: React.FC = () => {
               </div>
               <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
                 <span className="text-[#666] text-[11px]">
-                  {t('pro.insights.top_country', 'Top Country:')}
+                  {t('pro.insights.measurement_source', 'Measured By:')}
                 </span>
-                <span className="text-white font-bold flex items-center gap-1.5 truncate">
-                  {summary?.topCountries[0] ? (
-                    <>
-                      <CountryFlag
-                        code={summary.topCountries[0].code}
-                        name={formatLocalizedCountry(
-                          summary.topCountries[0].code,
-                          summary.topCountries[0].name,
-                          language,
-                          t
-                        )}
-                        size="sm"
-                      />
-                      <span className="truncate">
-                        {formatLocalizedCountry(
-                          summary.topCountries[0].code,
-                          summary.topCountries[0].name,
-                          language,
-                          t
-                        )}
-                      </span>
-                    </>
-                  ) : (
-                    formatLocalizedCountry('US', 'United States', language, t)
-                  )}
+                <span className="text-white font-bold truncate">
+                  {t('pro.insights.badge_requests', 'Badge requests')}
                 </span>
               </div>
               <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
@@ -504,12 +481,6 @@ export const AnalyticsDashboard: React.FC = () => {
             summary={summary}
             range={range}
             compareEnabled={compareEnabled}
-          />
-
-          <AnalyticsGeoSection
-            summary={summary}
-            selectedCountryCode={selectedCountryCode}
-            setSelectedCountryCode={setSelectedCountryCode}
           />
 
           <AnalyticsTechSourcesSection summary={summary} />

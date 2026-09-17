@@ -1,8 +1,15 @@
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
+import { MIGRATION_TEMPLATES } from '@/constants'
+import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { getDynamicRulesConfig } from '@/features/pro/server/dynamicRulesStore'
+import { getProEntitlements } from '@/features/pro/server/entitlements'
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
+import { bootstrapGitasciiBranch } from '@/lib/migration/branchBootstrap'
+import { generateV2EmbedCode, updateReadmeContent } from '@/lib/migration/markdownGenerator'
+import { generateWorkflowYaml } from '@/lib/migration/workflowGenerator'
 import { saveProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -13,24 +20,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { embedCode, exportData, installation_id } = await request.json()
-    if (!embedCode && !installation_id) {
-      return NextResponse.json({ error: 'Missing embedCode' }, { status: 400 })
-    }
-
+    const { exportData, installation_id } = await request.json()
     const username = session.username
     let appToken = null
-    let finalEmbedCode = embedCode
 
-    const host = request.headers.get('host') || 'localhost:3000'
-    const protocol = request.headers.get('x-forwarded-proto') || 'https'
-    const v = Date.now()
     const rawSlug = typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default'
-    const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug : 'default'
+    const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug.toLowerCase() : 'default'
+    const revision = `rev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 
     if (exportData && typeof exportData === 'object') {
       exportData.username = username
       exportData.profileSlug = profileSlug
+      exportData.metadata = {
+        ...exportData.metadata,
+        revision,
+        updatedAt: new Date().toISOString(),
+      }
     }
 
     if (installation_id) {
@@ -46,15 +51,6 @@ export async function POST(request: Request) {
         )
       }
       appToken = token
-
-      const slugPath = profileSlug === 'default' ? '' : `/${profileSlug}`
-      finalEmbedCode = `<a href="${protocol}://${host}">
-  <img
-    src="${protocol}://${host}/api/${encodeURIComponent(username)}${slugPath}?v=${v}"
-    alt="GitAscii Widget"
-    width="100%"
-  />
-</a>`
     } else {
       const { token, installUrl } = await getInstallationTokenForUser(username)
       if (!token) {
@@ -82,12 +78,15 @@ export async function POST(request: Request) {
     }
 
     const repoName = username
-
     const headers = {
       Authorization: `Bearer ${appToken}`,
       Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'GitAscii-App',
     }
+
+    const authorName = session.name || session.username
+    const authorEmail = session.email || `${session.username}@users.noreply.github.com`
+    const coAuthorTrailer = `\n\nCo-authored-by: ${authorName} <${authorEmail}>`
 
     const repoRes = await fetch(API_ENDPOINTS.GITHUB.REPO_INFO(username, repoName), {
       headers,
@@ -98,6 +97,14 @@ export async function POST(request: Request) {
         { error: 'Failed to access repository', details: await repoRes.text() },
         { status: 500 }
       )
+    }
+
+    let defaultBranch = 'main'
+    if (repoRes.status === 200) {
+      const repoData = await repoRes.json()
+      if (repoData?.default_branch) {
+        defaultBranch = repoData.default_branch
+      }
     }
 
     if (repoRes.status === 404) {
@@ -119,231 +126,156 @@ export async function POST(request: Request) {
         )
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const REPO_CREATION_DELAY_MS = 1000
+      await new Promise((resolve) => setTimeout(resolve, REPO_CREATION_DELAY_MS))
     }
 
-    let jsonSha = undefined
-    let hasJsonChanged = true
-    let incomingJsonStr = ''
+    const [profileData, entitlements, dynamicRules] = await Promise.all([
+      fetchGitHubProfile(username, { fresh: true }).catch((error) => {
+        console.error('[Commit Route] Failed to fetch GitHub profile:', error)
+        return null
+      }),
+      getProEntitlements(username).catch((error) => {
+        console.error('[Commit Route] Failed to fetch Pro entitlements:', error)
+        return null
+      }),
+      getDynamicRulesConfig(username).catch(() => null),
+    ])
 
-    const isDefaultProfile = profileSlug === 'default'
-    const safeProfileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(profileSlug)
-      ? profileSlug.toLowerCase()
-      : 'default'
-    const jsonFileName =
-      isDefaultProfile || safeProfileSlug === 'default'
-        ? 'gitascii.json'
-        : `gitascii_${safeProfileSlug}.json`
+    const isPro = entitlements?.tier && entitlements.tier !== 'free'
 
-    if (exportData) {
-      const jsonRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, jsonFileName),
-        { headers }
+    if (exportData && !profileData) {
+      return NextResponse.json(
+        { error: 'Unable to fetch GitHub profile data required for publication' },
+        { status: 502 }
       )
-      if (jsonRes.status === 200) {
-        const jsonData = await jsonRes.json()
-        jsonSha = jsonData.sha
-        const currentJsonStr = Buffer.from(jsonData.content, 'base64').toString('utf8')
-        incomingJsonStr = JSON.stringify(exportData, null, 2)
-
-        if (currentJsonStr === incomingJsonStr) {
-          hasJsonChanged = false
-        }
-      } else {
-        incomingJsonStr = JSON.stringify(exportData, null, 2)
-      }
     }
 
-    const authorName = session.name || session.username
-    const authorEmail = session.email || `${session.username}@users.noreply.github.com`
-    const coAuthorTrailer = `\n\nCo-authored-by: ${authorName} <${authorEmail}>`
-    const commitAuthor = {
-      name: authorName,
-      email: authorEmail,
-    }
-
-    if (isDefaultProfile) {
-      const readmeRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
-        { headers }
+    if (exportData && profileData) {
+      const bootstrapRes = await bootstrapGitasciiBranch(
+        username,
+        repoName,
+        appToken,
+        exportData,
+        profileData
       )
 
-      let sha = undefined
-      let currentContent = ''
-
-      if (readmeRes.status === 200) {
-        const readmeData = await readmeRes.json()
-        sha = readmeData.sha
-        currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
-      }
-
-      const widgetRegex =
-        /!\[Widget\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
-      const isWidgetMissing = !currentContent.match(widgetRegex)
-
-      if (hasJsonChanged || isWidgetMissing || currentContent.trim() !== finalEmbedCode.trim()) {
-        const newContent = finalEmbedCode
-
-        const updateRes = await fetch(
-          API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
-          {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify({
-              message: `Update profile README via GitAscii${coAuthorTrailer}`,
-              content: Buffer.from(newContent, 'utf8').toString('base64'),
-              sha,
-              author: commitAuthor,
-            }),
-          }
+      if (!bootstrapRes.success) {
+        throw new Error(
+          `Failed to publish the GitAscii branch: ${bootstrapRes.error || 'unknown error'}`
         )
-
-        if (!updateRes.ok) {
-          return NextResponse.json(
-            { error: 'Failed to update README', details: await updateRes.text() },
-            { status: 500 }
-          )
-        }
-      }
-    } else {
-      const readmeRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
-        { headers }
-      )
-
-      if (readmeRes.status === 200) {
-        const readmeData = await readmeRes.json()
-        const sha = readmeData.sha
-        const currentContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
-        const markerStart = `<!-- GITASCII:${profileSlug}:START -->`
-        const markerEnd = `<!-- GITASCII:${profileSlug}:END -->`
-
-        if (currentContent.includes(markerStart) && currentContent.includes(markerEnd)) {
-          const markerRegex = new RegExp(`${markerStart}[\\s\\S]*?${markerEnd}`, 'g')
-          const updatedContent = currentContent.replace(
-            markerRegex,
-            `${markerStart}\n${finalEmbedCode}\n${markerEnd}`
-          )
-
-          await fetch(API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'), {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify({
-              message: `Update ${profileSlug} section in README via GitAscii${coAuthorTrailer}`,
-              content: Buffer.from(updatedContent, 'utf8').toString('base64'),
-              sha,
-              author: commitAuthor,
-            }),
-          })
-        }
       }
     }
 
-    if (exportData && hasJsonChanged) {
-      const updateJsonRes = await fetch(
-        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, jsonFileName),
+    const v2EmbedCode = generateV2EmbedCode({
+      username,
+      profileSlug,
+      includeBadge: Boolean(isPro),
+      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
+    })
+
+    const readmeRes = await fetch(
+      API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
+      { headers }
+    )
+
+    let readmeSha = undefined
+    let currentReadmeContent = ''
+
+    if (readmeRes.status === 200) {
+      const readmeData = await readmeRes.json()
+      readmeSha = readmeData.sha
+      currentReadmeContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
+    }
+
+    const updatedReadmeContent = updateReadmeContent(currentReadmeContent, v2EmbedCode, profileSlug)
+
+    if (currentReadmeContent.trim() !== updatedReadmeContent.trim()) {
+      const updateReadmeRes = await fetch(
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
         {
           method: 'PUT',
           headers,
           body: JSON.stringify({
-            message: `Update GitAscii layout export (${jsonFileName})${coAuthorTrailer}`,
-            content: Buffer.from(incomingJsonStr, 'utf8').toString('base64'),
-            sha: jsonSha,
-            author: commitAuthor,
+            message: `${MIGRATION_TEMPLATES.COMMITS.UPDATE_README}${coAuthorTrailer}`,
+            content: Buffer.from(updatedReadmeContent, 'utf8').toString('base64'),
+            sha: readmeSha,
           }),
         }
       )
 
-      if (!updateJsonRes.ok) {
-        const errorText = (await updateJsonRes.text()).replace(/[\r\n]/g, ' ')
-        console.error('[Commit Route] Failed to upload JSON config: %s', errorText)
-      } else {
-        const { invalidateProfileConfig } = await import('@/lib/profileStorage')
-        await invalidateProfileConfig(username, profileSlug)
+      if (!updateReadmeRes.ok) {
+        throw new Error(`Failed to update README: ${await updateReadmeRes.text()}`)
       }
+    }
 
-      const hasSnakeWidget = exportData?.widgets?.some(
-        (w: { id?: string; widgetId?: string }) =>
-          w.id === 'contribution-snake' || w.widgetId === 'contribution-snake'
+    const workflowYaml = generateWorkflowYaml(username, exportData, {
+      isPro: Boolean(isPro),
+      forceSchedule: true,
+    })
+
+    const workflowRes = await fetch(
+      API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/gitascii.yml'),
+      { headers }
+    )
+
+    let workflowSha = undefined
+    let currentWorkflowContent = ''
+
+    if (workflowRes.status === 200) {
+      const workflowData = await workflowRes.json()
+      workflowSha = workflowData.sha
+      currentWorkflowContent = Buffer.from(workflowData.content, 'base64').toString('utf8')
+    }
+
+    if (currentWorkflowContent.trim() !== workflowYaml.trim()) {
+      const updateWorkflowRes = await fetch(
+        API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/gitascii.yml'),
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            message: `${MIGRATION_TEMPLATES.COMMITS.CONFIGURE_WORKFLOW}${coAuthorTrailer}`,
+            content: Buffer.from(workflowYaml, 'utf8').toString('base64'),
+            sha: workflowSha,
+          }),
+        }
       )
 
-      if (hasSnakeWidget) {
-        try {
-          const snakeYaml = `name: Generate Snake Animation
-
-on:
-  schedule:
-    - cron: "0 */12 * * *"
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-      - main
-
-jobs:
-  generate:
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: generate-snake-game-from-github-contribution-grid
-        uses: Platane/snk/svg-only@v3
-        with:
-          github_user_name: \${{ github.repository_owner }}
-          outputs: |
-            dist/github-contribution-grid-snake.svg
-            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
-
-      - name: push github-contribution-grid-snake.svg to the output branch
-        uses: crazy-max/ghaction-github-pages@v3.1.0
-        with:
-          target_branch: output
-          build_dir: dist
-        env:
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-`
-
-          const actionRes = await fetch(
-            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
-            { headers, signal: AbortSignal.timeout(6000) }
-          )
-          let actionSha = undefined
-          if (actionRes.status === 200) {
-            const actionData = await actionRes.json()
-            actionSha = actionData.sha
-          }
-
-          const updateActionRes = await fetch(
-            API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, '.github/workflows/snake.yml'),
-            {
-              method: 'PUT',
-              headers,
-              body: JSON.stringify({
-                message: `Configure Contribution Snake GitHub Action${coAuthorTrailer}`,
-                content: Buffer.from(snakeYaml, 'utf8').toString('base64'),
-                sha: actionSha,
-                author: commitAuthor,
-              }),
-              signal: AbortSignal.timeout(6000),
-            }
-          )
-
-          if (!updateActionRes.ok) {
-            console.error('Failed to configure Snake GitHub Action:', await updateActionRes.text())
-          }
-        } catch (err) {
-          console.error('Error configuring snake workflow:', err)
-        }
+      if (!updateWorkflowRes.ok) {
+        throw new Error(`Failed to write workflow file: ${await updateWorkflowRes.text()}`)
       }
+    }
+
+    // Remove legacy files deletion logic to prevent data loss on unmigrated accounts
+
+    try {
+      const dispatchRes = await fetch(
+        API_ENDPOINTS.GITHUB.WORKFLOW_DISPATCH(username, repoName, 'gitascii.yml'),
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            ref: defaultBranch,
+          }),
+        }
+      )
+      if (!dispatchRes.ok) {
+        console.warn(
+          `[Commit Route] Non-blocking dispatch warning: HTTP ${dispatchRes.status}: ${await dispatchRes.text()}`
+        )
+      }
+    } catch (dispatchErr) {
+      console.warn(
+        `[Commit Route] Non-blocking dispatch warning: Failed to dispatch GitAscii workflow: ${dispatchErr instanceof Error ? dispatchErr.message : String(dispatchErr)}`
+      )
     }
 
     if (exportData && typeof exportData === 'object') {
       try {
         await saveProfileConfig(exportData)
       } catch (saveErr) {
-        console.error('Failed to cache profile configuration in memory:', saveErr)
+        console.error('Failed to cache profile configuration:', saveErr)
       }
     }
 
@@ -354,8 +286,7 @@ jobs:
           username: session.username,
           name: session.name,
           email: session.email,
-          profileSlug:
-            typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default',
+          profileSlug,
           widgetCount: Array.isArray(exportData?.widgets) ? exportData.widgets.length : undefined,
         })
         .catch((err) => {
@@ -363,11 +294,16 @@ jobs:
         })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      revision,
+      embedCode: v2EmbedCode,
+    })
   } catch (error: unknown) {
     Sentry.captureException(error)
-    console.error('Commit error:', error)
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    const rawMessage = error instanceof Error ? error.message : 'Internal Server Error'
+    const message = rawMessage.replace(/[\r\n]+/g, ' ')
+    console.error(`Commit error: ${message}`)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -20,6 +20,7 @@ interface ProfileItem {
   slug: string
   name: string
   isDefault?: boolean
+  isSynced?: boolean
 }
 
 interface SessionData {
@@ -38,7 +39,7 @@ export function ProfileSwitcher({
   const [isOpen, setIsOpen] = useState(false)
   const [isProUser, setIsProUser] = useState<boolean | null>(null)
   const [profiles, setProfiles] = useState<ProfileItem[]>([
-    { slug: 'default', name: 'Default', isDefault: true },
+    { slug: 'default', name: 'Default', isDefault: true, isSynced: true },
   ])
   const [newSlugInput, setNewSlugInput] = useState('')
   const [newNameInput, setNewNameInput] = useState('')
@@ -67,7 +68,6 @@ export function ProfileSwitcher({
       setIsProUser(isPro)
 
       const discoveredMap = new Map<string, ProfileItem>()
-      discoveredMap.set('default', { slug: 'default', name: 'Default', isDefault: true })
 
       try {
         const res = await fetch(API_ENDPOINTS.PRO.PROFILES)
@@ -77,10 +77,12 @@ export function ProfileSwitcher({
             for (const p of data.profiles) {
               const slug = (p.slug || '').toLowerCase().trim()
               if (slug) {
+                const isSynced = Boolean(p.isSynced)
                 discoveredMap.set(slug, {
                   slug,
                   name: p.name || slug,
                   isDefault: Boolean(p.isDefault || slug === 'default'),
+                  isSynced,
                 })
               }
             }
@@ -88,6 +90,15 @@ export function ProfileSwitcher({
         }
       } catch {
         // Fallback to local storage
+      }
+
+      if (!discoveredMap.has('default')) {
+        discoveredMap.set('default', {
+          slug: 'default',
+          name: 'Default',
+          isDefault: true,
+          isSynced: false,
+        })
       }
 
       if (effectiveUsername) {
@@ -103,6 +114,7 @@ export function ProfileSwitcher({
                   slug,
                   name: typeof item === 'string' ? slug : item.name || slug,
                   isDefault: slug === 'default',
+                  isSynced: false,
                 })
               }
             }
@@ -118,6 +130,7 @@ export function ProfileSwitcher({
           slug: current,
           name: current === 'default' ? 'Default' : current,
           isDefault: current === 'default',
+          isSynced: false,
         })
       }
 
@@ -189,9 +202,9 @@ export function ProfileSwitcher({
       console.warn('Could not persist profile to server:', err)
     }
 
-    const updated = [
+    const updated: ProfileItem[] = [
       ...profiles.filter((p) => p.slug !== cleanSlug),
-      { slug: cleanSlug, name: profileName, isDefault: false },
+      { slug: cleanSlug, name: profileName, isDefault: false, isSynced: false },
     ]
     setProfiles(updated)
 
@@ -268,6 +281,8 @@ export function ProfileSwitcher({
           <div className="max-h-56 overflow-y-auto p-1 space-y-0.5">
             {profiles.map((p) => {
               const isCurrent = p.slug === currentProfileSlug
+              const configFileName =
+                p.slug === 'default' ? 'gitascii.json' : `gitascii_${p.slug}.json`
               return (
                 <button
                   key={p.slug}
@@ -279,14 +294,22 @@ export function ProfileSwitcher({
                   }`}
                 >
                   <div className="min-w-0 pr-2">
-                    <div className="font-jetbrains-mono text-[11.5px] truncate">
-                      {p.name || p.slug}
+                    <div className="font-jetbrains-mono text-[11.5px] truncate flex items-center gap-1.5">
+                      <span>{p.name || p.slug}</span>
+                      {p.isDefault && (
+                        <span className="text-[9px] px-1 py-0.2 rounded-xs bg-graphite text-ash font-mono">
+                          default
+                        </span>
+                      )}
                     </div>
-                    {p.name && p.name !== p.slug && (
-                      <div className="font-jetbrains-mono text-[9.5px] text-ash/70 truncate">
-                        /{p.slug}
-                      </div>
-                    )}
+                    <div className="font-jetbrains-mono text-[9.5px] text-ash/70 truncate flex items-center gap-1 mt-0.5">
+                      <span>{configFileName}</span>
+                      {p.isSynced ? (
+                        <span className="text-signal-lime/70">• synced</span>
+                      ) : (
+                        <span className="text-amber-400/80 font-medium">• draft</span>
+                      )}
+                    </div>
                   </div>
                   {isCurrent && <Check size={12} className="text-signal-lime shrink-0" />}
                 </button>
@@ -341,7 +364,7 @@ export function ProfileSwitcher({
                 className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xs border border-dashed border-graphite/70 hover:border-signal-lime/50 text-ash/80 hover:text-signal-lime bg-transparent font-inter-tight text-[11px] font-medium transition-colors cursor-pointer"
               >
                 <Plus size={11} />
-                <span>{t('editor.profile_switcher.new_profile', '+ New Profile')}</span>
+                <span>{t('editor.profile_switcher.new_profile', 'New Profile')}</span>
               </button>
             )}
           </div>

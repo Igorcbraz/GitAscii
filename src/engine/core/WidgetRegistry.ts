@@ -30,10 +30,19 @@ import { renderInterlace } from '@/features/widgets/renderers/InterlaceRenderer'
 import { renderLanguages } from '@/features/widgets/renderers/LanguagesRenderer'
 import { renderMarquee } from '@/features/widgets/renderers/MarqueeRenderer'
 import { renderMetroMap } from '@/features/widgets/renderers/MetroMapRenderer'
+import {
+  renderMinecraftAchievement,
+  renderMinecraftChat,
+  renderMinecraftDeathScreen,
+  renderMinecraftHud,
+  renderMinecraftInventory,
+  renderMinecraftServer,
+} from '@/features/widgets/renderers/MinecraftRenderers'
 import { renderMonolith } from '@/features/widgets/renderers/MonolithRenderer'
 import { renderNeural } from '@/features/widgets/renderers/NeuralRenderer'
 import { renderPatchbay } from '@/features/widgets/renderers/PatchbayRenderer'
 import { renderPokemonCard } from '@/features/widgets/renderers/PokemonCardRenderer'
+import { renderPokemonTrainerCard } from '@/features/widgets/renderers/PokemonTrainerCardRenderer'
 import { renderPremiumAsciiCodingVelocity } from '@/features/widgets/renderers/PremiumAsciiCodingVelocityRenderer'
 import { renderPremiumAsciiDeveloperDna } from '@/features/widgets/renderers/PremiumAsciiDeveloperDnaRenderer'
 import { renderPremiumAsciiDevScore } from '@/features/widgets/renderers/PremiumAsciiDevScoreRenderer'
@@ -95,6 +104,7 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.TERMINAL_INFO, (w, d, g) => renderTerminalInfo(w, d, g)],
   ['terminal-card', (w, d, g) => renderTerminalInfo(w, d, g)],
   [WIDGET_IDS.POKEMON_CARD, (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
+  [WIDGET_IDS.POKEMON_TRAINER_CARD, (w, d, g, s) => renderPokemonTrainerCard(w, d, g, s)],
   [WIDGET_IDS.GITFUT_CARD, (w, d, g) => renderGitFutCard(w, d, g, w.size.width, w.size.height)],
 
   [WIDGET_IDS.GODPROFILE_TERMINAL, (w, d, g) => renderTerminal(w, d, g)],
@@ -175,6 +185,13 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.README_QUOTES, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.AWESOME_BADGE, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.CUSTOM_IMAGE, (w, d, g) => renderExternalWidgets(w, d, g)],
+
+  [WIDGET_IDS.MINECRAFT_HUD, (w, d) => renderMinecraftHud(w, d)],
+  [WIDGET_IDS.MINECRAFT_INVENTORY, (w, d) => renderMinecraftInventory(w, d)],
+  [WIDGET_IDS.MINECRAFT_CHAT, (w, d) => renderMinecraftChat(w, d)],
+  [WIDGET_IDS.MINECRAFT_ACHIEVEMENT, (w, d) => renderMinecraftAchievement(w, d)],
+  [WIDGET_IDS.MINECRAFT_SERVER, (w, d) => renderMinecraftServer(w, d)],
+  [WIDGET_IDS.MINECRAFT_DEATH_SCREEN, (w, d) => renderMinecraftDeathScreen(w, d)],
 ])
 
 export function renderFallbackWidget(widget: WidgetInstance, globalStyles: GlobalStyles): string {

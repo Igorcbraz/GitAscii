@@ -73,6 +73,14 @@ export async function flushAnalyticsBatchToDb(
       const slug = (item.slug || 'default').toLowerCase().trim()
       const views = Math.max(0, item.views)
       const uniques = Math.max(0, item.uniques)
+
+      const profileId = `prof_${user.id}_${slug}`
+      await sql`
+        INSERT INTO profiles (id, user_id, slug, name, description, is_default, created_at, updated_at)
+        VALUES (${profileId}, ${user.id}, ${slug}, ${slug === 'default' ? 'Default' : slug}, '', ${slug === 'default'}, NOW(), NOW())
+        ON CONFLICT (user_id, slug) DO NOTHING;
+      `
+
       await sql`
         INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
         VALUES (${user.id}, ${slug}, ${item.dateStr}, ${views}, ${uniques}, NOW())
@@ -89,36 +97,73 @@ export async function recordViewInDb(
   username: string,
   slug: string,
   dateStr: string,
-  isUnique: boolean
+  _isUnique: boolean,
+  dimensions?: [string, string][]
 ): Promise<void> {
   if (!hasDbConfig()) return
   const u = username.toLowerCase().trim()
   const cleanSlug = (slug || 'default').toLowerCase().trim()
-  const user = await ensureUser(u)
+  const dimensionMap = new Map(dimensions || [])
+  const source = dimensionMap.get('sources') || 'Unknown'
+  const trafficType = dimensionMap.get('traffic_types') || 'unknown'
+  const statusCode = dimensionMap.get('status_codes') || '200'
+  const hour = dimensionMap.get('hours') || '0'
+  const weekdayHour = dimensionMap.get('weekday_hours') || `0:${hour}`
 
+  // One round trip and one transaction per CDN badge fetch. A badge fetch is not a
+  // unique human view, so uniques intentionally remains zero.
   await sql`
-    INSERT INTO user_analytics_totals (user_id, views, uniques, updated_at)
-    VALUES (${user.id}, 1, ${isUnique ? 1 : 0}, NOW())
-    ON CONFLICT (user_id) DO UPDATE SET
-      views = user_analytics_totals.views + 1,
-      uniques = user_analytics_totals.uniques + ${isUnique ? 1 : 0},
+    WITH target_user AS (
+      SELECT id FROM users WHERE username = ${u} LIMIT 1
+    ), totals AS (
+      INSERT INTO user_analytics_totals (user_id, views, uniques, updated_at)
+      SELECT id, 1, 0, NOW() FROM target_user
+      ON CONFLICT (user_id) DO UPDATE SET
+        views = user_analytics_totals.views + 1,
+        updated_at = NOW()
+    ), profile_total AS (
+      UPDATE profiles
+      SET total_views = total_views + 1, updated_at = NOW()
+      WHERE user_id = (SELECT id FROM target_user) AND slug = ${cleanSlug}
+    ), daily AS (
+      INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
+      SELECT id, ${cleanSlug}, ${dateStr}, 1, 0, NOW() FROM target_user
+      ON CONFLICT (user_id, slug, date_str) DO UPDATE SET
+        views = profile_daily_analytics.views + 1,
+        updated_at = NOW()
+    ), incoming(dimension, dimension_key) AS (
+      VALUES
+        ('sources', ${source}),
+        ('traffic_types', ${trafficType}),
+        ('status_codes', ${statusCode}),
+        ('hours', ${hour}),
+        ('weekday_hours', ${weekdayHour})
+    )
+    INSERT INTO profile_daily_dimensions
+      (user_id, slug, date_str, dimension, dimension_key, count, updated_at)
+    SELECT target_user.id, ${cleanSlug}, ${dateStr}, incoming.dimension,
+      incoming.dimension_key, 1, NOW()
+    FROM target_user CROSS JOIN incoming
+    ON CONFLICT (user_id, slug, date_str, dimension, dimension_key) DO UPDATE SET
+      count = profile_daily_dimensions.count + 1,
       updated_at = NOW();
   `
+}
 
-  await sql`
-    UPDATE profiles
-    SET total_views = total_views + 1, updated_at = NOW()
-    WHERE user_id = ${user.id} AND slug = ${cleanSlug};
+export async function getProfileCountsFromDb(
+  username: string,
+  dateList: string[]
+): Promise<Array<{ slug: string; views: number }>> {
+  if (!hasDbConfig() || dateList.length === 0) return []
+  const rows = await sql`
+    SELECT a.slug, SUM(a.views) AS views
+    FROM profile_daily_analytics a
+    JOIN users u ON u.id = a.user_id
+    WHERE u.username = ${username.toLowerCase().trim()} AND a.date_str = ANY(${dateList})
+    GROUP BY a.slug
+    ORDER BY views DESC;
   `
-
-  await sql`
-    INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
-    VALUES (${user.id}, ${cleanSlug}, ${dateStr}, 1, ${isUnique ? 1 : 0}, NOW())
-    ON CONFLICT (user_id, slug, date_str) DO UPDATE SET
-      views = profile_daily_analytics.views + 1,
-      uniques = profile_daily_analytics.uniques + ${isUnique ? 1 : 0},
-      updated_at = NOW();
-  `
+  return rows.map((row) => ({ slug: String(row.slug), views: Number(row.views || 0) }))
 }
 
 export async function getDailyAnalyticsFromDb(
@@ -142,4 +187,81 @@ export async function getDailyAnalyticsFromDb(
     views: Number(rows[0].views || 0),
     uniques: Number(rows[0].uniques || 0),
   }
+}
+
+export async function getTimeSeriesFromDb(
+  username: string,
+  dateList: string[],
+  slug?: string
+): Promise<Array<{ date: string; views: number; uniques: number }>> {
+  if (!hasDbConfig() || dateList.length === 0) return []
+  const u = username.toLowerCase().trim()
+  const cleanSlug = slug && slug !== 'all' ? slug.toLowerCase().trim() : null
+
+  const rows = cleanSlug
+    ? await sql`
+        SELECT a.date_str, SUM(a.views) as views, SUM(a.uniques) as uniques
+        FROM profile_daily_analytics a
+        JOIN users u ON u.id = a.user_id
+        WHERE u.username = ${u} AND a.slug = ${cleanSlug} AND a.date_str = ANY(${dateList})
+        GROUP BY a.date_str;
+      `
+    : await sql`
+        SELECT a.date_str, SUM(a.views) as views, SUM(a.uniques) as uniques
+        FROM profile_daily_analytics a
+        JOIN users u ON u.id = a.user_id
+        WHERE u.username = ${u} AND a.date_str = ANY(${dateList})
+        GROUP BY a.date_str;
+      `
+
+  const map = new Map<string, { views: number; uniques: number }>()
+  for (const r of rows) {
+    map.set(r.date_str, {
+      views: Number(r.views || 0),
+      uniques: Number(r.uniques || 0),
+    })
+  }
+
+  return dateList.map((d) => ({
+    date: d,
+    views: map.get(d)?.views || 0,
+    uniques: map.get(d)?.uniques || 0,
+  }))
+}
+
+export async function getDimensionCountsFromDb(
+  username: string,
+  dimension: string,
+  dateList: string[],
+  slug?: string
+): Promise<Record<string, number>> {
+  if (!hasDbConfig() || dateList.length === 0) return {}
+  const u = username.toLowerCase().trim()
+  const cleanSlug = slug && slug !== 'all' ? slug.toLowerCase().trim() : null
+
+  const rows = cleanSlug
+    ? await sql`
+        SELECT d.dimension_key, SUM(d.count) as total_count
+        FROM profile_daily_dimensions d
+        JOIN users u ON u.id = d.user_id
+        WHERE u.username = ${u} AND d.dimension = ${dimension} AND d.slug = ${cleanSlug} AND d.date_str = ANY(${dateList})
+        GROUP BY d.dimension_key
+        ORDER BY total_count DESC
+        LIMIT 50;
+      `
+    : await sql`
+        SELECT d.dimension_key, SUM(d.count) as total_count
+        FROM profile_daily_dimensions d
+        JOIN users u ON u.id = d.user_id
+        WHERE u.username = ${u} AND d.dimension = ${dimension} AND d.date_str = ANY(${dateList})
+        GROUP BY d.dimension_key
+        ORDER BY total_count DESC
+        LIMIT 50;
+      `
+
+  const result: Record<string, number> = {}
+  for (const r of rows) {
+    result[r.dimension_key] = Number(r.total_count || 0)
+  }
+  return result
 }

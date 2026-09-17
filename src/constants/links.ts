@@ -157,3 +157,56 @@ export const GUIDES_RESOURCES_LIST: readonly ResourceGuide[] = [
     tags: ['ASCII Art', 'FreeCodeCamp', 'Tutorial'],
   },
 ]
+
+export const MIGRATION_TEMPLATES = {
+  PR: {
+    TITLE: '⚡ Migrate GitAscii to GitHub-Native Publishing (V2)',
+    BODY: (username: string) => `### 🚀 GitAscii V2 Architecture Upgrade
+
+Hi @${username}! This automated Pull Request upgrades your GitAscii profile to our **V2 GitHub-Native Publishing Architecture**.
+
+#### 🌟 Key Improvements
+1. **100% Guaranteed Uptime:** Your profile SVG is now stored directly in your \`gitascii\` branch and delivered straight from GitHub (\`raw.githubusercontent.com\`).
+2. **Zero Downtime Risk:** Even if \`gitascii.com\`, cloud workers, or edge caches are completely offline, your README image will continue to load instantly and reliably.
+3. **Automated Dynamic Updates:** A minimal GitHub Action (\`.github/workflows/gitascii.yml\`) will periodically refresh your dynamic stats using your repository's own quota.
+4. **Adaptive Dark & Light Themes:** Uses GitHub's native \`<picture>\` Markdown element to smoothly match the reader's preferred GitHub theme.
+
+#### 🔒 Security & Minimal Privileges
+- Uses standard repository \`GITHUB_TOKEN\` with minimal required privileges (\`contents: write\`).
+- Zero long-lived secrets or external access keys stored in your repository.
+- Action execution code is securely pinned to an immutable release commit SHA.
+
+---
+*To activate your new high-availability profile, simply merge this Pull Request!*
+`,
+  },
+  ACTION_UPGRADE: {
+    TITLE: (previousSha: string | null, targetSha: string) =>
+      `⬆️ Bump GitAscii Action from ${previousSha ? previousSha.slice(0, 7) : 'previous'} to ${targetSha.slice(0, 7)}`,
+    COMMIT_MESSAGE: (targetSha: string) => `Upgrade GitAscii Action to @${targetSha.slice(0, 7)}`,
+    BODY: (targetSha: string) => `### 🚀 GitAscii Action Upgrade
+
+This automated Pull Request updates the GitAscii GitHub Action in your profile repository to the latest verified release (\`${targetSha.slice(0, 7)}\`).
+
+#### 📦 What's Included
+- Performance and reliability optimizations in SVG generation.
+- Security and stability enhancements for widget rendering.
+- Immutable release SHA pinning.
+
+---
+*Merge this Pull Request to keep your GitAscii profile generator up to date!*`,
+  },
+  WORKFLOW: {
+    NAME: 'Update GitAscii',
+    CONCURRENCY_GROUP: 'gitascii-publication',
+    STEP_NAME: 'Generate and Publish GitAscii SVGs',
+    ACTION_REPO: 'Igorcbraz/GitAscii/action',
+  },
+  COMMITS: {
+    V2_MIGRATION_PR: (owner: string) =>
+      `Migrate profile to GitAscii V2 GitHub-Native Publishing\n\nCo-authored-by: ${owner} <${owner}@users.noreply.github.com>`,
+    UPDATE_README: 'Update profile README via GitAscii V2',
+    CONFIGURE_WORKFLOW: 'Configure GitAscii GitHub Action workflow',
+    CLEANUP_LEGACY: (fileName: string) => `Clean up legacy ${fileName} (migrated to GitAscii V2)`,
+  },
+} as const

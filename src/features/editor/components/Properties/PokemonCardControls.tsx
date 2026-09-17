@@ -80,7 +80,7 @@ async function searchPokemonCards(query: string): Promise<UnifiedPokemonCard[]> 
           .map((c: any) => ({
             id: c.id,
             name: c.name,
-            image: `${c.image}/low.webp`,
+            image: `${c.image}/low.png`,
           }))
         if (valid.length > 0) {
           return valid

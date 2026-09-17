@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { duplicateProfile } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
+import { publishStoredProfileV2 } from '@/lib/v2/profilePublisher'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +27,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       name,
       description,
     })
+    await publishStoredProfileV2(session.username, duplicated.slug)
 
     return NextResponse.json({ profile: duplicated }, { status: 201 })
   } catch (error: unknown) {

@@ -360,7 +360,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                   <p className="text-xs text-[#8a8a8a] mt-0.5">
                     {t(
                       'pro.trends.daily_volume_sub',
-                      'Interactive multi-layer breakdown of profile views, unique visitors, cache hits, and proxy views.'
+                      'Observed analytics badge fetches, including GitHub Camo and direct requests.'
                     )}
                   </p>
                 </div>
@@ -745,7 +745,7 @@ export const AnalyticsDashboardSkeleton: React.FC = () => {
                     </th>
                     <th className="pb-3 font-semibold">{t('pro.table.views', 'Views')}</th>
                     <th className="pb-3 font-semibold">
-                      {t('pro.table.unique_visitors', 'Unique Visitors')}
+                      {t('pro.table.unique_visitors', 'Unique Visitors Unavailable')}
                     </th>
                     <th className="pb-3 font-semibold">
                       {t('pro.table.cache_hit_ratio', 'Cache Hit Ratio')}

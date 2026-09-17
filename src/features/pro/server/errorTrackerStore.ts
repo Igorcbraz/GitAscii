@@ -1,3 +1,4 @@
+import { hasDbConfig } from '@/lib/db/client'
 import {
   clearAllWidgetErrorsInDb,
   deleteWidgetErrorsInDb,
@@ -8,7 +9,7 @@ import {
 
 import type { IngestErrorPayload, WidgetErrorRecord } from '../types/errors'
 import { REDIS_KEYS } from './analyticsStore'
-import { logSentEmail } from './emailLogStore'
+import { getProEmailLogs, logSentEmail } from './emailLogStore'
 import { getProRedisClient } from './redisClient'
 
 const ERROR_ALERT_COOLDOWN_SECONDS = 60 * 60
@@ -27,7 +28,9 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
     const itemKey = REDIS_KEYS.errorItem(username, errorId)
     const listKey = REDIS_KEYS.errorList(username)
 
-    const existing = await redis.hgetall<Record<string, any>>(itemKey).catch(() => null)
+    const existing = hasDbConfig()
+      ? (await getWidgetErrorsFromDb(username, 50)).find((error) => error.id === errorId) || null
+      : await redis.hgetall<Record<string, any>>(itemKey).catch(() => null)
 
     const recordToSave: WidgetErrorRecord = {
       id: errorId,
@@ -44,11 +47,7 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
       resolvedAt: null,
     }
 
-    try {
-      await recordWidgetErrorInDb(username, recordToSave)
-    } catch (dbErr) {
-      console.warn('[ErrorTrackerStore] PostgreSQL recordWidgetError error:', dbErr)
-    }
+    await recordWidgetErrorInDb(username, recordToSave)
 
     if (existing && existing.id) {
       await redis
@@ -59,21 +58,40 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
           details: payload.details || existing.details || '',
           status: 'active',
         })
-        .catch(() => {})
-      await redis.zadd(listKey, { score: nowScore, member: errorId }).catch(() => {})
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      await redis
+        .zadd(listKey, { score: nowScore, member: errorId })
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
     } else {
-      await redis.hset(itemKey, recordToSave as unknown as Record<string, any>).catch(() => {})
-      await redis.zadd(listKey, { score: nowScore, member: errorId }).catch(() => {})
+      await redis
+        .hset(itemKey, recordToSave as unknown as Record<string, any>)
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      await redis
+        .zadd(listKey, { score: nowScore, member: errorId })
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
     }
 
-    await redis.expire(itemKey, 90 * 86400).catch(() => {})
-    await redis.expire(listKey, 90 * 86400).catch(() => {})
+    await redis
+      .expire(itemKey, 90 * 86400)
+      .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+    await redis
+      .expire(listKey, 90 * 86400)
+      .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
 
     const cooldownKey = REDIS_KEYS.errorAlertCooldown(username, widgetId)
-    const isInCooldown = await redis.get(cooldownKey).catch(() => null)
+    const isInCooldown = hasDbConfig()
+      ? (await getProEmailLogs(username)).some(
+          (log) =>
+            log.templateName === 'WidgetErrorAlertEmail' &&
+            log.relatedWidget === widgetName &&
+            Date.now() - new Date(log.sentAt).getTime() < ERROR_ALERT_COOLDOWN_SECONDS * 1000
+        )
+      : Boolean(await redis.get(cooldownKey).catch(() => null))
 
     if (!isInCooldown) {
-      await redis.set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS }).catch(() => {})
+      await redis
+        .set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS })
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
 
       void sendWidgetErrorAlertEmail(username, slug, widgetName, payload.message)
     }
@@ -109,7 +127,9 @@ async function sendWidgetErrorAlertEmail(
       if (session && session.username.toLowerCase() === username.toLowerCase()) {
         sessionEmail = session.email
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[ErrorTrackerStore] Session lookup failed while resolving alert email:', error)
+    }
 
     const recipientEmail =
       userSettings?.alertEmailAddress || sessionEmail || `${username}@users.noreply.github.com`
@@ -134,6 +154,21 @@ export async function getWidgetErrors(username: string): Promise<WidgetErrorReco
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.errorList(u)
 
+  if (hasDbConfig()) {
+    const dbErrors = await getWidgetErrorsFromDb(u, 50)
+    if (dbErrors.length > 0) {
+      const p = redis.pipeline()
+      for (const error of dbErrors) {
+        p.hset(REDIS_KEYS.errorItem(u, error.id), error as unknown as Record<string, any>)
+        p.zadd(listKey, { score: new Date(error.lastSeenAt).getTime(), member: error.id })
+      }
+      void p
+        .exec()
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+    }
+    return dbErrors
+  }
+
   const errorIds = await redis.zrevrange<string[]>(listKey, 0, 50).catch(() => [])
   if (!errorIds || errorIds.length === 0) {
     try {
@@ -144,7 +179,9 @@ export async function getWidgetErrors(username: string): Promise<WidgetErrorReco
           p.hset(REDIS_KEYS.errorItem(u, err.id), err as unknown as Record<string, any>)
           p.zadd(listKey, { score: new Date(err.lastSeenAt).getTime(), member: err.id })
         }
-        await p.exec().catch(() => {})
+        await p
+          .exec()
+          .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
         return dbErrors
       }
     } catch (dbErr) {
@@ -187,11 +224,8 @@ export async function resolveWidgetError(username: string, errorId: string): Pro
   const u = username.toLowerCase().trim()
   const itemKey = REDIS_KEYS.errorItem(u, errorId)
 
-  try {
-    await resolveWidgetErrorInDb(u, errorId)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL resolveWidgetError error:', dbErr)
-  }
+  const resolved = await resolveWidgetErrorInDb(u, errorId)
+  if (hasDbConfig() && !resolved) return false
 
   const existing = await redis.hgetall<any>(itemKey).catch(() => null)
   if (!existing) return true
@@ -201,7 +235,7 @@ export async function resolveWidgetError(username: string, errorId: string): Pro
       status: 'resolved',
       resolvedAt: new Date().toISOString(),
     })
-    .catch(() => {})
+    .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
   return true
 }
 
@@ -212,15 +246,15 @@ export async function deleteWidgetErrors(username: string, errorIds: string[]): 
 
   if (!errorIds || errorIds.length === 0) return
 
-  try {
-    await deleteWidgetErrorsInDb(u, errorIds)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL deleteWidgetErrors error:', dbErr)
-  }
+  await deleteWidgetErrorsInDb(u, errorIds)
 
   const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
-  await redis.del(...itemKeys).catch(() => {})
-  await redis.zrem(listKey, ...errorIds).catch(() => {})
+  await redis
+    .del(...itemKeys)
+    .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+  await redis
+    .zrem(listKey, ...errorIds)
+    .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
 }
 
 export async function clearAllWidgetErrors(username: string): Promise<void> {
@@ -228,16 +262,16 @@ export async function clearAllWidgetErrors(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.errorList(u)
 
-  try {
-    await clearAllWidgetErrorsInDb(u)
-  } catch (dbErr) {
-    console.warn('[ErrorTrackerStore] PostgreSQL clearAllWidgetErrors error:', dbErr)
-  }
+  await clearAllWidgetErrorsInDb(u)
 
   const errorIds = await redis.zrange<string[]>(listKey, 0, -1).catch(() => [])
   if (errorIds && errorIds.length > 0) {
     const itemKeys = errorIds.map((id) => REDIS_KEYS.errorItem(u, id))
-    await redis.del(...itemKeys).catch(() => {})
+    await redis
+      .del(...itemKeys)
+      .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
   }
-  await redis.del(listKey).catch(() => {})
+  await redis
+    .del(listKey)
+    .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
 }

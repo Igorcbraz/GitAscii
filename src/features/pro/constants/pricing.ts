@@ -49,15 +49,56 @@ export interface ProPricingConfig {
 }
 
 export function getProPricing(lang?: string): ProPricingConfig {
-  const isPt = lang === 'pt'
+  const cleanLang = (lang || '').toLowerCase()
+
+  if (cleanLang === 'pt') {
+    return {
+      ...PRO_PRICING_CONFIG,
+      priceUsd: 29.9,
+      priceFormatted: 'R$ 29,90',
+      originalPriceUsd: 69.9,
+      originalPriceFormatted: 'R$ 69,90',
+      discountPercentage: 57,
+      currency: 'BRL',
+      currencySymbol: 'R$',
+    }
+  }
+
+  if (cleanLang === 'de' || cleanLang === 'fr' || cleanLang === 'es') {
+    return {
+      ...PRO_PRICING_CONFIG,
+      priceUsd: 9.0,
+      priceFormatted: '9 €',
+      originalPriceUsd: 19.0,
+      originalPriceFormatted: '19 €',
+      discountPercentage: 53,
+      currency: 'EUR',
+      currencySymbol: '€',
+    }
+  }
+
+  if (cleanLang === 'ja') {
+    return {
+      ...PRO_PRICING_CONFIG,
+      priceUsd: 9.0,
+      priceFormatted: '¥1,400',
+      originalPriceUsd: 19.0,
+      originalPriceFormatted: '¥3,000',
+      discountPercentage: 53,
+      currency: 'JPY',
+      currencySymbol: '¥',
+    }
+  }
+
   return {
     ...PRO_PRICING_CONFIG,
-    priceUsd: isPt ? 19.9 : 3.0,
-    priceFormatted: isPt ? 'R$ 19,90' : '$3',
-    originalPriceUsd: isPt ? 49.9 : 9.0,
-    originalPriceFormatted: isPt ? 'R$ 49,90' : '$9',
-    currency: isPt ? 'BRL' : 'USD',
-    currencySymbol: isPt ? 'R$' : '$',
+    priceUsd: 9.0,
+    priceFormatted: '$9',
+    originalPriceUsd: 19.0,
+    originalPriceFormatted: '$19',
+    discountPercentage: 53,
+    currency: 'USD',
+    currencySymbol: '$',
   }
 }
 
@@ -65,11 +106,11 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
   planId: 'gitascii-pro-lifetime',
   planName: 'GitAscii Pro Lifetime',
   billingModel: 'lifetime',
-  priceUsd: 19.9,
-  priceFormatted: 'R$ 19,90',
-  originalPriceUsd: 49.9,
-  originalPriceFormatted: 'R$ 49,90',
-  discountPercentage: 60,
+  priceUsd: 29.9,
+  priceFormatted: 'R$ 29,90',
+  originalPriceUsd: 69.9,
+  originalPriceFormatted: 'R$ 69,90',
+  discountPercentage: 57,
   currency: 'BRL',
   currencySymbol: 'R$',
   guaranteeDays: 14,
@@ -112,7 +153,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       tag: '// 02 · REPUTATION',
       tagKey: 'pro.pricing.feat.monitor.tag',
       specs: [
-        'Background health checks every 10 min',
+        'GitHub Actions publication health and artifact monitoring',
         'Instant email alert on any broken widget',
         'Keeps your portfolio clean and credible',
         '1-click fix right from your dashboard',
@@ -199,7 +240,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
     {
       id: 'updates',
       titleKey: 'pro.pricing.feat.updates.title',
-      titleDefault: 'Pay R$ 19,90 Once. Keep Every Feature Forever.',
+      titleDefault: 'Pay R$ 29,90 Once. Keep Every Feature Forever.',
       descKey: 'pro.pricing.feat.updates.desc',
       descDefault:
         'No monthly subscriptions draining your wallet. Pay once and get full lifetime access, plus every future widget, template, and feature we ever build, delivered automatically at no extra charge.',
@@ -309,7 +350,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       featureKey: 'pro.pricing.comp.recurring_fees',
       featureDefault: 'Monthly Subscriptions',
       free: '$0',
-      pro: 'R$ 0/mês (Pague R$ 19,90 Uma Vez, Tenha Para Sempre)',
+      pro: 'R$ 0/mês (Pague R$ 29,90 Uma Vez, Tenha Para Sempre)',
       freeKey: 'landing.pricing.cell.free_0',
       proKey: 'pro.pricing.comp.pro_recurring_val',
     },
@@ -322,7 +363,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       questionDefault: 'Is it truly a one-time payment with no subscriptions?',
       answerKey: 'pro.pricing.faq.lifetime_a',
       answerDefault:
-        "Yes — R$ 19,90 once, yours forever. No monthly billing, no annual renewals, no price increases. We're building a tool we'd want to use ourselves, and that means no subscription traps.",
+        "Yes — R$ 29,90 once, yours forever. No monthly billing, no annual renewals, no price increases. We're building a tool we'd want to use ourselves, and that means no subscription traps.",
     },
     {
       id: 'faq_camo',
@@ -374,7 +415,7 @@ export const PRO_ARCHITECTURE_NODES = [
     defaultNum: '01 / FAST WORLDWIDE',
     defaultTitle: 'Loads Instantly Anywhere',
     defaultDesc:
-      'Your profile SVGs render in milliseconds worldwide so visitors never experience slow loading or empty placeholders.',
+      'Your published SVG artifacts are served directly by GitHub, without requiring GitAscii to render every README request.',
     iconId: 'zap',
   },
   {

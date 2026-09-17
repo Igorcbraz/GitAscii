@@ -15,6 +15,7 @@ interface ProfileCardProps {
   username: string
   openDropdownSlug: string | null
   setOpenDropdownSlug: (slug: string | null) => void
+  settingDefaultSlug?: string | null
   onSelect: (slug: string) => void
   onSetDefault: (slug: string) => void
   onDuplicate: (p: ProProfileRecord) => void
@@ -29,6 +30,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   username,
   openDropdownSlug,
   setOpenDropdownSlug,
+  settingDefaultSlug,
   onSelect,
   onSetDefault,
   onDuplicate,
@@ -39,6 +41,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   const { t } = useI18n()
   const isDropdownOpen = openDropdownSlug === profile.slug
   const isDefault = profile.isDefault || profile.slug === 'default'
+  const isSettingDefault = settingDefaultSlug === profile.slug
 
   const effectiveUsername = username || 'user'
   const editorUrl = isDefault ? `/${effectiveUsername}` : `/${effectiveUsername}/${profile.slug}`
@@ -50,7 +53,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
         isSelected
           ? 'bg-white/[0.04] border-[#c5ff4a]/50 ring-1 ring-[#c5ff4a]/20 shadow-xs'
           : 'bg-[#111111] border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
-      }`}
+      } ${isSettingDefault ? 'opacity-70 pointer-events-none' : ''}`}
     >
       <div className="min-w-0 flex items-center gap-2.5">
         <div
@@ -67,7 +70,13 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             >
               {profile.name}
             </h3>
-            {isDefault && (
+            {isSettingDefault && (
+              <ProBadge variant="lime" size="sm">
+                <span className="w-2.5 h-2.5 border border-black border-t-transparent rounded-full animate-spin inline-block mr-1" />
+                {t('pro.dialog.saving', 'Saving...')}
+              </ProBadge>
+            )}
+            {!isSettingDefault && isDefault && (
               <ProBadge variant="lime" size="sm">
                 {t('pro.common.default', 'Default')}
               </ProBadge>

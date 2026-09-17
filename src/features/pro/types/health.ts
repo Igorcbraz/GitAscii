@@ -1,4 +1,10 @@
-export type HealthStatus = 'operational' | 'warning' | 'failed'
+export const HEALTH_STATUS = {
+  OPERATIONAL: 'operational',
+  WARNING: 'warning',
+  FAILED: 'failed',
+} as const
+
+export type HealthStatus = (typeof HEALTH_STATUS)[keyof typeof HEALTH_STATUS]
 
 export interface WidgetHealthRecord {
   widgetId: string

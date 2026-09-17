@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { getAnalyticsSummary } from '@/features/pro/server/analyticsStore'
+import { isProUser } from '@/features/pro/server/entitlements'
 import type { TimeRange } from '@/features/pro/types'
 import { getSession } from '@/lib/auth'
 
@@ -10,6 +11,9 @@ export async function GET(request: Request) {
   const session = await getSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  if (!(await isProUser(session.username))) {
+    return NextResponse.json({ error: 'Pro subscription required' }, { status: 403 })
   }
 
   const { searchParams } = new URL(request.url)
@@ -28,11 +32,11 @@ export async function GET(request: Request) {
       const rows = [
         [
           'Date',
-          'Views',
-          'Uniques',
+          'Badge Fetches',
+          'Unique Visitors Unavailable',
           'Cache Hits',
-          'Camo Proxy Views',
-          'Direct Views',
+          'Camo Proxy Fetches',
+          'Direct Fetches',
           'Status 200',
           'Status 304',
           'Avg Latency (ms)',

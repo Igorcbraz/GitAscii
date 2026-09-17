@@ -7,8 +7,8 @@ import {
   duplicateProfile,
   getProfileVersions,
   getUserProfiles,
+  promoteProfileToCanonicalDefault,
   restoreProfileVersion,
-  setDefaultProfile,
   updateProfile,
 } from './profileManagerStore'
 import { resetProRedisMemoryStoreForTesting } from './redisClient'
@@ -137,16 +137,16 @@ describe('ProfileManagerStore Comprehensive Unit Tests', () => {
     expect(versions[0].label).toContain('Cloned from /source-profile')
   })
 
-  it('sets default profile and updates other profiles isDefault flag', async () => {
+  it('promotes a profile configuration into the canonical default profile', async () => {
     const username = 'DefaultSwitcher'
     await createProfile(username, { slug: 'work', name: 'Work Profile' })
 
-    const updatedList = await setDefaultProfile(username, 'work')
+    const updatedList = await promoteProfileToCanonicalDefault(username, 'work')
     const workProf = updatedList.find((p) => p.slug === 'work')
     const defProf = updatedList.find((p) => p.slug === 'default')
 
-    expect(workProf?.isDefault).toBe(true)
-    expect(defProf?.isDefault).toBe(false)
+    expect(workProf?.isDefault).toBe(false)
+    expect(defProf?.isDefault).toBe(true)
   })
 
   it('manages version checkpoints and restores previous versions', async () => {

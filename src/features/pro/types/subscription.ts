@@ -24,6 +24,7 @@ export interface ProUserSettings {
   dailyDigestEnabled: boolean
   themePreference: 'system' | 'dark' | 'light'
   anonymizeReferrers: boolean
+  publishIntervalMinutes?: number
   planTier?: ProPlanTier
   stripeCustomerId?: string
   stripeSubscriptionId?: string

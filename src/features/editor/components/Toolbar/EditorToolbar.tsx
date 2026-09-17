@@ -17,10 +17,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { useI18n } from '@/i18n'
+import { generateV2EmbedCode } from '@/lib/migration/markdownGenerator'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
 
-import { APP_URL } from '../../../../constants'
 import { useEditorStore } from '../../store/editorStore'
 import { useViewModeStore } from '../../store/viewModeStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
@@ -54,7 +54,6 @@ export function EditorToolbar({
   const triggerPreviewNudge = useViewModeStore((state) => state.triggerPreviewNudge)
   const showPreviewNudge = useViewModeStore((state) => state.showPreviewNudge)
 
-  const [currentOrigin, setCurrentOrigin] = useState(APP_URL)
   const [showExportGuide, setShowExportGuide] = useState(false)
   const [showGuestModal, setShowGuestModal] = useState(false)
   const [showStarPrompt, setShowStarPrompt] = useState(false)
@@ -121,12 +120,6 @@ export function EditorToolbar({
       console.error('Failed to log out:', e)
     }
   }
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setCurrentOrigin(window.location.origin)
-    }
-  }, [])
 
   const handleExport = useCallback(() => {
     const currentConfig = useEditorStore.getState().config
@@ -326,23 +319,11 @@ export function EditorToolbar({
 
   const viewerUsername = session?.username || username
 
-  const v = Date.now()
-  const currentViewerEmbedUrl =
-    profileSlug === 'default'
-      ? `${currentOrigin}/api/${viewerUsername}`
-      : `${currentOrigin}/api/${viewerUsername}/${profileSlug}`
-
-  const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
-    ? `${currentViewerEmbedUrl}&v=${v}`
-    : `${currentViewerEmbedUrl}?v=${v}`
-
-  const embedCode = `<a href="${currentOrigin}">
-  <img
-    src="${urlWithCacheBust}"
-    alt="GitAscii Widget"
-    width="100%"
-  />
-</a>`
+  const embedCode = generateV2EmbedCode({
+    username: viewerUsername,
+    profileSlug,
+    includeBadge: false,
+  })
 
   const handleCommitToGithub = async () => {
     if (!session) {
@@ -352,22 +333,11 @@ export function EditorToolbar({
     }
 
     setCommitStatus('committing')
-    const currentViewerEmbedUrl =
-      profileSlug === 'default'
-        ? `${currentOrigin}/api/${session.username}`
-        : `${currentOrigin}/api/${session.username}/${profileSlug}`
-
-    const v = Date.now()
-    const urlWithCacheBust = currentViewerEmbedUrl.includes('?')
-      ? `${currentViewerEmbedUrl}&v=${v}`
-      : `${currentViewerEmbedUrl}?v=${v}`
-    const finalEmbedCode = `<a href="${currentOrigin}">
-  <img
-    src="${urlWithCacheBust}"
-    alt="GitAscii Widget"
-    width="100%"
-  />
-</a>`
+    const finalEmbedCode = generateV2EmbedCode({
+      username: session.username,
+      profileSlug,
+      includeBadge: false,
+    })
 
     const currentConfig = useEditorStore.getState().config
     if (!currentConfig) return
