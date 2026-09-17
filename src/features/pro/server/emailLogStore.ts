@@ -1,3 +1,4 @@
+import { hasDbConfig } from '@/lib/db/client'
 import {
   getProEmailLogsFromDb,
   getTestDigestCountFromDb,
@@ -42,11 +43,7 @@ export async function logSentEmail(params: LogEmailParams): Promise<void> {
     messageId: params.messageId || null,
   }
 
-  try {
-    await logSentEmailInDb(username, record)
-  } catch (dbErr) {
-    console.warn('[EmailLogStore] Failed to persist sent email to PostgreSQL:', dbErr)
-  }
+  await logSentEmailInDb(username, record)
 
   try {
     const redis = getProRedisClient()
@@ -68,6 +65,19 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
   const u = username.toLowerCase().trim()
   const listKey = REDIS_KEYS.emailList(u)
 
+  if (hasDbConfig()) {
+    const dbLogs = await getProEmailLogsFromDb(u, 50)
+    if (dbLogs.length > 0) {
+      const p = redis.pipeline()
+      for (const log of dbLogs) {
+        p.hset(REDIS_KEYS.emailItem(u, log.id), log as unknown as Record<string, any>)
+        p.zadd(listKey, { score: new Date(log.sentAt).getTime(), member: log.id })
+      }
+      void p.exec().catch((error) => console.warn('[EmailLogStore cache operation] Failed:', error))
+    }
+    return dbLogs
+  }
+
   const emailIds = await redis.zrevrange<string[]>(listKey, 0, 50).catch(() => [])
   if (!emailIds || emailIds.length === 0) {
     try {
@@ -78,7 +88,9 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
           p.hset(REDIS_KEYS.emailItem(u, log.id), log as unknown as Record<string, any>)
           p.zadd(listKey, { score: new Date(log.sentAt).getTime(), member: log.id })
         }
-        await p.exec().catch(() => {})
+        await p
+          .exec()
+          .catch((error) => console.warn('[EmailLogStore cache operation] Failed:', error))
         return dbLogs
       }
     } catch (dbErr) {
@@ -120,6 +132,8 @@ export const MAX_TEST_DIGESTS = 3
 export async function canSendTestDigest(username: string): Promise<boolean> {
   const u = username.toLowerCase().trim()
 
+  if (hasDbConfig()) return (await getTestDigestCountFromDb(u)) < MAX_TEST_DIGESTS
+
   try {
     const redis = getProRedisClient()
     const count = Number((await redis.get(REDIS_KEYS.testDigestCooldown(u))) || 0)
@@ -149,11 +163,7 @@ export async function canSendTestDigest(username: string): Promise<boolean> {
 export async function recordTestDigestSent(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
 
-  try {
-    await recordTestDigestSentInDb(u)
-  } catch (dbErr) {
-    console.warn('[EmailLogStore] PostgreSQL error recording test digest:', dbErr)
-  }
+  await recordTestDigestSentInDb(u)
 
   try {
     const redis = getProRedisClient()

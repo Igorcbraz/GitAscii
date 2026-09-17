@@ -34,25 +34,23 @@ async function checkAndAcquireEventLock(eventId: string): Promise<EventLockStatu
   const key = `gitascii:stripe:event:${eventId}`
 
   try {
-    const status = await redis.get<string>(key)
-    if (status === 'completed') {
+    const alreadyProcessed = await isStripeEventProcessed(eventId)
+    if (alreadyProcessed) {
+      void redis.set(key, 'completed', { ex: 30 * 24 * 60 * 60 }).catch((error) => {
+        console.warn('[Stripe Webhook] Failed to cache completed event status:', error)
+      })
       return 'completed'
     }
-    if (status === 'in_flight') {
-      return 'in_flight'
-    }
   } catch (e) {
-    console.warn('[Stripe Webhook] Redis lock read warning:', e)
+    console.error('[Stripe Webhook] PostgreSQL event check failed:', e)
+    throw e
   }
 
   try {
-    const alreadyProcessed = await isStripeEventProcessed(eventId)
-    if (alreadyProcessed) {
-      await redis.set(key, 'completed', { ex: 30 * 24 * 60 * 60 }).catch(() => {})
-      return 'completed'
-    }
+    const status = await redis.get<string>(key)
+    if (status === 'in_flight') return 'in_flight'
   } catch (e) {
-    console.warn('[Stripe Webhook] DB event check warning:', e)
+    console.warn('[Stripe Webhook] Redis lock read warning:', e)
   }
 
   try {
@@ -82,7 +80,9 @@ async function releaseRedisEventLock(eventId: string): Promise<void> {
   try {
     const redis = getProRedisClient()
     await redis.del(`gitascii:stripe:event:${eventId}`)
-  } catch {}
+  } catch (error) {
+    console.warn('[Stripe Webhook] Failed to release optional Redis event lock:', error)
+  }
 }
 
 async function resolveUsername(
@@ -116,7 +116,9 @@ async function resolveUsername(
       if (userFromSub?.user.username) {
         return userFromSub.user.username.toLowerCase().trim()
       }
-    } catch {}
+    } catch (error) {
+      console.warn('[Stripe Webhook] Failed to resolve user by subscription in PostgreSQL:', error)
+    }
   }
 
   if (target.customerId) {
@@ -162,9 +164,10 @@ export async function POST(req: Request) {
   try {
     stripe = getStripeClient()
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-  } catch (err: any) {
-    console.error('[Stripe Webhook] Signature verification failed:', err.message)
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[Stripe Webhook] Signature verification failed:', message)
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
   const lockStatus = await checkAndAcquireEventLock(event.id)
@@ -214,7 +217,9 @@ export async function POST(req: Request) {
             await stripe.customers.update(customerId, {
               metadata: { username },
             })
-          } catch {}
+          } catch (error) {
+            console.warn('[Stripe Webhook] Failed to attach username to Stripe customer:', error)
+          }
         }
 
         await updateEntitlement({
@@ -235,7 +240,7 @@ export async function POST(req: Request) {
           stripeCustomerId: customerId || undefined,
           stripeSubscriptionId: subscriptionId,
           stripeSubscriptionStatus: session.mode === 'payment' ? 'paid' : 'active',
-        }).catch(() => {})
+        })
 
         try {
           const redis = getProRedisClient()
@@ -302,7 +307,7 @@ export async function POST(req: Request) {
           stripePriceId: priceId,
           stripeSubscriptionStatus: status,
           stripeCurrentPeriodEnd: currentPeriodEnd,
-        }).catch(() => {})
+        })
 
         console.log(
           `[Stripe Webhook] Subscription status updated for ${username}: status=${status}, pro=${isActive}`
@@ -363,7 +368,7 @@ export async function POST(req: Request) {
             planTier: 'free',
             stripeSubscriptionId: subscription.id,
             stripeSubscriptionStatus: 'canceled',
-          }).catch(() => {})
+          })
 
           console.log(`[Stripe Webhook] Subscription deleted. Revoked PRO access for: ${username}`)
         }
@@ -447,7 +452,7 @@ export async function POST(req: Request) {
             planTier: newTier,
             stripeSubscriptionId: subscriptionId,
             stripeSubscriptionStatus: subscriptionStatus,
-          }).catch(() => {})
+          })
         }
         break
       }
@@ -458,12 +463,10 @@ export async function POST(req: Request) {
 
     await markEventCompleted(event.id)
     return NextResponse.json({ received: true }, { status: 200 })
-  } catch (error: any) {
-    if (error?.message?.includes('already processed')) {
-      console.warn(
-        `[Stripe Webhook] Duplicate event ${event.id} suppressed gracefully:`,
-        error.message
-      )
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (message.includes('already processed')) {
+      console.warn(`[Stripe Webhook] Duplicate event ${event.id} suppressed gracefully:`, message)
       await markEventCompleted(event.id)
       return NextResponse.json({ received: true, deduplicated: true }, { status: 200 })
     }

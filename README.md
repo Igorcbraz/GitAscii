@@ -103,7 +103,7 @@ Compose your layout in the [Visual Editor](https://gitascii.com). When done, use
 - dark and light SVG files under `profiles/[slug]/`;
 - `.github/workflows/gitascii.yml` on the default branch.
 
-The GitHub Action publishes every configured profile atomically. Pro installations also enable authenticated, profile-scoped telemetry.
+The GitHub Action publishes every configured profile atomically. Pro installations also enable authenticated, profile-scoped publication health telemetry and add a small analytics badge to the README.
 
 ### 2. Authorize the GitHub App
 
@@ -122,6 +122,8 @@ Paste the generated snippet into your `README.md`. It automatically adapts to th
 ```
 
 The generated `<picture>` snippet contains both light and dark raw GitHub URLs. Updates keep the same stable URL and are performed by the repository workflow.
+
+For Pro profiles, keep the generated GitAscii badge directly below the `<picture>`. Because v2 SVGs are served by GitHub rather than GitAscii, this badge is the only privacy-safe analytics signal. Its numbers represent badge fetches observed by GitAscii (usually GitHub Camo cache refreshes), **not exact human views or unique visitors**. GitHub's image proxy does not expose reliable viewer geography, browser, device, or identity, so the dashboard intentionally does not invent those fields.
 
 ---
 

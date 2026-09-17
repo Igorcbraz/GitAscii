@@ -33,13 +33,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       isCacheHit: false,
       userAgent: viewerMeta.userAgent,
       referrer: viewerMeta.referrer,
-      country: viewerMeta.country,
-      region: viewerMeta.region,
-      city: viewerMeta.city,
-      timezone: viewerMeta.timezone,
-      continent: viewerMeta.continent,
-      language: viewerMeta.language,
-      ip: viewerMeta.ip,
       statusCode: 200,
       timestamp: new Date().toISOString(),
     }

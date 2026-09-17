@@ -1,3 +1,4 @@
+import { hasDbConfig } from '@/lib/db/client'
 import {
   createDynamicRuleInDb,
   deleteDynamicRuleFromDb,
@@ -116,6 +117,18 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
   const u = username.toLowerCase().trim()
   const cached = rulesCache.get(u)
   if (cached && cached.expiresAt > Date.now()) return cached.config
+
+  if (hasDbConfig()) {
+    const dbConfig = await getDynamicRulesConfigFromDb(u)
+    const authoritative = dbConfig || {
+      enabled: false,
+      fallbackProfileSlug: 'default',
+      defaultTimezone: 'UTC',
+      rules: [],
+    }
+    rulesCache.set(u, { config: authoritative, expiresAt: Date.now() + RULES_CACHE_TTL_MS })
+    return authoritative
+  }
   const configKey = REDIS_KEYS.dynamicRulesConfig(u)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
@@ -138,7 +151,9 @@ export async function getDynamicRulesConfig(username: string): Promise<DynamicRu
           p.set(REDIS_KEYS.dynamicRuleItem(u, r.id), JSON.stringify(r))
           p.zadd(listKey, { score: r.priority, member: r.id })
         }
-        await p.exec().catch(() => {})
+        await p
+          .exec()
+          .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
         rulesCache.set(u, { config: dbConfig, expiresAt: Date.now() + RULES_CACHE_TTL_MS })
         return dbConfig
       }
@@ -190,11 +205,7 @@ export async function saveDynamicRulesConfig(
   const u = username.toLowerCase().trim()
   const configKey = REDIS_KEYS.dynamicRulesConfig(u)
 
-  try {
-    await saveDynamicRulesConfigInDb(u, updates)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL saveDynamicRulesConfig error for @${u}:`, dbErr)
-  }
+  await saveDynamicRulesConfigInDb(u, updates)
 
   const payload: Record<string, string> = {}
   if (updates.enabled !== undefined) payload.enabled = String(updates.enabled)
@@ -203,7 +214,9 @@ export async function saveDynamicRulesConfig(
   if (updates.defaultTimezone !== undefined) payload.defaultTimezone = updates.defaultTimezone
 
   if (Object.keys(payload).length > 0) {
-    await redis.hset(configKey, payload).catch(() => {})
+    await redis
+      .hset(configKey, payload)
+      .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
   }
 
   invalidateRulesCache(u)
@@ -245,15 +258,15 @@ export async function createDynamicRule(
     updatedAt: now,
   }
 
-  try {
-    await createDynamicRuleInDb(u, newRule)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL createDynamicRule error for @${u}:`, dbErr)
-  }
+  await createDynamicRuleInDb(u, newRule)
 
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
-  await redis.set(itemKey, JSON.stringify(newRule)).catch(() => {})
-  await redis.zadd(listKey, { score: priority, member: ruleId }).catch(() => {})
+  await redis
+    .set(itemKey, JSON.stringify(newRule))
+    .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
+  await redis
+    .zadd(listKey, { score: priority, member: ruleId })
+    .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
 
   invalidateRulesCache(u)
   return newRule
@@ -269,7 +282,10 @@ export async function updateDynamicRule(
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
-  const raw = await redis.get<string | DynamicRuleRecord>(itemKey).catch(() => null)
+  const dbConfig = hasDbConfig() ? await getDynamicRulesConfigFromDb(u) : null
+  const raw = dbConfig
+    ? dbConfig.rules.find((rule) => rule.id === ruleId) || null
+    : await redis.get<string | DynamicRuleRecord>(itemKey).catch(() => null)
   if (!raw) return null
 
   const existing: DynamicRuleRecord = typeof raw === 'string' ? JSON.parse(raw) : raw
@@ -282,16 +298,17 @@ export async function updateDynamicRule(
     updatedAt: now,
   }
 
-  try {
-    await updateDynamicRuleInDb(u, ruleId, updates)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL updateDynamicRule error for @${u}:`, dbErr)
-  }
+  const dbUpdate = await updateDynamicRuleInDb(u, ruleId, updates)
+  if (!dbUpdate.updated) return null
 
-  await redis.set(itemKey, JSON.stringify(updated)).catch(() => {})
+  await redis
+    .set(itemKey, JSON.stringify(updated))
+    .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
 
   if (updates.priority !== undefined && updates.priority !== existing.priority) {
-    await redis.zadd(listKey, { score: updates.priority, member: ruleId }).catch(() => {})
+    await redis
+      .zadd(listKey, { score: updates.priority, member: ruleId })
+      .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
   }
 
   invalidateRulesCache(u)
@@ -304,14 +321,15 @@ export async function deleteDynamicRule(username: string, ruleId: string): Promi
   const itemKey = REDIS_KEYS.dynamicRuleItem(u, ruleId)
   const listKey = REDIS_KEYS.dynamicRulesList(u)
 
-  try {
-    await deleteDynamicRuleFromDb(u, ruleId)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL deleteDynamicRule error for @${u}:`, dbErr)
-  }
+  const deleted = await deleteDynamicRuleFromDb(u, ruleId)
+  if (!deleted && hasDbConfig()) return false
 
-  await redis.del(itemKey).catch(() => {})
-  await redis.zrem(listKey, ruleId).catch(() => {})
+  await redis
+    .del(itemKey)
+    .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
+  await redis
+    .zrem(listKey, ruleId)
+    .catch((error) => console.warn('[DynamicRulesStore cache operation] Failed:', error))
 
   invalidateRulesCache(u)
   return true
@@ -324,16 +342,14 @@ export async function reorderDynamicRules(
   const u = username.toLowerCase().trim()
   invalidateRulesCache(u)
 
-  try {
-    await reorderDynamicRulesInDb(u, ruleIdsInOrder)
-  } catch (dbErr) {
-    console.warn(`[DynamicRules] PostgreSQL reorderDynamicRules error for @${u}:`, dbErr)
-  }
+  await reorderDynamicRulesInDb(u, ruleIdsInOrder)
 
-  let basePriority = ruleIdsInOrder.length * 10
-  for (const id of ruleIdsInOrder) {
-    await updateDynamicRule(u, id, { priority: basePriority })
-    basePriority -= 10
+  if (!hasDbConfig()) {
+    let basePriority = ruleIdsInOrder.length * 10
+    for (const id of ruleIdsInOrder) {
+      await updateDynamicRule(u, id, { priority: basePriority })
+      basePriority -= 10
+    }
   }
 
   const config = await getDynamicRulesConfig(u)

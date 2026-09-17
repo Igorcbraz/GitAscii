@@ -1,6 +1,15 @@
-import { recordProfileDailyHealthInDb } from '@/lib/db/repositories/healthRepository'
+import { hasDbConfig } from '@/lib/db/client'
+import {
+  getProfileHealthRangeFromDb,
+  recordProfileDailyHealthInDb,
+} from '@/lib/db/repositories/healthRepository'
 
-import type { IngestErrorPayload, WidgetErrorRecord } from '../types/errors'
+import {
+  type IngestErrorPayload,
+  WIDGET_ERROR_STATUS,
+  WIDGET_ERROR_TYPE,
+  type WidgetErrorRecord,
+} from '../types/errors'
 import type {
   HealthHistoryPoint,
   HealthStatus,
@@ -8,6 +17,7 @@ import type {
   ProfileHealthSummary,
   WidgetHealthRecord,
 } from '../types/health'
+import { HEALTH_STATUS } from '../types/health'
 import { REDIS_KEYS } from './analyticsStore'
 import { getWidgetErrors, recordWidgetError } from './errorTrackerStore'
 import { getUserProfiles } from './profileManagerStore'
@@ -35,7 +45,7 @@ export async function recordRenderTelemetry(payload: {
     const duration = Math.max(1, Math.round(payload.durationMs || 25))
     const isSuccess = payload.statusCode >= 200 && payload.statusCode < 400 && !payload.hasErrors
 
-    void recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration).catch(() => {})
+    await recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration)
 
     const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
     const metaKey = REDIS_KEYS.profileMeta(u, slug)
@@ -54,10 +64,12 @@ export async function recordRenderTelemetry(payload: {
     p.hset(metaKey, {
       lastRenderedAt: now.toISOString(),
       lastRenderDurationMs: duration,
-      healthStatus: isSuccess ? 'operational' : 'warning',
+      healthStatus: isSuccess ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING,
     })
 
-    await p.exec()
+    await p
+      .exec()
+      .catch((error) => console.warn('[HealthMonitoringStore cache operation] Failed:', error))
 
     if (payload.widgetErrors && payload.widgetErrors.length > 0) {
       for (const errPayload of payload.widgetErrors) {
@@ -65,12 +77,14 @@ export async function recordRenderTelemetry(payload: {
 
         const widgetId = errPayload.widgetId.toLowerCase().trim()
         const widgetMetaKey = REDIS_KEYS.healthWidgetMeta(u, widgetId)
-        await redis.hset(widgetMetaKey, {
-          status: 'failed',
-          lastErrorType: errPayload.errorType,
-          lastErrorMessage: errPayload.message,
-          lastErrorAt: now.toISOString(),
-        })
+        await redis
+          .hset(widgetMetaKey, {
+            status: HEALTH_STATUS.FAILED,
+            lastErrorType: errPayload.errorType,
+            lastErrorMessage: errPayload.message,
+            lastErrorAt: now.toISOString(),
+          })
+          .catch((error) => console.warn('[HealthMonitoringStore cache operation] Failed:', error))
       }
     } else if (payload.hasErrors) {
       const fallbackErr: IngestErrorPayload = {
@@ -78,7 +92,7 @@ export async function recordRenderTelemetry(payload: {
         profileSlug: slug,
         widgetId: 'external-widget',
         widgetName: 'External Widget / Asset',
-        errorType: 'FETCH_TIMEOUT',
+        errorType: WIDGET_ERROR_TYPE.FETCH_TIMEOUT,
         message: 'External asset or upstream API timed out during render',
       }
       await recordWidgetError(fallbackErr)
@@ -99,10 +113,10 @@ export async function getOverallHealth(username: string): Promise<OverallHealthM
     getUserProfiles(u),
   ])
 
-  const activeErrors = widgetErrors.filter((e) => e.status !== 'resolved')
+  const activeErrors = widgetErrors.filter((e) => e.status !== WIDGET_ERROR_STATUS.RESOLVED)
   const errorsLast24h = widgetErrors.filter((e) => {
     const seenMs = new Date(e.lastSeenAt).getTime()
-    return Date.now() - seenMs <= 24 * 60 * 60 * 1000 && e.status !== 'resolved'
+    return Date.now() - seenMs <= 24 * 60 * 60 * 1000 && e.status !== WIDGET_ERROR_STATUS.RESOLVED
   }).length
 
   let totalRenders24h = 0
@@ -128,16 +142,19 @@ export async function getOverallHealth(username: string): Promise<OverallHealthM
       ? Math.max(0, Math.min(100, Math.round((totalSuccesses24h / totalRenders24h) * 100)))
       : 0
 
-  let systemStatus: HealthStatus = totalRenders24h > 0 ? 'operational' : 'warning'
+  let systemStatus: HealthStatus =
+    totalRenders24h > 0 ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING
   if (activeErrors.length > 2 || (totalRenders24h > 0 && overallHealthScore < 90)) {
-    systemStatus = 'failed'
+    systemStatus = HEALTH_STATUS.FAILED
   } else if (activeErrors.length > 0 || overallHealthScore < 98) {
-    systemStatus = 'warning'
+    systemStatus = HEALTH_STATUS.WARNING
   }
 
-  const operationalProfilesCount = profiles.filter((p) => p.status === 'operational').length
-  const warningProfilesCount = profiles.filter((p) => p.status === 'warning').length
-  const failedProfilesCount = profiles.filter((p) => p.status === 'failed').length
+  const operationalProfilesCount = profiles.filter(
+    (p) => p.status === HEALTH_STATUS.OPERATIONAL
+  ).length
+  const warningProfilesCount = profiles.filter((p) => p.status === HEALTH_STATUS.WARNING).length
+  const failedProfilesCount = profiles.filter((p) => p.status === HEALTH_STATUS.FAILED).length
 
   const avgRenderTimeMs =
     totalDurationCount24h > 0 ? Math.round(totalDurationMs24h / totalDurationCount24h) : 0
@@ -171,13 +188,16 @@ export async function getProfileHealthList(username: string): Promise<ProfileHea
   const todayStr = formatDate(new Date())
 
   const widgetErrors = await getWidgetErrors(u)
-  const activeErrors = widgetErrors.filter((e) => e.status !== 'resolved')
+  const activeErrors = widgetErrors.filter((e) => e.status !== WIDGET_ERROR_STATUS.RESOLVED)
+  const dbDaily = hasDbConfig() ? await getProfileHealthRangeFromDb(u, todayStr, todayStr) : []
 
   const summaries: ProfileHealthSummary[] = []
 
   for (const prof of profiles) {
     const dailyKey = REDIS_KEYS.healthProfileDaily(u, prof.slug, todayStr)
-    const data = await redis.hgetall<any>(dailyKey)
+    const data = hasDbConfig()
+      ? dbDaily.find((row) => row.slug === prof.slug)
+      : await redis.hgetall<any>(dailyKey).catch(() => null)
 
     const renders = Number(data?.renders || 0)
     const successes = Number(data?.successes || 0)
@@ -190,16 +210,20 @@ export async function getProfileHealthList(username: string): Promise<ProfileHea
     const healthScore =
       renders > 0 ? Math.max(0, Math.min(100, Math.round((successes / renders) * 100))) : 0
 
-    let status: HealthStatus = renders > 0 ? 'operational' : 'warning'
+    let status: HealthStatus = renders > 0 ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING
     if (profErrors.length > 1 || (renders > 0 && healthScore < 90)) {
-      status = 'failed'
+      status = HEALTH_STATUS.FAILED
     } else if (profErrors.length > 0 || (renders > 0 && healthScore < 98)) {
-      status = 'warning'
+      status = HEALTH_STATUS.WARNING
     }
 
     const opWidgets = Math.max(0, prof.widgetsCount - profErrors.length)
-    const warnWidgets = profErrors.filter((e) => e.errorType === 'RATE_LIMITED').length
-    const failWidgets = profErrors.filter((e) => e.errorType !== 'RATE_LIMITED').length
+    const warnWidgets = profErrors.filter(
+      (e) => e.errorType === WIDGET_ERROR_TYPE.RATE_LIMITED
+    ).length
+    const failWidgets = profErrors.filter(
+      (e) => e.errorType !== WIDGET_ERROR_TYPE.RATE_LIMITED
+    ).length
 
     summaries.push({
       profileSlug: prof.slug,
@@ -229,7 +253,7 @@ export async function getWidgetHealthList(
 ): Promise<WidgetHealthRecord[]> {
   const u = username.toLowerCase().trim()
   const [profiles, widgetErrors] = await Promise.all([getProfileHealthList(u), getWidgetErrors(u)])
-  const activeErrors = widgetErrors.filter((e) => e.status !== 'resolved')
+  const activeErrors = widgetErrors.filter((e) => e.status !== WIDGET_ERROR_STATUS.RESOLVED)
   const records = profiles
     .filter(
       (profile) => !profileSlug || profileSlug === 'all' || profile.profileSlug === profileSlug
@@ -240,7 +264,7 @@ export async function getWidgetHealthList(
         widgetId: `profile-artifacts:${profile.profileSlug}`,
         widgetName: `${profile.profileName} SVG artifacts`,
         profileSlug: profile.profileSlug,
-        status: error ? 'failed' : profile.status,
+        status: error ? HEALTH_STATUS.FAILED : profile.status,
         lastRenderAt: profile.lastRenderAt || new Date().toISOString(),
         lastRenderDurationMs: profile.avgRenderDurationMs,
         avgRenderDurationMs: profile.avgRenderDurationMs,
@@ -260,10 +284,10 @@ export async function getWidgetHealthList(
     })
 
   return records.sort((a, b) => {
-    if (a.status === 'failed' && b.status !== 'failed') return -1
-    if (b.status === 'failed' && a.status !== 'failed') return 1
-    if (a.status === 'warning' && b.status === 'operational') return -1
-    if (b.status === 'warning' && a.status === 'operational') return 1
+    if (a.status === HEALTH_STATUS.FAILED && b.status !== HEALTH_STATUS.FAILED) return -1
+    if (b.status === HEALTH_STATUS.FAILED && a.status !== HEALTH_STATUS.FAILED) return 1
+    if (a.status === HEALTH_STATUS.WARNING && b.status === HEALTH_STATUS.OPERATIONAL) return -1
+    if (b.status === HEALTH_STATUS.WARNING && a.status === HEALTH_STATUS.OPERATIONAL) return 1
     return b.totalRenders - a.totalRenders
   })
 }
@@ -284,6 +308,41 @@ export async function getHealthHistory(
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     historyDates.push({ date: d, dateStr: formatDate(d) })
+  }
+
+  if (hasDbConfig()) {
+    const rows = await getProfileHealthRangeFromDb(
+      u,
+      historyDates[0]?.dateStr || formatDate(today),
+      historyDates.at(-1)?.dateStr || formatDate(today)
+    )
+    for (const { date, dateStr } of historyDates) {
+      const dayRows = rows.filter((row) => row.dateStr === dateStr)
+      const dayRenders = dayRows.reduce((sum, row) => sum + row.renders, 0)
+      const daySuccesses = dayRows.reduce((sum, row) => sum + row.successes, 0)
+      const dayFailures = dayRows.reduce((sum, row) => sum + row.failures, 0)
+      const dayDurMs = dayRows.reduce((sum, row) => sum + row.durationMs, 0)
+      const dayDurCount = dayRows.reduce((sum, row) => sum + row.durationCount, 0)
+      const healthScore = dayRenders
+        ? Math.max(0, Math.min(100, Math.round((daySuccesses / dayRenders) * 100)))
+        : 0
+      let status: HealthStatus = dayRenders > 0 ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING
+      if (dayFailures > 2 || (dayRenders > 0 && healthScore < 90)) {
+        status = HEALTH_STATUS.FAILED
+      } else if (dayFailures > 0 || (dayRenders > 0 && healthScore < 98)) {
+        status = HEALTH_STATUS.WARNING
+      }
+      points.push({
+        timestamp: date.toISOString(),
+        date: dateStr,
+        healthScore,
+        totalRenders: dayRenders,
+        failedRenders: dayFailures,
+        avgDurationMs: dayDurCount > 0 ? Math.round(dayDurMs / dayDurCount) : 0,
+        status,
+      })
+    }
+    return points
   }
 
   const p = redis.pipeline()
@@ -318,9 +377,12 @@ export async function getHealthHistory(
     const healthScore =
       dayRenders > 0 ? Math.max(0, Math.min(100, Math.round((daySuccesses / dayRenders) * 100))) : 0
 
-    let status: HealthStatus = dayRenders > 0 ? 'operational' : 'warning'
-    if (dayFailures > 2 || (dayRenders > 0 && healthScore < 90)) status = 'failed'
-    else if (dayFailures > 0 || (dayRenders > 0 && healthScore < 98)) status = 'warning'
+    let status: HealthStatus = dayRenders > 0 ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING
+    if (dayFailures > 2 || (dayRenders > 0 && healthScore < 90)) {
+      status = HEALTH_STATUS.FAILED
+    } else if (dayFailures > 0 || (dayRenders > 0 && healthScore < 98)) {
+      status = HEALTH_STATUS.WARNING
+    }
 
     points.push({
       timestamp: d.toISOString(),
@@ -352,7 +414,7 @@ export async function simulateHealthIncident(
     profileSlug: options?.profileSlug || 'default',
     widgetId: options?.widgetId || 'contribution-snake',
     widgetName: options?.widgetName || 'Contribution Snake Game',
-    errorType: options?.errorType || 'FETCH_TIMEOUT',
+    errorType: options?.errorType || WIDGET_ERROR_TYPE.FETCH_TIMEOUT,
     message: options?.message || 'Upstream CDN asset timed out after 5000ms',
     details: 'HTTP 504 Gateway Timeout while fetching GitHub actions output SVG artifact.',
   }

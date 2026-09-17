@@ -110,7 +110,7 @@ describe('V2 Migration Services Suite', () => {
         'https://raw.githubusercontent.com/carol/carol/gitascii/profiles/default/light.svg'
       )
       expect(code).toContain(
-        '<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->'
+        '<!-- GITASCII:TELEMETRY:START - Measures badge fetches (usually GitHub Camo refreshes), not exact human views -->'
       )
       expect(code).toContain('https://gitascii.com/api/badge/carol?slug=default')
       expect(code).toContain('<!-- GITASCII:TELEMETRY:END -->')

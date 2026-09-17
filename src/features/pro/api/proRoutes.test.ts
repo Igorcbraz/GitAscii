@@ -88,11 +88,22 @@ describe('Pro API Route Handlers Test Suite', () => {
   })
 
   describe('GET /api/pro/analytics', () => {
+    it('returns 403 for authenticated free users', async () => {
+      mockedGetSession.mockResolvedValue({ username: 'FreeAnalyst', githubId: 998 } as any)
+
+      const res = await getAnalytics(new Request('http://localhost:3000/api/pro/analytics'))
+
+      expect(res.status).toBe(403)
+    })
+
     it('returns analytics summary and supports CSV export format', async () => {
       mockedGetSession.mockResolvedValue({
         username: 'AnalystUser',
         githubId: 999,
       } as any)
+
+      const { updateUserSettings } = await import('@/features/pro/server/entitlements')
+      await updateUserSettings('AnalystUser', { planTier: 'pro' })
 
       await ingestProfileView({
         username: 'AnalystUser',
@@ -117,7 +128,7 @@ describe('Pro API Route Handlers Test Suite', () => {
       expect(csvRes.status).toBe(200)
       expect(csvRes.headers.get('Content-Type')).toContain('text/csv')
       const csvText = await csvRes.text()
-      expect(csvText).toContain('Date,Views,Uniques')
+      expect(csvText).toContain('Date,Badge Fetches,Unique Visitors Unavailable')
     })
   })
 

@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
   SITE: {
+    HOME: 'https://gitascii.com',
     PROFILE: (username: string) => `https://gitascii.com/${encodeURIComponent(username)}`,
   },
   AUTH: {
@@ -87,6 +88,8 @@ export const API_ENDPOINTS = {
     GET: (username: string) => `/api/badge/${encodeURIComponent(username)}`,
     PUBLIC_URL: (username: string) =>
       `https://gitascii.com/api/badge/${encodeURIComponent(username)}`,
+    PUBLIC_PROFILE_URL: (username: string, slug: string) =>
+      `https://gitascii.com/api/badge/${encodeURIComponent(username)}?slug=${encodeURIComponent(slug)}`,
   },
   CONFIG: {
     GET: (username: string, profileSlug: string) =>

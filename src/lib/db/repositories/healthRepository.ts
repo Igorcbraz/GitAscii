@@ -253,3 +253,50 @@ export async function getProfileDailyHealthFromDb(
     durationCount: Number(r.duration_count || 0),
   }
 }
+
+export interface ProfileDailyHealthRow {
+  slug: string
+  dateStr: string
+  renders: number
+  successes: number
+  failures: number
+  durationMs: number
+  durationCount: number
+}
+
+interface ProfileDailyHealthDbRow {
+  slug: unknown
+  date_str: unknown
+  renders: unknown
+  successes: unknown
+  failures: unknown
+  duration_ms: unknown
+  duration_count: unknown
+}
+
+export async function getProfileHealthRangeFromDb(
+  username: string,
+  startDate: string,
+  endDate: string
+): Promise<ProfileDailyHealthRow[]> {
+  if (!hasDbConfig()) return []
+  const rows = await sql`
+    SELECT h.slug, h.date_str, h.renders, h.successes, h.failures,
+           h.duration_ms, h.duration_count
+    FROM profile_daily_health h
+    JOIN users u ON u.id = h.user_id
+    WHERE u.username = ${username.toLowerCase().trim()}
+      AND h.date_str >= ${startDate}
+      AND h.date_str <= ${endDate}
+    ORDER BY h.date_str ASC;
+  `
+  return (rows as ProfileDailyHealthDbRow[]).map((row) => ({
+    slug: String(row.slug),
+    dateStr: String(row.date_str),
+    renders: Number(row.renders || 0),
+    successes: Number(row.successes || 0),
+    failures: Number(row.failures || 0),
+    durationMs: Number(row.duration_ms || 0),
+    durationCount: Number(row.duration_count || 0),
+  }))
+}

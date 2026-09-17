@@ -1,6 +1,6 @@
 'use client'
 
-import { Compass, Eye, Radio, Users } from 'lucide-react'
+import { Activity, CalendarDays, GitBranch, ShieldCheck } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
@@ -26,42 +26,42 @@ export const AnalyticsKpiStrip: React.FC<AnalyticsKpiStripProps> = ({
   }
 
   const totalViews = summary?.totalRequests ?? summary?.totalViews ?? 0
-  const uniqueVisitors = summary?.uniqueSources ?? summary?.uniqueVisitors ?? 0
-  const directRate = summary?.directRatio ?? 100
+  const todayRequests = summary?.requestsToday ?? summary?.viewsToday ?? 0
+  const camoRate = summary?.camoRatio ?? 0
+  const trackedProfiles = summary?.topProfiles?.filter((profile) => profile.views > 0).length ?? 0
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <ProStatCard
-        title={t('pro.analytics.kpi_total_views', 'Total Views')}
+        title={t('pro.analytics.kpi_total_views', 'Badge Fetches')}
         value={formatNumber(totalViews)}
-        icon={<Eye className="w-4 h-4 text-[#c5ff4a]" />}
+        icon={<Activity className="w-4 h-4 text-[#c5ff4a]" />}
         trend={summary?.growthRateViews}
         trendLabel={t('pro.analytics.vs_previous', 'vs previous period')}
         variant="lime"
       />
 
       <ProStatCard
-        title={t('pro.analytics.kpi_unique_visitors', 'Unique Visitors')}
-        value={formatNumber(uniqueVisitors)}
-        icon={<Users className="w-4 h-4 text-cyan-400" />}
-        trend={summary?.growthRateUniques}
-        trendLabel={t('pro.analytics.anonymized_hashes', 'anonymized daily hashes')}
+        title={t('pro.analytics.kpi_unique_visitors', 'Fetches Today')}
+        value={formatNumber(todayRequests)}
+        icon={<CalendarDays className="w-4 h-4 text-cyan-400" />}
+        trendLabel={t('pro.analytics.anonymized_hashes', 'observed badge requests')}
         variant="default"
       />
 
       <ProStatCard
-        title={t('pro.analytics.kpi_direct_rate', 'Direct Traffic')}
-        value={`${directRate}%`}
-        icon={<Compass className="w-4 h-4 text-indigo-400" />}
-        trendLabel={t('pro.analytics.direct_github_embeds', 'direct GitHub embeds')}
+        title={t('pro.analytics.kpi_direct_rate', 'GitHub Camo')}
+        value={`${camoRate}%`}
+        icon={<ShieldCheck className="w-4 h-4 text-indigo-400" />}
+        trendLabel={t('pro.analytics.direct_github_embeds', 'share of observed fetches')}
         variant="default"
       />
 
       <ProStatCard
-        title={t('pro.analytics.kpi_active_now', 'Active Now (5m)')}
-        value={String(activeLiveCount)}
-        icon={<Radio className="w-4 h-4 text-emerald-400" />}
-        trendLabel={t('pro.analytics.live_realtime_streams', 'real-time telemetry')}
+        title={t('pro.analytics.kpi_active_now', 'Active Profiles')}
+        value={String(trackedProfiles || activeLiveCount)}
+        icon={<GitBranch className="w-4 h-4 text-emerald-400" />}
+        trendLabel={t('pro.analytics.live_realtime_streams', 'profiles with badge fetches')}
         variant="default"
       />
     </div>

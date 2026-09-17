@@ -139,7 +139,14 @@ export const AnalyticsDashboard: React.FC = () => {
       mime = 'application/json'
     } else {
       const rows = [
-        ['Date', 'Views', 'Unique Visitors', 'Cache Hits', 'Camo Proxy Views', 'Direct Views'],
+        [
+          'Date',
+          'Badge Fetches',
+          'Unavailable Uniques',
+          'Cache Hits',
+          'Camo Fetches',
+          'Direct Fetches',
+        ],
         ...(summary.timeSeries || []).map((t) => [
           t.date,
           t.views,

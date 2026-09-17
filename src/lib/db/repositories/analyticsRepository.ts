@@ -97,57 +97,73 @@ export async function recordViewInDb(
   username: string,
   slug: string,
   dateStr: string,
-  isUnique: boolean,
+  _isUnique: boolean,
   dimensions?: [string, string][]
 ): Promise<void> {
   if (!hasDbConfig()) return
   const u = username.toLowerCase().trim()
   const cleanSlug = (slug || 'default').toLowerCase().trim()
-  const user = await ensureUser(u)
+  const dimensionMap = new Map(dimensions || [])
+  const source = dimensionMap.get('sources') || 'Unknown'
+  const trafficType = dimensionMap.get('traffic_types') || 'unknown'
+  const statusCode = dimensionMap.get('status_codes') || '200'
+  const hour = dimensionMap.get('hours') || '0'
+  const weekdayHour = dimensionMap.get('weekday_hours') || `0:${hour}`
 
+  // One round trip and one transaction per CDN badge fetch. A badge fetch is not a
+  // unique human view, so uniques intentionally remains zero.
   await sql`
-    INSERT INTO user_analytics_totals (user_id, views, uniques, updated_at)
-    VALUES (${user.id}, 1, ${isUnique ? 1 : 0}, NOW())
-    ON CONFLICT (user_id) DO UPDATE SET
-      views = user_analytics_totals.views + 1,
-      uniques = user_analytics_totals.uniques + ${isUnique ? 1 : 0},
+    WITH target_user AS (
+      SELECT id FROM users WHERE username = ${u} LIMIT 1
+    ), totals AS (
+      INSERT INTO user_analytics_totals (user_id, views, uniques, updated_at)
+      SELECT id, 1, 0, NOW() FROM target_user
+      ON CONFLICT (user_id) DO UPDATE SET
+        views = user_analytics_totals.views + 1,
+        updated_at = NOW()
+    ), profile_total AS (
+      UPDATE profiles
+      SET total_views = total_views + 1, updated_at = NOW()
+      WHERE user_id = (SELECT id FROM target_user) AND slug = ${cleanSlug}
+    ), daily AS (
+      INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
+      SELECT id, ${cleanSlug}, ${dateStr}, 1, 0, NOW() FROM target_user
+      ON CONFLICT (user_id, slug, date_str) DO UPDATE SET
+        views = profile_daily_analytics.views + 1,
+        updated_at = NOW()
+    ), incoming(dimension, dimension_key) AS (
+      VALUES
+        ('sources', ${source}),
+        ('traffic_types', ${trafficType}),
+        ('status_codes', ${statusCode}),
+        ('hours', ${hour}),
+        ('weekday_hours', ${weekdayHour})
+    )
+    INSERT INTO profile_daily_dimensions
+      (user_id, slug, date_str, dimension, dimension_key, count, updated_at)
+    SELECT target_user.id, ${cleanSlug}, ${dateStr}, incoming.dimension,
+      incoming.dimension_key, 1, NOW()
+    FROM target_user CROSS JOIN incoming
+    ON CONFLICT (user_id, slug, date_str, dimension, dimension_key) DO UPDATE SET
+      count = profile_daily_dimensions.count + 1,
       updated_at = NOW();
   `
+}
 
-  await sql`
-    UPDATE profiles
-    SET total_views = total_views + 1, updated_at = NOW()
-    WHERE user_id = ${user.id} AND slug = ${cleanSlug};
+export async function getProfileCountsFromDb(
+  username: string,
+  dateList: string[]
+): Promise<Array<{ slug: string; views: number }>> {
+  if (!hasDbConfig() || dateList.length === 0) return []
+  const rows = await sql`
+    SELECT a.slug, SUM(a.views) AS views
+    FROM profile_daily_analytics a
+    JOIN users u ON u.id = a.user_id
+    WHERE u.username = ${username.toLowerCase().trim()} AND a.date_str = ANY(${dateList})
+    GROUP BY a.slug
+    ORDER BY views DESC;
   `
-
-  await sql`
-    INSERT INTO profile_daily_analytics (user_id, slug, date_str, views, uniques, updated_at)
-    VALUES (${user.id}, ${cleanSlug}, ${dateStr}, 1, ${isUnique ? 1 : 0}, NOW())
-    ON CONFLICT (user_id, slug, date_str) DO UPDATE SET
-      views = profile_daily_analytics.views + 1,
-      uniques = profile_daily_analytics.uniques + ${isUnique ? 1 : 0},
-      updated_at = NOW();
-  `
-
-  if (dimensions && dimensions.length > 0) {
-    for (const [dim, key] of dimensions) {
-      if (!key) continue
-      try {
-        await sql`
-          INSERT INTO profile_daily_dimensions (user_id, slug, date_str, dimension, dimension_key, count, updated_at)
-          VALUES (${user.id}, ${cleanSlug}, ${dateStr}, ${dim}, ${key}, 1, NOW())
-          ON CONFLICT (user_id, slug, date_str, dimension, dimension_key) DO UPDATE SET
-            count = profile_daily_dimensions.count + 1,
-            updated_at = NOW();
-        `
-      } catch (error) {
-        console.warn('[AnalyticsRepository] Failed to persist profile dimension', {
-          dimension: dim,
-          error,
-        })
-      }
-    }
-  }
+  return rows.map((row) => ({ slug: String(row.slug), views: Number(row.views || 0) }))
 }
 
 export async function getDailyAnalyticsFromDb(

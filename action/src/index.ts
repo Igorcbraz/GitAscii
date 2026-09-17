@@ -6,11 +6,24 @@ import { processExternalAssets } from '@/engine/inliner/externalAssetInliner'
 
 import { fetchGitHubDataForAction } from './dataFetcher'
 import { GitOpsService } from './gitOps'
-import { getPublishPolicy, sendProTelemetry } from './oidcTelemetry'
+import {
+  DEFAULT_PUBLISH_INTERVAL_MINUTES,
+  DEFAULT_TELEMETRY_URL,
+  getPublishPolicy,
+  sendProTelemetry,
+} from './oidcTelemetry'
 
 const ACTION_BRANCH_NAME = 'gitascii'
 const ACTION_INPUT_ENABLED = 'true'
-const DEFAULT_TELEMETRY_URL = 'https://gitascii.com/api/pro/telemetry'
+
+function getPublishStatus(result: {
+  committed: boolean
+  staleSkipped: boolean
+}): 'published' | 'skipped_stale' | 'svg_unchanged' {
+  if (result.committed) return 'published'
+  if (result.staleSkipped) return 'skipped_stale'
+  return 'svg_unchanged'
+}
 
 async function run(): Promise<void> {
   const startTime = Date.now()
@@ -31,7 +44,10 @@ async function run(): Promise<void> {
     const targetProfileSlug = core.getInput('profile_slug') || ''
     const proTelemetry = core.getInput('pro_telemetry') === ACTION_INPUT_ENABLED
     const telemetryUrl = core.getInput('telemetry_url') || DEFAULT_TELEMETRY_URL
-    const requestedRefreshMinutes = Math.max(1, Number(core.getInput('refresh_minutes')) || 1440)
+    const requestedRefreshMinutes = Math.max(
+      1,
+      Number(core.getInput('refresh_minutes')) || DEFAULT_PUBLISH_INTERVAL_MINUTES
+    )
 
     const { owner, repo } = github.context.repo
     const branchName = ACTION_BRANCH_NAME
@@ -152,11 +168,7 @@ async function run(): Promise<void> {
       `Update GitAscii profiles (${targetConfigs.map((c) => c.slug).join(', ')}) SVGs [skip ci]`
     )
 
-    const status = result.committed
-      ? 'published'
-      : result.staleSkipped
-        ? 'skipped_stale'
-        : 'svg_unchanged'
+    const status = getPublishStatus(result)
     core.setOutput('published_revision', latestRevision)
     core.setOutput('svg_changed', String(!result.unchanged))
     core.setOutput('status', status)
@@ -180,6 +192,18 @@ async function run(): Promise<void> {
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
+    if (core.getInput('pro_telemetry') === ACTION_INPUT_ENABLED) {
+      await sendProTelemetry(core.getInput('telemetry_url') || DEFAULT_TELEMETRY_URL, {
+        repository: `${github.context.repo.owner}/${github.context.repo.repo}`,
+        workflow: github.context.workflow,
+        runId: String(github.context.runId),
+        revision: String(Date.now()),
+        durationMs: Date.now() - startTime,
+        status: 'failed',
+        hasErrors: true,
+        profileSlug: core.getInput('profile_slug') || undefined,
+      })
+    }
     core.setFailed(message)
   }
 }

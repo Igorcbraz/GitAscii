@@ -1,5 +1,10 @@
 import * as core from '@actions/core'
 
+export const DEFAULT_TELEMETRY_URL = 'https://gitascii.com/api/pro/telemetry'
+export const DEFAULT_PUBLISH_INTERVAL_MINUTES = 1440
+export const MINIMUM_PUBLISH_INTERVAL_MINUTES = 60
+const TELEMETRY_TIMEOUT_MS = 5_000
+
 export interface TelemetryPayload {
   repository: string
   workflow: string
@@ -40,7 +45,7 @@ export async function sendProTelemetry(
         'User-Agent': 'GitAscii-Action',
       },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(TELEMETRY_TIMEOUT_MS),
     })
 
     if (!res.ok) {
@@ -57,17 +62,20 @@ export async function sendProTelemetry(
 export async function getPublishPolicy(telemetryUrl: string): Promise<number> {
   try {
     const idToken = await core.getIDToken('gitascii-pro')
-    if (!idToken) return 1440
+    if (!idToken) return DEFAULT_PUBLISH_INTERVAL_MINUTES
     const res = await fetch(telemetryUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
       body: JSON.stringify({ status: 'policy_check', repository: process.env.GITHUB_REPOSITORY }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(TELEMETRY_TIMEOUT_MS),
     })
-    if (!res.ok) return 1440
+    if (!res.ok) return DEFAULT_PUBLISH_INTERVAL_MINUTES
     const data = await res.json()
-    return Math.max(60, Number(data.minimumIntervalMinutes) || 1440)
+    return Math.max(
+      MINIMUM_PUBLISH_INTERVAL_MINUTES,
+      Number(data.minimumIntervalMinutes) || DEFAULT_PUBLISH_INTERVAL_MINUTES
+    )
   } catch {
-    return 1440
+    return DEFAULT_PUBLISH_INTERVAL_MINUTES
   }
 }

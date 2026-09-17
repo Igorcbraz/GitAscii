@@ -22,7 +22,7 @@ export function generateV2EmbedCode(options: EmbedOptions): string {
 </picture>`
 
   if (options.includeBadge) {
-    const badgeBlock = `\n<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->\n<p align="center">\n  <a href="https://gitascii.com">\n    <img alt="GitAscii Profile Insights" src="https://gitascii.com/api/badge/${username}?slug=${slug}" width="100%">\n  </a>\n</p>\n<!-- GITASCII:TELEMETRY:END -->`
+    const badgeBlock = `\n<!-- GITASCII:TELEMETRY:START - Measures badge fetches (usually GitHub Camo refreshes), not exact human views -->\n<p align="center">\n  <a href="${API_ENDPOINTS.SITE.HOME}">\n    <img alt="GitAscii badge fetch analytics" src="${API_ENDPOINTS.BADGE.PUBLIC_PROFILE_URL(username, slug)}" width="100%">\n  </a>\n</p>\n<!-- GITASCII:TELEMETRY:END -->`
     return `${pictureBlock}\n${badgeBlock}`
   }
 
