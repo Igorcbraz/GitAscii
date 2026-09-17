@@ -31,6 +31,8 @@
     "email:dev": "email dev -d emails -p 3001",
     "docs": "cd docs && mintlify dev",
     "dev:vinext": "vinext dev --port 3001",
+    "prebuild:vinext": "npm run generate:templates",
+    "build:vinext": "vinext build",
     "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json",
     "build:action": "node action/build.mjs"
   },
