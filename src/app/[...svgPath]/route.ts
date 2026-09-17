@@ -20,6 +20,11 @@ export async function GET(
     pathSegments.shift()
   }
 
+  // Se a rota for /api/badge/..., não trata como perfil SVG no catchall
+  if (pathSegments[0] === 'badge') {
+    return new NextResponse('Not found', { status: 404 })
+  }
+
   if (pathSegments.length === 0) {
     return new NextResponse('Invalid SVG route', { status: 400 })
   }
