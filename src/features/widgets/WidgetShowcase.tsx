@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  Blocks,
   Check,
   Copy,
   ExternalLink,
@@ -74,6 +75,18 @@ export function WidgetShowcase() {
       description: w.desc || '',
       codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
       features: ['Luna Blue Theme', 'Retro Nostalgia', 'Classic Windows XP'],
+      githubSourceUrl: EXTERNAL_LINKS.GITHUB_REPO,
+    }))
+  }, [])
+
+  const minecraftWidgets: WidgetItem[] = React.useMemo(() => {
+    return WIDGET_CATALOG.filter((w) => w.category === WIDGET_CATEGORIES.MINECRAFT).map((w) => ({
+      id: w.id,
+      name: w.name,
+      type: 'Minecraft Widget',
+      description: w.desc || '',
+      codeSnippet: `![${w.name}](${APP_URL}/api/YOUR_USERNAME?widgets=${w.id})`,
+      features: ['100% Minecraft Style', 'Live GitHub Telemetry', 'Authentic Pixel Art'],
       githubSourceUrl: EXTERNAL_LINKS.GITHUB_REPO,
     }))
   }, [])
@@ -490,6 +503,212 @@ export function WidgetShowcase() {
                         border: '2px solid',
                         borderColor: '#ffffff #4080d0 #4080d0 #ffffff',
                         boxShadow: '1px 1px 0 #003087, inset 0 1px 0 rgba(255,255,255,0.9)',
+                      }}
+                    >
+                      <span>Edit in Visual Builder</span>
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-8 pb-4 border-b-2 border-[#373737]">
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-white uppercase tracking-widest px-3 py-1.5"
+                  style={{
+                    backgroundColor: '#6b6b6b',
+                    boxShadow:
+                      'inset 2px 2px 0px #8b8b8b, inset -2px -2px 0px #373737, 0 0 0 2px #000000',
+                    fontFamily: "'Minecraft', 'Courier New', monospace",
+                  }}
+                >
+                  <Blocks className="size-3.5 text-[#80ff20]" />
+                  Minecraft Edition
+                </span>
+              </div>
+              <h2
+                className="text-3xl text-chalk font-bold"
+                style={{
+                  fontFamily: "'Minecraft', 'Courier New', monospace",
+                  textShadow: '2px 2px 0 #1e1e1e',
+                }}
+              >
+                Minecraft Widgets
+              </h2>
+              <p className="text-note text-[#aaaaaa] font-mono mt-1 max-w-lg">
+                Widgets inspirados 100% no Minecraft Java Edition com dados reais do seu perfil
+                GitHub e estilo visual de botões de pedra e telas do jogo.
+              </p>
+            </div>
+            <span
+              className="text-caption text-[#80ff20] uppercase tracking-widest hidden md:block"
+              style={{ fontFamily: "'Minecraft', 'Courier New', monospace" }}
+            >
+              {minecraftWidgets.length} widgets
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {minecraftWidgets.map((widget) => {
+            const markdownSnippet = widget.codeSnippet.replace('YOUR_USERNAME', activeUsername)
+
+            return (
+              <article
+                key={widget.id}
+                className="flex flex-col lg:flex-row justify-between items-start gap-6 p-6 group transition-transform"
+                style={{
+                  backgroundColor: '#4a4a4a',
+                  boxShadow:
+                    'inset 3px 3px 0px #707070, inset -3px -3px 0px #222222, 0 0 0 2px #000000',
+                  fontFamily: "'Minecraft', 'Courier New', monospace",
+                }}
+              >
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <a
+                      href={widget.githubSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 transition-colors text-[#55ffff] hover:text-white text-[11px]"
+                    >
+                      <Github className="size-3.5" />
+                      <span>View Source Code ↗</span>
+                    </a>
+                  </div>
+
+                  <h3
+                    className="text-subheading font-bold"
+                    style={{
+                      color: '#ffffff',
+                      textShadow: '2px 2px 0 #1e1e1e',
+                    }}
+                  >
+                    {widget.name}
+                  </h3>
+                  <p
+                    style={{
+                      color: '#cccccc',
+                      fontSize: '13px',
+                      lineHeight: '1.5',
+                      textShadow: '1px 1px 0 #111111',
+                    }}
+                  >
+                    {widget.description}
+                  </p>
+
+                  <div
+                    className="p-3 flex items-center justify-between gap-4"
+                    style={{
+                      backgroundColor: '#1e1e1e',
+                      boxShadow:
+                        'inset 2px 2px 0px #0a0a0a, inset -2px -2px 0px #373737, 0 0 0 1px #000000',
+                      fontSize: '11px',
+                      color: '#80ff20',
+                    }}
+                  >
+                    <code className="truncate">{markdownSnippet}</code>
+                    <button
+                      onClick={() => handleCopyMarkdown(widget)}
+                      className="shrink-0 p-1 cursor-pointer transition-colors text-[#aaaaaa] hover:text-[#80ff20]"
+                      title="Copy Markdown"
+                    >
+                      {copiedId === widget.id ? (
+                        <Check className="size-4 text-[#80ff20]" />
+                      ) : (
+                        <Copy className="size-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="w-full lg:w-72 shrink-0 flex flex-col justify-between gap-4 self-stretch lg:self-start"
+                  style={{
+                    backgroundColor: '#373737',
+                    boxShadow:
+                      'inset 2px 2px 0px #555555, inset -2px -2px 0px #1e1e1e, 0 0 0 2px #000000',
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5"
+                    style={{
+                      backgroundColor: '#2b2b2b',
+                      borderBottom: '2px solid #141414',
+                    }}
+                  >
+                    <Blocks className="size-3 text-[#80ff20]" />
+                    <span
+                      style={{
+                        color: '#ffff55',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        textShadow: '1px 1px 0 #000000',
+                      }}
+                    >
+                      [ PREVIEW ]
+                    </span>
+                  </div>
+
+                  <div className="p-3">
+                    <div
+                      className="flex flex-col items-center justify-center text-center overflow-hidden min-h-22.5"
+                      style={{
+                        backgroundColor: '#111111',
+                        boxShadow: 'inset 2px 2px 0px #000000, inset -2px -2px 0px #2a2a2a',
+                        padding: '10px',
+                      }}
+                    >
+                      <Image
+                        src={`/api/${activeUsername}?widgets=${widget.id}`}
+                        alt={widget.name}
+                        width={800}
+                        height={96}
+                        unoptimized
+                        className="max-w-full max-h-24 object-contain"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="px-3 pb-3 space-y-2">
+                    <Link
+                      href={`/widgets/${widget.id}`}
+                      className="w-full inline-flex items-center justify-center gap-2 font-bold text-[12px] uppercase py-2 px-4 cursor-pointer transition-all active:translate-y-px"
+                      style={{
+                        color: '#ffffff',
+                        backgroundColor: '#6b6b6b',
+                        boxShadow:
+                          'inset 2px 2px 0px #8b8b8b, inset -2px -2px 0px #373737, 0 0 0 2px #000000',
+                        textShadow: '1px 1px 0 #2a2a2a',
+                      }}
+                    >
+                      <span>View Docs</span>
+                      <ArrowRight size={12} />
+                    </Link>
+
+                    <Link
+                      href={{
+                        pathname: '/',
+                        query: { username: activeUsername, widget: widget.id },
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 font-bold text-[12px] uppercase py-2 px-4 cursor-pointer transition-all active:translate-y-px"
+                      style={{
+                        color: '#ffffff',
+                        backgroundColor: '#4a4a4a',
+                        boxShadow:
+                          'inset 2px 2px 0px #666666, inset -2px -2px 0px #222222, 0 0 0 2px #000000',
+                        textShadow: '1px 1px 0 #2a2a2a',
                       }}
                     >
                       <span>Edit in Visual Builder</span>

@@ -81,6 +81,12 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.WINXP_TASKBAR]: { width: 780, height: 48 },
   [WIDGET_IDS.WINXP_ERROR_DIALOG]: { width: 520, height: 210 },
   [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES]: { width: 780, height: 400 },
+  [WIDGET_IDS.POKEMON_TRAINER_CARD]: { width: 380, height: 240 },
+  [WIDGET_IDS.MINECRAFT_HUD]: { width: 480, height: 180 },
+  [WIDGET_IDS.MINECRAFT_INVENTORY]: { width: 480, height: 260 },
+  [WIDGET_IDS.MINECRAFT_CHAT]: { width: 480, height: 240 },
+  [WIDGET_IDS.MINECRAFT_ACHIEVEMENT]: { width: 480, height: 220 },
+  [WIDGET_IDS.MINECRAFT_SERVER]: { width: 480, height: 200 },
 }
 
 function extractExternalUrls(html: string): string[] {

@@ -1,0 +1,41 @@
+{
+  "id": "pokemon_trainer",
+  "name": "Pokemon Trainer Profile",
+  "description": "GitHub profile as a Pokemon Trainer ID card with gym badges, starter type and Pokedex completion.",
+  "category": "Pokemon",
+  "widgetCategory": "interactive",
+  "widgets": [
+    {
+      "instanceId": "widget_trainer_card_1",
+      "widgetId": "pokemon-trainer-card",
+      "name": "Pokemon Trainer Card",
+      "position": { "x": 10, "y": 0 },
+      "size": { "width": 380, "height": 240 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_pokemon_card_2",
+      "widgetId": "pokemon-card",
+      "name": "Pokemon Card",
+      "position": { "x": 10, "y": 250 },
+      "size": { "width": 300, "height": 418 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#1a237e",
+    "textColor": "#e3f2fd",
+    "accentColor": "#ffd700",
+    "borderColor": "#ffd700",
+    "fontFamily": "'Inter Tight', sans-serif",
+    "borderRadius": 4,
+    "templateStyle": "terminal"
+  },
+  "templateId": "pokemon_trainer"
+}

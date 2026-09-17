@@ -1,0 +1,41 @@
+{
+  "id": "minecraft",
+  "name": "Minecraft Dev Profile",
+  "description": "GitHub profile styled as a Minecraft server with HUD, inventory and achievement board.",
+  "category": "Gaming",
+  "widgetCategory": "minecraft",
+  "widgets": [
+    {
+      "instanceId": "widget_mc_server_1",
+      "widgetId": "minecraft-server",
+      "name": "Server Status Board",
+      "position": { "x": 10, "y": 0 },
+      "size": { "width": 480, "height": 110 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_mc_ach_2",
+      "widgetId": "minecraft-achievement",
+      "name": "Advancement Toast",
+      "position": { "x": 10, "y": 120 },
+      "size": { "width": 480, "height": 96 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    }
+  ],
+  "globalStyles": {
+    "backgroundColor": "#1a1a1a",
+    "textColor": "#ffffff",
+    "accentColor": "#80e040",
+    "borderColor": "#373737",
+    "fontFamily": "'Courier New', Courier, monospace",
+    "borderRadius": 0,
+    "templateStyle": "terminal"
+  },
+  "templateId": "minecraft"
+}
