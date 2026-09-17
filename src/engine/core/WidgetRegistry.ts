@@ -186,12 +186,12 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.AWESOME_BADGE, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.CUSTOM_IMAGE, (w, d, g) => renderExternalWidgets(w, d, g)],
 
-  [WIDGET_IDS.MINECRAFT_HUD, (w, d, g, s) => renderMinecraftHud(w, d, g, s)],
-  [WIDGET_IDS.MINECRAFT_INVENTORY, (w, d, g, s) => renderMinecraftInventory(w, d, g, s)],
-  [WIDGET_IDS.MINECRAFT_CHAT, (w, d, g, s) => renderMinecraftChat(w, d, g, s)],
-  [WIDGET_IDS.MINECRAFT_ACHIEVEMENT, (w, d, g, s) => renderMinecraftAchievement(w, d, g, s)],
-  [WIDGET_IDS.MINECRAFT_SERVER, (w, d, g, s) => renderMinecraftServer(w, d, g, s)],
-  [WIDGET_IDS.MINECRAFT_DEATH_SCREEN, (w, d, g, s) => renderMinecraftDeathScreen(w, d, g, s)],
+  [WIDGET_IDS.MINECRAFT_HUD, (w, d) => renderMinecraftHud(w, d)],
+  [WIDGET_IDS.MINECRAFT_INVENTORY, (w, d) => renderMinecraftInventory(w, d)],
+  [WIDGET_IDS.MINECRAFT_CHAT, (w, d) => renderMinecraftChat(w, d)],
+  [WIDGET_IDS.MINECRAFT_ACHIEVEMENT, (w, d) => renderMinecraftAchievement(w, d)],
+  [WIDGET_IDS.MINECRAFT_SERVER, (w, d) => renderMinecraftServer(w, d)],
+  [WIDGET_IDS.MINECRAFT_DEATH_SCREEN, (w, d) => renderMinecraftDeathScreen(w, d)],
 ])
 
 export function renderFallbackWidget(widget: WidgetInstance, globalStyles: GlobalStyles): string {
