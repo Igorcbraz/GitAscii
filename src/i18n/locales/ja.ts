@@ -2568,7 +2568,7 @@ export const ja: Record<string, string> = {
   'pro.pricing.comp.future_updates': '将来のProウィジェットと新リリースを含む',
   'pro.pricing.comp.geo_referrers': '国別ISOコードおよびリファラーの内訳',
   'pro.pricing.comp.pro_90_days_history': '90日間の全履歴',
-  'pro.pricing.comp.pro_recurring_val': '¥0（1回19ドルの買い切り、永久利用）',
+  'pro.pricing.comp.pro_recurring_val': '¥0（1回1,400円の買い切り、永久利用）',
   'pro.pricing.comp.profiles': 'サポートされるアクティブプロファイル数',
   'pro.pricing.comp.recurring_fees': '月額定期利用料金',
   'pro.pricing.comp.retention': '分析履歴の保持期間',
@@ -2589,7 +2589,7 @@ export const ja: Record<string, string> = {
     'GitAscii Proには14日間の100%返金保証が付いています。Proが開発者ポートフォリオの向上に役立たなかったり、ニーズを満たさなかったりした場合は、お問い合わせいただければ速やかに全額返金いたします。',
   'pro.pricing.faq.guarantee_q': '14日間の返金保証はどのように機能しますか？',
   'pro.pricing.faq.lifetime_a':
-    'はい。19米ドルを1回お支払いいただくだけで、GitHubアカウント向けにGitAscii Proへの永久アクセス権が付与されます。月額請求や年次更新、不意のロックインはありません。',
+    'はい。1,400円を1回お支払いいただくだけで、GitHubアカウント向けにGitAscii Proへの永久アクセス権が付与されます。月額請求や年次更新、不意のロックインはありません。',
   'pro.pricing.faq.lifetime_q': '本当にサブスクリプションのない1回限りの支払いですか？',
   'pro.pricing.faq.profiles_a':
     '最大10個の独立したプロファイルURLスラッグを作成できます（例：メイン用の /username、採用担当者用の /username/work、OSSスポンサー用の /username/oss）。各プロファイルは独自のウィジェット構成、テーマ、アナリティクスを保持します。',

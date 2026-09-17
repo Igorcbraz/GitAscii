@@ -2587,7 +2587,7 @@ export const de: Record<string, string> = {
   'pro.pricing.comp.future_updates': 'Zukünftige Pro-Widgets & Versionen enthalten',
   'pro.pricing.comp.geo_referrers': 'Länder-ISO & Referrer-Aufschlüsselung',
   'pro.pricing.comp.pro_90_days_history': '90 Tage vollständiger Verlauf',
-  'pro.pricing.comp.pro_recurring_val': '0 € (Einmalig 19 € zahlen, für immer besitzen)',
+  'pro.pricing.comp.pro_recurring_val': '0 € (Einmalig 9 € zahlen, für immer besitzen)',
   'pro.pricing.comp.profiles': 'Unterstützte aktive Profile',
   'pro.pricing.comp.recurring_fees': 'Monatlich wiederkehrende Gebühren',
   'pro.pricing.comp.retention': 'Aufbewahrung des Analyse-Verlaufs',
@@ -2609,7 +2609,7 @@ export const de: Record<string, string> = {
     'Wir stehen mit einer 14-tägigen 100%-Geld-zurück-Garantie hinter GitAscii Pro. Wenn Pro Ihr Entwicklerportfolio nicht aufwertet oder Ihre Anforderungen nicht erfüllt, kontaktieren Sie uns und wir erstatten Ihnen den vollen Betrag.',
   'pro.pricing.faq.guarantee_q': 'Wie funktioniert die 14-tägige Rückerstattungsgarantie?',
   'pro.pricing.faq.lifetime_a':
-    'Ja. Sie leisten eine einmalige Zahlung von 19 USD und erhalten dauerhaften, lebenslangen Zugriff auf GitAscii Pro für Ihr GitHub-Konto. Keine monatlichen Gebühren, keine jährlichen Verlängerungen.',
+    'Ja. Sie leisten eine einmalige Zahlung von 9 € und erhalten dauerhaften, lebenslangen Zugriff auf GitAscii Pro für Ihr GitHub-Konto. Keine monatlichen Gebühren, keine jährlichen Verlängerungen.',
   'pro.pricing.faq.lifetime_q': 'Handelt es sich wirklich um eine Einmalzahlung ohne Abonnements?',
   'pro.pricing.faq.profiles_a':
     'Sie können bis zu 10 separate Profil-Slugs erstellen (z. B. /username für das Hauptprofil, /username/work für Recruiter, /username/oss für Sponsoren). Jedes Profil behält seine eigene Widget-Konfiguration, sein Design und seine Analysen.',

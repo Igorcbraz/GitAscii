@@ -2448,7 +2448,7 @@ export const zh: Record<string, string> = {
   'pro.pricing.comp.future_updates': '包含未来所有 Pro 组件与新版本升级',
   'pro.pricing.comp.geo_referrers': '国家/地区 ISO 代码与引荐来源分析',
   'pro.pricing.comp.pro_90_days_history': '90 天完整历史记录',
-  'pro.pricing.comp.pro_recurring_val': '¥0（一次性付费 $19，终身享有）',
+  'pro.pricing.comp.pro_recurring_val': '¥0（一次性付费 $9，终身享有）',
   'pro.pricing.comp.profiles': '支持的有效配置文件数',
   'pro.pricing.comp.recurring_fees': '按月重复订阅费用',
   'pro.pricing.comp.retention': '分析历史数据保留期',
@@ -2469,7 +2469,7 @@ export const zh: Record<string, string> = {
     '我们为 GitAscii Pro 提供 14 天 100% 无理由全额退款保证。如果 Pro 版未能提升您的开发者个人主页品质或满足您的需求，请与我们联系，我们将及时为您办理全额退款。',
   'pro.pricing.faq.guarantee_q': '14 天退款保证是如何运作的？',
   'pro.pricing.faq.lifetime_a':
-    '是的。您只需一次性支付 19 美元，即可为您的 GitHub 账户获得 GitAscii Pro 的永久终身使用权限。无月度账单、无年度续费，绝无隐性费用。',
+    '是的。您只需一次性支付 9 美元，即可为您的 GitHub 账户获得 GitAscii Pro 的永久终身使用权限。无月度账单、无年度续费，绝无隐性费用。',
   'pro.pricing.faq.lifetime_q': '这真的是一次性付款且没有任何订阅吗？',
   'pro.pricing.faq.profiles_a':
     '您可以创建多达 10 个独立的配置文件（例如: 主个人资料 /username、面向招聘人员的 /username/work、面向开源赞助者的 /username/oss）。每个配置文件均具有独立的组件配置、主题和遥测分析指标。',

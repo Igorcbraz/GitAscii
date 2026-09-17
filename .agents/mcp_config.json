@@ -15,6 +15,10 @@
       "headers": {
         "Authorization": "Bearer ${RESEND_API_KEY}"
       }
+    },
+    "stripe": {
+      "type": "http",
+      "url": "https://mcp.stripe.com"
     }
   }
 }

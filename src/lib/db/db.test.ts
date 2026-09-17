@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 if (!process.env.DATABASE_URL) {
   const envLocalPath = path.resolve(process.cwd(), '.env.local')
@@ -26,6 +26,15 @@ const describeDb = isDbConfigured ? describe : describe.skip
 
 describeDb('PostgreSQL Neon Database Layer', () => {
   beforeAll(async () => {
+    if (isDbConfigured) {
+      try {
+        const { sql } = await import('./client')
+        await sql`DELETE FROM users WHERE username LIKE 'test_%'`
+      } catch {}
+    }
+  })
+
+  afterAll(async () => {
     if (isDbConfigured) {
       try {
         const { sql } = await import('./client')
@@ -758,83 +767,5 @@ describeDb('PostgreSQL Neon Database Layer', () => {
     )
     expect(updatedAgain.name).toBe('OCC Updated Twice')
     expect(updatedAgain.version).toBe(3)
-  })
-
-  it('reconciles real Stripe customers and lifetime purchases with PostgreSQL and Redis', async () => {
-    const Stripe = (await import('stripe')).default
-    const { getProRedisClient } = await import('@/features/pro/server/redisClient')
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '')
-    const redis = getProRedisClient()
-
-    const sessions = await stripe.checkout.sessions.list({ limit: 100 })
-    const paidSessions = sessions.data.filter((s) => s.payment_status === 'paid')
-
-    for (const s of paidSessions) {
-      const full = await stripe.checkout.sessions.retrieve(s.id, {
-        expand: ['line_items', 'payment_intent'],
-      })
-
-      const username = (full.metadata?.username || full.client_reference_id || '')
-        .toLowerCase()
-        .trim()
-      const githubId = full.metadata?.githubId ? parseInt(full.metadata.githubId, 10) : undefined
-      const email = full.customer_details?.email || full.customer_email || undefined
-      const name = full.customer_details?.name || undefined
-      const paymentIntentId =
-        typeof full.payment_intent === 'string'
-          ? full.payment_intent
-          : full.payment_intent?.id || undefined
-      const priceId = full.line_items?.data?.[0]?.price?.id || undefined
-
-      if (!username) continue
-
-      const user = await ensureUser(username, { githubId, email, name })
-      expect(user.username).toBe(username)
-
-      await updateEntitlement({
-        username,
-        planTier: 'pro',
-        stripePaymentIntentId: paymentIntentId,
-        stripePriceId: priceId,
-        stripeSubscriptionStatus: 'active',
-      })
-
-      await redis.sadd('gitascii:pro:customers', username)
-      await redis.hset(`gitascii:pro:${username}:settings`, {
-        planTier: 'pro',
-        stripePaymentIntentId: paymentIntentId || '',
-        stripePriceId: priceId || '',
-        stripeSubscriptionStatus: 'active',
-      })
-    }
-  })
-
-  it('registers live mode customer Praneshsivasankaran in PostgreSQL and Redis', async () => {
-    const { getProRedisClient } = await import('@/features/pro/server/redisClient')
-    const redis = getProRedisClient()
-
-    const username = 'praneshsivasankaran'
-    const githubId = 147587672
-    const name = 'Pranesh S'
-    const email = 'praneshsivasankaran@gmail.com'
-    const paymentIntentId = 'pi_3UD3RVABH3qRfPhd1jOReyp1'
-
-    const user = await ensureUser(username, { githubId, email, name })
-    expect(user.username).toBe(username)
-
-    await updateEntitlement({
-      username,
-      planTier: 'pro',
-      stripePaymentIntentId: paymentIntentId,
-      stripeSubscriptionStatus: 'active',
-    })
-
-    await redis.sadd('gitascii:pro:customers', username)
-    await redis.hset(`gitascii:pro:${username}:settings`, {
-      planTier: 'pro',
-      stripePaymentIntentId: paymentIntentId,
-      stripeSubscriptionStatus: 'active',
-      alertEmailAddress: email,
-    })
   })
 })
