@@ -16,7 +16,6 @@ export function StrobiHost() {
     controller,
     registry,
     gazeController,
-    stateMachine,
     physics,
     registerHostMounted,
   } = useStrobiContext()
@@ -220,7 +219,7 @@ export function StrobiHost() {
       }
     }
 
-    const handlePointerUpGlobal = (e: PointerEvent) => {
+    const handlePointerUpGlobal = (_e: PointerEvent) => {
       if (!isPointerDown.current) return
       isPointerDown.current = false
 
@@ -234,7 +233,7 @@ export function StrobiHost() {
       }
     }
 
-    const handlePointerCancelGlobal = (e: PointerEvent) => {
+    const handlePointerCancelGlobal = (_e: PointerEvent) => {
       if (!isPointerDown.current) return
       isPointerDown.current = false
       if (hasMovedPastThreshold.current) {

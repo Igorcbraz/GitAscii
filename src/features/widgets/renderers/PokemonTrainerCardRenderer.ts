@@ -4,8 +4,8 @@ import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engin
 export function renderPokemonTrainerCard(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
-  globalStyles: GlobalStyles,
-  theme?: any
+  _globalStyles?: GlobalStyles,
+  _theme?: any
 ): string {
   const width = widget.size.width || 380
   const height = widget.size.height || 240

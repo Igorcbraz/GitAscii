@@ -270,7 +270,6 @@ export function useScrollJourney(enabled = true) {
       if (isGuidingRef.current) return
 
       const scrollY = window.scrollY
-      const docHeight = document.documentElement.scrollHeight
       const winHeight = window.innerHeight
 
       // 1. Collect all registered/rendered landmarks with their live bounding rects
