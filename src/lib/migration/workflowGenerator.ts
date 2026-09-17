@@ -31,6 +31,11 @@ export function computeDeterministicCron(username: string): string {
   return `${minute} ${hour} * * *`
 }
 
+export function computeProCron(username: string): string {
+  const hash = crypto.createHash('sha256').update(username.toLowerCase()).digest()
+  return `${hash.readUInt8(0) % 60} * * * *`
+}
+
 export function generateWorkflowYaml(
   username: string,
   config: SavedConfiguration | null | undefined,
@@ -38,11 +43,14 @@ export function generateWorkflowYaml(
     actionSha?: string
     isPro?: boolean
     profileSlug?: string
+    forceSchedule?: boolean
   } = {}
 ): string {
   const actionSha = options.actionSha || DEFAULT_ACTION_SHA
-  const hasDynamicWidgets = shouldIncludeSchedule(config)
-  const cronExpression = computeDeterministicCron(username)
+  const hasDynamicWidgets = options.forceSchedule || shouldIncludeSchedule(config)
+  const cronExpression = options.isPro
+    ? computeProCron(username)
+    : computeDeterministicCron(username)
 
   const scheduleBlock = hasDynamicWidgets
     ? `
@@ -51,7 +59,9 @@ export function generateWorkflowYaml(
     : ''
 
   const idTokenPermission = options.isPro ? '\n  id-token: write' : ''
-  const proTelemetryParam = options.isPro ? '\n          pro_telemetry: true' : ''
+  const proTelemetryParam = options.isPro
+    ? '\n          pro_telemetry: true\n          refresh_minutes: 60'
+    : ''
   const profileSlugParam =
     options.profileSlug && options.profileSlug !== 'default'
       ? `\n          profile_slug: ${options.profileSlug}`

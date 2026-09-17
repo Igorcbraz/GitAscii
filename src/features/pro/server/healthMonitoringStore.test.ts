@@ -15,18 +15,18 @@ describe('HealthMonitoringStore Unit Tests', () => {
     resetProRedisMemoryStoreForTesting()
   })
 
-  it('computes 100% operational health for fresh user without errors', async () => {
+  it('reports awaiting publication data for a fresh user', async () => {
     const username = 'HealthyUser'
     const health = await getOverallHealth(username)
 
-    expect(health.status).toBe('operational')
-    expect(health.overallHealthScore).toBe(100)
+    expect(health.status).toBe('warning')
+    expect(health.overallHealthScore).toBe(0)
     expect(health.errorsLast24h).toBe(0)
     expect(health.activeIncidentsCount).toBe(0)
     expect(health.healthHistory.length).toBe(30)
   })
 
-  it('records render telemetry and updates widget performance metrics', async () => {
+  it('records publication telemetry and updates profile artifact health', async () => {
     const username = 'TelemetryUser'
 
     // Successful render
@@ -40,7 +40,7 @@ describe('HealthMonitoringStore Unit Tests', () => {
     })
 
     const widgets = await getWidgetHealthList(username, 'default')
-    const avatarWidget = widgets.find((w) => w.widgetId === 'avatar-card')
+    const avatarWidget = widgets.find((w) => w.widgetId === 'profile-artifacts:default')
 
     expect(avatarWidget).toBeDefined()
     expect(avatarWidget?.status).toBe('operational')

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { MIGRATION_TEMPLATES } from '@/constants'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
+import { getDynamicRulesConfig } from '@/features/pro/server/dynamicRulesStore'
 import { getProEntitlements } from '@/features/pro/server/entitlements'
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
       await new Promise((resolve) => setTimeout(resolve, REPO_CREATION_DELAY_MS))
     }
 
-    const [profileData, entitlements] = await Promise.all([
+    const [profileData, entitlements, dynamicRules] = await Promise.all([
       fetchGitHubProfile(username, { fresh: true }).catch((error) => {
         console.error('[Commit Route] Failed to fetch GitHub profile:', error)
         return null
@@ -138,9 +139,17 @@ export async function POST(request: Request) {
         console.error('[Commit Route] Failed to fetch Pro entitlements:', error)
         return null
       }),
+      getDynamicRulesConfig(username).catch(() => null),
     ])
 
     const isPro = entitlements?.tier && entitlements.tier !== 'free'
+
+    if (exportData && !profileData) {
+      return NextResponse.json(
+        { error: 'Unable to fetch GitHub profile data required for publication' },
+        { status: 502 }
+      )
+    }
 
     if (exportData && profileData) {
       const bootstrapRes = await bootstrapGitasciiBranch(
@@ -152,7 +161,9 @@ export async function POST(request: Request) {
       )
 
       if (!bootstrapRes.success) {
-        console.error('[Commit Route] Warning: Branch bootstrap failed:', bootstrapRes.error)
+        throw new Error(
+          `Failed to publish the GitAscii branch: ${bootstrapRes.error || 'unknown error'}`
+        )
       }
     }
 
@@ -160,6 +171,7 @@ export async function POST(request: Request) {
       username,
       profileSlug,
       includeBadge: Boolean(isPro),
+      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
     })
 
     const readmeRes = await fetch(
@@ -193,16 +205,13 @@ export async function POST(request: Request) {
       )
 
       if (!updateReadmeRes.ok) {
-        console.warn(
-          '[Commit Route] Warning: Failed to update README:',
-          await updateReadmeRes.text()
-        )
+        throw new Error(`Failed to update README: ${await updateReadmeRes.text()}`)
       }
     }
 
     const workflowYaml = generateWorkflowYaml(username, exportData, {
       isPro: Boolean(isPro),
-      profileSlug,
+      forceSchedule: true,
     })
 
     const workflowRes = await fetch(
@@ -234,52 +243,32 @@ export async function POST(request: Request) {
       )
 
       if (!updateWorkflowRes.ok) {
-        console.warn(
-          '[Commit Route] Warning: Could not write workflow file:',
-          await updateWorkflowRes.text()
-        )
+        throw new Error(`Failed to write workflow file: ${await updateWorkflowRes.text()}`)
       }
     }
 
-    const legacyFilesToCheck = ['gitascii.json']
-    if (profileSlug && profileSlug !== 'default') {
-      legacyFilesToCheck.push(`gitascii_${profileSlug.toLowerCase()}.json`)
-    }
-
-    for (const legacyPath of legacyFilesToCheck) {
-      try {
-        const checkRes = await fetch(
-          API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, legacyPath),
-          { headers }
-        )
-        if (checkRes.status === 200) {
-          const checkData = await checkRes.json()
-          if (checkData.sha) {
-            await fetch(API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, legacyPath), {
-              method: 'DELETE',
-              headers,
-              body: JSON.stringify({
-                message: `${MIGRATION_TEMPLATES.COMMITS.CLEANUP_LEGACY(legacyPath)}${coAuthorTrailer}`,
-                sha: checkData.sha,
-              }),
-            })
-          }
-        }
-      } catch (legacyErr) {
-        console.warn(`[Commit Route] Non-blocking cleanup warning for ${legacyPath}:`, legacyErr)
-      }
-    }
+    // Remove legacy files deletion logic to prevent data loss on unmigrated accounts
 
     try {
-      await fetch(API_ENDPOINTS.GITHUB.WORKFLOW_DISPATCH(username, repoName, 'gitascii.yml'), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          ref: defaultBranch,
-        }),
-      })
+      const dispatchRes = await fetch(
+        API_ENDPOINTS.GITHUB.WORKFLOW_DISPATCH(username, repoName, 'gitascii.yml'),
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            ref: defaultBranch,
+          }),
+        }
+      )
+      if (!dispatchRes.ok) {
+        console.warn(
+          `[Commit Route] Non-blocking dispatch warning: HTTP ${dispatchRes.status}: ${await dispatchRes.text()}`
+        )
+      }
     } catch (dispatchErr) {
-      console.warn('[Commit Route] Non-blocking dispatch warning:', dispatchErr)
+      console.warn(
+        `[Commit Route] Non-blocking dispatch warning: Failed to dispatch GitAscii workflow: ${dispatchErr instanceof Error ? dispatchErr.message : String(dispatchErr)}`
+      )
     }
 
     if (exportData && typeof exportData === 'object') {

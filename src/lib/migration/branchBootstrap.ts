@@ -26,6 +26,7 @@ export async function bootstrapGitasciiBranch(
 
   const branchName = 'gitascii'
   const slug = (config.profileSlug || 'default').toLowerCase()
+  const configPath = slug === 'default' ? 'gitascii.json' : `gitascii_${slug}.json`
   const revision = config.metadata?.revision || `rev_${Date.now()}`
 
   config.metadata = {
@@ -85,20 +86,12 @@ export async function bootstrapGitasciiBranch(
     }
 
     const rawDarkSvg = renderSvg(config, data, { theme: 'dark' })
-    const darkProcessed = await processExternalAssets(rawDarkSvg, {
-      validateUrl: async () => ({ safe: true }),
-    })
+    const darkProcessed = await processExternalAssets(rawDarkSvg)
 
     const rawLightSvg = renderSvg(config, data, { theme: 'light' })
-    const lightProcessed = await processExternalAssets(rawLightSvg, {
-      validateUrl: async () => ({ safe: true }),
-    })
+    const lightProcessed = await processExternalAssets(rawLightSvg)
 
     const files = [
-      {
-        path: 'gitascii.json',
-        content: JSON.stringify(config, null, 2),
-      },
       {
         path: `profiles/${slug}/dark.svg`,
         content: darkProcessed.svg,
@@ -106,6 +99,10 @@ export async function bootstrapGitasciiBranch(
       {
         path: `profiles/${slug}/light.svg`,
         content: lightProcessed.svg,
+      },
+      {
+        path: configPath,
+        content: JSON.stringify(config, null, 2),
       },
     ]
 
@@ -139,6 +136,7 @@ export async function bootstrapGitasciiBranch(
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tree: treeEntries,
+        ...(latestCommitSha ? { base_tree: latestCommitSha } : {}),
       }),
     })
 

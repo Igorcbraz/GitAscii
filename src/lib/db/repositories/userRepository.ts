@@ -622,7 +622,8 @@ export async function getUserSettingsFromDb(rawUsername: string): Promise<ProUse
       alert_email_address,
       daily_digest_enabled,
       theme_preference,
-      anonymize_referrers
+      anonymize_referrers,
+      publish_interval_minutes
     FROM user_settings
     WHERE user_id = ${user.user.id}
     LIMIT 1
@@ -636,6 +637,7 @@ export async function getUserSettingsFromDb(rawUsername: string): Promise<ProUse
     dailyDigestEnabled: s.daily_digest_enabled === true,
     themePreference: (s.theme_preference as 'system' | 'dark' | 'light') || 'system',
     anonymizeReferrers: s.anonymize_referrers !== false,
+    publishIntervalMinutes: Math.max(60, Number(s.publish_interval_minutes || 1440)),
     planTier: e.plan_tier,
     stripeCustomerId: user.user.stripe_customer_id || undefined,
     stripeSubscriptionId: e.stripe_subscription_id || undefined,
@@ -661,6 +663,7 @@ export async function updateUserSettingsInDb(
       daily_digest_enabled,
       theme_preference,
       anonymize_referrers,
+      publish_interval_minutes,
       updated_at
     ) VALUES (
       ${user.id},
@@ -669,6 +672,7 @@ export async function updateUserSettingsInDb(
       ${settings.dailyDigestEnabled !== undefined ? settings.dailyDigestEnabled : false},
       ${settings.themePreference || 'system'},
       ${settings.anonymizeReferrers !== undefined ? settings.anonymizeReferrers : true},
+      ${Math.max(60, settings.publishIntervalMinutes || 1440)},
       NOW()
     )
     ON CONFLICT (user_id) DO UPDATE SET
@@ -691,6 +695,11 @@ export async function updateUserSettingsInDb(
       anonymize_referrers = CASE
         WHEN ${settings.anonymizeReferrers !== undefined} THEN ${settings.anonymizeReferrers}
         ELSE user_settings.anonymize_referrers
+      END,
+      publish_interval_minutes = CASE
+        WHEN ${settings.publishIntervalMinutes !== undefined}
+          THEN ${Math.max(60, settings.publishIntervalMinutes || 1440)}
+        ELSE user_settings.publish_interval_minutes
       END,
       updated_at = NOW()
   `

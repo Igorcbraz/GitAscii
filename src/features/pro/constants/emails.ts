@@ -17,12 +17,12 @@ export const EMAIL_ALERT_TYPES = [
   {
     id: 'error_spike',
     label: 'Widget Errors & Fallbacks',
-    description: 'Immediate alert when a widget fails to render',
+    description: 'Immediate alert when a GitHub publication or external asset fails',
   },
   {
     id: 'traffic_milestone',
     label: 'Traffic Milestones',
-    description: 'Celebration alert when you reach 1k, 10k, 50k views',
+    description: 'Celebration alert when your badge reaches request milestones',
   },
   {
     id: 'downtime_alert',

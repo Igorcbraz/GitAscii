@@ -16,6 +16,12 @@ vi.mock('@/lib/auth', () => ({
   getSession: vi.fn(),
 }))
 
+vi.mock('@/lib/v2/profilePublisher', () => ({
+  deletePublishedProfileV2: vi.fn().mockResolvedValue(undefined),
+  promoteProfileToDefaultV2: vi.fn().mockResolvedValue(undefined),
+  publishStoredProfileV2: vi.fn().mockResolvedValue(undefined),
+}))
+
 import { getSession } from '@/lib/auth'
 
 const mockedGetSession = vi.mocked(getSession)
@@ -451,7 +457,8 @@ describe('Pro API Route Handlers Test Suite', () => {
       const healthRes = await getHealth()
       expect(healthRes.status).toBe(200)
       const healthData = await healthRes.json()
-      expect(healthData.status).toBe('operational')
+      expect(healthData.status).toBe('warning')
+      expect(healthData.overallHealthScore).toBe(0)
 
       // GET widgets
       const widgetsReq = new Request('http://localhost:3000/api/pro/health/widgets')

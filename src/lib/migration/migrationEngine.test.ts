@@ -58,6 +58,20 @@ describe('Migration Engine Suite', () => {
         new Response(JSON.stringify({ default_branch: 'main' }), { status: 200 })
       )
       .mockResolvedValueOnce(new Response(JSON.stringify({ sha: 'wf_123' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ name: 'gitascii' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ sha: 'dark' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ sha: 'light' }), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            sha: 'readme',
+            content: Buffer.from(
+              'https://raw.githubusercontent.com/charlie/charlie/gitascii/profiles/default/dark.svg'
+            ).toString('base64'),
+          }),
+          { status: 200 }
+        )
+      )
 
     const result = await processCandidateMigration(
       { installationId: 1, owner: 'charlie', repo: 'charlie' },

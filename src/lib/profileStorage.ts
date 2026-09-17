@@ -91,6 +91,7 @@ async function fetchConfigFromGitHub(
 ): Promise<SavedConfiguration | null> {
   const filename = slug === 'default' ? 'gitascii.json' : `gitascii_${slug.toLowerCase()}.json`
   const urls = [
+    API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'gitascii', filename),
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', filename),
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'main', `.github/${filename}`),
     API_ENDPOINTS.GITHUB.RAW_PROFILE_FILE(username, 'master', filename),

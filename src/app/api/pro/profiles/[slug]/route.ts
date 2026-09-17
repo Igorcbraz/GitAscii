@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { deleteProfile, updateProfile } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
+import { deletePublishedProfileV2 } from '@/lib/v2/profilePublisher'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const { slug } = await params
 
   try {
+    await deletePublishedProfileV2(session.username, slug)
     await deleteProfile(session.username, slug)
     return NextResponse.json({ success: true })
   } catch (error: unknown) {

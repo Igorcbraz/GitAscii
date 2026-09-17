@@ -6,7 +6,7 @@ import { processExternalAssets } from '@/engine/inliner/externalAssetInliner'
 
 import { fetchGitHubDataForAction } from './dataFetcher'
 import { GitOpsService } from './gitOps'
-import { sendProTelemetry } from './oidcTelemetry'
+import { getPublishPolicy, sendProTelemetry } from './oidcTelemetry'
 
 const ACTION_BRANCH_NAME = 'gitascii'
 const ACTION_INPUT_ENABLED = 'true'
@@ -16,6 +16,11 @@ async function run(): Promise<void> {
   const startTime = Date.now()
   let hasErrors = false
   const failedUrls: string[] = []
+  const profileResults: Array<{
+    slug: string
+    hasErrors: boolean
+    failedUrls?: string[]
+  }> = []
 
   try {
     const token = core.getInput('github_token') || process.env.GITHUB_TOKEN
@@ -26,6 +31,7 @@ async function run(): Promise<void> {
     const targetProfileSlug = core.getInput('profile_slug') || ''
     const proTelemetry = core.getInput('pro_telemetry') === ACTION_INPUT_ENABLED
     const telemetryUrl = core.getInput('telemetry_url') || DEFAULT_TELEMETRY_URL
+    const requestedRefreshMinutes = Math.max(1, Number(core.getInput('refresh_minutes')) || 1440)
 
     const { owner, repo } = github.context.repo
     const branchName = ACTION_BRANCH_NAME
@@ -33,12 +39,28 @@ async function run(): Promise<void> {
     console.log(`[GitAscii Action] Initializing publication for ${owner}/${repo}...`)
 
     const gitOps = new GitOpsService(owner, repo, token)
-    const { exists, configs } = await gitOps.getAllProfileConfigs(branchName)
+    const { exists, configs, branchState } = await gitOps.getAllProfileConfigs(branchName)
 
     if (!exists) {
       throw new Error(
         `Branch '${branchName}' not found in ${owner}/${repo}. Please complete onboarding via GitAscii Studio first.`
       )
+    }
+
+    const minimumIntervalMinutes = await getPublishPolicy(telemetryUrl)
+    const effectiveIntervalMinutes = Math.max(requestedRefreshMinutes, minimumIntervalMinutes)
+    const lastPublishedAt = configs.length > 0 ? branchState.latestCommitDate : undefined
+    const isScheduledRun = github.context.eventName === 'schedule'
+    if (isScheduledRun && lastPublishedAt) {
+      const elapsedMinutes = (Date.now() - new Date(lastPublishedAt).getTime()) / 60_000
+      if (elapsedMinutes < effectiveIntervalMinutes) {
+        core.setOutput('status', 'skipped_interval')
+        core.setOutput('svg_changed', 'false')
+        console.log(
+          `[GitAscii Action] Refresh skipped; effective interval is ${effectiveIntervalMinutes} minutes.`
+        )
+        return
+      }
     }
 
     if (configs.length === 0) {
@@ -66,34 +88,31 @@ async function run(): Promise<void> {
     for (const item of targetConfigs) {
       const config = item.config
       const slug = item.slug
+      const profileFailedUrls: string[] = []
       const rev = config.metadata?.revision || config.metadata?.updatedAt || String(Date.now())
       latestRevision = rev
 
       console.log(`[GitAscii Action] Rendering dark & light SVGs for profile '${slug}'...`)
 
       const rawDarkSvg = renderSvg(config, data, { theme: 'dark' })
-      const darkProcessed = await processExternalAssets(rawDarkSvg, {
-        fetcher: fetch,
-        validateUrl: async () => ({ safe: true }),
-      })
+      const darkProcessed = await processExternalAssets(rawDarkSvg)
 
       if (darkProcessed.hasErrors) {
         hasErrors = true
         if (darkProcessed.failedUrls) {
           failedUrls.push(...darkProcessed.failedUrls)
+          profileFailedUrls.push(...darkProcessed.failedUrls)
         }
       }
 
       const rawLightSvg = renderSvg(config, data, { theme: 'light' })
-      const lightProcessed = await processExternalAssets(rawLightSvg, {
-        fetcher: fetch,
-        validateUrl: async () => ({ safe: true }),
-      })
+      const lightProcessed = await processExternalAssets(rawLightSvg)
 
       if (lightProcessed.hasErrors) {
         hasErrors = true
         if (lightProcessed.failedUrls) {
           failedUrls.push(...lightProcessed.failedUrls)
+          profileFailedUrls.push(...lightProcessed.failedUrls)
         }
       }
 
@@ -114,6 +133,11 @@ async function run(): Promise<void> {
           content: lightProcessed.svg,
         }
       )
+      profileResults.push({
+        slug,
+        hasErrors: profileFailedUrls.length > 0,
+        failedUrls: profileFailedUrls.length > 0 ? [...new Set(profileFailedUrls)] : undefined,
+      })
     }
 
     console.log(
@@ -122,7 +146,9 @@ async function run(): Promise<void> {
     const result = await gitOps.publishAtomic(
       branchName,
       filesToCommit,
-      latestRevision,
+      targetConfigs.length === 1 && targetConfigs[0].path === 'gitascii.json'
+        ? latestRevision
+        : undefined,
       `Update GitAscii profiles (${targetConfigs.map((c) => c.slug).join(', ')}) SVGs [skip ci]`
     )
 
@@ -145,9 +171,11 @@ async function run(): Promise<void> {
         runId: String(github.context.runId),
         revision: latestRevision,
         durationMs,
-        status: result.committed ? 'published' : 'svg_unchanged',
+        status,
         hasErrors,
-        failedUrls: failedUrls.length > 0 ? failedUrls : undefined,
+        failedUrls: failedUrls.length > 0 ? [...new Set(failedUrls)] : undefined,
+        profileSlug: targetConfigs.length === 1 ? targetConfigs[0].slug : undefined,
+        profiles: profileResults.map((profile) => ({ ...profile, status })),
       })
     }
   } catch (error: unknown) {

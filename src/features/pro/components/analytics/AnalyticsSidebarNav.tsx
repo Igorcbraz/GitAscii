@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, Compass, Cpu, Globe2, Laptop, Layers, TrendingUp } from 'lucide-react'
+import { Activity, Compass, Laptop, Layers, TrendingUp } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
@@ -8,8 +8,7 @@ import { useI18n } from '@/i18n'
 import type { ProProfileRecord } from '../../types'
 import { ProfileScopeSelect } from '../ProfileScopeSelect'
 
-export type SectionId =
-  'overview' | 'traffic' | 'geography' | 'technology' | 'sources' | 'profiles' | 'activity'
+export type SectionId = 'overview' | 'traffic' | 'sources' | 'profiles' | 'activity'
 
 interface AnalyticsSidebarNavProps {
   activeSection: SectionId
@@ -26,7 +25,7 @@ export const AnalyticsSidebarNav: React.FC<AnalyticsSidebarNavProps> = ({
   selectedProfile,
   setSelectedProfile,
   profiles,
-  activeLiveCount,
+  activeLiveCount: _activeLiveCount,
 }) => {
   const { t } = useI18n()
 
@@ -40,16 +39,6 @@ export const AnalyticsSidebarNav: React.FC<AnalyticsSidebarNavProps> = ({
       id: 'traffic',
       label: t('pro.analytics.sec_traffic', 'Traffic & Trends'),
       icon: <TrendingUp className="w-3.5 h-3.5" />,
-    },
-    {
-      id: 'geography',
-      label: t('pro.analytics.sec_geography', 'Geography'),
-      icon: <Globe2 className="w-3.5 h-3.5" />,
-    },
-    {
-      id: 'technology',
-      label: t('pro.analytics.sec_technology', 'Technology'),
-      icon: <Cpu className="w-3.5 h-3.5" />,
     },
     {
       id: 'sources',

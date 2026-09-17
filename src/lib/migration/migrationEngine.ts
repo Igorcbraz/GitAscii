@@ -28,7 +28,13 @@ export interface MigrationCandidate {
 
 export interface MigrationStepResult {
   status:
-    'completed' | 'pr_opened' | 'pr_closed_unmerged' | 'permissions_missing' | 'skipped' | 'failed'
+    | 'completed'
+    | 'post_merge_pending'
+    | 'pr_opened'
+    | 'pr_closed_unmerged'
+    | 'permissions_missing'
+    | 'skipped'
+    | 'failed'
   prNumber?: number
   error?: string
 }
@@ -96,7 +102,65 @@ export async function processCandidateMigration(
     )
 
     if (workflowCheckRes.status === 200) {
-      return { status: 'completed' }
+      const [branchRes, darkSvgRes, lightSvgRes, readmeRes] = await Promise.all([
+        fetch(API_ENDPOINTS.GITHUB.REPO_BRANCHES(owner, repo, 'gitascii'), { headers }),
+        fetch(
+          `${API_ENDPOINTS.GITHUB.REPO_CONTENTS(owner, repo, 'profiles/default/dark.svg')}?ref=gitascii`,
+          { headers }
+        ),
+        fetch(
+          `${API_ENDPOINTS.GITHUB.REPO_CONTENTS(owner, repo, 'profiles/default/light.svg')}?ref=gitascii`,
+          { headers }
+        ),
+        fetch(
+          `${API_ENDPOINTS.GITHUB.REPO_CONTENTS(owner, repo, 'README.md')}?ref=${defaultBranch}`,
+          { headers }
+        ),
+      ])
+      const readmeData = readmeRes.ok ? await readmeRes.json() : null
+      const readme = readmeData?.content
+        ? Buffer.from(readmeData.content, 'base64').toString('utf8')
+        : ''
+      let readmeReady = readme.includes('/gitascii/profiles/default/')
+      if (readmeRes.ok && !readmeReady && readmeData?.sha) {
+        const repairedReadme = updateReadmeContent(
+          readme,
+          generateV2EmbedCode({
+            username: owner,
+            profileSlug: 'default',
+            includeBadge: Boolean(options.isPro),
+          }),
+          'default'
+        )
+        const repairRes = await fetch(
+          API_ENDPOINTS.GITHUB.REPO_CONTENTS(owner, repo, 'README.md'),
+          {
+            method: 'PUT',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: 'Repair GitAscii v2 README embed',
+              content: Buffer.from(repairedReadme, 'utf8').toString('base64'),
+              sha: readmeData.sha,
+              branch: defaultBranch,
+            }),
+          }
+        )
+        readmeReady = repairRes.ok
+      }
+      if (branchRes.ok && darkSvgRes.ok && lightSvgRes.ok && readmeReady) {
+        return { status: 'completed' }
+      }
+      if (branchRes.ok) {
+        await fetch(API_ENDPOINTS.GITHUB.WORKFLOW_DISPATCH(owner, repo, 'gitascii.yml'), {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: defaultBranch }),
+        }).catch(() => null)
+      }
+      return {
+        status: 'post_merge_pending',
+        error: `Post-merge verification pending: branch=${branchRes.ok}, dark=${darkSvgRes.ok}, light=${lightSvgRes.ok}, readme=${readmeReady}`,
+      }
     }
 
     const prsRes = await fetch(
@@ -112,7 +176,12 @@ export async function processCandidateMigration(
           return { status: 'pr_opened', prNumber: latestPr.number }
         }
         if (latestPr.merged_at) {
-          return { status: 'completed', prNumber: latestPr.number }
+          return {
+            status: 'post_merge_pending',
+            prNumber: latestPr.number,
+            error:
+              'Migration PR was merged; waiting for workflow and published artifacts verification',
+          }
         }
         return { status: 'pr_closed_unmerged', prNumber: latestPr.number }
       }

@@ -48,7 +48,7 @@ export const HealthErrorsSection: React.FC<HealthErrorsSectionProps> = ({
           <p className="text-[11px] text-[#5a5a5a] max-w-sm mx-auto">
             {t(
               'pro.health.no_incidents_desc',
-              'Zero widget rendering failures or timeouts detected in this scope.'
+              'No GitHub publication or external asset failures detected in this scope.'
             )}
           </p>
         </div>

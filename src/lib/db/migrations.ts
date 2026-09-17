@@ -365,6 +365,25 @@ export const MIGRATIONS: Migration[] = [
       `
     },
   },
+  {
+    version: '011_publish_interval',
+    name: 'Persist server-enforced v2 publication interval',
+    up: async () => {
+      await sql`
+        ALTER TABLE user_settings
+        ADD COLUMN IF NOT EXISTS publish_interval_minutes INTEGER NOT NULL DEFAULT 1440;
+      `
+      await sql`
+        ALTER TABLE user_settings
+        DROP CONSTRAINT IF EXISTS chk_publish_interval_minutes;
+      `
+      await sql`
+        ALTER TABLE user_settings
+        ADD CONSTRAINT chk_publish_interval_minutes
+        CHECK (publish_interval_minutes >= 60);
+      `
+    },
+  },
 ]
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {

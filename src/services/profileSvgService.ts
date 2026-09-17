@@ -6,7 +6,6 @@ import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { processExternalAssets as embedExternalImages } from '@/engine/inliner/externalAssetInliner'
 import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 import { fetchGitHubProfile, GitHubUserNotFoundError } from '@/features/github/api/fetchProfile'
-import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
 import { loadProfileConfig } from '@/lib/profileStorage'
 
 import { getCachedProfileSvg } from './profileSvgCache'
@@ -184,7 +183,6 @@ export async function generateProfileSvgResponse(
   request: Request,
   options: ProfileSvgRequestOptions
 ): Promise<NextResponse> {
-  const startTime = Date.now()
   const rawUsername = options.username || ''
   const username = rawUsername.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
 
@@ -207,12 +205,17 @@ export async function generateProfileSvgResponse(
     const { searchParams } = new URL(request.url)
     const previewDateParam = searchParams.get('preview_date') || searchParams.get('date')
     const timezoneParam = searchParams.get('timezone') || searchParams.get('tz')
+    const dynamicMode = searchParams.get('dynamic') === '1'
 
     let profileSlug =
       (options.profileSlug || 'default').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || 'default'
     let isDynamicResolved = false
 
-    if (!options.isExplicitSlug && (!options.profileSlug || options.profileSlug === 'default')) {
+    if (
+      dynamicMode &&
+      !options.isExplicitSlug &&
+      (!options.profileSlug || options.profileSlug === 'default')
+    ) {
       try {
         const { evaluateDynamicProfile } = await import('@/features/pro/server/dynamicRulesStore')
         const dynamicResult = await evaluateDynamicProfile(username, {
@@ -281,7 +284,7 @@ export async function generateProfileSvgResponse(
       normalizedWidgets
     )
 
-    const { svgContent, etag, hasErrors, renderedWidgetIds } = payload
+    const { svgContent, etag, hasErrors } = payload
     const ifNoneMatch = request.headers.get('if-none-match')
 
     const cacheControl = hasErrors
@@ -315,76 +318,6 @@ export async function generateProfileSvgResponse(
           (value) =>
             value.trim() === '*' || value.trim().replace(/^W\//, '') === etag.replace(/^W\//, '')
         ) ?? false
-    const renderTimeMs = Date.now() - startTime
-    const viewerMeta = parseViewerMetadata(request)
-
-    try {
-      const metricPayload = {
-        username,
-        profileSlug,
-        theme,
-        renderTimeMs,
-        isCamoProxy: viewerMeta.isCamoProxy,
-        isCacheHit,
-        userAgent: viewerMeta.userAgent,
-        referrer: viewerMeta.referrer,
-        country: viewerMeta.country,
-        region: viewerMeta.region,
-        city: viewerMeta.city,
-        timezone: viewerMeta.timezone,
-        continent: viewerMeta.continent,
-        language: viewerMeta.language,
-        ip: viewerMeta.ip,
-        statusCode: isCacheHit ? 304 : 200,
-        timestamp: new Date().toISOString(),
-      }
-
-      const telemetryHandler = async () => {
-        const sampleRate = Number(process.env.PROFILE_TELEMETRY_SAMPLE_RATE || '0.01')
-        if (!Number.isFinite(sampleRate) || sampleRate <= 0 || Math.random() > sampleRate) return
-
-        await recordProfileView(metricPayload)
-
-        try {
-          const { recordRenderTelemetry } =
-            await import('@/features/pro/server/healthMonitoringStore')
-          await recordRenderTelemetry({
-            username,
-            profileSlug,
-            durationMs: renderTimeMs,
-            statusCode: isCacheHit ? 304 : 200,
-            hasErrors,
-            renderedWidgets:
-              renderedWidgetIds.length > 0
-                ? renderedWidgetIds
-                : ['avatar-card', 'stats-cards', 'streak-graph'],
-            widgetErrors: hasErrors
-              ? [
-                  {
-                    username,
-                    profileSlug,
-                    widgetId: 'external-widget',
-                    widgetName: 'External Dynamic Embed',
-                    errorType: 'FETCH_TIMEOUT',
-                    message: 'External widget or image asset timed out or failed to load',
-                  },
-                ]
-              : undefined,
-          })
-        } catch (error) {
-          console.warn('[ProfileSvgService] Failed to record profile telemetry:', error)
-        }
-      }
-
-      if (typeof after === 'function') {
-        after(telemetryHandler)
-      } else {
-        void telemetryHandler()
-      }
-    } catch (error) {
-      console.warn('[ProfileSvgService] Failed to schedule profile telemetry:', error)
-    }
-
     if (isCacheHit) {
       return new NextResponse(null, {
         status: 304,

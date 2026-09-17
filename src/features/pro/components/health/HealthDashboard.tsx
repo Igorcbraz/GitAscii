@@ -350,7 +350,7 @@ export const HealthDashboard: React.FC = () => {
           title={t('pro.health.title', 'GitAscii Health')}
           subtitle={t(
             'pro.health.subtitle',
-            'Full 24/7 widget telemetry, sub-millisecond error diagnostics, and dynamic profile monitoring.'
+            'GitHub Actions publication health, workflow failures, and profile artifact monitoring.'
           )}
           actions={
             <div className="flex items-center gap-2">
@@ -365,7 +365,7 @@ export const HealthDashboard: React.FC = () => {
                 onClick={fetchData}
                 disabled={refreshing}
                 className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[#8a8a8a] hover:text-white transition-all cursor-pointer"
-                title={t('pro.health.refresh_data', 'Refresh telemetry data')}
+                title={t('pro.health.refresh_data', 'Refresh publication health')}
               >
                 <RefreshCw
                   className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#c5ff4a]' : ''}`}

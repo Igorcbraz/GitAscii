@@ -5,6 +5,7 @@ import type { SavedConfiguration } from '@/engine/types'
 import { generateV2EmbedCode, updateReadmeContent } from './markdownGenerator'
 import {
   computeDeterministicCron,
+  computeProCron,
   generateWorkflowYaml,
   shouldIncludeSchedule,
 } from './workflowGenerator'
@@ -87,15 +88,20 @@ describe('V2 Migration Services Suite', () => {
 
       const yaml = generateWorkflowYaml('bob', dynamicConfig, { isPro: true })
       expect(yaml).toContain('schedule:')
-      expect(yaml).toContain(`cron: '${cron1}'`)
+      expect(yaml).toContain(`cron: '${computeProCron('bob')}'`)
       expect(yaml).toContain('id-token: write')
       expect(yaml).toContain('pro_telemetry: true')
+      expect(yaml).toContain('refresh_minutes: 60')
     })
   })
 
   describe('Markdown Generator', () => {
     it('generates standard <picture> tag and telemetry comment block', () => {
-      const code = generateV2EmbedCode({ username: 'carol', profileSlug: 'default', includeBadge: true })
+      const code = generateV2EmbedCode({
+        username: 'carol',
+        profileSlug: 'default',
+        includeBadge: true,
+      })
       expect(code).toContain('<picture>')
       expect(code).toContain(
         'https://raw.githubusercontent.com/carol/carol/gitascii/profiles/default/dark.svg'
@@ -103,7 +109,9 @@ describe('V2 Migration Services Suite', () => {
       expect(code).toContain(
         'https://raw.githubusercontent.com/carol/carol/gitascii/profiles/default/light.svg'
       )
-      expect(code).toContain('<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->')
+      expect(code).toContain(
+        '<!-- GITASCII:TELEMETRY:START - Do not remove this badge; it powers your profile analytics -->'
+      )
       expect(code).toContain('https://gitascii.com/api/badge/carol?slug=default')
       expect(code).toContain('<!-- GITASCII:TELEMETRY:END -->')
     })

@@ -171,6 +171,7 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
             themePreference: dbSettings.themePreference,
             anonymizeReferrers: String(dbSettings.anonymizeReferrers),
             planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier || PRO_PLAN_TIERS.FREE,
+            publishIntervalMinutes: String(dbSettings.publishIntervalMinutes || 1440),
           }
           if (dbSettings.alertEmailAddress)
             cachePayload.alertEmailAddress = dbSettings.alertEmailAddress
@@ -190,6 +191,9 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
           }
           return {
             ...dbSettings,
+            publishIntervalMinutes: raw?.publishIntervalMinutes
+              ? Math.max(60, Number(raw.publishIntervalMinutes))
+              : Math.max(60, dbSettings.publishIntervalMinutes || 1440),
             planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier,
           }
         }
@@ -206,6 +210,9 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
     dailyDigestEnabled: raw?.dailyDigestEnabled === 'true',
     themePreference: (raw?.themePreference as 'system' | 'dark' | 'light') || 'system',
     anonymizeReferrers: raw?.anonymizeReferrers !== 'false',
+    publishIntervalMinutes: raw?.publishIntervalMinutes
+      ? Math.max(60, Number(raw.publishIntervalMinutes))
+      : 1440,
     planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : (raw?.planTier as ProPlanTier) || PRO_PLAN_TIERS.FREE,
     stripeCustomerId: typeof raw?.stripeCustomerId === 'string' ? raw.stripeCustomerId : undefined,
     stripeSubscriptionId:
@@ -255,6 +262,9 @@ export async function updateUserSettings(
   }
   if (settings.anonymizeReferrers !== undefined) {
     payload.anonymizeReferrers = String(settings.anonymizeReferrers)
+  }
+  if (settings.publishIntervalMinutes !== undefined) {
+    payload.publishIntervalMinutes = String(Math.max(60, settings.publishIntervalMinutes))
   }
   if (effectivePlanTier !== undefined) {
     payload.planTier = effectivePlanTier

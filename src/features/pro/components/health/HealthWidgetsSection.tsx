@@ -39,11 +39,11 @@ export const HealthWidgetsSection: React.FC<HealthWidgetsSectionProps> = ({
           <div className="flex items-center gap-2">
             <Server className="w-3.5 h-3.5 text-[#c5ff4a]" />
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-white">
-              {t('pro.health.widgets_table_title', 'Widget Health & Performance Telemetry')}
+              {t('pro.health.widgets_table_title', 'Published Artifact Health')}
             </h3>
           </div>
           <ProBadge variant="muted" size="sm">
-            {filteredWidgets.length} {t('pro.health.widgets_monitored', 'Widgets Monitored')}
+            {filteredWidgets.length} {t('pro.health.widgets_monitored', 'Profiles Monitored')}
           </ProBadge>
         </div>
 
@@ -51,17 +51,17 @@ export const HealthWidgetsSection: React.FC<HealthWidgetsSectionProps> = ({
           <table className="w-full text-left text-xs font-mono table-fixed">
             <thead>
               <tr className="border-b border-white/10 text-[#7a7a7a] uppercase text-[10px]">
-                <th className="pb-3 pl-4 w-[240px]">{t('pro.health.th_widget', 'Widget Name')}</th>
+                <th className="pb-3 pl-4 w-[240px]">{t('pro.health.th_widget', 'Artifact')}</th>
                 {selectedProfile === 'all' && (
                   <th className="pb-3 w-[110px]">{t('pro.health.th_profile', 'Profile')}</th>
                 )}
                 <th className="pb-3 w-[110px]">{t('pro.health.th_status', 'Status')}</th>
-                <th className="pb-3 w-[85px]">{t('pro.health.th_latency', 'Latency')}</th>
+                <th className="pb-3 w-[85px]">{t('pro.health.th_latency', 'Publish Time')}</th>
                 <th className="pb-3 w-[130px]">
                   {t('pro.health.th_success_rate', 'Success Rate')}
                 </th>
                 <th className="pb-3 w-[90px]">{t('pro.health.th_errors_24h', 'Errors (24h)')}</th>
-                <th className="pb-3 w-[100px]">{t('pro.health.th_last_render', 'Last Render')}</th>
+                <th className="pb-3 w-[100px]">{t('pro.health.th_last_render', 'Last Run')}</th>
                 <th className="pb-3 pr-4 w-[140px]">
                   {t('pro.health.th_health_score', 'Health Score')}
                 </th>

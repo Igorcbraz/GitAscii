@@ -1,4 +1,7 @@
 export const API_ENDPOINTS = {
+  SITE: {
+    PROFILE: (username: string) => `https://gitascii.com/${encodeURIComponent(username)}`,
+  },
   AUTH: {
     SESSION: '/api/auth/session',
     LOGOUT: '/api/auth/logout',
@@ -28,6 +31,10 @@ export const API_ENDPOINTS = {
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
     RAW_USER_CONTENT: (owner: string, repo: string, branch: string, path: string) =>
       `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${path}`,
+    PROFILE_FILE_PAGE: (username: string, slug: string, theme: 'dark' | 'light') =>
+      `https://github.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/blob/gitascii/profiles/${encodeURIComponent(slug)}/${theme}.svg`,
+    PUBLISHED_PROFILE: (username: string, slug: string, theme: 'dark' | 'light') =>
+      `https://raw.githubusercontent.com/${encodeURIComponent(username)}/${encodeURIComponent(username)}/gitascii/profiles/${encodeURIComponent(slug)}/${theme}.svg`,
     COMMITS_FOR_PATH: (owner: string, repo: string, path: string, branch?: string) =>
       `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits?path=${encodeURIComponent(path)}${branch ? `&sha=${encodeURIComponent(branch)}` : ''}&per_page=30`,
     RAW_PROFILE_README: (username: string, branch: 'main' | 'master' = 'main') =>
@@ -155,6 +162,10 @@ export const API_ENDPOINTS = {
       `/api/${encodeURIComponent(username)}?template=${encodeURIComponent(templateId)}`,
     CARD_WITH_QUERY: (username: string, queryString: string) =>
       `/api/${encodeURIComponent(username)}?${queryString}`,
+    PUBLIC_DYNAMIC_CARD: (username: string, theme: 'dark' | 'light') =>
+      `https://gitascii.com/api/${encodeURIComponent(username)}?dynamic=1&theme=${theme}`,
+    PUBLIC_DYNAMIC: (username: string) =>
+      `https://gitascii.com/api/${encodeURIComponent(username)}?dynamic=1`,
   },
   PRO: {
     OVERVIEW: (profile?: string) =>
@@ -206,5 +217,6 @@ export const API_ENDPOINTS = {
     DEV_TOGGLE: '/api/pro/dev-toggle',
     ADMIN_GRANT: '/api/pro/admin/grant',
     TELEMETRY: '/api/pro/telemetry',
+    PUBLISH_SETTINGS: '/api/pro/publish-settings',
   },
 } as const

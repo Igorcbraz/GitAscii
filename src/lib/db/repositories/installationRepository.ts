@@ -87,7 +87,7 @@ export async function getMigrationCandidateBatch(limit = 20): Promise<MigrationI
   const rows = await sql`
     SELECT *
     FROM migration_installations
-    WHERE migration_status IN ('pending', 'failed', 'permissions_missing')
+    WHERE migration_status IN ('pending', 'failed', 'permissions_missing', 'post_merge_pending')
       AND attempts < 5
     ORDER BY last_attempt_at ASC NULLS FIRST, created_at ASC
     LIMIT ${limit};

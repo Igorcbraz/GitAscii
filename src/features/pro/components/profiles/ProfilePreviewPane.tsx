@@ -6,6 +6,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { ProProfileRecord } from '../../types'
 import { ProBadge } from '../ProBadge'
@@ -44,23 +45,23 @@ export const ProfilePreviewPane: React.FC<ProfilePreviewPaneProps> = ({
 
   const effectiveUsername = username || 'user'
   const isDefaultProfile = selectedProfile.slug === 'default'
-  const svgEndpoint = isDefaultProfile
-    ? `/api/${encodeURIComponent(effectiveUsername)}?t=${previewTimestamp}`
-    : `/api/${encodeURIComponent(effectiveUsername)}/${encodeURIComponent(selectedProfile.slug)}?t=${previewTimestamp}`
+  const publishedSvgUrl = API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(
+    effectiveUsername,
+    selectedProfile.slug,
+    'dark'
+  )
+  const svgEndpoint = `${publishedSvgUrl}?t=${previewTimestamp}`
 
   const publicEditorUrl = isDefaultProfile
     ? `/${effectiveUsername}`
     : `/${effectiveUsername}/${selectedProfile.slug}`
 
-  const fullSvgUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}${isDefaultProfile ? `/api/${effectiveUsername}` : `/api/${effectiveUsername}/${selectedProfile.slug}`}`
-      : `https://gitascii.com${isDefaultProfile ? `/api/${effectiveUsername}` : `/api/${effectiveUsername}/${selectedProfile.slug}`}`
+  const fullSvgUrl = publishedSvgUrl
 
   const fullTargetUrl =
     typeof window !== 'undefined'
       ? `${window.location.origin}/${effectiveUsername}`
-      : `https://gitascii.com/${effectiveUsername}`
+      : API_ENDPOINTS.SITE.PROFILE(effectiveUsername)
 
   const getEmbedSnippet = () => {
     switch (embedType) {

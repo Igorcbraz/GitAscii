@@ -19,6 +19,10 @@ inputs:
     description: 'Endpoint URL for Pro telemetry'
     required: false
     default: 'https://gitascii.com/api/pro/telemetry'
+  refresh_minutes:
+    description: 'Requested refresh interval. Free is enforced at 1440 minutes; Pro minimum is 60.'
+    required: false
+    default: '1440'
 
 outputs:
   published_revision:
@@ -26,7 +30,7 @@ outputs:
   svg_changed:
     description: 'Whether SVGs were modified and committed (true/false)'
   status:
-    description: 'Status of execution (published, svg_unchanged, skipped_stale, failed)'
+    description: 'Status of execution (published, svg_unchanged, skipped_stale, skipped_interval, failed)'
 
 runs:
   using: 'node20'

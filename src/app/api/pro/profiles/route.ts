@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getProEntitlements } from '@/features/pro/server/entitlements'
 import { createProfile, getUserProfiles } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
+import { publishStoredProfileV2 } from '@/lib/v2/profilePublisher'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
     }
 
     const newProfile = await createProfile(session.username, { slug, name, description })
+    await publishStoredProfileV2(session.username, newProfile.slug)
     return NextResponse.json({ profile: newProfile }, { status: 201 })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Failed to create profile'

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { restoreProfileVersion } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
+import { publishStoredProfileV2 } from '@/lib/v2/profilePublisher'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,7 @@ export async function POST(
 
   try {
     const result = await restoreProfileVersion(session.username, slug, versionId)
+    await publishStoredProfileV2(session.username, slug)
     return NextResponse.json(result)
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Failed to restore version snapshot'

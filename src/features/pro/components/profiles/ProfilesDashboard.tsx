@@ -1,7 +1,7 @@
 'use client'
 
-import { Layers, Plus, RefreshCw } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { Check, ChevronDown, Clock3, Layers, Plus, RefreshCw } from 'lucide-react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -25,6 +25,76 @@ export interface ProfilesDashboardProps {
 type EmbedType = 'markdown' | 'html' | 'url'
 type ProfileStatusFilter = 'all' | 'active' | 'inactive'
 
+function CustomDropdown({
+  value,
+  options,
+  disabled,
+  onChange,
+}: {
+  value: number
+  options: { value: number; label: string }[]
+  disabled: boolean
+  onChange: (val: number) => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectedOption = options.find((o) => o.value === value)
+
+  return (
+    <div ref={containerRef} className="relative shrink-0 text-xs w-full sm:w-auto min-w-[120px]">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between rounded-lg border border-white/10 bg-black/30 pl-3 pr-2.5 py-1.5 text-white hover:bg-white/[0.02] transition-colors focus:border-[#c5ff4a]/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span>{selectedOption?.label || ''}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-[#8a8a8a] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {isOpen && !disabled && (
+        <div className="absolute right-0 mt-1.5 w-full min-w-[140px] origin-top-right rounded-xl border border-white/10 bg-[#141414] shadow-xl animate-in fade-in-0 zoom-in-95 duration-100 z-50 p-1">
+          <div className="py-0.5 space-y-0.5" role="menu">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value)
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
+                  option.value === value
+                    ? 'bg-white/10 text-white font-medium'
+                    : 'text-[#888] hover:bg-white/[0.04] hover:text-white'
+                }`}
+                role="menuitem"
+              >
+                <span>{option.label}</span>
+                {option.value === value && (
+                  <Check className="w-3.5 h-3.5 text-[#c5ff4a] shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
   username: initialUsername,
 }) => {
@@ -42,6 +112,9 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
   const [embedType, setEmbedType] = useState<EmbedType>('markdown')
   const [copiedSnippet, setCopiedSnippet] = useState(false)
   const [openDropdownSlug, setOpenDropdownSlug] = useState<string | null>(null)
+  const [publishIntervalMinutes, setPublishIntervalMinutes] = useState(1440)
+  const [canConfigureInterval, setCanConfigureInterval] = useState(false)
+  const [savingInterval, setSavingInterval] = useState(false)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [duplicateTargetProfile, setDuplicateTargetProfile] = useState<ProProfileRecord | null>(
@@ -51,6 +124,7 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
   const [editingProfile, setEditingProfile] = useState<ProProfileRecord | null>(null)
   const [deleteTargetSlug, setDeleteTargetSlug] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [settingDefaultSlug, setSettingDefaultSlug] = useState<string | null>(null)
 
   const [slug, setSlug] = useState('')
   const [name, setName] = useState('')
@@ -97,6 +171,31 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
     void fetchProfiles()
   }, [fetchProfiles])
 
+  useEffect(() => {
+    fetch(API_ENDPOINTS.PRO.PUBLISH_SETTINGS)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!data) return
+        setPublishIntervalMinutes(data.intervalMinutes || 1440)
+        setCanConfigureInterval(data.tier !== 'free')
+      })
+      .catch(() => {})
+  }, [])
+
+  const savePublishInterval = async (intervalMinutes: number) => {
+    setSavingInterval(true)
+    try {
+      const response = await fetch(API_ENDPOINTS.PRO.PUBLISH_SETTINGS, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intervalMinutes }),
+      })
+      if (response.ok) setPublishIntervalMinutes(intervalMinutes)
+    } finally {
+      setSavingInterval(false)
+    }
+  }
+
   const selectedProfile = profiles.find((p) => p.slug === selectedSlug) ||
     profiles[0] || {
       id: 'default',
@@ -110,8 +209,8 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
       healthStatus: 'operational' as const,
       lastUpdated: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      publicUrl: `/${username || 'user'}`,
-      rawSvgUrl: `/api/${username || 'user'}`,
+      publicUrl: API_ENDPOINTS.GITHUB.PROFILE_FILE_PAGE(username || 'user', 'default', 'dark'),
+      rawSvgUrl: API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(username || 'user', 'default', 'dark'),
     }
 
   const effectiveUsername = username || 'user'
@@ -137,12 +236,15 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
 
   const handleSetDefault = async (pSlug: string) => {
     try {
+      setSettingDefaultSlug(pSlug)
       const res = await fetch(API_ENDPOINTS.PRO.PROFILE_DEFAULT(pSlug), { method: 'POST' })
       if (res.ok) {
         await fetchProfiles()
       }
     } catch (err) {
       console.error('Failed to set default profile:', err)
+    } finally {
+      setSettingDefaultSlug(null)
     }
   }
 
@@ -285,34 +387,76 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
             />
           ) : (
             <>
-              <div className="p-3 rounded-xl bg-[#111111] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-lg bg-[#c5ff4a]/10 text-[#c5ff4a] border border-[#c5ff4a]/20">
-                    <Layers className="w-3.5 h-3.5" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 shrink-0">
+                <div className="p-3 rounded-xl bg-[#111111] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-[#c5ff4a]/10 text-[#c5ff4a] border border-[#c5ff4a]/20">
+                      <Layers className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white text-xs">
+                        {t(
+                          'pro.profiles.quota_configured',
+                          '{count} of {total} Profiles Configured',
+                          {
+                            count: String(profiles.length),
+                            total: '10',
+                          }
+                        )}
+                      </p>
+                      <p className="text-[10px] text-[#8a8a8a]">
+                        {t(
+                          'pro.profiles.quota_desc',
+                          'Pro Plan includes up to 10 independent dynamic README profiles.'
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-white text-xs">
-                      {t(
-                        'pro.profiles.quota_configured',
-                        '{count} of {total} Profiles Configured',
-                        {
-                          count: String(profiles.length),
-                          total: '10',
-                        }
-                      )}
-                    </p>
-                    <p className="text-[10px] text-[#8a8a8a]">
-                      {t(
-                        'pro.profiles.quota_desc',
-                        'Pro Plan includes up to 10 independent dynamic README profiles.'
-                      )}
-                    </p>
+                  <div className="w-full sm:w-40 bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5 shrink-0">
+                    <div
+                      className="bg-[#c5ff4a] h-full rounded-full transition-all"
+                      style={{ width: `${Math.min(100, (profiles.length / 10) * 100)}%` }}
+                    />
                   </div>
                 </div>
-                <div className="w-full sm:w-40 bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
-                  <div
-                    className="bg-[#c5ff4a] h-full rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (profiles.length / 10) * 100)}%` }}
+
+                <div className="p-3 rounded-xl bg-[#111111] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-sky-400/10 text-sky-300 border border-sky-400/20">
+                      <Clock3 className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white text-xs">
+                        {t('pro.profiles.publish_frequency', 'GitHub publication frequency')}
+                      </p>
+                      <p className="text-[10px] text-[#8a8a8a]">
+                        {canConfigureInterval
+                          ? t(
+                              'pro.profiles.publish_frequency_pro_desc',
+                              'Pro schedules hourly and the server enforces your selected interval.'
+                            )
+                          : t(
+                              'pro.profiles.publish_frequency_free_desc',
+                              'Free profiles are limited to one publication every 24 hours.'
+                            )}
+                      </p>
+                    </div>
+                  </div>
+                  <CustomDropdown
+                    value={publishIntervalMinutes}
+                    disabled={!canConfigureInterval || savingInterval}
+                    onChange={(val) => void savePublishInterval(val)}
+                    options={
+                      canConfigureInterval
+                        ? [
+                            { value: 60, label: '1 hour' },
+                            { value: 180, label: '3 hours' },
+                            { value: 360, label: '6 hours' },
+                            { value: 720, label: '12 hours' },
+                            { value: 1440, label: '24 hours' },
+                          ]
+                        : [{ value: 1440, label: '24 hours' }]
+                    }
                   />
                 </div>
               </div>
@@ -377,6 +521,7 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
                           username={effectiveUsername}
                           openDropdownSlug={openDropdownSlug}
                           setOpenDropdownSlug={setOpenDropdownSlug}
+                          settingDefaultSlug={settingDefaultSlug}
                           onSelect={handleSelectProfile}
                           onSetDefault={handleSetDefault}
                           onDuplicate={setDuplicateTargetProfile}

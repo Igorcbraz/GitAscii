@@ -6,20 +6,32 @@ import {
   getProfileVersionByIdFromDb,
   getProfileVersionsFromDb,
   getUserProfilesFromDb,
-  setDefaultProfileInDb,
   updateProfileInDb,
 } from '@/lib/db/repositories/profileRepository'
+import { getInstallationTokenForUser } from '@/lib/githubApp'
 import { loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
-import type { ProfileVersionRecord, ProProfileRecord } from '../types/profiles'
+import {
+  DEFAULT_PROFILE_SLUG,
+  MAX_PROFILES_PER_USER,
+  PROFILE_STATUS,
+  type ProfileVersionRecord,
+  type ProProfileRecord,
+} from '../types/profiles'
 import { REDIS_KEYS } from './analyticsStore'
 import { getProRedisClient } from './redisClient'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://gitascii.com'
 const MAX_VERSIONS_PER_PROFILE = 20
-const GITHUB_HISTORY_TIMEOUT_MS = 3_000
-const GITHUB_VERSION_TIMEOUT_MS = 4_000
+
+function getPublishedProfileUrls(username: string, slug: string) {
+  return {
+    publicUrl: API_ENDPOINTS.GITHUB.PROFILE_FILE_PAGE(username, slug, 'dark'),
+    rawSvgUrl: API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(username, slug, 'dark'),
+  }
+}
+const GITHUB_HISTORY_TIMEOUT_MS = 10_000
+const GITHUB_VERSION_TIMEOUT_MS = 10_000
 
 interface GitHubCommitHistoryItem {
   sha: string
@@ -105,13 +117,17 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           ? data.isDefault === 'true' || data.isDefault === true
           : (dbMatch?.isDefault ?? slug === 'default')
 
-      const publicUrl = slug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${slug}`
-      const rawSvgUrl = slug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${slug}.svg`
+      const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, slug)
       const versionCount =
         gitVersions.length || versionIds?.length || dbMatch?.versionCount || (isSynced ? 1 : 0)
 
       const storedStatus = data?.status || dbMatch?.status
-      const status = storedStatus === 'active' ? 'active' : versionCount > 0 ? 'active' : 'draft'
+      const status =
+        storedStatus === PROFILE_STATUS.ACTIVE || storedStatus === PROFILE_STATUS.DRAFT
+          ? storedStatus
+          : versionCount > 0
+            ? PROFILE_STATUS.ACTIVE
+            : PROFILE_STATUS.DRAFT
 
       if (data && data.name) {
         profiles.push({
@@ -213,10 +229,9 @@ export async function createProfile(
     throw new Error('Invalid profile identifier/slug.')
   }
 
-  const MAX_PROFILES_LIMIT = 10
   const existingProfiles = await getUserProfiles(u)
-  if (existingProfiles.length >= MAX_PROFILES_LIMIT) {
-    throw new Error(`Maximum profile limit (${MAX_PROFILES_LIMIT}) reached.`)
+  if (existingProfiles.length >= MAX_PROFILES_PER_USER) {
+    throw new Error(`Maximum profile limit (${MAX_PROFILES_PER_USER}) reached.`)
   }
 
   if (existingProfiles.some((p) => p.slug === cleanSlug)) {
@@ -229,9 +244,7 @@ export async function createProfile(
   const now = new Date().toISOString()
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
 
-  const publicUrl = cleanSlug === 'default' ? `${APP_URL}/${u}` : `${APP_URL}/${u}/${cleanSlug}`
-  const rawSvgUrl =
-    cleanSlug === 'default' ? `${APP_URL}/${u}.svg` : `${APP_URL}/${u}/${cleanSlug}.svg`
+  const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, cleanSlug)
 
   const record: ProProfileRecord = {
     id: `prof_${cleanSlug}`,
@@ -335,9 +348,8 @@ export async function duplicateProfile(
     throw new Error(`Source profile "${srcSlug}" does not exist.`)
   }
 
-  const MAX_PROFILES_LIMIT = 10
-  if (existing.length >= MAX_PROFILES_LIMIT) {
-    throw new Error(`Maximum profile limit (${MAX_PROFILES_LIMIT}) reached.`)
+  if (existing.length >= MAX_PROFILES_PER_USER) {
+    throw new Error(`Maximum profile limit (${MAX_PROFILES_PER_USER}) reached.`)
   }
 
   if (existing.some((p) => p.slug === cleanSlug)) {
@@ -384,8 +396,7 @@ export async function duplicateProfile(
   await redis.sadd(profilesSetKey, cleanSlug)
 
   const metaKey = REDIS_KEYS.profileMeta(u, cleanSlug)
-  const publicUrl = `${APP_URL}/${u}/${cleanSlug}`
-  const rawSvgUrl = `${APP_URL}/${u}/${cleanSlug}.svg`
+  const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, cleanSlug)
 
   const record: ProProfileRecord = {
     id: `prof_${cleanSlug}`,
@@ -433,7 +444,7 @@ export async function duplicateProfile(
   return record
 }
 
-export async function setDefaultProfile(
+export async function promoteProfileToCanonicalDefault(
   username: string,
   targetSlug: string
 ): Promise<ProProfileRecord[]> {
@@ -442,25 +453,76 @@ export async function setDefaultProfile(
   const cleanSlug = targetSlug.toLowerCase().trim()
 
   const profiles = await getUserProfiles(u)
-  const targetExists = profiles.some((p) => p.slug === cleanSlug)
-  if (!targetExists) {
-    throw new Error(`Profile "${cleanSlug}" not found.`)
+  const target = profiles.find((p) => p.slug === cleanSlug)
+  const currentDefault = profiles.find((p) => p.slug === DEFAULT_PROFILE_SLUG)
+
+  if (!target || !currentDefault) {
+    throw new Error(`Profile "${cleanSlug}" or "default" not found.`)
+  }
+
+  const sourceConfig = await loadProfileConfig(u, cleanSlug, { bypassMemory: true })
+  const oldDefaultConfig = await loadProfileConfig(u, DEFAULT_PROFILE_SLUG, { bypassMemory: true })
+
+  if (!sourceConfig) throw new Error(`Profile configuration "${cleanSlug}" not found.`)
+
+  const now = new Date().toISOString()
+
+  const canonicalConfig: SavedConfiguration = {
+    ...sourceConfig,
+    profileSlug: DEFAULT_PROFILE_SLUG,
+    profileName: target.name,
+    metadata: {
+      ...sourceConfig.metadata,
+      updatedAt: now,
+      revision: `rev_${Date.now()}`,
+    },
+  }
+  await saveProfileConfig(canonicalConfig)
+  await createProfileVersion(u, DEFAULT_PROFILE_SLUG, {
+    config: canonicalConfig,
+    label: `Promoted from /${cleanSlug}`,
+    description: `Canonical default updated from "${target.name}"`,
+    createdBy: u,
+  })
+
+  if (oldDefaultConfig) {
+    const backupConfig: SavedConfiguration = {
+      ...oldDefaultConfig,
+      profileSlug: cleanSlug,
+      profileName: currentDefault.name,
+      metadata: {
+        ...oldDefaultConfig.metadata,
+        updatedAt: now,
+        revision: `rev_${Date.now()}_backup`,
+      },
+    }
+    await saveProfileConfig(backupConfig)
   }
 
   try {
-    await setDefaultProfileInDb(u, cleanSlug)
+    await updateProfileInDb(u, DEFAULT_PROFILE_SLUG, {
+      name: target.name,
+      description: target.description,
+    })
+    await updateProfileInDb(u, cleanSlug, {
+      name: currentDefault.name,
+      description: currentDefault.description,
+    })
   } catch (dbErr) {
-    console.warn(`[ProfileManager] PostgreSQL setDefaultProfile error for @${u}:`, dbErr)
+    console.warn(`[ProfileManager] PostgreSQL swap names error for @${u}:`, dbErr)
   }
 
-  for (const p of profiles) {
-    const metaKey = REDIS_KEYS.profileMeta(u, p.slug)
-    const shouldBeDefault = p.slug === cleanSlug
-    await redis.hset(metaKey, {
-      isDefault: String(shouldBeDefault),
-      updatedAt: new Date().toISOString(),
-    })
-  }
+  await redis.hset(REDIS_KEYS.profileMeta(u, DEFAULT_PROFILE_SLUG), {
+    name: target.name,
+    description: target.description,
+    updatedAt: now,
+  })
+
+  await redis.hset(REDIS_KEYS.profileMeta(u, cleanSlug), {
+    name: currentDefault.name,
+    description: currentDefault.description,
+    updatedAt: now,
+  })
 
   return getUserProfiles(u)
 }
@@ -613,31 +675,65 @@ export async function getGitCommitsVersionHistory(
   try {
     const u = username.toLowerCase().trim()
     const cleanSlug = slug.toLowerCase().trim()
-    const filePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+    if (!u || !cleanSlug) return []
 
-    let res = await fetch(API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath, 'gitascii'), {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'GitAscii-App',
-      },
-      signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
-    })
+    const filePath = `profiles/${cleanSlug}/dark.svg`
+    const legacyFilePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
 
-    if (!res.ok) {
-      res = await fetch(API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath), {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'GitAscii-App',
-        },
+    const authHeaders: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'GitAscii-App',
+    }
+
+    try {
+      const { token } = await getInstallationTokenForUser(u)
+      if (token) {
+        authHeaders['Authorization'] = `Bearer ${token}`
+      }
+    } catch (tokenErr) {
+      console.warn('[ProfileManager] Failed to get installation token for history fetch:', tokenErr)
+    }
+
+    let res = await fetch(
+      API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath, 'gitascii') + '&_t=' + Date.now(),
+      {
+        headers: authHeaders,
         signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
-      })
+        cache: 'no-store',
+      }
+    )
+
+    let commits: unknown = []
+    if (res.ok) {
+      commits = await res.json()
+    } else {
+      console.error(
+        '[ProfileManager] GitHub API error (primary):',
+        res.status,
+        await res.text().catch(() => '')
+      )
     }
 
-    if (!res.ok) {
-      return []
+    if (!res.ok || !Array.isArray(commits) || commits.length === 0) {
+      res = await fetch(
+        API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, legacyFilePath) + '&_t=' + Date.now(),
+        {
+          headers: authHeaders,
+          signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+          cache: 'no-store',
+        }
+      )
+      if (res.ok) {
+        commits = await res.json()
+      } else {
+        console.error(
+          '[ProfileManager] GitHub API error (legacy):',
+          res.status,
+          await res.text().catch(() => '')
+        )
+      }
     }
 
-    const commits: unknown = await res.json()
     if (!Array.isArray(commits) || commits.length === 0) {
       return []
     }

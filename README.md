@@ -79,14 +79,13 @@ What your GitHub profile actually renders: dynamic, high-density SVG output comp
 
 ## How It Works
 
-GitAscii uses a declarative layout file stored in your own GitHub profile repository. It connects your custom layout with edge-rendered dynamic data:
+GitAscii v2 publishes self-contained SVG files from a dedicated `gitascii` branch in your own GitHub profile repository. GitHub Actions refreshes the files without putting the rendering service in the README request path:
 
 ```mermaid
 flowchart LR
-    A["🎛️ GitAscii Web Editor<br/>(Design Layout)"] -->|"Download"| B["📄 gitascii.json<br/>(Config File)"]
-    B -->|"Upload to Root"| C["🐙 GitHub Repo<br/>(username/username)"]
-    C -->|"Live Query"| D["⚡ GitAscii Edge Server<br/>(Fetch Telemetry & Compile)"]
-    D -->|"Dynamic SVG Stream"| E["🖼️ Profile README.md<br/>(Rendered in Browser)"]
+    A["🎛️ GitAscii Web Editor<br/>(Design Layout)"] -->|"Publish"| B["🌿 gitascii branch<br/>(Config + SVGs)"]
+    B -->|"GitHub Action refresh"| C["📄 profiles/slug/*.svg"]
+    C -->|"raw.githubusercontent.com"| E["🖼️ Profile README.md<br/>(Rendered by GitHub)"]
 
     style A fill:#1f1f1f,stroke:#c5ff4a,stroke-width:1px,color:#ffffff
     style B fill:#060606,stroke:#252525,stroke-width:1px,color:#c5ff4a
@@ -95,18 +94,20 @@ flowchart LR
     style E fill:#060606,stroke:#c5ff4a,stroke-width:1px,color:#c5ff4a
 ```
 
-### 1. Design & Download Configuration
+### 1. Design & Publish
 
-Compose your layout in the [Visual Editor](https://gitascii.com). When done, click **Export** to download your profile configuration file:
+Compose your layout in the [Visual Editor](https://gitascii.com). When done, use **Publish to GitHub**. GitAscii creates or updates:
 
-- Default profile: `gitascii.json`
-- Custom profile slug: `gitascii_[profile_slug].json`
+- the dedicated `gitascii` branch;
+- `gitascii.json` for the default profile and `gitascii_[slug].json` for additional profiles;
+- dark and light SVG files under `profiles/[slug]/`;
+- `.github/workflows/gitascii.yml` on the default branch.
 
-> **Note:** Keep the exact filename. GitAscii strictly queries for this name in the root of your special repository.
+The GitHub Action publishes every configured profile atomically. Pro installations also enable authenticated, profile-scoped telemetry.
 
-### 2. Upload to your GitHub Profile Repository
+### 2. Authorize the GitHub App
 
-Upload `gitascii.json` to the **root** of your special GitHub repository (`username/username`).
+Authorize GitAscii for your special profile repository (`username/username`). The editor performs the branch, workflow, and README updates for you.
 
 ### 3. Embed into your Profile `README.md`
 
@@ -115,12 +116,12 @@ Paste the generated snippet into your `README.md`. It automatically adapts to th
 ```html
 <img
   alt="GitAscii Profile"
-  src="https://gitascii.com/api/user/yourusername?v=1740672000"
+  src="https://raw.githubusercontent.com/yourusername/yourusername/gitascii/profiles/default/dark.svg"
   width="100%"
 />
 ```
 
-> **Tip (Cache Invalidation):** GitHub caches external images through its Camo proxy. Whenever you update your `gitascii.json`, update the version parameter in your README links (e.g. using a current Unix timestamp like `?v=1740672000` or simply incrementing `?v=2`) to force GitHub to fetch and render the new layout instantly.
+The generated `<picture>` snippet contains both light and dark raw GitHub URLs. Updates keep the same stable URL and are performed by the repository workflow.
 
 ---
 

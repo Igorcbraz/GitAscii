@@ -2,13 +2,18 @@ export interface EmbedOptions {
   username: string
   profileSlug?: string
   includeBadge?: boolean
+  dynamic?: boolean
 }
 
 export function generateV2EmbedCode(options: EmbedOptions): string {
   const username = options.username.toLowerCase()
   const slug = (options.profileSlug || 'default').toLowerCase()
-  const darkUrl = `https://raw.githubusercontent.com/${username}/${username}/gitascii/profiles/${slug}/dark.svg`
-  const lightUrl = `https://raw.githubusercontent.com/${username}/${username}/gitascii/profiles/${slug}/light.svg`
+  const darkUrl = options.dynamic
+    ? API_ENDPOINTS.SVG.PUBLIC_DYNAMIC_CARD(username, 'dark')
+    : API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(username, slug, 'dark')
+  const lightUrl = options.dynamic
+    ? API_ENDPOINTS.SVG.PUBLIC_DYNAMIC_CARD(username, 'light')
+    : API_ENDPOINTS.GITHUB.PUBLISHED_PROFILE(username, slug, 'light')
 
   const pictureBlock = `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="${darkUrl}">
@@ -44,7 +49,7 @@ export function updateReadmeContent(
   }
 
   const legacyWidgetRegex =
-    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)*<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/gi
+    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)*<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/i
 
   if (currentContent.match(legacyWidgetRegex)) {
     return currentContent.replace(legacyWidgetRegex, newEmbedCode)
@@ -56,3 +61,4 @@ export function updateReadmeContent(
 
   return `${currentContent.trim()}\n\n${newEmbedCode}\n`
 }
+import { API_ENDPOINTS } from '@/services/endpoints'

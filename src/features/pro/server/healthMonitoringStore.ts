@@ -1,7 +1,4 @@
-import {
-  recordProfileDailyHealthInDb,
-  recordWidgetDailyHealthInDb,
-} from '@/lib/db/repositories/healthRepository'
+import { recordProfileDailyHealthInDb } from '@/lib/db/repositories/healthRepository'
 
 import type { IngestErrorPayload, WidgetErrorRecord } from '../types/errors'
 import type {
@@ -43,16 +40,6 @@ export async function recordRenderTelemetry(payload: {
     const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
     const metaKey = REDIS_KEYS.profileMeta(u, slug)
 
-    const widgetsToRecord =
-      payload.renderedWidgets && payload.renderedWidgets.length > 0
-        ? payload.renderedWidgets
-        : ['avatar-card', 'stats-cards', 'streak-graph']
-
-    for (const rawWidgetId of widgetsToRecord) {
-      const widgetId = rawWidgetId.toLowerCase().trim()
-      void recordWidgetDailyHealthInDb(u, widgetId, dateStr, isSuccess, duration).catch(() => {})
-    }
-
     const p = redis.pipeline()
     p.hincrby(profileHealthKey, 'renders', 1)
     if (isSuccess) {
@@ -69,28 +56,6 @@ export async function recordRenderTelemetry(payload: {
       lastRenderDurationMs: duration,
       healthStatus: isSuccess ? 'operational' : 'warning',
     })
-
-    for (const rawWidgetId of widgetsToRecord) {
-      const widgetId = rawWidgetId.toLowerCase().trim()
-      const widgetHealthKey = REDIS_KEYS.healthWidgetDaily(u, widgetId, dateStr)
-      const widgetMetaKey = REDIS_KEYS.healthWidgetMeta(u, widgetId)
-
-      p.hincrby(widgetHealthKey, 'renders', 1)
-      if (isSuccess) {
-        p.hincrby(widgetHealthKey, 'successes', 1)
-      } else {
-        p.hincrby(widgetHealthKey, 'failures', 1)
-      }
-      p.hincrby(widgetHealthKey, 'durationMs', duration)
-      p.hincrby(widgetHealthKey, 'durationCount', 1)
-      p.expire(widgetHealthKey, 90 * 86400)
-
-      p.hset(widgetMetaKey, {
-        lastRenderAt: now.toISOString(),
-        lastRenderDurationMs: duration,
-        status: isSuccess ? 'operational' : 'warning',
-      })
-    }
 
     await p.exec()
 
@@ -161,12 +126,10 @@ export async function getOverallHealth(username: string): Promise<OverallHealthM
   const overallHealthScore =
     totalRenders24h > 0
       ? Math.max(0, Math.min(100, Math.round((totalSuccesses24h / totalRenders24h) * 100)))
-      : activeErrors.length === 0
-        ? 100
-        : Math.max(70, 100 - activeErrors.length * 10)
+      : 0
 
-  let systemStatus: HealthStatus = 'operational'
-  if (activeErrors.length > 2 || overallHealthScore < 90) {
+  let systemStatus: HealthStatus = totalRenders24h > 0 ? 'operational' : 'warning'
+  if (activeErrors.length > 2 || (totalRenders24h > 0 && overallHealthScore < 90)) {
     systemStatus = 'failed'
   } else if (activeErrors.length > 0 || overallHealthScore < 98) {
     systemStatus = 'warning'
@@ -177,13 +140,7 @@ export async function getOverallHealth(username: string): Promise<OverallHealthM
   const failedProfilesCount = profiles.filter((p) => p.status === 'failed').length
 
   const avgRenderTimeMs =
-    totalDurationCount24h > 0
-      ? Math.round(totalDurationMs24h / totalDurationCount24h)
-      : profiles.length > 0
-        ? Math.round(
-            profiles.reduce((acc, p) => acc + (p.avgRenderDurationMs || 30), 0) / profiles.length
-          )
-        : 28
+    totalDurationCount24h > 0 ? Math.round(totalDurationMs24h / totalDurationCount24h) : 0
 
   const [widgets, healthHistory] = await Promise.all([
     getWidgetHealthList(u),
@@ -200,7 +157,7 @@ export async function getOverallHealth(username: string): Promise<OverallHealthM
     warningProfilesCount,
     failedProfilesCount,
     avgRenderTimeMs,
-    lastRenderAt: lastRenderAt || new Date().toISOString(),
+    lastRenderAt,
     profiles,
     widgets,
     healthHistory,
@@ -227,20 +184,16 @@ export async function getProfileHealthList(username: string): Promise<ProfileHea
     const failures = Number(data?.failures || 0)
     const durMs = Number(data?.durationMs || renders * 30)
     const durCount = Number(data?.durationCount || renders)
-    const avgDuration = durCount > 0 ? Math.round(durMs / durCount) : 32
+    const avgDuration = durCount > 0 ? Math.round(durMs / durCount) : 0
 
     const profErrors = activeErrors.filter((e) => e.profileSlug === prof.slug)
     const healthScore =
-      renders > 0
-        ? Math.max(0, Math.min(100, Math.round((successes / renders) * 100)))
-        : profErrors.length === 0
-          ? 100
-          : Math.max(60, 100 - profErrors.length * 15)
+      renders > 0 ? Math.max(0, Math.min(100, Math.round((successes / renders) * 100))) : 0
 
-    let status: HealthStatus = 'operational'
-    if (profErrors.length > 1 || healthScore < 90) {
+    let status: HealthStatus = renders > 0 ? 'operational' : 'warning'
+    if (profErrors.length > 1 || (renders > 0 && healthScore < 90)) {
       status = 'failed'
-    } else if (profErrors.length > 0 || healthScore < 98) {
+    } else if (profErrors.length > 0 || (renders > 0 && healthScore < 98)) {
       status = 'warning'
     }
 
@@ -274,84 +227,37 @@ export async function getWidgetHealthList(
   username: string,
   profileSlug?: string
 ): Promise<WidgetHealthRecord[]> {
-  const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
-  const todayStr = formatDate(new Date())
-
-  const widgetErrors = await getWidgetErrors(u)
+  const [profiles, widgetErrors] = await Promise.all([getProfileHealthList(u), getWidgetErrors(u)])
   const activeErrors = widgetErrors.filter((e) => e.status !== 'resolved')
-
-  const knownWidgets = [
-    { id: 'avatar-card', name: 'Profile Avatar & Bio' },
-    { id: 'stats-cards', name: 'GitHub Stats Cards' },
-    { id: 'streak-graph', name: 'Contribution Streak Graph' },
-    { id: 'language-pie', name: 'Top Languages Breakdown' },
-    { id: 'activity-calendar', name: 'Activity Calendar & Grid' },
-    { id: 'trophies-shelf', name: 'Achievements & Trophies' },
-    { id: 'contribution-snake', name: 'Contribution Snake Game' },
-    { id: 'quotes-card', name: 'Inspirational Developer Quote' },
-    { id: 'custom-badge', name: 'Custom Shields.io Badge' },
-    { id: 'external-widget', name: 'External Dynamic Embed' },
-  ]
-
-  const records: WidgetHealthRecord[] = []
-  const p = redis.pipeline()
-  for (const w of knownWidgets) {
-    p.hgetall(REDIS_KEYS.healthWidgetMeta(u, w.id))
-    p.hgetall(REDIS_KEYS.healthWidgetDaily(u, w.id, todayStr))
-  }
-
-  const results = await p.exec<any[]>()
-
-  for (let i = 0; i < knownWidgets.length; i++) {
-    const w = knownWidgets[i]
-    const meta = results[i * 2] as any
-    const daily = results[i * 2 + 1] as any
-
-    const widgetErr = activeErrors.find((e) => e.widgetId === w.id)
-    const renders = Number(daily?.renders || 0)
-    const successes = Number(daily?.successes || (widgetErr ? 0 : renders))
-    const failures = Number(daily?.failures || (widgetErr ? widgetErr.occurrences : 0))
-    const durMs = Number(daily?.durationMs || renders * 25)
-    const durCount = Number(daily?.durationCount || renders)
-    const avgDuration = durCount > 0 ? Math.round(durMs / durCount) : 26
-
-    const successRate =
-      renders > 0
-        ? Math.max(0, Math.min(100, Math.round((successes / renders) * 100)))
-        : widgetErr
-          ? 75
-          : 100
-
-    let status: HealthStatus = 'operational'
-    if (widgetErr) {
-      status = widgetErr.errorType === 'RATE_LIMITED' ? 'warning' : 'failed'
-    } else if (meta?.status) {
-      status = meta.status as HealthStatus
-    }
-
-    records.push({
-      widgetId: w.id,
-      widgetName: w.name,
-      profileSlug: profileSlug || widgetErr?.profileSlug || 'default',
-      status,
-      lastRenderAt: meta?.lastRenderAt || new Date().toISOString(),
-      lastRenderDurationMs: Number(meta?.lastRenderDurationMs || avgDuration),
-      avgRenderDurationMs: avgDuration,
-      totalRenders: renders,
-      totalErrors: failures,
-      errorsLast24h: widgetErr ? widgetErr.occurrences : 0,
-      successRate,
-      lastError: widgetErr
-        ? {
-            errorType: widgetErr.errorType,
-            message: widgetErr.message,
-            timestamp: widgetErr.lastSeenAt,
-            details: widgetErr.details,
-          }
-        : undefined,
+  const records = profiles
+    .filter(
+      (profile) => !profileSlug || profileSlug === 'all' || profile.profileSlug === profileSlug
+    )
+    .map((profile): WidgetHealthRecord => {
+      const error = activeErrors.find((item) => item.profileSlug === profile.profileSlug)
+      return {
+        widgetId: `profile-artifacts:${profile.profileSlug}`,
+        widgetName: `${profile.profileName} SVG artifacts`,
+        profileSlug: profile.profileSlug,
+        status: error ? 'failed' : profile.status,
+        lastRenderAt: profile.lastRenderAt || new Date().toISOString(),
+        lastRenderDurationMs: profile.avgRenderDurationMs,
+        avgRenderDurationMs: profile.avgRenderDurationMs,
+        totalRenders: profile.totalRenders,
+        totalErrors: profile.failedRenders,
+        errorsLast24h: error?.occurrences || 0,
+        successRate: profile.healthScore,
+        lastError: error
+          ? {
+              errorType: error.errorType,
+              message: error.message,
+              timestamp: error.lastSeenAt,
+              details: error.details,
+            }
+          : undefined,
+      }
     })
-  }
 
   return records.sort((a, b) => {
     if (a.status === 'failed' && b.status !== 'failed') return -1
@@ -410,13 +316,11 @@ export async function getHealthHistory(
     }
 
     const healthScore =
-      dayRenders > 0
-        ? Math.max(0, Math.min(100, Math.round((daySuccesses / dayRenders) * 100)))
-        : 100
+      dayRenders > 0 ? Math.max(0, Math.min(100, Math.round((daySuccesses / dayRenders) * 100))) : 0
 
-    let status: HealthStatus = 'operational'
-    if (dayFailures > 2 || healthScore < 90) status = 'failed'
-    else if (dayFailures > 0 || healthScore < 98) status = 'warning'
+    let status: HealthStatus = dayRenders > 0 ? 'operational' : 'warning'
+    if (dayFailures > 2 || (dayRenders > 0 && healthScore < 90)) status = 'failed'
+    else if (dayFailures > 0 || (dayRenders > 0 && healthScore < 98)) status = 'warning'
 
     points.push({
       timestamp: d.toISOString(),
@@ -424,7 +328,7 @@ export async function getHealthHistory(
       healthScore,
       totalRenders: dayRenders,
       failedRenders: dayFailures,
-      avgDurationMs: dayDurCount > 0 ? Math.round(dayDurMs / dayDurCount) : 28,
+      avgDurationMs: dayDurCount > 0 ? Math.round(dayDurMs / dayDurCount) : 0,
       status,
     })
   }

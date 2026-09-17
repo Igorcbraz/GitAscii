@@ -22,13 +22,21 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || process.env.MIGRATION_CRON_SECRET
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret) {
+      console.error('[Migration Cron] CRON_SECRET or MIGRATION_CRON_SECRET is not configured.')
+      return NextResponse.json({ error: 'Migration endpoint is not configured' }, { status: 503 })
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const limitParam = parseInt(searchParams.get('limit') || DEFAULT_LIMIT_STR, DECIMAL_RADIX)
-    const batchLimit = Math.min(Math.max(MIN_BATCH_LIMIT, isNaN(limitParam) ? DEFAULT_BATCH_LIMIT : limitParam), MAX_BATCH_LIMIT)
+    const batchLimit = Math.min(
+      Math.max(MIN_BATCH_LIMIT, isNaN(limitParam) ? DEFAULT_BATCH_LIMIT : limitParam),
+      MAX_BATCH_LIMIT
+    )
 
     const candidates = await getMigrationCandidateBatch(batchLimit)
 

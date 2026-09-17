@@ -1,14 +1,11 @@
 import {
   flushAnalyticsBatchToDb,
-  getDimensionCountsFromDb,
   getTimeSeriesFromDb,
   recordViewInDb,
 } from '@/lib/db/repositories/analyticsRepository'
 
 import type {
   AnalyticsSummary,
-  ContinentMetric,
-  CountryMetric,
   DailyDataPoint,
   DimensionMetric,
   HourlyDataPoint,
@@ -18,25 +15,7 @@ import type {
   TimeRange,
   WeekdayHourPoint,
 } from '../types/analytics'
-import {
-  getCountryContinent,
-  getCountryFlagEmoji,
-  getCountryName,
-  getLanguageName,
-} from './geoData'
-import {
-  generateAnonymizedVisitorId,
-  parseBrowser,
-  parseDeviceType,
-  parseLanguage,
-  parseOperatingSystem,
-  parseTrafficType,
-  sanitizeCity,
-  sanitizeCountryCode,
-  sanitizeReferrer,
-  sanitizeRegion,
-  sanitizeTimezone,
-} from './privacy'
+import { generateAnonymizedVisitorId, parseTrafficType, sanitizeReferrer } from './privacy'
 import { getProRedisClient } from './redisClient'
 
 const RETENTION_TTL_SECONDS = 90 * 24 * 60 * 60
@@ -156,31 +135,12 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
     const statusCode = payload.statusCode || (payload.isCacheHit ? 304 : 200)
 
     const visitorId = generateAnonymizedVisitorId(payload.ip, payload.userAgent, dateStr)
-    const country = sanitizeCountryCode(payload.country)
-    const countryName = getCountryName(country)
-    const continent = getCountryContinent(country)
-    const flagEmoji = getCountryFlagEmoji(country)
-    const region = sanitizeRegion(payload.region)
-    const city = sanitizeCity(payload.city)
-    const timezone = sanitizeTimezone(payload.timezone)
-    const language = parseLanguage(payload.language)
     const source = sanitizeReferrer(payload.referrer, payload.isCamoProxy)
-    const device = parseDeviceType(payload.userAgent, payload.isCamoProxy)
-    const browser = parseBrowser(payload.userAgent, payload.isCamoProxy)
-    const os = parseOperatingSystem(payload.userAgent, payload.isCamoProxy)
     const trafficType = parseTrafficType(payload.userAgent, payload.isCamoProxy, payload.referrer)
     const latency = Math.max(1, Math.round(payload.renderTimeMs || 25))
 
     const dimensionsToRecord: [string, string][] = [
-      ['countries', country],
-      ['continents', continent.name],
-      ['regions', region !== 'Unknown' ? `${country}-${region}` : country],
-      ['languages', language],
-      ['timezones', timezone],
       ['sources', source],
-      ['devices', device],
-      ['browsers', browser],
-      ['os', os],
       ['traffic_types', trafficType],
       ['status_codes', String(statusCode)],
     ]
@@ -190,14 +150,13 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
       timestamp: now.toISOString(),
       relativeTime: 'Just now',
       profileSlug: slug,
-      country,
-      countryName,
-      flagEmoji,
-      city: city !== 'Unknown' ? city : undefined,
+      country: 'Unknown',
+      countryName: 'Unavailable in GitHub-hosted v2',
+      flagEmoji: '',
       trafficType,
-      device,
-      browser,
-      os,
+      device: 'GitHub image proxy',
+      browser: 'Unavailable',
+      os: 'Unavailable',
       status: statusCode,
       isCacheHit: payload.isCacheHit,
       latencyMs: latency,
@@ -441,32 +400,14 @@ export async function getAnalyticsSummary(
   let totalLatencyMs = 0
   let totalLatencyCount = 0
 
-  const countryCounts: Record<string, number> = {}
-  const continentCounts: Record<string, number> = {}
-  const languageCounts: Record<string, number> = {}
-  const timezoneCounts: Record<string, number> = {}
   const sourceCounts: Record<string, number> = {}
-  const deviceCounts: Record<string, number> = {}
-  const browserCounts: Record<string, number> = {}
-  const osCounts: Record<string, number> = {}
   const trafficTypeCounts: Record<string, number> = {}
   const _themeCounts: Record<string, number> = {}
   const statusCodeCounts: Record<string, number> = {}
 
   const currentPipeline = redis.pipeline()
   const queryMeta: Array<{ slug: string; dateStr: string }> = []
-  const dimsList = [
-    'countries',
-    'continents',
-    'languages',
-    'timezones',
-    'sources',
-    'devices',
-    'browsers',
-    'os',
-    'traffic_types',
-    'status_codes',
-  ]
+  const dimsList = ['sources', 'traffic_types', 'status_codes']
 
   for (const slug of slugsToQuery) {
     for (const dateStr of currentDateList) {
@@ -528,16 +469,9 @@ export async function getAnalyticsSummary(
     totalLatencyMs += latMs
     totalLatencyCount += latCount
 
-    mergeMap(currentPipelineResults[baseIndex + 2], countryCounts)
-    mergeMap(currentPipelineResults[baseIndex + 3], continentCounts)
-    mergeMap(currentPipelineResults[baseIndex + 4], languageCounts)
-    mergeMap(currentPipelineResults[baseIndex + 5], timezoneCounts)
-    mergeMap(currentPipelineResults[baseIndex + 6], sourceCounts)
-    mergeMap(currentPipelineResults[baseIndex + 7], deviceCounts)
-    mergeMap(currentPipelineResults[baseIndex + 8], browserCounts)
-    mergeMap(currentPipelineResults[baseIndex + 9], osCounts)
-    mergeMap(currentPipelineResults[baseIndex + 10], trafficTypeCounts)
-    mergeMap(currentPipelineResults[baseIndex + 11], statusCodeCounts)
+    mergeMap(currentPipelineResults[baseIndex + 2], sourceCounts)
+    mergeMap(currentPipelineResults[baseIndex + 3], trafficTypeCounts)
+    mergeMap(currentPipelineResults[baseIndex + 4], statusCodeCounts)
   }
 
   let prevViews = 0
@@ -634,44 +568,6 @@ export async function getAnalyticsSummary(
           totalViews = dbTotalViews
           totalUniques = dbTotalUniques
         }
-      }
-
-      if (Object.keys(countryCounts).length === 0) {
-        const dbCountries = await getDimensionCountsFromDb(
-          u,
-          'countries',
-          currentDateList,
-          selectedSlug || undefined
-        )
-        mergeMap(dbCountries, countryCounts)
-        const dbSources = await getDimensionCountsFromDb(
-          u,
-          'sources',
-          currentDateList,
-          selectedSlug || undefined
-        )
-        mergeMap(dbSources, sourceCounts)
-        const dbDevices = await getDimensionCountsFromDb(
-          u,
-          'devices',
-          currentDateList,
-          selectedSlug || undefined
-        )
-        mergeMap(dbDevices, deviceCounts)
-        const dbBrowsers = await getDimensionCountsFromDb(
-          u,
-          'browsers',
-          currentDateList,
-          selectedSlug || undefined
-        )
-        mergeMap(dbBrowsers, browserCounts)
-        const dbOs = await getDimensionCountsFromDb(
-          u,
-          'os',
-          currentDateList,
-          selectedSlug || undefined
-        )
-        mergeMap(dbOs, osCounts)
       }
     } catch (error) {
       console.warn('[AnalyticsStore] Failed to load analytics dimensions from PostgreSQL:', error)
@@ -787,56 +683,9 @@ export async function getAnalyticsSummary(
       .sort((a, b) => b.count - a.count)
   }
 
-  const topCountries: CountryMetric[] = Object.entries(countryCounts)
-    .map(([code, count]) => {
-      const sum = totalViews || 1
-      const continentInfo = getCountryContinent(code)
-      return {
-        code,
-        name: getCountryName(code),
-        key: code,
-        continent: continentInfo.name,
-        continentCode: continentInfo.code,
-        flagEmoji: getCountryFlagEmoji(code),
-        count,
-        percentage: Math.round((count / sum) * 100),
-        uniques: Math.ceil(count * 0.75),
-      }
-    })
-    .sort((a, b) => b.count - a.count)
-
-  const topContinents: ContinentMetric[] = Object.entries(continentCounts)
-    .map(([name, count]) => {
-      const sum = totalViews || 1
-      return {
-        name,
-        key: name,
-        code: name.slice(0, 2).toUpperCase(),
-        count,
-        percentage: Math.round((count / sum) * 100),
-      }
-    })
-    .sort((a, b) => b.count - a.count)
-
-  const topLanguages: DimensionMetric[] = Object.entries(languageCounts)
-    .map(([code, count]) => {
-      const sum = totalViews || 1
-      return {
-        name: getLanguageName(code),
-        key: code,
-        count,
-        percentage: Math.round((count / sum) * 100),
-      }
-    })
-    .sort((a, b) => b.count - a.count)
-
   const topSources = formatGenericDim(sourceCounts)
-  const topDevices = formatGenericDim(deviceCounts)
-  const topBrowsers = formatGenericDim(browserCounts)
-  const topOs = formatGenericDim(osCounts)
   const trafficTypes = formatGenericDim(trafficTypeCounts)
   const statusCodes = formatGenericDim(statusCodeCounts)
-  const topTimezones = formatGenericDim(timezoneCounts)
 
   const trackedSlugsForTop = await redis.smembers(REDIS_KEYS.userTrackedSlugs(u)).catch(() => [])
   const profileSlugsForTop = await redis.smembers(REDIS_KEYS.userProfiles(u)).catch(() => [])
@@ -874,7 +723,7 @@ export async function getAnalyticsSummary(
     }
 
     const hitRatio = slugViews > 0 ? Math.round((slugCacheHits / slugViews) * 100) : 0
-    const avgLat = slugLatencyCount > 0 ? Math.round(slugLatencyMs / slugLatencyCount) : 28
+    const avgLat = slugLatencyCount > 0 ? Math.round(slugLatencyMs / slugLatencyCount) : 0
 
     topProfiles.push({
       slug,
@@ -932,89 +781,12 @@ export async function getAnalyticsSummary(
   const growthRateCacheHits = prevCacheHitRatio > 0 ? cacheHitRatio - prevCacheHitRatio : 0
 
   const avgDailyViews = count > 0 ? Math.round(totalViews / count) : 0
-  const avgLatencyMs = totalLatencyCount > 0 ? Math.round(totalLatencyMs / totalLatencyCount) : 28
+  const avgLatencyMs = totalLatencyCount > 0 ? Math.round(totalLatencyMs / totalLatencyCount) : 0
   const prevAvgLatency = prevLatencyCount > 0 ? Math.round(prevLatencyMs / prevLatencyCount) : 32
   const growthRateLatency = calcGrowth(avgLatencyMs, prevAvgLatency)
 
   const camoRatio = totalViews > 0 ? Math.round((totalCamoViews / totalViews) * 100) : 0
   const directRatio = totalViews > 0 ? Math.max(0, 100 - camoRatio) : 0
-
-  const effectiveTopCountries =
-    topCountries.length > 0
-      ? topCountries
-      : [
-          {
-            name: 'United States',
-            code: 'US',
-            key: 'US',
-            continent: 'North America',
-            continentCode: 'NA',
-            flagEmoji: '🇺🇸',
-            count: 0,
-            percentage: 0,
-            uniques: 0,
-          },
-          {
-            name: 'Brazil',
-            code: 'BR',
-            key: 'BR',
-            continent: 'South America',
-            continentCode: 'SA',
-            flagEmoji: '🇧🇷',
-            count: 0,
-            percentage: 0,
-            uniques: 0,
-          },
-          {
-            name: 'Germany',
-            code: 'DE',
-            key: 'DE',
-            continent: 'Europe',
-            continentCode: 'EU',
-            flagEmoji: '🇩🇪',
-            count: 0,
-            percentage: 0,
-            uniques: 0,
-          },
-        ]
-
-  const effectiveTopSources =
-    topSources.length > 0
-      ? topSources
-      : [
-          { name: 'GitHub README (Camo Proxy)', key: 'GitHub Camo', count: 0, percentage: 0 },
-          { name: 'Direct / Portfolio Embed', key: 'Direct', count: 0, percentage: 0 },
-          { name: 'Direct / No Referrer', key: 'No Referrer', count: 0, percentage: 0 },
-        ]
-
-  const effectiveTopDevices =
-    topDevices.length > 0
-      ? topDevices
-      : [
-          { name: 'GitHub Camo Proxy', key: 'GitHub Camo Proxy', count: 0, percentage: 0 },
-          { name: 'Desktop', key: 'Desktop', count: 0, percentage: 0 },
-          { name: 'Mobile', key: 'Mobile', count: 0, percentage: 0 },
-        ]
-
-  const effectiveTopBrowsers =
-    topBrowsers.length > 0
-      ? topBrowsers
-      : [
-          { name: 'GitHub Image Proxy', key: 'GitHub Image Proxy', count: 0, percentage: 0 },
-          { name: 'Chrome', key: 'Chrome', count: 0, percentage: 0 },
-          { name: 'Safari', key: 'Safari', count: 0, percentage: 0 },
-          { name: 'Firefox', key: 'Firefox', count: 0, percentage: 0 },
-        ]
-
-  const effectiveTopOs =
-    topOs.length > 0
-      ? topOs
-      : [
-          { name: 'GitHub Cloud (Proxy)', key: 'GitHub Cloud (Proxy)', count: 0, percentage: 0 },
-          { name: 'macOS', key: 'macOS', count: 0, percentage: 0 },
-          { name: 'Windows', key: 'Windows', count: 0, percentage: 0 },
-          { name: 'Linux', key: 'Linux', count: 0, percentage: 0 },
-        ]
 
   const summaryResult: AnalyticsSummary = {
     totalViews,
@@ -1047,14 +819,16 @@ export async function getAnalyticsSummary(
     timeSeries,
     hourlyDistribution: hourlyDataPoints,
     heatmapGrid,
-    topCountries: effectiveTopCountries,
-    topContinents,
-    topLanguages,
-    topTimezones,
-    topSources: effectiveTopSources,
-    topDevices: effectiveTopDevices,
-    topBrowsers: effectiveTopBrowsers,
-    topOs: effectiveTopOs,
+    // Badge requests are normally made by GitHub Camo. They cannot truthfully reveal the
+    // viewer's geography, device, browser, OS, language, or timezone.
+    topCountries: [],
+    topContinents: [],
+    topLanguages: [],
+    topTimezones: [],
+    topSources,
+    topDevices: [],
+    topBrowsers: [],
+    topOs: [],
     trafficTypes,
     themes: [],
     statusCodes,

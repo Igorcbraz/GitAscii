@@ -12,6 +12,7 @@ export interface ProfileConfigFile {
 export interface BranchState {
   exists: boolean
   latestCommitSha?: string
+  latestCommitDate?: string
   treeSha?: string
   config?: SavedConfiguration
   configSha?: string
@@ -63,6 +64,7 @@ export class GitOpsService {
 
     const branchData = await branchRes.json()
     const latestCommitSha = branchData.commit.sha
+    const latestCommitDate = branchData.commit.commit?.author?.date
     const treeSha = branchData.commit.commit.tree.sha
 
     // Fetch gitascii.json
@@ -105,6 +107,7 @@ export class GitOpsService {
     return {
       exists: true,
       latestCommitSha,
+      latestCommitDate,
       treeSha,
       config,
       configSha,

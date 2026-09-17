@@ -112,7 +112,7 @@ export const PRO_PRICING_CONFIG: ProPricingConfig = {
       tag: '// 02 · REPUTATION',
       tagKey: 'pro.pricing.feat.monitor.tag',
       specs: [
-        'Background health checks every 10 min',
+        'GitHub Actions publication health and artifact monitoring',
         'Instant email alert on any broken widget',
         'Keeps your portfolio clean and credible',
         '1-click fix right from your dashboard',
@@ -374,7 +374,7 @@ export const PRO_ARCHITECTURE_NODES = [
     defaultNum: '01 / FAST WORLDWIDE',
     defaultTitle: 'Loads Instantly Anywhere',
     defaultDesc:
-      'Your profile SVGs render in milliseconds worldwide so visitors never experience slow loading or empty placeholders.',
+      'Your published SVG artifacts are served directly by GitHub, without requiring GitAscii to render every README request.',
     iconId: 'zap',
   },
   {

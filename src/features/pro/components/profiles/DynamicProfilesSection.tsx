@@ -322,8 +322,8 @@ export const DynamicProfilesSection: React.FC<DynamicProfilesSectionProps> = ({
 
   const dynamicApiUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/api/${username || 'user'}`
-      : `https://gitascii.com/api/${username || 'user'}`
+      ? `${window.location.origin}/api/${username || 'user'}?dynamic=1`
+      : API_ENDPOINTS.SVG.PUBLIC_DYNAMIC(username || 'user')
 
   const profileOptions: CustomSelectOption[] = useMemo(() => {
     return profiles.map((p) => ({

@@ -9,10 +9,16 @@ const files = readdirSync(templatesDir)
   .filter((file) => extname(file) === '.json')
   .sort((a, b) => a.localeCompare(b))
 
-const imports = files.map((file, index) => {
-  const variable = `template${index}`
-  return `import ${variable} from './${basename(file, '.json')}.json'`
-})
+const imports = files
+  .map((file, index) => ({ file, variable: `template${index}` }))
+  .sort((a, b) => {
+    const normalizedA = a.file.toLowerCase()
+    const normalizedB = b.file.toLowerCase()
+    if (normalizedA < normalizedB) return -1
+    if (normalizedA > normalizedB) return 1
+    return a.file < b.file ? -1 : a.file > b.file ? 1 : 0
+  })
+  .map(({ file, variable }) => `import ${variable} from './${basename(file, '.json')}.json'`)
 const entries = files.map((file, index) => {
   const variable = `template${index}`
   return `  { file: '${basename(file, '.json')}', template: ${variable} }`
@@ -20,5 +26,5 @@ const entries = files.map((file, index) => {
 
 writeFileSync(
   outputPath,
-  `${imports.join('\n')}\n\nexport const GENERATED_TEMPLATES = [\n${entries.join(',\n')}\n] as const\n`
+  `${imports.join('\n')}\n\nexport const GENERATED_TEMPLATES = [\n${entries.join(',\n')},\n] as const\n`
 )

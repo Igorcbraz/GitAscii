@@ -6,9 +6,16 @@ export interface TelemetryPayload {
   runId: string
   revision: string
   durationMs: number
-  status: 'published' | 'svg_unchanged' | 'failed'
+  status: 'published' | 'svg_unchanged' | 'skipped_stale' | 'failed'
   hasErrors: boolean
   failedUrls?: string[]
+  profileSlug?: string
+  profiles?: Array<{
+    slug: string
+    status: 'published' | 'svg_unchanged' | 'skipped_stale' | 'failed'
+    hasErrors: boolean
+    failedUrls?: string[]
+  }>
 }
 
 export async function sendProTelemetry(
@@ -44,5 +51,23 @@ export async function sendProTelemetry(
       '[Telemetry] Telemetry submission skipped:',
       err instanceof Error ? err.message : String(err)
     )
+  }
+}
+
+export async function getPublishPolicy(telemetryUrl: string): Promise<number> {
+  try {
+    const idToken = await core.getIDToken('gitascii-pro')
+    if (!idToken) return 1440
+    const res = await fetch(telemetryUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ status: 'policy_check', repository: process.env.GITHUB_REPOSITORY }),
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) return 1440
+    const data = await res.json()
+    return Math.max(60, Number(data.minimumIntervalMinutes) || 1440)
+  } catch {
+    return 1440
   }
 }

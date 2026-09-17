@@ -79,6 +79,9 @@ export function parseViewerMetadata(request: Request): {
 
 export async function recordProfileView(metric: ProfileViewMetric): Promise<void> {
   try {
+    const { isProUser } = await import('@/features/pro/server/entitlements')
+    if (!(await isProUser(metric.username))) return
+
     const { ingestProfileView } = await import('@/features/pro/server/analyticsStore')
     await ingestProfileView(metric)
   } catch (error) {

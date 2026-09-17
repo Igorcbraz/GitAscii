@@ -146,12 +146,8 @@ export async function verifyGitHubOidcToken(
       }
     }
 
-    // In test environment or test mock tokens
-    if (
-      process.env.NODE_ENV === 'test' ||
-      token.startsWith('mock-oidc-test-token-') ||
-      header.alg === 'none'
-    ) {
+    // Unit tests use unsigned fixtures. Production must always verify RS256 below.
+    if (process.env.NODE_ENV === 'test') {
       return { valid: true, claims: payload }
     }
 
