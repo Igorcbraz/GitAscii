@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/Igorcbraz/GitAscii/compare/v2.0.0...v2.0.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **badge:** prevent collision with dynamic username/profileSlug api routes ([5169cbf](https://github.com/Igorcbraz/GitAscii/commit/5169cbf92af740787d9603275f9d69c01b32c523))
+* **badge:** resolve route collision in catch-all SVG route for badge endpoint ([de3456a](https://github.com/Igorcbraz/GitAscii/commit/de3456a0355b1406ab8fd33e241cabf301101b94))
+
 ## [2.0.0](https://github.com/Igorcbraz/GitAscii/compare/v1.24.0...v2.0.0) (2026-09-17)
 
 
