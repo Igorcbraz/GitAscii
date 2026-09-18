@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/Igorcbraz/GitAscii/compare/v2.0.1...v2.0.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* **client:** add crossorigin=anonymous to svg images to prevent cors bug ([08242c2](https://github.com/Igorcbraz/GitAscii/commit/08242c2d4ac0592c8241e0bf52c695a5bd47c644))
+* **client:** replace node:crypto with custom hash to prevent client-side crash ([ef90675](https://github.com/Igorcbraz/GitAscii/commit/ef9067516e3aad21ce806eda236f23d588e8fa54))
+
 ## [2.0.1](https://github.com/Igorcbraz/GitAscii/compare/v2.0.0...v2.0.1) (2026-09-17)
 
 
