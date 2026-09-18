@@ -1,5 +1,3 @@
-import crypto from 'node:crypto'
-
 import { MIGRATION_TEMPLATES } from '@/constants'
 import type { SavedConfiguration } from '@/engine/types'
 
@@ -24,16 +22,29 @@ export function shouldIncludeSchedule(config: SavedConfiguration | null | undefi
   )
 }
 
+function getPseudoHash(str: string) {
+  let h1 = 0xdeadbeef ^ str.length,
+    h2 = 0x41c6ce57 ^ str.length
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i)
+    h1 = Math.imul(h1 ^ ch, 2654435761)
+    h2 = Math.imul(h2 ^ ch, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  return [h1 >>> 0, h2 >>> 0]
+}
+
 export function computeDeterministicCron(username: string): string {
-  const hash = crypto.createHash('sha256').update(username.toLowerCase()).digest()
-  const minute = hash.readUInt8(0) % 60
-  const hour = hash.readUInt8(1) % 24
+  const [h1, h2] = getPseudoHash(username.toLowerCase())
+  const minute = h1 % 60
+  const hour = h2 % 24
   return `${minute} ${hour} * * *`
 }
 
 export function computeProCron(username: string): string {
-  const hash = crypto.createHash('sha256').update(username.toLowerCase()).digest()
-  return `${hash.readUInt8(0) % 60} * * * *`
+  const [h1] = getPseudoHash(username.toLowerCase())
+  return `${h1 % 60} * * * *`
 }
 
 export function generateWorkflowYaml(
