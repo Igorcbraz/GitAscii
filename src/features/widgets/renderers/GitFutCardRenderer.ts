@@ -101,7 +101,7 @@ export function renderGitFutCard(
   // If holo effect is not enabled, render the clean transparent FIFA card with zero cropping:
   if (!enableHolo) {
     return `
-      <image href="${imageUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
+      <image href="${imageUrl}" crossorigin="anonymous" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
     `
   }
 
@@ -153,12 +153,12 @@ export function renderGitFutCard(
       </linearGradient>
 
       <mask id="fut-card-mask-${id}">
-        <image href="${imageUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
+        <image href="${imageUrl}" crossorigin="anonymous" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
       </mask>
     </defs>
 
     <g transform="${transformStr}" filter="url(#fut-card-shadow-${id})">
-      <image href="${imageUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
+      <image href="${imageUrl}" crossorigin="anonymous" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" />
       <g mask="url(#fut-card-mask-${id})">
         <rect x="0" y="0" width="${width}" height="${height}" fill="url(#fut-glare-grad-${id})" style="mix-blend-mode: screen;" pointer-events="none" />
         <rect x="0" y="0" width="${width}" height="${height}" fill="url(#fut-shine-grad-${id})" style="mix-blend-mode: color-dodge;" pointer-events="none" />

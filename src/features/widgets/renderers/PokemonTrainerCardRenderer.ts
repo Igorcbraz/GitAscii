@@ -154,7 +154,7 @@ export function renderPokemonTrainerCard(
 
       <!-- Avatar section -->
       <rect class="avatar-bg" x="15" y="130" width="60" height="80" />
-      <image class="avatar" x="15" y="130" width="60" height="80" href="${escapeXml(avatarUrl)}" preserveAspectRatio="xMidYMid slice" />
+      <image class="avatar" x="15" y="130" width="60" height="80" crossorigin="anonymous" href="${escapeXml(avatarUrl)}" preserveAspectRatio="xMidYMid slice" />
 
       <!-- Badges -->
       <rect class="badge-case" x="90" y="130" width="275" height="40" />

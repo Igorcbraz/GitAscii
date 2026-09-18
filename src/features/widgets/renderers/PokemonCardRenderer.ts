@@ -190,7 +190,7 @@ export function renderPokemonCard(
 
     <g transform="${transformStr}" filter="url(#card-shadow-${id})">
       <g clip-path="url(#card-clip-${id})">
-        <image href="${imageUrl}" xlink:href="${imageUrl}" x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" preserveAspectRatio="xMidYMid slice" />
+        <image href="${imageUrl}" xlink:href="${imageUrl}" crossorigin="anonymous" x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" preserveAspectRatio="xMidYMid slice" />
         ${
           enableHolo
             ? `

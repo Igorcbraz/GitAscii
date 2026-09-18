@@ -401,7 +401,7 @@ export function renderSurveillanceHeader(
   )
   b.push(`<g clip-path="url(#hfclip-${id})">`)
   b.push(
-    `<image x="${fx}" y="${iy}" width="${fw}" height="${ih}" preserveAspectRatio="xMidYMid slice" href="${avatarUrl}" filter="url(#avtint-${id})" style="image-rendering:pixelated;"/>`
+    `<image x="${fx}" y="${iy}" width="${fw}" height="${ih}" preserveAspectRatio="xMidYMid slice" crossorigin="anonymous" href="${avatarUrl}" filter="url(#avtint-${id})" style="image-rendering:pixelated;"/>`
   )
   b.push(
     `<rect x="${fx}" y="${iy}" width="${fw}" height="${ih}" fill="url(#scan-${id})" opacity=".4"/>`
