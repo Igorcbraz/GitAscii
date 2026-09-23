@@ -234,14 +234,6 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.EXTERNAL,
   },
   {
-    id: WIDGET_IDS.ACTIVITY_GRAPH,
-    name: 'Activity Graph',
-    icon: Activity,
-    desc: 'Gráfico de linhas de atividade em 31 dias',
-    isExternal: true,
-    category: WIDGET_CATEGORIES.EXTERNAL,
-  },
-  {
     id: WIDGET_IDS.CONTRIBUTION_SNAKE,
     name: 'Contribution Snake',
     icon: TrendingUp,

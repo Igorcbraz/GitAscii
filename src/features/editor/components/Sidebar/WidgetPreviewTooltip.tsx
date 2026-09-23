@@ -35,7 +35,6 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.GITHUB_README_STATS]: { width: 390, height: 210 },
   [WIDGET_IDS.STREAK_STATS]: { width: 390, height: 210 },
   [WIDGET_IDS.PROFILE_TROPHY]: { width: 800, height: 200 },
-  [WIDGET_IDS.ACTIVITY_GRAPH]: { width: 710, height: 300 },
   [WIDGET_IDS.CONTRIBUTION_SNAKE]: { width: 800, height: 250 },
   [WIDGET_IDS.METRICS_CARD]: { width: 440, height: 380 },
   [WIDGET_IDS.VIEWS_COUNTER]: { width: 200, height: 96 },

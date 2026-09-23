@@ -14,7 +14,6 @@ export const WIDGET_IDS = {
   GITHUB_README_STATS: 'github-readme-stats',
   STREAK_STATS: 'streak-stats',
   PROFILE_TROPHY: 'profile-trophy',
-  ACTIVITY_GRAPH: 'activity-graph',
   CONTRIBUTION_SNAKE: 'contribution-snake',
   METRICS_CARD: 'metrics-card',
   VIEWS_COUNTER: 'views-counter',

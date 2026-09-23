@@ -790,7 +790,6 @@ export function PropertiesPanel() {
           WIDGET_IDS.GHSTATS as string,
           WIDGET_IDS.STREAK_STATS as string,
           WIDGET_IDS.PROFILE_TROPHY as string,
-          WIDGET_IDS.ACTIVITY_GRAPH as string,
           WIDGET_IDS.CONTRIBUTION_SNAKE as string,
           WIDGET_IDS.METRICS_CARD as string,
           WIDGET_IDS.VIEWS_COUNTER as string,

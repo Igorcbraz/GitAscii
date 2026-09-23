@@ -176,7 +176,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.GHSTATS, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.STREAK_STATS, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.PROFILE_TROPHY, (w, d, g) => renderExternalWidgets(w, d, g)],
-  [WIDGET_IDS.ACTIVITY_GRAPH, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.CONTRIBUTION_SNAKE, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.METRICS_CARD, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.VIEWS_COUNTER, (w, d, g) => renderExternalWidgets(w, d, g)],
