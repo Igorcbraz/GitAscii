@@ -791,15 +791,6 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     defaultSize: { width: 780, height: 440 },
   },
   {
-    id: WIDGET_IDS.POKEMON_TRAINER_CARD,
-    name: 'Pokemon Trainer Card',
-    desc: 'GitHub profile as a Pokemon Trainer ID card with badges, party, and Pokedex number',
-    icon: Sparkles,
-    category: WIDGET_CATEGORIES.INTERACTIVE,
-    badge: { text: 'TRAINER', type: 'highlight' },
-    defaultSize: { width: 380, height: 240 },
-  },
-  {
     id: WIDGET_IDS.MINECRAFT_HUD,
     name: 'Boss Raid Survival HUD',
     desc: 'Boss bar raid fight (Production Outage), active buff effects, equipment slots, hardcore hearts, XP level, and hotbar loadout',

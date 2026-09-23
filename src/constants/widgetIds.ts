@@ -82,7 +82,6 @@ export const WIDGET_IDS = {
   MINECRAFT_ACHIEVEMENT: 'minecraft-achievement',
   MINECRAFT_SERVER: 'minecraft-server',
   MINECRAFT_DEATH_SCREEN: 'minecraft-death-screen',
-  POKEMON_TRAINER_CARD: 'pokemon-trainer-card',
 } as const
 
 export type WidgetId = (typeof WIDGET_IDS)[keyof typeof WIDGET_IDS]
