@@ -13,18 +13,37 @@ function escapeXml(str: string): string {
 const INTERNAL_W = 370
 const INTERNAL_H = 400
 
+const cache = new Map<string, string>()
+
 export function renderAsciiPortrait(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles,
   isStaticOverride?: boolean
 ): string {
+  const cfg = widget?.config || {}
+  const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
+
+  const cacheKey = JSON.stringify({
+    w: widget?.size?.width,
+    h: widget?.size?.height,
+    c: widget?.config,
+    id: widget?.instanceId,
+    u: data?.user?.login,
+    n: data?.user?.name,
+    gs: globalStyles,
+    is: isStatic,
+  })
+
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!
+  }
+
   const width = Math.max(100, Number(widget?.size?.width) || 370)
   const height = Math.max(100, Number(widget?.size?.height) || 400)
 
   const IW = INTERNAL_W
   const IH = INTERNAL_H
-  const cfg = widget?.config || {}
 
   const username = data?.user?.login || 'user'
   const name = data?.user?.name || username
@@ -105,8 +124,6 @@ export function renderAsciiPortrait(
 
   const artTop = TITLEBAR_H + PAD * 0.35
 
-  const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
-
   for (let ry = 0; ry < ROWS; ry++) {
     const line = rowsTxt[ry] || ''
     const y = artTop + ry * CELL_H + CELL_H * 0.74
@@ -154,5 +171,10 @@ export function renderAsciiPortrait(
   )
 
   parts.push(`</svg>`)
-  return parts.join('\n')
+  const result = parts.join('\n')
+
+  if (cache.size > 100) cache.clear()
+  cache.set(cacheKey, result)
+
+  return result
 }
