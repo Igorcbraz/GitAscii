@@ -24,6 +24,7 @@ export interface UserSession {
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const [username, setUsername] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGithubLoading, setIsGithubLoading] = useState(false)
@@ -37,6 +38,9 @@ export default function Hero() {
 
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== 'undefined') {
+      setIsDesktop(window.matchMedia('(min-width: 768px)').matches)
+    }
 
     getClientSession()
       .then((currentSession) => {
@@ -100,7 +104,7 @@ export default function Hero() {
   return (
     <section id="hero" className="relative min-h-screen">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {mounted && <AsciiHands className="absolute inset-0 opacity-60" />}
+        {mounted && isDesktop && <AsciiHands className="absolute inset-0 opacity-60" />}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
       </div>
 

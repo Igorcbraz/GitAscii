@@ -14,35 +14,35 @@ import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
 const ptSerif = PT_Serif({
   weight: ['400', '700'],
   subsets: ['latin'],
-  variable: '--font-pt-serif',
+  variable: '--font-pt-serif-next',
   display: 'swap',
 })
 
 const interTight = Inter_Tight({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-inter-tight',
+  variable: '--font-inter-tight-next',
   display: 'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '600'],
   subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
+  variable: '--font-jetbrains-mono-next',
   display: 'swap',
 })
 
 const barlowCondensed = Barlow_Condensed({
   weight: ['600', '700', '800'],
   subsets: ['latin'],
-  variable: '--font-barlow-condensed',
+  variable: '--font-barlow-condensed-next',
   display: 'swap',
 })
 
 const teko = Teko({
   weight: ['500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-teko',
+  variable: '--font-teko-next',
   display: 'swap',
 })
 
