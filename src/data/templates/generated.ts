@@ -11,7 +11,8 @@ import template11 from './Native.json'
 import template9 from './native_advanced.json'
 import template10 from './native_simple.json'
 import template12 from './rugbedbugg.json'
-import template13 from './windows_xp.json'
+import template13 from './template_andreicsantana.json'
+import template14 from './windows_xp.json'
 
 export const GENERATED_TEMPLATES = [
   { file: 'ascii_native', template: template0 },
@@ -27,5 +28,6 @@ export const GENERATED_TEMPLATES = [
   { file: 'native_simple', template: template10 },
   { file: 'Native', template: template11 },
   { file: 'rugbedbugg', template: template12 },
-  { file: 'windows_xp', template: template13 },
+  { file: 'template_andreicsantana', template: template13 },
+  { file: 'windows_xp', template: template14 },
 ] as const

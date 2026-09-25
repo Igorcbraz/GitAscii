@@ -1,0 +1,160 @@
+{
+  "widgets": [
+    {
+      "instanceId": "widget_1788198777555",
+      "widgetId": "winxp-bliss",
+      "name": "Winxp-bliss Widget",
+      "position": {
+        "x": 10,
+        "y": 8
+      },
+      "size": {
+        "width": 780,
+        "height": 1488
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    },
+    {
+      "instanceId": "widget_1788205822704",
+      "widgetId": "winxp-window",
+      "name": "Winxp-window Widget",
+      "position": {
+        "x": 0,
+        "y": 56
+      },
+      "size": {
+        "width": 728,
+        "height": 336
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 2
+    },
+    {
+      "instanceId": "widget_1788205895417",
+      "widgetId": "winxp-paint",
+      "name": "Winxp-paint Widget",
+      "position": {
+        "x": 0,
+        "y": 560
+      },
+      "size": {
+        "width": 752,
+        "height": 352
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 3
+    },
+    {
+      "instanceId": "widget_1788205968216",
+      "widgetId": "winxp-minesweeper",
+      "name": "Winxp-minesweeper Widget",
+      "position": {
+        "x": 272,
+        "y": 328
+      },
+      "size": {
+        "width": 528,
+        "height": 320
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 4
+    },
+    {
+      "instanceId": "widget_1788206137909",
+      "widgetId": "winxp-error-dialog",
+      "name": "Winxp-error-dialog Widget",
+      "position": {
+        "x": 278,
+        "y": 1048
+      },
+      "size": {
+        "width": 520,
+        "height": 210
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    },
+    {
+      "instanceId": "widget_1788206152509",
+      "widgetId": "winxp-media-player",
+      "name": "Winxp-media-player Widget",
+      "position": {
+        "x": 72,
+        "y": 792
+      },
+      "size": {
+        "width": 632,
+        "height": 296
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 6
+    },
+    {
+      "instanceId": "widget_1788206259981",
+      "widgetId": "winxp-system-properties",
+      "name": "Winxp-system-properties Widget",
+      "position": {
+        "x": 0,
+        "y": 1120
+      },
+      "size": {
+        "width": 704,
+        "height": 360
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 7
+    },
+    {
+      "instanceId": "widget_1788206311805",
+      "widgetId": "winxp-taskbar",
+      "name": "Winxp-taskbar Widget",
+      "position": {
+        "x": 10,
+        "y": 1488
+      },
+      "size": {
+        "width": 780,
+        "height": 48
+      },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 8
+    }
+  ],
+  "globalStyles": {
+    "padding": 24,
+    "textColor": "#e5e5e5",
+    "themeMode": "dark",
+    "fontFamily": "'JetBrains Mono', monospace",
+    "accentColor": "#55ffff",
+    "borderColor": "#1a1424",
+    "borderRadius": 0,
+    "templateStyle": "windows-xp",
+    "backgroundColor": "#0055ea"
+  },
+  "id": "andreicsantana",
+  "name": "Windows XP (Andreicsantana)",
+  "description": "Custom Windows XP layout por Andreicsantana",
+  "templateId": "andreicsantana",
+  "widgetCategory": "windows-xp",
+  "author": "Andreicsantana",
+  "authorUrl": "https://github.com/Andreicsantana",
+  "category": "windows-xp",
+  "categoryUrl": "https://github.com/Andreicsantana"
+}
