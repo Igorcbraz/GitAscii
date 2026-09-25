@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, Compass, Laptop, Layers, TrendingUp } from 'lucide-react'
+import { Activity, Compass, Laptop, Layers, ScanEye, TrendingUp } from 'lucide-react'
 import React from 'react'
 
 import { useI18n } from '@/i18n'
@@ -8,7 +8,7 @@ import { useI18n } from '@/i18n'
 import type { ProProfileRecord } from '../../types'
 import { ProfileScopeSelect } from '../ProfileScopeSelect'
 
-export type SectionId = 'overview' | 'traffic' | 'sources' | 'profiles' | 'activity'
+export type SectionId = 'badge' | 'overview' | 'traffic' | 'sources' | 'profiles' | 'activity'
 
 interface AnalyticsSidebarNavProps {
   activeSection: SectionId
@@ -30,6 +30,11 @@ export const AnalyticsSidebarNav: React.FC<AnalyticsSidebarNavProps> = ({
   const { t } = useI18n()
 
   const sections: { id: SectionId; label: string; icon: React.ReactNode; badge?: string }[] = [
+    {
+      id: 'badge',
+      label: t('pro.analytics.badge_title', 'Analytics badge'),
+      icon: <ScanEye className="w-3.5 h-3.5" />,
+    },
     {
       id: 'overview',
       label: t('pro.analytics.sec_overview', 'Overview'),

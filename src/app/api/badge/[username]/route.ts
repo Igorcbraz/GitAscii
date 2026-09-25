@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { parseViewerMetadata, recordProfileView } from '@/lib/analytics/profileMetrics'
+import { isBadgeStyle } from '@/lib/analytics/telemetryBadge'
 import { isValidGitHubUsername } from '@/utils/githubUsername'
 
 export const dynamic = 'force-dynamic'
@@ -43,20 +44,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     console.error('Failed to process viewer metadata:', error)
   }
 
+  const requestedStyle = new URL(request.url).searchParams.get('style')
+  const style = isBadgeStyle(requestedStyle) ? requestedStyle : 'classic'
+  const width = style === 'compact' ? 160 : 800
   const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="24" viewBox="0 0 800 24" fill="none" role="img" aria-label="Made with GitAscii">
-  <defs>
-    <style>
-      .badge-bg { fill: #0a0a0c; }
-      .badge-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; fill: #71717a; letter-spacing: 0.05em; }
-      .badge-brand { fill: #c5ff4a; font-weight: 700; }
-    </style>
-  </defs>
-  <rect width="800" height="24" rx="4" class="badge-bg"/>
-  <text x="400" y="16" text-anchor="middle" class="badge-text">
-    made with <tspan class="badge-brand">GitAscii</tspan>
-  </text>
-</svg>`.trim()
+    style === 'transparent'
+      ? '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1" aria-label="GitAscii analytics pixel"></svg>'
+      : `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="24" viewBox="0 0 ${width} 24" fill="none" role="img" aria-label="Made with GitAscii">
+  ${style === 'outline' ? '<style>.badge-text{fill:#e5e5e5}.badge-brand{fill:#c5ff4a}@media(prefers-color-scheme:light){.badge-text{fill:#313131}.badge-brand{fill:#597321}}</style>' : ''}
+  ${style === 'classic' || style === 'compact' ? `<rect width="${width}" height="24" rx="4" fill="#0a0a0c"/>` : ''}
+  ${style === 'outline' ? `<rect x="0.5" y="0.5" width="${width - 1}" height="23" rx="4" stroke="#c5ff4a" stroke-opacity="0.65"/>` : ''}
+  <text x="${width / 2}" y="16" text-anchor="middle" class="badge-text" fill="${style === 'outline' ? '#e5e5e5' : '#71717a'}" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="500" letter-spacing="0.05em">made with <tspan class="badge-brand" fill="#c5ff4a" font-weight="700">GitAscii</tspan></text>
+</svg>`
 
   return new NextResponse(svg, {
     headers: {

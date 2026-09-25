@@ -5,6 +5,7 @@ import { MIGRATION_TEMPLATES } from '@/constants'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 import { getDynamicRulesConfig } from '@/features/pro/server/dynamicRulesStore'
 import { getProEntitlements } from '@/features/pro/server/entitlements'
+import { getTelemetryStyle } from '@/lib/analytics/telemetryBadge'
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
 import { bootstrapGitasciiBranch } from '@/lib/migration/branchBootstrap'
@@ -167,13 +168,6 @@ export async function POST(request: Request) {
       }
     }
 
-    const v2EmbedCode = generateV2EmbedCode({
-      username,
-      profileSlug,
-      includeBadge: Boolean(isPro),
-      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
-    })
-
     const readmeRes = await fetch(
       API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
       { headers }
@@ -187,6 +181,14 @@ export async function POST(request: Request) {
       readmeSha = readmeData.sha
       currentReadmeContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
     }
+
+    const v2EmbedCode = generateV2EmbedCode({
+      username,
+      profileSlug,
+      includeBadge: Boolean(isPro),
+      badgeStyle: getTelemetryStyle(currentReadmeContent, username, profileSlug),
+      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
+    })
 
     const updatedReadmeContent = updateReadmeContent(currentReadmeContent, v2EmbedCode, profileSlug)
 

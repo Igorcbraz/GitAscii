@@ -107,6 +107,14 @@ const MOCK_PRO_OVERVIEW = {
 
 const MOCK_PRO_ANALYTICS = {
   ...MOCK_PRO_OVERVIEW,
+  topProfiles: MOCK_PRO_OVERVIEW.topProfiles.map((profile) => ({
+    ...profile,
+    views: profile.totalViews,
+    uniques: Math.round(profile.totalViews / 5),
+    cacheHitRatio: 98,
+    avgLatencyMs: 24,
+    percentage: Math.round((profile.totalViews / 42850) * 100),
+  })),
   range: '30d',
   hourlyDistribution: Array.from({ length: 24 }, (_, hour) => ({
     hour,
@@ -305,6 +313,14 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
       })
     })
 
+    await page.route('**/api/pro/analytics/badge*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true, canWrite: true, style: 'classic' }),
+      })
+    })
+
     await page.route('**/api/pro/errors', async (route) => {
       await route.fulfill({
         status: 200,
@@ -385,12 +401,69 @@ test.describe('GitAscii Pro Area E2E Tests', () => {
 
     await expect(page.locator('h1')).toContainText(/Analytics|Métricas/i)
 
+    const updateBadge = page.getByRole('button', {
+      name: /Update README badge|Atualizar badge no README/,
+    })
+    const recheckBadge = page.getByRole('button', {
+      name: /Check README again|Verificar README novamente/,
+    })
+    await expect(updateBadge).toHaveCount(0)
+    await expect(recheckBadge).toHaveCount(0)
+    await page.getByRole('radio', { name: /Compact|Compacta/ }).click()
+    await expect(updateBadge).toBeVisible()
+    await expect(recheckBadge).toBeVisible()
+    await page.getByRole('radio', { name: /Classic|Clássica/ }).click()
+    await expect(updateBadge).toHaveCount(0)
+    await expect(recheckBadge).toHaveCount(0)
+
     await expect(page.locator('svg')).not.toHaveCount(0)
     await expect(page.getByText(/Badge Fetches|Buscas do Badge/i).first()).toBeVisible()
     await expect(
-      page.getByText(/No geographic data collected yet|Nenhum dado geográfico/i)
+      page.getByText(/Observed Request Metadata|Metadados e Ambiente Observados/i)
     ).toBeVisible()
     await expect(page.getByText('United States')).toHaveCount(0)
+  })
+
+  test('should guide badge installation and unlock analytics after README update', async ({
+    page,
+  }) => {
+    await page.route('**/api/pro/analytics/badge*', async (route) => {
+      if (route.request().method() === 'PUT') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ installed: true, canWrite: true, style: 'transparent' }),
+        })
+        return
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: false, canWrite: true, style: 'classic' }),
+      })
+    })
+    await page.goto('/pro/analytics')
+    await expect(
+      page.getByText(/Activate README analytics|Ative o analytics do README/)
+    ).toBeVisible()
+    await page.getByRole('radio', { name: /Invisible|Invisível/ }).click()
+    await page
+      .getByRole('button', { name: /Add badge to README|Adicionar badge ao README/ })
+      .click()
+    await expect(
+      page.getByText(/Activate README analytics|Ative o analytics do README/)
+    ).toHaveCount(0)
+    await expect(page.getByText(/Installed|Instalada/).first()).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: /Update README badge|Atualizar badge no README/ })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole('button', { name: /Check README again|Verificar README novamente/ })
+    ).toHaveCount(0)
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(
+      page.getByRole('radiogroup', { name: /Badge style|Estilo da badge/ })
+    ).toBeVisible()
   })
 
   test('should navigate to Profiles dashboard and allow creating a profile', async ({ page }) => {

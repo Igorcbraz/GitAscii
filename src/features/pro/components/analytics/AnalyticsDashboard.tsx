@@ -8,6 +8,7 @@ import {
   FileSpreadsheet,
   FileText,
   Layers,
+  LockKeyhole,
   Radio,
   RefreshCw,
   TrendingUp,
@@ -17,11 +18,13 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import type { BadgeStyle } from '@/lib/analytics/telemetryBadge'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { AnalyticsSummary, ProProfileRecord, TimeRange } from '../../types'
 import { formatLocalizedDay, formatUtcHourToLocal } from '../../utils/proFormatters'
 import { ProHeader } from '../ProHeader'
+import { AnalyticsBadgeCustomizer, type BadgeStatus } from './AnalyticsBadgeCustomizer'
 import { AnalyticsProfilesSection } from './AnalyticsProfilesSection'
 import { AnalyticsSidebarNav, type SectionId } from './AnalyticsSidebarNav'
 import { AnalyticsDashboardSkeleton } from './AnalyticsSkeleton'
@@ -43,6 +46,12 @@ export const AnalyticsDashboard: React.FC = () => {
   const [feedPage, setFeedPage] = useState(1)
   const [feedPageSize, setFeedPageSize] = useState(10)
   const [profiles, setProfiles] = useState<ProProfileRecord[]>([])
+  const [badgeStatus, setBadgeStatus] = useState<BadgeStatus | null>(null)
+  const [badgeStyle, setBadgeStyle] = useState<BadgeStyle>('classic')
+  const [badgeChecking, setBadgeChecking] = useState(false)
+  const [badgeSaving, setBadgeSaving] = useState(false)
+  const [badgeError, setBadgeError] = useState<string | null>(null)
+  const badgeProfile = selectedProfile === 'all' ? 'default' : selectedProfile
 
   const exportDropdownRef = useRef<HTMLDivElement>(null)
   const contentContainerRef = useRef<HTMLDivElement>(null)
@@ -62,6 +71,50 @@ export const AnalyticsDashboard: React.FC = () => {
   useEffect(() => {
     void fetchProfiles()
   }, [fetchProfiles])
+
+  const fetchBadgeStatus = useCallback(async () => {
+    setBadgeChecking(true)
+    setBadgeError(null)
+    try {
+      const res = await fetch(
+        `/api/pro/analytics/badge?profile=${encodeURIComponent(badgeProfile)}`,
+        { cache: 'no-store' }
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to check README')
+      setBadgeStatus(data)
+      setBadgeStyle(data.style || 'classic')
+    } catch (error) {
+      setBadgeStatus(null)
+      setBadgeError(error instanceof Error ? error.message : 'Unable to check README')
+    } finally {
+      setBadgeChecking(false)
+    }
+  }, [badgeProfile])
+
+  useEffect(() => {
+    setBadgeStatus(null)
+    void fetchBadgeStatus()
+  }, [fetchBadgeStatus])
+
+  const applyBadge = async () => {
+    setBadgeSaving(true)
+    setBadgeError(null)
+    try {
+      const res = await fetch('/api/pro/analytics/badge', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile: badgeProfile, style: badgeStyle }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to update README')
+      setBadgeStatus(data)
+    } catch (error) {
+      setBadgeError(error instanceof Error ? error.message : 'Unable to update README')
+    } finally {
+      setBadgeSaving(false)
+    }
+  }
 
   const fetchAnalytics = useCallback(
     async (isBackground = false) => {
@@ -112,6 +165,7 @@ export const AnalyticsDashboard: React.FC = () => {
     { id: '90d', label: t('pro.analytics.range_90d', '90 Days') },
     { id: 'all', label: t('pro.analytics.range_all', 'All Time') },
   ]
+  const analyticsLocked = !badgeStatus?.installed
 
   const scrollToSection = (id: SectionId) => {
     setActiveSection(id)
@@ -175,7 +229,7 @@ export const AnalyticsDashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex h-screen overflow-hidden bg-[#0a0a0a] max-w-full">
+    <div className="flex-1 flex flex-col md:flex-row h-screen overflow-hidden bg-[#0a0a0a] max-w-full">
       <AnalyticsSidebarNav
         activeSection={activeSection}
         onSelectSection={scrollToSection}
@@ -188,7 +242,7 @@ export const AnalyticsDashboard: React.FC = () => {
       <div
         ref={contentContainerRef}
         id="analytics-scroll-container"
-        className="flex-1 overflow-y-auto overflow-x-hidden h-screen flex flex-col min-w-0 max-w-full"
+        className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 md:h-screen flex flex-col min-w-0 w-full max-w-full"
       >
         <ProHeader
           title={t('pro.analytics.title', 'Analytics & Telemetry')}
@@ -244,6 +298,7 @@ export const AnalyticsDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setExportOpen(!exportOpen)}
+                  disabled={analyticsLocked}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium transition-all cursor-pointer"
                   title={t('pro.analytics.export', 'Export')}
                 >
@@ -297,207 +352,251 @@ export const AnalyticsDashboard: React.FC = () => {
         />
 
         <div className="p-6 sm:p-8 space-y-8 max-w-[1700px] w-full mx-auto min-w-0 max-w-full overflow-x-hidden">
-          <section id="overview" className="space-y-4 scroll-mt-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[#c5ff4a]" />
-                <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-                  {t('pro.analytics.sec_overview', 'Overview')}
-                </h2>
-              </div>
-              <span className="text-xs font-mono text-[#8a8a8a]">
-                {t('pro.analytics.active_scope', 'Active Scope:')}{' '}
-                <strong>
-                  {selectedProfile === 'all'
-                    ? t('pro.analytics.all_profiles', 'All Profiles')
-                    : selectedProfile}
-                </strong>{' '}
-                ({range})
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-white/[0.06] rounded overflow-hidden border border-white/[0.08]">
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.kpi.total_views', 'Total Image Requests')}
-                  </span>
-                  <div className="p-1 rounded bg-[#c5ff4a]/10 border border-[#c5ff4a]/20">
-                    <Eye className="w-3.5 h-3.5 text-[#c5ff4a]" />
+          <AnalyticsBadgeCustomizer
+            profile={badgeProfile}
+            status={badgeStatus}
+            style={badgeStyle}
+            onStyleChange={setBadgeStyle}
+            onApply={() => void applyBadge()}
+            onCheck={() => void fetchBadgeStatus()}
+            saving={badgeSaving}
+            checking={badgeChecking}
+            error={badgeError}
+          />
+          <div className="relative">
+            <div
+              className={`space-y-8 ${analyticsLocked ? 'blur-[5px] opacity-40 pointer-events-none select-none' : ''}`}
+              aria-hidden={analyticsLocked}
+              inert={analyticsLocked}
+            >
+              <section id="overview" className="space-y-4 scroll-mt-6">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-[#c5ff4a]" />
+                    <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                      {t('pro.analytics.sec_overview', 'Overview')}
+                    </h2>
                   </div>
+                  <span className="text-xs font-mono text-[#8a8a8a]">
+                    {t('pro.analytics.active_scope', 'Active Scope:')}{' '}
+                    <strong>
+                      {selectedProfile === 'all'
+                        ? t('pro.analytics.all_profiles', 'All Profiles')
+                        : selectedProfile}
+                    </strong>{' '}
+                    ({range})
+                  </span>
                 </div>
-                <p className="text-2xl font-bold font-mono text-[#c5ff4a] tracking-tight">
-                  {(summary?.totalRequests ?? summary?.totalViews ?? 0).toLocaleString()}
-                </p>
-                {compareEnabled && summary?.growthRateViews !== undefined ? (
-                  <div className="flex items-center gap-1.5 text-[11px]">
-                    <span
-                      className={`px-1.5 py-0.5 rounded font-bold ${
-                        summary.growthRateViews >= 0
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                      }`}
-                    >
-                      {summary.growthRateViews >= 0
-                        ? `+${summary.growthRateViews}%`
-                        : `${summary.growthRateViews}%`}
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-white/[0.06] rounded overflow-hidden border border-white/[0.08]">
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.kpi.total_views', 'Total Image Requests')}
+                      </span>
+                      <div className="p-1 rounded bg-[#c5ff4a]/10 border border-[#c5ff4a]/20">
+                        <Eye className="w-3.5 h-3.5 text-[#c5ff4a]" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-[#c5ff4a] tracking-tight">
+                      {(summary?.totalRequests ?? summary?.totalViews ?? 0).toLocaleString()}
+                    </p>
+                    {compareEnabled && summary?.growthRateViews !== undefined ? (
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <span
+                          className={`px-1.5 py-0.5 rounded font-bold ${
+                            summary.growthRateViews >= 0
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          }`}
+                        >
+                          {summary.growthRateViews >= 0
+                            ? `+${summary.growthRateViews}%`
+                            : `${summary.growthRateViews}%`}
+                        </span>
+                        <span className="text-[#666]">{t('pro.stat.vs_prev', 'vs prev')}</span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-[#777] block font-medium">
+                        {t('pro.analytics.observed_30d', '30d observed')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.kpi.unique_visitors', 'Est. Unique Sources')}
+                      </span>
+                      <div className="p-1 rounded bg-white/[0.04] border border-white/10">
+                        <Users className="w-3.5 h-3.5 text-[#aaa]" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-white tracking-tight">
+                      {(summary?.uniqueSources ?? summary?.uniqueVisitors ?? 0).toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-cyan-400/80 block font-medium">
+                      {t('pro.analytics.hyperloglog_hashed', 'HyperLogLog Hashed')}
                     </span>
-                    <span className="text-[#666]">{t('pro.stat.vs_prev', 'vs prev')}</span>
                   </div>
-                ) : (
-                  <span className="text-[10px] text-[#777] block font-medium">
-                    {t('pro.analytics.observed_30d', '30d observed')}
-                  </span>
-                )}
-              </div>
 
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.kpi.unique_visitors', 'Est. Unique Sources')}
-                  </span>
-                  <div className="p-1 rounded bg-white/[0.04] border border-white/10">
-                    <Users className="w-3.5 h-3.5 text-[#aaa]" />
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.kpi.cache_validation', 'Cache Validation (304)')}
+                      </span>
+                      <div className="p-1 rounded bg-cyan-500/10 border border-cyan-500/20">
+                        <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-cyan-400 tracking-tight">
+                      {`${summary?.cacheHitRatio || 0}%`}
+                    </p>
+                    <span className="text-[10px] text-[#777] block font-medium">
+                      {t('pro.analytics.not_modified_304', '304 Not Modified')}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.kpi.avg_render', 'Avg. Server Latency')}
+                      </span>
+                      <div className="p-1 rounded bg-amber-500/10 border border-amber-500/20">
+                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-white tracking-tight">
+                      {`${summary?.avgLatencyMs || 28}ms`}
+                    </p>
+                    <span className="text-[10px] text-[#777] block font-medium">
+                      {t('pro.analytics.edge_speed_sub30', '< 30ms Edge Speed')}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.analytics.recent_viewers', 'Requests (Last 30m)')}
+                      </span>
+                      <div className="p-1 rounded bg-emerald-500/10 border border-emerald-500/20">
+                        <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-emerald-400 tracking-tight">
+                      {(
+                        summary?.requestsLast30m ??
+                        summary?.activeViewersLast30m ??
+                        0
+                      ).toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-emerald-400/80 block font-medium">
+                      {t('pro.analytics.rolling_30m_window', 'Rolling 30m Window')}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
+                        {t('pro.analytics.daily_avg_views', 'Daily Avg. Requests')}
+                      </span>
+                      <div className="p-1 rounded bg-white/[0.04] border border-white/10">
+                        <TrendingUp className="w-3.5 h-3.5 text-[#c5ff4a]" />
+                      </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-white tracking-tight">
+                      {(summary?.avgDailyRequests ?? summary?.avgDailyViews ?? 0).toLocaleString()}
+                    </p>
+                    <span className="text-[10px] text-[#777] block font-medium">
+                      {t('pro.analytics.per_day_average', 'Per Day Average')}
+                    </span>
                   </div>
                 </div>
-                <p className="text-2xl font-bold font-mono text-white tracking-tight">
-                  {(summary?.uniqueSources ?? summary?.uniqueVisitors ?? 0).toLocaleString()}
-                </p>
-                <span className="text-[10px] text-cyan-400/80 block font-medium">
-                  {t('pro.analytics.hyperloglog_hashed', 'HyperLogLog Hashed')}
-                </span>
-              </div>
 
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.kpi.cache_validation', 'Cache Validation (304)')}
-                  </span>
-                  <div className="p-1 rounded bg-cyan-500/10 border border-cyan-500/20">
-                    <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded overflow-hidden border border-white/[0.05]">
+                  <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#666] text-[11px]">
+                      {t('pro.insights.peak_day', 'Peak Day:')}
+                    </span>
+                    <span className="text-white font-bold">
+                      {formatLocalizedDay(summary?.peakDay.day, language)}
+                    </span>
+                  </div>
+                  <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#666] text-[11px]">
+                      {t('pro.insights.peak_hour', 'Peak Hour:')}
+                    </span>
+                    <span className="text-white font-bold">
+                      {formatUtcHourToLocal(summary?.peakHour.hour)}
+                    </span>
+                  </div>
+                  <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#666] text-[11px]">
+                      {t('pro.insights.measurement_source', 'Measured By:')}
+                    </span>
+                    <span className="text-white font-bold truncate">
+                      {t('pro.insights.badge_requests', 'Badge requests')}
+                    </span>
+                  </div>
+                  <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
+                    <span className="text-[#666] text-[11px]">
+                      {t('pro.insights.top_referrer', 'Top Referrer:')}
+                    </span>
+                    <span className="text-white font-bold truncate max-w-[140px]">
+                      {summary?.topSources[0]?.name || 'GitHub'}
+                    </span>
                   </div>
                 </div>
-                <p className="text-2xl font-bold font-mono text-cyan-400 tracking-tight">
-                  {`${summary?.cacheHitRatio || 0}%`}
-                </p>
-                <span className="text-[10px] text-[#777] block font-medium">
-                  {t('pro.analytics.not_modified_304', '304 Not Modified')}
-                </span>
-              </div>
+              </section>
 
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.kpi.avg_render', 'Avg. Server Latency')}
-                  </span>
-                  <div className="p-1 rounded bg-amber-500/10 border border-amber-500/20">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold font-mono text-white tracking-tight">
-                  {`${summary?.avgLatencyMs || 28}ms`}
-                </p>
-                <span className="text-[10px] text-[#777] block font-medium">
-                  {t('pro.analytics.edge_speed_sub30', '< 30ms Edge Speed')}
-                </span>
-              </div>
+              <AnalyticsTrafficSection
+                summary={summary}
+                range={range}
+                compareEnabled={compareEnabled}
+              />
 
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.analytics.recent_viewers', 'Requests (Last 30m)')}
-                  </span>
-                  <div className="p-1 rounded bg-emerald-500/10 border border-emerald-500/20">
-                    <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold font-mono text-emerald-400 tracking-tight">
-                  {(
-                    summary?.requestsLast30m ??
-                    summary?.activeViewersLast30m ??
-                    0
-                  ).toLocaleString()}
-                </p>
-                <span className="text-[10px] text-emerald-400/80 block font-medium">
-                  {t('pro.analytics.rolling_30m_window', 'Rolling 30m Window')}
-                </span>
-              </div>
+              <AnalyticsTechSourcesSection summary={summary} />
 
-              <div className="bg-[#0c0c0c] px-4 py-3.5 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-[#777]">
-                    {t('pro.analytics.daily_avg_views', 'Daily Avg. Requests')}
-                  </span>
-                  <div className="p-1 rounded bg-white/[0.04] border border-white/10">
-                    <TrendingUp className="w-3.5 h-3.5 text-[#c5ff4a]" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold font-mono text-white tracking-tight">
-                  {(summary?.avgDailyRequests ?? summary?.avgDailyViews ?? 0).toLocaleString()}
-                </p>
-                <span className="text-[10px] text-[#777] block font-medium">
-                  {t('pro.analytics.per_day_average', 'Per Day Average')}
-                </span>
-              </div>
+              <AnalyticsProfilesSection summary={summary} />
+
+              <AnalyticsTelemetrySection
+                summary={summary}
+                autoRefresh={autoRefresh}
+                setAutoRefresh={setAutoRefresh}
+                refreshing={refreshing}
+                onFetchAnalytics={fetchAnalytics}
+                feedPage={feedPage}
+                setFeedPage={setFeedPage}
+                feedPageSize={feedPageSize}
+                setFeedPageSize={setFeedPageSize}
+              />
             </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.04] rounded overflow-hidden border border-white/[0.05]">
-              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666] text-[11px]">
-                  {t('pro.insights.peak_day', 'Peak Day:')}
-                </span>
-                <span className="text-white font-bold">
-                  {formatLocalizedDay(summary?.peakDay.day, language)}
-                </span>
+            {analyticsLocked && (
+              <div className="absolute inset-x-0 top-8 z-10 flex justify-center px-4">
+                <div className="max-w-sm w-full bg-[#151515] border border-white/15 rounded-md p-4">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                    <LockKeyhole className="w-4 h-4 text-[#c5ff4a]" aria-hidden="true" />
+                    <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
+                      {t('pro.analytics.badge_unlock_title', 'Activate README analytics')}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-[#a4a4a4] leading-relaxed mt-3">
+                    {t(
+                      'pro.analytics.badge_unlock_desc',
+                      'Add the tracking image to your GitHub profile README to collect badge fetches and unlock these charts.'
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection('badge')}
+                    className="mt-3 px-3 py-1.5 rounded bg-[#c5ff4a] text-black text-xs font-semibold cursor-pointer hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    {t('pro.analytics.badge_customize', 'Add the badge')}
+                  </button>
+                </div>
               </div>
-              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666] text-[11px]">
-                  {t('pro.insights.peak_hour', 'Peak Hour:')}
-                </span>
-                <span className="text-white font-bold">
-                  {formatUtcHourToLocal(summary?.peakHour.hour)}
-                </span>
-              </div>
-              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666] text-[11px]">
-                  {t('pro.insights.measurement_source', 'Measured By:')}
-                </span>
-                <span className="text-white font-bold truncate">
-                  {t('pro.insights.badge_requests', 'Badge requests')}
-                </span>
-              </div>
-              <div className="bg-[#0c0c0c] px-4 py-2.5 flex items-center justify-between text-xs font-mono">
-                <span className="text-[#666] text-[11px]">
-                  {t('pro.insights.top_referrer', 'Top Referrer:')}
-                </span>
-                <span className="text-white font-bold truncate max-w-[140px]">
-                  {summary?.topSources[0]?.name || 'GitHub'}
-                </span>
-              </div>
-            </div>
-          </section>
-
-          <AnalyticsTrafficSection
-            summary={summary}
-            range={range}
-            compareEnabled={compareEnabled}
-          />
-
-          <AnalyticsTechSourcesSection summary={summary} />
-
-          <AnalyticsProfilesSection summary={summary} />
-
-          <AnalyticsTelemetrySection
-            summary={summary}
-            autoRefresh={autoRefresh}
-            setAutoRefresh={setAutoRefresh}
-            refreshing={refreshing}
-            onFetchAnalytics={fetchAnalytics}
-            feedPage={feedPage}
-            setFeedPage={setFeedPage}
-            feedPageSize={feedPageSize}
-            setFeedPageSize={setFeedPageSize}
-          />
+            )}
+          </div>
         </div>
       </div>
     </div>

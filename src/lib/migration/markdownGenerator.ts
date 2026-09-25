@@ -1,8 +1,12 @@
+import { type BadgeStyle, generateTelemetryBlock } from '@/lib/analytics/telemetryBadge'
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 export interface EmbedOptions {
   username: string
   profileSlug?: string
   includeBadge?: boolean
   dynamic?: boolean
+  badgeStyle?: BadgeStyle
 }
 
 export function generateV2EmbedCode(options: EmbedOptions): string {
@@ -22,8 +26,7 @@ export function generateV2EmbedCode(options: EmbedOptions): string {
 </picture>`
 
   if (options.includeBadge) {
-    const badgeBlock = `\n<!-- GITASCII:TELEMETRY:START - Measures badge fetches (usually GitHub Camo refreshes), not exact human views -->\n<p align="center">\n  <a href="${API_ENDPOINTS.SITE.HOME}">\n    <img alt="GitAscii badge fetch analytics" src="${API_ENDPOINTS.BADGE.PUBLIC_PROFILE_URL(username, slug)}" width="100%">\n  </a>\n</p>\n<!-- GITASCII:TELEMETRY:END -->`
-    return `${pictureBlock}\n${badgeBlock}`
+    return `${pictureBlock}\n\n${generateTelemetryBlock(username, slug, options.badgeStyle || 'classic')}`
   }
 
   return pictureBlock
@@ -44,4 +47,3 @@ export function updateReadmeContent(
 
   return `${finalEmbedCode}\n`
 }
-import { API_ENDPOINTS } from '@/services/endpoints'
