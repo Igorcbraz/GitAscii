@@ -96,10 +96,20 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
       })
     }
     void p.exec().catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
-    return dbProfiles.map((profile) => ({
-      ...profile,
-      ...getPublishedProfileUrls(u, profile.slug),
-    }))
+
+    const gitExistsList = await Promise.allSettled(
+      dbProfiles.map((p) => checkIfProfileExistsOnGitHub(u, p.slug))
+    )
+
+    return dbProfiles.map((profile, i) => {
+      const settled = gitExistsList[i]
+      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
+      return {
+        ...profile,
+        isSynced: existsOnGit,
+        ...getPublishedProfileUrls(u, profile.slug),
+      }
+    })
   }
 
   let slugs = await redis.smembers(profilesSetKey).catch(() => [] as string[])
@@ -127,7 +137,20 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     } catch (error) {
       console.warn('[ProfileManager] Failed to hydrate Redis profile cache:', error)
     }
-    return dbProfiles
+
+    const gitExistsList = await Promise.allSettled(
+      dbProfiles.map((p) => checkIfProfileExistsOnGitHub(u, p.slug))
+    )
+
+    return dbProfiles.map((profile, i) => {
+      const settled = gitExistsList[i]
+      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
+      return {
+        ...profile,
+        isSynced: existsOnGit,
+        ...getPublishedProfileUrls(u, profile.slug),
+      }
+    })
   }
 
   if (!slugs || slugs.length === 0 || !slugs.includes('default')) {
@@ -147,22 +170,18 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     }
     const results = await p.exec<any[]>().catch(() => [])
 
-    const gitVersionsList = await Promise.allSettled(
-      slugs.map((slug) => getGitCommitsVersionHistory(u, slug))
+    const gitExistsList = await Promise.allSettled(
+      slugs.map((slug) => checkIfProfileExistsOnGitHub(u, slug))
     )
 
     for (let i = 0; i < slugs.length; i++) {
       const slug = slugs[i]
       const data = results[i * 2]
       const versionIds = results[i * 2 + 1] || []
-      const settled = gitVersionsList[i]
-      const gitVersions = settled && settled.status === 'fulfilled' ? settled.value : []
+      const settled = gitExistsList[i]
+      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
       const dbMatch = dbProfiles.find((dp) => dp.slug === slug)
-      const isSynced =
-        gitVersions.length > 0 ||
-        dbMatch?.isSynced ||
-        data?.isSynced === 'true' ||
-        data?.isSynced === true
+      const isSynced = existsOnGit
 
       const isDefault =
         data?.isDefault !== undefined
@@ -170,8 +189,7 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
           : (dbMatch?.isDefault ?? slug === 'default')
 
       const { publicUrl, rawSvgUrl } = getPublishedProfileUrls(u, slug)
-      const versionCount =
-        gitVersions.length || versionIds?.length || dbMatch?.versionCount || (isSynced ? 1 : 0)
+      const versionCount = versionIds?.length || dbMatch?.versionCount || (isSynced ? 1 : 0)
 
       const storedStatus = data?.status || dbMatch?.status
       const status =
@@ -738,17 +756,16 @@ export async function createProfileVersion(
   return record
 }
 
-export async function getGitCommitsVersionHistory(
+export async function checkIfProfileExistsOnGitHub(
   username: string,
   slug: string
-): Promise<ProfileVersionRecord[]> {
+): Promise<boolean> {
   try {
     const u = username.toLowerCase().trim()
     const cleanSlug = slug.toLowerCase().trim()
-    if (!u || !cleanSlug) return []
+    if (!u || !cleanSlug) return false
 
-    const filePath = `profiles/${cleanSlug}/dark.svg`
-    const legacyFilePath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
+    const configPath = cleanSlug === 'default' ? 'gitascii.json' : `gitascii_${cleanSlug}.json`
 
     const authHeaders: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
@@ -761,104 +778,35 @@ export async function getGitCommitsVersionHistory(
         authHeaders['Authorization'] = `Bearer ${token}`
       }
     } catch (tokenErr) {
-      console.warn('[ProfileManager] Failed to get installation token for history fetch:', tokenErr)
+      console.warn(
+        '[ProfileManager] Failed to get installation token for existence check:',
+        tokenErr
+      )
     }
 
-    let res = await fetch(
-      API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, filePath, 'gitascii') + '&_t=' + Date.now(),
+    const res = await fetch(
+      API_ENDPOINTS.GITHUB.REPO_CONTENTS(u, u, configPath) + '?ref=gitascii',
       {
+        method: 'HEAD',
         headers: authHeaders,
         signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
         cache: 'no-store',
       }
     )
 
-    let commits: unknown = []
-    if (res.ok) {
-      commits = await res.json()
-    } else {
-      console.error(
-        '[ProfileManager] GitHub API error (primary):',
-        res.status,
-        await res.text().catch(() => '')
-      )
-    }
-
-    if (!res.ok || !Array.isArray(commits) || commits.length === 0) {
-      res = await fetch(
-        API_ENDPOINTS.GITHUB.COMMITS_FOR_PATH(u, u, legacyFilePath) + '&_t=' + Date.now(),
-        {
-          headers: authHeaders,
-          signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
-          cache: 'no-store',
-        }
-      )
-      if (res.ok) {
-        commits = await res.json()
-      } else {
-        console.error(
-          '[ProfileManager] GitHub API error (legacy):',
-          res.status,
-          await res.text().catch(() => '')
-        )
-      }
-    }
-
-    if (!Array.isArray(commits) || commits.length === 0) {
-      return []
-    }
-
-    let defaultWidgetsCount = 3
-    try {
-      const dbProfiles = await getUserProfilesFromDb(u)
-      const matched = dbProfiles.find((dp) => dp.slug === cleanSlug)
-      if (matched && matched.widgetsCount > 0) {
-        defaultWidgetsCount = matched.widgetsCount
-      }
-    } catch (error) {
-      console.warn('[ProfileManager] Failed to load the baseline widget count:', error)
-    }
-
-    return (commits as GitHubCommitHistoryItem[]).map((commit, index) => {
-      const sha = String(commit.sha)
-      const message = String(commit.commit?.message || `Commit ${sha.slice(0, 7)}`)
-      const firstLine = message.split('\n')[0]
-      const author = commit.author?.login || commit.commit?.author?.name || u
-      const date = commit.commit?.author?.date || new Date().toISOString()
-
-      const widgetMatch =
-        message.match(/(?:with\s+|(?:\(|\[))(\d+)\s+widgets?/i) ||
-        message.match(/(\d+)\s+widgets?/i)
-      const widgetsCount = widgetMatch ? parseInt(widgetMatch[1], 10) : defaultWidgetsCount
-
-      return {
-        id: sha,
-        profileSlug: cleanSlug,
-        versionNumber: commits.length - index,
-        label: firstLine,
-        description: message,
-        widgetsCount,
-        createdAt: date,
-        createdBy: author,
-      }
-    })
-  } catch (error) {
-    console.warn('[ProfileManager] Failed to load Git commit history:', error)
-    return []
+    console.log(`[checkIfProfileExistsOnGitHub] ${u}/${configPath} HEAD status: ${res.status}`)
+    return res.status === 200
+  } catch (err) {
+    console.warn(`[ProfileManager] Failed to check existence for ${slug}:`, err)
+    return false
   }
 }
-
 export async function getProfileVersions(
   username: string,
   slug: string
 ): Promise<ProfileVersionRecord[]> {
   const u = username.toLowerCase().trim()
   const cleanSlug = slug.toLowerCase().trim()
-
-  const gitVersions = await getGitCommitsVersionHistory(u, cleanSlug)
-  if (gitVersions.length > 0) {
-    return gitVersions
-  }
 
   const redis = getProRedisClient()
   const versionsListKey = REDIS_KEYS.profileVersions(u, cleanSlug)

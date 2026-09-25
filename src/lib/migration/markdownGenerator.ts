@@ -36,29 +36,12 @@ export function updateReadmeContent(
 ): string {
   const slug = profileSlug.toLowerCase()
 
-  if (slug !== 'default') {
-    const markerStart = `<!-- GITASCII:${slug}:START -->`
-    const markerEnd = `<!-- GITASCII:${slug}:END -->`
+  const markerStart = slug !== 'default' ? `<!-- GITASCII:${slug}:START -->` : ''
+  const markerEnd = slug !== 'default' ? `<!-- GITASCII:${slug}:END -->` : ''
 
-    if (currentContent.includes(markerStart) && currentContent.includes(markerEnd)) {
-      const markerRegex = new RegExp(`${markerStart}[\\s\\S]*?${markerEnd}`, 'g')
-      return currentContent.replace(markerRegex, `${markerStart}\n${newEmbedCode}\n${markerEnd}`)
-    }
+  const finalEmbedCode =
+    slug !== 'default' ? `${markerStart}\n${newEmbedCode}\n${markerEnd}` : newEmbedCode
 
-    return `${currentContent.trim()}\n\n${markerStart}\n${newEmbedCode}\n${markerEnd}\n`
-  }
-
-  const legacyWidgetRegex =
-    /(?:<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->\s*)?<picture>[\s\S]*?<\/picture>(?:\s*<!-- GITASCII:TELEMETRY:START[\s\S]*?<!-- GITASCII:TELEMETRY:END -->|\s*<p align="(?:right|center)">[\s\S]*?<\/p>)*|<p align="(?:right|center)">\s*<a href="https:\/\/gitascii\.com">\s*<img[^>]*api\/badge\/[^>]*>\s*<\/a>\s*<\/p>|!\[(?:GitAscii|Widget)\]\([^)]+\)|<a href="[^"]+">\s*<img\s+src="[^"]+?\/api\/[^"]+"\s+alt="GitAscii Widget"\s+width="100%"\s*\/?>\s*<\/a>/i
-
-  if (currentContent.match(legacyWidgetRegex)) {
-    return currentContent.replace(legacyWidgetRegex, newEmbedCode)
-  }
-
-  if (!currentContent.trim()) {
-    return `${newEmbedCode}\n`
-  }
-
-  return `${currentContent.trim()}\n\n${newEmbedCode}\n`
+  return `${finalEmbedCode}\n`
 }
 import { API_ENDPOINTS } from '@/services/endpoints'
