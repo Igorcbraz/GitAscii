@@ -97,16 +97,24 @@ export function TemplateLibrarySection({
         }
       })
 
+      const author = githubData?.user.login || 'unknown'
+      const templateSlug =
+        author
+          .toLowerCase()
+          .replace(/[^a-z0-9_-]/g, '_')
+          .replace(/^_+|_+$/g, '') || 'custom'
+
       const exportData: Record<string, unknown> = {
+        id: templateSlug,
+        templateId: templateSlug,
+        name: `${author}'s Template`,
         widgets: sanitizedWidgets,
         globalStyles: config.globalStyles,
-        templateId: config.templateId,
       }
 
       if (widgetCategory) {
         exportData.widgetCategory = widgetCategory
       }
-      const author = githubData?.user.login || 'unknown'
       exportData.author = author
       exportData.authorUrl = `https://github.com/${author}`
       exportData.category = widgetCategory
@@ -117,12 +125,6 @@ export function TemplateLibrarySection({
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      const templateSlug =
-        (config.templateId || 'custom')
-          .toLowerCase()
-          .replace(/[^a-z0-9_-]/g, '_')
-          .replace(/^_+|_+$/g, '') || 'custom'
-
       link.download = `template_${templateSlug}.json`
       document.body.appendChild(link)
       link.click()
@@ -342,6 +344,9 @@ export function TemplateLibrarySection({
             p.id === 'blank'
         )
         const communityPresets = allPresets.filter((p) => Boolean(p.categoryUrl))
+        const windowsXpPresets = allPresets.filter(
+          (p) => p.widgetCategory === WIDGET_CATEGORIES.WINDOWS_XP
+        )
         const surveillancePresets = allPresets.filter(
           (p) => p.widgetCategory === WIDGET_CATEGORIES.SURVEILLANCE
         )
@@ -599,6 +604,70 @@ export function TemplateLibrarySection({
                             )}
                           </div>
                           <p className="font-mono text-[9px] text-[#6b6b8a] group-hover:text-[#a0a0c0] transition-colors line-clamp-1 mt-0.5">
+                            {tmpl.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1.5 ml-2 shrink-0">
+                        <div
+                          className="h-2.5 w-2.5 rounded-full border border-graphite"
+                          style={{ backgroundColor: tmpl.colors.background }}
+                        />
+                        <div
+                          className="h-2.5 w-2.5 rounded-full border border-graphite"
+                          style={{ backgroundColor: tmpl.colors.accent }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {windowsXpPresets.length > 0 && (
+              <div>
+                <div className="border-t border-graphite/50 my-3" />
+                <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                  <span
+                    className="font-mono text-caption font-semibold text-[#2989f5] uppercase tracking-[0.16em]"
+                    style={{ textShadow: '0 0 8px rgba(41,137,245,0.4)' }}
+                  >
+                    {t('editor.sidebar.winxp_category', 'Windows XP Retro')}
+                  </span>
+                  <span className="ml-auto font-mono text-caption text-[#6b8ab0]">
+                    {windowsXpPresets.length}
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {windowsXpPresets.map((tmpl) => (
+                    <div
+                      key={tmpl.id}
+                      onClick={() => applyTemplate(tmpl.id)}
+                      onMouseEnter={(e) =>
+                        handleHover(tmpl, e.currentTarget.getBoundingClientRect())
+                      }
+                      onMouseLeave={handleLeave}
+                      data-testid={`template-${tmpl.id}`}
+                      className={`group relative p-3 border bg-[#051126] hover:bg-[#0a1e3f] transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] rounded-xs cursor-pointer flex items-center justify-between shadow-xs hover:-translate-y-0.5 overflow-hidden ${
+                        config.templateId === tmpl.id
+                          ? 'border-[#2989f5] shadow-[0_0_15px_rgba(41,137,245,0.25)]'
+                          : 'border-[#122b52] hover:border-[#2989f5]/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-2 h-2 rounded-full bg-[#2989f5] group-hover:shadow-[0_0_8px_#2989f5] transition-all" />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="font-mono font-medium text-[11px] text-[#d6e7f8] group-hover:text-[#2989f5] transition-colors">
+                              {tmpl.name}
+                            </h4>
+                            {config.templateId === tmpl.id && (
+                              <span className="text-[8px] font-mono font-bold text-[#2989f5] bg-[#2989f5]/10 border border-[#2989f5]/30 px-1 py-0.2 rounded-xs">
+                                ACTIVE
+                              </span>
+                            )}
+                          </div>
+                          <p className="font-mono text-[9px] text-[#6b8ab0] group-hover:text-[#9bc2ef] transition-colors line-clamp-1 mt-0.5">
                             {tmpl.description}
                           </p>
                         </div>

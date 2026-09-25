@@ -107,11 +107,13 @@ export function TemplatePreviewTooltip({
         </span>
       </div>
 
-      <div className="bg-carbon border border-graphite/80 rounded-xs p-2 overflow-hidden flex items-center justify-center min-h-32 max-h-64 shadow-inner relative">
-        <div
-          className="w-full h-auto max-h-56 flex items-center justify-center [&>svg]:w-full [&>svg]:h-auto [&>svg]:max-h-56 [&>svg]:object-contain"
-          dangerouslySetInnerHTML={{ __html: svgMarkup }}
-        />
+      <div className="bg-carbon border border-graphite/80 rounded-xs p-0 overflow-hidden flex min-h-32 shadow-inner relative">
+        <div className="w-full max-h-96 overflow-y-auto custom-scrollbar p-2">
+          <div
+            className="w-full flex flex-col items-center justify-start [&>svg]:w-full [&>svg]:h-auto"
+            dangerouslySetInnerHTML={{ __html: svgMarkup }}
+          />
+        </div>
       </div>
 
       <div className="mt-2.5 flex items-center justify-between text-eyebrow">
