@@ -54,12 +54,7 @@ export function getTelemetryStyle(content: string, username: string, slug: strin
 
 function findBadgeImage(content: string, username: string, slug: string): string | null {
   const target = `https://gitascii.com/api/badge/${username.toLowerCase()}`
-  const renderedContent = content
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<!--[\s\S]*$/g, '')
-    .replace(/<!--/g, '&lt;!--')
-    .replace(/-->/g, '--&gt;')
-    .replace(/^\s*```[\s\S]*?^\s*```/gm, '')
+  const renderedContent = stripCommentsAndCodeFences(content)
   const images = renderedContent.match(/<img\b[^>]*>/gi) || []
   return (
     images.find((image) => {
@@ -76,6 +71,44 @@ function findBadgeImage(content: string, username: string, slug: string): string
       }
     }) ?? null
   )
+}
+
+function stripCommentsAndCodeFences(content: string): string {
+  let result = ''
+  let inComment = false
+  let inFence = false
+
+  for (const line of content.split(/\r?\n/)) {
+    if (!inComment && /^\s*```/.test(line)) {
+      inFence = !inFence
+      continue
+    }
+    if (inFence) continue
+
+    let index = 0
+    while (index < line.length) {
+      if (inComment) {
+        const close = line.indexOf('-->', index)
+        const closeBang = line.indexOf('--!>', index)
+        const end = close < 0 ? closeBang : closeBang < 0 ? close : Math.min(close, closeBang)
+        if (end < 0) break
+        index = end + (end === closeBang ? 4 : 3)
+        inComment = false
+        continue
+      }
+
+      const start = line.indexOf('<!--', index)
+      if (start < 0) {
+        result += `${line.slice(index)}\n`
+        break
+      }
+      result += `${line.slice(index, start)} `
+      index = start + 4
+      inComment = true
+    }
+    if (inComment) result += '\n'
+  }
+  return result
 }
 
 export function upsertTelemetryBlock(

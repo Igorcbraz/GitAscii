@@ -49,6 +49,12 @@ My own content.\n`
     expect(hasTelemetryBadge(content, 'igor', 'default')).toBe(false)
   })
 
+  it('recognizes the HTML comment end-bang token', () => {
+    const content =
+      '<!-- <img src="https://gitascii.com/api/badge/igor?slug=default"> --!>\n<img src="https://gitascii.com/api/badge/igor?slug=default">'
+    expect(hasTelemetryBadge(content, 'igor', 'default')).toBe(true)
+  })
+
   it('does not replace a profile whose slug only shares a prefix', () => {
     const other = upsertTelemetryBlock(readme, 'igor', 'foobar', 'outline')
     const updated = upsertTelemetryBlock(other, 'igor', 'foo', 'compact')

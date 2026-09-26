@@ -118,7 +118,7 @@ test('editor renders editable core widgets and external images through the safe 
       )
     )
     .toBe(true)
-  await page.locator('#overlay-widget-bio').dispatchEvent('dblclick')
+  await page.locator('#overlay-widget-bio').dblclick()
   const editor = page.getByTestId('widget-bio-input')
   await expect(editor).toBeVisible()
   await editor.fill('Edited core profile')
