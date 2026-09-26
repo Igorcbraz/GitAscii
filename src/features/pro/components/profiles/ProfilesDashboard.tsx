@@ -3,6 +3,7 @@
 import { Check, ChevronDown, Clock3, Layers, Plus, RefreshCw } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { fetchProfiles as fetchProfileList } from '@/features/pro/api/profilesClient'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -148,10 +149,7 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
   const fetchProfiles = useCallback(async () => {
     try {
       setRefreshing(true)
-      const res = await fetch(API_ENDPOINTS.PRO.PROFILES)
-      if (!res.ok) throw new Error(t('pro.profiles.error_fetch', 'Failed to fetch profiles'))
-      const data = await res.json()
-      const profList: ProProfileRecord[] = data.profiles || []
+      const profList = await fetchProfileList()
       setProfiles(profList)
       setSelectedSlug((prev) => {
         if (profList.length > 0 && !profList.some((p) => p.slug === prev)) {
@@ -165,7 +163,7 @@ export const ProfilesDashboard: React.FC<ProfilesDashboardProps> = ({
       setLoading(false)
       setRefreshing(false)
     }
-  }, [t])
+  }, [])
 
   useEffect(() => {
     void fetchProfiles()

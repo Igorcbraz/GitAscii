@@ -1,7 +1,7 @@
 import type { SavedConfiguration } from '@/engine/types'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 import { getInstallationTokenForUser } from '@/lib/githubApp'
-import { bootstrapGitasciiBranch } from '@/lib/migration/branchBootstrap'
+import { bootstrapGitasciiBranch, bootstrapGitasciiProfiles } from '@/lib/migration/branchBootstrap'
 import { loadProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -44,9 +44,17 @@ export async function publishProfileConfigV2(
 ): Promise<void> {
   const token = await requireToken(username)
   const data = await fetchGitHubProfile(username, { fresh: true })
-  const result = await bootstrapGitasciiBranch(username, username, token, config, data)
+  const result = await bootstrapGitasciiBranch(
+    username,
+    username,
+    token,
+    { ...config, username },
+    data
+  )
   if (!result.success) throw new Error(result.error || 'Unable to update gitascii branch')
-  await dispatchPublisher(username, token)
+  await dispatchPublisher(username, token).catch((error) => {
+    console.warn('[Publisher] Optional workflow dispatch failed after publication:', error)
+  })
 }
 
 async function deleteBranchFile(username: string, token: string, path: string): Promise<void> {
@@ -122,7 +130,9 @@ export async function deletePublishedProfileV2(username: string, slug: string): 
     await deleteBranchFile(username, token, path)
   }
   await removeProfileEmbedFromReadme(username, token, cleanSlug)
-  await dispatchPublisher(username, token)
+  await dispatchPublisher(username, token).catch((error) => {
+    console.warn('[Publisher] Optional workflow dispatch failed after publication:', error)
+  })
 }
 
 export async function publishStoredProfileV2(username: string, slug: string): Promise<void> {
@@ -131,27 +141,36 @@ export async function publishStoredProfileV2(username: string, slug: string): Pr
   await publishProfileConfigV2(username, config)
 }
 
-export async function promoteProfileToDefaultV2(username: string, slug: string): Promise<void> {
+export async function promoteProfileToDefaultV2(
+  username: string,
+  slug: string
+): Promise<{
+  sourceConfig: SavedConfiguration
+  oldDefaultConfig: SavedConfiguration | null
+}> {
   const targetConfig = await loadProfileConfig(username, slug, { bypassMemory: true })
   const oldDefaultConfig = await loadProfileConfig(username, 'default', { bypassMemory: true })
 
   if (!targetConfig) throw new Error(`Profile configuration "${slug}" was not found`)
+  if (slug.toLowerCase().trim() === 'default')
+    return { sourceConfig: targetConfig, oldDefaultConfig }
 
-  // Publish target's config to default
-  await publishProfileConfigV2(username, {
-    ...targetConfig,
-    profileSlug: 'default',
-    profileName: targetConfig.profileName || 'Default',
-    metadata: {
-      ...targetConfig.metadata,
-      revision: `rev_${Date.now()}`,
-      updatedAt: new Date().toISOString(),
+  const configs: SavedConfiguration[] = [
+    {
+      ...targetConfig,
+      profileSlug: 'default',
+      profileName: targetConfig.profileName || 'Default',
+      metadata: {
+        ...targetConfig.metadata,
+        revision: `rev_${Date.now()}`,
+        updatedAt: new Date().toISOString(),
+      },
     },
-  })
+  ]
 
-  // Publish old default's config to target as a backup
+  // Include the backup in the same Git commit as the canonical default.
   if (oldDefaultConfig) {
-    await publishProfileConfigV2(username, {
+    configs.push({
       ...oldDefaultConfig,
       profileSlug: slug,
       profileName: oldDefaultConfig.profileName || 'Backup',
@@ -162,4 +181,12 @@ export async function promoteProfileToDefaultV2(username: string, slug: string):
       },
     })
   }
+  const token = await requireToken(username)
+  const data = await fetchGitHubProfile(username, { fresh: true })
+  const result = await bootstrapGitasciiProfiles(username, username, token, configs, data)
+  if (!result.success) throw new Error(result.error || 'Unable to promote profile')
+  await dispatchPublisher(username, token).catch((error) => {
+    console.warn('[Publisher] Optional workflow dispatch failed after publication:', error)
+  })
+  return { sourceConfig: targetConfig, oldDefaultConfig }
 }

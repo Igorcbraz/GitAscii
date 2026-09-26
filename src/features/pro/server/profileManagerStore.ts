@@ -10,7 +10,7 @@ import {
   updateProfileInDb,
 } from '@/lib/db/repositories/profileRepository'
 import { getInstallationTokenForUser } from '@/lib/githubApp'
-import { loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
+import { invalidateProfileConfig, loadProfileConfig, saveProfileConfig } from '@/lib/profileStorage'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import {
@@ -34,20 +34,54 @@ function getPublishedProfileUrls(username: string, slug: string) {
 const GITHUB_HISTORY_TIMEOUT_MS = 10_000
 const GITHUB_VERSION_TIMEOUT_MS = 10_000
 
-interface GitHubCommitHistoryItem {
-  sha: string
-  author?: { login?: string }
-  commit?: {
-    message?: string
-    author?: { name?: string; date?: string }
+async function getPublishedProfileSlugs(username: string): Promise<Set<string>> {
+  try {
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'GitAscii-App',
+    }
+    try {
+      const { token } = await getInstallationTokenForUser(username)
+      if (token) headers.Authorization = `Bearer ${token}`
+    } catch {
+      /* Public repositories can still be inspected without an installation. */
+    }
+    const response = await fetch(
+      `${API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, username, '')}?ref=gitascii`,
+      {
+        headers,
+        cache: 'no-store',
+        signal: AbortSignal.timeout(GITHUB_HISTORY_TIMEOUT_MS),
+      }
+    )
+    if (!response.ok) return new Set()
+    const files: { name: string; type: string }[] = await response.json()
+    if (!Array.isArray(files)) return new Set()
+    return new Set(
+      files.flatMap((file) => {
+        if (file.type !== 'file') return []
+        if (file.name === 'gitascii.json') return ['default']
+        const match = /^gitascii_([a-zA-Z0-9_-]+)\.json$/.exec(file.name)
+        return match ? [match[1].toLowerCase()] : []
+      })
+    )
+  } catch {
+    return new Set()
   }
 }
 
-export async function getUserProfiles(username: string): Promise<ProProfileRecord[]> {
+export async function getUserProfiles(
+  username: string,
+  options: { includeSyncStatus?: boolean } = {}
+): Promise<ProProfileRecord[]> {
   const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const profilesSetKey = REDIS_KEYS.userProfiles(u)
 
+  const publishedSlugsPromise =
+    options.includeSyncStatus === false
+      ? Promise.resolve(new Set<string>())
+      : getPublishedProfileSlugs(u)
   let dbProfiles: ProProfileRecord[] = []
   try {
     dbProfiles = await getUserProfilesFromDb(u)
@@ -97,13 +131,10 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     }
     void p.exec().catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
-    const gitExistsList = await Promise.allSettled(
-      dbProfiles.map((p) => checkIfProfileExistsOnGitHub(u, p.slug))
-    )
+    const publishedSlugs = await publishedSlugsPromise
 
-    return dbProfiles.map((profile, i) => {
-      const settled = gitExistsList[i]
-      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
+    return dbProfiles.map((profile) => {
+      const existsOnGit = publishedSlugs.has(profile.slug)
       return {
         ...profile,
         isSynced: existsOnGit,
@@ -138,13 +169,10 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
       console.warn('[ProfileManager] Failed to hydrate Redis profile cache:', error)
     }
 
-    const gitExistsList = await Promise.allSettled(
-      dbProfiles.map((p) => checkIfProfileExistsOnGitHub(u, p.slug))
-    )
+    const publishedSlugs = await publishedSlugsPromise
 
-    return dbProfiles.map((profile, i) => {
-      const settled = gitExistsList[i]
-      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
+    return dbProfiles.map((profile) => {
+      const existsOnGit = publishedSlugs.has(profile.slug)
       return {
         ...profile,
         isSynced: existsOnGit,
@@ -170,16 +198,13 @@ export async function getUserProfiles(username: string): Promise<ProProfileRecor
     }
     const results = await p.exec<any[]>().catch(() => [])
 
-    const gitExistsList = await Promise.allSettled(
-      slugs.map((slug) => checkIfProfileExistsOnGitHub(u, slug))
-    )
+    const publishedSlugs = await publishedSlugsPromise
 
     for (let i = 0; i < slugs.length; i++) {
       const slug = slugs[i]
       const data = results[i * 2]
       const versionIds = results[i * 2 + 1] || []
-      const settled = gitExistsList[i]
-      const existsOnGit = settled && settled.status === 'fulfilled' ? settled.value : false
+      const existsOnGit = publishedSlugs.has(slug)
       const dbMatch = dbProfiles.find((dp) => dp.slug === slug)
       const isSynced = existsOnGit
 
@@ -301,7 +326,7 @@ export async function createProfile(
     throw new Error('Invalid profile identifier/slug.')
   }
 
-  const existingProfiles = await getUserProfiles(u)
+  const existingProfiles = await getUserProfiles(u, { includeSyncStatus: false })
   if (existingProfiles.length >= MAX_PROFILES_PER_USER) {
     throw new Error(`Maximum profile limit (${MAX_PROFILES_PER_USER}) reached.`)
   }
@@ -414,7 +439,7 @@ export async function duplicateProfile(
     throw new Error('Valid target profile slug is required.')
   }
 
-  const existing = await getUserProfiles(u)
+  const existing = await getUserProfiles(u, { includeSyncStatus: false })
   const sourceProfile = existing.find((p) => p.slug === srcSlug)
   if (!sourceProfile) {
     throw new Error(`Source profile "${srcSlug}" does not exist.`)
@@ -518,13 +543,15 @@ export async function duplicateProfile(
 
 export async function promoteProfileToCanonicalDefault(
   username: string,
-  targetSlug: string
+  targetSlug: string,
+  snapshot?: { sourceConfig: SavedConfiguration; oldDefaultConfig: SavedConfiguration | null }
 ): Promise<ProProfileRecord[]> {
   const redis = getProRedisClient()
   const u = username.toLowerCase().trim()
   const cleanSlug = targetSlug.toLowerCase().trim()
 
-  const profiles = await getUserProfiles(u)
+  const profiles = await getUserProfiles(u, { includeSyncStatus: false })
+  if (cleanSlug === DEFAULT_PROFILE_SLUG) return profiles
   const target = profiles.find((p) => p.slug === cleanSlug)
   const currentDefault = profiles.find((p) => p.slug === DEFAULT_PROFILE_SLUG)
 
@@ -532,8 +559,12 @@ export async function promoteProfileToCanonicalDefault(
     throw new Error(`Profile "${cleanSlug}" or "default" not found.`)
   }
 
-  const sourceConfig = await loadProfileConfig(u, cleanSlug, { bypassMemory: true })
-  const oldDefaultConfig = await loadProfileConfig(u, DEFAULT_PROFILE_SLUG, { bypassMemory: true })
+  const sourceConfig = snapshot
+    ? snapshot.sourceConfig
+    : await loadProfileConfig(u, cleanSlug, { bypassMemory: true })
+  const oldDefaultConfig = snapshot
+    ? snapshot.oldDefaultConfig
+    : await loadProfileConfig(u, DEFAULT_PROFILE_SLUG, { bypassMemory: true })
 
   if (!sourceConfig) throw new Error(`Profile configuration "${cleanSlug}" not found.`)
 
@@ -541,6 +572,7 @@ export async function promoteProfileToCanonicalDefault(
 
   const canonicalConfig: SavedConfiguration = {
     ...sourceConfig,
+    username: u,
     profileSlug: DEFAULT_PROFILE_SLUG,
     profileName: target.name,
     metadata: {
@@ -560,6 +592,7 @@ export async function promoteProfileToCanonicalDefault(
   if (oldDefaultConfig) {
     const backupConfig: SavedConfiguration = {
       ...oldDefaultConfig,
+      username: u,
       profileSlug: cleanSlug,
       profileName: currentDefault.name,
       metadata: {
@@ -648,7 +681,7 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
     throw new Error('The default profile cannot be deleted.')
   }
 
-  const profiles = await getUserProfiles(u)
+  const profiles = await getUserProfiles(u, { includeSyncStatus: false })
   const target = profiles.find((p) => p.slug === cleanSlug)
   if (target?.isDefault) {
     throw new Error(
@@ -686,6 +719,7 @@ export async function deleteProfile(username: string, slug: string): Promise<boo
     .del(versionsListKey)
     .catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
 
+  await invalidateProfileConfig(u, cleanSlug)
   return true
 }
 
@@ -722,7 +756,7 @@ export async function createProfileVersion(
     versionNumber: nextVersionNumber,
     label: snapshot.label || `Version ${nextVersionNumber}`,
     description: snapshot.description || '',
-    config: snapshot.config,
+    config: { ...snapshot.config, username: u, profileSlug: cleanSlug },
     widgetsCount: snapshot.config?.widgets?.length || 0,
     createdAt: now,
     createdBy: snapshot.createdBy || u,
@@ -944,6 +978,7 @@ export async function restoreProfileVersion(
 
   const restoredConfig: SavedConfiguration = {
     ...targetVersion.config,
+    username: u,
     profileSlug: cleanSlug,
     metadata: {
       ...targetVersion.config.metadata,
@@ -965,7 +1000,7 @@ export async function restoreProfileVersion(
     createdBy: u,
   })
 
-  const profiles = await getUserProfiles(u)
+  const profiles = await getUserProfiles(u, { includeSyncStatus: false })
   const currentProfile = profiles.find((p) => p.slug === cleanSlug) || profiles[0]
 
   return {

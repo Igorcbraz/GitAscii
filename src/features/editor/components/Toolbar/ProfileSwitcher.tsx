@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { fetchProfiles } from '@/features/pro/api/profilesClient'
+import { MAX_PROFILES_PER_USER } from '@/features/pro/types/profiles'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
-import { safeStorage } from '@/utils/storage'
 
 import { useEditorStore } from '../../store/editorStore'
 
@@ -23,15 +24,6 @@ interface ProfileItem {
   isSynced?: boolean
 }
 
-interface SessionData {
-  username: string
-  isPro?: boolean
-  tier?: string
-}
-
-const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
-let profilesCache: { timestamp: number; data: ProfileItem[]; isPro: boolean | null } | null = null
-
 export function ProfileSwitcher({
   username,
   currentProfileSlug = 'default',
@@ -41,104 +33,52 @@ export function ProfileSwitcher({
   const storeSession = useEditorStore((state) => state.session)
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isProUser, setIsProUser] = useState<boolean | null>(profilesCache?.isPro ?? null)
-  const [profiles, setProfiles] = useState<ProfileItem[]>(
-    profilesCache?.data ?? [{ slug: 'default', name: 'Default', isDefault: true, isSynced: true }]
-  )
+  const [isProUser, setIsProUser] = useState(false)
+  const [profiles, setProfiles] = useState<ProfileItem[]>([])
   const [newSlugInput, setNewSlugInput] = useState('')
   const [newNameInput, setNewNameInput] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const requestRef = useRef<AbortController | null>(null)
+
   const effectiveUsername = username || storeSession?.username
 
-  const loadProfiles = useCallback(
-    async (force = false) => {
-      if (!force && profilesCache && Date.now() - profilesCache.timestamp < CACHE_TTL) {
-        setProfiles(profilesCache.data)
-        setIsProUser(profilesCache.isPro)
-        return
-      }
-
-      setIsLoading(true)
-      try {
-        const isMockActive = safeStorage.getItem('gitascii_pro_mock_active') === 'true'
-        let isPro = isMockActive
-
-        const sessionRes = await fetch(API_ENDPOINTS.AUTH.SESSION)
-        if (sessionRes.ok) {
-          const sessionData: { session?: SessionData } = await sessionRes.json()
-          if (sessionData?.session) {
-            isPro = Boolean(
-              isMockActive ||
-              sessionData.session.isPro ||
-              (sessionData.session.tier && sessionData.session.tier !== 'free')
-            )
-          }
-        }
-        setIsProUser(isPro)
-
-        const discoveredMap = new Map<string, ProfileItem>()
-
-        try {
-          const res = await fetch(API_ENDPOINTS.PRO.PROFILES)
-          if (res.ok) {
-            const data = await res.json()
-            if (Array.isArray(data?.profiles)) {
-              for (const p of data.profiles) {
-                const slug = (p.slug || '').toLowerCase().trim()
-                if (slug) {
-                  const isSynced = true
-                  discoveredMap.set(slug, {
-                    slug,
-                    name: p.name || slug,
-                    isDefault: Boolean(p.isDefault || slug === 'default'),
-                    isSynced,
-                  })
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.warn('Failed to fetch profiles from API:', err)
-        }
-
-        if (!discoveredMap.has('default')) {
-          discoveredMap.set('default', {
-            slug: 'default',
-            name: 'Default',
-            isDefault: true,
-            isSynced: true,
-          })
-        }
-
-        const current = (currentProfileSlug || 'default').toLowerCase().trim()
-        if (current && !discoveredMap.has(current)) {
-          discoveredMap.set(current, {
-            slug: current,
-            name: current === 'default' ? 'Default' : current,
-            isDefault: current === 'default',
-            isSynced: true,
-          })
-        }
-
-        const mergedList = Array.from(discoveredMap.values())
-        setProfiles(mergedList)
-        profilesCache = { timestamp: Date.now(), data: mergedList, isPro }
-      } catch {
-        setIsProUser(false)
-        profilesCache = { timestamp: Date.now(), data: profiles, isPro: false }
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [currentProfileSlug, profiles]
-  )
+  const loadProfiles = useCallback(async () => {
+    requestRef.current?.abort()
+    const controller = new AbortController()
+    requestRef.current = controller
+    setIsLoading(true)
+    try {
+      const response = await fetch(API_ENDPOINTS.AUTH.SESSION, {
+        cache: 'no-store',
+        signal: controller.signal,
+      })
+      if (!response.ok) throw new Error('Failed to fetch session')
+      const { session } = await response.json()
+      const ownsProfile = session?.username?.toLowerCase() === effectiveUsername?.toLowerCase()
+      const isPro = Boolean(ownsProfile && session?.isPro)
+      const list = isPro ? await fetchProfiles(controller.signal) : []
+      if (controller.signal.aborted) return
+      setIsProUser(isPro)
+      setProfiles(list)
+    } catch (error) {
+      if (controller.signal.aborted) return
+      console.warn('Failed to fetch profiles:', error)
+      setIsProUser(false)
+      setProfiles([])
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false)
+    }
+  }, [effectiveUsername])
 
   useEffect(() => {
-    loadProfiles()
-  }, [loadProfiles])
+    setProfiles([])
+    setIsProUser(false)
+    void loadProfiles()
+    return () => requestRef.current?.abort()
+  }, [loadProfiles, storeSession?.username])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -198,18 +138,15 @@ export function ProfileSwitcher({
         throw new Error('Failed to create profile')
       }
 
-      const updated: ProfileItem[] = [
-        ...profiles.filter((p) => p.slug !== cleanSlug),
-        { slug: cleanSlug, name: profileName, isDefault: false, isSynced: true },
-      ]
-      setProfiles(updated)
+      const { profile } = await res.json()
+      await loadProfiles()
 
       setNewSlugInput('')
       setNewNameInput('')
       setIsSubmitting(false)
       setIsCreating(false)
       setIsOpen(false)
-      router.push(`/${effectiveUsername}/${cleanSlug}`)
+      router.push(`/${effectiveUsername}/${profile.slug}`)
     } catch (err) {
       console.warn('Could not persist profile to server:', err)
       setIsSubmitting(false)
@@ -243,6 +180,7 @@ export function ProfileSwitcher({
   return (
     <div className="relative" ref={containerRef}>
       <button
+        data-testid="profile-switcher-trigger"
         onClick={() => {
           if (!isOpen) loadProfiles()
           setIsOpen((prev) => !prev)
@@ -270,11 +208,14 @@ export function ProfileSwitcher({
               {t('editor.profile_switcher.pro_profiles', 'Pro Profiles')}
             </span>
             <span className="font-mono text-[9px] px-1.5 py-0.2 rounded-xs text-signal-lime font-medium border border-signal-lime/20 bg-signal-lime/5">
-              {profiles.length} / 10
+              {profiles.length} / {MAX_PROFILES_PER_USER}
             </span>
           </div>
 
-          <div className="max-h-56 overflow-y-auto p-1 space-y-0.5">
+          <div
+            data-testid="profile-switcher-list"
+            className="max-h-56 overflow-y-auto p-1 space-y-0.5"
+          >
             {isLoading ? (
               <>
                 {[1, 2, 3].map((i) => (

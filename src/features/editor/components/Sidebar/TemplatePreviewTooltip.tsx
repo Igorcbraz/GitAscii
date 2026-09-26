@@ -8,6 +8,7 @@ import { createConfiguration, type TemplatePreset } from '@/engine/core/Template
 import type { NormalizedGitHubData } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
 
 interface TemplatePreviewTooltipProps {
   template: TemplatePreset | null
@@ -112,6 +113,7 @@ export function TemplatePreviewTooltip({
           <div
             className="w-full flex flex-col items-center justify-start [&>svg]:w-full [&>svg]:h-auto"
             dangerouslySetInnerHTML={{ __html: svgMarkup }}
+            onErrorCapture={handleSvgImageError}
           />
         </div>
       </div>

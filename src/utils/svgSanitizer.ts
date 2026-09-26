@@ -12,7 +12,6 @@ function decodeXmlEntities(str: string): string {
 export function sanitizeSvg(svgContent: string): string {
   if (!svgContent || typeof svgContent !== 'string') return ''
 
-  // codeql[js/polynomial-redos] Unrolled loops and safe bounds
   let cleaned = svgContent.replace(/<\?xml[^?]*\?>/gi, '').replace(/<!DOCTYPE[^<>]*>/gi, '')
 
   const dangerousTags = [
@@ -29,7 +28,6 @@ export function sanitizeSvg(svgContent: string): string {
     'listener',
   ]
   for (const tag of dangerousTags) {
-    // codeql[js/polynomial-redos] Bounded by input size
     const tagRegex = new RegExp(
       `<(?:[a-zA-Z0-9_-]+:)?${tag}\\b[\\s\\S]*?<\\/(?:[a-zA-Z0-9_-]+:)?${tag}>|<(?:[a-zA-Z0-9_-]+:)?${tag}\\b[^>]*\\/?>`,
       'gi'
@@ -71,44 +69,33 @@ export function sanitizeSvg(svgContent: string): string {
     return match
   })
 
-  let prevEventClean = ''
-  while (prevEventClean !== cleaned) {
-    prevEventClean = cleaned
-    cleaned = cleaned.replace(
-      /(?:[\s/]+)(?:[a-zA-Z0-9_-]+:)?on[a-zA-Z0-9_-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi,
-      ''
-    )
-  }
-
-  const attrRegex =
-    /([\s/]+(?:[a-zA-Z0-9_-]+:)?(?:href|src|action|formaction)\s*=\s*)(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi
-
-  cleaned = cleaned.replace(attrRegex, (match, _prefix, valDouble, valSingle, valUnquoted) => {
-    const rawVal =
-      valDouble !== undefined ? valDouble : valSingle !== undefined ? valSingle : valUnquoted || ''
-    if (rawVal.startsWith('data:image/')) {
-      const isSafeDataImage =
-        /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml)(?:;[a-z0-9._=-]+)*;base64,/i.test(
-          rawVal.slice(0, 100)
-        )
-      return isSafeDataImage ? match : ' href="#"'
+  cleaned = cleaned.replace(
+    /<!--[\s\S]*?-->|<[a-zA-Z][^<>"']*(?:(?:"[^"]*"|'[^']*')[^<>"']*)*>/g,
+    (tag) => {
+      if (tag.startsWith('<!--')) return tag
+      return tag.replace(
+        /([\s/]+)([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g,
+        (attribute, prefix, name: string, doubleValue, singleValue, unquotedValue) => {
+          if (/^(?:[a-zA-Z0-9_-]+:)?on[a-zA-Z0-9_-]+$/i.test(name)) return ''
+          if (!/^(?:[a-zA-Z0-9_-]+:)?(?:href|src|action|formaction)$/i.test(name)) return attribute
+          const rawValue = doubleValue ?? singleValue ?? unquotedValue ?? ''
+          if (rawValue.startsWith('data:image/')) {
+            return /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml)(?:;[a-z0-9._=-]+)*;base64,/i.test(
+              rawValue.slice(0, 100)
+            )
+              ? attribute
+              : prefix + 'href="#"'
+          }
+          const decoded = decodeXmlEntities(rawValue)
+            .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '')
+            .toLowerCase()
+          return /^(?:javascript:|vbscript:|data:|\/\/)/.test(decoded)
+            ? prefix + 'href="#"'
+            : attribute
+        }
+      )
     }
-
-    const decoded = decodeXmlEntities(rawVal)
-      .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, '')
-      .toLowerCase()
-
-    if (
-      decoded.startsWith('javascript:') ||
-      decoded.startsWith('vbscript:') ||
-      decoded.startsWith('data:') ||
-      decoded.startsWith('//')
-    ) {
-      return ' href="#"'
-    }
-
-    return match
-  })
+  )
 
   cleaned = cleaned.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_, cssContent) => {
     const safeCss = cssContent

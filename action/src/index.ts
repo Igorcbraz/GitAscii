@@ -165,7 +165,8 @@ async function run(): Promise<void> {
       targetConfigs.length === 1 && targetConfigs[0].path === 'gitascii.json'
         ? latestRevision
         : undefined,
-      `Update GitAscii profiles (${targetConfigs.map((c) => c.slug).join(', ')}) SVGs [skip ci]`
+      `Update GitAscii profiles (${targetConfigs.map((c) => c.slug).join(', ')}) SVGs [skip ci]`,
+      branchState.latestCommitSha
     )
 
     const status = getPublishStatus(result)

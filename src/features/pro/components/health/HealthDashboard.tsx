@@ -4,6 +4,7 @@ import { Play, RefreshCw } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { SavedConfiguration } from '@/engine/types'
+import { fetchProfiles } from '@/features/pro/api/profilesClient'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
@@ -73,7 +74,7 @@ export const HealthDashboard: React.FC = () => {
       const [healthRes, errorsRes, profilesRes, sessionRes] = await Promise.all([
         fetch(API_ENDPOINTS.PRO.HEALTH),
         fetch(API_ENDPOINTS.PRO.ERRORS()),
-        fetch(API_ENDPOINTS.PRO.PROFILES).catch(() => null),
+        fetchProfiles().catch(() => null),
         fetch(API_ENDPOINTS.AUTH.SESSION)
           .then((r) => (r.ok ? r.json() : null))
           .catch(() => null),
@@ -90,9 +91,8 @@ export const HealthDashboard: React.FC = () => {
       }
 
       let fetchedProfiles: ProProfileRecord[] = []
-      if (profilesRes && profilesRes.ok) {
-        const pData = await profilesRes.json()
-        fetchedProfiles = pData.profiles || []
+      if (profilesRes) {
+        fetchedProfiles = profilesRes
         setProfiles(fetchedProfiles)
       }
 

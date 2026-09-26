@@ -195,7 +195,8 @@ export class GitOpsService {
     branchName: string,
     files: Array<{ path: string; content: string }>,
     expectedRevision?: string,
-    commitMessage = 'Update GitAscii SVGs [skip ci]'
+    commitMessage = 'Update GitAscii SVGs [skip ci]',
+    expectedCommitSha?: string
   ): Promise<PublishResult> {
     const currentState = await this.getBranchState(branchName)
 
@@ -205,6 +206,14 @@ export class GitOpsService {
 
     const remoteRevision =
       currentState.config?.metadata?.revision || currentState.config?.metadata?.updatedAt
+    if (expectedCommitSha && currentState.latestCommitSha !== expectedCommitSha) {
+      return {
+        committed: false,
+        revision: remoteRevision || '',
+        unchanged: true,
+        staleSkipped: true,
+      }
+    }
     if (expectedRevision && remoteRevision && remoteRevision !== expectedRevision) {
       console.log(
         `[GitOps] Newer revision (${remoteRevision}) detected on remote compared to current job (${expectedRevision}). Skipping publication.`

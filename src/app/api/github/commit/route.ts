@@ -5,6 +5,7 @@ import { MIGRATION_TEMPLATES } from '@/constants'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 import { getDynamicRulesConfig } from '@/features/pro/server/dynamicRulesStore'
 import { getProEntitlements } from '@/features/pro/server/entitlements'
+import { assertProfileWriteAllowed, ProfileLimitError } from '@/features/pro/server/profileAccess'
 import { getTelemetryStyle } from '@/lib/analytics/telemetryBadge'
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
@@ -28,6 +29,17 @@ export async function POST(request: Request) {
     const rawSlug = typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default'
     const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug.toLowerCase() : 'default'
     const revision = `rev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+
+    if (exportData) {
+      try {
+        await assertProfileWriteAllowed(username, profileSlug)
+      } catch (error) {
+        if (error instanceof ProfileLimitError) {
+          return NextResponse.json({ error: error.message }, { status: 403 })
+        }
+        throw error
+      }
+    }
 
     if (exportData && typeof exportData === 'object') {
       exportData.username = username

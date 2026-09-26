@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { fetchProfiles as fetchProfileList } from '@/features/pro/api/profilesClient'
 import { useI18n } from '@/i18n'
 import type { BadgeStyle } from '@/lib/analytics/telemetryBadge'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -58,11 +59,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
   const fetchProfiles = useCallback(async () => {
     try {
-      const res = await fetch(API_ENDPOINTS.PRO.PROFILES)
-      if (res.ok) {
-        const data = await res.json()
-        setProfiles(data.profiles || [])
-      }
+      setProfiles(await fetchProfileList())
     } catch (err) {
       console.warn('Failed to fetch profiles for analytics:', err)
     }

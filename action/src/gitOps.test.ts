@@ -22,6 +22,27 @@ describe('GitOpsService Suite', () => {
     expect(hash1).not.toBe(hash3)
   })
 
+  it('rejects stale named/multiple-profile output when the loaded branch changes', async () => {
+    vi.spyOn(gitOps, 'getBranchState').mockResolvedValue({
+      exists: true,
+      latestCommitSha: 'new-head',
+      existingSvgHashes: {},
+    })
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+    const result = await gitOps.publishAtomic(
+      'gitascii',
+      [
+        { path: 'profiles/work/dark.svg', content: '<svg/>' },
+        { path: 'profiles/default/dark.svg', content: '<svg/>' },
+      ],
+      undefined,
+      'Update',
+      'loaded-head'
+    )
+    expect(result.staleSkipped).toBe(true)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('detects missing gitascii branch gracefully', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('Not Found', { status: 404 }))
 

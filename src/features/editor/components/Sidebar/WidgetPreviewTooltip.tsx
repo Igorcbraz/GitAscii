@@ -9,6 +9,7 @@ import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
 
 import { isExternalWidget, type WidgetCatalogItem } from '../../config/widgets'
 
@@ -363,6 +364,7 @@ export function WidgetPreviewTooltip({
             viewBox={`0 0 ${size.width} ${size.height}`}
             className="w-full h-auto max-h-42.5 rounded object-contain animate-fade-in"
             dangerouslySetInnerHTML={{ __html: svgContent }}
+            onErrorCapture={handleSvgImageError}
           />
         )}
       </div>

@@ -66,8 +66,9 @@ describe('WidgetPreviewTooltip & Widget Previews', () => {
     }
 
     const svg = renderWidgetSvg(widget, mockGithubData, mockGlobalStyles)
-    expect(svg).toContain('foreignObject')
-    expect(svg).toContain('img')
+    expect(svg).toContain('<image ')
+    expect(svg).toContain('href="https://')
+    expect(svg).not.toContain('foreignObject')
   })
 
   it('renders template SVG configuration properly', () => {

@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SavedConfiguration } from '@/engine/types'
+import { saveProfileConfigInDb } from '@/lib/db/repositories/profileRepository'
 
 import {
   cacheProfileConfig,
@@ -65,6 +66,7 @@ const mockConfig: SavedConfiguration = {
 }
 
 describe('profileStorage', () => {
+  afterEach(() => vi.unstubAllGlobals())
   beforeEach(async () => {
     vi.clearAllMocks()
     await invalidateProfileConfig('testuser', 'default')
@@ -75,6 +77,43 @@ describe('profileStorage', () => {
     const loaded = await loadProfileConfig('testuser', 'default')
     expect(loaded).toEqual(mockConfig)
     expect(mockRedis.get).not.toHaveBeenCalled()
+  })
+
+  it('does not publish a failed database write into the memory cache', async () => {
+    cacheProfileConfig(mockConfig)
+    vi.mocked(saveProfileConfigInDb).mockRejectedValueOnce(new Error('database unavailable'))
+    await expect(
+      saveProfileConfig({ ...mockConfig, profileName: 'Unsaved change' })
+    ).rejects.toThrow('database unavailable')
+    expect((await loadProfileConfig('testuser', 'default'))?.profileName).toBe(
+      mockConfig.profileName
+    )
+  })
+
+  it('binds stored content to the requested account and slug', async () => {
+    mockRedis.get.mockResolvedValue({
+      ...mockConfig,
+      username: 'different-account',
+      profileSlug: 'other',
+    })
+    const loaded = await loadProfileConfig('testuser', 'default')
+    expect(loaded?.username).toBe('testuser')
+    expect(loaded?.profileSlug).toBe('default')
+  })
+
+  it('honors GitHub-first reads even when memory has an older configuration', async () => {
+    cacheProfileConfig(mockConfig)
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ ...mockConfig, profileName: 'Published update' }))
+        )
+    )
+    expect(
+      (await loadProfileConfig('testuser', 'default', { preferGitHub: true }))?.profileName
+    ).toBe('Published update')
   })
 
   it('saves config to redis and memory', async () => {

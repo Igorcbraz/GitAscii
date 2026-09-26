@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
+
 /**
  * Playwright E2E testing configuration.
  * Optimized for AI-friendly testing and verification of critical application flows.
@@ -16,7 +18,7 @@ export default defineConfig({
   },
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -29,8 +31,10 @@ export default defineConfig({
   ],
   // Run local dev server before starting the tests
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command:
+      process.env.PLAYWRIGHT_WEB_SERVER_COMMAND ||
+      (process.env.CI ? 'npm run start' : 'npm run dev'),
+    url: `${baseURL}/api/auth/session`,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

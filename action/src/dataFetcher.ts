@@ -42,7 +42,11 @@ export async function fetchGitHubDataForAction(
     }
   )
 
-  const repos: GitHubRepo[] = reposRes.ok ? await reposRes.json() : []
+  if (!reposRes.ok) {
+    throw new Error(`Failed to fetch repositories for ${username} (HTTP ${reposRes.status})`)
+  }
+  const repos: GitHubRepo[] = await reposRes.json()
+  if (!Array.isArray(repos)) throw new Error('Invalid GitHub repositories response')
 
   const languages: Record<string, number> = {}
   let totalStars = 0
