@@ -43,6 +43,12 @@ My own content.\n`
     expect(hasTelemetryBadge(content, 'igor', 'default')).toBe(false)
   })
 
+  it('ignores badge URLs inside malformed, unterminated HTML comments', () => {
+    const content =
+      '<!-- <img src="https://gitascii.com/api/badge/igor?slug=default">\n<img src="https://gitascii.com/api/badge/igor?slug=default">'
+    expect(hasTelemetryBadge(content, 'igor', 'default')).toBe(false)
+  })
+
   it('does not replace a profile whose slug only shares a prefix', () => {
     const other = upsertTelemetryBlock(readme, 'igor', 'foobar', 'outline')
     const updated = upsertTelemetryBlock(other, 'igor', 'foo', 'compact')

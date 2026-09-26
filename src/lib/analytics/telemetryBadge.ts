@@ -56,6 +56,7 @@ function findBadgeImage(content: string, username: string, slug: string): string
   const target = `https://gitascii.com/api/badge/${username.toLowerCase()}`
   const renderedContent = content
     .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<!--[\s\S]*$/g, '')
     .replace(/^\s*```[\s\S]*?^\s*```/gm, '')
   const images = renderedContent.match(/<img\b[^>]*>/gi) || []
   return (
