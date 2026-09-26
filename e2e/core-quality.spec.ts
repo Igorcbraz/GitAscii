@@ -71,15 +71,6 @@ test.beforeEach(async ({ page }) => {
     localStorage.setItem('gitascii_analytics_consent', 'denied')
     localStorage.setItem('gitascii_has_seen_tour', 'true')
     localStorage.setItem('gitascii_has_seen_v2_migration_tour', 'true')
-    const state = window as typeof window & { loadedSvgImages: string[] }
-    state.loadedSvgImages = []
-    const originalSetAttribute = SVGImageElement.prototype.setAttribute
-    SVGImageElement.prototype.setAttribute = function (name, value) {
-      if (name === 'href' && value === 'https://fixture.test/widget.svg') {
-        state.loadedSvgImages.push(value)
-      }
-      return originalSetAttribute.call(this, name, value)
-    }
   })
   await page.route('https://fixture.test/**', (route) =>
     route.fulfill({
@@ -101,6 +92,9 @@ test('editor renders editable core widgets and external images through the safe 
   page,
 }) => {
   const errors: string[] = []
+  const externalImageRequest = page.waitForRequest(
+    (request) => request.url() === 'https://fixture.test/widget.svg'
+  )
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('/Igorcbraz')
   const bio = page.getByTestId('canvas-svg-container').getByTestId('canvas-widget-bio')
@@ -109,15 +103,7 @@ test('editor renders editable core widgets and external images through the safe 
   const image = page.getByTestId('canvas-widget-custom-image').locator('image')
   await expect(image).toHaveAttribute('href', 'https://fixture.test/widget.svg')
   await expect(image).toBeVisible()
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (window as typeof window & { loadedSvgImages: string[] }).loadedSvgImages.includes(
-          'https://fixture.test/widget.svg'
-        )
-      )
-    )
-    .toBe(true)
+  await externalImageRequest
   await page.locator('#overlay-widget-bio').dblclick()
   const editor = page.getByTestId('widget-bio-input')
   await expect(editor).toBeVisible()
