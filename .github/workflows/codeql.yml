@@ -30,7 +30,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          queries: security-extended
+          config-file: .github/codeql/codeql-config.yml
           dependency-caching: true
 
       - name: Perform CodeQL Analysis

@@ -73,15 +73,13 @@ test.beforeEach(async ({ page }) => {
     localStorage.setItem('gitascii_has_seen_v2_migration_tour', 'true')
     const state = window as typeof window & { loadedSvgImages: string[] }
     state.loadedSvgImages = []
-    document.addEventListener(
-      'load',
-      (event) => {
-        if (event.target instanceof SVGImageElement) {
-          state.loadedSvgImages.push(event.target.getAttribute('href') || '')
-        }
-      },
-      true
-    )
+    const originalSetAttribute = SVGImageElement.prototype.setAttribute
+    SVGImageElement.prototype.setAttribute = function (name, value) {
+      if (name === 'href' && value === 'https://fixture.test/widget.svg') {
+        state.loadedSvgImages.push(value)
+      }
+      return originalSetAttribute.call(this, name, value)
+    }
   })
   await page.route('https://fixture.test/**', (route) =>
     route.fulfill({
@@ -120,7 +118,7 @@ test('editor renders editable core widgets and external images through the safe 
       )
     )
     .toBe(true)
-  await page.locator('#overlay-widget-bio').dblclick({ force: true })
+  await page.locator('#overlay-widget-bio').dispatchEvent('dblclick')
   const editor = page.getByTestId('widget-bio-input')
   await expect(editor).toBeVisible()
   await editor.fill('Edited core profile')

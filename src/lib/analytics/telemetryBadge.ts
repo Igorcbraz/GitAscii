@@ -57,6 +57,8 @@ function findBadgeImage(content: string, username: string, slug: string): string
   const renderedContent = content
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<!--[\s\S]*$/g, '')
+    .replace(/<!--/g, '&lt;!--')
+    .replace(/-->/g, '--&gt;')
     .replace(/^\s*```[\s\S]*?^\s*```/gm, '')
   const images = renderedContent.match(/<img\b[^>]*>/gi) || []
   return (
