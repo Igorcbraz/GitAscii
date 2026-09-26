@@ -11,6 +11,16 @@ import { normalizeProfileData, renderSvg } from './SVGEngine'
 import { getRenderer, REGISTRY_MAP, renderWidgetContent } from './WidgetRegistry'
 import { renderWidgetSvg } from './WidgetRenderer'
 
+// A single unescaped '&' anywhere in a widget's output is enough to make the
+// final published SVG invalid XML for the *entire* profile image, not just
+// this widget - see https://github.com/Igorcbraz/GitAscii/issues/234.
+// Ampersands inside XML comments are excluded: comment content isn't parsed
+// for entity references, so a literal '&' there is already valid XML.
+function hasUnescapedAmpersand(svg: string): boolean {
+  const withoutComments = svg.replace(/<!--[\s\S]*?-->/g, '')
+  return /&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/.test(withoutComments)
+}
+
 const mockFullData: NormalizedGitHubData = {
   user: {
     id: 12345,
@@ -143,6 +153,10 @@ describe('Engine Robustness & Widget Error Boundary', () => {
         const svg = renderWidgetContent(widget, mockFullData, mockGlobalStyles)
         expect(typeof svg).toBe('string')
         expect(svg.length).toBeGreaterThan(0)
+        expect(
+          hasUnescapedAmpersand(svg),
+          `widget "${widgetId}" emitted an unescaped '&', which invalidates the whole published SVG`
+        ).toBe(false)
       }).not.toThrow()
     }
   })
@@ -166,6 +180,10 @@ describe('Engine Robustness & Widget Error Boundary', () => {
         const svg = renderWidgetContent(widget, safeData, mockGlobalStyles)
         expect(typeof svg).toBe('string')
         expect(svg.length).toBeGreaterThan(0)
+        expect(
+          hasUnescapedAmpersand(svg),
+          `widget "${widgetId}" emitted an unescaped '&', which invalidates the whole published SVG`
+        ).toBe(false)
       }).not.toThrow()
     }
   })
