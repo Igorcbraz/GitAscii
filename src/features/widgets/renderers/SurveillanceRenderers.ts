@@ -572,7 +572,7 @@ export function renderSurveillanceLoadout(
 
       if (displayMode === 'logo') {
         out.push(
-          `<image x="${xPos + 6}" y="${yPos + 4}" width="16" height="16" href="${iconUrl}"/>`
+          `<image x="${xPos + 6}" y="${yPos + 4}" width="16" height="16" href="${esc(iconUrl)}"/>`
         )
       } else if (displayMode === 'name') {
         out.push(
@@ -580,7 +580,7 @@ export function renderSurveillanceLoadout(
         )
       } else {
         out.push(
-          `<image x="${xPos + 6}" y="${yPos + 4}" width="16" height="16" href="${iconUrl}"/>`
+          `<image x="${xPos + 6}" y="${yPos + 4}" width="16" height="16" href="${esc(iconUrl)}"/>`
         )
         out.push(
           `<text x="${xPos + 26}" y="${yPos + 16}" font-size="10.5" letter-spacing=".5" fill="${txtcol}">${esc(label)}</text>`

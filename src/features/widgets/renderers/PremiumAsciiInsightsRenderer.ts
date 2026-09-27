@@ -92,7 +92,7 @@ export function renderPremiumAsciiInsights(
     const title = 'INSIGHTS & HABITS'
     const padTitle = Math.max(0, Math.floor((INNER_W - title.length) / 2))
     lines.push(
-      ` ${' '.repeat(padTitle)}<tspan fill="${accentLime}" font-weight="bold">${title}</tspan>`
+      ` ${' '.repeat(padTitle)}<tspan fill="${accentLime}" font-weight="bold">${escapeXml(title)}</tspan>`
     )
     lines.push(` <tspan fill="${borderColor}">${'─'.repeat(INNER_W)}</tspan>`)
 
