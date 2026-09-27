@@ -111,15 +111,34 @@ function calculateStreaks(weeks: any[]): StreakStats {
   }
 }
 
+const cache = new Map<string, string>()
+
 export function renderAsciiHeatmap(
   widget: WidgetInstance,
   data: NormalizedGitHubData,
   globalStyles: GlobalStyles,
   isStaticOverride?: boolean
 ): string {
+  const cfg = widget?.config || {}
+  const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
+
+  const cacheKey = JSON.stringify({
+    w: widget?.size?.width,
+    h: widget?.size?.height,
+    c: widget?.config,
+    id: widget?.instanceId,
+    u: data?.user?.login,
+    gs: globalStyles,
+    is: isStatic,
+    ws: data?.contributions?.weeks,
+  })
+
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey)!
+  }
+
   const width = Math.max(100, Number(widget?.size?.width) || 800)
   const height = Math.max(100, Number(widget?.size?.height) || 280)
-  const cfg = widget?.config || {}
 
   const username = data?.user?.login || 'user'
 
@@ -158,7 +177,6 @@ export function renderAsciiHeatmap(
   const COL_T = 0.018
   const ROW_T = 0.045
   const CELL_DUR = 0.42
-  const isStatic = isStaticOverride !== undefined ? isStaticOverride : Boolean(cfg.staticMode)
 
   const grid: Array<Array<{ date: string; count: number; level: number } | null>> = weeks.map(
     (week) => {
@@ -335,5 +353,10 @@ export function renderAsciiHeatmap(
   )
 
   parts.push(`</svg>`)
-  return parts.join('\n')
+  const result = parts.join('\n')
+
+  if (cache.size > 100) cache.clear()
+  cache.set(cacheKey, result)
+
+  return result
 }

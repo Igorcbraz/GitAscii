@@ -5,6 +5,8 @@ import React, { useMemo } from 'react'
 
 import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme } from '@/constants'
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
+import { sanitizeSvg } from '@/utils/svgSanitizer'
 
 import { useEditorStore } from '../../store/editorStore'
 
@@ -39,7 +41,7 @@ export function GitHubReadmeCanvas() {
         .map((widget) => renderWidgetSvg(widget, githubData, config.globalStyles))
         .join('\n')
 
-      return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      return sanitizeSvg(`<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <style>
     * { box-sizing: border-box; }
     text { user-select: none; }
@@ -49,7 +51,7 @@ export function GitHubReadmeCanvas() {
   </style>
   ${!isTransparent ? `<rect class="${isAdaptiveBg ? 'gitascii-canvas-bg' : ''}" width="${width}" height="${height}" fill="${bg}" rx="${globalStyles.borderRadius || 0}" />` : ''}
   ${widgetsSvg}
-</svg>`
+</svg>`)
     } catch (err) {
       console.error('Failed to render SVG in GitHub Mode:', err)
       return ''
@@ -83,6 +85,7 @@ export function GitHubReadmeCanvas() {
             className="mx-auto w-full flex justify-center [&>svg]:max-w-full [&>svg]:h-auto [&>svg]:rounded-[inherit]"
             style={{ maxWidth: 800 }}
             dangerouslySetInnerHTML={{ __html: svgContent }}
+            onErrorCapture={handleSvgImageError}
           />
         </div>
       </div>

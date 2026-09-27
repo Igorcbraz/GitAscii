@@ -69,11 +69,11 @@ export function cacheProfileConfig(config: SavedConfiguration): void {
 }
 
 export async function saveProfileConfig(config: SavedConfiguration): Promise<void> {
-  cacheProfileConfig(config)
   const username = config.username.toLowerCase()
   const slug = (config.profileSlug || 'default').toLowerCase()
 
   await saveProfileConfigInDb(username, slug, config)
+  cacheProfileConfig(config)
 
   try {
     const redis = getProRedisClient()
@@ -124,10 +124,10 @@ async function fetchConfigFromGitHub(
   return null
 }
 
-export async function loadProfileConfig(
+async function readProfileConfig(
   username: string,
   slug: string,
-  options: { bypassMemory?: boolean; preferGitHub?: boolean } = {}
+  options: { bypassMemory?: boolean } = {}
 ): Promise<SavedConfiguration | null> {
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
@@ -215,4 +215,19 @@ export async function loadProfileConfig(
     memoryCache.delete(cacheKey)
   }
   return config
+}
+
+export async function loadProfileConfig(
+  username: string,
+  slug: string,
+  options: { bypassMemory?: boolean; preferGitHub?: boolean } = {}
+): Promise<SavedConfiguration | null> {
+  const owner = username.toLowerCase().trim()
+  const profileSlug = slug.toLowerCase().trim()
+  const config = options.preferGitHub
+    ? (await fetchConfigFromGitHub(owner, profileSlug)) ||
+      (await readProfileConfig(owner, profileSlug, options))
+    : await readProfileConfig(owner, profileSlug, options)
+  // Stored/imported JSON describes content, never the authority to write another account.
+  return config ? { ...config, username: owner, profileSlug } : null
 }

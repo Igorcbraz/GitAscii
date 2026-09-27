@@ -22,14 +22,20 @@ export async function GET() {
       } catch {}
     }
 
-    return NextResponse.json({
-      session: {
-        ...session,
-        isPro: entitlements.tier !== PRO_PLAN_TIERS.FREE,
-        tier: entitlements.tier,
-        entitlements,
+    return NextResponse.json(
+      {
+        session: {
+          username: session.username,
+          githubId: session.githubId,
+          name: session.name,
+          email: session.email,
+          isPro: entitlements.tier !== PRO_PLAN_TIERS.FREE,
+          tier: entitlements.tier,
+          entitlements,
+        },
       },
-    })
+      { headers: { 'Cache-Control': 'private, no-store' } }
+    )
   }
   return NextResponse.json({ session })
 }

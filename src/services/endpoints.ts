@@ -139,8 +139,6 @@ export const API_ENDPOINTS = {
       `https://streak-stats.demolab.com/?user=${encodeURIComponent(username)}${queryParams}`,
     PROFILE_TROPHY: (username: string, queryParams: string) =>
       `https://github-profile-trophy-fast.vercel.app/?username=${encodeURIComponent(username)}${queryParams}`,
-    ACTIVITY_GRAPH: (username: string, queryParams: string) =>
-      `https://github-readme-activity-graph.vercel.app/graph?username=${encodeURIComponent(username)}${queryParams}`,
     JSDELIVR_GH: (username: string, repo: string, branch: string, file: string) =>
       `https://cdn.jsdelivr.net/gh/${encodeURIComponent(username)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}/${file}`,
     LECOQ_METRICS: (username: string, template: string, base: string) =>

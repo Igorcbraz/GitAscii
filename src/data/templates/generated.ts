@@ -10,8 +10,8 @@ import template8 from './mission-control.json'
 import template11 from './Native.json'
 import template9 from './native_advanced.json'
 import template10 from './native_simple.json'
-import template12 from './pokemon_trainer.json'
-import template13 from './rugbedbugg.json'
+import template12 from './rugbedbugg.json'
+import template13 from './template_andreicsantana.json'
 import template14 from './windows_xp.json'
 
 export const GENERATED_TEMPLATES = [
@@ -27,7 +27,7 @@ export const GENERATED_TEMPLATES = [
   { file: 'native_advanced', template: template9 },
   { file: 'native_simple', template: template10 },
   { file: 'Native', template: template11 },
-  { file: 'pokemon_trainer', template: template12 },
-  { file: 'rugbedbugg', template: template13 },
+  { file: 'rugbedbugg', template: template12 },
+  { file: 'template_andreicsantana', template: template13 },
   { file: 'windows_xp', template: template14 },
 ] as const

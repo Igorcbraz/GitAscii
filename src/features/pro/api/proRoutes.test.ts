@@ -22,6 +22,7 @@ vi.mock('@/lib/v2/profilePublisher', () => ({
   publishStoredProfileV2: vi.fn().mockResolvedValue(undefined),
 }))
 
+import { POST as publishEditorProfile } from '@/app/api/github/commit/route'
 import { getSession } from '@/lib/auth'
 
 const mockedGetSession = vi.mocked(getSession)
@@ -283,7 +284,31 @@ describe('Pro API Route Handlers Test Suite', () => {
   })
 
   describe('Multi-profile enhancements: Duplicate, Default, Versions', () => {
+    it('enforces the same free profile limit in create, duplicate and editor publication', async () => {
+      mockedGetSession.mockResolvedValue({ username: 'FreeProfileOwner', githubId: 908 })
+      const { POST: duplicate } = await import('@/app/api/pro/profiles/[slug]/duplicate/route')
+      const request = (body: unknown) =>
+        new Request('http://localhost/api/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      expect((await postProfiles(request({ slug: 'extra', name: 'Extra' }))).status).toBe(403)
+      expect(
+        (
+          await duplicate(request({ targetSlug: 'extra', name: 'Extra' }), {
+            params: Promise.resolve({ slug: 'default' }),
+          })
+        ).status
+      ).toBe(403)
+      expect(
+        (await publishEditorProfile(request({ exportData: { profileSlug: 'extra' } }))).status
+      ).toBe(403)
+    })
+
     it('duplicates, sets default, and creates/restores versions', async () => {
+      const { updateUserSettings } = await import('@/features/pro/server/entitlements')
+      await updateUserSettings('MultiTester', { planTier: 'pro' })
       mockedGetSession.mockResolvedValue({
         username: 'MultiTester',
         githubId: 101,

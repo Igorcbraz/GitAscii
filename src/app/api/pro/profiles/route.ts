@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-import { getProEntitlements } from '@/features/pro/server/entitlements'
+import { assertProfileWriteAllowed, ProfileLimitError } from '@/features/pro/server/profileAccess'
 import { createProfile, getUserProfiles } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
 import { publishStoredProfileV2 } from '@/lib/v2/profilePublisher'
@@ -36,23 +36,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Slug and Name are required' }, { status: 400 })
     }
 
-    const entitlements = await getProEntitlements(session.username)
-    const existing = await getUserProfiles(session.username)
-
-    if (existing.length >= entitlements.maxProfiles) {
-      return NextResponse.json(
-        {
-          error: `You have reached the maximum number of profiles (${entitlements.maxProfiles}) for your plan.`,
-        },
-        { status: 403 }
-      )
-    }
+    await assertProfileWriteAllowed(session.username, slug)
 
     const newProfile = await createProfile(session.username, { slug, name, description })
     await publishStoredProfileV2(session.username, newProfile.slug)
     return NextResponse.json({ profile: newProfile }, { status: 201 })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Failed to create profile'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return NextResponse.json(
+      { error: msg },
+      { status: error instanceof ProfileLimitError ? 403 : 500 }
+    )
   }
 }

@@ -55,6 +55,7 @@ describe('Strobi Disney-Grade Landing Integration', () => {
 
   describe('GazeController Distraction Mode (Widgets Showcase)', () => {
     it('switches gaze away from user pointer when distracted and recovers upon end', () => {
+      const clock = vi.spyOn(performance, 'now').mockReturnValue(1000)
       const gaze = new GazeController()
       gaze.updatePointer(500, 500)
 
@@ -75,6 +76,7 @@ describe('Strobi Disney-Grade Landing Integration', () => {
       gaze.solve(100, 100, 3500)
       expect(gaze.getIsDistracted()).toBe(false)
       expect(onEnd).toHaveBeenCalled()
+      clock.mockRestore()
     })
   })
 

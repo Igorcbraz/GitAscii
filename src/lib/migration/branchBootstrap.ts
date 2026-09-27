@@ -18,6 +18,16 @@ export async function bootstrapGitasciiBranch(
   config: SavedConfiguration,
   data: NormalizedGitHubData
 ): Promise<BootstrapResult> {
+  return bootstrapGitasciiProfiles(owner, repo, token, [config], data)
+}
+
+export async function bootstrapGitasciiProfiles(
+  owner: string,
+  repo: string,
+  token: string,
+  configs: SavedConfiguration[],
+  data: NormalizedGitHubData
+): Promise<BootstrapResult> {
   const headers = {
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'GitAscii-App',
@@ -25,17 +35,23 @@ export async function bootstrapGitasciiBranch(
   }
 
   const branchName = 'gitascii'
-  const slug = (config.profileSlug || 'default').toLowerCase()
-  const configPath = slug === 'default' ? 'gitascii.json' : `gitascii_${slug}.json`
-  const revision = config.metadata?.revision || `rev_${Date.now()}`
-
-  config.metadata = {
-    ...config.metadata,
-    revision,
-    updatedAt: new Date().toISOString(),
-  }
+  const revision = configs[0]?.metadata?.revision || `rev_${Date.now()}`
+  const preparedConfigs = configs.map((config) => ({
+    ...config,
+    username: owner,
+    profileSlug: (config.profileSlug || 'default').toLowerCase(),
+    metadata: {
+      ...config.metadata,
+      revision: config.metadata?.revision || revision,
+      updatedAt: new Date().toISOString(),
+    },
+  }))
 
   try {
+    const slugs = preparedConfigs.map((config) => config.profileSlug)
+    if (slugs.length === 0 || new Set(slugs).size !== slugs.length) {
+      throw new Error('Publication requires distinct profile slugs')
+    }
     let latestCommitSha: string | null = null
     let branchCreated = false
 
@@ -85,26 +101,22 @@ export async function bootstrapGitasciiBranch(
       throw new Error(`Failed to check branch ${branchName}: HTTP ${branchRes.status}`)
     }
 
-    const rawDarkSvg = renderSvg(config, data, { theme: 'dark' })
-    const darkProcessed = await processExternalAssets(rawDarkSvg)
-
-    const rawLightSvg = renderSvg(config, data, { theme: 'light' })
-    const lightProcessed = await processExternalAssets(rawLightSvg)
-
-    const files = [
-      {
-        path: `profiles/${slug}/dark.svg`,
-        content: darkProcessed.svg,
-      },
-      {
-        path: `profiles/${slug}/light.svg`,
-        content: lightProcessed.svg,
-      },
-      {
-        path: configPath,
-        content: JSON.stringify(config, null, 2),
-      },
-    ]
+    const files: { path: string; content: string }[] = []
+    for (const config of preparedConfigs) {
+      const slug = config.profileSlug
+      const darkProcessed = await processExternalAssets(renderSvg(config, data, { theme: 'dark' }))
+      const lightProcessed = await processExternalAssets(
+        renderSvg(config, data, { theme: 'light' })
+      )
+      files.push(
+        { path: `profiles/${slug}/dark.svg`, content: darkProcessed.svg },
+        { path: `profiles/${slug}/light.svg`, content: lightProcessed.svg },
+        {
+          path: slug === 'default' ? 'gitascii.json' : `gitascii_${slug}.json`,
+          content: JSON.stringify(config, null, 2),
+        }
+      )
+    }
 
     const treeEntries = []
 
@@ -150,7 +162,7 @@ export async function bootstrapGitasciiBranch(
       method: 'POST',
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: `Initialize GitAscii ${slug} profile SVGs [skip ci]\n\nCo-authored-by: ${owner} <${owner}@users.noreply.github.com>`,
+        message: `Update GitAscii ${preparedConfigs.map((config) => config.profileSlug).join(', ')} profile SVGs [skip ci]\n\nCo-authored-by: ${owner} <${owner}@users.noreply.github.com>`,
         tree: treeData.sha,
         parents: latestCommitSha ? [latestCommitSha] : [],
       }),
@@ -168,7 +180,7 @@ export async function bootstrapGitasciiBranch(
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sha: newCommitSha,
-        force: true,
+        force: false,
       }),
     })
 

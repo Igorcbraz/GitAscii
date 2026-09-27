@@ -42,7 +42,6 @@ import { renderMonolith } from '@/features/widgets/renderers/MonolithRenderer'
 import { renderNeural } from '@/features/widgets/renderers/NeuralRenderer'
 import { renderPatchbay } from '@/features/widgets/renderers/PatchbayRenderer'
 import { renderPokemonCard } from '@/features/widgets/renderers/PokemonCardRenderer'
-import { renderPokemonTrainerCard } from '@/features/widgets/renderers/PokemonTrainerCardRenderer'
 import { renderPremiumAsciiCodingVelocity } from '@/features/widgets/renderers/PremiumAsciiCodingVelocityRenderer'
 import { renderPremiumAsciiDeveloperDna } from '@/features/widgets/renderers/PremiumAsciiDeveloperDnaRenderer'
 import { renderPremiumAsciiDevScore } from '@/features/widgets/renderers/PremiumAsciiDevScoreRenderer'
@@ -104,7 +103,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.TERMINAL_INFO, (w, d, g) => renderTerminalInfo(w, d, g)],
   ['terminal-card', (w, d, g) => renderTerminalInfo(w, d, g)],
   [WIDGET_IDS.POKEMON_CARD, (w, d, g) => renderPokemonCard(w, d, g, w.size.width, w.size.height)],
-  [WIDGET_IDS.POKEMON_TRAINER_CARD, (w, d, g, s) => renderPokemonTrainerCard(w, d, g, s)],
   [WIDGET_IDS.GITFUT_CARD, (w, d, g) => renderGitFutCard(w, d, g, w.size.width, w.size.height)],
 
   [WIDGET_IDS.GODPROFILE_TERMINAL, (w, d, g) => renderTerminal(w, d, g)],
@@ -178,7 +176,6 @@ export const REGISTRY_MAP = new Map<string, WidgetRendererFn>([
   [WIDGET_IDS.GHSTATS, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.STREAK_STATS, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.PROFILE_TROPHY, (w, d, g) => renderExternalWidgets(w, d, g)],
-  [WIDGET_IDS.ACTIVITY_GRAPH, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.CONTRIBUTION_SNAKE, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.METRICS_CARD, (w, d, g) => renderExternalWidgets(w, d, g)],
   [WIDGET_IDS.VIEWS_COUNTER, (w, d, g) => renderExternalWidgets(w, d, g)],

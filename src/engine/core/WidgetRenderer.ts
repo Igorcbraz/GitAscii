@@ -1,4 +1,5 @@
 import { GITHUB_THEME_KEYS, isGitHubAdaptiveTheme, WIDGET_IDS } from '@/constants'
+import { sanitizeSvg } from '@/utils/svgSanitizer'
 
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '../types'
 import { renderWidgetContent } from './WidgetRegistry'
@@ -93,7 +94,7 @@ export function renderWidgetSvg(
   let contentSvg = renderWidgetContent(widget, data, globalStylesSafe, forceStatic)
 
   let templateDecorationSvg = ''
-  const tmplStyle = globalStyles.templateStyle || 'terminal'
+  const tmplStyle = globalStylesSafe.templateStyle || 'terminal'
   let strokeWidth = 1
   let shadowRect = ''
 
@@ -382,11 +383,11 @@ export function renderWidgetSvg(
       ${contentSvg}
   `
 
-  if (!includeWrapper) return innerHtml
+  if (!includeWrapper) return sanitizeSvg(innerHtml)
 
-  return `
+  return sanitizeSvg(`
     <g transform="translate(${x}, ${y})" id="widget-${widget.instanceId}">
 ${innerHtml}
     </g>
-  `
+  `)
 }

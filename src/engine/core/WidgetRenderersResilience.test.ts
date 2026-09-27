@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
+import { RAW_TEMPLATES } from '@/data/templates'
 import type {
   GlobalStyles,
   NormalizedGitHubData,
   SavedConfiguration,
   WidgetInstance,
 } from '@/engine/types'
+import { WIDGET_CATALOG } from '@/features/editor/config/widgets'
 
 import { normalizeProfileData, renderSvg } from './SVGEngine'
 import { getRenderer, REGISTRY_MAP, renderWidgetContent } from './WidgetRegistry'
@@ -125,6 +127,33 @@ const mockGlobalStyles: GlobalStyles = {
 }
 
 describe('Engine Robustness & Widget Error Boundary', () => {
+  it('sanitizes inline previews while preserving external images and publication markers', () => {
+    const widget: WidgetInstance = {
+      widgetId: 'custom-image',
+      instanceId: 'external',
+      visible: true,
+      locked: false,
+      zIndex: 1,
+      position: { x: 0, y: 0 },
+      size: { width: 300, height: 180 },
+      config: {
+        backgroundColor: '#060606" onpointerenter="/* inert fixture */',
+        imageUrl: 'https://example.com/image.png',
+      },
+    }
+    const svg = renderWidgetSvg(widget, mockFullData, mockGlobalStyles)
+    expect(svg).not.toContain('onpointerenter=')
+    expect(svg).not.toContain('<foreignObject')
+    expect(svg).toContain('<image ')
+    expect(svg).toContain('EXTERNAL_WIDGET_JSON')
+  })
+  it('registers every catalog and template widget in the shared rendering engine', () => {
+    const ids = new Set([
+      ...WIDGET_CATALOG.map((widget) => widget.id),
+      ...RAW_TEMPLATES.flatMap((template) => template.widgets.map((widget) => widget.widgetId)),
+    ])
+    expect([...ids].filter((id) => !REGISTRY_MAP.has(id))).toEqual([])
+  })
   it('normalizes missing or corrupted profile data into guaranteed safe structures', () => {
     const normalized = normalizeProfileData(mockCorruptedData)
     expect(normalized.user.login).toBe('user')
@@ -157,6 +186,7 @@ describe('Engine Robustness & Widget Error Boundary', () => {
           hasUnescapedAmpersand(svg),
           `widget "${widgetId}" emitted an unescaped '&', which invalidates the whole published SVG`
         ).toBe(false)
+        expect(svg, widgetId).not.toContain('[ WIDGET ERROR:')
       }).not.toThrow()
     }
   })
@@ -184,6 +214,7 @@ describe('Engine Robustness & Widget Error Boundary', () => {
           hasUnescapedAmpersand(svg),
           `widget "${widgetId}" emitted an unescaped '&', which invalidates the whole published SVG`
         ).toBe(false)
+        expect(svg, widgetId).not.toContain('[ WIDGET ERROR:')
       }).not.toThrow()
     }
   })
