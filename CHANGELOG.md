@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.1.0](https://github.com/Igorcbraz/GitAscii/compare/v2.0.2...v2.1.0) (2026-09-27)
+
+
+### Features
+
+* **pro-analytics:** add customizable README badge, activation flow, and layout polish ([64aaba3](https://github.com/Igorcbraz/GitAscii/commit/64aaba3766b599e0bfe7cf576ce8859ae13d4521))
+* **templates:** add Windows XP template by andreicsantana ([df0223f](https://github.com/Igorcbraz/GitAscii/commit/df0223f4b5ee68c9b03ff9ceb89c1f0e3e9879f5))
+
+
+### Bug Fixes
+
+* address PR 233 CI and CodeQL findings ([5209d3e](https://github.com/Igorcbraz/GitAscii/commit/5209d3ebe3f69de76ab8a61be9b45ea34cda9f3d))
+* change Inter_Tight to Inter and rebuild action ([1b5773c](https://github.com/Igorcbraz/GitAscii/commit/1b5773cf5e135c81cb21235b84837c84312ca252))
+* **ci:** address PR security and browser checks ([86c1200](https://github.com/Igorcbraz/GitAscii/commit/86c1200e785519b298d34a215533ae88ec73a466))
+* **ci:** resolve PR checks ([1754636](https://github.com/Igorcbraz/GitAscii/commit/1754636b2efd122d0ed9696cde956f7dddb8f1d8))
+* **core:** unify Pro and editor logic, harden publishing, and expand regression coverage ([f859465](https://github.com/Igorcbraz/GitAscii/commit/f859465faf865cbeff6c6c9be23d63d8409b8c67))
+* **editor:** don't open 2 dialogs at the same time ([0480b68](https://github.com/Igorcbraz/GitAscii/commit/0480b68db8bd3dd9458ef04326b457e79790f12f))
+* **editor:** load pokemon card widget ([15400d4](https://github.com/Igorcbraz/GitAscii/commit/15400d4d510bf2c89f471a5bb1cb29c4622eb5ac))
+* **editor:** resolve duplicate template IDs and tooltip preview sizing ([81fee02](https://github.com/Igorcbraz/GitAscii/commit/81fee02f137498f5ec8940182d48d1cde2908f91))
+* remove next/font/google to bypass Turbopack build failure ([ce06208](https://github.com/Igorcbraz/GitAscii/commit/ce062086d913a5f05e490ed31489fa133935a7e9))
+* run eslint fix on layout.tsx to sort imports ([7579bf0](https://github.com/Igorcbraz/GitAscii/commit/7579bf0b2929ffa9510bc316490b4f7a4cf91dce))
+* **seo:** better seo perfomance ([8f8af5c](https://github.com/Igorcbraz/GitAscii/commit/8f8af5c629b84fd905492bf12310036357b1a520))
+* **widgets:** remove activity graph widget ([4d9ed64](https://github.com/Igorcbraz/GitAscii/commit/4d9ed644f6eea6c01cbb11b09f32d76c1a1f8416))
+* **widgets:** resolve image loading issues in GitFut cards ([8c0e03e](https://github.com/Igorcbraz/GitAscii/commit/8c0e03e472d22c20a689fcdc08eea7b7786fd0c9))
+
+
+### Performance Improvements
+
+* **widget:** memoize ASCII portrait and heatmap renderers to improve drag fluidity ([ec83cdd](https://github.com/Igorcbraz/GitAscii/commit/ec83cddfc11b65136dd4810d77877f0f2d1b440c))
+
 ## [2.0.2](https://github.com/Igorcbraz/GitAscii/compare/v2.0.1...v2.0.2) (2026-09-18)
 
 
