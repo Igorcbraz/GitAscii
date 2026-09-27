@@ -207,33 +207,6 @@ export function renderExternalWidgets(
       )
     }
 
-    case 'activity-graph': {
-      const username = (cfg.username as string) || data.user.login
-      const theme = (cfg.theme as string) || 'github-dark'
-      const days = Number(cfg.days) || 31
-      const showArea = cfg.showArea !== false
-      const hideBorder = Boolean(cfg.hideBorder)
-
-      const showTitle = cfg.showTitle !== false
-      const customTitle = (cfg.customTitle as string) || '[ ACTIVITY GRAPH ]'
-
-      const graphUrl = API_ENDPOINTS.EXTERNAL_WIDGETS.ACTIVITY_GRAPH(
-        username,
-        `&theme=${theme}&days=${days}&area=${showArea}${hideBorder ? '&hide_border=true' : ''}`
-      )
-
-      return renderExternalWidgetSvg(
-        graphUrl,
-        width,
-        height,
-        customTitle,
-        showTitle,
-        globalStyles,
-        accent,
-        'contain'
-      )
-    }
-
     case 'contribution-snake': {
       const username = (cfg.username as string) || data.user.login
       const theme = (cfg.theme as string) || 'dark'

@@ -1230,6 +1230,7 @@ export function renderWinXPBliss(
         <!-- Real Bliss Wallpaper Image -->
         <image
           href="${esc(imageUrl)}"
+          xlink:href="${esc(imageUrl)}"
           x="3"
           y="${innerY}"
           width="${innerW}"

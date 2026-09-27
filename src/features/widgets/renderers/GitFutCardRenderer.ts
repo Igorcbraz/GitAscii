@@ -1,4 +1,4 @@
-import { DEFAULT_GITFUT_BASE_URL, DEFAULT_GITFUT_FALLBACK_IMAGE } from '@/constants'
+import { DEFAULT_GITFUT_FALLBACK_IMAGE } from '@/constants'
 import { escapeXml } from '@/engine/core/xmlUtils'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { sanitizeId, sanitizeSafeHref } from '@/utils/svgSanitizer'
@@ -17,7 +17,8 @@ export function renderGitFutCard(
   const enableHolo = cfg.enableHolo === true
 
   const queryParam = country ? `?country=${encodeURIComponent(country)}` : ''
-  const rawImageUrl = `${DEFAULT_GITFUT_BASE_URL}/${encodeURIComponent(username)}.png${queryParam}`
+  const gitfutUrl = `gitfut.com/${encodeURIComponent(username)}.png${queryParam}`
+  const rawImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(gitfutUrl)}`
   const imageUrl = escapeXml(sanitizeSafeHref(rawImageUrl, DEFAULT_GITFUT_FALLBACK_IMAGE))
 
   const cx = width / 2

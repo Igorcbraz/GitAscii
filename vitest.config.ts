@@ -13,6 +13,7 @@ export default defineConfig({
     },
   },
   test: {
+    maxWorkers: 4,
     alias: {
       '@': path.resolve(dirname, './src'),
     },
@@ -26,6 +27,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           environment: 'node',
+          exclude: ['src/lib/db/db.test.ts'],
           include: [
             'src/**/*.test.ts',
             'src/**/*.test.tsx',

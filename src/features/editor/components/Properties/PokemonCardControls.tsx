@@ -146,8 +146,14 @@ function isTcgdexHost(urlStr: string): boolean {
 
 async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
   const isTcgdex = isTcgdexHost(cardImageUrl)
-  const targetUrl =
-    isTcgdex && !cardImageUrl.endsWith('.webp') ? `${cardImageUrl}/low.webp` : cardImageUrl
+  let targetUrl = cardImageUrl
+  if (isTcgdex && !cardImageUrl.endsWith('.webp')) {
+    if (cardImageUrl.match(/\.(png|jpg|jpeg)$/i)) {
+      targetUrl = cardImageUrl.replace(/\.(png|jpg|jpeg)$/i, '.webp')
+    } else {
+      targetUrl = `${cardImageUrl}/low.webp`
+    }
+  }
 
   try {
     const res = await fetch(targetUrl)

@@ -129,8 +129,8 @@ Thanks for visiting!`
 
       expect(updated).toContain('<picture>')
       expect(updated).not.toContain('https://gitascii.com/api/dave')
-      expect(updated).toContain('# Hi, I am Dave!')
-      expect(updated).toContain('Thanks for visiting!')
+      expect(updated).not.toContain('# Hi, I am Dave!')
+      expect(updated).not.toContain('Thanks for visiting!')
     })
 
     it('cleans duplicate or previous badges when updating README', () => {

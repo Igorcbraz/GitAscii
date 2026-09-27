@@ -9,6 +9,7 @@ import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
 
 import { isExternalWidget, type WidgetCatalogItem } from '../../config/widgets'
 
@@ -35,7 +36,6 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.GITHUB_README_STATS]: { width: 390, height: 210 },
   [WIDGET_IDS.STREAK_STATS]: { width: 390, height: 210 },
   [WIDGET_IDS.PROFILE_TROPHY]: { width: 800, height: 200 },
-  [WIDGET_IDS.ACTIVITY_GRAPH]: { width: 710, height: 300 },
   [WIDGET_IDS.CONTRIBUTION_SNAKE]: { width: 800, height: 250 },
   [WIDGET_IDS.METRICS_CARD]: { width: 440, height: 380 },
   [WIDGET_IDS.VIEWS_COUNTER]: { width: 200, height: 96 },
@@ -81,7 +81,6 @@ const DEFAULT_SIZE_MAP: Record<string, { width: number; height: number }> = {
   [WIDGET_IDS.WINXP_TASKBAR]: { width: 780, height: 48 },
   [WIDGET_IDS.WINXP_ERROR_DIALOG]: { width: 520, height: 210 },
   [WIDGET_IDS.WINXP_SYSTEM_PROPERTIES]: { width: 780, height: 400 },
-  [WIDGET_IDS.POKEMON_TRAINER_CARD]: { width: 380, height: 240 },
   [WIDGET_IDS.MINECRAFT_HUD]: { width: 480, height: 180 },
   [WIDGET_IDS.MINECRAFT_INVENTORY]: { width: 480, height: 260 },
   [WIDGET_IDS.MINECRAFT_CHAT]: { width: 480, height: 240 },
@@ -365,6 +364,7 @@ export function WidgetPreviewTooltip({
             viewBox={`0 0 ${size.width} ${size.height}`}
             className="w-full h-auto max-h-42.5 rounded object-contain animate-fade-in"
             dangerouslySetInnerHTML={{ __html: svgContent }}
+            onErrorCapture={handleSvgImageError}
           />
         )}
       </div>

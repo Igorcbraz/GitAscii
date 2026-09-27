@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { assertProfileWriteAllowed, ProfileLimitError } from '@/features/pro/server/profileAccess'
 import { duplicateProfile } from '@/features/pro/server/profileManagerStore'
 import { getSession } from '@/lib/auth'
 import { publishStoredProfileV2 } from '@/lib/v2/profilePublisher'
@@ -22,6 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       return NextResponse.json({ error: 'Destination slug and name are required' }, { status: 400 })
     }
 
+    await assertProfileWriteAllowed(session.username, targetSlug)
     const duplicated = await duplicateProfile(session.username, slug, {
       slug: targetSlug,
       name,
@@ -32,6 +34,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ profile: duplicated }, { status: 201 })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Failed to duplicate profile'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return NextResponse.json(
+      { error: msg },
+      { status: error instanceof ProfileLimitError ? 403 : 500 }
+    )
   }
 }

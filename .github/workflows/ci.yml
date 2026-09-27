@@ -35,3 +35,35 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Core editor and Pro browser regressions
+        run: npm run test:e2e:core
+
+      - name: Build Cloudflare deployment
+        run: npm run build:vinext
+
+      - name: Verify bundled Action matches source
+        run: |
+          npm run build:action
+          git diff --exit-code -- action/dist/index.js
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-browser-diagnostics
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/release-please.yml

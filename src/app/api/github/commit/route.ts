@@ -5,6 +5,8 @@ import { MIGRATION_TEMPLATES } from '@/constants'
 import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
 import { getDynamicRulesConfig } from '@/features/pro/server/dynamicRulesStore'
 import { getProEntitlements } from '@/features/pro/server/entitlements'
+import { assertProfileWriteAllowed, ProfileLimitError } from '@/features/pro/server/profileAccess'
+import { getTelemetryStyle } from '@/lib/analytics/telemetryBadge'
 import { getSession } from '@/lib/auth'
 import { getInstallationTokenById, getInstallationTokenForUser } from '@/lib/githubApp'
 import { bootstrapGitasciiBranch } from '@/lib/migration/branchBootstrap'
@@ -27,6 +29,17 @@ export async function POST(request: Request) {
     const rawSlug = typeof exportData?.profileSlug === 'string' ? exportData.profileSlug : 'default'
     const profileSlug = /^[a-zA-Z0-9_-]{1,50}$/.test(rawSlug) ? rawSlug.toLowerCase() : 'default'
     const revision = `rev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+
+    if (exportData) {
+      try {
+        await assertProfileWriteAllowed(username, profileSlug)
+      } catch (error) {
+        if (error instanceof ProfileLimitError) {
+          return NextResponse.json({ error: error.message }, { status: 403 })
+        }
+        throw error
+      }
+    }
 
     if (exportData && typeof exportData === 'object') {
       exportData.username = username
@@ -167,13 +180,6 @@ export async function POST(request: Request) {
       }
     }
 
-    const v2EmbedCode = generateV2EmbedCode({
-      username,
-      profileSlug,
-      includeBadge: Boolean(isPro),
-      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
-    })
-
     const readmeRes = await fetch(
       API_ENDPOINTS.GITHUB.REPO_CONTENTS(username, repoName, 'README.md'),
       { headers }
@@ -187,6 +193,14 @@ export async function POST(request: Request) {
       readmeSha = readmeData.sha
       currentReadmeContent = Buffer.from(readmeData.content, 'base64').toString('utf8')
     }
+
+    const v2EmbedCode = generateV2EmbedCode({
+      username,
+      profileSlug,
+      includeBadge: Boolean(isPro),
+      badgeStyle: getTelemetryStyle(currentReadmeContent, username, profileSlug),
+      dynamic: Boolean(isPro && dynamicRules?.enabled && profileSlug === 'default'),
+    })
 
     const updatedReadmeContent = updateReadmeContent(currentReadmeContent, v2EmbedCode, profileSlug)
 

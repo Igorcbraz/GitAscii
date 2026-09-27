@@ -234,14 +234,6 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.EXTERNAL,
   },
   {
-    id: WIDGET_IDS.ACTIVITY_GRAPH,
-    name: 'Activity Graph',
-    icon: Activity,
-    desc: 'Gráfico de linhas de atividade em 31 dias',
-    isExternal: true,
-    category: WIDGET_CATEGORIES.EXTERNAL,
-  },
-  {
     id: WIDGET_IDS.CONTRIBUTION_SNAKE,
     name: 'Contribution Snake',
     icon: TrendingUp,
@@ -789,15 +781,6 @@ export const WIDGET_CATALOG: WidgetCatalogItem[] = [
     category: WIDGET_CATEGORIES.WINDOWS_XP,
     isExternal: true,
     defaultSize: { width: 780, height: 440 },
-  },
-  {
-    id: WIDGET_IDS.POKEMON_TRAINER_CARD,
-    name: 'Pokemon Trainer Card',
-    desc: 'GitHub profile as a Pokemon Trainer ID card with badges, party, and Pokedex number',
-    icon: Sparkles,
-    category: WIDGET_CATEGORIES.INTERACTIVE,
-    badge: { text: 'TRAINER', type: 'highlight' },
-    defaultSize: { width: 380, height: 240 },
   },
   {
     id: WIDGET_IDS.MINECRAFT_HUD,

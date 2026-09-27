@@ -1,7 +1,6 @@
 import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
-import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'next/font/google'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
@@ -10,41 +9,6 @@ import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
-
-const ptSerif = PT_Serif({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  variable: '--font-pt-serif',
-  display: 'swap',
-})
-
-const interTight = Inter_Tight({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-inter-tight',
-  display: 'swap',
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  weight: ['400', '500', '600'],
-  subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
-  display: 'swap',
-})
-
-const barlowCondensed = Barlow_Condensed({
-  weight: ['600', '700', '800'],
-  subsets: ['latin'],
-  variable: '--font-barlow-condensed',
-  display: 'swap',
-})
-
-const teko = Teko({
-  weight: ['500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-teko',
-  display: 'swap',
-})
 
 export const viewport: Viewport = {
   themeColor: '#c5ff4a',
@@ -225,7 +189,6 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${ptSerif.variable} ${interTight.variable} ${jetbrainsMono.variable} ${barlowCondensed.variable} ${teko.variable}`}
     >
       <head>
         <link rel="dns-prefetch" href="https://api.github.com" />

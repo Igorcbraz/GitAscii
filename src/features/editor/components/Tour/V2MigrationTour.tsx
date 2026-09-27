@@ -123,6 +123,13 @@ export function V2MigrationTour({ embedded = false }: V2MigrationTourProps) {
     if (embedded) return
 
     const timer = setTimeout(() => {
+      const hasSeenWelcomeTour = safeStorage.getItem('gitascii_has_seen_tour')
+
+      if (!hasSeenWelcomeTour) {
+        safeStorage.setItem('gitascii_has_seen_v2_migration_tour', 'true')
+        return
+      }
+
       const hasSeenV2Tour = safeStorage.getItem('gitascii_has_seen_v2_migration_tour')
       if (!hasSeenV2Tour) {
         setIsOpen(true)

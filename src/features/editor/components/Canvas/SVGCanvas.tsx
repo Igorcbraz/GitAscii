@@ -1025,9 +1025,9 @@ export function SVGCanvas() {
                       instanceId: widget.instanceId,
                       field: 'customBio',
                       initialValue:
-                        (widget.config.customBio as string) ||
-                        githubData.user.bio ||
-                        'No bio provided.',
+                        widget.config.customBio !== undefined
+                          ? (widget.config.customBio as string)
+                          : githubData.user.bio || 'No bio provided.',
                     })
                   } else {
                     useEditorStore.getState().setActiveMobilePanel('properties')

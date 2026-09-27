@@ -4,6 +4,7 @@ import React, { memo } from 'react'
 
 import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, NormalizedGitHubData, WidgetInstance } from '@/engine/types'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
 
 export const WidgetNode = memo(
   function WidgetNode({
@@ -31,6 +32,7 @@ export const WidgetNode = memo(
         data-height={widget.size.height}
         transform={`translate(${widget.position.x}, ${widget.position.y})`}
         dangerouslySetInnerHTML={{ __html: innerSvg }}
+        onErrorCapture={handleSvgImageError}
       />
     )
   },

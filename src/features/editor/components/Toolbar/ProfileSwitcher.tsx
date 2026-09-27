@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { fetchProfiles } from '@/features/pro/api/profilesClient'
+import { MAX_PROFILES_PER_USER } from '@/features/pro/types/profiles'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
-import { safeStorage } from '@/utils/storage'
 
 import { useEditorStore } from '../../store/editorStore'
 
@@ -23,12 +24,6 @@ interface ProfileItem {
   isSynced?: boolean
 }
 
-interface SessionData {
-  username: string
-  isPro?: boolean
-  tier?: string
-}
-
 export function ProfileSwitcher({
   username,
   currentProfileSlug = 'default',
@@ -37,113 +32,53 @@ export function ProfileSwitcher({
   const router = useRouter()
   const storeSession = useEditorStore((state) => state.session)
   const [isOpen, setIsOpen] = useState(false)
-  const [isProUser, setIsProUser] = useState<boolean | null>(null)
-  const [profiles, setProfiles] = useState<ProfileItem[]>([
-    { slug: 'default', name: 'Default', isDefault: true, isSynced: true },
-  ])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isProUser, setIsProUser] = useState(false)
+  const [profiles, setProfiles] = useState<ProfileItem[]>([])
   const [newSlugInput, setNewSlugInput] = useState('')
   const [newNameInput, setNewNameInput] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const requestRef = useRef<AbortController | null>(null)
+
   const effectiveUsername = username || storeSession?.username
 
   const loadProfiles = useCallback(async () => {
+    requestRef.current?.abort()
+    const controller = new AbortController()
+    requestRef.current = controller
+    setIsLoading(true)
     try {
-      const isMockActive = safeStorage.getItem('gitascii_pro_mock_active') === 'true'
-      let isPro = isMockActive
-
-      const sessionRes = await fetch(API_ENDPOINTS.AUTH.SESSION)
-      if (sessionRes.ok) {
-        const sessionData: { session?: SessionData } = await sessionRes.json()
-        if (sessionData?.session) {
-          isPro = Boolean(
-            isMockActive ||
-            sessionData.session.isPro ||
-            (sessionData.session.tier && sessionData.session.tier !== 'free')
-          )
-        }
-      }
+      const response = await fetch(API_ENDPOINTS.AUTH.SESSION, {
+        cache: 'no-store',
+        signal: controller.signal,
+      })
+      if (!response.ok) throw new Error('Failed to fetch session')
+      const { session } = await response.json()
+      const ownsProfile = session?.username?.toLowerCase() === effectiveUsername?.toLowerCase()
+      const isPro = Boolean(ownsProfile && session?.isPro)
+      const list = isPro ? await fetchProfiles(controller.signal) : []
+      if (controller.signal.aborted) return
       setIsProUser(isPro)
-
-      const discoveredMap = new Map<string, ProfileItem>()
-
-      try {
-        const res = await fetch(API_ENDPOINTS.PRO.PROFILES)
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data?.profiles)) {
-            for (const p of data.profiles) {
-              const slug = (p.slug || '').toLowerCase().trim()
-              if (slug) {
-                const isSynced = Boolean(p.isSynced)
-                discoveredMap.set(slug, {
-                  slug,
-                  name: p.name || slug,
-                  isDefault: Boolean(p.isDefault || slug === 'default'),
-                  isSynced,
-                })
-              }
-            }
-          }
-        }
-      } catch {
-        // Fallback to local storage
-      }
-
-      if (!discoveredMap.has('default')) {
-        discoveredMap.set('default', {
-          slug: 'default',
-          name: 'Default',
-          isDefault: true,
-          isSynced: false,
-        })
-      }
-
-      if (effectiveUsername) {
-        const storedKey = `gitascii_user_profiles_${effectiveUsername}`
-        const stored = safeStorage.getItem(storedKey)
-        if (stored) {
-          try {
-            const list: (string | ProfileItem)[] = JSON.parse(stored)
-            for (const item of list) {
-              const slug = (typeof item === 'string' ? item : item.slug).toLowerCase().trim()
-              if (slug && !discoveredMap.has(slug)) {
-                discoveredMap.set(slug, {
-                  slug,
-                  name: typeof item === 'string' ? slug : item.name || slug,
-                  isDefault: slug === 'default',
-                  isSynced: false,
-                })
-              }
-            }
-          } catch {
-            // Ignore parse errors
-          }
-        }
-      }
-
-      const current = (currentProfileSlug || 'default').toLowerCase().trim()
-      if (current && !discoveredMap.has(current)) {
-        discoveredMap.set(current, {
-          slug: current,
-          name: current === 'default' ? 'Default' : current,
-          isDefault: current === 'default',
-          isSynced: false,
-        })
-      }
-
-      const mergedList = Array.from(discoveredMap.values())
-      setProfiles(mergedList)
-    } catch {
+      setProfiles(list)
+    } catch (error) {
+      if (controller.signal.aborted) return
+      console.warn('Failed to fetch profiles:', error)
       setIsProUser(false)
+      setProfiles([])
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false)
     }
-  }, [effectiveUsername, currentProfileSlug])
+  }, [effectiveUsername])
 
   useEffect(() => {
-    loadProfiles()
-  }, [loadProfiles])
+    setProfiles([])
+    setIsProUser(false)
+    void loadProfiles()
+    return () => requestRef.current?.abort()
+  }, [loadProfiles, storeSession?.username])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -189,7 +124,7 @@ export function ProfileSwitcher({
     setIsSubmitting(true)
 
     try {
-      await fetch(API_ENDPOINTS.PRO.PROFILES, {
+      const res = await fetch(API_ENDPOINTS.PRO.PROFILES, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,29 +133,24 @@ export function ProfileSwitcher({
           description: '',
         }),
       })
+
+      if (!res.ok) {
+        throw new Error('Failed to create profile')
+      }
+
+      const { profile } = await res.json()
+      await loadProfiles()
+
+      setNewSlugInput('')
+      setNewNameInput('')
+      setIsSubmitting(false)
+      setIsCreating(false)
+      setIsOpen(false)
+      router.push(`/${effectiveUsername}/${profile.slug}`)
     } catch (err) {
       console.warn('Could not persist profile to server:', err)
+      setIsSubmitting(false)
     }
-
-    const updated: ProfileItem[] = [
-      ...profiles.filter((p) => p.slug !== cleanSlug),
-      { slug: cleanSlug, name: profileName, isDefault: false, isSynced: false },
-    ]
-    setProfiles(updated)
-
-    if (effectiveUsername) {
-      safeStorage.setItem(
-        `gitascii_user_profiles_${effectiveUsername}`,
-        JSON.stringify(updated.map((p) => ({ slug: p.slug, name: p.name })))
-      )
-    }
-
-    setNewSlugInput('')
-    setNewNameInput('')
-    setIsSubmitting(false)
-    setIsCreating(false)
-    setIsOpen(false)
-    router.push(`/${effectiveUsername}/${cleanSlug}`)
   }
 
   if (!isProUser) {
@@ -250,7 +180,11 @@ export function ProfileSwitcher({
   return (
     <div className="relative" ref={containerRef}>
       <button
-        onClick={() => setIsOpen((prev) => !prev)}
+        data-testid="profile-switcher-trigger"
+        onClick={() => {
+          if (!isOpen) loadProfiles()
+          setIsOpen((prev) => !prev)
+        }}
         className="inline-flex items-center gap-1 px-2 h-[30px] rounded-xs bg-transparent hover:bg-white/5 border border-transparent hover:border-graphite/40 transition-all duration-150 cursor-pointer select-none"
         title={t('editor.profile_switcher.switch_title', 'Switch profile')}
       >
@@ -274,47 +208,66 @@ export function ProfileSwitcher({
               {t('editor.profile_switcher.pro_profiles', 'Pro Profiles')}
             </span>
             <span className="font-mono text-[9px] px-1.5 py-0.2 rounded-xs text-signal-lime font-medium border border-signal-lime/20 bg-signal-lime/5">
-              {profiles.length} / 10
+              {profiles.length} / {MAX_PROFILES_PER_USER}
             </span>
           </div>
 
-          <div className="max-h-56 overflow-y-auto p-1 space-y-0.5">
-            {profiles.map((p) => {
-              const isCurrent = p.slug === currentProfileSlug
-              const configFileName =
-                p.slug === 'default' ? 'gitascii.json' : `gitascii_${p.slug}.json`
-              return (
-                <button
-                  key={p.slug}
-                  onClick={() => handleProfileSwitch(p.slug)}
-                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xs text-left transition-colors cursor-pointer ${
-                    isCurrent
-                      ? 'bg-signal-lime/10 text-signal-lime font-medium'
-                      : 'text-chalk hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <div className="min-w-0 pr-2">
-                    <div className="font-jetbrains-mono text-[11.5px] truncate flex items-center gap-1.5">
-                      <span>{p.name || p.slug}</span>
-                      {p.isDefault && (
-                        <span className="text-[9px] px-1 py-0.2 rounded-xs bg-graphite text-ash font-mono">
-                          default
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-jetbrains-mono text-[9.5px] text-ash/70 truncate flex items-center gap-1 mt-0.5">
-                      <span>{configFileName}</span>
-                      {p.isSynced ? (
-                        <span className="text-signal-lime/70">• synced</span>
-                      ) : (
-                        <span className="text-amber-400/80 font-medium">• draft</span>
-                      )}
+          <div
+            data-testid="profile-switcher-list"
+            className="max-h-56 overflow-y-auto p-1 space-y-0.5"
+          >
+            {isLoading ? (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xs"
+                  >
+                    <div className="w-full pr-2 space-y-2 animate-pulse">
+                      <div className="h-3 w-1/2 bg-white/10 rounded-xs"></div>
+                      <div className="h-2 w-1/3 bg-white/5 rounded-xs"></div>
                     </div>
                   </div>
-                  {isCurrent && <Check size={12} className="text-signal-lime shrink-0" />}
-                </button>
-              )
-            })}
+                ))}
+              </>
+            ) : (
+              profiles.map((p) => {
+                const isCurrent = p.slug === currentProfileSlug
+                const configFileName =
+                  p.slug === 'default' ? 'gitascii.json' : `gitascii_${p.slug}.json`
+                return (
+                  <button
+                    key={p.slug}
+                    onClick={() => handleProfileSwitch(p.slug)}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xs text-left transition-colors cursor-pointer ${
+                      isCurrent
+                        ? 'bg-signal-lime/10 text-signal-lime font-medium'
+                        : 'text-chalk hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <div className="min-w-0 pr-2">
+                      <div className="font-jetbrains-mono text-[11.5px] truncate flex items-center gap-1.5">
+                        <span>{p.name || p.slug}</span>
+                        {p.isDefault && (
+                          <span className="text-[9px] px-1 py-0.2 rounded-xs bg-graphite text-ash font-mono">
+                            default
+                          </span>
+                        )}
+                      </div>
+                      <div className="font-jetbrains-mono text-[9.5px] text-ash/70 truncate flex items-center gap-1 mt-0.5">
+                        <span>{configFileName}</span>
+                        {p.isSynced ? (
+                          <span className="text-signal-lime/70">• synced</span>
+                        ) : (
+                          <span className="text-amber-400/80 font-medium">• draft</span>
+                        )}
+                      </div>
+                    </div>
+                    {isCurrent && <Check size={12} className="text-signal-lime shrink-0" />}
+                  </button>
+                )
+              })
+            )}
           </div>
 
           <div className="p-2 border-t border-graphite/60">

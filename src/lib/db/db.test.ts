@@ -1,16 +1,4 @@
-import fs from 'node:fs'
-import path from 'node:path'
-
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-
-if (!process.env.DATABASE_URL) {
-  const envLocalPath = path.resolve(process.cwd(), '.env.local')
-  if (fs.existsSync(envLocalPath) && typeof process.loadEnvFile === 'function') {
-    try {
-      process.loadEnvFile(envLocalPath)
-    } catch {}
-  }
-}
 
 import { runMigrations } from './migrations'
 import {
@@ -21,7 +9,7 @@ import {
   updateEntitlement,
 } from './repositories/userRepository'
 
-const isDbConfigured = Boolean(process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED)
+const isDbConfigured = Boolean(process.env.TEST_DATABASE_URL)
 const describeDb = isDbConfigured ? describe : describe.skip
 
 describeDb('PostgreSQL Neon Database Layer', () => {

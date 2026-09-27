@@ -122,6 +122,10 @@ export const useEditorStore = create<EditorStore>((set, get) => {
   }
 
   const applyConfigChange = (newConfig: SavedConfiguration, saveSnapshot = true) => {
+    newConfig = {
+      ...newConfig,
+      metadata: { ...newConfig.metadata, updatedAt: new Date().toISOString() },
+    }
     const { history, initialConfigSnapshot } = get()
     let newPast = history.past
 

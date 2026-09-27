@@ -21,7 +21,7 @@ Sentry.init({
     /ResizeObserver loop limit exceeded/,
   ],
 
-  beforeSend(event, hint) {
+  beforeSend(event: any, hint: any) {
     const error = hint?.originalException
     const message =
       (typeof error === 'string' ? error : error instanceof Error ? error.message : '') ||
@@ -37,9 +37,9 @@ Sentry.init({
     }
 
     if (
-      event.exception?.values?.some((val) =>
+      event.exception?.values?.some((val: any) =>
         val.stacktrace?.frames?.some(
-          (frame) =>
+          (frame: any) =>
             frame.filename?.includes('chrome-extension://') ||
             frame.filename?.includes('moz-extension://') ||
             frame.filename?.includes('safari-web-extension://') ||

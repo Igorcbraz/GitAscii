@@ -21,6 +21,7 @@ import type {
 } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { useI18n } from '@/i18n'
+import { handleSvgImageError } from '@/utils/svgImageFallback'
 
 import type { ProfileHealthSummary, WidgetErrorRecord } from '../../types'
 import { ProBadge } from '../ProBadge'
@@ -356,7 +357,10 @@ export const HealthOverviewSection: React.FC<HealthOverviewSectionProps> = ({
                                 transform={`translate(${wx}, ${wy})`}
                                 className="transition-all"
                               >
-                                <g dangerouslySetInnerHTML={{ __html: innerSvg }} />
+                                <g
+                                  onErrorCapture={handleSvgImageError}
+                                  dangerouslySetInnerHTML={{ __html: innerSvg }}
+                                />
 
                                 {isFailing && (
                                   <g>

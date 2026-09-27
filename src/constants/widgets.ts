@@ -72,6 +72,7 @@ export const ALL_COUNTRY_FLAGS: readonly CountryFlagDef[] = [
 ] as const
 
 export const TRUSTED_CDN_HOSTNAMES: readonly string[] = [
+  'wsrv.nl',
   'gitfut.com',
   'assets.tcgdex.net',
   'images.pokemontcg.io',

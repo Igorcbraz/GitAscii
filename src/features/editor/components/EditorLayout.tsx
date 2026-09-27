@@ -16,6 +16,7 @@ import { safeStorage } from '@/utils/storage'
 import { useEditorStore } from '../store/editorStore'
 import { useViewModeStore } from '../store/viewModeStore'
 import { calculateFitZoom, getCanvasContainerWidth } from '../utils/canvasZoom'
+import { resolveProfileDraft } from '../utils/resolveProfileDraft'
 import { CanvasStatusBar } from './Canvas/CanvasStatusBar'
 import { SVGCanvas } from './Canvas/SVGCanvas'
 import { EditorLoadingScreen, LoadStep } from './EditorLoadingScreen'
@@ -101,6 +102,9 @@ export function EditorLayout({
     async function loadData() {
       try {
         setLoading(true)
+        setError(null)
+        setIsNotFound(false)
+        setShowOnboarding(false)
         setSteps([
           {
             id: 'session',
@@ -219,7 +223,7 @@ export function EditorLayout({
 
         if (savedDraft) {
           try {
-            initialConfig = JSON.parse(savedDraft)
+            initialConfig = resolveProfileDraft(savedDraft, serverConfig)
             setStep('profile', 'done', t('editor.loading.draft_found', 'Saved draft found'))
           } catch {
             initialConfig = serverConfig || (autoGenerate ? generateBestProfile(data) : null)
@@ -265,6 +269,7 @@ export function EditorLayout({
 
           if (initialConfig) {
             initialConfig.username = username
+            initialConfig.githubId = data.user.id
             initialConfig.profileSlug = profileSlug
             initEditor(initialConfig, data)
             setLoading(false)
