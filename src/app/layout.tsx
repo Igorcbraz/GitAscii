@@ -1,7 +1,7 @@
 import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
-import { Barlow_Condensed, Inter_Tight, JetBrains_Mono, PT_Serif, Teko } from 'next/font/google'
+import { Barlow_Condensed, Inter, JetBrains_Mono, PT_Serif, Teko } from 'next/font/google'
 
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
@@ -18,7 +18,7 @@ const ptSerif = PT_Serif({
   display: 'swap',
 })
 
-const interTight = Inter_Tight({
+const interTight = Inter({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-inter-tight-next',
