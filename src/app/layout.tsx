@@ -1,6 +1,7 @@
 import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
+
 import { ToastProvider } from '@/components/ui/toast'
 import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
 import { StrobiRoot } from '@/features/mascot/components/StrobiRoot'
