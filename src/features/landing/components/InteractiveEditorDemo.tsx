@@ -47,32 +47,27 @@ export function InteractiveEditorDemo({
   }, [activeView])
 
   useEffect(() => {
-    if (shouldLoadEditor) return
+    const section = sectionRef.current
+    const player = playerRef.current
+    if (!section || !player) return
 
-    const el = sectionRef.current
-    if (!el) return
-
-    if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const [entry] = entries
-          if (entry && (entry.isIntersecting || entry.intersectionRatio > 0)) {
-            setShouldLoadEditor(true)
-            observer.disconnect()
-          }
-        },
-        {
-          rootMargin: '250px 0px',
-          threshold: 0,
-        }
-      )
-
-      observer.observe(el)
-      return () => observer.disconnect()
-    } else {
-      setShouldLoadEditor(true)
+    const pauseWhenHidden = () => {
+      if (document.hidden) player.pause()
     }
-  }, [shouldLoadEditor])
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) player.pause()
+      },
+      { threshold: 0.05 }
+    )
+
+    observer.observe(section)
+    document.addEventListener('visibilitychange', pauseWhenHidden)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', pauseWhenHidden)
+    }
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -116,8 +111,6 @@ export function InteractiveEditorDemo({
           className="relative w-full rounded-2xl flex flex-col h-[880px] md:h-[940px] lg:h-[980px] border border-white/[0.08]"
           style={{
             background: 'rgba(8, 8, 8, 0.88)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
             boxShadow:
               '0 20px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 0 rgba(197,255,74,0.18)',
           }}
@@ -350,7 +343,10 @@ export function InteractiveEditorDemo({
               </button>
 
               <button
-                onClick={() => setActiveView('demo')}
+                onClick={() => {
+                  setShouldLoadEditor(true)
+                  setActiveView('demo')
+                }}
                 className={`relative z-10 flex-1 min-w-[150px] sm:min-w-[170px] flex items-center justify-center gap-2.5 px-5 sm:px-7 py-2.5 rounded-full font-inter-tight text-[11px] sm:text-label font-semibold uppercase tracking-[0.12em] sm:tracking-[0.15em] transition-colors duration-200 cursor-pointer whitespace-nowrap ${
                   activeView === 'demo' ? 'text-signal-lime' : 'text-ash hover:text-pearl'
                 }`}

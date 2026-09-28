@@ -16,9 +16,9 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
   const redis = getProRedisClient()
 
   try {
-    const cached = await redis.get<string>(CACHE_KEY)
+    const cached = await redis.get<ProSocialProofData | string>(CACHE_KEY)
     if (cached) {
-      return JSON.parse(cached) as ProSocialProofData
+      return (typeof cached === 'string' ? JSON.parse(cached) : cached) as ProSocialProofData
     }
   } catch (error) {
     console.warn('[SocialProof] Redis cache read failed:', error)

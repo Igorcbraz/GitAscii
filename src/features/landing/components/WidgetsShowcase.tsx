@@ -339,6 +339,22 @@ const ALL_SHOWCASE_WIDGETS: ShowcaseWidgetDef[] = [
   },
 ]
 
+function renderSnakeShowcasePreview(): string {
+  const cells = Array.from({ length: 38 * 8 }, (_, index) => {
+    const x = index % 38
+    const y = Math.floor(index / 38)
+    const active = (x * 17 + y * 11) % 13 < 4
+    return `<rect x="${48 + x * 18}" y="${58 + y * 18}" width="14" height="14" rx="2" fill="${active ? '#238636' : '#161b22'}" opacity="${active ? 0.5 + ((x + y) % 3) * 0.18 : 1}"/>`
+  }).join('')
+
+  return `<text x="24" y="32" font-family="JetBrains Mono, monospace" font-size="11" fill="#7a7a7a" letter-spacing="2">[ CONTRIBUTION SNAKE ]</text>
+    ${cells}
+    <path d="M 130 173 H 238 V 137 H 346 V 101 H 454 V 155 H 562 V 119 H 670" fill="none" stroke="#0d1117" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 130 173 H 238 V 137 H 346 V 101 H 454 V 155 H 562 V 119 H 670" fill="none" stroke="#7ee787" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="670" cy="119" r="9" fill="#a5f3b8"/>
+    <circle cx="674" cy="116" r="2" fill="#0d1117"/>`
+}
+
 export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
   const { t } = useI18n()
   const demoData = useMemo(() => getMockGitHubData('Igorcbraz'), [])
@@ -377,7 +393,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
         },
       }
 
-      const innerSvg = renderWidgetSvg(instance, demoData, globalStyles, false, false)
+      const innerSvg =
+        widgetDef.id === WIDGET_IDS.CONTRIBUTION_SNAKE
+          ? renderSnakeShowcasePreview()
+          : renderWidgetSvg(instance, demoData, globalStyles, false, false)
       const fullSvg = `<svg width="100%" height="auto" viewBox="0 0 ${widgetDef.width} ${widgetDef.height}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
     * { box-sizing: border-box; }
@@ -423,7 +442,9 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
           <h2 className="font-pt-serif font-light text-3xl sm:text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
             {t('landing.widgets.title_start', 'Modular Engine Packed with Over ')}
             <em className="italic text-signal-lime">
-              {t('landing.widgets.title_highlight', `${count}+ Dynamic Cards.`)}
+              {t('landing.widgets.title_highlight', `${count}+ Dynamic Cards.`, {
+                count: String(count),
+              })}
             </em>
           </h2>
 

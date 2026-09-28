@@ -1,14 +1,38 @@
 import './globals.css'
 
 import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
 
 import { ToastProvider } from '@/components/ui/toast'
-import { APP_URL, EXTERNAL_LINKS, LANDING_FAQS } from '@/constants'
+import { APP_URL, EXTERNAL_LINKS } from '@/constants'
 import { StrobiRoot } from '@/features/mascot/components/StrobiRoot'
 import { I18nProvider } from '@/i18n'
 import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
+
+const ptSerif = localFont({
+  src: [
+    { path: '../assets/fonts/pt-serif-regular-latin.woff2', weight: '400', style: 'normal' },
+    { path: '../assets/fonts/pt-serif-bold-latin.woff2', weight: '700', style: 'normal' },
+    { path: '../assets/fonts/pt-serif-italic-latin.woff2', weight: '400', style: 'italic' },
+    { path: '../assets/fonts/pt-serif-bold-italic-latin.woff2', weight: '700', style: 'italic' },
+  ],
+  display: 'swap',
+  variable: '--font-pt-serif-next',
+})
+const interTight = localFont({
+  src: '../assets/fonts/inter-tight-latin.woff2',
+  weight: '100 900',
+  display: 'swap',
+  variable: '--font-inter-tight-next',
+})
+const jetBrainsMono = localFont({
+  src: '../assets/fonts/jetbrains-mono-latin.woff2',
+  weight: '100 800',
+  display: 'swap',
+  variable: '--font-jetbrains-mono-next',
+})
 
 export const viewport: Viewport = {
   themeColor: '#c5ff4a',
@@ -89,16 +113,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: APP_URL,
-    languages: {
-      en: APP_URL,
-      'pt-BR': `${APP_URL}?lang=pt`,
-      'es-ES': `${APP_URL}?lang=es`,
-      'zh-CN': `${APP_URL}?lang=zh`,
-      'x-default': APP_URL,
-    },
-  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -148,14 +162,6 @@ const websiteLd = {
   '@type': 'WebSite',
   name: 'GitAscii',
   url: APP_URL,
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: `${APP_URL}/{search_term_string}`,
-    },
-    'query-input': 'required name=search_term_string',
-  },
 }
 
 const orgLd = {
@@ -167,19 +173,6 @@ const orgLd = {
   sameAs: [EXTERNAL_LINKS.GITHUB_REPO],
 }
 
-const faqLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: LANDING_FAQS.map((faq) => ({
-    '@type': 'Question',
-    name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
-  })),
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -188,25 +181,11 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      className={`${ptSerif.variable} ${interTight.variable} ${jetBrainsMono.variable}`}
       suppressHydrationWarning
     >
       <head>
         <link rel="dns-prefetch" href="https://api.github.com" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              var link = document.createElement('link');
-              link.rel = 'stylesheet';
-              link.href = '${EXTERNAL_LINKS.GOOGLE_FONTS_CSS}';
-              link.media = 'print';
-              link.onload = function() { this.media = 'all'; };
-              document.head.appendChild(link);
-            `,
-          }}
-        />
-        <noscript>
-          <link rel="stylesheet" href={EXTERNAL_LINKS.GOOGLE_FONTS_CSS} />
-        </noscript>
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
@@ -237,10 +216,6 @@ export default function RootLayout({
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
-              />
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
               />
               <StrobiRoot>{children}</StrobiRoot>
             </AutoAnalyticsTracker>

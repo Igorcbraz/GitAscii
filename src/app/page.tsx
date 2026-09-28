@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 
-import KineticGrid from '@/components/ui/kinetic-grid'
 import { APP_URL, EXTERNAL_LINKS, fetchLandingMetrics } from '@/constants'
+import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
+import type { CommunityProfileItem } from '@/features/explore/getCommunityProfiles'
 import { getStoredProfiles } from '@/features/explore/getCommunityProfiles'
 import Hero from '@/features/landing/components/Hero'
 import { LandingBackgroundDecorations } from '@/features/landing/components/LandingBackgroundDecorations'
@@ -24,77 +26,94 @@ const Footer = dynamic(() =>
   import('@/features/landing/components/Footer').then((mod) => mod.Footer)
 )
 
-export async function generateMetadata(): Promise<Metadata> {
-  const ogImage = EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE
-
-  const title = 'GitAscii — GitHub Profile README & ASCII Generator'
-  const description =
-    'Create stunning custom GitHub Profile READMEs with live SVGs, ASCII art generator engine, and an interactive visual editor. Fast, free, and open source for developers.'
-  const canonicalUrl = APP_URL
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: canonicalUrl,
-      languages: {
-        en: APP_URL,
-        'pt-BR': `${APP_URL}?lang=pt`,
-        'es-ES': `${APP_URL}?lang=es`,
-        'zh-CN': `${APP_URL}?lang=zh`,
-        'ja-JP': `${APP_URL}?lang=ja`,
-        'de-DE': `${APP_URL}?lang=de`,
-        'fr-FR': `${APP_URL}?lang=fr`,
-        'x-default': APP_URL,
+export const metadata: Metadata = {
+  title: 'GitAscii — Turn Your GitHub Profile into ASCII Art & READMEs',
+  description:
+    'Turn your GitHub profile into ASCII art. Build a custom profile README with live SVG widgets and a visual editor. Free and open source.',
+  alternates: {
+    canonical: APP_URL,
+  },
+  openGraph: {
+    title: 'GitAscii — Turn Your GitHub Profile into ASCII Art & READMEs',
+    description:
+      'Turn your GitHub profile into ASCII art. Build a custom profile README with live SVG widgets and a visual editor.',
+    url: APP_URL,
+    images: [
+      {
+        url: EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'GitAscii GitHub profile ASCII art and README builder',
+        type: 'image/png',
       },
-    },
-    openGraph: {
-      title,
-      description,
-      url: canonicalUrl,
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-          type: 'image/png',
-        },
-      ],
-    },
-    twitter: {
-      title,
-      description,
-      images: [ogImage],
-    },
-  }
+    ],
+  },
+  twitter: {
+    title: 'GitAscii — Turn Your GitHub Profile into ASCII Art & READMEs',
+    description:
+      'Turn your GitHub profile into ASCII art. Build a custom profile README with live SVG widgets and a visual editor.',
+    images: [EXTERNAL_LINKS.DEFAULT_APP_OG_IMAGE],
+  },
 }
 
 export const revalidate = 3600
 
-export default async function LandingPage() {
-  const [metrics, storedProfiles] = await Promise.all([fetchLandingMetrics(), getStoredProfiles()])
+async function LandingTraction({ metricsPromise }: { metricsPromise: Promise<LandingMetrics> }) {
+  return <TractionBar metrics={await metricsPromise} />
+}
+
+async function LandingCommunity({
+  metricsPromise,
+  profilesPromise,
+}: {
+  metricsPromise: Promise<LandingMetrics>
+  profilesPromise: Promise<CommunityProfileItem[]>
+}) {
+  const [metrics, profiles] = await Promise.all([metricsPromise, profilesPromise])
+  return <CommunityProfiles profiles={profiles} usersCount={metrics.users} metrics={metrics} />
+}
+
+async function LandingMetricsSections({
+  metricsPromise,
+}: {
+  metricsPromise: Promise<LandingMetrics>
+}) {
+  const metrics = await metricsPromise
+  return (
+    <>
+      <ComparisonTable proCustomers={metrics.proCustomers} proUsernames={metrics.proUsernames} />
+      <WidgetsShowcase count={metrics.widgets} />
+      <EcosystemHub metrics={metrics} />
+      <FAQ />
+      <FinalCTA metrics={metrics} />
+    </>
+  )
+}
+
+export default function LandingPage() {
+  const metricsPromise = fetchLandingMetrics()
+  const profilesPromise = getStoredProfiles()
 
   return (
     <main className="min-h-screen relative bg-carbon">
       <Navbar />
-      <KineticGrid className="min-h-screen">
-        <Hero />
-      </KineticGrid>
+      <Hero />
 
       <div className="relative z-10 w-full bg-carbon">
         <LandingBackgroundDecorations />
         <div className="-mt-[clamp(80px,10vw,140px)]">
           <InteractiveEditorDemo defaultUsername="Igorcbraz" />
         </div>
-        <TractionBar metrics={metrics} />
-        <CommunityProfiles profiles={storedProfiles} usersCount={metrics.users} />
-        <TemplatesPreview count={metrics.templates} />
-        <ComparisonTable proCustomers={metrics.proCustomers} proUsernames={metrics.proUsernames} />
-        <WidgetsShowcase count={metrics.widgets} />
-        <EcosystemHub metrics={metrics} />
-        <FAQ />
-        <FinalCTA metrics={metrics} />
+        <Suspense fallback={<TractionBar />}>
+          <LandingTraction metricsPromise={metricsPromise} />
+        </Suspense>
+        <Suspense fallback={<CommunityProfiles />}>
+          <LandingCommunity metricsPromise={metricsPromise} profilesPromise={profilesPromise} />
+        </Suspense>
+        <TemplatesPreview count={DEFAULT_LANDING_METRICS.templates} />
+        <Suspense fallback={<div className="min-h-96" aria-hidden="true" />}>
+          <LandingMetricsSections metricsPromise={metricsPromise} />
+        </Suspense>
         <Footer />
       </div>
       <LandingMascotClient />

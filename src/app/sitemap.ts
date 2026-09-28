@@ -1,10 +1,10 @@
 import type { MetadataRoute } from 'next'
 
 import { APP_URL } from '@/constants'
+import { WIDGET_DOCS_MAP } from '@/constants/widgets'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = APP_URL
-  const currentDate = new Date()
 
   const staticHubs = [
     '',
@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/vs',
     '/privacy',
     '/terms',
+    '/support',
   ]
 
   const stackTemplates = [
@@ -26,73 +27,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/templates/rust',
   ]
 
-  const widgetPages = [
-    '/widgets/stats',
-    '/widgets/streak',
-    '/widgets/languages',
-    '/widgets/ascii',
-    '/widgets/badges',
-  ]
+  const widgetPages = Object.keys(WIDGET_DOCS_MAP).map((id) => `/widgets/${id}`)
 
   const vsPages = ['/vs/readme-so', '/vs/gprm', '/vs/github-profile-readme-generator']
 
-  const sampleProfiles = ['torvalds', 'gaearon', 'yyx990803', 'sindresorhus', 'tj', 'Igorcbraz']
-
   const allPaths = [...staticHubs, ...stackTemplates, ...widgetPages, ...vsPages]
 
-  const sitemapEntries: MetadataRoute.Sitemap = allPaths.map((path) => ({
+  return allPaths.map((path) => ({
     url: `${baseUrl}${path}`,
-    lastModified: currentDate,
-    changeFrequency: path === '' || path === '/templates' ? 'daily' : 'weekly',
-    priority:
-      path === '' ? 1.0 : path.startsWith('/templates') || path.startsWith('/widgets') ? 0.9 : 0.8,
-    alternates:
-      path === ''
-        ? {
-            languages: {
-              en: `${baseUrl}`,
-              'pt-BR': `${baseUrl}?lang=pt`,
-              'es-ES': `${baseUrl}?lang=es`,
-              'zh-CN': `${baseUrl}?lang=zh`,
-              'x-default': `${baseUrl}`,
-            },
-          }
-        : undefined,
   }))
-
-  const profileEntries: MetadataRoute.Sitemap = sampleProfiles.map((username) => ({
-    url: `${baseUrl}/${username}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
-
-  const feedEntries: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/feed.xml`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/feed.json`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/llms.txt`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/llms-full.txt`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-  ]
-
-  return [...sitemapEntries, ...profileEntries, ...feedEntries]
 }
