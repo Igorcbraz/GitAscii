@@ -11,16 +11,6 @@ import { AutoAnalyticsTracker } from '@/lib/analytics'
 import { ConsentControlledScripts } from '@/lib/analytics/ConsentControlledScripts'
 import { WebVitalsReporter } from '@/lib/analytics/web-vitals'
 
-const ptSerif = localFont({
-  src: [
-    { path: '../assets/fonts/pt-serif-regular-latin.woff2', weight: '400', style: 'normal' },
-    { path: '../assets/fonts/pt-serif-bold-latin.woff2', weight: '700', style: 'normal' },
-    { path: '../assets/fonts/pt-serif-italic-latin.woff2', weight: '400', style: 'italic' },
-    { path: '../assets/fonts/pt-serif-bold-italic-latin.woff2', weight: '700', style: 'italic' },
-  ],
-  display: 'swap',
-  variable: '--font-pt-serif-next',
-})
 const interTight = localFont({
   src: '../assets/fonts/inter-tight-latin.woff2',
   weight: '100 900',
@@ -181,10 +171,24 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${ptSerif.variable} ${interTight.variable} ${jetBrainsMono.variable}`}
+      className={`${interTight.variable} ${jetBrainsMono.variable}`}
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="preload"
+          href="/fonts/pt-serif-regular-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/pt-serif-italic-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <link rel="dns-prefetch" href="https://api.github.com" />
         <script
           type="speculationrules"

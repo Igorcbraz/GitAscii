@@ -176,7 +176,7 @@ export function InteractiveEditorDemo({
                   <video
                     ref={playerRef as any}
                     src="/presentation.mp4"
-                    poster="/editor.webp"
+                    poster="/editor-poster.webp"
                     playsInline
                     loop
                     preload="none"

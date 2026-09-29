@@ -59,3 +59,7 @@ coverage/
 .vinext/
 .wrangler/
 .env.prod
+
+# Lighthouse
+/reports/lighthouse
+/scratch

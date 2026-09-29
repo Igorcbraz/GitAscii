@@ -1,35 +1,32 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
-import { APP_URL, EXTERNAL_LINKS, fetchLandingMetrics } from '@/constants'
+import KineticGrid from '@/components/ui/kinetic-grid'
+import { APP_URL, EXTERNAL_LINKS, fetchLandingMetrics, LANDING_FAQS } from '@/constants'
 import { DEFAULT_LANDING_METRICS, type LandingMetrics } from '@/constants/metrics'
 import type { CommunityProfileItem } from '@/features/explore/getCommunityProfiles'
 import { getStoredProfiles } from '@/features/explore/getCommunityProfiles'
+import {
+  DeferredCommunityProfiles,
+  DeferredComparisonTable,
+  DeferredEcosystemHub,
+  DeferredFAQ,
+  DeferredFinalCTA,
+  DeferredFooter,
+  DeferredInteractiveEditorDemo,
+  DeferredTemplatesPreview,
+  DeferredTractionBar,
+  DeferredWidgetsShowcase,
+} from '@/features/landing/components/DeferredLandingPreviews'
 import Hero from '@/features/landing/components/Hero'
 import { LandingBackgroundDecorations } from '@/features/landing/components/LandingBackgroundDecorations'
 import { LandingMascotClient } from '@/features/landing/components/LandingMascotClient'
 import Navbar from '@/features/landing/components/Navbar'
-import { TractionBar } from '@/features/landing/components/TractionBar'
-
-const InteractiveEditorDemo = dynamic(
-  () => import('@/features/landing/components/InteractiveEditorDemo')
-)
-const CommunityProfiles = dynamic(() => import('@/features/landing/components/CommunityProfiles'))
-const TemplatesPreview = dynamic(() => import('@/features/landing/components/TemplatesPreview'))
-const WidgetsShowcase = dynamic(() => import('@/features/landing/components/WidgetsShowcase'))
-const EcosystemHub = dynamic(() => import('@/features/landing/components/EcosystemHub'))
-const ComparisonTable = dynamic(() => import('@/features/landing/components/ComparisonTable'))
-const FAQ = dynamic(() => import('@/features/landing/components/FAQ').then((mod) => mod.FAQ))
-const FinalCTA = dynamic(() => import('@/features/landing/components/FinalCTA'))
-const Footer = dynamic(() =>
-  import('@/features/landing/components/Footer').then((mod) => mod.Footer)
-)
 
 export const metadata: Metadata = {
   title: 'GitAscii — Turn Your GitHub Profile into ASCII Art & READMEs',
   description:
-    'Turn your GitHub profile into ASCII art. Build a custom profile README with live SVG widgets and a visual editor. Free and open source.',
+    'See your GitHub profile as ASCII art. Build a custom profile README with live SVG widgets, templates, and a visual editor. Free and open source.',
   alternates: {
     canonical: APP_URL,
   },
@@ -59,7 +56,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 async function LandingTraction({ metricsPromise }: { metricsPromise: Promise<LandingMetrics> }) {
-  return <TractionBar metrics={await metricsPromise} />
+  return <DeferredTractionBar metrics={await metricsPromise} />
 }
 
 async function LandingCommunity({
@@ -70,7 +67,9 @@ async function LandingCommunity({
   profilesPromise: Promise<CommunityProfileItem[]>
 }) {
   const [metrics, profiles] = await Promise.all([metricsPromise, profilesPromise])
-  return <CommunityProfiles profiles={profiles} usersCount={metrics.users} metrics={metrics} />
+  return (
+    <DeferredCommunityProfiles profiles={profiles} usersCount={metrics.users} metrics={metrics} />
+  )
 }
 
 async function LandingMetricsSections({
@@ -81,11 +80,14 @@ async function LandingMetricsSections({
   const metrics = await metricsPromise
   return (
     <>
-      <ComparisonTable proCustomers={metrics.proCustomers} proUsernames={metrics.proUsernames} />
-      <WidgetsShowcase count={metrics.widgets} />
-      <EcosystemHub metrics={metrics} />
-      <FAQ />
-      <FinalCTA metrics={metrics} />
+      <DeferredComparisonTable
+        proCustomers={metrics.proCustomers}
+        proUsernames={metrics.proUsernames}
+      />
+      <DeferredWidgetsShowcase count={metrics.widgets} />
+      <DeferredEcosystemHub metrics={metrics} />
+      <DeferredFAQ faqs={LANDING_FAQS} />
+      <DeferredFinalCTA metrics={metrics} />
     </>
   )
 }
@@ -97,24 +99,26 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen relative bg-carbon">
       <Navbar />
-      <Hero />
+      <KineticGrid className="min-h-screen">
+        <Hero />
+      </KineticGrid>
 
       <div className="relative z-10 w-full bg-carbon">
         <LandingBackgroundDecorations />
         <div className="-mt-[clamp(80px,10vw,140px)]">
-          <InteractiveEditorDemo defaultUsername="Igorcbraz" />
+          <DeferredInteractiveEditorDemo defaultUsername="Igorcbraz" />
         </div>
-        <Suspense fallback={<TractionBar />}>
+        <Suspense fallback={<DeferredTractionBar />}>
           <LandingTraction metricsPromise={metricsPromise} />
         </Suspense>
-        <Suspense fallback={<CommunityProfiles />}>
+        <Suspense fallback={<DeferredCommunityProfiles />}>
           <LandingCommunity metricsPromise={metricsPromise} profilesPromise={profilesPromise} />
         </Suspense>
-        <TemplatesPreview count={DEFAULT_LANDING_METRICS.templates} />
+        <DeferredTemplatesPreview count={DEFAULT_LANDING_METRICS.templates} />
         <Suspense fallback={<div className="min-h-96" aria-hidden="true" />}>
           <LandingMetricsSections metricsPromise={metricsPromise} />
         </Suspense>
-        <Footer />
+        <DeferredFooter />
       </div>
       <LandingMascotClient />
     </main>

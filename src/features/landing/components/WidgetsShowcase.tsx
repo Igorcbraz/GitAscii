@@ -3,14 +3,13 @@
 import { Flame, Globe, Layers, Sparkles, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import SpotlightCard from '@/components/ui/SpotlightCard'
 import { DEFAULT_POKEMON_CARD_IMAGE, WIDGET_IDS, type WidgetId } from '@/constants'
-import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { StrobiAnchor } from '@/features/mascot'
@@ -357,8 +356,30 @@ function renderSnakeShowcasePreview(): string {
 
 export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
   const { t } = useI18n()
+  const sectionRef = useRef<HTMLElement>(null)
+  const [renderWidgetSvg, setRenderWidgetSvg] = useState<
+    typeof import('@/engine/core/WidgetRenderer').renderWidgetSvg | null
+  >(null)
   const demoData = useMemo(() => getMockGitHubData('Igorcbraz'), [])
   const [activeGroup, setActiveGroup] = useState<WidgetGroup>('all')
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        void import('@/engine/core/WidgetRenderer').then((module) => {
+          setRenderWidgetSvg(() => module.renderWidgetSvg)
+        })
+      },
+      { rootMargin: '1200px 0px' }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   const renderedWidgets = useMemo(() => {
     return ALL_SHOWCASE_WIDGETS.map((widgetDef) => {
@@ -396,7 +417,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
       const innerSvg =
         widgetDef.id === WIDGET_IDS.CONTRIBUTION_SNAKE
           ? renderSnakeShowcasePreview()
-          : renderWidgetSvg(instance, demoData, globalStyles, false, false)
+          : renderWidgetSvg?.(instance, demoData, globalStyles, false, false) || ''
       const fullSvg = `<svg width="100%" height="auto" viewBox="0 0 ${widgetDef.width} ${widgetDef.height}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
     * { box-sizing: border-box; }
@@ -411,7 +432,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
         svgMarkup: fullSvg,
       }
     })
-  }, [demoData])
+  }, [demoData, renderWidgetSvg])
 
   const filteredWidgets = useMemo(() => {
     if (activeGroup === 'all') return renderedWidgets
@@ -420,6 +441,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
 
   return (
     <section
+      ref={sectionRef}
       id="widgets-showcase"
       className="relative z-10 w-full bg-transparent py-20 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-graphite/60 overflow-hidden"
     >
@@ -593,6 +615,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                       <div
                         suppressHydrationWarning
                         className="w-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:object-contain shadow-md"
+                        style={{ aspectRatio: `${widget.width} / ${widget.height}` }}
                         dangerouslySetInnerHTML={{ __html: widget.svgMarkup }}
                       />
                     </div>

@@ -298,6 +298,11 @@ export default function KineticGrid({
     const setSize = () => {
       const w = window.innerWidth
       const h = window.innerHeight
+      if (w < 768) {
+        canvas.style.display = 'none'
+        return
+      }
+      canvas.style.display = 'block'
       canvas.width = w
       canvas.height = h
       sizeRef.current = { w, h }
@@ -311,7 +316,7 @@ export default function KineticGrid({
       observer = new IntersectionObserver((entries) => {
         const [entry] = entries
         isVisibleRef.current = Boolean(entry && entry.isIntersecting)
-        if (isVisibleRef.current) {
+        if (isVisibleRef.current && window.innerWidth >= 768) {
           startAnimation()
         }
       })

@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/privacy',
     '/terms',
     '/support',
+    '/watch/gitascii-overview',
   ]
 
   const stackTemplates = [

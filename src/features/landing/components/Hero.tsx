@@ -97,11 +97,11 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-[100svh] bg-carbon"
+      className="relative min-h-[100svh]"
       style={{ paddingBottom: 'calc(clamp(10px, 10vw, 10px))' }}
     >
       <div
-        className="absolute inset-0 pointer-events-none opacity-70"
+        className="absolute inset-0 pointer-events-none opacity-70 md:hidden"
         aria-hidden="true"
         style={{
           backgroundImage:
