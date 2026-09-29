@@ -112,25 +112,6 @@ export async function getUserProfiles(
   }
 
   if (hasDbConfig()) {
-    const p = redis.pipeline()
-    for (const profile of dbProfiles) {
-      p.sadd(profilesSetKey, profile.slug)
-      p.hset(REDIS_KEYS.profileMeta(u, profile.slug), {
-        id: profile.id,
-        name: profile.name,
-        description: profile.description,
-        status: profile.status,
-        isDefault: String(profile.isDefault),
-        widgetsCount: profile.widgetsCount,
-        totalViews: profile.totalViews,
-        healthStatus: profile.healthStatus,
-        renderSuccessRate: profile.renderSuccessRate,
-        createdAt: profile.createdAt,
-        updatedAt: profile.lastUpdated,
-      })
-    }
-    void p.exec().catch((error) => console.warn('[ProfileManager cache operation] Failed:', error))
-
     const publishedSlugs = await publishedSlugsPromise
 
     return dbProfiles.map((profile) => {

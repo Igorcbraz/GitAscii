@@ -65,7 +65,7 @@ class UpstashRedisAdapter implements IProRedisStore {
     if (now - this.lastWarning > REDIS_WARNING_INTERVAL_MS) {
       const errorDetails = error instanceof Error ? error.message : error
       console.warn(
-        `[ProRedis] Upstash Redis operation '${operation}' failed (rate limit/quota/connectivity). Falling back to memory store.`,
+        `[ProRedis] Upstash Redis operation '${operation}' failed (rate limit/quota/connectivity).`,
         errorDetails
       )
       this.lastWarning = now
@@ -92,6 +92,8 @@ class UpstashRedisAdapter implements IProRedisStore {
       return await this.client.set(key, value)
     } catch (err) {
       this.logError('set', err)
+      // A local fallback cannot provide a distributed lock across Workers.
+      if (opts?.nx) throw err
       return this.fallback.set(key, value, opts)
     }
   }

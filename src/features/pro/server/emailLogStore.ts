@@ -44,6 +44,7 @@ export async function logSentEmail(params: LogEmailParams): Promise<void> {
   }
 
   await logSentEmailInDb(username, record)
+  if (hasDbConfig()) return
 
   try {
     const redis = getProRedisClient()
@@ -66,16 +67,7 @@ export async function getProEmailLogs(username: string): Promise<ProEmailLogReco
   const listKey = REDIS_KEYS.emailList(u)
 
   if (hasDbConfig()) {
-    const dbLogs = await getProEmailLogsFromDb(u, 50)
-    if (dbLogs.length > 0) {
-      const p = redis.pipeline()
-      for (const log of dbLogs) {
-        p.hset(REDIS_KEYS.emailItem(u, log.id), log as unknown as Record<string, any>)
-        p.zadd(listKey, { score: new Date(log.sentAt).getTime(), member: log.id })
-      }
-      void p.exec().catch((error) => console.warn('[EmailLogStore cache operation] Failed:', error))
-    }
-    return dbLogs
+    return getProEmailLogsFromDb(u, 50)
   }
 
   const emailIds = await redis.zrevrange<string[]>(listKey, 0, 50).catch(() => [])
@@ -164,6 +156,7 @@ export async function recordTestDigestSent(username: string): Promise<void> {
   const u = username.toLowerCase().trim()
 
   await recordTestDigestSentInDb(u)
+  if (hasDbConfig()) return
 
   try {
     const redis = getProRedisClient()

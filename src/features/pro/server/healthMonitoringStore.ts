@@ -37,7 +37,7 @@ export async function recordRenderTelemetry(payload: {
   widgetErrors?: IngestErrorPayload[]
 }): Promise<void> {
   try {
-    const redis = getProRedisClient()
+    const databaseConfigured = hasDbConfig()
     const u = payload.username.toLowerCase().trim()
     const slug = (payload.profileSlug || 'default').toLowerCase().trim()
     const now = new Date()
@@ -47,44 +47,45 @@ export async function recordRenderTelemetry(payload: {
 
     await recordProfileDailyHealthInDb(u, slug, dateStr, isSuccess, duration)
 
-    const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
-    const metaKey = REDIS_KEYS.profileMeta(u, slug)
-
-    const p = redis.pipeline()
-    p.hincrby(profileHealthKey, 'renders', 1)
-    if (isSuccess) {
-      p.hincrby(profileHealthKey, 'successes', 1)
-    } else {
-      p.hincrby(profileHealthKey, 'failures', 1)
+    if (!databaseConfigured) {
+      const redis = getProRedisClient()
+      const profileHealthKey = REDIS_KEYS.healthProfileDaily(u, slug, dateStr)
+      const metaKey = REDIS_KEYS.profileMeta(u, slug)
+      const p = redis.pipeline()
+      p.hincrby(profileHealthKey, 'renders', 1)
+      if (isSuccess) p.hincrby(profileHealthKey, 'successes', 1)
+      else p.hincrby(profileHealthKey, 'failures', 1)
+      p.hincrby(profileHealthKey, 'durationMs', duration)
+      p.hincrby(profileHealthKey, 'durationCount', 1)
+      p.expire(profileHealthKey, 90 * 86400)
+      p.hset(metaKey, {
+        lastRenderedAt: now.toISOString(),
+        lastRenderDurationMs: duration,
+        healthStatus: isSuccess ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING,
+      })
+      await p
+        .exec()
+        .catch((error) => console.warn('[HealthMonitoringStore cache operation] Failed:', error))
     }
-    p.hincrby(profileHealthKey, 'durationMs', duration)
-    p.hincrby(profileHealthKey, 'durationCount', 1)
-    p.expire(profileHealthKey, 90 * 86400)
-
-    p.hset(metaKey, {
-      lastRenderedAt: now.toISOString(),
-      lastRenderDurationMs: duration,
-      healthStatus: isSuccess ? HEALTH_STATUS.OPERATIONAL : HEALTH_STATUS.WARNING,
-    })
-
-    await p
-      .exec()
-      .catch((error) => console.warn('[HealthMonitoringStore cache operation] Failed:', error))
 
     if (payload.widgetErrors && payload.widgetErrors.length > 0) {
       for (const errPayload of payload.widgetErrors) {
         await recordWidgetError(errPayload)
 
-        const widgetId = errPayload.widgetId.toLowerCase().trim()
-        const widgetMetaKey = REDIS_KEYS.healthWidgetMeta(u, widgetId)
-        await redis
-          .hset(widgetMetaKey, {
-            status: HEALTH_STATUS.FAILED,
-            lastErrorType: errPayload.errorType,
-            lastErrorMessage: errPayload.message,
-            lastErrorAt: now.toISOString(),
-          })
-          .catch((error) => console.warn('[HealthMonitoringStore cache operation] Failed:', error))
+        if (!databaseConfigured) {
+          const widgetId = errPayload.widgetId.toLowerCase().trim()
+          const widgetMetaKey = REDIS_KEYS.healthWidgetMeta(u, widgetId)
+          await getProRedisClient()
+            .hset(widgetMetaKey, {
+              status: HEALTH_STATUS.FAILED,
+              lastErrorType: errPayload.errorType,
+              lastErrorMessage: errPayload.message,
+              lastErrorAt: now.toISOString(),
+            })
+            .catch((error) =>
+              console.warn('[HealthMonitoringStore cache operation] Failed:', error)
+            )
+        }
       }
     } else if (payload.hasErrors) {
       const fallbackErr: IngestErrorPayload = {

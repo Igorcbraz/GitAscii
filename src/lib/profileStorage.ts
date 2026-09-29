@@ -44,12 +44,14 @@ export async function invalidateProfileConfig(
   const usernameLower = username.toLowerCase()
   const slugLower = slug.toLowerCase()
   memoryCache.delete(`${usernameLower}_${slugLower}`)
-  try {
-    const redis = getProRedisClient()
-    const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
-    await redis.del(configKey)
-  } catch (error) {
-    console.warn('[ProfileStorage] Failed to invalidate Redis cache:', error)
+  if (!hasDbConfig()) {
+    try {
+      const redis = getProRedisClient()
+      const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
+      await redis.del(configKey)
+    } catch (error) {
+      console.warn('[ProfileStorage] Failed to invalidate Redis cache:', error)
+    }
   }
   await invalidateSvgCache(usernameLower)
   await purgeCommonEdgeSvgEntries(usernameLower, slugLower).catch((error) =>
@@ -75,12 +77,14 @@ export async function saveProfileConfig(config: SavedConfiguration): Promise<voi
   await saveProfileConfigInDb(username, slug, config)
   cacheProfileConfig(config)
 
-  try {
-    const redis = getProRedisClient()
-    const configKey = REDIS_KEYS.profileConfig(username, slug)
-    await redis.set(configKey, JSON.stringify(config))
-  } catch (err) {
-    console.warn('[ProfileStorage] Failed to persist config to Redis:', err)
+  if (!hasDbConfig()) {
+    try {
+      const redis = getProRedisClient()
+      const configKey = REDIS_KEYS.profileConfig(username, slug)
+      await redis.set(configKey, JSON.stringify(config))
+    } catch (err) {
+      console.warn('[ProfileStorage] Failed to persist config to Redis:', err)
+    }
   }
 
   await invalidateSvgCache(username)
@@ -138,57 +142,41 @@ async function readProfileConfig(
     return cached.config
   }
 
-  if (hasDbConfig()) {
-    const dbConfig = await getProfileConfigFromDb(usernameLower, slugLower)
-    if (dbConfig && Array.isArray(dbConfig.widgets)) {
-      memoryCache.set(cacheKey, {
-        config: dbConfig,
-        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
-      })
-      await getProRedisClient()
-        .set(REDIS_KEYS.profileConfig(usernameLower, slugLower), JSON.stringify(dbConfig))
-        .catch((error) => console.warn('[ProfileStorage cache operation] Failed:', error))
-      return dbConfig
-    }
-  }
-
-  try {
-    const redis = getProRedisClient()
-    const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
-    const redisData = await redis.get<string | SavedConfiguration>(configKey)
-    if (redisData) {
-      const parsedConfig =
-        typeof redisData === 'string' ? (JSON.parse(redisData) as SavedConfiguration) : redisData
-      if (parsedConfig && Array.isArray(parsedConfig.widgets)) {
+  const databaseConfigured = hasDbConfig()
+  let databaseLookupFailed = false
+  if (databaseConfigured) {
+    try {
+      const dbConfig = await getProfileConfigFromDb(usernameLower, slugLower)
+      if (dbConfig && Array.isArray(dbConfig.widgets)) {
         memoryCache.set(cacheKey, {
-          config: parsedConfig,
+          config: dbConfig,
           expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
         })
-        return parsedConfig
+        return dbConfig
       }
+    } catch (dbErr) {
+      databaseLookupFailed = true
+      console.warn('[ProfileStorage] Error reading config from PostgreSQL:', dbErr)
     }
-  } catch (err) {
-    console.warn('[ProfileStorage] Error reading config from Redis:', err)
-  }
-
-  try {
-    const dbConfig = await getProfileConfigFromDb(usernameLower, slugLower)
-    if (dbConfig && Array.isArray(dbConfig.widgets)) {
-      memoryCache.set(cacheKey, {
-        config: dbConfig,
-        expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
-      })
-      try {
-        const redis = getProRedisClient()
-        const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
-        await redis.set(configKey, JSON.stringify(dbConfig))
-      } catch (error) {
-        console.warn('[ProfileStorage] Failed to hydrate Redis cache from PostgreSQL:', error)
+  } else {
+    try {
+      const redisData = await getProRedisClient().get<string | SavedConfiguration>(
+        REDIS_KEYS.profileConfig(usernameLower, slugLower)
+      )
+      if (redisData) {
+        const parsedConfig =
+          typeof redisData === 'string' ? (JSON.parse(redisData) as SavedConfiguration) : redisData
+        if (parsedConfig && Array.isArray(parsedConfig.widgets)) {
+          memoryCache.set(cacheKey, {
+            config: parsedConfig,
+            expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
+          })
+          return parsedConfig
+        }
       }
-      return dbConfig
+    } catch (err) {
+      console.warn('[ProfileStorage] Error reading config from Redis:', err)
     }
-  } catch (dbErr) {
-    console.warn('[ProfileStorage] Error reading config from PostgreSQL:', dbErr)
   }
 
   const config = await fetchConfigFromGitHub(username, slugLower)
@@ -199,17 +187,14 @@ async function readProfileConfig(
       expiresAt: Date.now() + MEMORY_CACHE_TTL_MS,
     })
 
-    void saveProfileConfigInDb(usernameLower, slugLower, config).catch((error) => {
-      console.warn('[ProfileStorage] Failed to persist GitHub fallback in PostgreSQL:', error)
-    })
-    try {
-      const redis = getProRedisClient()
-      const configKey = REDIS_KEYS.profileConfig(usernameLower, slugLower)
-      void redis.set(configKey, JSON.stringify(config)).catch((error) => {
-        console.warn('[ProfileStorage] Failed to cache GitHub fallback in Redis:', error)
+    if (databaseConfigured && !databaseLookupFailed) {
+      void saveProfileConfigInDb(usernameLower, slugLower, config).catch((error) => {
+        console.warn('[ProfileStorage] Failed to persist GitHub fallback in PostgreSQL:', error)
       })
-    } catch (error) {
-      console.warn('[ProfileStorage] Failed to initialize Redis cache client:', error)
+    } else if (!databaseConfigured) {
+      void getProRedisClient()
+        .set(REDIS_KEYS.profileConfig(usernameLower, slugLower), JSON.stringify(config))
+        .catch((error) => console.warn('[ProfileStorage] Failed to cache GitHub fallback:', error))
     }
   } else {
     memoryCache.delete(cacheKey)

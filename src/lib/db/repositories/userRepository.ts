@@ -167,6 +167,20 @@ export async function getUserByUsername(rawUsername: string): Promise<UserWithEn
   }
 }
 
+export async function getUserPlanTierFromDb(rawUsername: string): Promise<ProPlanTier | null> {
+  if (!hasDbConfig()) return null
+  const username = rawUsername.toLowerCase().trim()
+  if (!username) return null
+  const rows = await sql`
+    SELECT e.plan_tier
+    FROM users u
+    LEFT JOIN user_entitlements e ON e.user_id = u.id
+    WHERE u.username = ${username}
+    LIMIT 1
+  `
+  return rows.length > 0 ? (rows[0].plan_tier as ProPlanTier) || 'free' : null
+}
+
 export async function getUserByStripeCustomerId(
   customerId: string
 ): Promise<UserWithEntitlements | null> {
