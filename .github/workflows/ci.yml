@@ -24,6 +24,14 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Verify bundled Action matches source
+        run: |
+          npm run build:action
+          if ! git diff --quiet -- action/dist/index.js; then
+            echo '::error::The committed Action bundle is out of date. Run npm run build:action and commit action/dist/index.js.'
+            exit 1
+          fi
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -44,11 +52,6 @@ jobs:
 
       - name: Build Cloudflare deployment
         run: npm run build:vinext
-
-      - name: Verify bundled Action matches source
-        run: |
-          npm run build:action
-          git diff --exit-code -- action/dist/index.js
 
       - name: Upload browser diagnostics
         if: failure()

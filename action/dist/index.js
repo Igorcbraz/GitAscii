@@ -51813,7 +51813,7 @@ var BVt,
           if (o - this.lastWarning > BVt) {
             let s = r instanceof Error ? r.message : r
             ;(console.warn(
-              `[ProRedis] Upstash Redis operation '${t}' failed (rate limit/quota/connectivity). Falling back to memory store.`,
+              `[ProRedis] Upstash Redis operation '${t}' failed (rate limit/quota/connectivity).`,
               s
             ),
               (this.lastWarning = o))
@@ -51837,7 +51837,8 @@ var BVt,
                 : await this.client.set(t, r)
             )
           } catch (s) {
-            return (this.logError('set', s), this.fallback.set(t, r, o))
+            if ((this.logError('set', s), o?.nx)) throw s
+            return this.fallback.set(t, r, o)
           }
         }
         async del(...t) {
@@ -75736,7 +75737,7 @@ var xpr = new Bd(),
 var wa = new Bd()
 var aK = {
   name: 'gitascii',
-  version: '2.0.2',
+  version: '2.1.0',
   license: 'GPL-3.0-or-later',
   private: !0,
   scripts: {
@@ -75747,6 +75748,10 @@ var aK = {
     dev: 'next dev',
     build: 'next build',
     start: 'next start',
+    'lighthouse:mobile':
+      'lighthouse http://127.0.0.1:3000/ --port=9222 --form-factor=mobile --screenEmulation.mobile=true --screenEmulation.width=390 --screenEmulation.height=844 --screenEmulation.deviceScaleFactor=3 --throttling-method=simulate --output=html --output=json --output-path=reports/lighthouse/latest-mobile --quiet',
+    'lighthouse:desktop':
+      'lighthouse http://127.0.0.1:3000/ --port=9222 --preset=desktop --output=html --output=json --output-path=reports/lighthouse/latest-desktop --quiet',
     lint: 'eslint .',
     'lint:fix': 'eslint . --fix',
     'fix:all': 'npm run lint:fix && npm run format',
@@ -75848,6 +75853,7 @@ var aK = {
     'eslint-plugin-unused-imports': '^4.4.1',
     'fast-uri': '^4.1.4',
     husky: '^9.1.7',
+    lighthouse: '13.5.0',
     'lint-staged': '^17.4.1',
     playwright: '^1.62.1',
     postcss: '^8.5.28',
@@ -92830,7 +92836,7 @@ async function ave() {
   let e = k4()
   try {
     let n = await e.get(ive)
-    if (n) return JSON.parse(n)
+    if (n) return typeof n == 'string' ? JSON.parse(n) : n
   } catch (n) {
     console.warn('[SocialProof] Redis cache read failed:', n)
   }
