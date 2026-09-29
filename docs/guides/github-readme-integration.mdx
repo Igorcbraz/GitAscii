@@ -38,14 +38,17 @@ Each profile slug has its own pair of published SVG files:
 GitHub proxies all images through its Camo CDN (`https://camo.githubusercontent.com/...`).
 
 <Note>
-  **How Camo Handles SVGs**: * Camo caches responses based on standard HTTP `Cache-Control` and
-  `ETag` headers. * GitHub serves the source from `raw.githubusercontent.com` and may proxy it
-  through Camo in README views. * The publishing Action converts allowed remote assets to base64
-  `data:` URIs or directly inlines sanitized SVG code.
+  GitHub may proxy README images through Camo and cache them. Refreshing the SVG on the `gitascii`
+  branch updates the stable source URL, but a viewer may briefly see a cached copy. The publishing
+  Action inlines permitted remote assets into the SVG before committing it.
 </Note>
 
 ---
 
 ## 4. One-Click Sync with Special Repository
 
-When logged in via GitHub OAuth, **Publish to GitHub** updates the `gitascii` branch, the repository workflow, and the marked profile block in `README.md`. Publishing another slug preserves existing profile configurations and embeds.
+After GitHub sign-in and GitHub App authorization, **Publish to GitHub** updates the `gitascii` branch, the repository workflow, and the profile `README.md`. It also renders the initial files; the workflow handles subsequent scheduled or manual refreshes. Named profile embeds have `GITASCII:[slug]` markers so they can be updated or removed independently.
+
+The HTTP SVG routes remain available for previews and integrations. If you enable Pro dynamic rules for the default profile, GitAscii generates an API embed with `?dynamic=1`; that is the explicit mode that evaluates a profile choice on each eligible request. The standard GitHub-hosted `<picture>` embed does not evaluate rules at view time.
+
+For Pro analytics, place the separately generated GitAscii badge beside the profile `<picture>`. It measures requests to the badge endpoint, usually from GitHub's image proxy, and does not count individual people or exact README views. Publication health comes from authenticated GitHub Action reports.

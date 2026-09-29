@@ -1,74 +1,48 @@
 ---
 title: 'Introduction'
-description: 'Programmatic SVG Generation Engine for Developer Profiles and Readmes'
+description: 'GitAscii v2 publishing, rendering engine, and documentation entry points'
 ---
 
-# Welcome to GitAscii API
+# Welcome to GitAscii
 
-**GitAscii** is an open-source, serverless SVG rendering engine and visual editor that generates aesthetic, real-time dynamic profile cards and banners for GitHub READMEs.
+GitAscii is an open-source visual editor and SVG engine for GitHub profile READMEs. Design a composition in the browser, then publish it to your own `username/username` repository. Version 2 serves the normal README image from GitHub rather than rendering it on every profile visit.
 
-Developers can design their profiles interactively in the web editor at [gitascii.com](https://gitascii.com) or use the underlying **TypeScript Engine & API** to construct, configure, and render widgets and full-page compositions programmatically.
-
+```text
+Visual editor → SavedConfiguration → initial dark/light SVG render
+                                      ↓
+                         username/username:gitascii
+                         gitascii.json + profiles/default/*.svg
+                                      ↓
+                README <picture> → raw.githubusercontent.com
+                                      ↑
+                    GitHub Action refreshes published SVGs
 ```
-GitAscii Editor
-      ↓
-Widget Configuration
-      ↓
-JSON Schema (SavedConfiguration)
-      ↓
-API / Core SVGEngine
-      ↓
-Widget Registry & Renderers
-      ↓
-Sanitized, Inlined SVG Output
-```
+
+The editor installs `.github/workflows/gitascii.yml` on the repository's default branch. The workflow reads the configuration files on `gitascii`, fetches fresh GitHub data, renders both themes, inlines permitted external assets, and commits updated SVGs atomically. The initial publish renders the first files immediately. The HTTP API and TypeScript engine remain available for previews and custom integrations.
 
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="bolt" href="/quickstart">
-    Learn how to render your first widget SVG in seconds.
+    Publish your first profile and copy the GitHub-hosted README embed.
   </Card>
   <Card title="API Overview" icon="code" href="/api/overview">
-    Explore the programmatic SVGEngine, routes, and data pipelines.
+    Explore the optional HTTP routes and the programmatic SVG engine.
   </Card>
   <Card title="Widget Catalog" icon="grid-2" href="/widgets/overview">
-    Discover all 40+ widgets across Native, ASCII, GodProfile, and ControlPlane suites.
+    Discover the widgets available in the visual editor and renderer.
   </Card>
   <Card title="JSON Schema" icon="brackets-curly" href="/api/json">
-    Understand the configuration format exported and consumed by the engine.
+    Understand the configuration stored on the `gitascii` branch.
   </Card>
 </CardGroup>
 
-## Core Principles
+## Where each piece runs
 
-<ResponseField name="Accuracy" type="Architecture">
-  Every parameter documented here maps 1:1 to production code in `src/engine/` and
-  `src/features/widgets/`.
-</ResponseField>
+| Component           | Role                                                                                                |
+| :------------------ | :-------------------------------------------------------------------------------------------------- |
+| GitAscii web app    | Editor, GitHub App authorization, initial publish, Pro management, and optional HTTP rendering API. |
+| `gitascii` branch   | Source configurations and published `profiles/[slug]/dark.svg` and `light.svg`.                     |
+| GitHub Action       | Scheduled or manual refresh of every configured profile from current GitHub data.                   |
+| Profile `README.md` | `<picture>` sources point at stable raw GitHub URLs and select the viewer's theme.                  |
+| Pro analytics badge | Separate GitAscii endpoint that counts observed badge fetches; it cannot identify README visitors.  |
 
-<ResponseField name="Universal Rendering" type="Engine">
-  Widgets can be rendered as isolated standalone SVGs or combined into stacked, absolute-positioned
-  compositions.
-</ResponseField>
-
-<ResponseField name="Zero Runtime Dependency" type="SVG Output">
-  Generated SVGs contain inlined Google Fonts, CSS animations (or SMIL fallbacks), and embedded
-  image buffers ready for GitHub Camo Proxy.
-</ResponseField>
-
-## Architecture Pipeline
-
-```mermaid
-graph TD
-  A[GitHub GraphQL & REST API] --> B[NormalizedGitHubData]
-  C[SavedConfiguration / JSON] --> D[SVGEngine.renderSvg]
-  B --> D
-  D --> E[WidgetRegistry & Custom Renderers]
-  E --> F[Raw SVG Buffer]
-  F --> G[embedExternalImages & SSRF Validator]
-  G --> H[Final Pure SVG Stream]
-```
-
-1. **Normalized GitHub Data**: Fetches user repos, commits, stargazers, forks, languages, and contribution heatmaps into a strictly typed `NormalizedGitHubData` model.
-2. **SavedConfiguration Schema**: Defines the global styles, template theme, and array of positioned `WidgetInstance` elements.
-3. **Core SVG Engine**: Computes bounding boxes, calculates grid coordinates, applies entrance animation keyframes, and invokes the registry map.
-4. **External Asset Inliner**: Resolves and embeds third-party badges, avatar binaries, and shields into base64 data URIs or inlined `<svg>` trees to ensure fast cache hits through GitHub's Camo CDN proxy.
+See [GitHub README Integration](/guides/github-readme-integration) for the embed and [Telemetry & Privacy](/pro/telemetry-and-privacy) for the Pro measurement limits.

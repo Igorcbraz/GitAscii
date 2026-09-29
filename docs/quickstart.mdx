@@ -5,17 +5,15 @@ description: 'Publish a GitAscii v2 profile with GitHub-native SVG delivery'
 
 # Quickstart
 
-Get up and running with GitAscii v2 in under 5 minutes. Profile README delivery uses SVG files published to your own `gitascii` branch. The HTTP API remains available for previews and programmatic rendering, but is not the primary production embed.
+GitAscii v2 publishes SVG files to your own `gitascii` branch. The HTTP API remains available for previews and programmatic rendering; the normal profile README uses the GitHub-hosted files.
 
 ## 1. GitHub-native profile publishing
 
-Open the visual editor, authorize the GitHub App, and select **Publish to GitHub**. The generated README embed uses these stable files:
+Open the [visual editor](https://gitascii.com), sign in, authorize the GitHub App for your special profile repository (`YOUR_USERNAME/YOUR_USERNAME`), and select **Publish to GitHub**. GitAscii creates the repository if needed, publishes an initial dark/light SVG pair and configuration, writes the README embed, and installs `.github/workflows/gitascii.yml` on the default branch. The generated embed uses these stable files:
 
 <CodeGroup>
 
-```markdown GitHub Markdown (Full Profile)
-<!-- Embed Full Profile SVG -->
-
+```markdown GitHub Markdown (Dark Only)
 ![GitAscii Profile](https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg)
 ```
 
@@ -28,6 +26,8 @@ Open the visual editor, authorize the GitHub App, and select **Publish to GitHub
 ```
 
 </CodeGroup>
+
+The `<picture>` version switches themes automatically. The workflow refreshes saved profiles from current GitHub data on a schedule or manual dispatch; the README URL stays the same. Free runs are scheduled daily. Pro runs are scheduled hourly, subject to the configured minimum interval for scheduled publication. Additional profiles use their own `profiles/[slug]/` directory and `gitascii_[slug].json` configuration. If Pro dynamic rules are enabled for the default profile, the generated default embed uses the HTTP API with `?dynamic=1` to select a profile at request time.
 
 ---
 

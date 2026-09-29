@@ -7,6 +7,8 @@ description: 'Core rendering functions: SVGEngine, WidgetRenderer, and External 
 
 The GitAscii rendering engine lives in `src/engine/` and transforms JSON configuration models and normalized GitHub data into standards-compliant SVG strings.
 
+The editor's initial v2 publication and the bundled GitHub Action both use this engine, then process permitted external assets before writing dark and light files to the user's `gitascii` branch. The HTTP API can also invoke the engine for previews and custom requests; the standard README embed loads the published files instead.
+
 ## `renderSvg(config, data, options)`
 
 The main orchestration function that computes bounds, sorts layers by `zIndex`, renders individual widget nodes, and produces the root `<svg>` container.

@@ -1,85 +1,50 @@
 ---
 title: 'HTTP Endpoints Reference'
-description: 'Detailed specification of routes, query parameters, cache headers, and error codes'
+description: 'Profile SVG, configuration, and analytics badge routes'
 ---
 
 # HTTP Endpoints Reference
 
-GitAscii exposes edge API route handlers powered by Next.js App Router in `src/app/`.
+The standard v2 README embed points to `https://raw.githubusercontent.com/:username/:username/gitascii/profiles/:slug/{dark,light}.svg`. These GitAscii HTTP routes are for previews and custom integrations.
 
-## 1. Catch-all Profile SVG Route
+## Profile SVG routes
 
 ```http
 GET /:username.svg
 GET /api/:username
 GET /api/:username/:profileSlug
-GET /api/svg/:username
+GET /api/svg/:username.svg
 ```
 
-### Path Parameters
+`username` is the GitHub handle. `profileSlug` selects a named saved profile; the default is `default`. The routes accept:
 
-| Parameter     | Type     | Required | Description                                   |
-| :------------ | :------- | :------- | :-------------------------------------------- |
-| `username`    | `string` | **Yes**  | GitHub username handle                        |
-| `profileSlug` | `string` | No       | Stored profile slug (`default`, `work`, etc.) |
+| Query                         | Meaning                                                  |
+| :---------------------------- | :------------------------------------------------------- |
+| `theme=dark` or `theme=light` | Theme to render or redirect to; default `dark`.          |
+| `template=<preset>`           | Fallback preset if no configuration is stored.           |
+| `widgets=<id>,<id>`           | Select up to 12 known widget IDs for a custom render.    |
+| `dynamic=1`                   | Evaluate enabled Pro rules on the default profile route. |
+| `preview_date`, `timezone`    | Simulate rule timing for a dynamic API request.          |
 
-### Query Parameters
+Without rendering overrides, a published v2 SVG can produce a `302` redirect to the raw GitHub file. Otherwise the route renders an SVG, with `200` or `304` for a matching ETag. Render errors return an SVG error response with `404` or `500`. Cache headers depend on whether the response was redirected, rendered, dynamic, or degraded; do not assume a single TTL.
 
-| Parameter  | Type                | Default      | Description                                         |
-| :--------- | :------------------ | :----------- | :-------------------------------------------------- |
-| `theme`    | `'dark' \| 'light'` | `'dark'`     | Force light or dark mode palette                    |
-| `template` | `string`            | `'terminal'` | Fallback template preset ID                         |
-| `widgets`  | `string`            | `undefined`  | Comma-separated widget IDs / aliases to shrink-wrap |
-
-### Response Headers
-
-```http
-Content-Type: image/svg+xml; charset=utf-8
-Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=7200
-CDN-Cache-Control: public, s-maxage=3600, stale-while-revalidate=7200
-ETag: W/"gitascii-1a2b3c4d"
-X-Content-Type-Options: nosniff
-Access-Control-Allow-Origin: *
-```
-
----
-
-## 2. Configuration JSON Route
+## Configuration and generation
 
 ```http
 GET /api/config/:username/:profileSlug
-```
-
-### Success Response (`200 OK`)
-
-Returns the `SavedConfiguration` JSON object.
-
-### Error Response (`404 Not Found`)
-
-```json
-{
-  "error": "Configuration not found for user octocat and slug default"
-}
-```
-
----
-
-## 3. Auto-Generate Profile Analysis
-
-```http
+GET /api/github/:username
 POST /api/generate
 Content-Type: application/json
 
-{
-  "username": "octocat"
-}
+{"username":"octocat"}
 ```
 
-### Success Response (`200 OK`)
+The configuration route returns the saved `SavedConfiguration` or `404`. The GitHub route returns normalized profile data. The generation route returns a suggested configuration and data for the supplied username.
 
-```json
-{
-  "config": {/* Complete SavedConfiguration object tailored to user's tech stack */},
-  "data": {/* NormalizedGitHubData */}
-}
+## Pro badge
+
+```http
+GET /api/badge/:username?slug=default&style=classic
 ```
+
+Badge styles are `classic`, `compact`, `outline`, and `transparent`. This is a separate image request from the GitHub-hosted profile SVG. Its analytics represent badge fetches observed by GitAscii, usually GitHub Camo refreshes, not individual profile visitors. Publication health is reported separately by the GitHub Action.

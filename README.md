@@ -7,7 +7,7 @@
 
   <p>
     <b>Where cryptic terminals meet editorial broadsheet design.</b><br />
-    Transform your GitHub profile into a live, encrypted telemetry deck and high-contrast ASCII artwork.
+    Design a GitHub profile in your browser and publish self-contained ASCII and widget SVGs to your own repository.
   </p>
 
   <p>
@@ -15,11 +15,11 @@
     <a href="https://github.com/Igorcbraz/GitAscii/releases"><img src="https://img.shields.io/github/v/release/Igorcbraz/GitAscii?style=for-the-badge&logo=github&color=c5ff4a&logoColor=c5ff4a&labelColor=060606" alt="Release" /></a>
     <a href="https://github.com/Igorcbraz/GitAscii/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Igorcbraz/GitAscii/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=c5ff4a&label=CI&color=c5ff4a&labelColor=060606" alt="CI Status" /></a>
     <a href="https://github.com/Igorcbraz/GitAscii/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/Igorcbraz/GitAscii/codeql.yml?branch=main&style=for-the-badge&logo=github&logoColor=c5ff4a&label=CodeQL&color=c5ff4a&labelColor=060606" alt="CodeQL" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-c5ff4a?style=for-the-badge&logo=opensourceinitiative&logoColor=060606&labelColor=060606" alt="License MIT" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-c5ff4a?style=for-the-badge&logo=opensourceinitiative&logoColor=060606&labelColor=060606" alt="License GPLv3" /></a>
   </p>
 
   <p>
-    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15.3-060606?style=flat-square&logo=nextdotjs&logoColor=c5ff4a" alt="Next.js" /></a>
+    <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16.3-060606?style=flat-square&logo=nextdotjs&logoColor=c5ff4a" alt="Next.js" /></a>
     <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19.0-060606?style=flat-square&logo=react&logoColor=c5ff4a" alt="React" /></a>
     <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind-4.0-060606?style=flat-square&logo=tailwindcss&logoColor=c5ff4a" alt="Tailwind" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-060606?style=flat-square&logo=typescript&logoColor=c5ff4a" alt="TypeScript" /></a>
@@ -31,6 +31,7 @@
     <a href="https://gitascii.com">Launch Web App</a> •
     <a href="#how-it-works">How It Works</a> •
     <a href="#quickstart">Quickstart</a> •
+    <a href="docs/introduction.mdx">Documentation</a> •
     <a href="#adding-new-community-templates">Creating Templates</a> •
     <a href="#developer-scripts">Developer Scripts</a> •
     <a href="#contributing">Contributing</a>
@@ -67,9 +68,9 @@ A classified broadsheet aesthetic engineered with brutalist minimalism, monospac
 
 <br />
 
-### ⚡ Live Generated SVG Output
+### ⚡ Published SVG Output
 
-What your GitHub profile actually renders: dynamic, high-density SVG output compiled on-the-fly at the edge with automatic dark/light theme switching.
+What your GitHub profile actually renders: self-contained dark and light SVG files generated when you publish and refreshed by a GitHub Action. The README uses a `<picture>` element to select the viewer's theme.
 
 <div align="center">
   <img src="public/example.svg" alt="Generated GitAscii Profile SVG" width="100%" />
@@ -79,7 +80,7 @@ What your GitHub profile actually renders: dynamic, high-density SVG output comp
 
 ## How It Works
 
-GitAscii v2 publishes self-contained SVG files from a dedicated `gitascii` branch in your own GitHub profile repository. GitHub Actions refreshes the files without putting the rendering service in the README request path:
+GitAscii v2 publishes self-contained SVG files to a dedicated `gitascii` branch in your GitHub profile repository (`username/username`). A GitHub Action refreshes them from current GitHub data. The normal README embed loads those files from GitHub:
 
 ```mermaid
 flowchart LR
@@ -90,40 +91,51 @@ flowchart LR
     style A fill:#1f1f1f,stroke:#c5ff4a,stroke-width:1px,color:#ffffff
     style B fill:#060606,stroke:#252525,stroke-width:1px,color:#c5ff4a
     style C fill:#1f1f1f,stroke:#252525,stroke-width:1px,color:#ffffff
-    style D fill:#1f1f1f,stroke:#c5ff4a,stroke-width:2px,color:#ffffff
     style E fill:#060606,stroke:#c5ff4a,stroke-width:1px,color:#c5ff4a
 ```
 
 ### 1. Design & Publish
 
-Compose your layout in the [Visual Editor](https://gitascii.com). When done, use **Publish to GitHub**. GitAscii creates or updates:
+Compose your layout in the [Visual Editor](https://gitascii.com). Sign in, authorize the GitHub App for your profile repository, and use **Publish to GitHub**. GitAscii creates the repository if needed and creates or updates:
 
 - the dedicated `gitascii` branch;
 - `gitascii.json` for the default profile and `gitascii_[slug].json` for additional profiles;
 - dark and light SVG files under `profiles/[slug]/`;
 - `.github/workflows/gitascii.yml` on the default branch.
 
-The GitHub Action publishes every configured profile atomically. Pro installations also enable authenticated, profile-scoped publication health telemetry and add a small analytics badge to the README.
+The app renders an initial dark/light pair at publication. The workflow then refreshes configured profiles on a schedule (daily for Free, with an hourly minimum for Pro) and can be dispatched manually. Its updates to the SVGs are atomic. Pro publication also enables authenticated, profile-scoped workflow health telemetry and a separate analytics badge in the README.
 
-### 2. Authorize the GitHub App
+### 2. Embed into your Profile `README.md`
 
-Authorize GitAscii for your special profile repository (`username/username`). The editor performs the branch, workflow, and README updates for you.
-
-### 3. Embed into your Profile `README.md`
-
-Paste the generated snippet into your `README.md`. It automatically adapts to the viewer's GitHub Dark or Light theme:
+The editor writes the generated embed to your profile repository's `README.md`; you can also copy it manually. Replace `yourusername` if using this example:
 
 ```html
-<img
-  alt="GitAscii Profile"
-  src="https://raw.githubusercontent.com/yourusername/yourusername/gitascii/profiles/default/dark.svg"
-  width="100%"
-/>
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="
+      https://raw.githubusercontent.com/yourusername/yourusername/gitascii/profiles/default/dark.svg
+    "
+  />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="
+      https://raw.githubusercontent.com/yourusername/yourusername/gitascii/profiles/default/light.svg
+    "
+  />
+  <img
+    alt="GitAscii Profile"
+    src="https://raw.githubusercontent.com/yourusername/yourusername/gitascii/profiles/default/dark.svg"
+    width="100%"
+  />
+</picture>
 ```
 
-The generated `<picture>` snippet contains both light and dark raw GitHub URLs. Updates keep the same stable URL and are performed by the repository workflow.
+The two URLs remain stable as the repository workflow updates their contents. Additional profiles use `profiles/[slug]/dark.svg` and `light.svg`.
 
-For Pro profiles, keep the generated GitAscii badge directly below the `<picture>`. Because v2 SVGs are served by GitHub rather than GitAscii, this badge is the only privacy-safe analytics signal. Its numbers represent badge fetches observed by GitAscii (usually GitHub Camo cache refreshes), **not exact human views or unique visitors**. GitHub's image proxy does not expose reliable viewer geography, browser, device, or identity, so the dashboard intentionally does not invent those fields.
+The HTTP rendering API (`/api/[username]`) remains available for previews, custom integrations, and Pro dynamic rules. It is not the default README embed.
+
+For Pro profiles, keep the generated GitAscii badge directly below the `<picture>`. Its analytics count badge fetches observed by GitAscii (usually GitHub Camo cache refreshes), **not exact human views or unique visitors**. GitHub's image proxy does not expose reliable viewer geography, browser, device, or identity. Pro health data comes separately from authenticated workflow runs.
 
 ---
 
@@ -158,32 +170,36 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+Local browsing and editing work without connecting your own integrations. To test sign-in and **Publish to GitHub**, copy `.env.example` to `.env.local` and set the GitHub OAuth, GitHub App, and `SESSION_SECRET` values. Set `DATABASE_URL` for PostgreSQL persistence and the Upstash variables for Redis-backed features; Stripe and Resend are needed only for their respective Pro billing and email flows. The publisher writes to a GitHub profile repository, so use an account and repository intended for testing.
+
 ---
 
 ## Developer Scripts
 
 All available scripts configured in `package.json`:
 
-| Command                   | Description                                                                         |
-| :------------------------ | :---------------------------------------------------------------------------------- |
-| `npm run dev`             | Starts the Next.js local development server on port `3000`                          |
-| `npm run build`           | Compiles the production build and verifies type definitions                         |
-| `npm run start`           | Boots the compiled Next.js production server                                        |
-| `npm run check`           | Comprehensive pipeline check: executes `typecheck`, `lint`, and `build` in sequence |
-| `npm run typecheck`       | Validates all TypeScript types across the codebase (`tsc --noEmit`)                 |
-| `npm run lint`            | Analyzes code for issues and stylistic discrepancies using ESLint                   |
-| `npm run lint:fix`        | Automatically fixes auto-fixable ESLint warnings and errors                         |
-| `npm run format`          | Formats the entire codebase using Prettier                                          |
-| `npm run format:check`    | Verifies whether all files conform to Prettier formatting rules                     |
-| `npm run fix:all`         | Executes both `lint:fix` and `format` together for complete code cleanup            |
-| `npm run test`            | Runs the full unit and integration test suite via **Vitest**                        |
-| `npm run test:e2e`        | Runs automated end-to-end browser tests via **Playwright**                          |
-| `npm run test:e2e:ui`     | Opens the **Playwright** interactive UI mode for visual debugging                   |
-| `npm run storybook`       | Launches the isolated UI widget and component workbench on port `6006`              |
-| `npm run build-storybook` | Compiles the Storybook workbench into a static production bundle                    |
-| `npm run email:dev`       | Launches the React Email local preview server on port `3001`                        |
-| `npm run docs`            | Launches the interactive documentation server locally via **Mintlify**              |
-| `npm run prepare`         | Configures Git hooks (pre-commit, commit-msg) via **Husky**                         |
+| Command                   | Description                                                              |
+| :------------------------ | :----------------------------------------------------------------------- |
+| `npm run dev`             | Starts the Next.js local development server on port `3000`               |
+| `npm run build`           | Compiles the production build and verifies type definitions              |
+| `npm run start`           | Boots the compiled Next.js production server                             |
+| `npm run check`           | Runs `typecheck`, `lint`, `test`, and `build` in sequence                |
+| `npm run typecheck`       | Validates all TypeScript types across the codebase (`tsc --noEmit`)      |
+| `npm run lint`            | Analyzes code for issues and stylistic discrepancies using ESLint        |
+| `npm run lint:fix`        | Automatically fixes auto-fixable ESLint warnings and errors              |
+| `npm run format`          | Formats the entire codebase using Prettier                               |
+| `npm run format:check`    | Verifies whether all files conform to Prettier formatting rules          |
+| `npm run fix:all`         | Executes both `lint:fix` and `format` together for complete code cleanup |
+| `npm run test`            | Runs the full unit and integration test suite via **Vitest**             |
+| `npm run test:db`         | Runs the database-specific Vitest suite                                  |
+| `npm run build:action`    | Builds the bundled GitHub Action used to refresh published SVGs          |
+| `npm run test:e2e`        | Runs automated end-to-end browser tests via **Playwright**               |
+| `npm run test:e2e:ui`     | Opens the **Playwright** interactive UI mode for visual debugging        |
+| `npm run storybook`       | Launches the isolated UI widget and component workbench on port `6006`   |
+| `npm run build-storybook` | Compiles the Storybook workbench into a static production bundle         |
+| `npm run email:dev`       | Launches the React Email local preview server on port `3001`             |
+| `npm run docs`            | Launches the interactive documentation server locally via **Mintlify**   |
+| `npm run prepare`         | Configures Git hooks (pre-commit, commit-msg) via **Husky**              |
 
 ---
 
