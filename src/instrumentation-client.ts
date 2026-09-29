@@ -18,6 +18,10 @@ function initializeSentry(Sentry: typeof import('@sentry/nextjs')) {
       /'set' on proxy: trap returned falsish/i,
       /ResizeObserver loop completed with undelivered notifications/,
       /ResizeObserver loop limit exceeded/,
+      'NeonDbError',
+      'exceeded the quota',
+      'KineticGrid is not defined',
+      'Grid is not defined',
     ],
 
     beforeSend(event: any, hint: any) {
