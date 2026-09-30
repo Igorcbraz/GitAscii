@@ -38,7 +38,22 @@ export function InteractiveEditorDemo({
   const [activeView, setActiveView] = useState<'video' | 'demo'>('video')
   const [hasPlayed, setHasPlayed] = useState<boolean>(false)
   const [showControls, setShowControls] = useState<boolean>(false)
+  const [isMobileVideo, setIsMobileVideo] = useState<boolean>(false)
   const hideControlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    const mobileViewport = window.matchMedia('(max-width: 767px)')
+    const updateVideo = () => {
+      playerRef.current?.pause()
+      setHasPlayed(false)
+      setShowControls(false)
+      setIsMobileVideo(mobileViewport.matches)
+    }
+
+    updateVideo()
+    mobileViewport.addEventListener('change', updateVideo)
+    return () => mobileViewport.removeEventListener('change', updateVideo)
+  }, [])
 
   useEffect(() => {
     if (activeView !== 'video' && playerRef.current) {
@@ -94,6 +109,17 @@ export function InteractiveEditorDemo({
     setShowControls(true)
     scheduleHideControls()
   }, [hasPlayed, scheduleHideControls])
+
+  const handleVideoEnded = useCallback(() => {
+    const player = playerRef.current
+    if (player) {
+      player.pause()
+      player.currentTime = 0
+    }
+    if (hideControlsTimerRef.current) clearTimeout(hideControlsTimerRef.current)
+    setHasPlayed(false)
+    setShowControls(false)
+  }, [])
 
   return (
     <section
@@ -175,10 +201,10 @@ export function InteractiveEditorDemo({
                 >
                   <video
                     ref={playerRef as any}
-                    src="/presentation.mp4"
-                    poster="/editor-poster.webp"
+                    src={isMobileVideo ? '/presentation(mobile).mp4' : '/presentation.mp4'}
+                    poster={isMobileVideo ? '/editor-poster(mobile).webp' : '/editor-poster.webp'}
                     playsInline
-                    loop
+                    onEnded={handleVideoEnded}
                     preload="none"
                     controls={showControls}
                     className="w-full h-full object-cover bg-black"

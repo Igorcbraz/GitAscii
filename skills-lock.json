@@ -13,6 +13,12 @@
       "skillPath": "skills/attribution/SKILL.md",
       "computedHash": "4e39f858ac85befe82cdff5b0844869cd61adc58f6ca4c602bfcff40fe89b8f2"
     },
+    "brag": {
+      "source": "latent-spaces/brag",
+      "sourceType": "github",
+      "skillPath": "skills/brag/SKILL.md",
+      "computedHash": "d8098e34675c8cb2107256ab19391f258e2cd2eb513275f7002db83c3cb36e76"
+    },
     "churn-prevention": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
