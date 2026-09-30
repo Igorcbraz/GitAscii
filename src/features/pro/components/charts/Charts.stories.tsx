@@ -24,7 +24,7 @@ const mockDailyData = Array.from({ length: 30 }, (_, i) => {
     directViews,
     status200: directViews,
     status304: cacheHits,
-    avgLatencyMs: Math.floor(18 + Math.random() * 10),
+    avgLatencyMs: 18 + (i % 10),
     previousPeriodViews: Math.floor(views * 0.85),
   }
 })

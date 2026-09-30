@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
+import { mockProDashboardApi } from '../../../../../.storybook/proDashboardFixtures'
 import { OverviewDashboard } from './OverviewDashboard'
 
 const meta: Meta<typeof OverviewDashboard> = {
@@ -27,4 +28,6 @@ const meta: Meta<typeof OverviewDashboard> = {
 export default meta
 type Story = StoryObj<typeof OverviewDashboard>
 
-export const Default: Story = {}
+export const Default: Story = { beforeEach: () => mockProDashboardApi('populated') }
+export const Empty: Story = { beforeEach: () => mockProDashboardApi('empty') }
+export const ServiceError: Story = { beforeEach: () => mockProDashboardApi('error') }
