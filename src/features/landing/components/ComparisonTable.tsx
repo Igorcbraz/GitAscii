@@ -139,6 +139,7 @@ export function ProPricingSection({
 
               <Link
                 href="/pro"
+                data-analytics-cta="comparison_pro"
                 className="w-full max-w-xs inline-flex items-center justify-center gap-2.5 py-3.5 px-6 bg-signal-lime text-carbon font-inter-tight font-semibold text-[15px] rounded-sm transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_24px_rgba(197,255,74,0.6)] hover:brightness-110 active:scale-[0.98] cursor-pointer group whitespace-nowrap"
               >
                 <Zap className="w-4 h-4 fill-carbon shrink-0" />
@@ -226,6 +227,7 @@ export function ProPricingSection({
             </div>
             <Link
               href="/pro"
+              data-analytics-cta="comparison_bottom_pro"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-signal-lime text-carbon font-inter-tight font-semibold text-[13px] rounded-sm transition-all duration-300 shadow-[0_0_8px_rgba(197,255,74,0.45)] hover:shadow-[0_0_18px_rgba(197,255,74,0.55)] hover:brightness-110 active:scale-[0.98] cursor-pointer group shrink-0"
             >
               <span>{t('landing.pricing.bottom_cta', 'See Full Details')}</span>

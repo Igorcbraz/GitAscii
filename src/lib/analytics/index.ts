@@ -123,6 +123,15 @@ export function useAnalytics() {
   }
 }
 
+function safePagePath(pathname: string, searchParams: URLSearchParams | null): string {
+  const safeParams = new URLSearchParams()
+  for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
+    const value = searchParams?.get(key)
+    if (value) safeParams.set(key, value.slice(0, 100))
+  }
+  return pathname + (safeParams.size ? `?${safeParams.toString()}` : '')
+}
+
 function RouteTrackListener() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -130,7 +139,7 @@ function RouteTrackListener() {
 
   useEffect(() => {
     if (!pathname) return
-    const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
+    const url = safePagePath(pathname, searchParams)
     if (lastTrackedPath.current === url) return
     lastTrackedPath.current = url
     analytics.trackPageView(url, typeof document !== 'undefined' ? document.title : '')
@@ -148,9 +157,9 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   const applyGrantedConsent = useCallback(() => {
     analytics.updateConsent({
       analytics_storage: 'granted',
-      ad_storage: 'granted',
-      ad_user_data: 'granted',
-      ad_personalization: 'granted',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
     })
   }, [])
 
@@ -171,7 +180,15 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
       if (choice === 'granted') {
         applyGrantedConsent()
         setConsentGranted(true)
+        if (!safeStorage.getItem('gitascii_visited')) {
+          analytics.track('first_visit')
+          safeStorage.setItem('gitascii_visited', 'true')
+        }
         analytics.track('session_start')
+        analytics.trackPageView(
+          safePagePath(window.location.pathname, new URLSearchParams(window.location.search)),
+          document.title
+        )
       } else {
         analytics.updateConsent({
           analytics_storage: 'denied',
@@ -186,8 +203,20 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   )
 
   useEffect(() => {
+    const handleCtaClick = (event: MouseEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const element = target.closest<HTMLElement>('[data-analytics-cta]')
+      if (!element) return
+      analytics.track('cta_clicked', {
+        location: element.dataset.analyticsCta || 'unknown',
+        destination: element.getAttribute('href')?.split('?')[0] || 'editor',
+      })
+    }
+    document.addEventListener('click', handleCtaClick)
+
     const isFirstVisit = !safeStorage.getItem('gitascii_visited')
-    if (isFirstVisit) {
+    if (isFirstVisit && getConsentChoice() === 'granted') {
       analytics.track('first_visit')
       safeStorage.setItem('gitascii_visited', 'true')
     }
@@ -262,6 +291,7 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
     window.addEventListener('unhandledrejection', handleUnhandledRejection)
 
     return () => {
+      document.removeEventListener('click', handleCtaClick)
       flushTimers()
       window.removeEventListener('click', handleFirstInteraction)
       window.removeEventListener('keydown', handleFirstInteraction)

@@ -566,7 +566,17 @@ describe('Pro API Route Handlers Test Suite', () => {
 
       try {
         const { POST: postSubscribe } = await import('@/app/api/pro/subscribe/route')
-        const res = await postSubscribe()
+        const res = await postSubscribe(
+          new Request('http://localhost:3000/api/pro/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ga_client_id: '123.456',
+              ga_session_id: '9876',
+              email: 'leak@example.com',
+            }),
+          })
+        )
         expect(res.status).toBe(200)
         const data = await res.json()
         expect(data.checkoutUrl).toBe('https://checkout.stripe.com/c/pay/cs_test_123')
@@ -575,8 +585,11 @@ describe('Pro API Route Handlers Test Suite', () => {
             allow_promotion_codes: true,
             customer_email: 'voucher@test.com',
             client_reference_id: 'voucheruser',
+            metadata: expect.objectContaining({ ga_client_id: '123.456', ga_session_id: '9876' }),
           })
         )
+        const createArgs = createSessionSpy.mock.calls[0][0]
+        expect(createArgs.metadata).not.toHaveProperty('email')
       } finally {
         process.env.STRIPE_SECRET_KEY = prevSecret
         process.env.STRIPE_PRICE_ID = prevPrice

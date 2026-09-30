@@ -11,7 +11,13 @@ const config: StorybookConfig = {
     '@storybook/addon-docs',
     '@storybook/addon-mcp',
   ],
-  framework: '@storybook/nextjs-vite',
+  framework: {
+    name: '@storybook/nextjs-vite',
+    options: {
+      // Storybook needs Next's component mocks, not the app's vinext/Cloudflare Vite plugins.
+      builder: { viteConfigPath: '.storybook/vite.config.ts' },
+    },
+  },
   staticDirs: ['..\\public'],
   async viteFinal(config) {
     config.resolve = config.resolve || {}

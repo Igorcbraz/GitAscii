@@ -1,4 +1,16 @@
 export const de: Record<string, string> = {
+  'pro.checkout.error': 'Der Bezahlvorgang konnte nicht geöffnet werden. Bitte erneut versuchen.',
+  'pro.checkout.feedback_title_prefix': 'Was hat Sie vom Kauf ',
+  'pro.checkout.feedback_title_highlight': 'abgehalten',
+  'pro.checkout.feedback_title_suffix': '?',
+  'pro.checkout.feedback_description':
+    'Freiwilliges Feedback ohne persönliche Angaben zur Verbesserung des Bezahlvorgangs.',
+  'pro.checkout.reason_price': 'Der Preis war zu hoch',
+  'pro.checkout.reason_payment': 'Meine Zahlungsmethode war nicht verfügbar',
+  'pro.checkout.reason_trust': 'Ich brauchte vor dem Kauf mehr Informationen',
+  'pro.checkout.reason_timing': 'Ich bin noch nicht bereit zu kaufen',
+  'pro.checkout.reason_technical': 'Ich hatte ein technisches Problem',
+  'pro.checkout.reason_other': 'Ein anderer Grund',
   '2d': '2d',
   ALL: 'ALL',
   'Content-Type': 'Content-Type',

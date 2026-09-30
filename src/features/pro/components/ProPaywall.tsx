@@ -20,9 +20,10 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'
+import { trackProOffer } from '@/lib/analytics/commerce'
 
 import { getProPricing, PRO_PRICING_CONFIG, type ProFeatureItem } from '../constants/pricing'
 import { CountryFlag } from './CountryFlag'
@@ -48,7 +49,14 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
 }) => {
   const { t, language } = useI18n()
   const pricing = getProPricing(language)
+  const offerTracked = useRef(false)
   const [openFaq, setOpenFaq] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (offerTracked.current) return
+    offerTracked.current = true
+    trackProOffer()
+  }, [])
 
   const toggleFaq = (id: string) => {
     setOpenFaq((prev) => (prev === id ? null : id))

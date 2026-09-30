@@ -1,6 +1,6 @@
 'use client'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
+import Script from 'next/script'
 import { useEffect, useState } from 'react'
 
 import { MicrosoftClarity } from '@/lib/analytics/clarity'
@@ -26,7 +26,12 @@ export function ConsentControlledScripts() {
 
   return (
     <>
-      {gaId && <GoogleAnalytics gaId={gaId} />}
+      {gaId && (
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`}
+          strategy="afterInteractive"
+        />
+      )}
 
       <MicrosoftClarity consentGranted={clarityGranted} />
     </>

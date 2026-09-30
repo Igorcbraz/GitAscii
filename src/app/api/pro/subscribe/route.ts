@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { isProUser } from '@/features/pro/server/entitlements'
+import { checkoutAnalyticsMetadata } from '@/lib/analytics/measurement-protocol'
 import { getSession } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
@@ -49,6 +50,9 @@ export async function POST(request?: Request) {
   }
 
   const headers = request?.headers
+  const analyticsMetadata = request
+    ? checkoutAnalyticsMetadata(await request.json().catch(() => null))
+    : {}
   const acceptLanguage = headers?.get('accept-language') ?? null
   const priceId = resolvePriceId(acceptLanguage)
   const secretKey = process.env.STRIPE_SECRET_KEY
@@ -79,6 +83,10 @@ export async function POST(request?: Request) {
         metadata: {
           username,
           githubId: String(session.githubId),
+          ...analyticsMetadata,
+        },
+        payment_intent_data: {
+          metadata: analyticsMetadata,
         },
         success_url: `${origin}/pro?checkout=success`,
         cancel_url: `${origin}/pro?checkout=cancelled`,
@@ -87,6 +95,7 @@ export async function POST(request?: Request) {
       if (checkoutSession.url) {
         return NextResponse.json({
           checkoutUrl: checkoutSession.url,
+          checkoutProvider: 'stripe',
           redirect: true,
         })
       }
@@ -108,11 +117,13 @@ export async function POST(request?: Request) {
       }
       return NextResponse.json({
         checkoutUrl: url.toString(),
+        checkoutProvider: 'external',
         redirect: true,
       })
     } catch {
       return NextResponse.json({
         checkoutUrl: directCheckoutUrl,
+        checkoutProvider: 'external',
         redirect: true,
       })
     }

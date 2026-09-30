@@ -1,4 +1,16 @@
 export const fr: Record<string, string> = {
+  'pro.checkout.error': 'Impossible d’ouvrir le paiement. Réessayez.',
+  'pro.checkout.feedback_title_prefix': 'Qu’est-ce qui a ',
+  'pro.checkout.feedback_title_highlight': 'empêché',
+  'pro.checkout.feedback_title_suffix': ' votre achat ?',
+  'pro.checkout.feedback_description':
+    'Réponse facultative, sans données personnelles, pour améliorer le paiement.',
+  'pro.checkout.reason_price': 'Le prix était trop élevé',
+  'pro.checkout.reason_payment': 'Mon moyen de paiement n’était pas disponible',
+  'pro.checkout.reason_trust': 'Il me fallait plus d’informations avant d’acheter',
+  'pro.checkout.reason_timing': 'Je ne suis pas encore prêt à acheter',
+  'pro.checkout.reason_technical': 'J’ai rencontré un problème technique',
+  'pro.checkout.reason_other': 'Une autre raison',
   '2d': '2d',
   ALL: 'ALL',
   'Content-Type': 'Content-Type',

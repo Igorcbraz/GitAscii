@@ -1,6 +1,6 @@
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { readFile, writeFile } from 'node:fs/promises'
 
 import esbuild from 'esbuild'
 import prettier from 'prettier'

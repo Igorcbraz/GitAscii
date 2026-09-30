@@ -1,4 +1,16 @@
 export const en: Record<string, string> = {
+  'pro.checkout.error': 'Unable to open checkout. Please try again.',
+  'pro.checkout.feedback_title_prefix': 'What ',
+  'pro.checkout.feedback_title_highlight': 'stopped',
+  'pro.checkout.feedback_title_suffix': ' your purchase?',
+  'pro.checkout.feedback_description':
+    'Optional feedback without personal details to help us improve checkout.',
+  'pro.checkout.reason_price': 'The price was too high',
+  'pro.checkout.reason_payment': 'My payment method was unavailable',
+  'pro.checkout.reason_trust': 'I needed more information before buying',
+  'pro.checkout.reason_timing': 'I am not ready to buy yet',
+  'pro.checkout.reason_technical': 'I had a technical problem',
+  'pro.checkout.reason_other': 'Another reason',
   '2d': '2d',
   ALL: 'ALL',
   'Content-Type': 'Content-Type',

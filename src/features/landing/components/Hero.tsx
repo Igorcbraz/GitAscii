@@ -13,6 +13,7 @@ import { getProPricing, PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
 import { getClientSession } from '@/features/auth/clientSession'
 import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
+import { analytics } from '@/lib/analytics'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
@@ -91,6 +92,7 @@ export default function Hero() {
     }
 
     setIsLoading(true)
+    analytics.track('open_editor', { entryPoint: 'hero' })
     router.push(`/${handle}`)
   }
 
@@ -159,6 +161,7 @@ export default function Hero() {
                 <Magnet distance={60} strength={0.25} className="w-full">
                   <Link
                     href={`/${session.username}`}
+                    data-analytics-cta="hero_editor"
                     className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
                   >
                     <User size={18} />
@@ -171,6 +174,7 @@ export default function Hero() {
                 {isProUser ? (
                   <Link
                     href="/pro"
+                    data-analytics-cta="hero_pro_existing"
                     className="relative overflow-hidden w-full inline-flex items-center justify-between gap-3 px-4 py-3.5 rounded-sm bg-gradient-to-r from-onyx via-carbon to-onyx hover:from-[#151515] hover:to-[#181818] text-white transition-colors duration-200 group cursor-pointer shadow-none"
                   >
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1200 ease-in-out bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none" />
@@ -196,6 +200,7 @@ export default function Hero() {
                 ) : (
                   <Link
                     href="/pro"
+                    data-analytics-cta="hero_pro"
                     className="relative overflow-hidden w-full inline-flex items-center justify-between gap-3 px-4 py-3.5 rounded-sm bg-gradient-to-r from-onyx via-carbon to-onyx hover:from-[#151515] hover:to-[#181818] text-white transition-colors duration-200 group cursor-pointer shadow-none"
                   >
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1200 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 pointer-events-none" />
@@ -237,6 +242,7 @@ export default function Hero() {
                 <Magnet distance={60} strength={0.25} className="w-full">
                   <Link
                     href={API_ENDPOINTS.AUTH.LOGIN()}
+                    data-analytics-cta="hero_github_login"
                     prefetch={false}
                     rel="nofollow"
                     onClick={() => setIsGithubLoading(true)}
@@ -297,6 +303,7 @@ export default function Hero() {
 
                 <Link
                   href="/pro"
+                  data-analytics-cta="hero_pro_guest"
                   className="w-full inline-flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm bg-transparent hover:bg-signal-lime/[0.04] transition-all duration-200 group cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
