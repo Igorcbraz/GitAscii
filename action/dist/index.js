@@ -75762,6 +75762,8 @@ var aK = {
     prepare: 'node scripts/prepare.mjs',
     storybook: 'storybook dev -p 6006',
     'build-storybook': 'storybook build',
+    'check-storybook-coverage': 'node scripts/audit-storybook.mjs --check',
+    'test:storybook:smoke': 'node scripts/storybook-smoke.mjs --all',
     test: 'vitest run',
     'test:db': 'vitest run --config vitest.db.config.ts',
     'test:pro:unit':
@@ -75834,7 +75836,6 @@ var aK = {
     '@storybook/addon-mcp': '^0.7.0',
     '@storybook/addon-vitest': '^10.6.0',
     '@storybook/nextjs-vite': '^10.5.10',
-    '@storybook/test': '*',
     '@tailwindcss/postcss': '^4.0.0',
     '@types/d3-geo': '^3.1.1',
     '@types/node': '^26.2.0',
