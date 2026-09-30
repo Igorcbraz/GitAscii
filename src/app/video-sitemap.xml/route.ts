@@ -6,10 +6,19 @@ export function GET() {
   <url>
     <loc>${APP_URL}/watch/gitascii-overview</loc>
     <video:video>
-      <video:thumbnail_loc>${APP_URL}/editor.webp</video:thumbnail_loc>
+      <video:thumbnail_loc>${APP_URL}/editor-poster.webp</video:thumbnail_loc>
       <video:title>GitAscii Overview: GitHub Profile README and ASCII Art Demo</video:title>
       <video:description>Watch a 40-second walkthrough of GitAscii: turn a GitHub profile into ASCII art, choose README templates, and edit live SVG widgets.</video:description>
       <video:content_loc>${APP_URL}/presentation.mp4</video:content_loc>
+    </video:video>
+  </url>
+  <url>
+    <loc>${APP_URL}/watch/gitascii-overview-mobile</loc>
+    <video:video>
+      <video:thumbnail_loc>${APP_URL}/editor-poster(mobile).webp</video:thumbnail_loc>
+      <video:title>GitAscii Mobile Overview: GitHub Profile README and ASCII Art Demo</video:title>
+      <video:description>Watch the portrait-format GitAscii presentation for phones: explore ASCII art, GitHub profile README templates, and the interactive editor.</video:description>
+      <video:content_loc>${APP_URL}/presentation(mobile).mp4</video:content_loc>
     </video:video>
   </url>
 </urlset>`
