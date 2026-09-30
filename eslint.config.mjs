@@ -8,6 +8,7 @@ const eslintConfig = [
   {
     ignores: [
       '.next/**',
+      'dist/**',
       'node_modules/**',
       'storybook-static/**',
       'playwright-report/**',

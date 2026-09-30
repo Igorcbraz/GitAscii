@@ -1,5 +1,7 @@
 # 📈 GitAscii Analytics System
 
+Para o funil comercial atual, configuração de GA4/Stripe e limites de interpretação, veja [Medição do site e funil Pro](docs/site-analytics.md). A lista abaixo também inclui tipos de eventos ainda não conectados a ações reais da interface.
+
 Este projeto utiliza uma arquitetura de monitoramento desacoplada, tipada e profissional (nível SaaS de produção) para rastreamento de métricas, comportamento de usuários, eventos de funil e análise de performance (Web Vitals).
 
 ---
@@ -14,7 +16,7 @@ O sistema de analytics foi estruturado sob o princípio da **Inversão de Depend
 - [interface.ts](file:///C:/Repos/GitAscii/src/lib/analytics/interface.ts): Interface genérica que qualquer provedor (GA4, PostHog, Amplitude, etc.) deve implementar.
 - [google-analytics.ts](file:///C:/Repos/GitAscii/src/lib/analytics/google-analytics.ts): Implementação da interface voltada para o Google Analytics 4.
 - [clarity.ts](file:///C:/Repos/GitAscii/src/lib/analytics/clarity.ts): Microsoft Clarity — requer `consentGranted: true` para carregar.
-- [ConsentControlledScripts.tsx](file:///C:/Repos/GitAscii/src/lib/analytics/ConsentControlledScripts.tsx): Client component que monta GA4 e Clarity condicionalmente com base no consentimento.
+- [ConsentControlledScripts.tsx](file:///C:/Repos/GitAscii/src/lib/analytics/ConsentControlledScripts.tsx): Client component que carrega GA4 quando configurado e condiciona Clarity ao consentimento.
 - [index.ts](file:///C:/Repos/GitAscii/src/lib/analytics/index.ts): Exporta o hook `useAnalytics()`, o singleton `analytics` e o componente `<AutoAnalyticsTracker />`.
 - [web-vitals.tsx](file:///C:/Repos/GitAscii/src/lib/analytics/web-vitals.tsx): Rastreamento automático e envio de métricas de performance (LCP, FID, CLS, etc.).
 
@@ -94,7 +96,7 @@ Primeiro acesso
       ▼
   analytics.init() chamado em analytics/index.ts
       │  Cria gtag stub (dataLayer)
-      │  Consent Mode v2 → analytics_storage: 'denied' (padrão)
+  │  Consent Mode v2 → analytics_storage: 'denied' (padrão sem aceite salvo)
       │
       ▼
   AutoAnalyticsTracker lê localStorage via getConsentChoice()
@@ -126,11 +128,11 @@ Primeiro acesso
 
 ### GA4 vs. Clarity — tratamentos diferentes
 
-|                              | Google Analytics 4                          | Microsoft Clarity                                            |
-| ---------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| **Script carregado**         | Sempre (Consent Mode v2)                    | Somente após consent granted                                 |
-| **Dados enviados se negado** | Bloqueado por `analytics_storage: 'denied'` | Script não existe, nada é enviado                            |
-| **Por quê a diferença**      | GA4 tem suporte nativo a Consent Mode v2    | Clarity não tem equivalente; não carregar é a única garantia |
+|                               | Google Analytics 4                                                              | Microsoft Clarity                                            |
+| ----------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Script carregado**          | Sempre (Consent Mode v2)                                                        | Somente após consent granted                                 |
+| **Eventos do site se negado** | Não são disparados pelo provedor; `analytics_storage: 'denied'` permanece ativo | Script não existe, nada é enviado                            |
+| **Por quê a diferença**       | GA4 tem suporte nativo a Consent Mode v2                                        | Clarity não tem equivalente; não carregar é a única garantia |
 
 ### Sentry — separado do consentimento de analytics
 

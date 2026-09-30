@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import React from 'react'
 
+import { ToastProvider } from '@/components/ui/toast'
+
 import { useEditorStore } from '../../store/editorStore'
 import { mockConfig, mockGithubData } from '../stories/mockData'
 import { WidgetLibrary } from './WidgetLibrary'
@@ -13,9 +15,11 @@ const meta: Meta<typeof WidgetLibrary> = {
       // Synchronously initialize the store for this story
       useEditorStore.getState().initEditor(mockConfig, mockGithubData)
       return (
-        <div className="h-[600px] w-[300px] border border-graphite bg-onyx flex overflow-hidden">
-          <Story />
-        </div>
+        <ToastProvider>
+          <div className="h-[600px] w-[300px] border border-graphite bg-onyx flex overflow-hidden">
+            <Story />
+          </div>
+        </ToastProvider>
       )
     },
   ],

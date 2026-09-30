@@ -12,25 +12,27 @@ Developers, open-source maintainers, and tech creators who want an effortless, h
 
 ## Product Purpose
 
-GitAscii is a complete README creation and management platform where cryptic terminals meet editorial newspaper design. It unifies ASCII art generation, dynamic GitHub statistics tracking, customization tools, and edge asset hosting into a single centralized workspace to build and evolve developer GitHub presences.
+GitAscii is a visual GitHub profile README editor where cryptic terminals meet editorial newspaper design. It combines ASCII art, GitHub data widgets, templates, and publishing in one workspace. Version 2 publishes finished SVGs to the user's own GitHub profile repository.
 
 ## Positioning
 
-Beyond single-purpose ASCII generators or static badge tools, GitAscii provides an end-to-end visual README workspace. It fuses terminal aesthetics with editorial layout design, generating auto-updating dynamic SVGs served via Edge endpoints or self-hosted setups—replacing scattered profile tools with one cohesive environment.
+GitAscii replaces a collection of separate profile widgets with an editable composition. The standard README embed points to dark and light SVG files on the user's `gitascii` branch; a repository GitHub Action refreshes those files. The HTTP rendering API remains available for previews and specialized uses.
 
 ## Operating Context
 
 - Used in web browsers to visually compose, drag, drop, and edit GitHub profile README layouts.
-- Output embedded directly into GitHub profile `README.md` files via single dynamic image URLs.
-- Rendered live by GitHub's Camo image proxy upon each visitor page load, adapting dynamically to the visitor's dark or light theme preference.
+- The editor writes a `<picture>` embed to `username/username/README.md` using stable `raw.githubusercontent.com` URLs for the published dark and light SVGs.
+- GitHub serves the published files, often through its Camo image proxy. The browser selects the theme from the `<picture>` sources; visiting the README does not trigger a GitAscii render.
+- GitAscii Pro can manage multiple slugs, profile versions, publication health, and a separate analytics badge. Badge requests are a proxy signal, not exact people or unique visits.
 
 ## Capabilities and Constraints
 
-- **Visual Builder:** Drag-and-drop editor interface for arranging widgets, ASCII graphics, and real-time GitHub metrics.
+- **Visual Builder:** Drag-and-drop editor interface for arranging widgets, ASCII graphics, and GitHub metrics.
 - **ASCII Engine:** Browser-side canvas image processing converting images into ASCII character matrices based on luminance mapping.
-- **Adaptive Themes:** Uses SVG media queries (`prefers-color-scheme`) to serve tailored light and dark designs from a single URL.
-- **Dynamic Edge Rendering:** Next.js Edge APIs construct optimized SVG markup on the fly, cached efficiently for GitHub Camo.
-- **Output Constraints:** SVG assets must maintain fast loading (<100KB target) while preserving rich typography and high-density widget layouts.
+- **Adaptive Themes:** Publishes separate `dark.svg` and `light.svg` files; a README `<picture>` uses `prefers-color-scheme` to select between them.
+- **GitHub-Native Delivery:** An initial publish and scheduled GitHub Action runs render self-contained SVGs from saved configuration and fresh GitHub data on the `gitascii` branch.
+- **HTTP API:** Next.js routes can render previews and custom variants; Pro dynamic rules use the API when explicitly enabled.
+- **Output Constraints:** Published SVGs inline permitted external assets so GitHub can display them without loading third-party images at view time.
 
 ## Brand Commitments
 
@@ -41,12 +43,12 @@ Beyond single-purpose ASCII generators or static badge tools, GitAscii provides 
 ## Evidence on Hand
 
 - **Live Platform:** `https://gitascii.com/`
-- **Output Preview:** [`public/example.svg`](file:///C:/Repos/GitAscii/public/example.svg)
-- **Interface Previews:** [`public/hero.webp`](file:///C:/Repos/GitAscii/public/hero.webp), [`public/editor.webp`](file:///C:/Repos/GitAscii/public/editor.webp)
+- **Output Preview:** `public/example.svg`
+- **Interface Previews:** `public/hero.webp`, `public/editor.webp`
 
 ## Product Principles
 
-1. **Effortless Elevation:** Transform static GitHub profile Markdown into a high-craft visual statement without constant manual updates.
-2. **Centralized Platform:** Consolidate README creation, widget composition, hosting, and asset management into one unified workspace.
-3. **GitHub Edge Native:** Deliver lightweight, fast-loading dynamic SVGs tailored specifically to GitHub's Camo image proxy and dark/light modes.
+1. **Effortless Elevation:** Transform static GitHub profile Markdown into a visual statement with scheduled refreshes.
+2. **Centralized Platform:** Consolidate README creation, widget composition, and publication management in one workspace.
+3. **GitHub-Native Delivery:** Serve the published SVGs from the user's repository with stable URLs and dark/light variants.
 4. **Editorial Terminal Aesthetic:** Juxtapose crisp, technical terminal output with high-contrast serif typography and signal lime accents.

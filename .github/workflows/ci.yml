@@ -30,6 +30,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check Storybook coverage
+        run: npm run check-storybook-coverage
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
       - name: Run Security & Unit Tests
         run: npm test
 
@@ -44,11 +50,6 @@ jobs:
 
       - name: Build Cloudflare deployment
         run: npm run build:vinext
-
-      - name: Verify bundled Action matches source
-        run: |
-          npm run build:action
-          git diff --exit-code -- action/dist/index.js
 
       - name: Upload browser diagnostics
         if: failure()

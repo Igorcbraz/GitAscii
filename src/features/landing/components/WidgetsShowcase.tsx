@@ -3,14 +3,13 @@
 import { Flame, Globe, Layers, Sparkles, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
 import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import SpotlightCard from '@/components/ui/SpotlightCard'
 import { DEFAULT_POKEMON_CARD_IMAGE, WIDGET_IDS, type WidgetId } from '@/constants'
-import { renderWidgetSvg } from '@/engine/core/WidgetRenderer'
 import type { GlobalStyles, WidgetInstance } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
 import { StrobiAnchor } from '@/features/mascot'
@@ -339,10 +338,48 @@ const ALL_SHOWCASE_WIDGETS: ShowcaseWidgetDef[] = [
   },
 ]
 
+function renderSnakeShowcasePreview(): string {
+  const cells = Array.from({ length: 38 * 8 }, (_, index) => {
+    const x = index % 38
+    const y = Math.floor(index / 38)
+    const active = (x * 17 + y * 11) % 13 < 4
+    return `<rect x="${48 + x * 18}" y="${58 + y * 18}" width="14" height="14" rx="2" fill="${active ? '#238636' : '#161b22'}" opacity="${active ? 0.5 + ((x + y) % 3) * 0.18 : 1}"/>`
+  }).join('')
+
+  return `<text x="24" y="32" font-family="JetBrains Mono, monospace" font-size="11" fill="#7a7a7a" letter-spacing="2">[ CONTRIBUTION SNAKE ]</text>
+    ${cells}
+    <path d="M 130 173 H 238 V 137 H 346 V 101 H 454 V 155 H 562 V 119 H 670" fill="none" stroke="#0d1117" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 130 173 H 238 V 137 H 346 V 101 H 454 V 155 H 562 V 119 H 670" fill="none" stroke="#7ee787" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="670" cy="119" r="9" fill="#a5f3b8"/>
+    <circle cx="674" cy="116" r="2" fill="#0d1117"/>`
+}
+
 export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
   const { t } = useI18n()
+  const sectionRef = useRef<HTMLElement>(null)
+  const [renderWidgetSvg, setRenderWidgetSvg] = useState<
+    typeof import('@/engine/core/WidgetRenderer').renderWidgetSvg | null
+  >(null)
   const demoData = useMemo(() => getMockGitHubData('Igorcbraz'), [])
   const [activeGroup, setActiveGroup] = useState<WidgetGroup>('all')
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        void import('@/engine/core/WidgetRenderer').then((module) => {
+          setRenderWidgetSvg(() => module.renderWidgetSvg)
+        })
+      },
+      { rootMargin: '1200px 0px' }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   const renderedWidgets = useMemo(() => {
     return ALL_SHOWCASE_WIDGETS.map((widgetDef) => {
@@ -377,7 +414,10 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
         },
       }
 
-      const innerSvg = renderWidgetSvg(instance, demoData, globalStyles, false, false)
+      const innerSvg =
+        widgetDef.id === WIDGET_IDS.CONTRIBUTION_SNAKE
+          ? renderSnakeShowcasePreview()
+          : renderWidgetSvg?.(instance, demoData, globalStyles, false, false) || ''
       const fullSvg = `<svg width="100%" height="auto" viewBox="0 0 ${widgetDef.width} ${widgetDef.height}" fill="none" xmlns="http://www.w3.org/2000/svg">
   <style>
     * { box-sizing: border-box; }
@@ -392,7 +432,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
         svgMarkup: fullSvg,
       }
     })
-  }, [demoData])
+  }, [demoData, renderWidgetSvg])
 
   const filteredWidgets = useMemo(() => {
     if (activeGroup === 'all') return renderedWidgets
@@ -401,6 +441,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
 
   return (
     <section
+      ref={sectionRef}
       id="widgets-showcase"
       className="relative z-10 w-full bg-transparent py-20 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-graphite/60 overflow-hidden"
     >
@@ -423,7 +464,9 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
           <h2 className="font-pt-serif font-light text-3xl sm:text-heading leading-[0.95] tracking-[-0.02em] text-chalk">
             {t('landing.widgets.title_start', 'Modular Engine Packed with Over ')}
             <em className="italic text-signal-lime">
-              {t('landing.widgets.title_highlight', `${count}+ Dynamic Cards.`)}
+              {t('landing.widgets.title_highlight', `${count}+ Dynamic Cards.`, {
+                count: String(count),
+              })}
             </em>
           </h2>
 
@@ -572,6 +615,7 @@ export function WidgetsShowcase({ count = 70 }: WidgetsShowcaseProps) {
                       <div
                         suppressHydrationWarning
                         className="w-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-auto [&>svg]:max-w-full [&>svg]:object-contain shadow-md"
+                        style={{ aspectRatio: `${widget.width} / ${widget.height}` }}
                         dangerouslySetInnerHTML={{ __html: widget.svgMarkup }}
                       />
                     </div>

@@ -111,7 +111,7 @@ interface CachedAnalyticsSummary {
 }
 
 const analyticsSummaryCache = new Map<string, CachedAnalyticsSummary>()
-const ANALYTICS_CACHE_TTL_MS = 60 * 1000
+const ANALYTICS_CACHE_TTL_MS = 5 * 60 * 1000
 
 export function invalidateAnalyticsCache(username?: string): void {
   if (username) {
@@ -312,7 +312,6 @@ export async function ingestProfileView(payload: IngestViewPayload): Promise<voi
 
     if (hasDbConfig()) {
       await recordViewInDb(username, slug, dateStr, false, dimensionsToRecord)
-      invalidateAnalyticsCache(username)
       return
     }
 

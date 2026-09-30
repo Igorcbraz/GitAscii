@@ -1,4 +1,4 @@
-import { sendGAEvent } from '@next/third-parties/google'
+import { getConsentChoice } from '@/lib/consent'
 
 import { AnalyticsProvider } from './interface'
 import { AnalyticsEvents, ConsentState, UserProperties } from './types'
@@ -41,16 +41,22 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       }
     }
 
-    this.updateConsent({
-      analytics_storage: 'granted',
+    window.gtag('consent', 'default', {
+      analytics_storage: getConsentChoice() === 'granted' ? 'granted' : 'denied',
       ad_storage: 'denied',
       ad_user_data: 'denied',
       ad_personalization: 'denied',
     })
+    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+    if (gaId && this.isProd) {
+      window.gtag('js', new Date())
+      window.gtag('config', gaId, { send_page_view: false })
+    }
   }
 
   identify(userId: string, properties?: UserProperties) {
     if (typeof window === 'undefined') return
+    if (getConsentChoice() !== 'granted') return
 
     const cleanedProperties = properties ? cleanPayload(properties) : undefined
 
@@ -64,6 +70,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       if (gaId) {
         window.gtag('config', gaId, {
           user_id: userId,
+          send_page_view: false,
         })
       }
       if (cleanedProperties) {
@@ -74,6 +81,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   setUserProperties(properties: UserProperties) {
     if (typeof window === 'undefined') return
+    if (getConsentChoice() !== 'granted') return
 
     const cleanedProperties = cleanPayload(properties)
 
@@ -89,6 +97,8 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   track<E extends keyof AnalyticsEvents>(event: E, params?: AnalyticsEvents[E]) {
     if (typeof window === 'undefined') return
+    if (getConsentChoice() !== 'granted') return
+    if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) return
 
     const cleanedParams = params ? cleanPayload(params) : undefined
 
@@ -98,18 +108,50 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     try {
-      if (window.gtag) {
-        window.gtag('event', event, cleanedParams || {})
-      } else {
-        sendGAEvent('event', event, cleanedParams || {})
-      }
+      window.gtag?.('event', event, cleanedParams || {})
     } catch (err) {
       console.error('[GA Error Tracking Event]:', err)
     }
   }
 
+  async trackBeforeNavigation<E extends keyof AnalyticsEvents>(
+    event: E,
+    params?: AnalyticsEvents[E]
+  ): Promise<void> {
+    if (
+      !this.isProd ||
+      !process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+      getConsentChoice() !== 'granted' ||
+      !window.gtag
+    ) {
+      this.track(event, params)
+      return
+    }
+    await new Promise<void>((resolve) => {
+      let completed = false
+      const finish = () => {
+        if (completed) return
+        completed = true
+        window.clearTimeout(timer)
+        resolve()
+      }
+      const timer = window.setTimeout(finish, 750)
+      try {
+        window.gtag?.('event', event, {
+          ...(params ? cleanPayload(params) : {}),
+          event_callback: finish,
+          event_timeout: 750,
+        })
+      } catch {
+        finish()
+      }
+    })
+  }
+
   trackPageView(url: string, title?: string) {
     if (typeof window === 'undefined') return
+    if (getConsentChoice() !== 'granted') return
+    if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) return
 
     if (!this.isProd) {
       console.log(`[Analytics Dev] PageView: ${url} (${title || 'No Title'})`)
@@ -119,6 +161,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     if (window.gtag) {
       window.gtag('event', 'page_view', {
         page_path: url,
+        page_location: new URL(url, window.location.origin).toString(),
         page_title: title,
       })
     }

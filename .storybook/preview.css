@@ -1,0 +1,20 @@
+@font-face {
+  font-family: 'GitAscii Inter Tight Storybook';
+  src: url('../src/assets/fonts/inter-tight-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GitAscii JetBrains Mono Storybook';
+  src: url('../src/assets/fonts/jetbrains-mono-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --font-inter-tight-next: 'GitAscii Inter Tight Storybook';
+  --font-jetbrains-mono-next: 'GitAscii JetBrains Mono Storybook';
+}

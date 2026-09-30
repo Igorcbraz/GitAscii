@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, userEvent } from '@storybook/test'
 import React from 'react'
+import { expect, userEvent } from 'storybook/test'
 
 import { useEditorStore } from '../../store/editorStore'
 import { mockConfig, mockGithubData } from '../stories/mockData'

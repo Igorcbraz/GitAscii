@@ -17,6 +17,7 @@ const ERROR_ALERT_COOLDOWN_SECONDS = 60 * 60
 export async function recordWidgetError(payload: IngestErrorPayload): Promise<void> {
   try {
     const redis = getProRedisClient()
+    const databaseConfigured = hasDbConfig()
     const username = payload.username.toLowerCase().trim()
     const slug = (payload.profileSlug || 'default').toLowerCase().trim()
     const widgetId = payload.widgetId.toLowerCase().trim()
@@ -28,7 +29,7 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
     const itemKey = REDIS_KEYS.errorItem(username, errorId)
     const listKey = REDIS_KEYS.errorList(username)
 
-    const existing = hasDbConfig()
+    const existing = databaseConfigured
       ? (await getWidgetErrorsFromDb(username, 50)).find((error) => error.id === errorId) || null
       : await redis.hgetall<Record<string, any>>(itemKey).catch(() => null)
 
@@ -49,37 +50,23 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
 
     await recordWidgetErrorInDb(username, recordToSave)
 
-    if (existing && existing.id) {
-      await redis
-        .hset(itemKey, {
-          occurrences: recordToSave.occurrences,
-          lastSeenAt: now,
-          message: payload.message,
-          details: payload.details || existing.details || '',
-          status: 'active',
-        })
-        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
-      await redis
-        .zadd(listKey, { score: nowScore, member: errorId })
-        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
-    } else {
+    if (!databaseConfigured) {
       await redis
         .hset(itemKey, recordToSave as unknown as Record<string, any>)
         .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
       await redis
         .zadd(listKey, { score: nowScore, member: errorId })
         .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      await redis
+        .expire(itemKey, 90 * 86400)
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      await redis
+        .expire(listKey, 90 * 86400)
+        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
     }
 
-    await redis
-      .expire(itemKey, 90 * 86400)
-      .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
-    await redis
-      .expire(listKey, 90 * 86400)
-      .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
-
     const cooldownKey = REDIS_KEYS.errorAlertCooldown(username, widgetId)
-    const isInCooldown = hasDbConfig()
+    const isInCooldown = databaseConfigured
       ? (await getProEmailLogs(username)).some(
           (log) =>
             log.templateName === 'WidgetErrorAlertEmail' &&
@@ -89,9 +76,11 @@ export async function recordWidgetError(payload: IngestErrorPayload): Promise<vo
       : Boolean(await redis.get(cooldownKey).catch(() => null))
 
     if (!isInCooldown) {
-      await redis
-        .set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS })
-        .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      if (!databaseConfigured) {
+        await redis
+          .set(cooldownKey, '1', { ex: ERROR_ALERT_COOLDOWN_SECONDS })
+          .catch((error) => console.warn('[ErrorTrackerStore cache operation] Failed:', error))
+      }
 
       void sendWidgetErrorAlertEmail(username, slug, widgetName, payload.message)
     }

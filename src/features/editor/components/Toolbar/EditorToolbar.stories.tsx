@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { expect, userEvent, within } from '@storybook/test'
 import React from 'react'
+import { expect, userEvent, within } from 'storybook/test'
 
+import { mockStoryFetch } from '../../../../../.storybook/mockFetch'
 import { useEditorStore } from '../../store/editorStore'
 import { mockConfig, mockGithubData } from '../stories/mockData'
 import { EditorToolbar } from './EditorToolbar'
@@ -9,6 +10,17 @@ import { EditorToolbar } from './EditorToolbar'
 const meta: Meta<typeof EditorToolbar> = {
   title: 'Editor/EditorToolbar',
   component: EditorToolbar,
+  parameters: {
+    layout: 'fullscreen',
+    nextjs: { appDirectory: true, navigation: { pathname: '/Igorcbraz/default/edit' } },
+  },
+  beforeEach: () =>
+    mockStoryFetch((url) => {
+      if (url.includes('/api/auth/session')) return { body: { session: null } }
+      if (url.includes('/api/pro/profiles')) return { body: { profiles: [] } }
+      if (url.includes('/api/github/star')) return { body: { starred: false } }
+      return undefined
+    }),
   decorators: [
     (Story) => {
       // Synchronously initialize the store for this story

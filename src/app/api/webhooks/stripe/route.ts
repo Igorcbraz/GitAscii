@@ -9,6 +9,7 @@ import {
   updateUserSettings,
 } from '@/features/pro/server/entitlements'
 import { getProRedisClient } from '@/features/pro/server/redisClient'
+import { sendCheckoutEvent, sendCheckoutPaymentFailure } from '@/lib/analytics/measurement-protocol'
 import {
   getUserBySubscriptionId,
   getUserByUsername,
@@ -251,6 +252,27 @@ export async function POST(req: Request) {
         }
 
         console.log(`[Stripe Webhook] Verified checkout completed for user: ${username}`)
+        if (session.payment_status === 'paid') {
+          await sendCheckoutEvent(session, 'purchase').catch((error) => {
+            console.warn('[Stripe Webhook] Purchase analytics delivery failed:', error)
+          })
+        }
+        break
+      }
+
+      case 'checkout.session.expired': {
+        const session = event.data.object as Stripe.Checkout.Session
+        await sendCheckoutEvent(session, 'checkout_expired').catch((error) => {
+          console.warn('[Stripe Webhook] Checkout expiration analytics delivery failed:', error)
+        })
+        break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const intent = event.data.object as Stripe.PaymentIntent
+        await sendCheckoutPaymentFailure(intent).catch((error) => {
+          console.warn('[Stripe Webhook] Payment failure analytics delivery failed:', error)
+        })
         break
       }
 

@@ -113,6 +113,20 @@ export interface AutomaticEventParams {
 }
 
 export interface AnalyticsEvents {
+  cta_clicked: { location: string; destination: string }
+  view_item: {
+    items: { item_id: string; item_name: string; quantity: number }[]
+  }
+  begin_checkout: {
+    items: { item_id: string; item_name: string; quantity: number }[]
+  }
+  checkout_opened: { checkout_provider: 'stripe' | 'external'; entry_point: string }
+  checkout_cancelled: { checkout_provider: 'stripe'; entry_point: string }
+  checkout_feedback: {
+    reason: 'price' | 'payment_method' | 'trust' | 'timing' | 'technical_issue' | 'other'
+    checkout_provider: 'stripe'
+  }
+  checkout_error: { stage: 'create_session' | 'redirect'; status_code?: number }
   generate_readme: GenerateReadmeParams
   preview_template: PreviewTemplateParams
   template_selected: TemplateSelectedParams

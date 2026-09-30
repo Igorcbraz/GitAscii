@@ -1,13 +1,18 @@
 // @ts-expect-error CSS module declaration is provided by the Next.js build/runtime.
 import '../src/app/globals.css'
+import './preview.css'
 
 import type { Preview } from '@storybook/nextjs-vite'
 import React from 'react'
 
+import { StrobiProvider } from '../src/features/mascot/core/StrobiContext'
 import { I18nProvider } from '../src/i18n'
+import { EmailCanvas } from './EmailCanvas'
 
 const preview: Preview = {
+  tags: ['autodocs'],
   parameters: {
+    layout: 'centered',
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -23,9 +28,11 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story, context) => (
       <I18nProvider>
-        <Story />
+        <StrobiProvider initialAnchor="hero-cta">
+          {context.title.startsWith('Emails/') ? <EmailCanvas story={<Story />} /> : <Story />}
+        </StrobiProvider>
       </I18nProvider>
     ),
   ],

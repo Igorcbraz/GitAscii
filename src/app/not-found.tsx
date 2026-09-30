@@ -63,7 +63,7 @@ export default function NotFound() {
       <KineticGrid className="min-h-screen!">
         <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-24 sm:px-6 text-center">
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            {mounted && <AsciiHands className="absolute inset-0 opacity-40" />}
+            {mounted && <AsciiHands className="opacity-40" />}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.92)_0%,rgba(6,6,6,0.55)_50%,transparent_75%)]" />
           </div>
 

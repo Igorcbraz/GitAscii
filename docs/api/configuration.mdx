@@ -7,6 +7,8 @@ description: 'Specification of SavedConfiguration, WidgetInstance, and GlobalSty
 
 Every layout in GitAscii is represented by the `SavedConfiguration` interface. This structure defines the canvas dimensions, color tokens, font stack, and the full tree of positioned widgets.
 
+In v2, the default profile configuration is stored as `gitascii.json` on the user's `gitascii` branch. Additional slugs use `gitascii_[slug].json`. The GitHub Action reads these files to refresh `profiles/[slug]/dark.svg` and `light.svg`.
+
 ## `SavedConfiguration`
 
 ```typescript
@@ -24,6 +26,8 @@ export interface SavedConfiguration {
     updatedAt: string
     schemaVersion: number
     generatedBy?: 'manual' | 'auto'
+    revision?: string
+    publishedAt?: string
   }
 }
 ```

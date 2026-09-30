@@ -1,141 +1,43 @@
-# GitAscii Pro — Architecture, Redis Persistence & Telemetry
+# GitAscii Pro architecture (v2)
 
-This document outlines the architecture, data models, privacy design, and telemetry pipeline for **GitAscii Pro**.
+This document describes the current publication, telemetry, and persistence paths. The GitHub-hosted profile SVG and the separate Pro badge have different request flows.
 
----
+## Publication and delivery
 
-## 1. Overview & Principles
+1. The signed-in editor uses a GitHub App installation to create or update the user's `username/username` repository. It writes `gitascii.json` (or `gitascii_[slug].json`) and an initial dark/light SVG pair to the `gitascii` branch.
+2. The app writes `.github/workflows/gitascii.yml` and the generated `<picture>` block to the repository's default branch.
+3. The bundled GitHub Action reads all saved configurations, fetches current GitHub data, renders both themes with the shared `src/engine/` implementation, inlines permitted external assets, and atomically commits changed SVGs to `gitascii`.
+4. The README loads `profiles/[slug]/dark.svg` or `light.svg` from `raw.githubusercontent.com`, often through GitHub Camo. A normal README visit does not call the GitAscii rendering API.
 
-- **Single Persistence Layer**: Uses **Upstash Redis** exclusively. No PostgreSQL, MongoDB, Supabase, or additional relational/document databases are introduced.
-- **Integrated Architecture**: Runs natively inside the existing Next.js App Router without introducing a separate API service.
-- **Privacy by Design (LGPD / GDPR Compliant)**:
-  - Zero raw IP address storage.
-  - Daily rotating salt for visitor anonymization (`HMAC-SHA256(ip + ua, salt)`).
-  - HyperLogLog (`PFADD` / `PFCOUNT`) for $O(1)$ unique visitor tracking.
-  - Zero cross-site tracking, zero personal profiling.
-- **Future-Ready Subscription Model**: Architecture includes entitlement abstraction (`getProEntitlements`), preparing for Stripe subscriptions, plan quotas, and custom domains without hardcoded billing lock-in.
+The workflow supports manual dispatch. The editor installs a daily Free schedule and a Pro hourly schedule; the Action also enforces the server-provided minimum interval for scheduled runs. The app's HTTP SVG API remains available for previews and custom embeds. When Pro dynamic rules are enabled for the default profile, the generated embed explicitly uses `?dynamic=1` and the API evaluates a profile selection.
 
----
+## Pro signals
 
-## 2. Routes & Navigation Structure
+| Signal               | Origin                                    | What it means                                                                                                                  |
+| :------------------- | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| Badge analytics      | `GET /api/badge/[username]?slug=...`      | Requests observed by GitAscii for the separate badge, usually GitHub Camo cache refreshes. Not exact views or unique visitors. |
+| Publication health   | GitHub Action → `POST /api/pro/telemetry` | Authenticated run outcome, duration, profile slug, and failed external assets.                                                 |
+| Health badge         | `GET /api/[username]/health-badge`        | SVG summary of stored publication health.                                                                                      |
+| Optional HTTP render | `GET /api/[username]` and variants        | Preview or custom API response; may redirect to a published v2 SVG when there are no render overrides.                         |
 
-### App Router Frontend Routes (`/pro`)
+The Action authenticates Pro telemetry with a GitHub OIDC token. The server verifies it and associates the report with the repository owner. Failed external assets can create error records and trigger Pro email alerts when enabled, subject to a one-hour cooldown. The badge endpoint and workflow telemetry do not provide a reliable viewer IP, geography, browser, device, or identity for the GitHub-hosted README image.
 
-| Route            | View                          | Description                                                                                                   |
-| ---------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `/pro`           | `OverviewDashboard`           | High-level summary of views, uniques, active profiles, error alerts, recent events, and traffic chart.        |
-| `/pro/analytics` | `AnalyticsDashboard`          | In-depth metrics, time range filters (24h, 7d, 30d, 90d, all), hourly distribution, and dimension breakdowns. |
-| `/pro/reports`   | `ReportsDashboard`            | Consolidated executive reports, exportable summaries, and profiles breakdown.                                 |
-| `/pro/errors`    | `WidgetErrorsDashboard`       | Real-time tracking of failed GitHub README widgets, technical diagnostics, and resolve actions.               |
-| `/pro/emails`    | `EmailNotificationsDashboard` | Dispatched notification audit log, delivery status, and trigger explanations.                                 |
-| `/pro/profiles`  | `ProfilesDashboard`           | Multi-profile management (create, configure, delete, and copy markdown embed URLs).                           |
+## Persistence
 
-### Server API Endpoints (`/api/pro`)
+PostgreSQL is the persistent store for profiles and Pro records when `DATABASE_URL` or `DATABASE_URL_UNPOOLED` is configured. Redis handles caches and some telemetry operations. Without a database configuration, several stores use Upstash Redis, with an in-memory fallback for local development. The published configuration and SVGs also live in GitHub, which the app can read as a fallback for profile configuration.
 
-| Method            | Endpoint                    | Description                                                                                     |
-| ----------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `GET`             | `/api/pro/overview`         | Retrieves consolidated metrics, top profiles, error counts, and recent activity.                |
-| `GET`             | `/api/pro/analytics`        | Retrieves time-series, uniques, hourly histograms, and dimension rankings (`range`, `profile`). |
-| `GET`             | `/api/pro/reports`          | Generates structured performance report for export or printing.                                 |
-| `GET`, `POST`     | `/api/pro/errors`           | Lists logged widget failures or simulates test error events.                                    |
-| `PATCH`           | `/api/pro/errors/[errorId]` | Marks an active widget error as resolved.                                                       |
-| `GET`, `POST`     | `/api/pro/emails`           | Lists dispatched email logs or triggers test email alerts.                                      |
-| `GET`, `POST`     | `/api/pro/profiles`         | Lists user profiles or creates a new profile (validating plan limits).                          |
-| `PATCH`, `DELETE` | `/api/pro/profiles/[slug]`  | Updates profile metadata or deletes a custom profile.                                           |
+The earlier Redis-only design and request-time README rendering model no longer describe v2. The implementation entry points are `src/app/api/github/commit/route.ts`, `src/lib/migration/branchBootstrap.ts`, `src/lib/migration/workflowGenerator.ts`, `action/src/index.ts`, `src/app/api/badge/[username]/route.ts`, and `src/app/api/pro/telemetry/route.ts`.
 
----
+## Relevant environment
 
-## 3. Redis Key Schema & TTL Retention Strategy
+| Variable                                                        | Purpose                                                    |
+| :-------------------------------------------------------------- | :--------------------------------------------------------- |
+| `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`                       | GitHub App installation tokens for repository publication. |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`    | Sign-in and session handling.                              |
+| `DATABASE_URL` or `DATABASE_URL_UNPOOLED`                       | PostgreSQL persistence when configured.                    |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`            | Redis backing for caches and fallback stores.              |
+| `RESEND_API_KEY`                                                | Optional email delivery.                                   |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID` | Pro subscription integration.                              |
+| `NEXT_PUBLIC_APP_URL`                                           | Public app URL for links and callbacks.                    |
 
-All keys are namespaced under `gitascii:pro:` and strictly isolated by username.
-
-### Key Schema
-
-```
-# Multi-Profile Management
-gitascii:pro:{username}:profiles                 -> Set [ "default", "minimal", "stats" ]
-gitascii:pro:{username}:profile:{slug}           -> Hash { id, name, description, status, isDefault, widgetsCount, totalViews, createdAt, updatedAt }
-
-# User Settings & Entitlements
-gitascii:pro:{username}:settings                 -> Hash { emailAlertsEnabled, alertEmailAddress, dailyDigestEnabled, themePreference }
-gitascii:pro:{username}:totals                   -> Hash { totalViews, totalErrors }
-
-# Time-Series Analytics (Daily, 90-Day TTL)
-gitascii:pro:{username}:{slug}:daily:{YYYY-MM-DD}        -> Hash { views, cacheHits, camoViews }
-gitascii:pro:{username}:{slug}:hll:{YYYY-MM-DD}          -> HyperLogLog (unique visitor tokens)
-gitascii:pro:{username}:{slug}:hourly:{YYYY-MM-DD}       -> Hash { "0": 5, "1": 2, ..., "23": 18 }
-
-# Audience Dimensions (Daily, 90-Day TTL)
-gitascii:pro:{username}:{slug}:dim:countries:{YYYY-MM-DD} -> Hash { "US": 120, "BR": 85, "DE": 40 }
-gitascii:pro:{username}:{slug}:dim:sources:{YYYY-MM-DD}   -> Hash { "GitHub": 210, "Google Search": 15 }
-gitascii:pro:{username}:{slug}:dim:devices:{YYYY-MM-DD}   -> Hash { "Desktop": 180, "Mobile": 45, "GitHub Camo": 90 }
-gitascii:pro:{username}:{slug}:dim:browsers:{YYYY-MM-DD}  -> Hash { "Chrome": 150, "Safari": 70, "Firefox": 25 }
-gitascii:pro:{username}:{slug}:dim:os:{YYYY-MM-DD}        -> Hash { "macOS": 130, "Windows": 90, "Linux": 40 }
-
-# Widget Errors Tracker (90-Day Retention)
-gitascii:pro:{username}:errors:list              -> Sorted Set (score = timestamp, member = errorId)
-gitascii:pro:{username}:errors:{errorId}         -> Hash { id, widgetId, widgetName, profileSlug, errorType, message, details, status, occurrences, firstSeenAt, lastSeenAt, resolvedAt }
-gitascii:pro:{username}:cooldown:alert:{widgetId}-> String (1-hour TTL for spam prevention)
-
-# Sent Email Notifications History (90-Day Retention)
-gitascii:pro:{username}:emails:list              -> Sorted Set (score = timestamp, member = emailId)
-gitascii:pro:{username}:emails:{emailId}         -> Hash { id, recipientEmail, templateName, subject, reason, relatedWidget, relatedProfile, sentAt, status, messageId }
-```
-
-### TTL & Eviction Strategy
-
-| Data Category         | Structure         | Retention / TTL | Cost & Memory Optimization                        |
-| --------------------- | ----------------- | --------------- | ------------------------------------------------- |
-| Daily Traffic Rollups | Hash              | 90 days         | Automatic expiry prevents stale accumulation.     |
-| Unique Visitors       | HyperLogLog       | 90 days         | $O(1)$ constant memory (~12KB max per key).       |
-| Dimensions            | Hash              | 90 days         | Top aggregates merged across time ranges on read. |
-| Widget Error History  | Sorted Set + Hash | 90 days         | Capped at latest 50 items per user.               |
-| Email Logs            | Sorted Set + Hash | 90 days         | Capped at latest 50 items per user.               |
-| Error Alert Cooldown  | String            | 1 hour          | Prevents duplicate alert spam to user inboxes.    |
-
----
-
-## 4. Privacy & LGPD Architecture
-
-1. **Zero Raw IP Storage**: IPs from `x-forwarded-for` or `cf-connecting-ip` are strictly processed in-memory to generate an ephemeral daily hash:
-   $$\text{VisitorToken} = \text{HMAC-SHA256}(\text{IP} \parallel \text{UserAgent}, \text{DailySalt})[0:16]$$
-   The `DailySalt` changes every 24 hours UTC, rendering cross-day and cross-service tracking mathematically impossible.
-2. **Referrer Stripping**: Query parameters, tokens, and tracking IDs are stripped. Only normalized top-level domains are stored.
-3. **HyperLogLog Cardinality**: Allows calculating unique visitor counts across arbitrary date ranges (`PFCOUNT key1 key2 ...`) with high accuracy and zero personal data persistence.
-
----
-
-## 5. Widget Error & Email Notification Pipeline
-
-```mermaid
-flowchart TD
-    A[GitHub Readme Requests SVG] --> B[SVGEngine / embedExternalImages]
-    B -->|External Widget Fails / Times out| C[recordWidgetError in Redis]
-    C --> D{Alert in Cooldown?}
-    D -->|No: Set 1h Cooldown| E[Dispatch Alert Email via EmailService]
-    E --> F[Log Sent Record in Redis Email Log]
-    D -->|Yes: Suppress Email| G[Increment Occurrence Counter]
-```
-
----
-
-## 6. Future Stripe / Subscriptions Integration Points
-
-- The abstraction `getProEntitlements(username)` in `src/features/pro/server/entitlements.ts` centralizes feature gating:
-  - `maxProfiles`: Configurable per plan (Free: 1, Pro: 10, Team: 50).
-  - `analyticsRetentionDays`: (Free: 7 days, Pro: 90 days, Enterprise: 365 days).
-  - `widgetErrorAlertsEnabled`: Feature flag.
-  - `customDomainEnabled`: Feature flag.
-- When Stripe webhooks are added in the future, updating the `gitascii:pro:{username}:settings` or user subscription record in Redis will automatically unlock higher tiers without code modifications across UI components.
-
----
-
-## 7. Environment Variables
-
-| Variable                   | Description                                                          |
-| -------------------------- | -------------------------------------------------------------------- |
-| `UPSTASH_REDIS_REST_URL`   | Upstash Redis REST URL.                                              |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST authentication token.                             |
-| `SESSION_SECRET`           | 32+ character key for session cookie encryption and HMAC daily salt. |
-| `RESEND_API_KEY`           | Resend API key for automated email delivery.                         |
-| `NEXT_PUBLIC_APP_URL`      | Application root URL (e.g. `https://gitascii.com`).                  |
+See `.env.example` for the full development environment template.

@@ -1,10 +1,11 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { safeStorage } from '@/utils/storage'
 
-import { type AppLocale, locales } from './locales'
+import type { AppLocale } from './locales'
+import { pt } from './locales/pt'
 
 export type Language = AppLocale
 
@@ -16,57 +17,82 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
-export const translations: Record<Language, Record<string, string>> = locales
+const initialTranslations: Partial<Record<Language, Record<string, string>>> = { pt }
+const localeLoaders = {
+  en: () => import('./locales/en').then((module) => module.en),
+  es: () => import('./locales/es').then((module) => module.es),
+  zh: () => import('./locales/zh').then((module) => module.zh),
+  ja: () => import('./locales/ja').then((module) => module.ja),
+  de: () => import('./locales/de').then((module) => module.de),
+  fr: () => import('./locales/fr').then((module) => module.fr),
+}
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('pt')
+  const [translations, setTranslations] = useState(initialTranslations)
+  const selectionRef = useRef(0)
+  const initializedRef = useRef(false)
+
+  const selectLanguage = useCallback(
+    (lang: Language, persist: boolean) => {
+      const selection = ++selectionRef.current
+      if (persist) safeStorage.setItem('gitascii_lang', lang)
+      const apply = (dictionary?: Record<string, string>) => {
+        if (selection !== selectionRef.current) return
+        if (dictionary) {
+          setTranslations((current) => ({ ...current, [lang]: dictionary }))
+        }
+        setLanguageState(lang)
+        document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang
+      }
+
+      if (translations[lang]) {
+        apply()
+      } else {
+        void localeLoaders[lang as keyof typeof localeLoaders]()
+          .then(apply)
+          .catch(() => {})
+      }
+    },
+    [translations]
+  )
 
   useEffect(() => {
+    if (initializedRef.current) return
+    initializedRef.current = true
     if (typeof window !== 'undefined') {
       const saved = safeStorage.getItem('gitascii_lang') as Language
       const validLangs: Language[] = ['en', 'pt', 'es', 'zh', 'ja', 'de', 'fr']
       if (saved && validLangs.includes(saved)) {
-        setLanguageState(saved)
+        selectLanguage(saved, false)
       } else {
         const navLang = navigator.language.split('-')[0]
         if (navLang === 'pt' || navLang === 'br') {
-          setLanguageState('pt')
+          selectLanguage('pt', false)
         } else if (navLang === 'es') {
-          setLanguageState('es')
+          selectLanguage('es', false)
         } else if (navLang === 'zh') {
-          setLanguageState('zh')
+          selectLanguage('zh', false)
         } else if (navLang === 'ja') {
-          setLanguageState('ja')
+          selectLanguage('ja', false)
         } else if (navLang === 'de') {
-          setLanguageState('de')
+          selectLanguage('de', false)
         } else if (navLang === 'fr') {
-          setLanguageState('fr')
+          selectLanguage('fr', false)
         } else {
-          setLanguageState('en')
+          selectLanguage('en', false)
         }
       }
     }
-  }, [])
+  }, [selectLanguage])
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    if (typeof window !== 'undefined') {
-      safeStorage.setItem('gitascii_lang', lang)
-      document.documentElement.lang = lang
-    }
+    selectLanguage(lang, true)
   }
 
   const t = (key: string, defaultValue?: string, variables?: Record<string, string>): string => {
     const translationSet = translations[language] || translations['en']
-    let value = translationSet?.[key]
-
-    if (value === undefined) {
-      value = translations['en']?.[key]
-    }
-
-    if (value === undefined) {
-      value = defaultValue !== undefined ? defaultValue : key
-    }
+    let value = translationSet?.[key] ?? translations['en']?.[key] ?? defaultValue ?? key
 
     if (variables) {
       Object.entries(variables).forEach(([k, v]) => {
@@ -89,5 +115,3 @@ export function useI18n() {
   }
   return context
 }
-
-export { locales } from './locales'

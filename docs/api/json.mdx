@@ -5,7 +5,7 @@ description: 'How to export, import, programmatically generate, and consume GitA
 
 # JSON Schema & Storage
 
-The visual editor and the API communicate via JSON configurations. When you download a configuration file from the editor (or when the editor commits to your special GitHub repository), it outputs a `.gitascii.json` file structured according to the `SavedConfiguration` interface.
+The visual editor and the API use JSON configurations based on `SavedConfiguration`. In v2, the profile repository's `gitascii` branch stores the default layout as `gitascii.json` and additional layouts as `gitascii_[slug].json`, alongside the published SVGs. The editor can also export a JSON file for programmatic use.
 
 ## Complete Real JSON Example
 

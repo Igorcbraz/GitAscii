@@ -19,6 +19,8 @@ Sentry.init({
     'The router state header was sent but could not be parsed',
     'ECONNRESET',
     'EPIPE',
+    'NeonDbError',
+    'exceeded the quota',
   ],
 
   dataCollection: {

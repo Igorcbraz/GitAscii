@@ -1,7 +1,7 @@
 import { hasDbConfig } from '@/lib/db/client'
 import {
   getUserByStripeCustomerId,
-  getUserByUsername,
+  getUserPlanTierFromDb,
   getUserSettingsFromDb,
   updateUserSettingsInDb,
 } from '@/lib/db/repositories/userRepository'
@@ -17,13 +17,36 @@ interface CachedEntitlements {
 }
 
 const entitlementsCache = new Map<string, CachedEntitlements>()
-const ENTITLEMENTS_CACHE_TTL_MS = 5 * 60 * 1000
+const entitlementsPending = new Map<string, Promise<ProEntitlements>>()
+const ENTITLEMENTS_CACHE_TTL_MS = 60 * 1000
+const FREE_ENTITLEMENTS_CACHE_TTL_MS = 30 * 1000
+const settingsCache = new Map<string, { settings: ProUserSettings; expiresAt: number }>()
+const SETTINGS_CACHE_TTL_MS = 60 * 1000
+const MAX_CACHE_ENTRIES = 1000
+
+function remember<T extends { expiresAt: number }>(cache: Map<string, T>, key: string, value: T) {
+  cache.delete(key)
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    for (const [cachedKey, cachedValue] of cache) {
+      if (cachedValue.expiresAt <= Date.now()) cache.delete(cachedKey)
+    }
+  }
+  while (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value
+    if (oldest === undefined) break
+    cache.delete(oldest)
+  }
+  cache.set(key, value)
+}
 
 export function invalidateEntitlementsCache(username?: string): void {
   if (username) {
-    entitlementsCache.delete(username.toLowerCase().trim())
+    const key = username.toLowerCase().trim()
+    entitlementsCache.delete(key)
+    settingsCache.delete(key)
   } else {
     entitlementsCache.clear()
+    settingsCache.clear()
   }
 }
 
@@ -72,20 +95,34 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
 
   const databaseConfigured = hasDbConfig()
   const cached = entitlementsCache.get(u)
-  if (!databaseConfigured && cached && cached.expiresAt > Date.now()) {
+  if (cached && cached.expiresAt > Date.now()) {
     return cached.entitlements
   }
 
+  const pending = entitlementsPending.get(u)
+  if (pending) return pending
+
+  const lookup = loadProEntitlements(u, databaseConfigured)
+  entitlementsPending.set(u, lookup)
+  try {
+    return await lookup
+  } finally {
+    entitlementsPending.delete(u)
+  }
+}
+
+async function loadProEntitlements(
+  u: string,
+  databaseConfigured: boolean
+): Promise<ProEntitlements> {
   const redis = getProRedisClient()
   const key = REDIS_KEYS.userSettings(u)
 
   let raw: Record<string, unknown> | null = null
-  let redisFailed = databaseConfigured
   if (!databaseConfigured) {
     try {
       raw = await redis.hgetall(key)
     } catch (err) {
-      redisFailed = true
       console.warn(`[Entitlements] Redis read failed for ${u}:`, err)
     }
   }
@@ -100,33 +137,7 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
   // briefly after a downgrade, so never let it authorize paid data collection.
   if (databaseConfigured) {
     try {
-      const dbUser = await getUserByUsername(u)
-      if (dbUser) {
-        const dbTier = dbUser.entitlement.plan_tier || PRO_PLAN_TIERS.FREE
-        tier = dbTier
-        if (dbTier === PRO_PLAN_TIERS.PRO) {
-          if (!redisFailed) {
-            const cachePayload: Record<string, any> = {
-              planTier: PRO_PLAN_TIERS.PRO,
-            }
-            if (dbUser.user.stripe_customer_id) {
-              cachePayload.stripeCustomerId = dbUser.user.stripe_customer_id
-            }
-            if (dbUser.entitlement.stripe_subscription_id) {
-              cachePayload.stripeSubscriptionId = dbUser.entitlement.stripe_subscription_id
-            }
-            if (dbUser.entitlement.stripe_subscription_status) {
-              cachePayload.stripeSubscriptionStatus = dbUser.entitlement.stripe_subscription_status
-            }
-            void redis
-              .hset(key, cachePayload)
-              .catch((error) => console.warn('[Entitlements cache operation] Failed:', error))
-            void redis
-              .sadd('gitascii:pro:customers', u)
-              .catch((error) => console.warn('[Entitlements cache operation] Failed:', error))
-          }
-        }
-      }
+      tier = await getUserPlanTierFromDb(u)
     } catch (dbErr) {
       console.warn(`[Entitlements] DB lookup failed for ${u}:`, dbErr)
     }
@@ -138,9 +149,11 @@ export async function getProEntitlements(username: string): Promise<ProEntitleme
 
   const entitlements = computeEntitlements(tier)
 
-  entitlementsCache.set(u, {
+  remember(entitlementsCache, u, {
     entitlements,
-    expiresAt: Date.now() + (tier !== PRO_PLAN_TIERS.FREE ? ENTITLEMENTS_CACHE_TTL_MS : 60 * 1000),
+    expiresAt:
+      Date.now() +
+      (tier !== PRO_PLAN_TIERS.FREE ? ENTITLEMENTS_CACHE_TTL_MS : FREE_ENTITLEMENTS_CACHE_TTL_MS),
   })
 
   return entitlements
@@ -155,46 +168,29 @@ export async function getUserSettings(username: string): Promise<ProUserSettings
   const u = username.toLowerCase().trim()
   const isEnvPro = isEnvProUser(u)
 
+  if (hasDbConfig()) {
+    const cached = settingsCache.get(u)
+    if (cached && cached.expiresAt > Date.now()) return cached.settings
+    const dbSettings = await getUserSettingsFromDb(u)
+    const settings = dbSettings
+      ? { ...dbSettings, planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier }
+      : {
+          emailAlertsEnabled: true,
+          dailyDigestEnabled: false,
+          themePreference: 'system',
+          anonymizeReferrers: true,
+          publishIntervalMinutes: 1440,
+          planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : PRO_PLAN_TIERS.FREE,
+        }
+    remember(settingsCache, u, {
+      settings: settings as ProUserSettings,
+      expiresAt: Date.now() + SETTINGS_CACHE_TTL_MS,
+    })
+    return settings as ProUserSettings
+  }
+
   const redis = getProRedisClient()
   const key = REDIS_KEYS.userSettings(u)
-
-  if (hasDbConfig()) {
-    const dbSettings = await getUserSettingsFromDb(u)
-    if (!dbSettings) {
-      return {
-        emailAlertsEnabled: true,
-        dailyDigestEnabled: false,
-        themePreference: 'system',
-        anonymizeReferrers: true,
-        publishIntervalMinutes: 1440,
-        planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : PRO_PLAN_TIERS.FREE,
-      }
-    }
-
-    const cachePayload: Record<string, any> = {
-      emailAlertsEnabled: String(dbSettings.emailAlertsEnabled),
-      dailyDigestEnabled: String(dbSettings.dailyDigestEnabled),
-      themePreference: dbSettings.themePreference,
-      anonymizeReferrers: String(dbSettings.anonymizeReferrers),
-      planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier,
-      publishIntervalMinutes: String(Math.max(60, dbSettings.publishIntervalMinutes || 1440)),
-    }
-    for (const field of [
-      'alertEmailAddress',
-      'stripeCustomerId',
-      'stripeSubscriptionId',
-      'stripePriceId',
-      'stripeSubscriptionStatus',
-      'stripeCurrentPeriodEnd',
-    ] as const) {
-      const value = dbSettings[field]
-      if (value !== undefined && value !== null) cachePayload[field] = String(value)
-    }
-    await redis
-      .hset(key, cachePayload)
-      .catch((error) => console.warn('[Entitlements cache operation] Failed:', error))
-    return { ...dbSettings, planTier: isEnvPro ? PRO_PLAN_TIERS.PRO : dbSettings.planTier }
-  }
 
   let raw: Record<string, unknown> | null = null
   try {
@@ -285,11 +281,16 @@ export async function updateUserSettings(
 
   const dbResult = hasDbConfig() ? await updateUserSettingsInDb(u, settings) : null
 
+  if (dbResult) {
+    invalidateEntitlementsCache(u)
+    return dbResult
+  }
+
   const redis = getProRedisClient()
   const key = REDIS_KEYS.userSettings(u)
 
-  const effectivePlanTier = dbResult ? dbResult.planTier : settings.planTier
-  const effectiveCustomerId = dbResult?.stripeCustomerId || settings.stripeCustomerId
+  const effectivePlanTier = settings.planTier
+  const effectiveCustomerId = settings.stripeCustomerId
 
   const payload: Record<string, any> = {}
   if (settings.emailAlertsEnabled !== undefined) {
@@ -329,19 +330,16 @@ export async function updateUserSettings(
       .catch((error) => console.warn('[Entitlements cache operation] Failed:', error))
   }
   if (settings.stripeSubscriptionId !== undefined) {
-    payload.stripeSubscriptionId = dbResult?.stripeSubscriptionId ?? settings.stripeSubscriptionId
+    payload.stripeSubscriptionId = settings.stripeSubscriptionId
   }
   if (settings.stripePriceId !== undefined) {
-    payload.stripePriceId = dbResult?.stripePriceId ?? settings.stripePriceId
+    payload.stripePriceId = settings.stripePriceId
   }
   if (settings.stripeSubscriptionStatus !== undefined) {
-    payload.stripeSubscriptionStatus =
-      dbResult?.stripeSubscriptionStatus ?? settings.stripeSubscriptionStatus
+    payload.stripeSubscriptionStatus = settings.stripeSubscriptionStatus
   }
   if (settings.stripeCurrentPeriodEnd !== undefined) {
-    payload.stripeCurrentPeriodEnd = String(
-      dbResult?.stripeCurrentPeriodEnd ?? settings.stripeCurrentPeriodEnd
-    )
+    payload.stripeCurrentPeriodEnd = String(settings.stripeCurrentPeriodEnd)
   }
 
   if (Object.keys(payload).length > 0) {
@@ -351,23 +349,18 @@ export async function updateUserSettings(
   }
 
   invalidateEntitlementsCache(username)
-  return dbResult || getUserSettings(username)
+  return getUserSettings(username)
 }
 
 export async function getUserByStripeCustomer(customerId: string): Promise<string | null> {
   if (!customerId) return null
-  const redis = getProRedisClient()
-
   if (hasDbConfig()) {
     const dbUser = await getUserByStripeCustomerId(customerId)
     if (!dbUser) return null
-    const username = dbUser.user.username.toLowerCase().trim()
-    void redis
-      .set(`gitascii:stripe:customer:${customerId}`, username)
-      .catch((error) => console.warn('[Entitlements cache operation] Failed:', error))
-    return username
+    return dbUser.user.username.toLowerCase().trim()
   }
 
+  const redis = getProRedisClient()
   try {
     const cached = await redis.get<string>(`gitascii:stripe:customer:${customerId}`)
     if (cached) return cached.toLowerCase().trim()

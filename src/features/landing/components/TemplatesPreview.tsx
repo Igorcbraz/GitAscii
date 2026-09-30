@@ -1,16 +1,13 @@
 'use client'
 
-import { GitFork, Layers, LayoutTemplate, Palette } from 'lucide-react'
+import { Grid, Layers, LayoutTemplate, Palette } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter'
-import Magnet from '@/components/ui/Magnet'
 import ShinyText from '@/components/ui/ShinyText'
 import SpotlightCard from '@/components/ui/SpotlightCard'
-import { EXTERNAL_LINKS } from '@/constants'
-import { renderSvg } from '@/engine/core/SVGEngine'
 import {
   createConfiguration,
   TEMPLATE_PRESETS,
@@ -26,10 +23,34 @@ interface TemplatesPreviewProps {
 
 export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
   const { t } = useI18n()
+  const sectionRef = useRef<HTMLElement>(null)
+  const [renderSvg, setRenderSvg] = useState<
+    typeof import('@/engine/core/SVGEngine').renderSvg | null
+  >(null)
   const demoData = useMemo(() => getMockGitHubData('Igorcbraz'), [])
 
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        void import('@/engine/core/SVGEngine').then((module) => {
+          setRenderSvg(() => module.renderSvg)
+        })
+      },
+      { rootMargin: '1200px 0px' }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
+
   const templateList: TemplatePreset[] = useMemo(() => {
-    return Object.values(TEMPLATE_PRESETS).filter((p) => p.id !== 'blank')
+    return Object.values(TEMPLATE_PRESETS)
+      .filter((p) => p.id !== 'blank')
+      .slice(0, 5)
   }, [])
 
   const [selectedId, setSelectedId] = useState<string>('native')
@@ -39,6 +60,7 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
   }, [templateList, selectedId])
 
   const activeSvgMarkup = useMemo(() => {
+    if (!renderSvg) return ''
     const config = createConfiguration(
       0,
       'Igorcbraz',
@@ -49,10 +71,11 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
     )
     const rawSvg = renderSvg(config, demoData, { width: 800 })
     return rawSvg.replace(/<\?xml[\s\S]*?\?>/i, '').trim()
-  }, [activeTemplate.id, demoData])
+  }, [activeTemplate.id, demoData, renderSvg])
 
   return (
     <section
+      ref={sectionRef}
       id="templates-preview"
       className="relative z-10 w-full bg-transparent py-20 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-graphite/60 overflow-hidden"
     >
@@ -227,9 +250,11 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
               <span>
                 {t(
                   'landing.templates.available_studio',
-                  `${templateList.length} Available in Studio`,
+                  `${Object.values(TEMPLATE_PRESETS).filter((p) => p.id !== 'blank').length} Available in Studio`,
                   {
-                    count: String(templateList.length),
+                    count: String(
+                      Object.values(TEMPLATE_PRESETS).filter((p) => p.id !== 'blank').length
+                    ),
                   }
                 )}
               </span>
@@ -295,54 +320,44 @@ export function TemplatesPreview({ count = 18 }: TemplatesPreviewProps) {
                 )
               })}
 
-              <a
-                href={EXTERNAL_LINKS.GITHUB_FORK}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/templates"
                 className="p-3 border border-dashed border-signal-lime/50 bg-signal-lime/5 hover:bg-signal-lime/10 hover:border-signal-lime transition-all duration-300 cursor-pointer flex items-center justify-between group"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0">
-                    <GitFork size={13} />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 rounded-xs bg-signal-lime text-black shrink-0 group-hover:scale-105 transition-transform">
+                    <Grid size={13} />
                   </div>
                   <div>
-                    <h4 className="font-inter-tight font-semibold text-[12px] text-signal-lime leading-tight">
-                      {t('landing.templates.contribute', 'Contribute a Template!')}
+                    <h4 className="font-inter-tight font-semibold text-[12px] text-signal-lime leading-tight group-hover:text-signal-lime-hover transition-colors truncate">
+                      {t(
+                        'landing.templates.more_templates',
+                        `+${Object.values(TEMPLATE_PRESETS).filter((p) => p.id !== 'blank').length - templateList.length} Templates Disponíveis`,
+                        {
+                          count: String(
+                            Object.values(TEMPLATE_PRESETS).filter((p) => p.id !== 'blank').length -
+                              templateList.length
+                          ),
+                        }
+                      )}
                     </h4>
                     <p className="font-inter-tight text-[10px] text-ash leading-tight mt-0.5">
-                      {t(
-                        'landing.templates.contribute_desc',
-                        'Submit your JSON preset via GitHub Pull Request'
-                      )}
+                      {t('landing.templates.more_templates_desc', 'Explore o diretório completo')}
                     </p>
                   </div>
                 </div>
-                <span className="font-jetbrains-mono text-[9px] text-signal-lime uppercase px-2 py-0.5 border border-signal-lime/40 bg-signal-lime/10">
-                  {t('landing.templates.fork', 'Fork')}
+                <span className="font-jetbrains-mono text-[9px] text-signal-lime uppercase px-2 py-0.5 border border-signal-lime/40 bg-signal-lime/10 flex items-center gap-1 shrink-0 group-hover:border-signal-lime transition-colors">
+                  <span>{t('landing.templates.more_templates_badge', 'Explorar')}</span>
+                  <span
+                    aria-hidden="true"
+                    className="group-hover:translate-x-0.5 transition-transform"
+                  >
+                    →
+                  </span>
                 </span>
-              </a>
+              </Link>
             </div>
           </motion.div>
-        </div>
-
-        <div className="text-center pt-4 relative">
-          <Magnet distance={80} strength={0.2}>
-            <Link
-              href="/templates"
-              className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 bg-signal-lime hover:bg-signal-lime-hover text-carbon font-inter-tight font-semibold text-[14px] uppercase tracking-wider transition-colors shadow-[0_0_20px_rgba(197,255,74,0.2)]"
-            >
-              <span>
-                {t(
-                  'landing.templates.explore_all',
-                  `Explore Complete Template Directory (${count}+)`,
-                  {
-                    count: String(count),
-                  }
-                )}
-              </span>
-              <span aria-hidden="true">→</span>
-            </Link>
-          </Magnet>
         </div>
       </div>
     </section>

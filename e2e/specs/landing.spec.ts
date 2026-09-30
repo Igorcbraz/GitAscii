@@ -14,6 +14,20 @@ test.describe('GitAscii Landing Page E2E Tests', () => {
     await expect(page.locator('footer')).toBeVisible()
   })
 
+  test('renders the hero with the loaded PT Serif webfont', async ({ page }) => {
+    const font = await page.locator('#hero h1').evaluate(async (heading) => {
+      await document.fonts.load("400 32px 'GitAscii PT Serif'")
+      return {
+        computed: getComputedStyle(heading).fontFamily,
+        loaded: [...document.fonts].some(
+          (face) => face.family === 'GitAscii PT Serif' && face.status === 'loaded'
+        ),
+      }
+    })
+    expect(font.computed).toContain('GitAscii PT Serif')
+    expect(font.loaded).toBe(true)
+  })
+
   test('should allow user to enter username in Hero input and redirect to Editor', async ({
     page,
   }) => {

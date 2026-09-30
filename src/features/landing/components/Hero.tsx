@@ -13,6 +13,7 @@ import { getProPricing, PRO_PLAN_TIERS, PRO_PRICING_CONFIG } from '@/constants'
 import { getClientSession } from '@/features/auth/clientSession'
 import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
+import { analytics } from '@/lib/analytics'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
@@ -23,8 +24,6 @@ export interface UserSession {
 }
 
 export default function Hero() {
-  const [mounted, setMounted] = useState(false)
-  const [isDesktop, setIsDesktop] = useState(false)
   const [username, setUsername] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGithubLoading, setIsGithubLoading] = useState(false)
@@ -37,11 +36,6 @@ export default function Hero() {
   const isProUser = Boolean(session?.isPro || session?.tier === 'pro')
 
   useEffect(() => {
-    setMounted(true)
-    if (typeof window !== 'undefined') {
-      setIsDesktop(window.matchMedia('(min-width: 768px)').matches)
-    }
-
     getClientSession()
       .then((currentSession) => {
         if (currentSession) {
@@ -98,22 +92,36 @@ export default function Hero() {
     }
 
     setIsLoading(true)
+    analytics.track('open_editor', { entryPoint: 'hero' })
     router.push(`/${handle}`)
   }
 
   return (
-    <section id="hero" className="relative min-h-screen">
+    <section
+      id="hero"
+      className="relative min-h-[100svh]"
+      style={{ paddingBottom: 'calc(clamp(10px, 10vw, 10px))' }}
+    >
+      <div
+        className="absolute inset-0 pointer-events-none opacity-70 md:hidden"
+        aria-hidden="true"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px), radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)',
+          backgroundSize: '55px 55px, 55px 55px, 28px 28px',
+        }}
+      />
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {mounted && isDesktop && <AsciiHands className="absolute inset-0 opacity-60" />}
+        <AsciiHands className="hidden opacity-60 md:block" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,6,6,0.85)_0%,rgba(6,6,6,0.3)_45%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pb-24 md:pb-32 pt-16">
-        <div className="max-w-4xl mx-auto flex flex-col items-center">
+      <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-6 py-16 text-center">
+        <div className="mx-auto flex w-full min-w-0 max-w-4xl flex-col items-center">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-100 mb-6 flex flex-col items-center"></div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150 mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 font-jetbrains-mono text-[11px] uppercase tracking-[0.22em] text-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.15)]">
+            <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 bg-signal-lime/5 border border-signal-lime/20 font-jetbrains-mono text-[9px] sm:text-[11px] uppercase tracking-[0.12em] sm:tracking-[0.22em] text-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.15)]">
               <Sparkles className="w-3.5 h-3.5" />
               <ShinyText speed={3.5}>
                 {t('landing.hero.eyebrow', '[ THE FUTURE OF GITHUB PROFILES ]')}
@@ -153,6 +161,7 @@ export default function Hero() {
                 <Magnet distance={60} strength={0.25} className="w-full">
                   <Link
                     href={`/${session.username}`}
+                    data-analytics-cta="hero_editor"
                     className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
                   >
                     <User size={18} />
@@ -165,6 +174,7 @@ export default function Hero() {
                 {isProUser ? (
                   <Link
                     href="/pro"
+                    data-analytics-cta="hero_pro_existing"
                     className="relative overflow-hidden w-full inline-flex items-center justify-between gap-3 px-4 py-3.5 rounded-sm bg-gradient-to-r from-onyx via-carbon to-onyx hover:from-[#151515] hover:to-[#181818] text-white transition-colors duration-200 group cursor-pointer shadow-none"
                   >
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1200 ease-in-out bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none" />
@@ -190,6 +200,7 @@ export default function Hero() {
                 ) : (
                   <Link
                     href="/pro"
+                    data-analytics-cta="hero_pro"
                     className="relative overflow-hidden w-full inline-flex items-center justify-between gap-3 px-4 py-3.5 rounded-sm bg-gradient-to-r from-onyx via-carbon to-onyx hover:from-[#151515] hover:to-[#181818] text-white transition-colors duration-200 group cursor-pointer shadow-none"
                   >
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1200 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 pointer-events-none" />
@@ -231,6 +242,7 @@ export default function Hero() {
                 <Magnet distance={60} strength={0.25} className="w-full">
                   <Link
                     href={API_ENDPOINTS.AUTH.LOGIN()}
+                    data-analytics-cta="hero_github_login"
                     prefetch={false}
                     rel="nofollow"
                     onClick={() => setIsGithubLoading(true)}
@@ -254,7 +266,7 @@ export default function Hero() {
                 </div>
 
                 <form onSubmit={handleOpenEditor} className="flex w-full group">
-                  <div className="relative grow flex items-center">
+                  <div className="relative flex min-w-0 grow items-center">
                     <label htmlFor="hero-username-input" className="sr-only">
                       {t('landing.hero.placeholder', 'Enter your GitHub username')}
                     </label>
@@ -291,6 +303,7 @@ export default function Hero() {
 
                 <Link
                   href="/pro"
+                  data-analytics-cta="hero_pro_guest"
                   className="w-full inline-flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-sm bg-transparent hover:bg-signal-lime/[0.04] transition-all duration-200 group cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -318,18 +331,12 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
-      <div
-        className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 pointer-events-none animate-in fade-in duration-1000 fill-mode-both delay-1000"
-        style={{ top: 'calc(100vh - 72px)' }}
-      >
+      <div className="relative z-10 -mt-12 flex flex-col items-center gap-1.5 pointer-events-none animate-in fade-in duration-1000 fill-mode-both delay-1000 md:-mt-14">
         <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.22em] text-ash/60">
           {t('landing.hero.scroll_cue', 'scroll to explore')}
         </span>
         <ChevronDown className="w-4 h-4 text-signal-lime/60 animate-bounce" />
       </div>
-
-      <div className="absolute bottom-0 left-0 w-full h-1.5 bg-signal-lime shadow-[0_0_15px_rgba(197,255,74,0.5)] z-20" />
     </section>
   )
 }
