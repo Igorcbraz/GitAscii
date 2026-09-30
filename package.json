@@ -111,7 +111,7 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-storybook": "^10.5.10",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "fast-uri": "^4.1.4",
+    "fast-uri": "^4.2.1",
     "husky": "^9.1.7",
     "lighthouse": "13.5.0",
     "lint-staged": "^17.4.1",
