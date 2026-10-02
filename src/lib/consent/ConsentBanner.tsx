@@ -90,7 +90,6 @@ export function ConsentBanner({ onConsent }: ConsentBannerProps) {
             className="font-inter-tight text-note text-pearl leading-relaxed mt-2"
           >
             {t('consent.description_prefix', 'GitAscii uses')}{' '}
-            <span className="text-white font-medium">Google Analytics</span> &amp;{' '}
             <span className="text-white font-medium">Microsoft Clarity</span>{' '}
             {t(
               'consent.description_body',

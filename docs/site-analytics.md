@@ -4,7 +4,7 @@ Atualizado em 2026-09-29. Este plano mede decisões comerciais; a telemetria dos
 
 ## Configuração
 
-1. Configure `NEXT_PUBLIC_GA_MEASUREMENT_ID` para carregar GA4 em todas as páginas, inclusive antes da escolha de consentimento. Eventos do site são enviados somente após aceite. Clarity continua condicionado ao aceite.
+1. Configure `NEXT_PUBLIC_GA_MEASUREMENT_ID` para carregar GA4 em todas as páginas com consentimento `granted` por padrão. Todos os eventos do site para GA4 são mapeados de forma contínua. Microsoft Clarity é a única integração condicionada ao consentimento do usuário.
 2. Configure `GA_MEASUREMENT_PROTOCOL_API_SECRET` **apenas no servidor** para receber `purchase`, `checkout_expired` e `checkout_payment_failed` a partir de webhooks Stripe. Crie o segredo em GA4 → Administrador → Fluxos de dados → seu fluxo web → Segredos da API do Measurement Protocol.
 3. Confirme que o endpoint `/api/webhooks/stripe` recebe `checkout.session.completed`, `checkout.session.expired` e `payment_intent.payment_failed`. O webhook já exige assinatura. O Stripe é a fonte de verdade da compra; retorno à página `/pro?checkout=success` não cria uma venda no GA4.
 4. Em GA4, marque `purchase` como evento principal. Crie dimensões de escopo evento para `checkout_provider`, `entry_point`, `reason`, `failure_reason`, `stage`, `location` e `destination` se quiser usá-las nas explorações. `currency`, `value`, `items` e `transaction_id` são parâmetros de comércio eletrônico.
@@ -29,11 +29,11 @@ Atualizado em 2026-09-29. Este plano mede decisões comerciais; a telemetria dos
 
 ## Atribuição e limites
 
-O navegador envia `client_id` e `session_id` do GA4 ao criar a sessão Stripe somente após consentimento. O servidor valida esses identificadores e os associa à sessão Stripe; o webhook usa os mesmos dados para vincular compra e expiração ao tráfego de origem. Não envie email, nome de usuário, detalhes do cartão ou texto livre ao GA4. O segredo do Measurement Protocol nunca vai para o navegador.
+O navegador envia `client_id` e `session_id` do GA4 ao criar a sessão Stripe quando GA4 está ativo. O servidor valida esses identificadores e os associa à sessão Stripe; o webhook usa os mesmos dados para vincular compra e expiração ao tráfego de origem. Não envie email, nome de usuário, detalhes do cartão ou texto livre ao GA4. O segredo do Measurement Protocol nunca vai para o navegador.
 
 `view_item` e `begin_checkout` não enviam valor: o preço exibido pode variar por idioma, enquanto a seleção final de preço ocorre no servidor. Somente `purchase` contabiliza receita com o total e a moeda confirmados pelo Stripe.
 
-Sessões criadas sem consentimento ou antes da configuração do segredo não geram eventos de webhook no GA4. Checkouts externos configurados por `PRO_CHECKOUT_URL`/`STRIPE_CHECKOUT_URL` não têm sessão Stripe criada por este código e, portanto, não fornecem `purchase` nem `checkout_expired` por este fluxo. A taxa de abandono do Stripe deve ser calculada por coortes de sessões, após aguardar expiração, e comparada com as vendas reais no Stripe. `checkout_opened` indica redirecionamento; não prova que o Stripe carregou. `checkout_feedback` mede apenas quem cancelou, retornou e respondeu, então não representa todos os motivos de perda.
+Sessões criadas antes da configuração do segredo não geram eventos de webhook no GA4. Checkouts externos configurados por `PRO_CHECKOUT_URL`/`STRIPE_CHECKOUT_URL` não têm sessão Stripe criada por este código e, portanto, não fornecem `purchase` nem `checkout_expired` por este fluxo. A taxa de abandono do Stripe deve ser calculada por coortes de sessões, após aguardar expiração, e comparada com as vendas reais no Stripe. `checkout_opened` indica redirecionamento; não prova que o Stripe carregou. `checkout_feedback` mede apenas quem cancelou, retornou e respondeu, então não representa todos os motivos de perda.
 
 O envio do webhook para GA4 é de melhor esforço: falhas são registradas no servidor sem bloquear a concessão de acesso Pro. Reconcilie periodicamente o número de compras do GA4 com o Stripe; o Stripe permanece a fonte de verdade financeira.
 
