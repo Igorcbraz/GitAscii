@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/Igorcbraz/GitAscii/compare/v2.2.0...v2.3.0) (2026-10-04)
+
+
+### Features
+
+* **analytics:** always grant Google Analytics and prompt only for Clarity ([efad50a](https://github.com/Igorcbraz/GitAscii/commit/efad50a553ad644746c7fb2175fa698281b3550c))
+
+
+### Bug Fixes
+
+* **analytics:** guard vinext browser process check ([1390186](https://github.com/Igorcbraz/GitAscii/commit/1390186eabe7080ad52310f0ff41cb7ab2bebb29))
+
 ## [2.2.0](https://github.com/Igorcbraz/GitAscii/compare/v2.1.0...v2.2.0) (2026-09-30)
 
 
