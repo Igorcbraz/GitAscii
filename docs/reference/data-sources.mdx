@@ -1,0 +1,34 @@
+---
+title: 'Data Sources and Display Limits'
+description: 'What widget values represent and when published profiles change'
+---
+
+A published profile is a snapshot. GitHub data and external images are collected during initial publication or an Action refresh, not when someone views the README.
+
+## Data categories
+
+| Content                                    | Source and limits                                                                                                                                                     |
+| :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User, repositories, stars and forks        | GitHub API responses and totals calculated from the fetched repository set. Values can differ from other services using different permissions, pagination or filters. |
+| Contributions and social accounts          | GitHub enrichment where available. The Action treats GraphQL enrichment as best effort; a failure can leave partial/default data.                                     |
+| Language charts                            | Aggregated GitHub language data; language share is not measured coding time.                                                                                          |
+| ASCII portraits                            | Saved character/color grids from editor conversion, or a renderer fallback. See [ASCII pipeline](/guides/ascii-pipeline).                                             |
+| Remote badges and cards                    | A snapshot from an external service fetched during publication. Upstream errors, limits and caching affect the result.                                                |
+| Animation, radar, meters, maps and game UI | Visual treatment computed by the renderer. These graphics are not evidence of live infrastructure monitoring or playable applications.                                |
+
+## Names that need context
+
+- **WakaTime Activity** (`godprofile-wakatime`) currently charts GitHub `data.languages`. It does not call WakaTime or measure weekly coding hours.
+- **GodProfile Trophies** uses contribution/profile counts with illustrative nonzero fallback values. A trophy is not an authoritative achievement record, especially for missing or zero metrics.
+- **Globe** draws a spherical wireframe; it does not map contributor locations.
+- **Control Plane** and **Surveillance** layouts use repository/profile data, configuration and decorative graphics. They do not poll deployments, hardware or a monitoring system.
+- **Views Counter** is inlined into the published SVG. Its upstream fetches are not one request per README visit. GitAscii's separate [analytics badge](/pro/telemetry-and-privacy) has its own proxy-counting limitations.
+- **Premium ASCII** renderer types include scores, DNA and velocity. The current full-composition `renderSvg` normalizer does not preserve optional enriched fields such as `developerScores`, `developerDna` and `codingVelocity`. Renderers can therefore display fallback-derived values in published output even when another part of the app computed richer data.
+
+## SVG image behavior
+
+The README embeds an image, not the editor application. Browser-editor pointer interactions, controls and game-like surfaces do not become interactive applications inside that image. Some SVG animations can run in compatible viewers. Links inside SVG markup should not be treated as independently clickable README buttons; place links in surrounding Markdown or wrap the whole image.
+
+A dark/light file pair is generated, but colors fixed in widget configuration are not necessarily transformed by the theme option. Check both published files when selecting colors and fonts.
+
+Sources: [Action data fetcher](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/dataFetcher.ts), [render normalizer](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/SVGEngine.ts), [widget renderers](https://github.com/Igorcbraz/GitAscii/tree/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers).

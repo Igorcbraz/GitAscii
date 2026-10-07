@@ -1,0 +1,64 @@
+---
+title: 'Using the Editor'
+description: 'Layouts, layers, keyboard shortcuts, drafts, and publication'
+---
+
+The editor builds a positioned SVG layout from your GitHub profile. Start with the [quickstart](/quickstart) to connect your repository, then use this guide for everyday editing.
+
+## Choose a starting layout
+
+Load your GitHub username and choose a template from the library. Applying a template replaces the current composition. Export a layout before replacing a design you want to keep. The library's **Import** control accepts a JSON layout with `widgets` and `globalStyles`; identity-specific fields are cleaned during import. Use [JSON configuration](/api/json) to distinguish an editor export from a complete published configuration.
+
+## Arrange widgets
+
+Add widgets from the library and select them on the canvas. Drag to move and use the resize handles or properties panel to adjust dimensions. Position and size use SVG pixels; zoom changes the editor view, not the published dimensions. The canvas supports multiple selection, alignment, and distribution. Locked widgets are excluded from movement, resize, and batch deletion.
+
+Use layer controls to change overlap. Higher `zIndex` values draw later and appear above lower values. Hiding a widget removes it from the rendered output while keeping it in the layout. Locking a widget protects editing; it does not hide it.
+
+## Set appearance and content
+
+Global styles provide the background, colors, and font stack. Widget properties can override inherited values where the renderer supports them. Choose a widget's documentation from the [catalog](/widgets/overview) before editing JSON: arbitrary property names are not automatically supported.
+
+Check both dark and light output after publishing. GitHub chooses between two separate SVG files through the README `<picture>`; it does not run the editor or its pointer interactions. Consult [data sources](/reference/data-sources) for decorative defaults, external services, and metric limitations.
+
+## Keyboard shortcuts
+
+Use **Ctrl** on Windows/Linux and **Cmd** on macOS. Except for the command palette, these shortcuts are ignored while typing in an input, textarea, or editable text field.
+
+| Shortcut                              | Action                                  |
+| :------------------------------------ | :-------------------------------------- |
+| Ctrl/Cmd + K                          | Toggle command palette                  |
+| Ctrl/Cmd + Z                          | Undo                                    |
+| Ctrl/Cmd + Shift + Z, or Ctrl/Cmd + Y | Redo                                    |
+| Ctrl/Cmd + C / X / V                  | Copy / cut / paste selected widgets     |
+| Ctrl/Cmd + D                          | Duplicate selection                     |
+| Ctrl/Cmd + A                          | Select all widgets                      |
+| Ctrl/Cmd + [ / ]                      | Move selected widgets down / up a layer |
+| Ctrl/Cmd + L                          | Toggle lock for selected widgets        |
+| Delete / Backspace                    | Remove unlocked selected widgets        |
+| Escape                                | Clear selection                         |
+| Arrow keys                            | Move unlocked selections by 2 pixels    |
+| Shift + arrow keys                    | Move by 10 pixels                       |
+
+Undo history is limited to 50 steps in the editor session. It is separate from Pro profile versions and Git commit history.
+
+## Drafts, exports, and recovery
+
+Changes are stored in this browser under a key containing the GitHub ID and profile slug. A valid newer server configuration takes precedence over an older local draft when loading. Clearing browser storage or moving to another browser can remove access to unpublished work; a draft is not a remote backup.
+
+**Export Layout** downloads `widgets`, `globalStyles`, and `templateId`. The template library also offers a community-template export that removes personal fields and adds catalog metadata. Neither download publishes a README or installs a workflow.
+
+To recover a layout, import its exported JSON. For an already published profile, the configuration on the `gitascii` branch is another recovery source. Pro users can also use [profile versions](/pro/multi-profile), subject to their separate publication behavior.
+
+## Publish the edited design
+
+Choose **Publish to GitHub** after editing. It writes the configuration and initial SVGs, updates the README and workflow, and attempts a refresh dispatch. The public layout changes only when publication succeeds; a downloaded JSON file or local draft alone does not update it.
+
+<Warning>
+  Publishing replaces the repository's README with the generated embed. Back up surrounding content
+  before publishing again.
+</Warning>
+
+For named profiles, use the profile switcher and confirm the intended slug before publishing. See [README integration](/guides/github-readme-integration) and [troubleshooting](/guides/troubleshooting) if the published output differs from the editor.
+
+Implementation: [toolbar](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/editor/components/Toolbar/EditorToolbar.tsx), [editor store](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/editor/store/editorStore.ts), and [draft resolution](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/editor/utils/resolveProfileDraft.ts).

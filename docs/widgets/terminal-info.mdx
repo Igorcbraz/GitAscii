@@ -3,11 +3,13 @@ title: 'Terminal Info Widget'
 description: 'Neofetch-style terminal info card with dot-leader alignments and developer metadata'
 ---
 
-# Terminal Info Widget (`terminal-info`)
+Widget ID: `terminal-info`.
 
 The Terminal Info widget renders a comprehensive, Unix `neofetch`-style console card with ASCII border dividers, section titles, dot leaders (`...`), and developer metadata (uptime, location, company, languages, stats, and social channels).
 
 ## Configuration Schema
+
+The “uptime” label represents account age derived from GitHub's `created_at` unless overridden. It does not measure repository or service availability.
 
 ```typescript
 export interface TerminalInfoConfig {

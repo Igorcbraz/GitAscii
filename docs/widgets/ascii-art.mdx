@@ -1,11 +1,11 @@
 ---
 title: 'ASCII Art Widget'
-description: 'Image-to-ASCII character art converter with luminance matrix dithering and multi-color support'
+description: 'Stored ASCII character grids, color matrices, and fallback patterns'
 ---
 
-# ASCII Art Widget (`ascii-art`)
+Widget ID: `ascii-art`.
 
-The ASCII Art widget converts avatars or custom images into character-based text art. It supports dense grayscale gradients, true braille matrices, edge enhancement, gamma correction, and full-color `<tspan>` matrices.
+The editor converts an image to a character grid. This renderer draws the saved `asciiText` and optional `asciiColors`, or a username-derived fallback when no grid is stored. Edge enhancement and dithering run during browser conversion, not in the publisher. See the [ASCII pipeline](/guides/ascii-pipeline).
 
 ## Configuration Schema
 
@@ -30,8 +30,6 @@ export interface AsciiArtConfig {
   cols?: number // Default: 150
   rows?: number // Default: Math.round(cols * 0.5)
   invert?: boolean // Inverts character luminance ramp
-  edgeEnhance?: boolean // Sobel-style edge detection boost
-  dithering?: boolean // Floyd-Steinberg error diffusion
   accentColor?: string // Tint applied in monochrome mode
   asciiText?: string[] // Inlined pre-calculated ASCII text lines
   asciiColors?: string[][] // Inlined color matrix (rows x cols)
@@ -39,10 +37,8 @@ export interface AsciiArtConfig {
 ```
 
 <ParamField body="charset" type="string" default="dense">
-  Selects the character set for brightness mapping: * `dense`: 70-character gradient for maximum
-  photographic precision. * `standard`: Classic ` .:-=+*#%@` ramp. * `blocks`: Shading blocks `
-  ░▒▓█`. * `braille`: True unicode Braille patterns (`⡿⣟⣯⣷`). * `matrix`: Hexadecimal characters `
-  0123456789ABCDEF`.
+  Character-ramp key. Use the exported `CHARSETS` in the converter for the current ramps; stored art
+  must be regenerated for conversion changes to take effect.
 </ParamField>
 
 <ParamField body="colorMode" type="'monochrome' | 'color'" default="monochrome">
@@ -68,7 +64,6 @@ const asciiArtWidget: WidgetInstance = {
     colorMode: 'monochrome',
     accentColor: '#c5ff4a',
     fontSize: 9,
-    edgeEnhance: true,
   },
   locked: false,
   visible: true,

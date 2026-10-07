@@ -3,15 +3,16 @@ title: 'Constellation Star Chart Widget'
 description: 'Connected star chart constellation map of projects and repositories'
 ---
 
-# Constellation Star Chart Widget (`controlplane-constellation`)
+Widget ID: `controlplane-constellation`.
 
 The Constellation Star Chart widget plots repositories as celestial star nodes connected by constellation lines against a deep astronomical night sky with star magnitude indicators.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface ConstellationConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

@@ -1,0 +1,62 @@
+---
+title: 'Local Development and Deployment'
+description: 'Run the application, configure integrations, and build the existing deployment targets'
+---
+
+GitAscii has three distinct execution contexts: the web application, the bundled GitHub Action, and the documentation site. The [architecture](/architecture/rendering-and-publishing) explains their boundaries; the Action does not need the application's database.
+
+## Run locally
+
+Use Node.js 22, matching the application's CI, and npm with the committed lockfile.
+
+```bash
+git clone https://github.com/Igorcbraz/GitAscii.git
+cd GitAscii
+npm ci
+```
+
+Copy `.env.example` to `.env.local` and configure only the integrations needed for your work. Do not commit credentials. Then run:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000`. The `predev` script regenerates the template registry. For renderer-only work, the [offline example](/guides/reproduce-editor) avoids sign-in, publication, and production services.
+
+## Configure identity and publication
+
+Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` for the OAuth App. Its authorization callback is `/api/auth/callback` on the application origin. Keep local and production callback configuration aligned with their respective origins.
+
+Set `SESSION_SECRET` to a random secret of at least 32 characters; production rejects a missing or too-short value. Sessions use cookies, so test identity flows through the browser rather than substituting a GitHub token for a GitAscii session.
+
+Publication also needs `GITHUB_APP_ID` and `GITHUB_APP_PRIVATE_KEY`, with an installation authorized for the profile repository. The repository operations require content writes, workflow-file writes, and Action dispatch permissions. The App installation URLs are currently configured in `src/services/endpoints.ts`; an environment-only setup is not sufficient to substitute your own GitHub App. Review those constants for a separate self-hosted instance.
+
+`GITASCII_ACTION_SHA` selects the Action revision written into generated workflows. Without it, the generator uses `main`. The generated Action's default telemetry URL points to `gitascii.com`; adapting a self-hosted installation also requires reviewing workflow generation and OIDC audience/verification settings. See [environment reference](/reference/environment).
+
+## Configure storage
+
+Set `DATABASE_URL` or `DATABASE_URL_UNPOOLED` for the existing Neon HTTP database client. This is not a generic TCP PostgreSQL-driver configuration. Prepare the schema using the [operations guide](/guides/operations).
+
+Set both `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for the Redis adapter. Without them, the adapter uses process memory. Memory fallback is useful locally but is not durable or shared between application instances. PostgreSQL-backed stores still need their schema and connectivity.
+
+## Build the application and Action
+
+| Command                 | Purpose                                                   |
+| :---------------------- | :-------------------------------------------------------- |
+| `npm run build`         | Build the Next.js application                             |
+| `npm run start`         | Serve that build locally                                  |
+| `npm run dev:vinext`    | Run the Cloudflare/Vinext development target on port 3001 |
+| `npm run build:vinext`  | Build the configured Cloudflare target                    |
+| `npm run deploy:vinext` | Deploy using generated `dist/server/wrangler.json`        |
+| `npm run build:action`  | Rebuild the committed Node 20 Action bundle               |
+| `npm run storybook`     | Open component stories on port 6006                       |
+
+The Cloudflare target is defined by `vite.config.ts` and `wrangler.jsonc`, including assets, compatibility flags, domain routes, and observability. Provision deployment secrets through the platform secret store. Review the configured account/domain destination before deploying a separate instance. A successful application build does not rebuild the Action bundle or documentation site automatically.
+
+## Contribution checks
+
+`npm run check` runs type checking, lint, unit tests, and the application build. The main CI also covers Storybook, browser regressions, and the Cloudflare build. Use the checks relevant to your change; this page describes commands, not evidence that a deployment has passed them.
+
+Read the repository's `AGENTS.md` before changing application code, including the installed Next.js guides and landing-page constraints. For templates, run `npm run generate:templates` after editing JSON files. See [custom widgets](/guides/custom-widgets), [templates](/templates/overview), and [documentation maintenance](/guides/documentation).
+
+Sources: [package scripts](https://github.com/Igorcbraz/GitAscii/blob/89a95eb42b684a21e16475e7573e7d822c2728a1/package.json), [Cloudflare configuration](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/wrangler.jsonc), and [service endpoints](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/services/endpoints.ts).

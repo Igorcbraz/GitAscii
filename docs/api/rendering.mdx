@@ -1,94 +1,51 @@
 ---
-title: 'Rendering'
-description: 'Core rendering functions: SVGEngine, WidgetRenderer, and External Asset Inlining'
+title: 'Rendering Engine'
+description: 'The shared SVG engine used by the backend and GitHub Action'
 ---
 
-# Rendering Engine
+The engine in `src/engine/` converts a configuration and GitHub data into SVG. Initial publication runs on the GitAscii backend; scheduled refreshes run in GitHub Actions. Standard README visits load the resulting files from GitHub. See [architecture](/architecture/rendering-and-publishing) for the complete flow.
 
-The GitAscii rendering engine lives in `src/engine/` and transforms JSON configuration models and normalized GitHub data into standards-compliant SVG strings.
+`@/engine` is an internal repository alias, not an independently published SDK. Examples using it run inside a GitAscii checkout. The [local rendering guide](/guides/reproduce-editor) includes an executable example.
 
-The editor's initial v2 publication and the bundled GitHub Action both use this engine, then process permitted external assets before writing dark and light files to the user's `gitascii` branch. The HTTP API can also invoke the engine for previews and custom requests; the standard README embed loads the published files instead.
-
-## `renderSvg(config, data, options)`
-
-The main orchestration function that computes bounds, sorts layers by `zIndex`, renders individual widget nodes, and produces the root `<svg>` container.
+## Render a composition
 
 ```typescript
-import { renderSvg, SavedConfiguration, NormalizedGitHubData, RenderOptions } from '@/engine'
+import { renderSvg } from '@/engine'
 
-export function renderSvg(
-  config: SavedConfiguration,
-  data: NormalizedGitHubData,
-  options: RenderOptions = {}
-): string
+const svg = renderSvg(config, githubData, { theme: 'dark' })
 ```
 
-### Parameters
+`renderSvg(config, data, options)` normalizes input data, filters visible widgets, sorts by `zIndex`, and wraps widget markup in a root SVG.
 
-<ParamField body="config" type="SavedConfiguration" required>
-  The profile configuration containing `globalStyles` and the `widgets` list.
-</ParamField>
+| Option            | Implemented behavior                                                                                                                                    |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `theme`           | Selects the root dark or light background. Widget colors still depend on their configuration and renderer; this does not recolor every hardcoded color. |
+| `width`, `height` | Override canvas bounds. Normal rendering uses an 800-pixel width and content-derived height.                                                            |
+| `widgets`         | Filters by widget or instance ID and repositions selected widgets to shrink-wrap the output.                                                            |
 
-<ParamField body="data" type="NormalizedGitHubData" required>
-  Normalized data containing `user`, `repos`, `languages`, `totalStars`, and `contributions`.
-</ParamField>
+The type also declares `embedFonts` and `optimize`, but the current `SVGEngine` does not consume these options. Do not rely on them for font embedding or optimization. Font appearance can differ between editor previews and image viewers.
 
-<ParamField body="options" type="RenderOptions" optional>
-  Optional rendering overrides: * `theme?: 'dark' | 'light'` - Forces dark or light palette. *
-  `width?: number` - Explicit output canvas width (defaults to bounding max or 800px). * `height?:
-  number` - Explicit output canvas height. * `widgets?: string[]` - Target widget instance IDs or
-  widget IDs to isolate with automatic shrink-wrap.
-</ParamField>
-
-### Shrink-Wrap Calculation
-
-When `options.widgets` is provided, `renderSvg` recalculates the coordinate system:
-
-1. Finds the bounding box minimum: `minX = Math.min(...widget.position.x)`, `minY = Math.min(...widget.position.y)`.
-2. Translates each widget position: `x' = x - minX`, `y' = y - minY`.
-3. Sets `<svg viewBox="0 0 maxX maxY">` precisely around the selected elements.
-
----
-
-## `renderWidgetSvg(widget, data, globalStyles, includeWrapper, forceStatic)`
-
-Renders an individual widget instance, applying frame borders, background rectangles, template decorations, entrance animations, and transforms.
+## Render a widget fragment
 
 ```typescript
 import { renderWidgetSvg } from '@/engine'
 
-export function renderWidgetSvg(
-  widget: WidgetInstance,
-  data: NormalizedGitHubData,
-  globalStyles: GlobalStyles,
-  includeWrapper: boolean = true,
-  forceStatic: boolean = false
-): string
+const fragment = renderWidgetSvg(widget, githubData, globalStyles, true, false)
 ```
 
-### Execution Steps
+The last arguments are `includeWrapper` and `forceStatic`. This returns an SVG **fragment**, normally inside a positioned `<g>`, not a standalone image. Use `renderSvg` with a one-widget configuration to obtain the root SVG. The wrapper adds frames, decorations and configured entrance animation; some renderers supply their own frame. Support for `forceStatic` depends on the registered renderer.
 
-1. **Card Frame**: If the widget is not self-contained, a background `<rect>` is created using `config.backgroundColor || globalStyles.backgroundColor`, `stroke-width`, and `borderRadius`.
-2. **Template Decorations**: Injects signature template accents (e.g. Dracula dots `🔴🟡🟢`, Cyberpunk corner cuts, Terminal `+` corner marks, Nord header accent lines, Neo-brutalism offset drop shadow).
-3. **Animations**: Injects `<style>` keyframes (`fade-in`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `zoom-in`, `zoom-out`, `flip-x`, `flip-y`, `typewriter`, `glitch`, `scan-lines`) with staggered `animation-delay` attributes across text and rect nodes.
-4. **Transform Wrapper**: If `includeWrapper` is `true`, encapsulates the node in `<g transform="translate(x, y)" id="widget-${instanceId}">`.
-
----
-
-## `embedExternalImages(svgContent)`
-
-External widgets (such as Shields badges, GitHub Readme Stats, and avatars) are initially rendered with boundary markers or remote `<image>` tags. `embedExternalImages` fetches, sanitizes, and inlines these external assets to avoid CORS issues and Camo proxy blocks.
+## Process external assets
 
 ```typescript
-import { embedExternalImages, ProcessedSvgResult } from '@/engine'
+import { processExternalAssets } from '@/engine'
 
-export async function embedExternalImages(svgContent: string): Promise<ProcessedSvgResult> {
-  // Returns: { svg: string, hasErrors: boolean }
-}
+const result = await processExternalAssets(svg)
+// result.svg, result.hasErrors, result.failedUrls (when available)
 ```
 
-### Security & Inlining Mechanisms
+The publishers run this separate asynchronous stage before committing files. It resolves external-widget markers and remote images, validates fetch targets, sanitizes supported SVGs, and embeds raster data with its MIME type. `embedExternalImages` remains an alias for this function.
 
-- **SSRF Validator**: Every external URL is pre-validated against private IP ranges (e.g. `127.0.0.1`, `10.0.0.0/8`, `169.254.169.254`) before making network calls.
-- **SVG Inlining (`inlineSvg`)**: Parses remote SVGs, extracts `<style>` blocks to prevent namespace collisions, normalizes the `viewBox`, and replaces external image tags with direct `<svg x="..." y="...">` structures.
-- **Binary Fallback**: Non-SVG images (PNG, WebP, GIF) are converted to `data:image/png;base64,...` data URIs.
+A failed asset may become a fallback or placeholder while the rest of the SVG is published. Check `hasErrors` and `failedUrls`; a returned string alone does not mean every dependency succeeded. See [external widgets](/widgets/external-widgets) and [publication health](/pro/health-monitoring).
+
+Implementation: [SVGEngine](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/SVGEngine.ts), [WidgetRenderer](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/WidgetRenderer.ts).

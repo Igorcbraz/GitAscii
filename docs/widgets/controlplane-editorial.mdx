@@ -3,15 +3,16 @@ title: 'Editorial Portfolio Widget'
 description: 'Restrained, typographic selected work index and project archive'
 ---
 
-# Editorial Portfolio Widget (`controlplane-editorial`)
+Widget ID: `controlplane-editorial`.
 
 The Editorial Portfolio widget renders a classified, broadsheet-inspired typographic index of selected repositories with serial numbers, monospace language tags, and high-contrast headlines.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface EditorialConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

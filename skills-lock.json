@@ -7,6 +7,12 @@
       "skillPath": "skills/analytics/SKILL.md",
       "computedHash": "c68a6b09f9d15c67c2130c99ced243814ca46ed95ae9e3ef458d69ddac40a84f"
     },
+    "archify": {
+      "source": "tt-a1i/archify",
+      "sourceType": "github",
+      "skillPath": "archify/SKILL.md",
+      "computedHash": "97190f1668a81e3228b4f69263ddba479b3bd537e58b1065da4034781129f76f"
+    },
     "attribution": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",

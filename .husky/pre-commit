@@ -1,1 +1,1 @@
-node node_modules/lint-staged/bin/lint-staged.js
+node node_modules/lint-staged/bin/lint-staged.js --max-arg-length 6000

@@ -20,7 +20,7 @@ The workflow supports manual dispatch. The editor installs a daily Free schedule
 | Health badge         | `GET /api/[username]/health-badge`        | SVG summary of stored publication health.                                                                                      |
 | Optional HTTP render | `GET /api/[username]` and variants        | Preview or custom API response; may redirect to a published v2 SVG when there are no render overrides.                         |
 
-The Action authenticates Pro telemetry with a GitHub OIDC token. The server verifies it and associates the report with the repository owner. Failed external assets can create error records and trigger Pro email alerts when enabled, subject to a one-hour cooldown. The badge endpoint and workflow telemetry do not provide a reliable viewer IP, geography, browser, device, or identity for the GitHub-hosted README image.
+The Action authenticates Pro telemetry with a GitHub OIDC token. The server verifies it and associates the report with the repository owner. Failed external assets can create error records. The widget-error alert path applies a one-hour cooldown and records an email-log entry, but currently does not call an email provider; the log is not proof of delivery. The badge endpoint and workflow telemetry do not provide a reliable viewer IP, geography, browser, device, or identity for the GitHub-hosted README image.
 
 ## Persistence
 

@@ -3,15 +3,16 @@ title: 'Patch Bay Channels Widget'
 description: 'Modular audio patch panel cable routing strip layout'
 ---
 
-# Patch Bay Channels Widget (`controlplane-patchbay`)
+Widget ID: `controlplane-patchbay`.
 
 The Patch Bay Channels widget simulates an analog studio audio rack with 1/4" TRS patch jacks, routing cables, signal attenuation meters, and repository channel strips.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface PatchbayConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

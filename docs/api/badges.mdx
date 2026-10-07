@@ -1,0 +1,38 @@
+---
+title: 'Analytics and Health Badges'
+description: 'Two independent SVG endpoints with different semantics'
+---
+
+These anonymous image endpoints are separate from the profile SVG. They do not render the user's layout.
+
+## Analytics badge
+
+```bash
+curl -i 'https://gitascii.com/api/badge/octocat?slug=default&style=classic'
+```
+
+| Parameter  | Meaning                                                                                                   |
+| :--------- | :-------------------------------------------------------------------------------------------------------- |
+| `username` | GitHub handle; normalized to lowercase and validated                                                      |
+| `slug`     | Profile scope; alias `profile`, default `default`; sanitized to letters, digits, underscores, and hyphens |
+| `style`    | `classic`, `compact`, `outline`, or `transparent`; unknown values fall back to `classic`                  |
+
+Successful responses return `200` and `image/svg+xml; charset=utf-8`. Invalid usernames return `400` with plain text `Invalid username`. The transparent style is a 1×1 SVG; it is not a visible counter.
+
+The route schedules metric collection after handling the request. A cached badge can be returned without recording another origin event. Collection failure does not prevent the SVG response. Account entitlement and privacy policy further determine what is retained.
+
+The route sets `Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=3600`. Its Cloudflare cache entry uses a one-hour lifetime. Counts reflect observed badge fetches, commonly from GitHub's image proxy; they are not unique human visitors. See [metrics](/pro/metrics-and-charts) and [privacy](/pro/telemetry-and-privacy).
+
+## Publication-health badge
+
+```bash
+curl -i https://gitascii.com/api/octocat/health-badge
+```
+
+This endpoint reads account-level stored publication health. It accepts the username path parameter and has no profile-selection contract. It returns `200` SVG with `Operational`, `Degraded`, or `Incident` and the stored score. Invalid usernames return `400` plain text.
+
+If the health lookup throws, the handler retains its `Operational 100%` fallback. This fallback does not prove a successful refresh. Normal no-data health behavior is defined by the health store; read [health semantics](/pro/health-monitoring) before using the badge as a monitoring signal.
+
+Headers include `Cache-Control: public, max-age=0, s-maxage=120, stale-while-revalidate=300`. This endpoint does not count README visitors or initiate a health check.
+
+Sources: [analytics badge](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/badge/%5Busername%5D/route.ts) and [health badge](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/%5Busername%5D/health-badge/route.ts).

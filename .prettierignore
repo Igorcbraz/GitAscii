@@ -4,3 +4,11 @@ out
 build
 coverage
 *.tsbuildinfo
+
+# Installed third-party skill; preserve its distributed source and fixtures.
+.agents/skills/archify/
+
+# Archify artifacts and receipts are hash-linked generated output.
+docs/architecture/diagrams/v2/*.json
+docs/architecture/diagrams/v2/*.html
+docs/images/architecture/*.svg

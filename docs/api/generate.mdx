@@ -1,0 +1,36 @@
+---
+title: 'Generate a Suggested Layout'
+description: 'POST /api/generate request, response, and errors'
+---
+
+Creates a suggested configuration from a GitHub username. It returns JSON; it does not save the profile, commit files, create a README, or install a workflow. No GitAscii session is required.
+
+```bash
+curl -i https://gitascii.com/api/generate \
+  -H 'Content-Type: application/json' \
+  --data '{"username":"octocat"}'
+```
+
+`username` must be a non-empty string. Send an object with that field. The route does not define a full request schema or a maximum username length of its own.
+
+The `200` response has this shape:
+
+```typescript
+interface GenerateResponse {
+  config: SavedConfiguration
+  data: NormalizedGitHubData
+}
+```
+
+See [configuration](/api/configuration) and [normalized types](/reference/types) for the two models. Generated widget choices depend on the fetched account data; they are not a fixed preset contract.
+
+| Status | Body / condition                                                 |
+| :----- | :--------------------------------------------------------------- |
+| `200`  | `{ config, data }`                                               |
+| `400`  | `{"error":"Invalid JSON body in request"}`                       |
+| `400`  | `{"error":"Username is required and must be a string"}`          |
+| `500`  | `{"error":"<failure message>"}`, including GitHub fetch failures |
+
+Unlike the GitHub-data GET route, this handler does not separately map a missing GitHub user to `404`. It does not set an explicit public cache policy. Keep integration retries bounded and treat the returned design as a starting point for review.
+
+Source: [generation route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/generate/route.ts).

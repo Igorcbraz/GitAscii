@@ -1,0 +1,62 @@
+---
+title: 'Read a Profile SVG'
+description: 'Image routes, rendering overrides, redirects, and conditional requests'
+---
+
+The normal V2 README uses [raw GitHub files](/guides/github-readme-integration). These anonymous HTTP routes support previews and custom integrations:
+
+```http
+GET /api/:username
+GET /api/:username/:profileSlug
+GET /api/svg/:username.svg
+GET /:username.svg
+```
+
+The default slug is `default`. Use the named-profile route to select another saved configuration.
+
+```bash
+curl -i 'https://gitascii.com/api/octocat?theme=light'
+curl -L 'https://gitascii.com/api/octocat/work?theme=dark' -o work.svg
+curl -i 'https://gitascii.com/api/octocat?widgets=header,stats'
+```
+
+## Query parameters
+
+| Parameter      | Behavior                                                                                                                                      |
+| :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme`        | `dark` or `light`; other values fall back to the route default, normally dark                                                                 |
+| `template`     | Preset ID used when no saved configuration is available; lowercased and sanitized                                                             |
+| `widgets`      | Comma-separated renderer IDs; alias `widget`. IDs are sanitized, deduplicated, filtered against the editor catalog, sorted, and limited to 12 |
+| `dynamic=1`    | Evaluate enabled Pro rules on the default profile route                                                                                       |
+| `preview_date` | Simulated date for rule evaluation; alias `date`                                                                                              |
+| `timezone`     | Simulated timezone; alias `tz`                                                                                                                |
+
+Use exact [widget IDs](/widgets/overview) and [template IDs](/templates/overview). Unsupported widget IDs are filtered rather than returned as a validation error. Rule selection and fallback are described in [dynamic rules](/pro/dynamic-rules); simulation parameters do not modify saved rules.
+
+## Responses
+
+| Status | Body and headers                                                                           |
+| :----- | :----------------------------------------------------------------------------------------- |
+| `302`  | Empty body; `Location` points to an existing raw GitHub SVG; `X-GitAscii-V2-Offload: true` |
+| `200`  | `image/svg+xml; charset=utf-8`; rendered SVG with `ETag`                                   |
+| `304`  | Empty body for a matching `If-None-Match`                                                  |
+| `400`  | Missing-username handler error; not a normal routed request                                |
+| `404`  | SVG error image for a missing GitHub account; `/api/badge` is also reserved                |
+| `500`  | SVG error image for other rendering failures                                               |
+
+Clients must inspect both status and content type. An image error is not a JSON error envelope. Follow redirects when downloading an SVG, and preserve returned ETags verbatim for conditional requests.
+
+## Cache behavior
+
+Without template, widget, preview-date, or resolved dynamic overrides, the service checks the published file and can redirect. Theme selection alone does not force a backend render.
+
+| Response path            | Browser `max-age` | CDN policy in the service                  |
+| :----------------------- | :---------------- | :----------------------------------------- |
+| Raw-file redirect        | 300 seconds       | `s-maxage=3600`                            |
+| Normal rendered SVG      | 300 seconds       | `max-age=300, stale-while-revalidate=3600` |
+| Resolved dynamic render  | 30 seconds        | `max-age=60, stale-while-revalidate=180`   |
+| Render with asset errors | 60 seconds        | `max-age=120, stale-while-revalidate=300`  |
+
+These describe service headers. Framework, CDN, raw GitHub, and GitHub image-proxy caching are separate layers; an origin header is not a guarantee of immediate README refresh. Dynamic rules are evaluated on requests that reach the service, not on every README view. See [architecture](/architecture/rendering-and-publishing).
+
+Source: [SVG service](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/services/profileSvgService.ts).

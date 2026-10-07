@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="480" viewBox="0 0 600 480" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Teko:wght@500;600;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Fira+Code:wght@300..700&amp;family=Inter+Tight:ital,wght@0,100..900;1,100..900&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Outfit:wght@100..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;family=Space+Grotesk:wght@300..700&amp;display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    text {
+      user-select: none;
+    }
+
+    .gitascii-canvas-bg {
+      fill: #0d1117;
+      transition: fill 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .gitascii-canvas-bg {
+        fill: #ffffff !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gitascii-canvas-bg {
+        fill: #0d1117 !important;
+      }
+    }
+  </style>
+
+  <rect class="" width="600" height="480" fill="#060606" rx="0" />
+
+  
+    <g transform="translate(0, 0)" id="widget-winxp-window-preview">
+
+      
+      
+      
+      
+      
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 480" width="600" height="480">
+      
+    <defs>
+      <linearGradient id="winxp-title-grad-winxp-window-winxp-window-preview" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#0058ee" />
+        <stop offset="25%" stop-color="#2989f5" />
+        <stop offset="85%" stop-color="#0058ee" />
+        <stop offset="100%" stop-color="#2989f5" />
+      </linearGradient>
+      <linearGradient id="winxp-btn-grad-winxp-window-winxp-window-preview" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#3c8cf5" />
+        <stop offset="40%" stop-color="#2464df" />
+        <stop offset="100%" stop-color="#1446b8" />
+      </linearGradient>
+      <linearGradient id="winxp-close-grad-winxp-window-winxp-window-preview" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#e96c56" />
+        <stop offset="40%" stop-color="#d63f24" />
+        <stop offset="100%" stop-color="#b8240c" />
+      </linearGradient>
+      <filter id="winxp-shadow-winxp-window-winxp-window-preview" x="-4%" y="-4%" width="108%" height="112%">
+        <feDropShadow dx="3" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.35" />
+      </filter>
+    </defs>
+
+    <!-- Outer Window Frame -->
+    <rect x="2" y="2" width="596" height="476" rx="6" ry="6" fill="#ece9d8" stroke="#0054e3" stroke-width="3" filter="url(#winxp-shadow-winxp-window-winxp-window-preview)" />
+
+    <!-- Title Bar Header -->
+    <path d="M 4 8 Q 4 4 8 4 L 592 4 Q 596 4 596 8 L 596 30 L 4 30 Z" fill="url(#winxp-title-grad-winxp-window-winxp-window-preview)" />
+
+    <!-- Title Bar Inner Highlight (Classic XP Gel Gloss) -->
+    <path d="M 4 8 Q 4 4 8 4 L 592 4 Q 596 4 596 8 L 596 16 L 4 16 Z" fill="#ffffff" fill-opacity="0.25" />
+
+    <!-- Window Icon -->
+    <circle cx="16" cy="17" r="6" fill="#f59e0b" /><text x="13.5" y="20.5" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">XP</text>
+
+    <!-- Window Title -->
+    <text x="32" y="20" font-family="'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" style="text-shadow: 1px 1px 1px #001a66;">
+      C:\Documents and Settings\example-user
+    </text>
+
+    <!-- Title Bar Buttons (Minimize, Maximize, Close) -->
+    <g transform="translate(526, 7)">
+      <!-- Minimize Button -->
+      <rect x="0" y="0" width="19" height="17" rx="3" fill="url(#winxp-btn-grad-winxp-window-winxp-window-preview)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.7" />
+      <line x1="4" y1="12" x2="14" y2="12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+
+      <!-- Maximize Button -->
+      <rect x="23" y="0" width="19" height="17" rx="3" fill="url(#winxp-btn-grad-winxp-window-winxp-window-preview)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.7" />
+      <rect x="27" y="4" width="10" height="9" fill="none" stroke="#ffffff" stroke-width="1.8" />
+      <line x1="27" y1="6" x2="37" y2="6" stroke="#ffffff" stroke-width="2" />
+
+      <!-- Close Button (Red) -->
+      <rect x="46" y="0" width="21" height="17" rx="3" fill="url(#winxp-close-grad-winxp-window-winxp-window-preview)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.8" />
+      <path d="M 52 5 L 61 12 M 61 5 L 52 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+    </g>
+  
+
+      <!-- Menu Bar -->
+      <g transform="translate(6, 32)">
+        <rect x="0" y="0" width="588" height="22" fill="#ece9d8" />
+        <line x1="0" y1="22" x2="588" y2="22" stroke="#d5d0be" />
+        <text x="10" y="15" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#000000">
+          <tspan font-weight="500"><u>F</u>ile</tspan>
+          <tspan dx="15" font-weight="500"><u>E</u>dit</tspan>
+          <tspan dx="15" font-weight="500"><u>V</u>iew</tspan>
+          <tspan dx="15" font-weight="500"><u>F</u>avorites</tspan>
+          <tspan dx="15" font-weight="500"><u>T</u>ools</tspan>
+          <tspan dx="15" font-weight="500"><u>H</u>elp</tspan>
+        </text>
+        <!-- Windows Flag Logo in menu bar corner -->
+        <g transform="translate(568, 2)">
+          <rect x="0" y="0" width="18" height="18" rx="2" fill="#ffffff" stroke="#c0c0c0" />
+          <path d="M 3 4 Q 7 2 10 4 L 10 9 Q 6 7 3 9 Z" fill="#e11d48" />
+          <path d="M 11 4 Q 14 6 16 4 L 16 9 Q 13 11 11 9 Z" fill="#2563eb" />
+          <path d="M 3 10 Q 7 8 10 10 L 10 15 Q 6 13 3 15 Z" fill="#16a34a" />
+          <path d="M 11 10 Q 14 12 16 10 L 16 15 Q 13 17 11 15 Z" fill="#ca8a04" />
+        </g>
+      </g>
+
+      <!-- Standard Buttons Toolbar & Address Bar -->
+      <g transform="translate(6, 56)">
+        <rect x="0" y="0" width="588" height="32" fill="#ece9d8" />
+        <line x1="0" y1="32" x2="588" y2="32" stroke="#d5d0be" />
+        <!-- Back Button with Green Circle -->
+        <circle cx="16" cy="15" r="11" fill="#46a049" stroke="#2e6d30" />
+        <path d="M 19 15 L 12 15 M 15 11 L 11 15 L 15 19" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="32" y="19" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#333333">Back</text>
+
+        <!-- Address Bar Box -->
+        <text x="80" y="19" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#666666">Address</text>
+        <rect x="130" y="4" width="450" height="22" rx="2" fill="#ffffff" stroke="#7f9db9" stroke-width="1.5" />
+        <circle cx="142" cy="15" r="5" fill="#2563eb" />
+        <text x="154" y="19" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#1e293b">https://github.com/example-user</text>
+      </g>
+
+      <!-- Main Workspace: Explorer Left Task Pane + Right File View -->
+      <g transform="translate(10, 96)">
+        <!-- Left Task Panel (Classic Blue Gradient Panel) -->
+        <rect x="0" y="0" width="200" height="350" rx="3" fill="#6b8fc6" />
+
+        <!-- Task Panel Section 1: System Tasks -->
+        <path d="M 4 4 Q 4 4 8 4 L 192 4 Q 196 4 196 4 L 196 24 L 4 24 Z" fill="#215dc6" />
+        <text x="12" y="17" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10.5" font-weight="bold" fill="#ffffff">System Telemetry</text>
+        <rect x="4" y="24" width="192" height="100" fill="#d6dff7" />
+
+        <!-- Specs in left panel -->
+        <g transform="translate(12, 40)">
+          <text font-family="'Segoe UI', Tahoma, sans-serif" font-size="10" fill="#001a66" font-weight="bold">Microsoft Windows XP</text>
+          <text y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Professional Version 2002</text>
+          <text y="28" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Service Pack 3 (Git Edition)</text>
+
+          <line x1="0" y1="36" x2="176" y2="36" stroke="#9bb3e1" />
+
+          <text y="50" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#001a66" font-weight="bold">Computer Rig:</text>
+          <text y="64" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Intel Pentium 4 @ 3.20GHz</text>
+          <text y="78" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">3 Repositories Online</text>
+        </g>
+
+        <!-- Task Panel Section 2: Details / Location -->
+        <g transform="translate(0, 132)">
+          <path d="M 4 0 L 196 0 L 196 20 L 4 20 Z" fill="#215dc6" />
+          <text x="12" y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10.5" font-weight="bold" fill="#ffffff">User Coordinates</text>
+          <rect x="4" y="20" width="192" height="194" fill="#d6dff7" />
+          <g transform="translate(12, 36)">
+            <text font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#001a66" font-weight="bold">Location:</text>
+            <text y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Redmond, WA</text>
+            <text y="30" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#001a66" font-weight="bold">Affiliation:</text>
+            <text y="44" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#334155">Open Source</text>
+          </g>
+        </g>
+
+        <!-- Right File/Folder Canvas Area (White Background) -->
+        <rect x="208" y="0" width="374" height="350" fill="#ffffff" stroke="#7f9db9" stroke-width="1.5" />
+
+        <!-- User Profile Card Banner inside Canvas -->
+        <g transform="translate(222, 16)">
+          <!-- Avatar Icon with XP bevel -->
+          <rect x="0" y="0" width="60" height="60" rx="3" fill="#ece9d8" stroke="#7f9db9" stroke-width="2" />
+          <circle cx="30" cy="24" r="12" fill="#2563eb" />
+          <path d="M 12 52 Q 12 40 30 40 Q 48 40 48 52 Z" fill="#2563eb" />
+          <rect x="4" y="4" width="52" height="52" fill="none" stroke="#ffffff" stroke-width="1" />
+
+          <!-- User Heading & Bio -->
+          <g transform="translate(72, 8)">
+            <text font-family="'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif" font-size="15" font-weight="bold" fill="#1e3a8a">
+              Example Developer
+            </text>
+            <text y="16" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" fill="#64748b">
+              @example-user • Authentic Windows XP Developer Profile
+            </text>
+            <text y="34" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10.5" fill="#334155">Offline documentation fixture</text>
+          </g>
+        </g>
+
+        <!-- Folder Items Grid (Classic XP Folders for GitHub Stats) -->
+        <g transform="translate(222, 106)">
+          <!-- Hard Drive / Repos -->
+          <g transform="translate(0, 0)">
+            <rect x="0" y="0" width="150" height="48" rx="2" fill="#f8fafc" stroke="#cbd5e1" />
+            <!-- HDD Icon -->
+            <rect x="8" y="10" width="28" height="18" rx="2" fill="#94a3b8" stroke="#475569" />
+            <line x1="12" y1="22" x2="24" y2="22" stroke="#ffffff" stroke-width="1.5" />
+            <circle cx="30" cy="22" r="1.5" fill="#22c55e" />
+            <text x="44" y="20" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" font-weight="bold" fill="#0f172a">Local Disk (C:)</text>
+            <text x="44" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#64748b">3 Repositories</text>
+          </g>
+
+          <!-- Stars / Achievements Drive -->
+          <g transform="translate(162, 0)">
+            <rect x="0" y="0" width="150" height="48" rx="2" fill="#f8fafc" stroke="#cbd5e1" />
+            <!-- Star Folder Icon -->
+            <path d="M 8 12 L 18 12 L 22 16 L 36 16 L 36 32 L 8 32 Z" fill="#f59e0b" stroke="#d97706" />
+            <text x="44" y="20" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" font-weight="bold" fill="#0f172a">Stars &amp; Badges</text>
+            <text x="44" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#64748b">7 Stars Earned</text>
+          </g>
+
+          <!-- Followers / Network Folder -->
+          <g transform="translate(324, 0)">
+            <rect x="0" y="0" width="150" height="48" rx="2" fill="#f8fafc" stroke="#cbd5e1" />
+            <!-- Network Icon -->
+            <rect x="10" y="12" width="22" height="16" rx="2" fill="#3b82f6" stroke="#1d4ed8" />
+            <circle cx="21" cy="20" r="3" fill="#ffffff" />
+            <text x="44" y="20" font-family="'Segoe UI', Tahoma, sans-serif" font-size="11" font-weight="bold" fill="#0f172a">Workgroup</text>
+            <text x="44" y="32" font-family="'Segoe UI', Tahoma, sans-serif" font-size="9.5" fill="#64748b">12 Followers</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Status Bar at Window Bottom -->
+      <g transform="translate(6, 454)">
+        <rect x="0" y="0" width="588" height="20" fill="#ece9d8" stroke="#d5d0be" />
+        <text x="12" y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10" fill="#475569">
+          3 objects (Disk free space: 98.4 GB)
+        </text>
+        <line x1="420" y1="2" x2="420" y2="18" stroke="#d5d0be" />
+        <text x="430" y="14" font-family="'Segoe UI', Tahoma, sans-serif" font-size="10" fill="#475569">
+          My Computer • Local Intranet
+        </text>
+      </g>
+    </svg>
+  
+  
+    </g>
+  
+</svg>

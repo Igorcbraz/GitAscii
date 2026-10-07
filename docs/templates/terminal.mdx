@@ -1,57 +1,18 @@
 ---
-title: 'Terminal & Hackerspace Presets'
-description: 'High-contrast developer terminal aesthetics, neofetch cards, and matrix CRT monitors'
+title: 'Native Terminal Templates'
+description: 'The native, native_simple, and native_advanced presets'
 ---
 
-# Terminal & Hackerspace Presets
+Use these preset IDs when selecting a terminal layout:
 
-## 1. Neo-Terminal (`terminal`)
+| ID                | Initial widget composition                                                                          |
+| :---------------- | :-------------------------------------------------------------------------------------------------- |
+| `native`          | `header`, `ascii-art`, `terminal-info`, `languages`, `footer`, `tech-stack`                         |
+| `native_advanced` | `header`, `terminal-info`, `repositories`, `avatar`, `footer`, `stats`, `languages`, `custom-image` |
+| `native_simple`   | `header`, `ascii-art`, `terminal-info`, `ascii-text`, `social-media`                                |
 
-The default GitAscii aesthetic featuring carbon dark backgrounds, zkPass Signal Lime `#c5ff4a` accents, sharp rectangular bounds, and `+` terminal corner registration markers.
+All three use JetBrains Mono, a dark `#060606` canvas, lime `#c5ff4a` accent and terminal decorations in their source JSON. Customize the resulting configuration in the editor and inspect both published themes.
 
-```json
-{
-  "templateId": "terminal",
-  "globalStyles": {
-    "backgroundColor": "#060606",
-    "textColor": "#ffffff",
-    "accentColor": "#c5ff4a",
-    "borderColor": "#252525",
-    "fontFamily": "'JetBrains Mono', monospace",
-    "borderRadius": 0,
-    "padding": 24,
-    "templateStyle": "terminal"
-  }
-}
-```
+The preset ID for Native Terminal is **`native`**, not `terminal`. `globalStyles.templateStyle = 'terminal'` controls decoration and is a separate property. For ASCII image generation, see the [ASCII pipeline](/guides/ascii-pipeline).
 
-### Pre-loaded Widgets
-
-- `header`: Display name and `@handle`.
-- `ascii-art`: Dense 150-column monochrome ASCII avatar.
-- `terminal-info`: Full neofetch spec card with dot leaders.
-- `languages`: Horizontal stacked language percentage bar.
-- `repositories`: Featured repositories list with star meters.
-- `footer`: Classified generation stamp.
-
----
-
-## 2. Hacker Space (`hackerspace`)
-
-A high-intensity cybersecurity theme with Phosphor Matrix Green `#00ff41` accents, scan-line overlays, CRT distortion flickers, and binary matrix code.
-
-```json
-{
-  "templateId": "hackerspace",
-  "globalStyles": {
-    "backgroundColor": "#0d1117",
-    "textColor": "#00ff41",
-    "accentColor": "#00ff41",
-    "borderColor": "#003b00",
-    "fontFamily": "'Courier New', monospace",
-    "borderRadius": 0,
-    "padding": 20,
-    "templateStyle": "hackerspace"
-  }
-}
-```
+See the [template catalog](/templates/overview) for source files and programmatic creation.

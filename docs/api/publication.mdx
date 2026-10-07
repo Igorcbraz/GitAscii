@@ -1,0 +1,48 @@
+---
+title: 'Editor Publication'
+description: 'Session-authenticated POST /api/github/commit and partial failures'
+---
+
+This is the editor's application endpoint, not an API-key integration service. It requires the GitAscii signed-in session and repository authorization through the GitHub App. OAuth identity alone does not grant repository write access.
+
+## Request
+
+The editor sends JSON containing `exportData`, with its layout, identity, profile slug, and metadata. An optional `installation_id` selects an installation; the backend verifies that its account matches the signed-in user. The backend replaces the configuration username with the session username.
+
+```typescript
+interface PublicationRequest {
+  exportData: SavedConfiguration
+  installation_id?: number
+}
+```
+
+Use a configuration produced by the editor or the [generation endpoint](/api/generate). This interface describes the intended caller payload; the handler does not perform complete JSON-schema validation. Invalid slugs fall back to `default`; accepted slugs use 1–50 letters, digits, underscores, or hyphens and are lowercased. The client-supplied `embedCode` does not control the final V2 embed.
+
+## Response
+
+```typescript
+interface PublicationResponse {
+  success: true
+  revision: string
+  embedCode: string
+}
+```
+
+| Status | Meaning                                                                    |
+| :----- | :------------------------------------------------------------------------- |
+| `200`  | Publication completed; response contains the generated embed and revision  |
+| `401`  | `{"error":"Unauthorized"}`: missing session                                |
+| `403`  | Profile limit, installation ownership failure, or missing App installation |
+| `500`  | Repository access, rendering, write, or other unexpected failure           |
+
+An installation-required response includes `{"error":"not_installed","installUrl":"..."}`. Install the App and retry publication from the editor. Other failures use an `error` string; some GitHub failures also include `details`.
+
+## Writes and retries
+
+Publication targets the signed-in user's profile repository. It writes JSON and initial SVGs on `gitascii`, and the README and workflow on the repository default branch. **It replaces README content.** These operations span separate GitHub writes; they are not one cross-branch transaction.
+
+Workflow dispatch, configuration caching, and lifecycle email work can fail independently without turning a completed publication into a failed response. A `200` does not guarantee that the dispatched Action has completed. A `500` can follow an earlier successful write; inspect repository files before retrying. Retrying can create a new revision and replace the README again.
+
+See [architecture](/architecture/rendering-and-publishing) for ordering and [troubleshooting](/guides/troubleshooting) for recovery. This endpoint does not establish a general-purpose personal-access-token authentication contract.
+
+Source: [publisher route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/github/commit/route.ts).

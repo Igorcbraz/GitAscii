@@ -1,0 +1,24 @@
+---
+title: 'Additional Widget Suites'
+description: 'Premium ASCII, Surveillance, Windows XP, Minecraft, and GitFut renderers'
+---
+
+These families are registered in the current SVG engine. See the [complete catalog](/widgets/overview) for every exact ID.
+
+Each renderer has its own configuration reference and layout example in the sidebar. Start with [Premium ASCII Profile Card](/widgets/premium-ascii-profile-card), [Surveillance Header](/widgets/surveillance-header), [Windows XP Window](/widgets/winxp-window), [Minecraft HUD](/widgets/minecraft-hud), or [GitFut Card](/widgets/gitfut-card). The first four include output generated from offline fixture data.
+
+| Family        | What it renders                                                                                           | Configuration and implementation                                                                                                                                                                                                                                                                                                  |
+| :------------ | :-------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Premium ASCII | Profile card, developer score, insights, developer DNA and coding velocity compositions.                  | Profile card reads properties including `customName`, `customLocation`, `showRoles`, `showMetrics`, `showTopRepos`, `maxRepos` and `showLanguages`. [Profile-card source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/PremiumAsciiProfileCardRenderer.ts). |
+| Surveillance  | Header, dossier, loadout, telemetry-themed panels, transmission, field, feeds and title.                  | Uses profile data plus configured copy, colors and decorative status values. [Suite source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/SurveillanceRenderers.ts).                                                                                         |
+| Windows XP    | Windows, Minesweeper, media player, Paint, taskbar, error dialog, system properties and Bliss background. | SVG desktop compositions. These are not executable desktop applications. [Suite source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/WinXPRenderers.ts).                                                                                                    |
+| Minecraft     | HUD, inventory, chat, achievement, server and death-screen compositions.                                  | Game-themed SVG panels, not a Minecraft server connection or playable game. [Suite source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/MinecraftRenderers.ts).                                                                                             |
+| GitFut        | Collectible football-card composition.                                                                    | Renderer ID `gitfut-card`. [Card source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/GitFutCardRenderer.ts).                                                                                                                                               |
+
+The `rugbedbugg`, `windows_xp`, `andreicsantana`, and `minecraft` presets provide starting layouts for several of these families. Their display names and IDs are listed in [templates](/templates/overview).
+
+## Data and fallback caveats
+
+Decorative status labels, coordinates, roles and locations can have preset or renderer defaults. Replace them with accurate copy before publishing. A field named “telemetry” in a themed widget is not the Pro publication-health service.
+
+The full SVG render path currently drops some optional enriched analytics fields during normalization. Premium ASCII scores, DNA and velocity may therefore use fallback-derived values. These visuals are not independently verified assessments of developer productivity. Read [data sources](/reference/data-sources) before interpreting them as metrics.

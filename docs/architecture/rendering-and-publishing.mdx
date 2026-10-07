@@ -1,0 +1,175 @@
+---
+title: 'Rendering & Publishing Architecture'
+description: 'How V1 request-time rendering evolved into V2 GitHub-native publication and refreshes'
+mode: 'wide'
+---
+
+GitAscii V2 renders a profile **before it is viewed**, commits dark and light SVGs to the user's GitHub repository, and embeds their raw GitHub URLs in the README. GitAscii still renders during editor publication; the GitAscii GitHub Action handles subsequent refreshes. The normal README image request does not execute GitAscii's backend or query its database.
+
+This page describes the implementation at [revision f248c93](https://github.com/Igorcbraz/GitAscii/tree/f248c939a3ea7810c3d3e331ae904b56a72b998f). It covers the standard GitHub-native embed. [Pro dynamic rules](/pro/dynamic-rules) deliberately use the HTTP rendering API instead.
+
+## V2 architecture
+
+![GitAscii V2: editor publication through the backend and GitHub API, repository-based Action refreshes, and raw SVG delivery to the README](/images/architecture/gitascii-v2.svg)
+
+[Open the interactive Archify diagram](/architecture/diagrams/v2/gitascii-v2.html) for zoom, source links, dark/light themes, and export controls. You can also save the standalone HTML and open it locally. The [diagram source and validation receipts](https://github.com/Igorcbraz/GitAscii/tree/main/docs/architecture/diagrams/v2) are kept beside the HTML. Arrows summarize operations; Action repository reads and writes also use the GitHub API.
+
+## Ownership and stored artifacts
+
+| Owner                                 | Responsibility                                                                                                                                                                                     |
+| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser editor                        | Edits a configuration, keeps local drafts, and submits an explicit publication request.                                                                                                            |
+| GitAscii backend                      | Authenticates the user, checks profile entitlements, obtains a GitHub App installation token, fetches profile data, renders the initial SVG pair, writes repository files, and requests a refresh. |
+| GitAscii PostgreSQL / caches          | Stores profile configurations and app/Pro state. Supports editor/API reads; it does not serve the standard published image.                                                                        |
+| GitHub API                            | Accepts authenticated repository writes, supplies GitHub data, and accepts `workflow_dispatch`.                                                                                                    |
+| User's `username/username` repository | Owns the published configurations, SVGs, workflow, and README.                                                                                                                                     |
+| GitHub Actions runtime                | Executes the bundled renderer with the workflow's `GITHUB_TOKEN`, then commits refreshed SVGs.                                                                                                     |
+| Raw GitHub / README                   | Delivers committed SVG bytes through stable URLs; the README selects the dark or light variant.                                                                                                    |
+
+The branches contain different publication inputs and outputs:
+
+```text
+username/username
+├── default branch (discovered from repository metadata)
+│   ├── README.md
+│   └── .github/workflows/gitascii.yml
+└── gitascii branch
+    ├── gitascii.json
+    ├── gitascii_work.json              # example additional profile
+    └── profiles/
+        ├── default/{dark.svg,light.svg}
+        └── work/{dark.svg,light.svg}
+```
+
+`gitascii.json` is the default profile configuration, including widgets, global styles, slug, and revision metadata. Named profiles use `gitascii_[slug].json`. The `gitascii` branch is initially created from the default branch's current commit, so it can also contain inherited files; it is not created as an orphan branch. See [Configuration](/api/configuration) for the model and [Multi-Profile](/pro/multi-profile) for profile management.
+
+## Editing, onboarding, and publication
+
+1. **Edit locally.** The editor store updates the design and saves a browser draft. This does not itself publish a GitHub commit. **Publish to GitHub** sends the current widgets, styles, template, and slug as `exportData` to `POST /api/github/commit`.
+2. **Authenticate and authorize.** GitHub OAuth exchanges an authorization code, reads the GitHub user, and establishes the GitAscii session. Repository publication separately uses a **GitHub App installation token**. The backend derives the owner from the session, checks profile write access, and stamps a revision. An absent installation returns `not_installed` with an installation URL; the editor redirects there and the setup callback returns to the app. That callback does not publish by itself.
+3. **Prepare the repository.** The backend accesses `username/username` and discovers its default branch. On a 404, it attempts to create the profile repository using the installation token. A rejected creation request is returned as an error; successful repository creation is not guaranteed by this code path.
+4. **Render and commit now.** GitAscii fetches fresh profile data and calls `bootstrapGitasciiBranch`. It creates `gitascii` if needed, renders both themes with the shared engine, processes external assets, and writes the configuration plus SVG pair through GitHub's blobs/tree/commit/ref APIs. The branch ref update uses `force: false`.
+5. **Write integration files.** The backend generates the README embed and `.github/workflows/gitascii.yml` on the default branch, updating each only when its content differs. These writes are separate from the SVG/config commit.
+6. **Request a refresh and persist app state.** It sends `workflow_dispatch` for `gitascii.yml` with `ref` set to the default branch, then attempts to save the configuration in GitAscii storage. Dispatch and storage failures are logged without failing an otherwise completed publication. The editor marks its draft clean only after a successful response.
+
+The same path handles first publication and later editor updates. A usable initial SVG pair does not depend on waiting for the dispatched Action.
+
+<Warning>
+  The current `updateReadmeContent` helper returns only the generated embed block. Publishing
+  replaces the README content; it does not preserve arbitrary surrounding Markdown or merge several
+  profile blocks. Named profile markers identify generated blocks but do not change this behavior.
+</Warning>
+
+Sources: [editor publication handler](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/editor/components/Toolbar/EditorToolbar.tsx#L328), [publication route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/github/commit/route.ts), [OAuth callback](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/auth/callback/route.ts), [GitHub App token helper](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/githubApp.ts), [branch bootstrap](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/migration/branchBootstrap.ts), and [README generator](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/migration/markdownGenerator.ts).
+
+### Pro profile mutations
+
+Creating, duplicating, or restoring a Pro profile saves app state and then calls the V2 profile publisher to bootstrap its configuration and SVGs and request a refresh. This helper assumes onboarding has already installed the workflow; it does not install it or rewrite the README. Promotion writes the canonical default and the old-default backup together in one Git commit before updating app metadata. Deletion removes the named profile files and its marked README block in separate operations. These management paths are not a transaction spanning GitHub and app storage. See [profile publisher](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/v2/profilePublisher.ts) and [multi-profile management](/pro/multi-profile).
+
+### What the backend and database retain
+
+`saveProfileConfig` writes `profiles` metadata and JSON in `profile_configurations` when PostgreSQL is configured, updates the process memory cache, and invalidates the HTTP SVG cache. Without a configured database, it uses Redis for configuration persistence. Normal storage reads use memory, then PostgreSQL (or Redis when no database is configured), then GitHub as a fallback. The public configuration endpoint requests `preferGitHub: true`.
+
+GitHub configuration lookup tries `gitascii` first, then legacy root and `.github/` locations on `main` and `master`. These copies can diverge: the Action reads configuration from GitHub, and its SVG refresh does not synchronize configuration back into PostgreSQL. The backend/database remain important for account state, entitlements, profile management, migration tracking, and optional Pro services.
+
+Sources: [profile storage](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/profileStorage.ts), [database repository](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/db/repositories/profileRepository.ts), and [configuration endpoint](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/config/%5Busername%5D/%5BprofileSlug%5D/route.ts).
+
+## Workflow and Action refreshes
+
+The generated workflow runs on `ubuntu-latest`, grants `contents: write`, has a five-minute timeout, and cancels an earlier run in the same concurrency group. It calls `Igorcbraz/GitAscii/action@<ref>` with `secrets.GITHUB_TOKEN`. The ref is `GITASCII_ACTION_SHA` when configured, otherwise `main`; deployments are not necessarily pinned to an immutable Action revision. The Action metadata selects Node 20 and the bundled `action/dist/index.js`, which includes the shared SVG engine.
+
+| Trigger                      | Implemented behavior                                                                                                                                                |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `workflow_dispatch`          | Always included. Requested by the publisher after writing files; also available for manual runs.                                                                    |
+| `schedule`                   | Editor publication forces a schedule: one deterministic daily time for Free, or a deterministic minute each hour for Pro. Username hashing spreads scheduled times. |
+| Migration-generated workflow | Adds a schedule only when the configuration contains a recognized visible dynamic widget; migration does not pass `forceSchedule`.                                  |
+| Repository config push       | No `push` trigger is generated. A direct configuration edit is picked up by a later scheduled or manually dispatched run.                                           |
+
+At execution time, the Action:
+
+1. Reads the `gitascii` branch and discovers `gitascii.json` / `gitascii_[slug].json` configurations through GitHub's tree/blob APIs. It does not load profile JSON from GitAscii's database. Missing branches or no usable configurations fail the run; onboarding must create them first.
+2. Checks the publication policy. Only scheduled runs apply the elapsed-time guard, measured against the latest branch commit date. The effective interval is the larger of `refresh_minutes` and the policy minimum. Without a successful OIDC policy response, the minimum falls back to 1,440 minutes; Pro's supported minimum is 60. Manual dispatch bypasses this elapsed-time guard.
+3. Fetches fresh GitHub data using REST and GraphQL, renders both themes for all discovered profiles (or the optional `profile_slug` selection), and inlines permitted external assets. See [Rendering](/api/rendering) and the [ASCII Pipeline](/guides/ascii-pipeline) for engine internals.
+4. Checks that each result contains SVG markup and submits the generated SVGs together through `publishAtomic`. Matching Git blob hashes produce `svg_unchanged`; a changed branch head or applicable configuration revision produces `skipped_stale`. Otherwise it creates one commit and advances the branch with `force: false`.
+5. Optionally reports profile-scoped health results with GitHub OIDC. Pro workflows grant `id-token: write`; see [Health Monitoring](/pro/health-monitoring) and [Telemetry & Privacy](/pro/telemetry-and-privacy).
+
+The policy request is a remaining GitAscii dependency during refresh, with a daily fallback. It is not a dependency for serving already published SVGs. Refresh timing is therefore a configured cadence, not a freshness or uptime guarantee.
+
+Sources: [workflow generator](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/migration/workflowGenerator.ts), [Action metadata](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/action.yml), [Action entry point](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/index.ts), [Git operations](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/gitOps.ts), and [OIDC policy/telemetry](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/oidcTelemetry.ts).
+
+## How the SVG reaches the README
+
+The generated `<picture>` references stable URLs such as:
+
+```text
+https://raw.githubusercontent.com/USERNAME/USERNAME/gitascii/profiles/default/dark.svg
+https://raw.githubusercontent.com/USERNAME/USERNAME/gitascii/profiles/default/light.svg
+```
+
+The source media queries select the theme, with the dark image as the `<img>` fallback. GitHub serves the committed files; GitHub image proxy/cache behavior can delay visibility of newer bytes at the same URL. No render runs because a reader opens the README. A failed refresh can leave the previous committed image available, but this is not a guarantee against repository deletion, access changes, or GitHub outages.
+
+Use [GitHub README Integration](/guides/github-readme-integration) for copyable embeds. The optional Pro badge makes a separate GitAscii request; it does not turn the raw profile image into an exact view counter. An enabled Pro dynamic rule for the default profile instead generates an API URL with `?dynamic=1` and follows the HTTP path.
+
+## Failure and consistency boundaries
+
+| Condition                                               | Result                                                                                                                                                                                               |
+| :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No session, profile access denied, or App not installed | Publication stops before normal repository writes. Installation flow is offered when available.                                                                                                      |
+| GitHub profile fetch or branch bootstrap fails          | The publication route fails; no success response is returned. A new branch may already have been created.                                                                                            |
+| README/workflow write fails after SVG publication       | The request fails after earlier commits may have succeeded. There is no transaction or rollback spanning both branches, README, workflow, and database.                                              |
+| Dispatch or app-storage save fails                      | Logged as non-blocking; already published SVGs remain usable. Dispatch failure is not retried by the publication route.                                                                              |
+| Action REST user/repository fetch fails                 | The Action fails before committing refreshed files. GraphQL enrichment is best-effort and can leave partial/default data.                                                                            |
+| External asset fetch fails                              | The inliner may use a fallback or placeholder and report errors. The Action can commit the resulting SVG and report degraded health; it does not always preserve the previous SVG on an asset error. |
+| New publication overtakes a running Action              | The Action skips a stale snapshot; a later ref-update race is rejected by the non-forced update and fails the run.                                                                                   |
+| Action crashes before a successful ref update           | Previously committed SVG files remain at the branch head.                                                                                                                                            |
+
+Sources: [publication route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/github/commit/route.ts), [Action data fetcher](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/dataFetcher.ts), [external asset inliner](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/inliner/externalAssetInliner.ts), and [atomic publication](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/gitOps.ts#L201).
+
+## V1: verified historical rendering path
+
+The available pre-V2 snapshot is [4e6b497](https://github.com/Igorcbraz/GitAscii/tree/4e6b497a0a3334a93bbb5465e7d42759f045598a), the parent of the first available GitHub-native publishing commit, `085de1f`. This describes that late V1 implementation, not every earlier deployment.
+
+- **Save:** the publisher wrote configuration JSON to the profile repository's default branch and saved an app-side copy. README embeds pointed to GitAscii HTTP SVG endpoints such as `/api/[username]`, with theme/slug variants and cache-busting URLs in some paths. A separate contribution-snake workflow existed; it did not render the whole GitAscii profile.
+- **Render and serve:** on an uncached HTTP request, GitAscii loaded configuration (memory/Redis/PostgreSQL, then legacy GitHub locations), fetched GitHub data, ran `renderSvg`, inlined external images, and returned `image/svg+xml`. Missing configuration could fall back to a template.
+- **Cache/proxy:** the service had an optional Cloudflare Cache API layer, memory and compressed Redis SVG caches, in-flight request deduplication, ETags/304 responses, and browser/CDN cache headers. Normal responses requested a 300-second cache lifetime and CDN stale-while-revalidate; degraded results used shorter lifetimes. GitHub Camo added another cache/proxy boundary for README embeds.
+- **Limitation:** cold generation still depended on the GitAscii runtime, cache/storage availability, GitHub requests, and external assets before the proxy received an image. The historical service explicitly records that awaiting an edge-cache write caused cold renders to reach Camo 504 timeouts. Layered invalidation and cache lifetimes also complicated update visibility.
+
+Historical sources: [publisher](https://github.com/Igorcbraz/GitAscii/blob/4e6b497a0a3334a93bbb5465e7d42759f045598a/src/app/api/github/commit/route.ts), [SVG service](https://github.com/Igorcbraz/GitAscii/blob/4e6b497a0a3334a93bbb5465e7d42759f045598a/src/services/profileSvgService.ts), [SVG cache](https://github.com/Igorcbraz/GitAscii/blob/4e6b497a0a3334a93bbb5465e7d42759f045598a/src/services/profileSvgCache.ts), and [configuration storage](https://github.com/Igorcbraz/GitAscii/blob/4e6b497a0a3334a93bbb5465e7d42759f045598a/src/lib/profileStorage.ts). The HTTP renderer remains in V2 for previews and integrations; its current behavior is documented in [Endpoints](/reference/endpoints).
+
+## V1 versus V2
+
+| Concern               | Late V1 HTTP embed                                         | Standard V2 GitHub-native embed                                                              |
+| :-------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| Rendering time        | Cache miss on an image request                             | Editor publication or workflow execution                                                     |
+| SVG origin            | GitAscii HTTP rendering service                            | Committed files on GitHub's `gitascii` branch                                                |
+| Availability coupling | Cold requests need a working render path                   | Existing SVG delivery survives GitAscii render/backend failures                              |
+| Freshness             | Render/cache lifetimes and proxy caching                   | Publication cadence, Action success, then GitHub caching                                     |
+| Work placement        | GitAscii handles render work on the serving path           | GitAscii handles explicit publication; Actions handles refresh work                          |
+| Operational cost      | Serving, rendering, upstream calls, and cache invalidation | Repository commits, workflow permissions/runtime, GitHub API calls, and concurrency handling |
+| Request-time choices  | API can evaluate eligible dynamic rules                    | Static files cannot select a different profile at view time                                  |
+
+V2 moves expensive rendering out of the usual image request and makes the published result independently retrievable from the user's repository. The tradeoff is eventually refreshed data and a publishing pipeline that can fail or partially complete. It does not remove GitAscii storage, every API request, GitHub caching, or the need to monitor refresh failures.
+
+## V1 to V2 migration and backfill
+
+Existing users can publish through the editor, which creates the V2 artifacts directly. That route intentionally leaves legacy configuration files in place. There is also a separate migration campaign implementation:
+
+1. A secret-protected `POST /api/internal/migration` reads eligible rows from PostgreSQL's `migration_installations` table, mints installation tokens, checks rate limits, and records outcomes. Eligible states are `pending`, `failed`, `permissions_missing`, and `post_merge_pending`, with fewer than five attempts.
+2. For an unmigrated repository, the engine loads the default profile through existing storage/fallbacks and fetches fresh GitHub data. If no configuration is found, it constructs a minimal stats configuration. It bootstraps `gitascii` and the initial SVG pair **before** proposing integration changes.
+3. It opens a PR from `gitascii-v2-migration` to the default branch with the workflow and generated README. The PR also removes root `gitascii.json` / `gitascii_default.json` from the default branch when present. This migration handles the default profile; it is not an all-slug backfill.
+4. When a workflow is already present, the engine checks the branch, both default SVGs, and the README raw URL. It may rewrite the README to repair the embed or dispatch a refresh. It returns `completed` only when those checks pass; otherwise it returns `post_merge_pending`. Existing open or closed-unmerged PRs have separate states.
+
+<Note>
+  Repository inspection found no production caller of `upsertMigrationInstallation` and no scheduled
+  caller of the migration endpoint. Also, the batch query excludes `pr_opened`, so opening a PR does
+  not by itself establish automatic post-merge verification. Queue population, scheduling, and
+  requeueing after merge require orchestration that cannot be verified here.
+</Note>
+
+The separate `runRedisToPostgresBackfill` utility copies legacy app data (users, settings, profiles/configurations, versions, rules, email logs, and errors) under locks. It does not publish GitHub SVGs. No invocation of that utility was found in the current application or scripts, so it is documented as available migration code rather than an automatic startup step.
+
+Sources: [migration endpoint](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/internal/migration/route.ts), [migration engine](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/migration/migrationEngine.ts), [queue repository](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/db/repositories/installationRepository.ts), and [Redis-to-PostgreSQL backfill](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/db/backfill.ts).
+
+## Verification limits
+
+Source inspection establishes the implemented paths, not their production execution history. The repository does not establish migration rollout completion, externally configured schedulers, actual GitHub App installation permissions, deployed `GITASCII_ACTION_SHA`, or exact raw/Camo cache retention. Repository creation is an attempted API call, not a verified onboarding outcome. The V1 snapshot supplies concrete engineering evidence but no measured before/after reliability or cost data.

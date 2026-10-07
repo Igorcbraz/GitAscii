@@ -3,8 +3,6 @@ title: 'Multi-Profile Architecture'
 description: 'Publish and manage named v2 profile configurations'
 ---
 
-# Multi-Profile Architecture
-
 Pro can manage a default profile and additional named slugs such as `minimal` or `work`. Each has its own configuration and dark/light published SVG pair on the `gitascii` branch:
 
 | Slug      | Configuration        | Published files                          |
@@ -17,3 +15,5 @@ Use the generated `<picture>` embed for each slug. For example, the dark source 
 In `/pro/profiles`, you can create, duplicate, rename, delete, and restore profile versions. Promoting a named profile to default publishes the new canonical default and a backup in one Git commit. The default profile itself cannot be deleted.
 
 The Pro badge uses a `slug` query parameter, so badge request totals can be grouped by profile. Those totals are proxy fetch observations, not unique visitors. Dynamic rules affect only the optional default HTTP API embed with `?dynamic=1`; direct published-file URLs always display the named slug.
+
+Creating, duplicating and restoring profiles invokes the V2 publisher after saving app state. These management operations require an App installation and assume the repository workflow already exists; they do not install the workflow or add a README embed. Copy the desired slug embed into your README yourself. Renaming display metadata is separate from changing the rendered design. Deletion removes the named configuration/SVG files and its marked README block through separate GitHub operations. A partial error can leave app and repository state out of sync; inspect both before retrying.

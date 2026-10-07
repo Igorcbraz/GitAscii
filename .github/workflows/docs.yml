@@ -1,0 +1,33 @@
+name: Documentation
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'scripts/check-docs.mjs'
+      - 'src/constants/widgetIds.ts'
+      - '.github/workflows/docs.yml'
+  push:
+    branches: [main, dev]
+    paths:
+      - 'docs/**'
+      - 'scripts/check-docs.mjs'
+      - 'src/constants/widgetIds.ts'
+      - '.github/workflows/docs.yml'
+permissions:
+  contents: read
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.x'
+      - name: Check navigation, catalog, and local links
+        run: node scripts/check-docs.mjs
+      - name: Validate Mintlify pages
+        working-directory: docs
+        run: npx --yes mintlify validate
+      - name: Check Mintlify links
+        working-directory: docs
+        run: npx --yes mintlify broken-links

@@ -3,15 +3,16 @@ title: 'Cipher Print Rosette Widget'
 description: 'Engraved rosette index and edition ledger register folio'
 ---
 
-# Cipher Print Rosette Widget (`controlplane-cipher`)
+Widget ID: `controlplane-cipher`.
 
 The Cipher Print Rosette widget renders repositories inside a banknote-grade guilloché rosette engraving with hexadecimal ledger registers and cryptographic stamp borders.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface CipherConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

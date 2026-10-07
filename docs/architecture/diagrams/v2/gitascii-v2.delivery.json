@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "dbcb8d68-5ab7-4a75-8c24-8e025a37fdd5",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Repos\\GitAscii\\docs\\architecture\\diagrams\\v2\\candidate.json",
+  "output": "C:\\Repos\\GitAscii\\docs\\architecture\\diagrams\\v2\\gitascii-v2.html",
+  "specification": {
+    "sha256": "c49db6152747c887a5c3240c46573083571e97e609cabe3225dccf8b1d31aafe",
+    "bytes": 7959
+  },
+  "artifact": {
+    "sha256": "97970d1a2258ee72bc0c7634e7b7ace9469546bf0153463fe30c6fd2e10fb502",
+    "bytes": 767591
+  }
+}

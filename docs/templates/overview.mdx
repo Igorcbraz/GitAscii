@@ -1,52 +1,52 @@
 ---
-title: 'Templates Overview'
-description: 'Template Presets, Built-in Themes, Color Tokens, and Layout Engine'
+title: 'Template Catalog'
+description: 'Preset IDs loaded by the current GitAscii template registry'
 ---
 
-# Templates Overview
+Templates are starting layouts: widget positions, configuration and global styles. After you edit a profile, the saved widgets and styles are the publishing input. A template ID alone does not continuously reset your layout.
 
-GitAscii features **14 professionally tuned template presets**. Each preset provides a custom color palette, font pairings, border treatments, signature decorations, and default widget arrangements.
+The registry loads 15 JSON templates plus `blank`. These are the current IDs; filenames and IDs are not always identical.
 
-## Preset Catalog
+| Preset ID         | Name                        | Source file                      |
+| :---------------- | :-------------------------- | :------------------------------- |
+| `ascii_native`    | ASCII Native                | `ascii_native.json`              |
+| `bento_grid`      | Bento Grid                  | `bento_grid.json`                |
+| `codeweb`         | Code Web                    | `codeweb.json`                   |
+| `dossier`         | Dossier                     | `dossier.json`                   |
+| `hacker`          | Hacker                      | `hacker.json`                    |
+| `mainframe`       | Mainframe                   | `mainframe.json`                 |
+| `minecraft`       | Minecraft Dev Profile       | `minecraft.json`                 |
+| `minimal_luxe`    | Minimal Luxe                | `minimal_luxe.json`              |
+| `mission-control` | Mission Control             | `mission-control.json`           |
+| `native`          | Native Terminal             | `Native.json`                    |
+| `native_advanced` | Native Advanced             | `native_advanced.json`           |
+| `native_simple`   | Native Simple               | `native_simple.json`             |
+| `rugbedbugg`      | Surveillance Console        | `rugbedbugg.json`                |
+| `andreicsantana`  | Windows XP (Andreicsantana) | `template_andreicsantana.json`   |
+| `windows_xp`      | Windows XP Bliss Desktop    | `windows_xp.json`                |
+| `blank`           | Blank Canvas                | Defined in `TemplateRenderer.ts` |
 
-| Preset ID     | Name             | Theme Accent             | Font Stack     | Border Style                |
-| :------------ | :--------------- | :----------------------- | :------------- | :-------------------------- |
-| `terminal`    | Neo-Terminal     | `#c5ff4a` (Lime)         | JetBrains Mono | Sharp / `+` corners         |
-| `minimal`     | Minimalist Luxe  | `#e5e5e5` (Bone)         | Inter Tight    | 1px Clean                   |
-| `dracula`     | Dracula Pro      | `#bd93f9` (Purple)       | Fira Code      | `🔴🟡🟢` Mac dots           |
-| `synthwave`   | Synthwave '84    | `#ff7edb` (Neon Pink)    | VT323 / Mono   | Cyberpunk corner cuts       |
-| `tokyonight`  | Tokyo Night      | `#7aa2f7` (Sky Blue)     | JetBrains Mono | 6px Soft Radius             |
-| `gruvbox`     | Gruvbox Retro    | `#fabd2f` (Warm Yellow)  | Space Mono     | Earthy Sharp                |
-| `bento`       | Bento Modern     | `#3b82f6` (Cobalt)       | Inter Tight    | 12px Rounded Cards          |
-| `githubdark`  | GitHub Dark      | `#58a6ff` (Blue)         | SF Mono        | GitHub Header Accent        |
-| `nordic`      | Nordic Frost     | `#88c0d0` (Frost Blue)   | Inter          | Top Colored Stripe          |
-| `hackerspace` | Hacker Space     | `#00ff41` (Matrix Green) | Matrix Code    | Scanlines & CRT Glitch      |
-| `contributor` | Open Contributor | `#10b981` (Emerald)      | Inter          | Clean Flat Square           |
-| `galaxy`      | Deep Galaxy      | `#a855f7` (Deep Purple)  | Space Grotesk  | Atmospheric Radial Glow     |
-| `devcard`     | Developer Card   | `#f59e0b` (Amber)        | Inter          | Offset Neo-brutalist Shadow |
-| `blank`       | Blank Canvas     | `#c5ff4a` (Lime)         | JetBrains Mono | Unstyled Base               |
-
----
-
-## Applying Templates via API
-
-You can generate a configuration directly from any preset using `createConfiguration`:
+## Use a preset in this repository
 
 ```typescript
-import { createConfiguration, NormalizedGitHubData } from '@/engine'
+import { createConfiguration } from '@/engine'
 
 const config = createConfiguration(
-  user.id,
-  user.login,
-  'synthwave', // template ID
+  githubData.user.id,
+  githubData.user.login,
+  'native',
   'default',
-  'Synthwave Profile',
+  'Default',
   githubData
 )
 ```
 
-For an API preview, pass `?template=synthwave` in an HTTP endpoint URL. Published v2 README images use the theme stored in their configuration instead:
+Unknown IDs currently fall back to the default preset, normally `native`. This can hide a typo: `terminal`, `minimal`, `dracula` and `synthwave` are not registered preset IDs in this revision. Some similar names exist as **decoration styles**, which are a separate setting.
 
-```markdown
-![Synthwave Profile](https://gitascii.com/api/octocat?template=synthwave)
-```
+The HTTP `template` query is a fallback when there is no saved configuration; it does not replace a stored profile. Standard README URLs reference published files and do not accept template query overrides.
+
+## Maintain the catalog
+
+Add or edit a JSON file in `src/data/templates/`, then run `npm run generate:templates`. The script rebuilds `generated.ts`; do not manually maintain its imports. The loader checks IDs when constructing the registry.
+
+Sources: [template JSON directory](https://github.com/Igorcbraz/GitAscii/tree/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/data/templates), [registry generator](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/scripts/generate-template-registry.mjs), [TemplateRenderer](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/TemplateRenderer.ts).

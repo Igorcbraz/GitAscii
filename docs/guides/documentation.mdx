@@ -1,0 +1,45 @@
+---
+title: 'Maintaining the Documentation'
+description: 'Source evidence, navigation, preview, and architecture artifacts'
+---
+
+The public documentation lives in `docs/`. `docs/docs.json` is the current Mintlify configuration; `docs/mint.json` remains a compatibility configuration and must contain the same ordered pages. Pages use MDX frontmatter for title and description, so do not add a second H1.
+
+## Author against implementation
+
+Confirm behaviors in the caller, service, and persistence layer before documenting them. Distinguish implemented features from declared types, UI labels, and future intentions. Keep V1 descriptions in the historical architecture section; current guides describe V2 publication. Remaining HTTP rendering routes are valid V2 preview/custom integration interfaces.
+
+Link to shared configuration, data-source, and health semantics instead of repeating them. Describe defaults and error responses at their actual boundary. Source links pinned to a revision provide reproducible evidence; update them when the relevant behavior changes.
+
+The root README is a quick overview. `CONTRIBUTING.md` covers contribution workflow. Internal Markdown notes and dated audits are supporting evidence, not a replacement for the navigable product documentation. Keep behavioral claims in those notes aligned with the current guides.
+
+## Preview and review
+
+From the repository root, enter the documentation directory:
+
+```bash
+cd docs
+npx --yes mintlify dev
+```
+
+`npm run docs` from the repository root requires the Mintlify CLI already available on PATH. The CLI is documentation tooling; it is not an application runtime dependency.
+
+Check changed pages in both themes and on a narrow viewport, including code blocks, tables, warning messages, and the architecture illustration. A structural check does not prove visual quality.
+
+```bash
+node scripts/check-docs.mjs
+```
+
+From `docs/`, the CLI commands `npx --yes mintlify validate` and `npx --yes mintlify broken-links` check MDX and links. The Documentation CI runs these checks for future documentation changes; its existence does not mean the current changes have already passed a remote run.
+
+## Maintain the widget catalog
+
+Every registered widget ID belongs in the catalog. Keep its configuration documentation aligned with property reads in its renderer. Review property names, accepted values, defaults, and family caveats when implementation changes; source assertions are not runtime validation.
+
+The suite illustrations use invented fixture data and an inline avatar. To update an illustration, render its layout with the [local rendering example](/guides/reproduce-editor) and save the final SVG under `docs/images/widgets/`. Review both the example output and the accompanying configuration reference before committing.
+
+## Maintain the Archify diagram
+
+The V2 diagram's editable candidate, standalone HTML, and delivery receipts live in `docs/architecture/diagrams/v2/`. The embedded SVG lives in `docs/images/architecture/`. Follow the artifact directory's README and installed Archify skill to regenerate after an architectural change.
+
+Generated HTML and provenance receipts must not be reformatted after delivery. Keep application runtime dependencies unchanged for diagram generation. The small README Mermaid remains the quick overview; the full Archify diagram belongs in the detailed architecture documentation.

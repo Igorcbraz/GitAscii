@@ -1,153 +1,39 @@
 ---
 title: 'Quickstart'
-description: 'Publish a GitAscii v2 profile with GitHub-native SVG delivery'
+description: 'Design, publish, and refresh your GitHub profile with GitAscii V2'
 ---
 
-# Quickstart
+## 1. Design your profile
 
-GitAscii v2 publishes SVG files to your own `gitascii` branch. The HTTP API remains available for previews and programmatic rendering; the normal profile README uses the GitHub-hosted files.
+Open the [editor](https://gitascii.com/editor), load your GitHub username, and choose a [template](/templates/overview). Arrange widgets and adjust their properties. Editor changes are saved as a local browser draft; they do not update your public README until you publish.
 
-## 1. GitHub-native profile publishing
+## 2. Sign in and connect your repository
 
-Open the [visual editor](https://gitascii.com), sign in, authorize the GitHub App for your special profile repository (`YOUR_USERNAME/YOUR_USERNAME`), and select **Publish to GitHub**. GitAscii creates the repository if needed, publishes an initial dark/light SVG pair and configuration, writes the README embed, and installs `.github/workflows/gitascii.yml` on the default branch. The generated embed uses these stable files:
+Sign in with GitHub. GitAscii also needs its GitHub App installed with access to your profile repository, `YOUR_USERNAME/YOUR_USERNAME`. OAuth sign-in identifies you; the App installation supplies the repository permissions used for publication.
 
-<CodeGroup>
+If publishing opens the installation flow, return to the editor and publish again after granting access. The installation callback does not publish a profile by itself. If the repository is missing, the backend attempts to create it; if that fails, create your public profile repository on GitHub and give the App access to it.
 
-```markdown GitHub Markdown (Dark Only)
-![GitAscii Profile](https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg)
-```
+<Warning>
+  The current publisher replaces the repository's `README.md` with the generated embed. Save any
+  existing README content before publishing, and restore your surrounding text afterward. This also
+  applies when publishing later edits.
+</Warning>
 
-```markdown GitHub Markdown (HTML Picture Theme Switching)
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/light.svg" />
-  <img src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_USERNAME/gitascii/profiles/default/dark.svg" alt="GitAscii Profile" />
-</picture>
-```
+## 3. Publish to GitHub
 
-</CodeGroup>
+Choose **Publish to GitHub**. GitAscii renders the first dark and light SVGs on its backend and writes:
 
-The `<picture>` version switches themes automatically. The workflow refreshes saved profiles from current GitHub data on a schedule or manual dispatch; the README URL stays the same. Free runs are scheduled daily. Pro runs are scheduled hourly, subject to the configured minimum interval for scheduled publication. Additional profiles use their own `profiles/[slug]/` directory and `gitascii_[slug].json` configuration. If Pro dynamic rules are enabled for the default profile, the generated default embed uses the HTTP API with `?dynamic=1` to select a profile at request time.
+| Location                  | Files                                                                      |
+| :------------------------ | :------------------------------------------------------------------------- |
+| `gitascii` branch         | `gitascii.json`, `profiles/default/dark.svg`, `profiles/default/light.svg` |
+| Repository default branch | `README.md`, `.github/workflows/gitascii.yml`                              |
 
----
+The README uses a `<picture>` with raw GitHub URLs. The first images do not depend on waiting for the scheduled Action. Open both SVG files on the `gitascii` branch and check the README. See [README integration](/guides/github-readme-integration) for the complete embed and named-profile paths.
 
-## 2. Programmatic Engine Rendering (TypeScript)
+## 4. Refresh data and publish changes
 
-If you are building custom tools, CLI banners, or Next.js edge routes, import the core engine from `@/engine`:
+The installed GitHub Action refreshes the published images from saved configuration and current GitHub data. Editor publication requests a manual run; the generated workflow also has a daily Free or hourly Pro schedule. Pro scheduled publication is additionally limited by the configured refresh interval, so an hourly workflow does not necessarily produce an hourly commit.
 
-```typescript
-import {
-  renderSvg,
-  embedExternalImages,
-  createConfiguration,
-  NormalizedGitHubData,
-  SavedConfiguration,
-  WidgetInstance,
-} from '@/engine'
+To refresh manually, open your repository's **Actions** tab, select the GitAscii workflow, and use **Run workflow** on the default branch. To change the design, edit it in GitAscii and publish again. Editing a JSON file directly on `gitascii` does not trigger the workflow: dispatch it or wait for its schedule.
 
-// 1. Prepare Mock or Live GitHub Data
-const profileData: NormalizedGitHubData = {
-  user: {
-    id: 123456,
-    login: 'octocat',
-    name: 'The Octocat',
-    avatar_url: 'https://github.com/images/error/octocat_happy.gif',
-    bio: 'Building open source developer tools.',
-    company: 'GitHub',
-    blog: 'https://github.blog',
-    location: 'San Francisco, CA',
-    email: null,
-    twitter_username: 'github',
-    public_repos: 8,
-    public_gists: 1,
-    followers: 1200,
-    following: 0,
-    created_at: '2011-01-25T18:44:36Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  },
-  repos: [
-    {
-      id: 1,
-      name: 'git-ascii',
-      description: 'Aesthetic SVG generator for developer profiles',
-      stargazers_count: 340,
-      forks_count: 24,
-      language: 'TypeScript',
-      html_url: 'https://github.com/octocat/git-ascii',
-      fork: false,
-      updated_at: '2026-02-18T10:00:00Z',
-    },
-  ],
-  languages: {
-    TypeScript: 84500,
-    JavaScript: 12400,
-    CSS: 5600,
-  },
-  totalStars: 340,
-  totalForks: 24,
-  readmeContent: null,
-  socialAccounts: [],
-  contributions: {
-    totalContributions: 1420,
-    weeks: [],
-  },
-}
-
-// 2. Generate a Configuration Preset
-const config: SavedConfiguration = createConfiguration(
-  profileData.user.id,
-  profileData.user.login,
-  'terminal', // 'terminal' | 'minimal' | 'dracula' | 'synthwave' | etc.
-  'default',
-  'Default Profile',
-  profileData
-)
-
-// 3. Render Pure SVG
-const rawSvg = renderSvg(config, profileData, { theme: 'dark' })
-
-// 4. Inline External Images (for shields and remote avatars)
-const { svg: finalSvg, hasErrors } = await embedExternalImages(rawSvg)
-
-console.log(finalSvg) // Standard XML/SVG string
-```
-
----
-
-## 3. Rendering an Individual Widget Standalone
-
-To isolate and render a single widget without creating a full multi-widget layout:
-
-```typescript
-import { renderWidgetSvg, NormalizedGitHubData, GlobalStyles, WidgetInstance } from '@/engine'
-
-const globalStyles: GlobalStyles = {
-  backgroundColor: '#060606',
-  textColor: '#ffffff',
-  accentColor: '#c5ff4a',
-  borderColor: '#252525',
-  fontFamily: "'JetBrains Mono', monospace",
-  borderRadius: 4,
-  padding: 24,
-  themeMode: 'dark',
-}
-
-const widget: WidgetInstance = {
-  instanceId: 'stats_widget_01',
-  widgetId: 'stats',
-  name: 'GitHub Stats',
-  position: { x: 0, y: 0 },
-  size: { width: 800, height: 120 },
-  locked: false,
-  visible: true,
-  zIndex: 1,
-  config: {
-    statsStyle: 'terminal',
-    statsLayout: 'horizontal',
-    accentColor: '#c5ff4a',
-    valueFontSize: 28,
-  },
-}
-
-const widgetSvgSnippet = renderWidgetSvg(widget, profileData, globalStyles)
-```
+Continue with [using the editor](/guides/editor), [GitHub Action and refreshes](/guides/github-action), [troubleshooting](/guides/troubleshooting), or the detailed [V1 and V2 architecture](/architecture/rendering-and-publishing). Developers can [render a configuration locally](/guides/reproduce-editor) or follow [development and deployment](/guides/development).

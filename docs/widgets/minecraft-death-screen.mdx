@@ -1,0 +1,39 @@
+---
+title: 'Minecraft Death Screen'
+description: 'Minecraft renderer configuration and publication limits'
+---
+
+Widget ID: `minecraft-death-screen`.
+
+These panels reinterpret GitHub data with Minecraft visuals. They do not query a game server or provide a playable inventory, chat, or game. The current renderers do not read widget-specific configuration; geometry and supplied GitHub data control the composition. See [data sources](/reference/data-sources) for interpretation and asset fallback behavior.
+
+## Configuration
+
+This renderer does not read widget-specific configuration properties. Use its GitHub data and instance geometry; adding arbitrary keys to `config` has no effect.
+
+## Layout example
+
+This instance starts from the renderer defaults. The dimensions are an example, not a promised minimum or editor preset. Add it to the `widgets` array of a [configuration](/api/configuration), then [render the complete layout](/guides/reproduce-editor).
+
+```json
+{
+  "instanceId": "minecraft-death-screen-example",
+  "widgetId": "minecraft-death-screen",
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "width": 600,
+    "height": 360
+  },
+  "config": {},
+  "locked": false,
+  "visible": true,
+  "zIndex": 1
+}
+```
+
+Start with the matching suite's [template](/templates/overview) in the editor to inherit its composition and dimensions. Check both published themes and replace decorative placeholder copy before publishing. Preview interaction does not establish interaction support in GitHub's image embed.
+
+Implementation: [`renderMinecraftDeathScreen`](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/MinecraftRenderers.ts). See the [full catalog](/widgets/overview) for related widgets.

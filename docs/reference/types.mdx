@@ -1,122 +1,33 @@
 ---
 title: 'TypeScript Definitions'
-description: 'Comprehensive TypeScript interface and type catalog from src/engine/types.ts'
+description: 'Canonical configuration, rendering, and GitHub-data types'
 ---
 
-# TypeScript Definitions
-
-This reference documents the TypeScript interfaces exported by `@/engine`.
-
-## Core Configuration Interfaces
+The engine types are internal exports from the GitAscii repository:
 
 ```typescript
-export interface SavedConfiguration {
-  version: number
-  githubId: number
-  username: string
-  profileSlug: string
-  profileName: string
-  templateId: string
-  widgets: WidgetInstance[]
-  globalStyles: GlobalStyles
-  metadata: {
-    createdAt: string
-    updatedAt: string
-    schemaVersion: number
-    generatedBy?: 'manual' | 'auto'
-  }
-}
-
-export interface WidgetInstance {
-  instanceId: string
-  widgetId: string
-  name?: string
-  position: { x: number; y: number }
-  size: { width: number; height: number }
-  config: Record<string, unknown>
-  locked: boolean
-  visible: boolean
-  zIndex: number
-}
-
-export interface GlobalStyles {
-  backgroundColor: string
-  transparentBackground?: boolean
-  textColor: string
-  accentColor: string
-  borderColor: string
-  fontFamily: string
-  borderRadius: number
-  padding: number
-  themeMode: 'dark' | 'light' | 'auto'
-  templateStyle?: string
-}
-
-export interface RenderOptions {
-  theme?: 'dark' | 'light'
-  width?: number
-  height?: number
-  widgets?: string[]
-}
+import type {
+  SavedConfiguration,
+  WidgetInstance,
+  WidgetConfig,
+  GlobalStyles,
+  RenderOptions,
+  NormalizedGitHubData,
+} from '@/engine'
 ```
 
----
+`@/` resolves to `src/` in this checkout. It is not an npm package name.
 
-## Normalized GitHub Data Interfaces
+| Type                   | Purpose                                                                                        | Source                                                                                                                                     |
+| :--------------------- | :--------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| `SavedConfiguration`   | Identity, profile slug, template, widgets, styles and revision metadata.                       | [engine/types.ts](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/types.ts)                 |
+| `WidgetInstance`       | Instance ID, renderer ID, position, size, config, visibility, lock and layer.                  | Same file.                                                                                                                                 |
+| `WidgetConfig`         | Common optional properties plus a string-keyed `unknown` extension map.                        | Same file.                                                                                                                                 |
+| `GlobalStyles`         | Canvas and inherited widget styling.                                                           | Same file.                                                                                                                                 |
+| `RenderOptions`        | Theme, dimensions and widget selection. Declared font/optimization flags are currently unused. | Same file; see [rendering](/api/rendering).                                                                                                |
+| `NormalizedGitHubData` | GitHub user/repositories, language totals, contributions and optional derived fields.          | [github.ts](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/github/types/github.ts)       |
+| `WidgetRendererFn`     | Synchronous function returning SVG fragment markup.                                            | [WidgetRegistry.ts](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/WidgetRegistry.ts) |
 
-```typescript
-export interface NormalizedGitHubData {
-  user: GitHubUser
-  repos: GitHubRepo[]
-  languages: Record<string, number>
-  totalStars: number
-  totalForks: number
-  readmeContent?: string | null
-  socialAccounts?: GitHubSocialAccount[]
-  contributions: {
-    totalContributions: number
-    weeks: ContributionWeek[]
-  }
-}
+See [configuration](/api/configuration) for the main model and [JSON storage](/api/json) for the distinction between editor exports and published files. TypeScript interfaces are not runtime JSON Schema validators, and an arbitrary key in `WidgetConfig` has no effect unless its renderer reads it.
 
-export interface GitHubUser {
-  id: number
-  login: string
-  name: string | null
-  avatar_url: string
-  bio: string | null
-  company: string | null
-  blog: string | null
-  location: string | null
-  email: string | null
-  twitter_username: string | null
-  public_repos: number
-  public_gists: number
-  followers: number
-  following: number
-  created_at: string
-  updated_at: string
-}
-
-export interface GitHubRepo {
-  id: number
-  name: string
-  description: string | null
-  stargazers_count: number
-  forks_count: number
-  language: string | null
-  html_url: string
-  fork: boolean
-  updated_at: string
-}
-
-export interface ContributionDay {
-  contributionCount: number
-  date: string
-  color: string
-}
-
-export interface ContributionWeek {
-  contributionDays: ContributionDay[]
-}
-```
+Optional data fields in the type are not a guarantee that every rendering path supplies them. See [data sources and display limits](/reference/data-sources).

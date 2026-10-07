@@ -1,20 +1,22 @@
 ---
-title: 'Widget Error Monitoring & Alerts'
-description: 'How v2 reports publication failures and sends Pro alerts'
+title: 'Publication Errors and Alert Logs'
+description: 'Reported external-asset failures, incident resolution, and current alert limitations'
 ---
 
-# Widget Error Monitoring & Alerts
+During a V2 refresh, the Action processes external assets and can report failed URLs to GitAscii for Pro accounts. The errors console at `/pro/errors` shows recorded incidents, occurrence counts and resolution state. It does not detect an external service failure between refreshes.
 
-During a v2 refresh, the GitHub Action renders each configured profile and processes external assets. For Pro accounts, it can send failed asset URLs and a run result to GitAscii using GitHub OIDC. The app records an error for the affected profile; the README continues to reference the last published SVG until a successful update.
+A fatal failure before the commit leaves the last published SVG intact. A handled asset failure can publish a **new SVG with a placeholder or fallback** and report degraded health. A successful commit therefore does not prove that every remote widget rendered successfully.
 
-```mermaid
-flowchart LR
-  Action[GitHub Action refresh] -->|OIDC report| API[/api/pro/telemetry]
-  API --> Store[Health and error records]
-  Store --> Console[/pro/errors]
-  Store --> Alert[Optional email alert]
-```
+## What an incident identifies
 
-The `/pro/errors` console shows the reported profile, asset or widget label, error message, occurrence count, and resolution state. The public SVG fetch does not execute widget code, so an external service failing between refreshes is not detected at README view time.
+The telemetry endpoint creates generic IDs such as `external-widget-1` and labels such as `External Asset (hostname)`. It currently categorizes failed URLs as `FETCH_TIMEOUT`; that label does not prove the underlying cause was a timeout. Use the URL and workflow log to diagnose the failure.
 
-Email alerts require an eligible Pro account and enabled email settings. Repeated alerts for the same widget are suppressed for roughly one hour. You can mark an error resolved in the console or use the simulator to test alert behavior. See [Health Monitoring](/pro/health-monitoring) for the separate publication success signal.
+Resolve incidents in the console after repairing the configuration and checking a subsequent run. The simulator creates real stored incidents, so simulated records should also be resolved.
+
+## Email alert limitation
+
+The error-alert path checks Pro eligibility, email preferences and a one-hour cooldown. However, the current `sendWidgetErrorAlertEmail` implementation calls **only `logSentEmail`** with a `sent` status. That store persists the record; this path does not invoke an email provider.
+
+Consequently, an error-alert entry in `/pro/emails` is not evidence that a notification reached an inbox. This limitation concerns the widget-error path specifically, not every transactional email in GitAscii. Use the errors console and GitHub Actions logs to inspect publication failures.
+
+Sources: [error tracker](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/errorTrackerStore.ts), [email log store](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/emailLogStore.ts). See also [health monitoring](/pro/health-monitoring).
