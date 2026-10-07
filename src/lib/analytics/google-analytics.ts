@@ -1,5 +1,3 @@
-import { getConsentChoice } from '@/lib/consent'
-
 import { AnalyticsProvider } from './interface'
 import { AnalyticsEvents, ConsentState, UserProperties } from './types'
 
@@ -42,7 +40,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     }
 
     window.gtag('consent', 'default', {
-      analytics_storage: getConsentChoice() === 'granted' ? 'granted' : 'denied',
+      analytics_storage: 'granted',
       ad_storage: 'denied',
       ad_user_data: 'denied',
       ad_personalization: 'denied',
@@ -56,7 +54,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   identify(userId: string, properties?: UserProperties) {
     if (typeof window === 'undefined') return
-    if (getConsentChoice() !== 'granted') return
 
     const cleanedProperties = properties ? cleanPayload(properties) : undefined
 
@@ -81,7 +78,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   setUserProperties(properties: UserProperties) {
     if (typeof window === 'undefined') return
-    if (getConsentChoice() !== 'granted') return
 
     const cleanedProperties = cleanPayload(properties)
 
@@ -97,7 +93,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   track<E extends keyof AnalyticsEvents>(event: E, params?: AnalyticsEvents[E]) {
     if (typeof window === 'undefined') return
-    if (getConsentChoice() !== 'granted') return
     if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) return
 
     const cleanedParams = params ? cleanPayload(params) : undefined
@@ -118,12 +113,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
     event: E,
     params?: AnalyticsEvents[E]
   ): Promise<void> {
-    if (
-      !this.isProd ||
-      !process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
-      getConsentChoice() !== 'granted' ||
-      !window.gtag
-    ) {
+    if (!this.isProd || !process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || !window.gtag) {
       this.track(event, params)
       return
     }
@@ -150,7 +140,6 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   trackPageView(url: string, title?: string) {
     if (typeof window === 'undefined') return
-    if (getConsentChoice() !== 'granted') return
     if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) return
 
     if (!this.isProd) {

@@ -152,55 +152,21 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
   const editorStartTime = useRef<number | null>(null)
   const previewStartTime = useRef<number | null>(null)
 
-  const [_consentGranted, setConsentGranted] = useState<boolean>(false)
-
-  const applyGrantedConsent = useCallback(() => {
-    analytics.updateConsent({
-      analytics_storage: 'granted',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-    })
-  }, [])
+  const [_clarityConsentGranted, setClarityConsentGranted] = useState<boolean>(false)
 
   useEffect(() => {
     const stored = getConsentChoice()
     if (stored === 'granted') {
-      applyGrantedConsent()
-      setConsentGranted(true)
+      setClarityConsentGranted(true)
     }
-  }, [applyGrantedConsent])
+  }, [])
 
-  const handleConsentDecision = useCallback(
-    (choice: 'granted' | 'denied') => {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('analytics-consent-decision', { detail: { choice } }))
-      }
-
-      if (choice === 'granted') {
-        applyGrantedConsent()
-        setConsentGranted(true)
-        if (!safeStorage.getItem('gitascii_visited')) {
-          analytics.track('first_visit')
-          safeStorage.setItem('gitascii_visited', 'true')
-        }
-        analytics.track('session_start')
-        analytics.trackPageView(
-          safePagePath(window.location.pathname, new URLSearchParams(window.location.search)),
-          document.title
-        )
-      } else {
-        analytics.updateConsent({
-          analytics_storage: 'denied',
-          ad_storage: 'denied',
-          ad_user_data: 'denied',
-          ad_personalization: 'denied',
-        })
-        setConsentGranted(false)
-      }
-    },
-    [applyGrantedConsent]
-  )
+  const handleConsentDecision = useCallback((choice: 'granted' | 'denied') => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('analytics-consent-decision', { detail: { choice } }))
+    }
+    setClarityConsentGranted(choice === 'granted')
+  }, [])
 
   useEffect(() => {
     const handleCtaClick = (event: MouseEvent) => {
@@ -216,7 +182,7 @@ export function AutoAnalyticsTracker({ children }: { children: React.ReactNode }
     document.addEventListener('click', handleCtaClick)
 
     const isFirstVisit = !safeStorage.getItem('gitascii_visited')
-    if (isFirstVisit && getConsentChoice() === 'granted') {
+    if (isFirstVisit) {
       analytics.track('first_visit')
       safeStorage.setItem('gitascii_visited', 'true')
     }

@@ -86,53 +86,50 @@ Para adicionar um novo evento de forma profissional e segura ao longo da aplica�
 
 ### Visão Geral
 
-O GitAscii implementa um sistema de consentimento explícito. Nenhum dado de analytics é coletado sem o aceite ativo do usuário.
+O GitAscii mantém o Google Analytics 4 sempre ativo (`granted` por padrão) para métricas gerais de navegação e produto. O **Microsoft Clarity** (heatmaps e gravações de sessão) é a única ferramenta que solicita consentimento explícito do usuário antes de ser ativada.
 
 ### Como funciona — fluxo de consentimento
 
 ```
 Primeiro acesso
       │
-      ▼
-  analytics.init() chamado em analytics/index.ts
-      │  Cria gtag stub (dataLayer)
-  │  Consent Mode v2 → analytics_storage: 'denied' (padrão sem aceite salvo)
+      ├───────────────────────────────────────────────┐
+      │                                               ▼
+      ▼                                       Google Analytics 4
+  analytics.init() chamado em analytics/index.ts       Sempre ativo (analytics_storage: 'granted')
+      │  Cria gtag stub (dataLayer)                   Eventos e page views mapeados de imediato
+      │  Consent Mode v2 → analytics_storage: 'granted'
       │
       ▼
   AutoAnalyticsTracker lê localStorage via getConsentChoice()
       │
       ├── 'granted' (visita anterior com aceite) ────────────────────────────┐
-      │       updateConsent({ analytics_storage: 'granted', ... })            │
-      │       setConsentGranted(true) → eventos de sessão disparados          │
       │       ConsentControlledScripts → Clarity carregado                   │
       │       Banner NÃO exibido                                              │
       │                                                                       │
       ├── 'denied' (visita anterior com recusa) ──────────────────────────────┤
-      │       Consent permanece 'denied'                                      │
       │       Banner NÃO exibido                                              │
       │       Clarity NÃO carregado                                           │
       │                                                                       │
       └── null (primeira visita) ─────────────────────────────────────────────┤
-              ConsentBanner exibido                                            │
+              ConsentBanner exibido (apenas para Microsoft Clarity)           │
               │                                                                │
               ├── [Aceita] → saveConsentChoice('granted')                     │
               │              dispara 'analytics-consent-decision'              │
-              │              GA4 consent → 'granted'                          │
               │              Clarity: carregado dinamicamente                 │
               │                                                                │
               └── [Recusa] → saveConsentChoice('denied') ───────────────────┘
-                             GA4 consent permanece 'denied'
                              Clarity: script nunca carregado
-                             Sentry: continua funcionando normalmente
+                             GA4 & Sentry: continuam funcionando normalmente
 ```
 
 ### GA4 vs. Clarity — tratamentos diferentes
 
-|                               | Google Analytics 4                                                              | Microsoft Clarity                                            |
-| ----------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Script carregado**          | Sempre (Consent Mode v2)                                                        | Somente após consent granted                                 |
-| **Eventos do site se negado** | Não são disparados pelo provedor; `analytics_storage: 'denied'` permanece ativo | Script não existe, nada é enviado                            |
-| **Por quê a diferença**       | GA4 tem suporte nativo a Consent Mode v2                                        | Clarity não tem equivalente; não carregar é a única garantia |
+|                             | Google Analytics 4                                             | Microsoft Clarity                       |
+| --------------------------- | -------------------------------------------------------------- | --------------------------------------- |
+| **Script carregado**        | Sempre                                                         | Somente após consent granted            |
+| **Eventos do site**         | Disparados normalmente (`analytics_storage: 'granted'` padrão) | Não são enviados sem consentimento      |
+| **Consentimento requerido** | Não (granted por padrão)                                       | Sim (banner de consentimento exclusivo) |
 
 ### Sentry — separado do consentimento de analytics
 

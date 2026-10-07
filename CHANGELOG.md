@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.3.0](https://github.com/Igorcbraz/GitAscii/compare/v2.2.0...v2.3.0) (2026-10-04)
+
+
+### Features
+
+* **analytics:** always grant Google Analytics and prompt only for Clarity ([efad50a](https://github.com/Igorcbraz/GitAscii/commit/efad50a553ad644746c7fb2175fa698281b3550c))
+
+
+### Bug Fixes
+
+* **analytics:** guard vinext browser process check ([1390186](https://github.com/Igorcbraz/GitAscii/commit/1390186eabe7080ad52310f0ff41cb7ab2bebb29))
+
+## [2.2.0](https://github.com/Igorcbraz/GitAscii/compare/v2.1.0...v2.2.0) (2026-09-30)
+
+
+### Features
+
+* **analytics:** track Stripe funnel and add checkout feedback Storybook stories ([bce435e](https://github.com/Igorcbraz/GitAscii/commit/bce435e7280163d2025d0226cea123730e1a5a53))
+* **storybook:** expand component coverage and improve story quality ([4eb9208](https://github.com/Igorcbraz/GitAscii/commit/4eb92085e9d848782ec7438cf9780544c5af7312))
+
+
+### Bug Fixes
+
+* **action:** refresh bundled output after Storybook updates ([3e01b3f](https://github.com/Igorcbraz/GitAscii/commit/3e01b3f0438ef2517309800d88cc5d11684f51db))
+* **ci:** align GitHub Action bundle verification with build output ([acd2526](https://github.com/Igorcbraz/GitAscii/commit/acd2526a32db2b86b061df876f9eacd6625fcee4))
+
+
+### Performance Improvements
+
+* **landing:** optimize loading, preserve visuals, and improve video SEO ([9d5c1f9](https://github.com/Igorcbraz/GitAscii/commit/9d5c1f94915e5a970d334822f733ad700d7f5fb7))
+* **landing:** otimiza hero e vídeo, corrige widgets e melhora SEO ([80d2241](https://github.com/Igorcbraz/GitAscii/commit/80d2241f52bf2a2c01bb41b5012b87f4413248d2))
+* **neon:** reduce Postgres queries and redundant Redis writes ([e307743](https://github.com/Igorcbraz/GitAscii/commit/e30774332fc38b7a5cab4c3314989348694ee80b))
+
 ## [2.1.0](https://github.com/Igorcbraz/GitAscii/compare/v2.0.2...v2.1.0) (2026-09-27)
 
 

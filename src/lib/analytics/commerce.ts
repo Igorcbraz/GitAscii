@@ -1,7 +1,5 @@
 'use client'
 
-import { getConsentChoice } from '@/lib/consent'
-
 import { analytics } from './index'
 
 export const PRO_ITEM = {
@@ -22,19 +20,13 @@ export function trackCheckoutIntent() {
   })
 }
 
-// Only attach GA identifiers after analytics consent. The server never receives a GA API secret from the browser.
+// Attach GA identifiers when GA is active. The server never receives a GA API secret from the browser.
 export async function getGAIdentifiers(): Promise<{
   ga_client_id?: string
   ga_session_id?: string
 }> {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
-  if (
-    process.env.NODE_ENV !== 'production' ||
-    !measurementId ||
-    getConsentChoice() !== 'granted' ||
-    !window.gtag
-  )
-    return {}
+  if (process.env.NODE_ENV !== 'production' || !measurementId || !window.gtag) return {}
 
   const read = (field: 'client_id' | 'session_id') =>
     new Promise<string | undefined>((resolve) => {
