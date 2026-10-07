@@ -31,6 +31,7 @@ import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { EXTERNAL_LINKS, NAVBAR_DROPDOWN_SECTIONS } from '@/constants'
 import { clearClientSession, getClientSession } from '@/features/auth/clientSession'
 import { useI18n } from '@/i18n'
+import { navigateToGithubLogin } from '@/services/authNavigation'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
@@ -380,8 +381,9 @@ export default function Navbar() {
               <UserMenuDropdown username={session.username} onLogout={handleLogout} />
             ) : (
               <Link
-                href="/api/auth/login"
+                href={API_ENDPOINTS.AUTH.LOGIN()}
                 prefetch={false}
+                onNavigate={navigateToGithubLogin}
                 rel="nofollow"
                 onClick={() => setIsLoginLoading(true)}
                 className="inline-flex items-center justify-center gap-1.5 rounded-sm border border-graphite/70 bg-gradient-to-r from-onyx via-carbon to-onyx px-3 h-[32px] w-[130px] font-inter-tight text-label font-medium text-white transition-all duration-300 ease-in-out hover:border-graphite hover:bg-carbon hover:shadow-[0_0_14px_rgba(197,255,74,0.15)] active:scale-[0.98] group cursor-pointer overflow-hidden relative"
@@ -518,8 +520,9 @@ export default function Navbar() {
                 </div>
               ) : (
                 <Link
-                  href="/api/auth/login"
+                  href={API_ENDPOINTS.AUTH.LOGIN()}
                   prefetch={false}
+                  onNavigate={navigateToGithubLogin}
                   rel="nofollow"
                   onClick={() => setIsLoginLoading(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-sm bg-signal-lime px-5 py-3 font-inter-tight text-label font-bold text-black transition-all duration-300 ease-in-out hover:brightness-110 w-full text-center cursor-pointer min-h-[44px]"

@@ -14,6 +14,7 @@ import { getClientSession } from '@/features/auth/clientSession'
 import { StrobiAnchor } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 import { analytics } from '@/lib/analytics'
+import { navigateToGithubLogin } from '@/services/authNavigation'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 export interface UserSession {
@@ -244,6 +245,7 @@ export default function Hero() {
                     href={API_ENDPOINTS.AUTH.LOGIN()}
                     data-analytics-cta="hero_github_login"
                     prefetch={false}
+                    onNavigate={navigateToGithubLogin}
                     rel="nofollow"
                     onClick={() => setIsGithubLoading(true)}
                     className="w-full inline-flex items-center justify-center gap-2.5 rounded-sm bg-signal-lime px-6 py-3.5 font-inter-tight text-body font-bold text-black transition-all duration-300 shadow-[0_0_12px_rgba(197,255,74,0.4)] hover:shadow-[0_0_20px_rgba(197,255,74,0.65)] hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] cursor-pointer min-h-[48px]"
