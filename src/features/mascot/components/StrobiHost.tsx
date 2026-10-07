@@ -1,29 +1,30 @@
 'use client'
 
-import { AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { getStrobiChoreography } from '../assistant/motion'
+import { STROBI_MOTION, STROBI_REACTION } from '../constants/motion'
+import { REDUCED_MOTION_QUERY, STROBI_MOOD, STROBI_SCENE } from '../constants/strobi'
 import { useStrobiContext } from '../core/StrobiContext'
 import type { EyeRigState, GazeVector } from '../core/types'
+import { useStrobiAvailability } from '../hooks/useStrobiAvailability'
 import { StrobiRig } from './StrobiRig'
 import { StrobiShadow } from './StrobiShadow'
 import { StrobiSpeechBubble } from './StrobiSpeechBubble'
 import { StrobiTether } from './StrobiTether'
 
 export function StrobiHost() {
-  const {
-    state,
-    controller,
-    registry,
-    gazeController,
-    physics,
-    registerHostMounted,
-  } = useStrobiContext()
+  const { state, controller, registry, gazeController, physics, registerHostMounted } =
+    useStrobiContext()
 
   const hostRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
+  const isAssistant =
+    state.currentScene === STROBI_SCENE.EDITOR || state.currentScene === STROBI_SCENE.PRO
+  const { workspaceBlocked, pageVisible } = useStrobiAvailability(isAssistant)
 
   useEffect(() => {
     setMounted(true)
@@ -74,7 +75,7 @@ export function StrobiHost() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const mq = window.matchMedia(REDUCED_MOTION_QUERY)
     setReduceMotion(mq.matches)
     const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches)
     mq.addEventListener('change', handler)
@@ -142,11 +143,13 @@ export function StrobiHost() {
 
   useEffect(() => {
     let frameId: number
+    if (!state.visible || !pageVisible || workspaceBlocked) return
 
     const tick = (currentTime: number) => {
       const currentAnchorConfig = state.currentAnchorId ? registry.get(state.currentAnchorId) : null
       const enableFloat = currentAnchorConfig?.float !== false && !state.isSleeping
-      const enableBounce = currentAnchorConfig?.bounce === true || state.currentMood === 'jumping'
+      const enableBounce =
+        currentAnchorConfig?.bounce === true || state.currentMood === STROBI_MOOD.JUMPING
 
       const nextSpatial = physics.update(currentTime, reduceMotion, enableFloat, enableBounce)
       setSpatial(nextSpatial)
@@ -180,15 +183,23 @@ export function StrobiHost() {
     state.isSleeping,
     registry,
     reduceMotion,
+    state.visible,
+    pageVisible,
+    workspaceBlocked,
   ])
 
   const handlePet = useCallback(() => {
+    if (isAssistant) {
+      controller.react(STROBI_MOOD.HAPPY, STROBI_REACTION.petDurationMs)
+      if (!reduceMotion) physics.triggerSquash(STROBI_REACTION.squash.x, STROBI_REACTION.squash.y)
+      return
+    }
     controller.pet(strokeVelocity.current)
-  }, [controller])
+  }, [controller, isAssistant, physics, reduceMotion])
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      if ((e.target as HTMLElement).closest('button')) return
+      if (e.target instanceof Element && e.target.closest('button')) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
 
       isPointerDown.current = true
@@ -207,11 +218,11 @@ export function StrobiHost() {
       const dy = e.clientY - pointerStartPos.current.y
       const dist = Math.hypot(dx, dy)
 
-      if (!hasMovedPastThreshold.current && dist > 5) {
+      if (!hasMovedPastThreshold.current && dist > STROBI_REACTION.dragThresholdPx) {
         hasMovedPastThreshold.current = true
         setIsDragging(true)
         physics.startDrag(e.clientX, e.clientY, dragOffset.current.x, dragOffset.current.y)
-        controller.react('surprised', 1200)
+        controller.react(STROBI_MOOD.SURPRISED, STROBI_REACTION.dragStartDurationMs)
       }
 
       if (hasMovedPastThreshold.current) {
@@ -227,7 +238,7 @@ export function StrobiHost() {
         setIsDragging(false)
         const finalPos = physics.endDrag()
         controller.moveToCoords(finalPos.x, finalPos.y, { immediate: true })
-        controller.react('happy', 1600)
+        controller.react(STROBI_MOOD.HAPPY, STROBI_REACTION.dragEndDurationMs)
       } else {
         handlePet()
       }
@@ -255,6 +266,7 @@ export function StrobiHost() {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.target !== e.currentTarget) return
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         handlePet()
@@ -266,7 +278,7 @@ export function StrobiHost() {
   )
 
   const handleGoodTip = useCallback(() => {
-    controller.react('happy', 1800)
+    controller.react(STROBI_MOOD.HAPPY, STROBI_REACTION.goodTipDurationMs)
     controller.dismissSpeech()
   }, [controller])
 
@@ -279,7 +291,7 @@ export function StrobiHost() {
     }
   }, [state.muted, controller])
 
-  if (!mounted || !state.visible) {
+  if (!mounted || !state.visible || workspaceBlocked) {
     return (
       <div
         id="strobi-persistent-actor"
@@ -304,9 +316,13 @@ export function StrobiHost() {
   const mascotCenterX = spatial.x + (state.size * spatial.scale) / 2
   const mascotCenterY = spatial.y + (state.size * spatial.scale) / 2
 
+  let reactionDuration: number = STROBI_MOTION.reactionDuration
+  if (state.currentMood === STROBI_MOOD.CELEBRATING)
+    reactionDuration = STROBI_MOTION.celebrationDuration
+  if (reduceMotion) reactionDuration = 0
+
   return (
     <>
-      {/* Visual Guiding Tether */}
       <StrobiTether
         startX={mascotCenterX}
         startY={mascotCenterY}
@@ -315,8 +331,6 @@ export function StrobiHost() {
         active={state.isGuiding && !!state.guideTargetElement}
         label="DICA STROBI"
       />
-
-      {/* The ONE Persistent Mascot Container */}
       <div
         ref={hostRef}
         id="strobi-persistent-actor"
@@ -345,31 +359,36 @@ export function StrobiHost() {
           pointerEvents: 'auto',
         }}
       >
-        {/* Contact Shadow Plane */}
         <StrobiShadow
           size={state.size * spatial.scale}
           elevation={spatial.elevation}
           squashX={spatial.squashX}
         />
-
-        {/* High-Fidelity SVG Rig */}
-        <StrobiRig
-          size={state.size * spatial.scale}
-          variant={state.variant}
-          theme={state.theme}
-          gazeVector={gaze.gazeVector}
-          eyeRigState={gaze.eyeRigState}
-          mood={state.currentMood}
-          accessory={state.currentAccessory}
-          elevation={spatial.elevation}
-          squashX={spatial.squashX}
-          squashY={spatial.squashY}
-          rotation={spatial.rotation}
-          isHovered={isHovered}
-        />
-
-        {/* Muted Badge / Indicator */}
-        {state.muted && (
+        <motion.div
+          initial={false}
+          animate={getStrobiChoreography(state.currentMood, isAssistant && !reduceMotion)}
+          transition={{
+            duration: reactionDuration,
+            ease: 'easeOut',
+          }}
+          style={{ transformOrigin: '50% 85%' }}
+        >
+          <StrobiRig
+            size={state.size * spatial.scale}
+            variant={state.variant}
+            theme={state.theme}
+            gazeVector={gaze.gazeVector}
+            eyeRigState={gaze.eyeRigState}
+            mood={state.currentMood}
+            accessory={state.currentAccessory}
+            elevation={spatial.elevation}
+            squashX={spatial.squashX}
+            squashY={spatial.squashY}
+            rotation={spatial.rotation}
+            isHovered={isHovered}
+          />
+        </motion.div>
+        {state.muted && !isAssistant && (
           <button
             type="button"
             onClick={(e) => {
@@ -395,14 +414,12 @@ export function StrobiHost() {
             </svg>
           </button>
         )}
-
-        {/* Speech Bubble Positioned Above Mascot */}
         <div
           className="absolute bottom-full right-0 mb-3 pointer-events-none"
           style={{ width: 'max-content' }}
         >
           <AnimatePresence mode="wait">
-            {state.isSpeaking && state.currentMessage && (
+            {!isAssistant && state.isSpeaking && state.currentMessage && (
               <StrobiSpeechBubble
                 key={state.currentMessage.id}
                 message={state.currentMessage}

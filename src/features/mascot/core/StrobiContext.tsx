@@ -12,6 +12,8 @@ import React, {
 
 import type { GitAsciiAvatarTheme, GitAsciiAvatarVariant } from '@/components/avatar'
 
+import { STROBI_STORAGE } from '../constants/strobi'
+import { reportStrobiStorageFailure } from '../utils/storageDiagnostics'
 import { AnchorRegistry } from './AnchorRegistry'
 import { AnimationStateMachine } from './AnimationStateMachine'
 import { GazeController } from './GazeController'
@@ -74,9 +76,11 @@ export function StrobiProvider({
     let initialVisible = true
     if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('gitascii_strobi_visible')
+        const stored = localStorage.getItem(STROBI_STORAGE.VISIBILITY)
         if (stored === 'false') initialVisible = false
-      } catch {}
+      } catch (error) {
+        reportStrobiStorageFailure('Unable to access visibility preference', error)
+      }
     }
 
     return {
@@ -188,6 +192,7 @@ export function StrobiProvider({
         return {
           ...prev,
           currentAnchorId: anchorId,
+          currentScene: config?.scene ?? prev.currentScene,
           size: coords.size,
           currentAccessory: targetAccessory,
         }
@@ -418,8 +423,10 @@ export function StrobiProvider({
     setActorState((prev) => ({ ...prev, visible: true }))
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('gitascii_strobi_visible', 'true')
-      } catch {}
+        localStorage.setItem(STROBI_STORAGE.VISIBILITY, 'true')
+      } catch (error) {
+        reportStrobiStorageFailure('Unable to access visibility preference', error)
+      }
     }
   }, [])
 
@@ -427,8 +434,10 @@ export function StrobiProvider({
     setActorState((prev) => ({ ...prev, visible: false }))
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('gitascii_strobi_visible', 'false')
-      } catch {}
+        localStorage.setItem(STROBI_STORAGE.VISIBILITY, 'false')
+      } catch (error) {
+        reportStrobiStorageFailure('Unable to access visibility preference', error)
+      }
     }
   }, [])
 

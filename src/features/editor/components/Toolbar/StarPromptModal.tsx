@@ -122,6 +122,7 @@ export function StarPromptModal({
 
   return createPortal(
     <>
+      <span hidden data-strobi-blocking />
       <div
         className={`fixed inset-0 z-110 bg-black/80 backdrop-blur-xs transition-opacity duration-200 ${
           isClosing ? 'opacity-0' : 'opacity-100'

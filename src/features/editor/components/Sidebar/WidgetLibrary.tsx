@@ -150,6 +150,7 @@ export function WidgetLibrary() {
         <button
           onClick={() => setSidebarTab('widgets')}
           data-testid="widgets-tab-btn"
+          data-strobi-context="widgets"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'widgets'
               ? 'border-signal-lime text-signal-lime bg-onyx'
@@ -161,6 +162,7 @@ export function WidgetLibrary() {
         <button
           onClick={() => setSidebarTab('templates')}
           data-testid="templates-tab-btn"
+          data-strobi-context="templates"
           className={`flex-1 py-3 font-inter-tight text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors cursor-pointer border-b-2 ${
             sidebarTab === 'templates'
               ? 'border-signal-lime text-signal-lime bg-onyx'

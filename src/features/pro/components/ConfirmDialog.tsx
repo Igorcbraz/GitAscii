@@ -96,7 +96,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const styles = getVariantStyles()
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 animate-fade-in">
+    <div
+      data-strobi-blocking
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 animate-fade-in"
+    >
       <div className="w-full max-w-md p-6 rounded-2xl bg-[#111111] border border-white/10 shadow-2xl space-y-5 relative">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">

@@ -243,6 +243,7 @@ export function V2MigrationTour({ embedded = false }: V2MigrationTourProps) {
 
   const tourElements = (
     <>
+      <span hidden data-strobi-blocking />
       {targetRect ? (
         <svg
           className={`fixed inset-0 z-[110] pointer-events-auto w-full h-full transition-opacity duration-200 ${
