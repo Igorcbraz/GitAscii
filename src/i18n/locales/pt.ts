@@ -1,4 +1,7 @@
+import { automationPt } from '@/features/automation/messages'
+
 export const pt: Record<string, string> = {
+  ...automationPt,
   'pro.checkout.error': 'Não foi possível abrir o pagamento. Tente novamente.',
   'pro.checkout.feedback_title_prefix': 'O que ',
   'pro.checkout.feedback_title_highlight': 'impediu',

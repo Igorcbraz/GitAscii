@@ -257,6 +257,15 @@ export function UserMenuDropdown({
             </div>
           )}
 
+          <Link
+            href="/settings/connections"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-xs font-medium text-chalk hover:bg-onyx hover:text-signal-lime"
+          >
+            <Layers className="size-3 shrink-0" aria-hidden="true" />
+            {t('automation.connections.title', 'Connected apps')}
+          </Link>
+
           {!isEditor && (
             <Link
               href={finalEditorHref}

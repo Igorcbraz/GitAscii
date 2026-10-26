@@ -1,3 +1,5 @@
+import { automationMigration } from '@/features/automation/migration'
+
 import { sql } from './client'
 
 export interface Migration {
@@ -385,6 +387,8 @@ export const MIGRATIONS: Migration[] = [
     },
   },
 ]
+
+MIGRATIONS.push(automationMigration)
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {
   await sql`

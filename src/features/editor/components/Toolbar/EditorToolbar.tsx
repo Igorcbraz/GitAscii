@@ -25,6 +25,7 @@ import { safeStorage } from '@/utils/storage'
 import { useEditorStore } from '../../store/editorStore'
 import { useViewModeStore } from '../../store/viewModeStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
+import { CloudDraftControls } from './CloudDraftControls'
 import { ExportGuideModal } from './ExportGuideModal'
 import { GuestLoginModal } from './GuestLoginModal'
 import { ProfileSwitcher } from './ProfileSwitcher'
@@ -622,6 +623,7 @@ export function EditorToolbar({
           data-strobi-context="export"
         >
           <ProfileSwitcher username={username} currentProfileSlug={profileSlug} />
+          <CloudDraftControls username={username} slug={profileSlug} />
           <span className="h-5 w-px bg-graphite/80 shrink-0" />
 
           <div className="flex items-center gap-2">
