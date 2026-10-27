@@ -774,19 +774,15 @@ export async function isStripeEventProcessed(eventId: string): Promise<boolean> 
 }
 
 export async function getProUsersFromDb(): Promise<string[]> {
-  try {
-    const rows = await sql`
-      SELECT u.username FROM users u
-      JOIN user_entitlements e ON e.user_id = u.id
-      WHERE e.plan_tier = 'pro'
-      ORDER BY e.updated_at DESC
-      LIMIT 100
-    `
-    return rows.map((r: any) => String(r.username))
-  } catch (err) {
-    console.warn('[UserRepository] Error fetching Pro users from DB:', err)
-    return []
-  }
+  // Let the caller distinguish an outage from a valid empty result before caching.
+  const rows = await sql`
+    SELECT u.username FROM users u
+    JOIN user_entitlements e ON e.user_id = u.id
+    WHERE e.plan_tier = 'pro'
+    ORDER BY e.updated_at DESC
+    LIMIT 100
+  `
+  return rows.map((r) => String(r.username))
 }
 
 export async function getUserCountFromDb(): Promise<number> {

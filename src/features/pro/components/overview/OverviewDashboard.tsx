@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { OVERVIEW_REFRESH_INTERVAL } from '../../constants/overview'
 import type { ProOverviewData } from '../../types'
+import { startActivePolling } from '../../utils/activePolling'
 import { AreaChart } from '../charts/AreaChart'
 import { ProBadge } from '../ProBadge'
 import { ProHeader } from '../ProHeader'
@@ -55,10 +56,7 @@ export const OverviewDashboard: React.FC = () => {
   }, [fetchData])
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      void fetchData(true)
-    }, OVERVIEW_REFRESH_INTERVAL)
-    return () => clearInterval(interval)
+    return startActivePolling(() => fetchData(true), OVERVIEW_REFRESH_INTERVAL)
   }, [fetchData])
 
   useEffect(() => {

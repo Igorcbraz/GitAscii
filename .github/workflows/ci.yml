@@ -45,6 +45,9 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Verify hidden dashboard polling without production credentials
+        run: npm run test:compute-cache:browser
+
       - name: Core editor and Pro browser regressions
         run: npm run test:e2e:core
 

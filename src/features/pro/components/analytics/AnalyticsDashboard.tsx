@@ -23,6 +23,7 @@ import type { BadgeStyle } from '@/lib/analytics/telemetryBadge'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
 import type { AnalyticsSummary, ProProfileRecord, TimeRange } from '../../types'
+import { startActivePolling } from '../../utils/activePolling'
 import { formatLocalizedDay, formatUtcHourToLocal } from '../../utils/proFormatters'
 import { ProHeader } from '../ProHeader'
 import { AnalyticsBadgeCustomizer, type BadgeStatus } from './AnalyticsBadgeCustomizer'
@@ -137,10 +138,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!autoRefresh) return
-    const interval = setInterval(() => {
-      void fetchAnalytics(true)
-    }, 15000)
-    return () => clearInterval(interval)
+    return startActivePolling(() => fetchAnalytics(true), 15000)
   }, [autoRefresh, fetchAnalytics])
 
   useEffect(() => {

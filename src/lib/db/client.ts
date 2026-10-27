@@ -18,6 +18,15 @@ export function getDbUrl(): string {
 export function getDbClient(): NeonQueryFunction<false, false> {
   if (!cachedSql) {
     const dbUrl = getDbUrl()
+    if (
+      process.env.NODE_ENV === 'development' &&
+      new URL(dbUrl).hostname.endsWith('.neon.tech') &&
+      process.env.GITASCII_ALLOW_NEON_IN_DEVELOPMENT !== 'true'
+    ) {
+      throw new Error(
+        'Local development must not wake Neon implicitly. Use a local database, or explicitly set GITASCII_ALLOW_NEON_IN_DEVELOPMENT=true for an isolated Neon development project.'
+      )
+    }
     cachedSql = neon(dbUrl)
   }
 
