@@ -1,6 +1,7 @@
 import { automationMigration } from '@/features/automation/migration'
 
 import { sql } from './client'
+import { telemetryBatchMigration } from './repositories/telemetryBatchRepository'
 
 export interface Migration {
   version: string
@@ -389,6 +390,7 @@ export const MIGRATIONS: Migration[] = [
 ]
 
 MIGRATIONS.push(automationMigration)
+MIGRATIONS.push(telemetryBatchMigration)
 
 export async function runMigrations(): Promise<{ applied: string[]; alreadyApplied: string[] }> {
   await sql`

@@ -1,5 +1,9 @@
 # Revisão antes do novo ciclo — 29/10/2026
 
+Atualização posterior: a [fila de telemetria](telemetry-queue.md) foi implementada
+localmente, com migração própria. Os riscos de acesso por badge descritos abaixo
+correspondem ao código anterior à fila; o deploy deve seguir o novo guia.
+
 ## Não há garantia de 100 CU-h apenas com as correções de cache
 
 Os commits `6a5140d` e `1e15c6a` já estão no Git; a árvore estava limpa no início

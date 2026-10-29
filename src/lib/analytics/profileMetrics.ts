@@ -1,3 +1,5 @@
+import { hasDbConfig } from '@/lib/db/client'
+
 export interface ProfileViewMetric {
   username: string
   profileSlug: string
@@ -43,12 +45,21 @@ export function parseViewerMetadata(request: Request): {
 
 export async function recordProfileView(metric: ProfileViewMetric): Promise<void> {
   try {
+    if (hasDbConfig()) {
+      const { queueView } = await import('@/features/pro/server/telemetryQueue')
+      const { getTelemetryQueueStore, flushQueuedTelemetry } =
+        await import('@/features/pro/server/telemetryQueueRedis')
+      await getTelemetryQueueStore().enqueue(queueView(metric))
+      await flushQueuedTelemetry()
+      return
+    }
     const { isProUser } = await import('@/features/pro/server/entitlements')
     if (!(await isProUser(metric.username))) return
 
     const { ingestProfileView } = await import('@/features/pro/server/analyticsStore')
     await ingestProfileView(metric)
-  } catch (error) {
-    console.warn('[ProfileMetrics] Failed to record profile view:', error)
+  } catch {
+    // SDK error text can contain request credentials. Do not log raw errors.
+    console.warn('[ProfileMetrics] Telemetry unavailable; no direct database fallback')
   }
 }
