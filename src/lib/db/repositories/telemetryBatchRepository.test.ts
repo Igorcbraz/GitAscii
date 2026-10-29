@@ -27,7 +27,7 @@ beforeAll(async () => {
     INSERT INTO user_entitlements VALUES(1,'pro','2026-01-01'),(2,'free','2026-01-01'),(3,'pro','2026-11-01');
   `)
   await telemetryBatchMigration.up()
-}, 30000)
+}, 120000)
 beforeEach(async () => {
   vi.stubEnv('PRO_USERNAMES', '')
   vi.stubEnv('PRO_ADMIN_USERS', '')

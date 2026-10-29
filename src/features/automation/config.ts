@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from '@/services/endpoints'
+
 import { AutomationError } from './errors'
 
 export const SCOPES = [
@@ -17,7 +19,10 @@ export interface Actor {
 }
 
 export function appOrigin() {
-  const url = new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+  const url = new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === 'production' ? API_ENDPOINTS.SITE.HOME : 'http://localhost:3000')
+  )
   if (
     url.username ||
     url.password ||

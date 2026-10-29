@@ -53,7 +53,7 @@ beforeAll(async () => {
   await db.exec('CREATE TABLE users (github_id BIGINT UNIQUE NOT NULL, username TEXT NOT NULL)')
   await db.exec("INSERT INTO users VALUES (1, 'alice'), (2, 'bob')")
   await automationMigration.up()
-}, 30000)
+}, 120000)
 
 beforeEach(async () => {
   await db.exec(

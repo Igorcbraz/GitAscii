@@ -18,6 +18,7 @@ function initializeSentry(Sentry: typeof import('@sentry/nextjs')) {
       /'set' on proxy: trap returned falsish/i,
       /ResizeObserver loop completed with undelivered notifications/,
       /ResizeObserver loop limit exceeded/,
+      /Object Not Found Matching Id:\d+, MethodName:update, ParamCount:4/,
       'NeonDbError',
       'exceeded the quota',
       'KineticGrid is not defined',
@@ -38,6 +39,18 @@ function initializeSentry(Sentry: typeof import('@sentry/nextjs')) {
       ) {
         return null
       }
+
+      if (
+        event.exception?.values?.some(
+          (val: any) =>
+            val.value?.includes("reading 'M_ID'") &&
+            val.stacktrace?.frames?.length > 0 &&
+            val.stacktrace.frames.every((frame: any) =>
+              /(?:^|\/)executors\/\d+\.js(?:$|\?)/.test(frame.filename || '')
+            )
+        )
+      )
+        return null
 
       if (
         event.exception?.values?.some((val: any) =>

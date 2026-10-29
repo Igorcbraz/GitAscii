@@ -17,6 +17,9 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
         does not expose status codes for errors, we simply pass 0 to render a
         generic error message. */}
         <NextError statusCode={0} />
+        <div style={{ textAlign: 'center', padding: 24 }}>
+          <button onClick={() => window.location.reload()}>Reload page</button>
+        </div>
       </body>
     </html>
   )

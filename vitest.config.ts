@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   test: {
-    maxWorkers: 4,
+    maxWorkers: process.env.CI ? 2 : 4,
     alias: {
       '@': path.resolve(dirname, './src'),
     },
