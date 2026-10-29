@@ -12,7 +12,7 @@ describe('Email API Endpoints Suite', () => {
 
   beforeEach(() => {
     resetLedgerForTesting()
-    process.env = { ...originalEnv }
+    process.env = { ...originalEnv, CRON_SECRET: 'test-cron-secret', RESEND_API_KEY: '' }
   })
 
   afterEach(() => {
@@ -139,7 +139,7 @@ describe('Email API Endpoints Suite', () => {
     it('returns 400 when body does not contain users array', async () => {
       const req1 = new Request('https://gitascii.com/api/email/reengagement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: JSON.stringify({}),
       })
       const res1 = await reengagementPost(req1)
@@ -147,7 +147,7 @@ describe('Email API Endpoints Suite', () => {
 
       const req2 = new Request('https://gitascii.com/api/email/reengagement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: JSON.stringify({ users: [] }),
       })
       const res2 = await reengagementPost(req2)
@@ -157,7 +157,7 @@ describe('Email API Endpoints Suite', () => {
     it('processes batch of inactive users successfully', async () => {
       const request = new Request('https://gitascii.com/api/email/reengagement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: JSON.stringify({
           users: [
             { username: 'user1', email: 'user1@example.com', inactiveDays: 20 },
@@ -177,7 +177,7 @@ describe('Email API Endpoints Suite', () => {
     it('returns 500 on unexpected parsing error', async () => {
       const request = new Request('https://gitascii.com/api/email/reengagement', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: 'invalid-json{',
       })
 
@@ -206,7 +206,7 @@ describe('Email API Endpoints Suite', () => {
     it('returns 400 for empty or missing users array', async () => {
       const req = new Request('https://gitascii.com/api/email/request-star', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: JSON.stringify({ users: [] }),
       })
 
@@ -217,7 +217,7 @@ describe('Email API Endpoints Suite', () => {
     it('processes batch of users requesting GitHub star', async () => {
       const request = new Request('https://gitascii.com/api/email/request-star', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: JSON.stringify({
           users: [
             { username: 'staruser1', email: 'staruser1@example.com' },
@@ -237,7 +237,7 @@ describe('Email API Endpoints Suite', () => {
     it('returns 500 on malformed json payload', async () => {
       const request = new Request('https://gitascii.com/api/email/request-star', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-cron-secret' },
         body: '{not_json}',
       })
 
