@@ -21,9 +21,13 @@ env.NODE_ENV = process.argv.includes('--build') ? 'production' : 'development'
 const child = spawn(
   process.execPath,
   [
-    'node_modules/next/dist/bin/next',
+    process.argv.includes('--vinext')
+      ? 'node_modules/vinext/dist/cli.js'
+      : 'node_modules/next/dist/bin/next',
     ...(process.argv.includes('--build')
-      ? ['build', '--webpack']
+      ? process.argv.includes('--vinext')
+        ? ['build']
+        : ['build', '--webpack']
       : ['dev', '--webpack', '--port', '3107']),
   ],
   {
