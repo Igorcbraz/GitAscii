@@ -26,3 +26,5 @@ PGlite setup hooks now allow 120 seconds, and CI uses two test workers. Assertio
 
 Final local validation with Node 22.23.2: 498 tests passed in 75 files. Full lint,
 Next compilation/typechecking and the updated Cloudflare production build passed.
+Both Playwright cache/polling regressions also passed: hidden overview and analytics
+pages issue no periodic requests and resume when visible.
