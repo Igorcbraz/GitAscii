@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/Igorcbraz/GitAscii/compare/v2.4.0...v2.4.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* **pricing:** lower international lifetime offer to USD 3 ([5577895](https://github.com/Igorcbraz/GitAscii/commit/5577895e68e73787b6e8f6f4903adf57b4c84ff8))
+
 ## [2.4.0](https://github.com/Igorcbraz/GitAscii/compare/v2.3.0...v2.4.0) (2026-10-30)
 
 
