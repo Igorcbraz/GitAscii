@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     : {}
   const acceptLanguage = headers?.get('accept-language') ?? null
   const priceId = resolvePriceId(acceptLanguage)
+  const priceLookupKey = process.env.STRIPE_PRICE_LOOKUP_KEY?.trim()
   const secretKey = process.env.STRIPE_SECRET_KEY
   const directCheckoutUrl = process.env.PRO_CHECKOUT_URL || process.env.STRIPE_CHECKOUT_URL
 
@@ -64,9 +65,14 @@ export async function POST(request: Request) {
     headers?.get('referer')?.split('/').slice(0, 3).join('/') ||
     'http://localhost:3000'
 
-  if (secretKey && priceId) {
+  if (secretKey && (priceId || priceLookupKey)) {
     try {
       const stripe = getStripeClient()
+      const checkoutPriceId = priceLookupKey
+        ? (await stripe.prices.list({ lookup_keys: [priceLookupKey], active: true, limit: 1 }))
+            .data[0]?.id
+        : priceId
+      if (!checkoutPriceId) throw new Error('The configured Pro price is unavailable.')
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: 'payment',
         customer_creation: 'always',
@@ -74,7 +80,7 @@ export async function POST(request: Request) {
         customer_email: userEmail,
         line_items: [
           {
-            price: priceId,
+            price: checkoutPriceId,
             quantity: 1,
           },
         ],

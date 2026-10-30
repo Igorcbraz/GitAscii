@@ -13,12 +13,12 @@ import { getProPricing } from './pricing'
 describe('localized Pro lifetime pricing', () => {
   it.each([
     ['pt', 'BRL', 'R$ 29,90', 'R$ 69,90', 57],
-    ['en', 'USD', '$9', '$19', 53],
-    ['de', 'EUR', '9 €', '19 €', 53],
-    ['fr', 'EUR', '9 €', '19 €', 53],
-    ['es', 'EUR', '9 €', '19 €', 53],
-    ['ja', 'JPY', '¥1,400', '¥3,000', 53],
-    ['zh', 'USD', '$9', '$19', 53],
+    ['en', 'USD', '$3', '$19', 84],
+    ['de', 'EUR', '3 €', '19 €', 84],
+    ['fr', 'EUR', '3 €', '19 €', 84],
+    ['es', 'EUR', '3 €', '19 €', 84],
+    ['ja', 'JPY', '¥470', '¥3,000', 84],
+    ['zh', 'USD', '$3', '$19', 84],
   ])(
     'returns the expected lifetime offer for %s',
     (language, currency, price, originalPrice, discount) => {
@@ -41,12 +41,12 @@ describe('localized Pro lifetime pricing', () => {
 
   it.each([
     ['pt', pt, '29,90'],
-    ['en', en, '9'],
-    ['de', de, '9'],
-    ['es', es, '9'],
-    ['fr', fr, '9'],
-    ['ja', ja, '1,400'],
-    ['zh', zh, '9'],
+    ['en', en, '3'],
+    ['de', de, '3'],
+    ['es', es, '3'],
+    ['fr', fr, '3'],
+    ['ja', ja, '470'],
+    ['zh', zh, '3'],
   ])('keeps the lifetime FAQ and comparison copy aligned for %s', (_, locale, expectedPrice) => {
     expect(locale['pro.pricing.faq.lifetime_a']).toContain(expectedPrice)
     expect(locale['pro.pricing.comp.pro_recurring_val']).toContain(expectedPrice)

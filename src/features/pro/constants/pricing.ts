@@ -67,11 +67,11 @@ export function getProPricing(lang?: string): ProPricingConfig {
   if (cleanLang === 'de' || cleanLang === 'fr' || cleanLang === 'es') {
     return {
       ...PRO_PRICING_CONFIG,
-      priceUsd: 9.0,
-      priceFormatted: '9 €',
+      priceUsd: 3.0,
+      priceFormatted: '3 €',
       originalPriceUsd: 19.0,
       originalPriceFormatted: '19 €',
-      discountPercentage: 53,
+      discountPercentage: 84,
       currency: 'EUR',
       currencySymbol: '€',
     }
@@ -80,11 +80,11 @@ export function getProPricing(lang?: string): ProPricingConfig {
   if (cleanLang === 'ja') {
     return {
       ...PRO_PRICING_CONFIG,
-      priceUsd: 9.0,
-      priceFormatted: '¥1,400',
+      priceUsd: 3.0,
+      priceFormatted: '¥470',
       originalPriceUsd: 19.0,
       originalPriceFormatted: '¥3,000',
-      discountPercentage: 53,
+      discountPercentage: 84,
       currency: 'JPY',
       currencySymbol: '¥',
     }
@@ -92,11 +92,11 @@ export function getProPricing(lang?: string): ProPricingConfig {
 
   return {
     ...PRO_PRICING_CONFIG,
-    priceUsd: 9.0,
-    priceFormatted: '$9',
+    priceUsd: 3.0,
+    priceFormatted: '$3',
     originalPriceUsd: 19.0,
     originalPriceFormatted: '$19',
-    discountPercentage: 53,
+    discountPercentage: 84,
     currency: 'USD',
     currencySymbol: '$',
   }
