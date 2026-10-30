@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.4.0](https://github.com/Igorcbraz/GitAscii/compare/v2.3.0...v2.4.0) (2026-10-30)
+
+
+### Features
+
+* **mcp:** add OAuth connections and shared editor tools ([6a5140d](https://github.com/Igorcbraz/GitAscii/commit/6a5140d241b88b7261f01a1e4d0f9ac37a439d38))
+* **strobi:** add contextual guidance and motion for editor and pro ([fb7aebb](https://github.com/Igorcbraz/GitAscii/commit/fb7aebb79f7a12b8927b8d8680d7c262203a18c9))
+
+
+### Bug Fixes
+
+* address Sentry crashes and PR validation failures ([cab5c09](https://github.com/Igorcbraz/GitAscii/commit/cab5c09eff866c1741b7a3a4d1f0305b9c1d5503))
+* **api:** require credentials for scheduled email tasks ([f431245](https://github.com/Igorcbraz/GitAscii/commit/f4312457deb6392d6f05ddb29884076ef6338bd4))
+* **auth:** handle GitHub OAuth timeouts and login navigation ([f599b6d](https://github.com/Igorcbraz/GitAscii/commit/f599b6dfd90265d6bf0ab0cccc2372660f4d9a96))
+* **deps:** patch fflate advisory without downgrading vinext ([46b49f1](https://github.com/Igorcbraz/GitAscii/commit/46b49f160eebef04333611848cf759f0762f8db3))
+* **deps:** patch Python tooling msgpack and urllib3 advisories ([3962022](https://github.com/Igorcbraz/GitAscii/commit/396202239cadd3744143c05c7b3be536be0740f9))
+* **neon:** batch badge telemetry through durable Redis queue ([5d83586](https://github.com/Igorcbraz/GitAscii/commit/5d835860f322f3314f549b358cebe2fe1ba3d5a2))
+* **neon:** bound public counter queries and stop idle polling ([1e15c6a](https://github.com/Igorcbraz/GitAscii/commit/1e15c6a5c7c9a374cfc1b2ee7f8a47685aa20958))
+* recover stale chunks and patch vulnerable runtime dependencies ([5c32809](https://github.com/Igorcbraz/GitAscii/commit/5c328092e594c0abf4ba10c4a7867bbbfa275aed))
+
 ## [2.3.0](https://github.com/Igorcbraz/GitAscii/compare/v2.2.0...v2.3.0) (2026-10-04)
 
 
