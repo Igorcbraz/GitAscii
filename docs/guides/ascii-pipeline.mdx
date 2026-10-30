@@ -1,67 +1,38 @@
 ---
 title: 'ASCII Conversion Pipeline'
-description: 'Server-side and canvas ASCII conversion, dithering algorithms, character sets, and text fonts'
+description: 'Browser image conversion, stored character grids, and server-compatible text banners'
 ---
 
-# ASCII Conversion Pipeline
+GitAscii has separate image and text conversion paths. The image converter uses browser canvas APIs; the publisher does not rerun that canvas pipeline on every Action refresh.
 
-GitAscii includes dedicated ASCII sub-engines for both image-to-text rasterization (`src/engine/ascii/converter.ts`) and string-to-FIGlet banner generation (`src/engine/ascii/textConverter.ts`).
+## Image conversion in the editor
 
-## Image to ASCII Conversion
-
-```typescript
-import {
-  convertImageToAsciiCanvas,
-  generateAsciiArt,
-  CHARSETS,
-  AsciiConvertOptions,
-} from '@/engine/ascii/converter'
-```
-
-### Conversion Pipeline Steps
+`convertImageToAsciiCanvas` in `src/engine/ascii/converter.ts` loads an image into a browser canvas, downsamples it, converts sRGB channels to linear luminance, and maps the result to a character ramp. It uses luminance weights `0.2126 R + 0.7152 G + 0.0722 B`. Edge enhancement and Floyd–Steinberg dithering are optional.
 
 ```mermaid
-graph LR
-  A[Input Image / Avatar] --> B[Downscale to Cols x Rows]
-  B --> C[Grayscale Luminance: 0.299R + 0.587G + 0.114B]
-  C --> D[Sobel Edge Enhancement]
-  D --> E[Floyd-Steinberg Dithering]
-  E --> F[Charset Character Ramp Mapping]
-  F --> G[SVG tspan / XML Text Matrix]
+flowchart LR
+  Image[Image in browser] --> Canvas[Resize and sample canvas]
+  Canvas --> Convert[Luminance and optional filters]
+  Convert --> Grid[Character grid and colors]
+  Grid --> Config[Saved widget config]
+  Config --> SVG[Backend or Action SVG renderer]
 ```
 
-### Character Set Catalog
+The ASCII Art renderer consumes stored `asciiText` and color data when present. Without stored art it can use `generateAsciiArt(username, options)`, which generates a username-derived fallback pattern; that function does not download and convert the user's avatar.
 
-```typescript
-export const CHARSETS = {
-  dense: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ',
-  standard: '@%#*+=-:. ',
-  blocks: '█▓▒░ ',
-  dots: '⣿⣇⡇⠇⠃⠁ ',
-  matrix: '0123456789ABCDEF ',
-  ascii: " .',:;!|/>(){}[]?-_+~<>i!lI;:",
-  binary: '01 ',
-  slash: '/\\| ',
-  retro: '.oO@Oop ',
-  minimal: '.*# ',
-  braille: '⡿⣟⣯⣷ ',
-}
-```
+Changing editor conversion controls such as dithering or edge enhancement requires regenerating the stored grid. These are not server-side image-processing switches in `AsciiArtRenderer`. Read the exported `CHARSETS` and `AsciiConvertOptions` in the converter for the current ramps and options.
 
----
+## Text banners
 
-## Text to ASCII Art Conversion
-
-The `convertTextToAscii` function translates alphanumeric strings into FIGlet-style ASCII art lines using embedded bitmap matrices:
+The text converter uses bundled character matrices and takes **positional arguments**:
 
 ```typescript
 import { convertTextToAscii } from '@/engine/ascii/textConverter'
 
-const asciiLines = convertTextToAscii('GITASCII', {
-  font: 'slant', // 'block' | 'slant' | 'thin'
-  charSpacing: 1,
-  charset: 'default',
-})
-
-console.log(asciiLines.join('\n'))
+const lines = convertTextToAscii('GITASCII', 'slant', 1, 'default')
+console.log(lines.join('\n'))
 ```
+
+Signature: `convertTextToAscii(text, fontName = 'block', charSpacing = 1, charsetKey = 'default', customCharset = '')`. Fonts are `block`, `slant`, and `thin`. This path does not require a browser canvas.
+
+Sources: [image converter](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/ascii/converter.ts), [text converter](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/ascii/textConverter.ts), [ASCII renderer](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/AsciiArtRenderer.ts).

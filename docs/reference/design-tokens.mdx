@@ -1,11 +1,9 @@
 ---
 title: 'Design Tokens & Colors'
-description: 'Colors, typography, spacing, and design system specifications from design.md'
+description: 'Application color and typography tokens, separate from SVG rendering'
 ---
 
-# Design Tokens & Colors
-
-GitAscii’s visual language is inspired by zkPass aesthetic tokens and technical industrial consoles, balancing brutalist minimalism, high legibility, and neon Signal Lime accents.
+These tokens describe the web application styles in `src/app/globals.css`. Published SVGs use their saved global styles and renderer output; they do not load the app stylesheet.
 
 ## Color Tokens
 
@@ -38,6 +36,8 @@ GitAscii’s visual language is inspired by zkPass aesthetic tokens and technica
 
 | Font Family        | Weights             | Intended Use                                  |
 | :----------------- | :------------------ | :-------------------------------------------- |
-| **PT Serif**       | `300`               | Elegant display titles, editorial headings    |
+| **PT Serif**       | `400`, `700`        | Elegant display titles, editorial headings    |
 | **Inter Tight**    | `400`, `500`, `600` | Interface text, card titles, status tags      |
 | **JetBrains Mono** | `400`, `500`, `600` | Monospace code, metadata, coordinates, labels |
+
+A font-family name in SVG does not guarantee that the image viewer can load the same web font as the editor. See [rendering](/api/rendering).

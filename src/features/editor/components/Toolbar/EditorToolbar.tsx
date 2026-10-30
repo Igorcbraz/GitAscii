@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
+import { EDITOR_EVENTS } from '@/constants/editorEvents'
 import { useI18n } from '@/i18n'
 import { generateV2EmbedCode } from '@/lib/migration/markdownGenerator'
 import { API_ENDPOINTS } from '@/services/endpoints'
@@ -24,6 +25,7 @@ import { safeStorage } from '@/utils/storage'
 import { useEditorStore } from '../../store/editorStore'
 import { useViewModeStore } from '../../store/viewModeStore'
 import { CommandPalette } from '../CommandPalette/CommandPalette'
+import { CloudDraftControls } from './CloudDraftControls'
 import { ExportGuideModal } from './ExportGuideModal'
 import { GuestLoginModal } from './GuestLoginModal'
 import { ProfileSwitcher } from './ProfileSwitcher'
@@ -181,7 +183,7 @@ export function EditorToolbar({
           if (store.canUndo) {
             e.preventDefault()
             store.undo()
-            window.dispatchEvent(new CustomEvent('gitascii:undo'))
+            window.dispatchEvent(new CustomEvent(EDITOR_EVENTS.UNDO))
           }
         }
         return
@@ -198,7 +200,7 @@ export function EditorToolbar({
       if (cmdOrCtrl && e.key.toLowerCase() === 'c') {
         e.preventDefault()
         store.copyWidgets()
-        window.dispatchEvent(new CustomEvent('gitascii:copy'))
+        window.dispatchEvent(new CustomEvent(EDITOR_EVENTS.COPY))
         return
       }
 
@@ -311,8 +313,8 @@ export function EditorToolbar({
     const handleOpenExportGuide = () => {
       setShowExportGuide(true)
     }
-    window.addEventListener('openExportGuide', handleOpenExportGuide)
-    return () => window.removeEventListener('openExportGuide', handleOpenExportGuide)
+    window.addEventListener(EDITOR_EVENTS.EXPORT_GUIDE, handleOpenExportGuide)
+    return () => window.removeEventListener(EDITOR_EVENTS.EXPORT_GUIDE, handleOpenExportGuide)
   }, [])
 
   if (!hasData || !username) return null
@@ -371,7 +373,7 @@ export function EditorToolbar({
 
       markClean()
       setCommitStatus('success')
-      window.dispatchEvent(new CustomEvent('gitascii:saved'))
+      window.dispatchEvent(new CustomEvent(EDITOR_EVENTS.SAVED))
       setTimeout(() => setCommitStatus('idle'), 2500)
       setTimeout(() => {
         triggerPreviewNudge()
@@ -382,6 +384,7 @@ export function EditorToolbar({
     } catch (e) {
       console.error(e)
       setCommitStatus('error')
+      window.dispatchEvent(new CustomEvent(EDITOR_EVENTS.PUBLISH_ERROR))
       setTimeout(() => setCommitStatus('idle'), 3000)
     }
   }
@@ -605,7 +608,7 @@ export function EditorToolbar({
         </button>
 
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent('gitascii:start-tour'))}
+          onClick={() => window.dispatchEvent(new CustomEvent(EDITOR_EVENTS.START_TOUR))}
           title={t('editor.toolbar.tour', 'Take Tour')}
           className="h-[30px] w-[30px] flex items-center justify-center text-ash/70 hover:text-signal-lime hover:bg-graphite/40 rounded-sm transition-all duration-150 cursor-pointer"
         >
@@ -614,8 +617,13 @@ export function EditorToolbar({
       </div>
 
       {!embedded ? (
-        <div className="flex items-center h-full ml-auto pr-3 pl-2 gap-2" id="tour-export-buttons">
+        <div
+          className="flex items-center h-full ml-auto pr-3 pl-2 gap-2"
+          id="tour-export-buttons"
+          data-strobi-context="export"
+        >
           <ProfileSwitcher username={username} currentProfileSlug={profileSlug} />
+          <CloudDraftControls username={username} slug={profileSlug} />
           <span className="h-5 w-px bg-graphite/80 shrink-0" />
 
           <div className="flex items-center gap-2">

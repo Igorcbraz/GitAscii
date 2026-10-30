@@ -1,18 +1,40 @@
 ---
-title: 'Health Monitoring & Badges'
-description: 'Publication-run health and failed-asset monitoring for v2 profiles'
+title: 'Publication Health and Badges'
+description: 'Understand Action reports, daily success scores, and monitoring limits'
 ---
 
-# Health Monitoring & Badges
+The console at `/pro/health` uses reported publication results. A Pro workflow can send an OIDC-authenticated report to `/api/pro/telemetry` after rendering. The report contains run status, duration, profile slugs and failed external asset URLs when available. It does not probe each README image request.
 
-The Pro health console at `/pro/health` reflects reported publication runs. The GitHub Action renders configured profiles, inlines permitted external assets, commits the SVGs, and sends an authenticated report to `/api/pro/telemetry`. The report records run duration, status, profile slugs, and failed asset URLs when available.
+## Reading the score
 
-A health score describes the share of **reported successful publication renders** in the tracked period. An active error can change the displayed status. It is not the uptime of every README image fetch, and it does not measure each visitor's latency. When no runs have been recorded, the console has no measured success rate.
+The implementation groups render counters by **UTC calendar day**. The current score is successful recorded renders divided by all recorded renders for today, rounded to a percentage. The render total named `totalRenders24h` uses today's UTC bucket, not a rolling 24-hour window. Account-level `errorsLast24h` separately filters unresolved incidents by their last-seen time; the per-profile field counts unresolved incidents without that time filter.
 
-The public health badge can be embedded separately:
+| State       | Account-level interpretation                                       |
+| :---------- | :----------------------------------------------------------------- |
+| Operational | Recorded success rate at least 98% and no active errors.           |
+| Warning     | No samples, any active errors, or recorded success rate below 98%. |
+| Failed      | More than two active errors, or recorded success rate below 90%.   |
+
+The no-sample score is currently `0` with a warning state. It means **no measured success rate**, not measured zero uptime. Per-profile failure thresholds differ: more than one active error can mark a profile failed.
+
+The endpoint counts `published` and `svg_unchanged` as successful statuses only when there are no reported errors. A reported `skipped_stale` is currently counted as a failed render even though it can be normal concurrency protection. The Action exits on `skipped_interval` before sending a health report. A run-level error flag can affect every profile in the same report.
+
+“Widget health” rows currently summarize each profile's artifacts; they are not independent probes of every widget. Failed URLs receive generic external-asset labels. A displayed last-render time can fall back to the profile's stored update time.
+
+## Health badge
 
 ```markdown
-![GitAscii Profile Health](https://gitascii.com/api/USERNAME/health-badge)
+![GitAscii publication health](https://gitascii.com/api/USERNAME/health-badge)
 ```
 
-The badge summarizes the stored health state and is cached. It is distinct from the analytics badge at `/api/badge/USERNAME` and from the published profile SVG. You can inspect incidents in `/pro/errors` and use the health simulator in `/pro/health` to test the dashboard without waiting for a real workflow failure.
+This is a separate, public GitAscii endpoint that summarizes account health across profiles. It remains valid in V2; the normal profile SVG is still served by GitHub. The badge is distinct from the [analytics badge](/pro/telemetry-and-privacy) and does not count visits.
+
+The response requests a shared cache lifetime of 120 seconds with 300 seconds of stale-while-revalidate. If the health lookup throws, the route retains its initial “Operational / 100%” fallback; do not use the badge alone as an availability guarantee.
+
+## Simulator and missing reports
+
+The health simulator writes incidents and failed-render telemetry to the **same account stores** used by the dashboard. It is not an isolated dry run. Resolve simulated incidents in the errors console afterward; the recorded daily counters remain.
+
+Reporting is best effort. Missing reports may mean telemetry is disabled, OIDC permissions are missing, or the report failed, even when the images were committed successfully. Diagnose publication in the repository's Actions log first. See [Action configuration](/guides/github-action) and [error monitoring](/pro/error-monitoring-and-alerts).
+
+Sources: [health store](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/healthMonitoringStore.ts), [telemetry endpoint](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/pro/telemetry/route.ts), [badge endpoint](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/%5Busername%5D/health-badge/route.ts).

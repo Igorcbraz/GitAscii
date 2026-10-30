@@ -121,6 +121,7 @@ export function PropertiesPanel() {
     return (
       <aside
         id="tour-properties-sidebar"
+        data-strobi-context="properties"
         className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto"
       >
         <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">
@@ -321,6 +322,7 @@ export function PropertiesPanel() {
   return (
     <aside
       id="tour-properties-sidebar"
+      data-strobi-context="properties"
       className="w-full lg:w-[320px] h-full bg-onyx border-l-0 lg:border-l border-graphite flex flex-col shrink-0 overflow-y-auto"
     >
       <div className="p-4 border-b border-graphite flex items-center justify-between bg-void-black">

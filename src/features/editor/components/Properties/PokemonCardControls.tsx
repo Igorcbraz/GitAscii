@@ -144,7 +144,7 @@ function isTcgdexHost(urlStr: string): boolean {
   }
 }
 
-async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
+export async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
   const isTcgdex = isTcgdexHost(cardImageUrl)
   let targetUrl = cardImageUrl
   if (isTcgdex && !cardImageUrl.endsWith('.webp')) {
@@ -159,7 +159,7 @@ async function fetchCardAsDataUri(cardImageUrl: string): Promise<string> {
     const res = await fetch(targetUrl)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const blob = await res.blob()
-    return new Promise((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {

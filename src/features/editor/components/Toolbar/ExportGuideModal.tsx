@@ -92,7 +92,8 @@ export function ExportGuideModal({
         'Create .github/workflows/gitascii.yml in your main branch to enable automated SVG builds.'
       ),
       linkLabel: t('editor.guide.export.step3_link_v2', 'Create workflow on GitHub'),
-      getLinkUrl: (user: string) => `https://github.com/${user}/${user}/new/main?filename=.github/workflows/gitascii.yml`,
+      getLinkUrl: (user: string) =>
+        `https://github.com/${user}/${user}/new/main?filename=.github/workflows/gitascii.yml`,
     },
     {
       icon: Sparkles,
@@ -162,6 +163,7 @@ export function ExportGuideModal({
 
   return createPortal(
     <>
+      <span hidden data-strobi-blocking />
       <div
         className={`fixed inset-0 z-100 bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={handleClose}
@@ -317,7 +319,9 @@ export function ExportGuideModal({
                           }
                         }}
                         className="absolute top-2.5 right-2.5 p-1.5 rounded-md hover:bg-iron text-ash hover:text-white transition-all cursor-pointer bg-onyx/90 border border-graphite/80 backdrop-blur-sm"
-                        title={copiedWorkflow ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')}
+                        title={
+                          copiedWorkflow ? t('common.copied', 'Copied!') : t('common.copy', 'Copy')
+                        }
                       >
                         {copiedWorkflow ? (
                           <Check size={14} className="text-signal-lime" />

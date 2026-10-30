@@ -16,6 +16,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 
+import { EDITOR_EVENTS } from '@/constants/editorEvents'
 import { useI18n } from '@/i18n'
 import { safeStorage } from '@/utils/storage'
 
@@ -284,11 +285,11 @@ export function EditorTour({ embedded = false }: EditorTourProps) {
       safeStorage.setItem('gitascii_has_seen_tour', 'true')
     }
 
-    window.addEventListener('gitascii:start-tour', handleStartTourEvent)
+    window.addEventListener(EDITOR_EVENTS.START_TOUR, handleStartTourEvent)
 
     return () => {
       clearTimeout(timer)
-      window.removeEventListener('gitascii:start-tour', handleStartTourEvent)
+      window.removeEventListener(EDITOR_EVENTS.START_TOUR, handleStartTourEvent)
     }
   }, [embedded])
 
@@ -397,6 +398,7 @@ export function EditorTour({ embedded = false }: EditorTourProps) {
 
   const tourElements = (
     <>
+      {!embedded && <span hidden data-strobi-blocking />}
       {targetRect ? (
         <svg
           className={`${

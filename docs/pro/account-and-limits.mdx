@@ -1,0 +1,49 @@
+---
+title: 'Account, Access, and Limits'
+description: 'Pro activation, implemented limits, settings, and billing boundaries'
+---
+
+Sign in with the GitHub account that owns your profile repository. Pro access belongs to that username; a GitHub App installation and a paid entitlement are separate requirements.
+
+## Activate Pro
+
+Open the Pro upgrade flow while signed in. The current Stripe checkout uses **one-time payment** (`mode: payment`), not a recurring subscription. The checkout return page alone is not the authoritative entitlement update: the signed Stripe webhook associates the payment with the GitHub username and grants Pro.
+
+If checkout succeeds but access is missing, confirm the signed-in username, reload the Pro page, and contact support with the checkout reference. Do not pay again solely because access has not appeared. Operators should inspect webhook delivery and persisted entitlements. The backend also supports an externally configured checkout URL, whose fulfillment depends on its configuration.
+
+Current commercial prices and terms belong in the product's checkout. This guide documents implementation behavior rather than duplicating prices that can change.
+
+## Implemented limits
+
+| Capability                      | Free         | Pro                              |
+| :------------------------------ | :----------- | :------------------------------- |
+| Account profile limit           | 1            | 10                               |
+| Analytics retention entitlement | 7 days       | 90 days                          |
+| Scheduled publication policy    | 1440 minutes | Configurable, minimum 60 minutes |
+| Default publication interval    | 1440 minutes | 1440 minutes until changed       |
+
+The retention values are entitlement settings, not a guarantee of visitor tracking or immediate deletion at an exact instant. Collection and storage behavior are described in [privacy](/pro/telemetry-and-privacy). The profile manager's 20-version pruning applies to Redis entries; the database version repository does not enforce that same limit. Git commit history is separate. Do not treat 20 as a universal history-retention guarantee.
+
+An existing profile can still pass the profile-write guard after an account exceeds its current plan limit; that guard blocks creation of another profile. Do not infer that a downgrade automatically deletes existing configurations or GitHub artifacts.
+
+## Configure refresh frequency
+
+Use the publication-frequency setting in the Pro dashboard. The session-authenticated `/api/pro/publish-settings` handler returns the current interval and minimum. Updates require Pro and an `intervalMinutes` value of at least 60; values are rounded to whole minutes.
+
+The installed workflow schedule and the server interval are separate. A scheduled run uses the larger of its Action input and server policy; manual dispatch bypasses the interval guard. See [Action refreshes](/guides/github-action) before expecting an hourly update.
+
+Alert settings, daily-digest settings, and entitlement flags do not by themselves prove a delivery implementation. In particular, widget-error alert processing currently records an alert entry without sending through an email provider. See [error monitoring](/pro/error-monitoring-and-alerts).
+
+## Legacy subscriptions and access changes
+
+The webhook still handles subscription creation, update, deletion, and failed invoices for existing subscription records. Deleting a matching legacy subscription can revoke its Pro access. A recorded one-time Pro payment is preserved by the subscription-deletion and failed-invoice handlers.
+
+The repository does not expose a customer billing-portal or self-service cancellation endpoint. Do not expect the current one-time purchase to have a recurring cancellation flow. Refund requests require support; no automated refund-to-entitlement workflow is established by the implemented event cases.
+
+Losing dashboard access does not remove committed SVG files from GitHub. Existing workflows also remain installed; future policy decisions and dashboard permissions use current account access. The raw README image continues to refer to repository files until those files or URLs change.
+
+## Declared flags versus available features
+
+The entitlement model includes flags for custom domains, instant SVG purge, priority support, and email quota. A flag is not evidence of an end-to-end feature: this guide does not advertise custom-domain provisioning or a guarantee of purging GitHub's caches. Likewise, `team` and `enterprise` exist as type values; the current checkout does not establish separate purchase flows for them.
+
+Sources: [checkout](https://github.com/Igorcbraz/GitAscii/blob/89a95eb42b684a21e16475e7573e7d822c2728a1/src/app/api/pro/subscribe/route.ts), [webhook](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/webhooks/stripe/route.ts), [entitlements](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/entitlements.ts), and [profile access](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/profileAccess.ts).

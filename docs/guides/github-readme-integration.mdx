@@ -3,9 +3,9 @@ title: 'GitHub README Integration'
 description: 'Embed GitHub-native GitAscii v2 SVGs with automatic theme switching'
 ---
 
-# GitHub README Integration
+GitAscii V2 embeds SVGs published to the repository's `gitascii` branch. The rendering workflow runs ahead of the README request, so delivery of an already published profile does not require GitAscii's rendering API. Permitted remote images are processed before publication; web-font availability still depends on the SVG viewer.
 
-GitAscii v2 embeds self-contained SVGs published to the repository's `gitascii` branch. The rendering workflow runs ahead of the README request, so profile availability does not depend on the GitAscii rendering API.
+For the publication sequence, storage responsibilities, and migration path, see [Rendering & Publishing Architecture](/architecture/rendering-and-publishing).
 
 ## 1. Embedding with Automatic Dark/Light Mode
 
@@ -14,7 +14,7 @@ GitHub's Markdown renderer natively supports the HTML `<picture>` element with `
 ```markdown
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/octocat/octocat/gitascii/profiles/default/dark.svg" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/USERNAME/USERNAME/gitascii/profiles/default/dark.svg" />
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/octocat/octocat/gitascii/profiles/default/light.svg" />
     <img src="https://raw.githubusercontent.com/octocat/octocat/gitascii/profiles/default/dark.svg" alt="GitAscii Profile Banner" width="800" />
   </picture>
@@ -35,20 +35,24 @@ Each profile slug has its own pair of published SVG files:
 
 ## 3. GitHub Camo CDN Proxy Considerations
 
-GitHub proxies all images through its Camo CDN (`https://camo.githubusercontent.com/...`).
-
 <Note>
   GitHub may proxy README images through Camo and cache them. Refreshing the SVG on the `gitascii`
-  branch updates the stable source URL, but a viewer may briefly see a cached copy. The publishing
-  Action inlines permitted remote assets into the SVG before committing it.
+  branch updates the stable source URL, but a viewer may see a cached copy. The publishing Action
+  inlines permitted remote assets into the SVG before committing it.
 </Note>
 
 ---
 
 ## 4. One-Click Sync with Special Repository
 
-After GitHub sign-in and GitHub App authorization, **Publish to GitHub** updates the `gitascii` branch, the repository workflow, and the profile `README.md`. It also renders the initial files; the workflow handles subsequent scheduled or manual refreshes. Named profile embeds have `GITASCII:[slug]` markers so they can be updated or removed independently.
+After GitHub sign-in and GitHub App authorization, **Publish to GitHub** updates the `gitascii` branch, the repository workflow, and the profile `README.md`. It also renders the initial files; the workflow handles subsequent scheduled or manual refreshes. Named profile embeds have `GITASCII:[slug]` markers.
 
-The HTTP SVG routes remain available for previews and integrations. If you enable Pro dynamic rules for the default profile, GitAscii generates an API embed with `?dynamic=1`; that is the explicit mode that evaluates a profile choice on each eligible request. The standard GitHub-hosted `<picture>` embed does not evaluate rules at view time.
+<Warning>
+  Publication currently replaces the README with the generated embed. The publisher does not merge
+  surrounding Markdown or preserve other profile blocks. After publication, restore your surrounding
+  text and place the embed where needed; future editor publications can replace it again.
+</Warning>
+
+The HTTP SVG routes remain available for previews and integrations. If you enable Pro dynamic rules for the default profile, GitAscii generates an API embed with `?dynamic=1`; that is the explicit mode that evaluates a profile choice on eligible cache misses. The standard GitHub-hosted `<picture>` embed does not evaluate rules at view time.
 
 For Pro analytics, place the separately generated GitAscii badge beside the profile `<picture>`. It measures requests to the badge endpoint, usually from GitHub's image proxy, and does not count individual people or exact README views. Publication health comes from authenticated GitHub Action reports.

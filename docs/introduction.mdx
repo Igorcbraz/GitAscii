@@ -3,8 +3,6 @@ title: 'Introduction'
 description: 'GitAscii v2 publishing, rendering engine, and documentation entry points'
 ---
 
-# Welcome to GitAscii
-
 GitAscii is an open-source visual editor and SVG engine for GitHub profile READMEs. Design a composition in the browser, then publish it to your own `username/username` repository. Version 2 serves the normal README image from GitHub rather than rendering it on every profile visit.
 
 ```text
@@ -18,14 +16,18 @@ Visual editor → SavedConfiguration → initial dark/light SVG render
                     GitHub Action refreshes published SVGs
 ```
 
-The editor installs `.github/workflows/gitascii.yml` on the repository's default branch. The workflow reads the configuration files on `gitascii`, fetches fresh GitHub data, renders both themes, inlines permitted external assets, and commits updated SVGs atomically. The initial publish renders the first files immediately. The HTTP API and TypeScript engine remain available for previews and custom integrations.
+The editor installs `.github/workflows/gitascii.yml` on the repository's default branch. The workflow reads the configuration files on `gitascii`, fetches fresh GitHub data, renders both themes, inlines permitted external assets, and commits updated SVGs atomically. The initial publish renders the first files immediately. The HTTP API remains available for previews and custom integrations; the TypeScript engine is internal to this repository. Saving an editor draft is separate from publishing it.
 
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="bolt" href="/quickstart">
     Publish your first profile and copy the GitHub-hosted README embed.
   </Card>
-  <Card title="API Overview" icon="code" href="/api/overview">
-    Explore the optional HTTP routes and the programmatic SVG engine.
+  <Card
+    title="Publishing Architecture"
+    icon="diagram-project"
+    href="/architecture/rendering-and-publishing"
+  >
+    Understand V2 ownership, refreshes, failure boundaries, and the verified V1 history.
   </Card>
   <Card title="Widget Catalog" icon="grid-2" href="/widgets/overview">
     Discover the widgets available in the visual editor and renderer.
@@ -46,3 +48,7 @@ The editor installs `.github/workflows/gitascii.yml` on the repository's default
 | Pro analytics badge | Separate GitAscii endpoint that counts observed badge fetches; it cannot identify README visitors.  |
 
 See [GitHub README Integration](/guides/github-readme-integration) for the embed and [Telemetry & Privacy](/pro/telemetry-and-privacy) for the Pro measurement limits.
+
+Start with [Action refreshes](/guides/github-action) and [troubleshooting](/guides/troubleshooting) for repository operations. For what widgets actually measure, read [data sources and display limits](/reference/data-sources).
+
+After the quickstart, [using the editor](/guides/editor) covers shortcuts, layers, drafts, and recovery. Integrators can use the [API Reference](/api/overview); maintainers can follow [local development](/guides/development), [operations](/guides/operations), and [environment configuration](/reference/environment).

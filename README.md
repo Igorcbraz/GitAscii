@@ -7,7 +7,7 @@
 
   <p>
     <b>Where cryptic terminals meet editorial broadsheet design.</b><br />
-    Design a GitHub profile in your browser and publish self-contained ASCII and widget SVGs to your own repository.
+    Design a GitHub profile in your browser and publish ASCII and widget SVGs to your own repository.
   </p>
 
   <p>
@@ -70,7 +70,7 @@ A classified broadsheet aesthetic engineered with brutalist minimalism, monospac
 
 ### ⚡ Published SVG Output
 
-What your GitHub profile actually renders: self-contained dark and light SVG files generated when you publish and refreshed by a GitHub Action. The README uses a `<picture>` element to select the viewer's theme.
+What your GitHub profile renders: dark and light SVG files generated when you publish and refreshed by a GitHub Action. The README uses a `<picture>` element to select the viewer's theme.
 
 <div align="center">
   <img src="public/example.svg" alt="Generated GitAscii Profile SVG" width="100%" />
@@ -80,13 +80,15 @@ What your GitHub profile actually renders: self-contained dark and light SVG fil
 
 ## How It Works
 
-GitAscii v2 publishes self-contained SVG files to a dedicated `gitascii` branch in your GitHub profile repository (`username/username`). A GitHub Action refreshes them from current GitHub data. The normal README embed loads those files from GitHub:
+GitAscii V2 publishes SVG files to a dedicated `gitascii` branch in your GitHub profile repository (`username/username`). A GitHub Action refreshes them from current GitHub data. The normal README embed loads those files from GitHub:
 
 ```mermaid
 flowchart LR
-    A["🎛️ GitAscii Web Editor<br/>(Design Layout)"] -->|"Publish"| B["🌿 gitascii branch<br/>(Config + SVGs)"]
-    B -->|"GitHub Action refresh"| C["📄 profiles/slug/*.svg"]
-    C -->|"raw.githubusercontent.com"| E["🖼️ Profile README.md<br/>(Rendered by GitHub)"]
+    A["🎛️ GitAscii Editor + Backend"] -->|"Render and publish via GitHub API"| B["🌿 gitascii branch<br/>(Config + dark/light SVGs)"]
+    W["Default-branch workflow"] -->|"Schedule / workflow_dispatch"| C["GitAscii Action"]
+    B -->|"Read config"| C
+    C -->|"Commit refreshed SVGs via API"| B
+    B -->|"raw.githubusercontent.com"| E["🖼️ GitHub README"]
 
     style A fill:#1f1f1f,stroke:#c5ff4a,stroke-width:1px,color:#ffffff
     style B fill:#060606,stroke:#252525,stroke-width:1px,color:#c5ff4a
@@ -94,20 +96,22 @@ flowchart LR
     style E fill:#060606,stroke:#c5ff4a,stroke-width:1px,color:#c5ff4a
 ```
 
+See [Rendering & Publishing Architecture](docs/architecture/rendering-and-publishing.mdx) for the Archify visualization, V1 history, V2 publication sequence, and migration/failure boundaries.
+
 ### 1. Design & Publish
 
-Compose your layout in the [Visual Editor](https://gitascii.com). Sign in, authorize the GitHub App for your profile repository, and use **Publish to GitHub**. GitAscii creates the repository if needed and creates or updates:
+Compose your layout in the [Visual Editor](https://gitascii.com). Sign in, authorize the GitHub App for your profile repository, and use **Publish to GitHub**. The backend attempts repository creation if needed; with repository access, it creates or updates:
 
 - the dedicated `gitascii` branch;
 - `gitascii.json` for the default profile and `gitascii_[slug].json` for additional profiles;
 - dark and light SVG files under `profiles/[slug]/`;
 - `.github/workflows/gitascii.yml` on the default branch.
 
-The app renders an initial dark/light pair at publication. The workflow then refreshes configured profiles on a schedule (daily for Free, with an hourly minimum for Pro) and can be dispatched manually. Its updates to the SVGs are atomic. Pro publication also enables authenticated, profile-scoped workflow health telemetry and a separate analytics badge in the README.
+The app renders an initial dark/light pair at publication. The generated workflow schedules Free runs daily and Pro runs hourly; scheduled publication also respects the effective refresh interval. Manual dispatch bypasses that interval guard. The Action commits changed SVGs together. Pro publication also enables authenticated publication-health reports and a separate analytics badge in the README.
 
 ### 2. Embed into your Profile `README.md`
 
-The editor writes the generated embed to your profile repository's `README.md`; you can also copy it manually. Replace `yourusername` if using this example:
+The editor replaces your profile repository's `README.md` with the generated embed. Save existing content before publishing and restore surrounding Markdown afterward. Replace `yourusername` if using this example:
 
 ```html
 <picture>
@@ -146,7 +150,7 @@ Want to share a custom layout with the community? Adding a new template takes tw
 1. **Export the Template JSON in the Editor:**  
    Click the export template action in the sidebar. GitAscii automatically scrubs personal data (usernames, custom bio, avatars) while preserving the grid layout, widgets, and visual tokens.
 2. **Drop your JSON file into `src/data/templates/`:**  
-   Place your file as `src/data/templates/<template_name>.json` and register it in `src/data/templates/index.ts`. Open a Pull Request and your template will be available to all GitAscii users!
+   Place your file as `src/data/templates/<template_name>.json` and run `npm run generate:templates` to update the generated registry. Open a Pull Request and your template will be available to all GitAscii users!
 
 ---
 
@@ -171,6 +175,8 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Local browsing and editing work without connecting your own integrations. To test sign-in and **Publish to GitHub**, copy `.env.example` to `.env.local` and set the GitHub OAuth, GitHub App, and `SESSION_SECRET` values. Set `DATABASE_URL` for PostgreSQL persistence and the Upstash variables for Redis-backed features; Stripe and Resend are needed only for their respective Pro billing and email flows. The publisher writes to a GitHub profile repository, so use an account and repository intended for testing.
+
+See the [development and deployment guide](docs/guides/development.mdx), [environment reference](docs/reference/environment.mdx), and [storage operations](docs/guides/operations.mdx) for configuration and recovery boundaries. For product usage, start with the [editor guide](docs/guides/editor.mdx) and [API reference](docs/api/overview.mdx).
 
 ---
 

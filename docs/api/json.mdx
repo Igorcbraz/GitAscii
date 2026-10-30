@@ -1,166 +1,35 @@
 ---
-title: 'JSON Schema & Storage'
-description: 'How to export, import, programmatically generate, and consume GitAscii configurations'
+title: 'JSON Configuration and Storage'
+description: 'Editor exports, published configuration files, and app-side copies'
 ---
 
-# JSON Schema & Storage
+The canonical TypeScript model is [SavedConfiguration](/api/configuration). V2 stores the default profile as `gitascii.json` on the `gitascii` branch, and named profiles as `gitascii_[slug].json`. The Action reads those files to render `profiles/[slug]/dark.svg` and `light.svg`.
 
-The visual editor and the API use JSON configurations based on `SavedConfiguration`. In v2, the profile repository's `gitascii` branch stores the default layout as `gitascii.json` and additional layouts as `gitascii_[slug].json`, alongside the published SVGs. The editor can also export a JSON file for programmatic use.
+## Editor download versus published configuration
 
-## Complete Real JSON Example
+The toolbar's JSON export contains `widgets`, `globalStyles`, and `templateId`. It is a portable **layout export**, not necessarily a complete `SavedConfiguration` with identity, slug and metadata.
 
-Below is a complete, production-valid configuration representing a Terminal layout:
+The publication request also supplies the username and profile slug; the backend assigns revision/update metadata. If consuming a downloaded layout in code, start with `createConfiguration` and overlay its layout fields. Do not assume a TypeScript cast fills missing values.
 
-```json
-{
-  "version": 1,
-  "githubId": 583231,
-  "username": "octocat",
-  "profileSlug": "default",
-  "profileName": "Default",
-  "templateId": "terminal",
-  "globalStyles": {
-    "backgroundColor": "#060606",
-    "transparentBackground": false,
-    "textColor": "#ffffff",
-    "accentColor": "#c5ff4a",
-    "borderColor": "#252525",
-    "fontFamily": "'JetBrains Mono', monospace",
-    "borderRadius": 0,
-    "padding": 24,
-    "themeMode": "dark",
-    "templateStyle": "terminal"
-  },
-  "widgets": [
-    {
-      "instanceId": "widget_header_0",
-      "widgetId": "header",
-      "name": "Header Widget",
-      "position": { "x": 0, "y": 0 },
-      "size": { "width": 800, "height": 90 },
-      "config": {},
-      "locked": false,
-      "visible": true,
-      "zIndex": 1
-    },
-    {
-      "instanceId": "widget_ascii_art_1",
-      "widgetId": "ascii-art",
-      "name": "ASCII Art Widget",
-      "position": { "x": 0, "y": 106 },
-      "size": { "width": 280, "height": 280 },
-      "config": {
-        "detail": "medium",
-        "cols": 150,
-        "charset": "dense",
-        "edgeEnhance": true,
-        "lockAspectRatio": true,
-        "accentColor": "#c5ff4a",
-        "fontSize": 9
-      },
-      "locked": false,
-      "visible": true,
-      "zIndex": 2
-    },
-    {
-      "instanceId": "widget_terminal_info_2",
-      "widgetId": "terminal-info",
-      "name": "Terminal Info Widget",
-      "position": { "x": 296, "y": 106 },
-      "size": { "width": 504, "height": 280 },
-      "config": {
-        "headerColor": "#58a6ff",
-        "labelColor": "#ffa657",
-        "valueColor": "#c9d1d9",
-        "dotLeaders": true,
-        "showUptime": true,
-        "showLocation": true,
-        "showLanguages": true,
-        "showStars": true,
-        "showRepos": true
-      },
-      "locked": false,
-      "visible": true,
-      "zIndex": 3
-    },
-    {
-      "instanceId": "widget_languages_3",
-      "widgetId": "languages",
-      "name": "Top Languages Widget",
-      "position": { "x": 0, "y": 402 },
-      "size": { "width": 800, "height": 140 },
-      "config": {
-        "langsLayout": "bars",
-        "langsCount": 5,
-        "showPercentage": true
-      },
-      "locked": false,
-      "visible": true,
-      "zIndex": 4
-    },
-    {
-      "instanceId": "widget_repositories_4",
-      "widgetId": "repositories",
-      "name": "Featured Repos Widget",
-      "position": { "x": 0, "y": 558 },
-      "size": { "width": 800, "height": 300 },
-      "config": {
-        "repoViewMode": "list",
-        "repoSortBy": "stars",
-        "maxRepos": 3,
-        "showRepoLanguage": true,
-        "showRepoStars": true,
-        "showRepoDesc": true
-      },
-      "locked": false,
-      "visible": true,
-      "zIndex": 5
-    },
-    {
-      "instanceId": "widget_footer_5",
-      "widgetId": "footer",
-      "name": "Footer Widget",
-      "position": { "x": 0, "y": 874 },
-      "size": { "width": 800, "height": 50 },
-      "config": {
-        "accentColor": "#c5ff4a"
-      },
-      "locked": false,
-      "visible": true,
-      "zIndex": 6
-    }
-  ],
-  "metadata": {
-    "createdAt": "2026-02-18T10:00:00.000Z",
-    "updatedAt": "2026-02-18T10:00:00.000Z",
-    "schemaVersion": 1,
-    "generatedBy": "manual"
-  }
-}
+The [local rendering example](/guides/reproduce-editor) accepts both a layout export and a complete configuration. Its [sample configuration](https://github.com/Igorcbraz/GitAscii/blob/main/docs/examples/profile-config.json) contains one native stats widget and no remote assets. The paired data file uses invented fixture values, not live GitHub metrics.
+
+## Which copy is used?
+
+| Copy                      | Consumer                                                                                                                               |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser draft             | Editor state before publication.                                                                                                       |
+| App configuration storage | Editor/API and Pro profile management. PostgreSQL when configured, otherwise Redis for configuration persistence, plus memory caching. |
+| JSON on `gitascii`        | GitHub Action refresh input and preferred source for the public configuration endpoint.                                                |
+| Published SVG             | README image delivery; no database read is needed to serve it.                                                                         |
+
+A direct GitHub JSON edit does not synchronize the database or trigger the generated workflow. A later editor publication can replace that JSON with the current editor design. Keep these sources consistent when mixing manual edits and the web app.
+
+For compatibility, configuration loading also checks legacy locations on `main` and `master`. These are fallbacks, not the normal V2 publishing destination. See [architecture](/architecture/rendering-and-publishing) for lookup order and migration details.
+
+## Fetch a saved profile
+
+```http
+GET https://gitascii.com/api/config/USERNAME/default
 ```
 
----
-
-## Consuming JSON via Node.js / Server
-
-You can load this JSON file from disk or an API response and feed it straight to `renderSvg`:
-
-```typescript
-import fs from 'node:fs'
-import { renderSvg, embedExternalImages, SavedConfiguration } from '@/engine'
-import { fetchGitHubProfile } from '@/features/github/api/fetchProfile'
-
-async function generateSvgFromJson(configPath: string): Promise<string> {
-  const fileContent = fs.readFileSync(configPath, 'utf-8')
-  const config: SavedConfiguration = JSON.parse(fileContent)
-
-  // Fetch real-time GitHub profile metrics
-  const profileData = await fetchGitHubProfile(config.username)
-
-  // Render SVG composition
-  const rawSvg = renderSvg(config, profileData)
-  const { svg } = await embedExternalImages(rawSvg)
-
-  return svg
-}
-```
+The public route prefers GitHub configuration and returns `404` when it cannot find the requested profile. It does not publish or run the Action. See [HTTP endpoints](/reference/endpoints).

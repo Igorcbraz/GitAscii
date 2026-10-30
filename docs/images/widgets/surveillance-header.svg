@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="480" viewBox="0 0 600 480" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Teko:wght@500;600;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Fira+Code:wght@300..700&amp;family=Inter+Tight:ital,wght@0,100..900;1,100..900&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;family=Outfit:wght@100..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;family=Space+Grotesk:wght@300..700&amp;display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    text {
+      user-select: none;
+    }
+
+    .gitascii-canvas-bg {
+      fill: #0d1117;
+      transition: fill 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: light) {
+      .gitascii-canvas-bg {
+        fill: #ffffff !important;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gitascii-canvas-bg {
+        fill: #0d1117 !important;
+      }
+    }
+  </style>
+
+  <rect class="" width="600" height="480" fill="#060606" rx="0" />
+
+  
+    <g transform="translate(0, 0)" id="widget-surveillance-header-preview">
+
+      
+      
+      
+      
+      
+    <svg xmlns="http://www.w3.org/2000/svg" id="surveillance-header-preview" width="600" height="480" viewBox="0 0 600 480" preserveAspectRatio="xMidYMid meet" font-family="'Departure Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">
+      
+    <defs>
+      <pattern id="scan-surveillance-header-preview" width="4" height="4" patternUnits="userSpaceOnUse">
+        <rect width="4" height="2" fill="#000"/>
+      </pattern>
+      <radialGradient id="vig-surveillance-header-preview" cx="50%" cy="50%" r="62%">
+        <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity=".6"/>
+      </radialGradient>
+      <radialGradient id="amb1-surveillance-header-preview" cx="24%" cy="12%" r="46%">
+        <stop offset="0%" stop-color="#c5ff4a" stop-opacity=".06"/>
+        <stop offset="100%" stop-color="#c5ff4a" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="amb2-surveillance-header-preview" cx="80%" cy="92%" r="52%">
+        <stop offset="0%" stop-color="#c084fc" stop-opacity=".11"/>
+        <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="nmfade-surveillance-header-preview" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity=".9"/>
+      </linearGradient>
+      <filter id="glow-surveillance-header-preview" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="1.6" result="b"/>
+        <feMerge>
+          <feMergeNode in="b"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <filter id="avtint-surveillance-header-preview">
+        <feColorMatrix type="matrix" values="
+          0.33 0.33 0.33 0 0
+          0.33 0.33 0.33 0 0
+          0.33 0.33 0.33 0 0
+          0    0    0    1 0
+        " result="gray"/>
+        <feComponentTransfer in="gray" result="contrast">
+          <feFuncR type="linear" slope="1.2" intercept="-0.08"/>
+          <feFuncG type="linear" slope="1.2" intercept="-0.08"/>
+          <feFuncB type="linear" slope="1.2" intercept="-0.08"/>
+        </feComponentTransfer>
+        <feColorMatrix in="contrast" type="matrix" values="
+          0.773 0 0 0 0
+          0 1.000 0 0 0
+          0 0 0.290 0 0
+          0 0 0 1 0
+        "/>
+      </filter>
+    </defs>
+  
+      <style>
+        
+    #surveillance-header-preview text, #surveillance-header-preview tspan { font-family: 'Departure Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+    #surveillance-header-preview .led { animation: blink-surveillance-header-preview 1.1s steps(1,end) infinite; }
+    @keyframes blink-surveillance-header-preview { 0%,55%{opacity:1} 56%,100%{opacity:.12} }
+  
+        
+      @keyframes jitter-surveillance-header-preview{0%,93%,100%{transform:translateX(0)}94%{transform:translateX(-3px)}96%{transform:translateX(2px)}98%{transform:translateX(-1px)}}
+      #surveillance-header-preview .nm{animation:jitter-surveillance-header-preview 7s steps(1) infinite;transform-box:fill-box}
+      @keyframes roll-surveillance-header-preview{0%{transform:translateY(-14px)}100%{transform:translateY(171px)}}
+      #surveillance-header-preview .track{animation:roll-surveillance-header-preview 9s linear infinite}
+    
+      </style>
+      
+      <text x="8" y="14" font-size="10" letter-spacing="1.5" fill="#6f6478">NODE//example-user  ·  SIG:<tspan fill="#55ff55">STRONG</tspan>  ·  198X MODE</text><rect x="484" y="6" width="8" height="8" fill="#ff5555" class="led" filter="url(#glow-surveillance-header-preview)"/><text x="592" y="14" font-size="10" letter-spacing="1.5" text-anchor="end" fill="#ff5555">REC 00:37:12</text><line x1="8" y1="24" x2="592" y2="24" stroke="rgba(197,255,74,0.18)"/><text x="300" y="52" font-size="10.5" letter-spacing="2.4" text-anchor="middle" fill="#c5ff4a" opacity=".8">[ SYSTEM :: OXIDE TERMINAL PROFILE :: 198X MODE ]</text><text class="nm" x="298" y="108" font-size="48" letter-spacing="5" text-anchor="middle" fill="#ff5555" opacity=".5">&gt; Example Developer</text><text class="nm" x="302" y="108" font-size="48" letter-spacing="5" text-anchor="middle" fill="#c5ff4a" opacity=".55">&gt; Example Developer</text><text class="nm" x="300" y="108" font-size="48" letter-spacing="5" text-anchor="middle" fill="#e6fbfb" filter="url(#glow-surveillance-header-preview)"><tspan fill="#6f6478">&gt;</tspan> Example Developer</text><text x="300" y="130" font-size="11" letter-spacing=".9" text-anchor="middle" fill="#6f6478">[ Example Developer // @example-user // Developer ]</text><text x="300" y="152" font-size="13" letter-spacing="2.6" text-anchor="middle" fill="#c5ff4a">Developer <tspan fill="#c084fc">//</tspan> Terminal Purist</text><rect x="8" y="178" width="2" height="131" fill="rgba(197,255,74,0.3)"/><text x="22" y="190" font-size="11" fill="#aaaaaa"><tspan fill="#c5ff4a">Example Developer (@example-user)</tspan> — system operator.</text><text x="22" y="206" font-size="11" fill="#aaaaaa">Welcome to the terminal station.</text><text x="22" y="228" font-size="11" fill="#c084fc">“Once I told the computer to do something</text><text x="22" y="244" font-size="11" fill="#c084fc">and it did it exactly how I told it to.”</text><text x="22" y="266" font-size="11" fill="#aaaaaa"><tspan fill="#c5ff4a">SYS:</tspan> Offline documentation fixture</text><rect x="364" y="176" width="33.57142857142857" height="4" fill="#ffffff"/><rect x="396.57142857142856" y="176" width="33.57142857142857" height="4" fill="#ffff55"/><rect x="429.1428571428571" y="176" width="33.57142857142857" height="4" fill="#55ffff"/><rect x="461.7142857142857" y="176" width="33.57142857142857" height="4" fill="#55ff55"/><rect x="494.2857142857143" y="176" width="33.57142857142857" height="4" fill="#ff55ff"/><rect x="526.8571428571429" y="176" width="33.57142857142857" height="4" fill="#ff5555"/><rect x="559.4285714285714" y="176" width="33.57142857142857" height="4" fill="#5555ff"/><clipPath id="hfclip-surveillance-header-preview"><rect x="364" y="180" width="228" height="167"/></clipPath><g clip-path="url(#hfclip-surveillance-header-preview)"><image x="364" y="180" width="228" height="167" preserveAspectRatio="xMidYMid slice" crossorigin="anonymous" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjMjUyNTI1Ii8+PHRleHQgeD0iNDAiIHk9IjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYzVmZjRhIiBmb250LXNpemU9IjI4Ij5HQTwvdGV4dD48L3N2Zz4=" filter="url(#avtint-surveillance-header-preview)" style="image-rendering:pixelated;"/><rect x="364" y="180" width="228" height="167" fill="url(#scan-surveillance-header-preview)" opacity=".4"/><rect class="track" x="364" y="180" width="228" height="12" fill="#fff" opacity=".10"/><rect x="364" y="180" width="228" height="167" fill="url(#vig-surveillance-header-preview)"/></g><rect x="364" y="176" width="228" height="171" fill="none" stroke="rgba(197,255,74,0.3)" stroke-width="2"/><rect x="364" y="180" width="228" height="17" fill="rgba(0,0,0,.55)"/><rect x="373" y="184.5" width="8" height="8" fill="#ff5555" class="led" filter="url(#glow-surveillance-header-preview)"/><text x="383" y="192" font-size="8" letter-spacing="1.2" fill="#c5ff4a">CH 03 · CAM-01</text><text x="584" y="192" font-size="8" letter-spacing="1.2" text-anchor="end" fill="#ff5555">LIVE</text><rect x="364" y="313" width="228" height="34" fill="url(#nmfade-surveillance-header-preview)"/><text x="372" y="331" font-size="8" letter-spacing=".8" fill="#ff5555">REC <tspan fill="#c5ff4a">02:41:07:14</tspan></text><text x="372" y="341" font-size="8" letter-spacing=".8" fill="#c5ff4a">◎ 12.911210, 79.132685</text><g stroke="rgba(197,255,74,0.6)" stroke-width="1" fill="none"><path d="M368 191 v-11 M368 180 h11"/><path d="M588 191 v-11 M588 180 h-11"/><path d="M368 332 v11 M368 343 h11"/><path d="M588 332 v11 M588 343 h-11"/></g>
+    </svg>
+  
+  
+    </g>
+  
+</svg>

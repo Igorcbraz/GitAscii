@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 
 import { useToast } from '@/components/ui/toast'
 import { PRO_PLAN_TIERS } from '@/constants'
+import { ProMascot } from '@/features/mascot/ProMascot'
 import { useI18n } from '@/i18n'
 import { analytics } from '@/lib/analytics'
 import { getGAIdentifiers, trackCheckoutIntent } from '@/lib/analytics/commerce'
@@ -142,6 +143,7 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
           proCustomers={socialProof.count}
           proUsernames={socialProof.usernames}
         />
+        <ProMascot isPro={false} />
         {showCheckoutFeedback && (
           <CheckoutFeedback onClose={() => setShowCheckoutFeedback(false)} />
         )}
@@ -149,5 +151,10 @@ export const ProAuthGuard: React.FC<ProAuthGuardProps> = ({ children, loadingFal
     )
   }
 
-  return <>{children}</>
+  return (
+    <>
+      {children}
+      <ProMascot isPro />
+    </>
+  )
 }

@@ -2,6 +2,7 @@ import { hasDbConfig } from '@/lib/db/client'
 import { getProUsersFromDb, getUserCountFromDb } from '@/lib/db/repositories/userRepository'
 import { API_ENDPOINTS } from '@/services/endpoints'
 
+import { createPublicCounterCache } from './publicCounterCache'
 import { getProRedisClient } from './redisClient'
 
 export interface ProSocialProofData {
@@ -9,37 +10,19 @@ export interface ProSocialProofData {
   usernames: string[]
 }
 
-const CACHE_KEY = 'gitascii:pro:social_proof_cache'
-const CACHE_TTL = 60 * 10 // 10 minutes
-
-export async function getProSocialProof(): Promise<ProSocialProofData> {
-  const redis = getProRedisClient()
-
-  try {
-    const cached = await redis.get<ProSocialProofData | string>(CACHE_KEY)
-    if (cached) {
-      return (typeof cached === 'string' ? JSON.parse(cached) : cached) as ProSocialProofData
-    }
-  } catch (error) {
-    console.warn('[SocialProof] Redis cache read failed:', error)
-  }
-
+async function loadProSocialProof(): Promise<ProSocialProofData> {
   const proUsers: string[] = []
   const proUsersSet = new Set<string>()
 
-  try {
-    if (hasDbConfig()) {
-      const dbProUsers = await getProUsersFromDb()
-      for (const u of dbProUsers) {
-        const normalized = u.toLowerCase().trim()
-        if (normalized && !proUsersSet.has(normalized)) {
-          proUsersSet.add(normalized)
-          proUsers.push(normalized)
-        }
+  if (hasDbConfig()) {
+    const dbProUsers = await getProUsersFromDb()
+    for (const u of dbProUsers) {
+      const normalized = u.toLowerCase().trim()
+      if (normalized && !proUsersSet.has(normalized)) {
+        proUsersSet.add(normalized)
+        proUsers.push(normalized)
       }
     }
-  } catch (dbErr) {
-    console.warn('[SocialProof] DB fallback lookup warning:', dbErr)
   }
 
   const envProUsers = (process.env.PRO_USERNAMES || process.env.PRO_ADMIN_USERS || '')
@@ -56,6 +39,7 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
 
   if (!hasDbConfig())
     try {
+      const redis = getProRedisClient()
       let cursor = 0
       do {
         const [nextCursor, keys] = await redis.scan(cursor, {
@@ -90,24 +74,49 @@ export async function getProSocialProof(): Promise<ProSocialProofData> {
       console.warn('[SocialProof] Fallback scan failed:', err)
     }
 
-  const result: ProSocialProofData = {
-    count: proUsers.length,
-    usernames: proUsers.slice(0, 8),
-  }
-
   if (proUsers.length > 0) {
     try {
-      await redis.sadd('gitascii:pro:customers', ...proUsers)
-      await redis.set(CACHE_KEY, JSON.stringify(result), { ex: CACHE_TTL })
-    } catch (err) {
-      console.warn('[SocialProof] Failed to persist fallback data:', err)
+      await getProRedisClient().sadd('gitascii:pro:customers', ...proUsers)
+    } catch {
+      console.warn('[SocialProof] Failed to persist customer index')
     }
   }
 
-  return result
+  return {
+    count: proUsers.length,
+    usernames: proUsers.slice(0, 8),
+  }
 }
 
-export async function getLoggedInUsersCount(): Promise<number> {
+function validSocialProof(value: unknown): value is ProSocialProofData {
+  if (!value || typeof value !== 'object') return false
+  const data = value as Partial<ProSocialProofData>
+  return (
+    typeof data.count === 'number' &&
+    Number.isInteger(data.count) &&
+    data.count >= 0 &&
+    Array.isArray(data.usernames) &&
+    data.usernames.length <= 8 &&
+    data.usernames.every((username) => typeof username === 'string')
+  )
+}
+
+export const getProSocialProof = createPublicCounterCache({
+  key: 'gitascii:public:social-proof:v2',
+  load: loadProSocialProof,
+  valid: validSocialProof,
+  fallback: () => ({ count: 0, usernames: [] }),
+})
+
+export const getLoggedInUsersCount = createPublicCounterCache({
+  key: 'gitascii:public:user-count:v2',
+  load: loadLoggedInUsersCount,
+  valid: (value): value is number =>
+    typeof value === 'number' && Number.isInteger(value) && value >= 0,
+  fallback: () => 0,
+})
+
+async function loadLoggedInUsersCount(): Promise<number> {
   try {
     const clientId = process.env.GITHUB_CLIENT_ID
     const clientSecret = process.env.GITHUB_CLIENT_SECRET
@@ -143,5 +152,5 @@ export async function getLoggedInUsersCount(): Promise<number> {
     console.warn('[SocialProof] Redis user count fallback failed:', error)
   }
 
-  return 0
+  throw new Error('User count unavailable')
 }

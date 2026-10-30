@@ -3,15 +3,16 @@ title: 'Foundry Casting Yard Widget'
 description: 'Casting floor alloys smelted master mold ingot ledger'
 ---
 
-# Foundry Casting Yard Widget (`controlplane-foundry`)
+Widget ID: `controlplane-foundry`.
 
 The Foundry Casting Yard widget represents projects as cast metallic ingots, stamped foundry serial numbers, alloy grade percentages, and smelting registry ledgers.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface FoundryConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

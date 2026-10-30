@@ -2,11 +2,21 @@ import crypto from 'crypto'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import { GITHUB_OAUTH, OAUTH_ERROR, OAUTH_STAGE, type OAuthStage } from '@/constants/auth'
 import { setSession } from '@/lib/auth'
 import { API_ENDPOINTS } from '@/services/endpoints'
+import {
+  exchangeGithubOAuthCode,
+  fetchGithubOAuthEmail,
+  fetchGithubOAuthProfile,
+  logGithubOAuthWarning,
+} from '@/services/githubOAuth'
 
 export async function GET(request: Request) {
   const cookieStore = await cookies()
+  const startedAt = Date.now()
+  let stage: OAuthStage = OAUTH_STAGE.VALIDATION
+  let customRedirectPath = '/'
   try {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
@@ -23,9 +33,9 @@ export async function GET(request: Request) {
       )
     }
 
-    const savedStateCookie = cookieStore.get('oauth_state')
+    const savedStateCookie = cookieStore.get(GITHUB_OAUTH.stateCookie)
     const savedNonce = savedStateCookie?.value
-    cookieStore.delete('oauth_state')
+    cookieStore.delete(GITHUB_OAUTH.stateCookie)
 
     if (!savedNonce) {
       return NextResponse.json(
@@ -46,14 +56,14 @@ export async function GET(request: Request) {
       )
     }
 
-    let customRedirectPath = '/'
     if (redirectB64) {
       try {
         const decoded = Buffer.from(redirectB64, 'base64url').toString('utf8')
         if (decoded.startsWith('/') && !decoded.startsWith('//') && !decoded.includes('\\')) {
           customRedirectPath = decoded
         }
-      } catch {
+      } catch (error) {
+        logGithubOAuthWarning('Invalid redirect payload; using home', error)
         customRedirectPath = '/'
       }
     }
@@ -68,26 +78,8 @@ export async function GET(request: Request) {
       )
     }
 
-    const tokenResponse = await fetch(API_ENDPOINTS.GITHUB.OAUTH_ACCESS_TOKEN, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
-      signal: AbortSignal.timeout(8000),
-    })
-
-    if (!tokenResponse.ok) {
-      throw new Error('Failed to exchange code for access token')
-    }
-
-    const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token
+    stage = OAUTH_STAGE.TOKEN_EXCHANGE
+    const accessToken = await exchangeGithubOAuthCode({ clientId, clientSecret, code })
 
     if (!accessToken) {
       return NextResponse.json(
@@ -96,50 +88,11 @@ export async function GET(request: Request) {
       )
     }
 
-    const userResponse = await fetch(API_ENDPOINTS.GITHUB.CURRENT_USER, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'User-Agent': 'GitAscii-App',
-      },
-      signal: AbortSignal.timeout(8000),
-    })
+    stage = OAUTH_STAGE.USER_PROFILE
+    const userData = await fetchGithubOAuthProfile(accessToken)
 
-    if (!userResponse.ok) {
-      throw new Error('Failed to fetch user details from GitHub')
-    }
-
-    const userData = await userResponse.json()
-
-    if (!userData.login || !userData.id) {
-      throw new Error('Invalid user details returned from GitHub')
-    }
-
-    let userEmail: string | undefined = userData.email || undefined
-
-    if (!userEmail) {
-      try {
-        const emailsResponse = await fetch(API_ENDPOINTS.GITHUB.USER_EMAILS, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'User-Agent': 'GitAscii-App',
-          },
-          signal: AbortSignal.timeout(4000),
-        })
-
-        if (emailsResponse.ok) {
-          const emailsData = await emailsResponse.json()
-          if (Array.isArray(emailsData)) {
-            const primaryEmailObj =
-              emailsData.find((e: any) => e.primary && e.verified) ||
-              emailsData.find((e: any) => e.verified) ||
-              emailsData[0]
-            if (primaryEmailObj?.email) {
-              userEmail = primaryEmailObj.email
-            }
-          }
-        }
-      } catch {}
-    }
+    stage = OAUTH_STAGE.SESSION
+    const userEmail = userData.email || (await fetchGithubOAuthEmail(accessToken))
 
     await setSession({
       username: userData.login,
@@ -157,15 +110,15 @@ export async function GET(request: Request) {
         name: userData.name || userData.login,
       })
     } catch (dbErr) {
-      console.warn('[OAuth Callback] Non-blocking DB user creation warning:', dbErr)
+      logGithubOAuthWarning('Non-blocking DB user creation failed', dbErr)
     }
 
     try {
       const { getProRedisClient } = await import('@/features/pro/server/redisClient')
       const redis = getProRedisClient()
-      await redis.sadd('gitascii:all:users', userData.login.toLowerCase())
-    } catch {
-      // non-blocking, never fail login over this
+      await redis.sadd(GITHUB_OAUTH.allUsersKey, userData.login.toLowerCase())
+    } catch (error) {
+      logGithubOAuthWarning('Non-blocking user index update failed', error)
     }
 
     if (userEmail) {
@@ -177,7 +130,7 @@ export async function GET(request: Request) {
           name: userData.name || userData.login,
         })
         .catch((err) => {
-          console.error('[OAuth Callback] Non-blocking welcome email error:', err)
+          logGithubOAuthWarning('Non-blocking welcome email failed', err)
         })
     }
 
@@ -187,7 +140,26 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(redirectUrl)
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error during OAuth callback'
-    return NextResponse.json({ error: message }, { status: 500 })
+    const errorName = error instanceof Error ? error.name : 'UnknownError'
+    console.error('[OAuth Callback] Login failed', {
+      stage,
+      errorName,
+      elapsedMs: Date.now() - startedAt,
+    })
+    if (
+      errorName === OAUTH_ERROR.TIMEOUT_NAME &&
+      (stage === OAUTH_STAGE.TOKEN_EXCHANGE || stage === OAUTH_STAGE.USER_PROFILE)
+    ) {
+      return NextResponse.json(
+        {
+          error: OAUTH_ERROR.TIMEOUT_MESSAGE,
+          code: OAUTH_ERROR.TIMEOUT_CODE,
+          stage,
+          retryUrl: API_ENDPOINTS.AUTH.LOGIN(customRedirectPath),
+        },
+        { status: 504, headers: { 'Cache-Control': 'no-store' } }
+      )
+    }
+    return NextResponse.json({ error: OAUTH_ERROR.UNEXPECTED_MESSAGE }, { status: 500 })
   }
 }

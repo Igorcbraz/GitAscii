@@ -1,119 +1,42 @@
 ---
-title: 'Widgets Overview'
-description: 'Architecture, Registry Map, Categories, and Custom Configurations'
+title: 'Widget Catalog'
+description: 'Registered widget IDs, renderer families, and publication behavior'
 ---
 
-# Widgets Overview
+The current engine registers **82 widget IDs plus the `terminal-card` compatibility alias**. Each receives a widget configuration, normalized GitHub data and global styles, then returns SVG markup. The backend or Action composes that markup and processes external assets before publication.
 
-GitAscii comes with over **40 built-in widget renderers** categorized into functional suites. Every widget adheres to a unified rendering signature and receives the widget configuration, normalized GitHub data, and global theme styles.
+Start with [data sources and display limits](/reference/data-sources): some values are illustrative or derived, and editor interactions do not become interactive controls in a README image.
 
-## The Widget Architecture
+## Registered IDs
 
-```
-WidgetInstance (JSON)
-      ↓
-Registry Map (`REGISTRY_MAP.get(widgetId)`)
-      ↓
-WidgetRendererFn (Pure TypeScript function)
-      ↓
-renderWidgetSvg (Frame, Theme Decorators, Animation & CSS Keyframes)
-      ↓
-SVG Node Snippet
-```
+| Family                              | Widget IDs                                                                                                                                                                                                                                                                                                                                                                                       |
+| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core, stats, cards and integrations | `header`, `ascii-text`, `ascii-art`, `terminal-info`, `avatar`, `tech-stack`, `bio`, `custom-image`, `stats`, `languages`, `repositories`, `social-media`, `github-readme-stats`, `streak-stats`, `profile-trophy`, `contribution-snake`, `metrics-card`, `views-counter`, `readme-quotes`, `awesome-badge`, `gitfest-lineup`, `ghstats`, `divider`, `footer`, `pokemon-card`, `gitfut-card`     |
+| GodProfile                          | `godprofile-terminal`, `godprofile-marquee`, `godprofile-neural`, `godprofile-trophies`, `godprofile-wakatime`, `godprofile-globe`                                                                                                                                                                                                                                                               |
+| ASCII Profile                       | `asciiprofile-portrait`, `asciiprofile-info`, `asciiprofile-heatmap`                                                                                                                                                                                                                                                                                                                             |
+| Control Plane                       | `controlplane-system-loop`, `controlplane-command-deck`, `controlplane-signal-grid`, `controlplane-metro`, `controlplane-bento`, `controlplane-editorial`, `controlplane-blueprint`, `controlplane-constellation`, `controlplane-monolith`, `controlplane-interlace`, `controlplane-cipher`, `controlplane-specimen`, `controlplane-patchbay`, `controlplane-cartograph`, `controlplane-foundry` |
+| Codeweb Aura                        | `codeweb-hero-orbit`, `codeweb-retro-grid`, `codeweb-showcase-cards`, `codeweb-social-badge`, `codeweb-minimal-badge`                                                                                                                                                                                                                                                                            |
+| Surveillance                        | `surveillance-header`, `surveillance-dossier`, `surveillance-loadout`, `surveillance-telemetry`, `surveillance-transmission`, `surveillance-field`, `surveillance-feeds`, `surveillance-title`                                                                                                                                                                                                   |
+| Premium ASCII                       | `premium-ascii-profile-card`, `premium-ascii-dev-score`, `premium-ascii-insights`, `premium-ascii-dna`, `premium-ascii-coding-velocity`                                                                                                                                                                                                                                                          |
+| Windows XP                          | `winxp-window`, `winxp-minesweeper`, `winxp-media-player`, `winxp-paint`, `winxp-taskbar`, `winxp-error-dialog`, `winxp-system-properties`, `winxp-bliss`                                                                                                                                                                                                                                        |
+| Minecraft                           | `minecraft-hud`, `minecraft-inventory`, `minecraft-chat`, `minecraft-achievement`, `minecraft-server`, `minecraft-death-screen`                                                                                                                                                                                                                                                                  |
 
-### Renderer Function Signature
+`terminal-card` maps to the Terminal Info renderer. This catalog is derived from [widget IDs](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/constants/widgetIds.ts) and the [renderer registry](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/engine/core/WidgetRegistry.ts). Appearance and editor availability are separate from whether a renderer exists.
 
-Every widget renderer in GitAscii is a pure function matching this type signature:
+Individual pages cover the established suites. See [additional suites](/widgets/additional-suites) for Premium ASCII, Surveillance, Windows XP, Minecraft and GitFut, and [external integrations](/widgets/external-widgets) for remote assets.
 
-```typescript
-export type WidgetRendererFn = (
-  widget: WidgetInstance,
-  data: NormalizedGitHubData,
-  globalStyles: GlobalStyles,
-  forceStatic?: boolean
-) => string
-```
+## Common configuration
 
----
+Widgets use the [WidgetInstance model](/api/configuration) for position, size, visibility and `zIndex`. The shared wrapper reads frame colors, radius, `hideBorder`, `hideDecorations`, and entrance-animation settings. Renderers with their own frames can handle styling differently; an arbitrary property is not supported merely because `WidgetConfig` accepts string keys.
 
-## Widget Categories
+| Property                                         | Shared wrapper behavior                     |
+| :----------------------------------------------- | :------------------------------------------ |
+| `backgroundColor`, `borderColor`, `borderRadius` | Frame styling, with global-style fallbacks. |
+| `hideBorder`                                     | Removes the wrapper's border.               |
+| `hideDecorations`                                | Suppresses wrapper template decorations.    |
+| `animationType`                                  | Entrance effect; default `none`.            |
+| `animationDuration`                              | Duration in milliseconds; default `1500`.   |
+| `animationDelay`                                 | Delay in milliseconds; default `0`.         |
+| `animationEasing`                                | Timing function; default `ease-out`.        |
 
-<CardGroup cols={3}>
-  <Card title="Essential Widgets" icon="star" href="/widgets/header">
-    Header, Avatar, Bio, Neofetch Terminal Info, Divider, Footer.
-  </Card>
-  <Card title="Interactive & ASCII" icon="terminal" href="/widgets/ascii-art">
-    Image-to-ASCII Converter, ASCII Text Banner, Tech Stack Icons, Pokémon Card.
-  </Card>
-  <Card title="Stats & Metrics" icon="chart-simple" href="/widgets/stats">
-    GitHub Stats, Top Languages Bar/Donut, Featured Repositories, Social Badges. Published values
-    update when the repository workflow refreshes the SVGs.
-  </Card>
-  <Card title="GodProfile Suite" icon="sparkles" href="/widgets/godprofile-terminal">
-    Tree Terminal, Marquee Pill Strip, Neural Network, Trophies, WakaTime, 3D Globe.
-  </Card>
-  <Card title="ASCII Profile Suite" icon="microchip" href="/widgets/asciiprofile-portrait">
-    Monochrome Typing Portrait, Neofetch Info Card, Calendar ASCII Heatmap.
-  </Card>
-  <Card title="Control Plane Suite" icon="network-wired" href="/widgets/controlplane-system-loop">
-    System Loop, Command Deck, Signal Grid, Metro Map, Bento, Blueprint, Constellation.
-  </Card>
-  <Card title="Codeweb Aura Suite" icon="galaxy" href="/widgets/codeweb-hero-orbit">
-    Cosmic Orbit Hero, Aura Showcase Cards, Aura Bento Grid, Rotating Social Badges.
-  </Card>
-  <Card title="External Integrations" icon="puzzle-piece" href="/widgets/external-widgets">
-    GitHub Readme Stats, Streak, Trophy, Snake, Metrics, Quotes, GitFest, Views, GHStats.
-  </Card>
-</CardGroup>
-
----
-
-## Universal Configuration Options
-
-In addition to custom widget options, every widget supports these universal parameters in `widget.config`:
-
-<ResponseField name="backgroundColor" type="string" default="globalStyles.backgroundColor">
-  Card fill color.
-</ResponseField>
-
-<ResponseField name="borderColor" type="string" default="globalStyles.borderColor">
-  Card perimeter stroke color.
-</ResponseField>
-
-<ResponseField name="textColor" type="string" default="globalStyles.textColor">
-  Primary text color within the widget.
-</ResponseField>
-
-<ResponseField name="accentColor" type="string" default="globalStyles.accentColor">
-  Signature highlight color for icons, borders, and emphasis strings.
-</ResponseField>
-
-<ResponseField name="borderRadius" type="number" default="globalStyles.borderRadius">
-  Card border radius in pixels.
-</ResponseField>
-
-<ResponseField name="hideBorder" type="boolean" default="false">
-  When `true`, sets `strokeWidth = 0` to remove the boundary border line.
-</ResponseField>
-
-<ResponseField name="hideDecorations" type="boolean" default="false">
-  When `true`, removes theme-specific corner elements (e.g. Dracula dots, Cyberpunk corner
-  brackets).
-</ResponseField>
-
-<ResponseField name="animationType" type="AnimationType" default="none">
-  Entrance animation: `none`, `fade-in`, `slide-up`, `slide-down`, `slide-left`, `slide-right`,
-  `zoom-in`, `zoom-out`, `flip-x`, `flip-y`, `typewriter`, `glitch`, `scan-lines`.
-</ResponseField>
-
-<ResponseField name="animationDuration" type="number" default="1500">
-  Animation duration in milliseconds.
-</ResponseField>
-
-<ResponseField name="animationDelay" type="number" default="0">
-  Delay in milliseconds before the animation triggers.
-</ResponseField>
-
-<ResponseField name="animationEasing" type="AnimationEasing" default="ease-out">
-  Easing timing function: `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`, `spring`.
-</ResponseField>
+See [animations](/reference/animations) and [custom widget development](/guides/custom-widgets). Code fragments in individual widget pages assume the GitAscii repository environment and preexisting `profileData`/`globalStyles`; use the [executable example](/guides/reproduce-editor) for a complete standalone image.

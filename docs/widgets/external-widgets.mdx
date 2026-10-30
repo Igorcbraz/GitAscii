@@ -1,169 +1,40 @@
 ---
-title: 'External Integrations'
-description: 'Documentation for GitHub Readme Stats, Streak, Trophy, Snake, Metrics, Quotes, GitFest, and Custom Image widgets'
+title: 'External Widgets and Assets'
+description: 'Implemented integrations, supported options, snapshot behavior, and fallback limits'
 ---
 
-# External Integrations
+External cards are fetched during publication and inlined into the final SVG. They do not execute on every README visit. The renderer emits request markers; `processExternalAssets` resolves and sanitizes them before the backend or Action commits the result.
 
-GitAscii provides seamless integration for popular ecosystem widgets. When rendered, GitAscii generates the proper upstream API request markers (`<!-- EXTERNAL_WIDGET_JSON: ... -->`) and automatically resolves, sanitizes, and inlines the generated SVGs using `embedExternalImages`.
+The options below are read by the current GitAscii adapter. They are not a promise that an upstream service accepts every request or exposes private metrics.
 
----
+| Widget ID             | Selected supported options and defaults                                                                                                                                                                                        |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-readme-stats` | `statType: 'stats'` (also `top-langs`, `pin`); `theme: 'dark'`; `showIcons: true`; `countPrivate: false`; `includeAllCommits: false`; `hideRank`, `hideBorder`; `repoName`, `layout: 'compact'`, `langsCount: 5`, `hideLangs`. |
+| `streak-stats`        | `theme: 'dark'`, `mode: 'daily'`, `dateFormat: 'M j, Y'`, `streakBorderRadius: 4`, `hideBorder: false`.                                                                                                                        |
+| `profile-trophy`      | `theme: 'flat'`, `column: 6`, `row: 1`, `noBg: false`, `noFrame: false`. The current `noFrame` adapter adds `margin-w=0`, rather than an upstream `no-frame` parameter.                                                        |
+| `contribution-snake`  | `username`, `theme: 'dark'` (or `light`), `branch: 'output'`. Reads an existing snake artifact; see below.                                                                                                                     |
+| `metrics-card`        | `template: 'classic'`, `baseSections: 'header,activity,community,repositories'`.                                                                                                                                               |
+| `views-counter`       | `color: '00f0ff'`, `style: 'for-the-badge'`, `label: 'PROFILE VIEWS'`, `baseVal: 0`. This is a publication-time snapshot.                                                                                                      |
+| `gitfest-lineup`      | `username`, `theme: 'dark'`, `sort: 'stars'`, `order: 'asc'`, `type: 'owner'`, `invertColors`, `hideRepos`. Requires a reachable GitFest service configured for the renderer.                                                  |
+| `ghstats`             | `embedType: 'card'` (also `langs`, `mini`, `badge`), `theme: 'default'`, `showIcons`, `showRing`, `hideBorder`, `hideTitle`, `size`, `compactCount`, `hideStats`, `customTitle`, `layout`, `maxLangs`, `badgeStyle`.           |
+| `awesome-badge`       | `badgeStyle: 'for-the-badge'`, `badgeColor: 'brightgreen'`, `label: 'Awesome GitHub Profile'`, `logo: 'github'`. A configured badge, not verification of an award.                                                             |
+| `custom-image`        | `imageUrl` (aliases `src`, `url`), `targetUrl` (alias `href`), `mode: 'contain'` (or `badge`), `showTitle: false`, `customTitle`.                                                                                              |
+| `readme-quotes`       | Despite its placement in the external adapter, renders locally from bundled quotes. Uses `quoteType`, `theme`, `showTitle`, `customTitle`. No remote Quotes API.                                                               |
 
-## 1. GitHub Readme Stats (`github-readme-stats`)
+Most external cards accept `showTitle` and `customTitle`; their defaults and upstream options differ. See the [adapter source](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/ExternalWidgetsRenderer.ts) for the full request construction. `activity-graph` is not registered in the current widget registry.
 
-Renders Anurag Hazra's official [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) card.
+## Contribution Snake setup
 
-```typescript
-export interface GitHubReadmeStatsConfig {
-  showIcons?: boolean // Default: true
-  includeAllCommits?: boolean // Default: true
-  countPrivate?: boolean // Default: true
-  theme?: string // Default: 'tokyonight'
-  hideTitle?: boolean // Default: false
-  hideRank?: boolean // Default: false
-  showLifetimeCommits?: boolean // Default: false
-}
-```
+The widget looks for `github-contribution-grid-snake-dark.svg` or `github-contribution-grid-snake.svg` in the configured branch of `USERNAME/USERNAME`, through the configured CDN endpoint. You need a separate snake-generation workflow or an existing artifact. The V2 GitAscii publisher workflow does not generate those snake files.
 
----
+If the user's artifact cannot be loaded, the adapter supplies a Platane sample as fallback. A visible snake can therefore be sample content rather than the user's contribution history.
 
-## 2. GitHub Streak Stats (`streak-stats`)
+## GitFest configuration
 
-Renders DenverCoder1's [github-readme-streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) tracking current and longest commit streaks.
+The source uses `NEXT_PUBLIC_GITFEST_URL`, with `http://localhost:3000` as fallback. That fallback does not establish a reachable public GitFest service in GitHub Actions. Availability depends on the configuration incorporated into the executing renderer/bundle; adding a card is not service provisioning.
 
-```typescript
-export interface StreakStatsConfig {
-  theme?: string // Default: 'tokyonight'
-  hideBorder?: boolean // Default: true
-  borderRadius?: number // Default: 0
-  cardSection?: 'all' | 'current' | 'total' // Default: 'all'
-}
-```
+## Failure and display behavior
 
----
+A denied URL, timeout or invalid response can produce fallback content or a placeholder. Other widgets may still publish, and the Action can report the failed URL. See [health monitoring](/pro/health-monitoring).
 
-## 3. GitHub Profile Trophy (`profile-trophy`)
-
-Renders RyotaK's [github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) trophy showcase.
-
-```typescript
-export interface ProfileTrophyConfig {
-  theme?: string // Default: 'onedark'
-  column?: number // Default: 6
-  row?: number // Default: 1
-  noBg?: boolean // Default: true
-  noFrame?: boolean // Default: true
-  marginW?: number // Default: 0
-}
-```
-
----
-
-## 4. Contribution Activity Graph (`activity-graph`)
-
-Renders Ashutosh00710's [github-readme-activity-graph](https://github.com/Ashutosh00710/github-readme-activity-graph).
-
-```typescript
-export interface ActivityGraphConfig {
-  theme?: string // Default: 'tokyo-night'
-  area?: boolean // Default: true
-  hideTitle?: boolean // Default: false
-  hideBorder?: boolean // Default: true
-  radius?: number // Default: 0
-}
-```
-
----
-
-## 5. Contribution Snake (`contribution-snake`)
-
-Renders Platane's [snk](https://github.com/Platane/snk) animated contribution eating game.
-
-```typescript
-export interface ContributionSnakeConfig {
-  variant?: 'dark' | 'light' | 'ocean' // Default: 'dark'
-}
-```
-
----
-
-## 6. GitHub Metrics Card (`metrics-card`)
-
-Renders Lowlighter's [metrics](https://github.com/lowlighter/metrics) infocard.
-
-```typescript
-export interface MetricsCardConfig {
-  theme?: string // Default: 'dark'
-}
-```
-
----
-
-## 7. Profile Views Counter (`views-counter`)
-
-Renders a dynamic visit counter badge via Komarev's visitor badge service.
-
-```typescript
-export interface ViewsCounterConfig {
-  style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' // Default: 'for-the-badge'
-  color?: string // Hex without '#' (default: 'c5ff4a')
-  labelColor?: string // Default: '000000'
-  label?: string // Default: 'PROFILE VIEWS'
-}
-```
-
----
-
-## 8. Random Readme Quotes (`readme-quotes`)
-
-Renders inspirational developer quotes from the Quotes API.
-
-```typescript
-export interface ReadmeQuotesConfig {
-  theme?: string // Default: 'tokyonight'
-  animation?: boolean // Default: true
-  layout?: 'default' | 'horizontal'
-}
-```
-
----
-
-## 9. GitFest Lineup (`gitfest-lineup`)
-
-Renders a festival lineup poster where top starred repositories headline the event.
-
-```typescript
-export interface GitFestConfig {
-  festivalName?: string // Default: 'GITFEST 2026'
-  headlinerCount?: number // Default: 3
-  accentColor?: string // Default: '#c5ff4a'
-}
-```
-
----
-
-## 10. Custom Image & GIFs (`custom-image`)
-
-Embeds remote PNGs, WebPs, SVGs, or animated GIFs.
-
-```typescript
-export interface CustomImageConfig {
-  url?: string // Image URL
-  objectFit?: 'contain' | 'cover' | 'fill' // Default: 'contain'
-  borderRadius?: number // Corner radius in px
-  opacity?: number // Default: 1
-}
-```
-
----
-
-## 11. GHStats Card (`ghstats`)
-
-Alternative GitHub stats card with clean minimalist layout and commit totals.
-
-```typescript
-export interface GHStatsConfig {
-  accentColor?: string
-  showPrivate?: boolean
-}
-```
+An inlined counter cannot count each README visit, and links embedded within the SVG are not separate README controls. See [data sources and display limits](/reference/data-sources).

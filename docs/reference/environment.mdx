@@ -1,0 +1,32 @@
+---
+title: 'Environment Reference'
+description: 'Configuration consumed by the application and publication services'
+---
+
+Use `.env.local` for development and your platform's secret store for deployment. `NEXT_PUBLIC_` values are public configuration. Server credentials, private keys, session secrets, and database URLs must not be placed in profile JSON or committed templates.
+
+| Variables                                                             | Required for                                | Notes                                                                      |
+| :-------------------------------------------------------------------- | :------------------------------------------ | :------------------------------------------------------------------------- |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                            | OAuth sign-in                               | Separate from GitHub App installation credentials                          |
+| `SESSION_SECRET`                                                      | Sessions                                    | At least 32 characters in production                                       |
+| `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`                             | Repository publication                      | Private key used to mint installation tokens                               |
+| `DATABASE_URL`, alternatively `DATABASE_URL_UNPOOLED`                 | Database-backed persistence                 | First takes precedence; existing client uses Neon HTTP                     |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                  | Shared Redis adapter                        | Without both, process-memory fallback                                      |
+| `GITASCII_ACTION_SHA`                                                 | Generated workflow revision                 | Optional; defaults to `main`; does not rewrite already installed workflows |
+| `NEXT_PUBLIC_APP_URL`                                                 | Canonical application URL                   | Used by lifecycle links and checkout returns                               |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                          | Checkout and verified payment events        | Server secrets                                                             |
+| `STRIPE_PRICE_ID`                                                     | Primary checkout price                      | Overrides alternate price IDs                                              |
+| `STRIPE_PRICE_ID_BRL`, `STRIPE_PRICE_ID_USD`                          | Alternate checkout price selection          | Used when primary price ID is absent                                       |
+| `PRO_CHECKOUT_URL`, alternatively `STRIPE_CHECKOUT_URL`               | External checkout fallback                  | Optional alternative when direct Stripe checkout is unavailable            |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`                      | Implemented lifecycle emails                | Not evidence that every alert path sends mail                              |
+| `CRON_SECRET`                                                         | Internal migration and protected email jobs | Authorization secret; does not install a scheduler                         |
+| `MIGRATION_CRON_SECRET`, `EMAIL_CRON_SECRET`                          | Job-specific fallback secrets               | Used when the corresponding route has no `CRON_SECRET`                     |
+| `PRO_USERNAMES`, alternatively `PRO_ADMIN_USERS`                      | Explicit administrative Pro overrides       | Comma-separated usernames; overrides billing-derived access                |
+| `NEXT_PUBLIC_GITFEST_URL`                                             | GitFest integration                         | Optional external service URL                                              |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `GA_MEASUREMENT_PROTOCOL_API_SECRET` | Site analytics / server measurement         | Separate from Pro README badge analytics                                   |
+| `NEXT_PUBLIC_CLARITY_PROJECT_ID`                                      | Site session analytics                      | Separate integration                                                       |
+| `CF_COMMIT_SHA`                                                       | Cloudflare deployment metadata              | Optional platform-side value                                               |
+
+The `.env.example` also contains GitHub App client ID/secret fields. Do not confuse those with the OAuth credentials or the App ID/private key required for installation tokens. Review the consuming source before configuring an integration.
+
+Some self-hosting settings are still code constants: GitHub App installation URLs and the generated telemetry endpoint require source review. See [development and deployment](/guides/development). This reference does not claim that all integrations can be relocated solely through environment variables.

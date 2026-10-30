@@ -8,7 +8,7 @@ import { createConfiguration } from '@/engine/core/TemplateRenderer'
 import { generateBestProfile } from '@/engine/generate/profileAnalyzer'
 import type { NormalizedGitHubData, SavedConfiguration } from '@/engine/types'
 import { getMockGitHubData } from '@/features/github/api/mockProfile'
-import { EditorMascot, StrobiAnchor } from '@/features/mascot'
+import { EditorMascot } from '@/features/mascot'
 import { useI18n } from '@/i18n'
 import { API_ENDPOINTS } from '@/services/endpoints'
 import { safeStorage } from '@/utils/storage'
@@ -647,10 +647,7 @@ export function EditorLayout({
 
       <EditorTour embedded={embedded} />
       <V2MigrationTour embedded={embedded} />
-      <div className="fixed bottom-6 right-6 z-[180] pointer-events-none">
-        <StrobiAnchor id="editor" size={68} align="bottom-right" scene="editor" float />
-      </div>
-      <EditorMascot />
+      {!embedded && <EditorMascot />}
       <WidgetDragOverlay />
     </div>
   )

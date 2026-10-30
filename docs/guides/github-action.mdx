@@ -1,0 +1,53 @@
+---
+title: 'GitHub Action and Refreshes'
+description: 'Workflow installation, triggers, permissions, schedules, and publication results'
+---
+
+The generated `.github/workflows/gitascii.yml` lives on your profile repository's **default branch**. It uses `Igorcbraz/GitAscii/action`, whose Node 20 entry point is the bundled `action/dist/index.js`. The Action reads configurations and writes SVGs on **`gitascii`**; it does not read the GitAscii database.
+
+## When it runs
+
+| Trigger                 | What happens                                                                                                        |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| Editor publication      | The backend first writes configuration and initial SVGs, then attempts `workflow_dispatch` on the default branch.   |
+| Manual refresh          | Run the workflow from GitHub's Actions tab on the default branch.                                                   |
+| Schedule                | Editor-generated workflows schedule Free daily and Pro hourly, at a deterministic minute derived from the username. |
+| JSON edit on `gitascii` | No automatic run: the generated workflow has no `push` trigger. Dispatch it manually or wait for the schedule.      |
+
+The schedule created by the migration engine is conditional on its dynamic-widget detection; normal editor publication explicitly enables scheduling. Check the YAML in your repository to see what is installed.
+
+## Permissions and inputs
+
+The workflow grants `contents: write` to its `GITHUB_TOKEN`. Pro workflows also grant `id-token: write` to authenticate publication-policy requests and telemetry to GitAscii. The Action does not use the user's OAuth access token.
+
+| Input             | Default                                  | Purpose                                                              |
+| :---------------- | :--------------------------------------- | :------------------------------------------------------------------- |
+| `github_token`    | Workflow token                           | Read the repository and commit rendered artifacts.                   |
+| `profile_slug`    | Empty                                    | Empty discovers all profile configurations; a slug limits rendering. |
+| `refresh_minutes` | `1440`                                   | Minimum interval requested for scheduled refreshes.                  |
+| `pro_telemetry`   | `false`                                  | Enable publication reports.                                          |
+| `telemetry_url`   | `https://gitascii.com/api/pro/telemetry` | Policy and report endpoint.                                          |
+
+For scheduled runs, the effective interval is the larger of the input and the server's publication policy. Pro policy has a 60-minute floor, but defaults to 1440 minutes when no interval is configured. A policy/OIDC failure falls back to 1440 minutes. The guard compares against the latest `gitascii` branch commit, not a per-profile timer. Manual dispatch bypasses this interval guard.
+
+The generator uses `GITASCII_ACTION_SHA` when configured on the backend, otherwise `main`. The generated workflow has a five-minute job timeout and cancels an earlier run in the same concurrency group. Existing repository workflows must be updated to pick up generator changes.
+
+## What a refresh publishes
+
+1. Read saved JSON configurations from `gitascii`.
+2. Fetch GitHub user and repository data, with best-effort GraphQL enrichment.
+3. Render dark and light images and process external assets.
+4. Compare file hashes and check that the branch/configuration has not advanced.
+5. Commit changed SVGs together using a non-forced branch update.
+
+| Result             | Meaning                                                               |
+| :----------------- | :-------------------------------------------------------------------- |
+| `published`        | New SVG files were committed.                                         |
+| `svg_unchanged`    | Rendered bytes match the existing artifacts. No new commit is needed. |
+| `skipped_stale`    | The branch or configuration changed while the run was working.        |
+| `skipped_interval` | A scheduled run was too soon.                                         |
+| `failed`           | The run could not complete. Consult the Actions log.                  |
+
+Pro reporting is best effort and is not required to commit SVGs. An asset placeholder can be published with an error report; a fatal failure before the commit leaves the previous files intact. See [troubleshooting](/guides/troubleshooting) and [health semantics](/pro/health-monitoring).
+
+Source: [Action definition](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/action.yml), [Action implementation](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/action/src/index.ts), [workflow generator](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/migration/workflowGenerator.ts).

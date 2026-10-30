@@ -8,7 +8,10 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET || process.env.EMAIL_CRON_SECRET
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret?.trim()) {
+      return NextResponse.json({ error: 'Scheduled emails are not configured' }, { status: 503 })
+    }
+    if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

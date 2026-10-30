@@ -1,0 +1,28 @@
+---
+title: 'Publishing Troubleshooting'
+description: 'Diagnose repository permissions, stale images, failed refreshes, and missing telemetry'
+---
+
+Start with the repository state: check the `gitascii` branch, the requested `profiles/[slug]/dark.svg` and `light.svg`, and the workflow on the default branch. GitAscii's database state alone does not confirm that publication completed.
+
+| Symptom                                                | Check and next step                                                                                                                                                                              |
+| :----------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Publishing requests installation again                 | GitHub sign-in and GitHub App installation are separate. Grant the App access to `USERNAME/USERNAME`, return to the editor, and publish again.                                                   |
+| Repository creation fails                              | Create the public profile repository on GitHub, grant the App access, and retry. The backend attempts creation but cannot guarantee permission to do so.                                         |
+| An edit is visible only in the editor                  | Local draft changes are not published. Choose **Publish to GitHub**.                                                                                                                             |
+| SVG files exist, but the workflow is missing or failed | Initial rendering and workflow setup are separate operations. Inspect the default branch and Actions log; republishing can retry setup.                                                          |
+| A JSON edit did not refresh the image                  | The generated YAML has no push trigger. Run the workflow manually on the default branch.                                                                                                         |
+| Scheduled run did not commit                           | Look for `skipped_interval`, `skipped_stale`, or `svg_unchanged`. Check the Pro interval as well as the YAML schedule.                                                                           |
+| Raw SVG is current, README still looks old             | Confirm the README points to the correct username, branch, slug, and theme. The raw host, image proxy and browser can cache responses; a commit does not guarantee immediate cache invalidation. |
+| A remote widget becomes a placeholder                  | Check the failed URL in the workflow report/log. External assets are fetched at publication time. Repair its configuration and refresh again.                                                    |
+| README text disappears after publishing                | The current publisher replaces the complete README. Restore surrounding text from Git history after publication; keep a copy before future publishes.                                            |
+| Health has no samples                                  | Free/default workflows do not report Pro telemetry. For Pro, check `pro_telemetry`, `id-token: write`, and report errors in the log. Missing telemetry does not prove publication failed.        |
+| A dynamic profile does not switch                      | Raw GitHub file URLs never evaluate rules. Use the default HTTP embed with `dynamic=1`, enable Pro rules, and allow for API/proxy caching.                                                       |
+
+## After a partial failure
+
+The branch update, README write, workflow setup, dispatch and database save are not one transaction. Inspect which steps succeeded before retrying. A failed dispatch or telemetry request can coexist with successfully published images. A fatal render failure before a new commit leaves the last published files in place; a handled asset failure can produce a new file containing fallback content.
+
+## Existing HTTP embeds
+
+The standard V2 embed points to raw GitHub files, with a workflow on the default branch and configuration on `gitascii`. If your README still uses a GitAscii HTTP URL, publish from the editor and use the generated raw-file embed, unless you deliberately use Pro dynamic rules. See [migration and verification limits](/architecture/rendering-and-publishing) for existing installations.

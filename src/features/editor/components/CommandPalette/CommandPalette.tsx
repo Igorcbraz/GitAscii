@@ -351,6 +351,7 @@ export function CommandPalette({
   return (
     <div
       className="fixed inset-0 z-9999 flex items-start justify-center pt-[12vh]"
+      data-strobi-blocking
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}

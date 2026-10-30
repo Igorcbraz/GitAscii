@@ -67,7 +67,7 @@ Adding custom pre-built templates for the community is straightforward:
 1. Design your template inside the [GitAscii Web Editor](https://gitascii.com).
 2. Click **Export Template** in the sidebar (this automatically removes personal data like custom bio, usernames, and avatars).
 3. Save the file into `src/data/templates/<template_name>.json`.
-4. Register the template in `src/data/templates/index.ts`.
+4. Run `npm run generate:templates` to regenerate the registry from the template JSON files. See [the template documentation](docs/templates/overview.mdx).
 5. Submit a PR!
 
 ### Improving Documentation
@@ -75,7 +75,8 @@ Adding custom pre-built templates for the community is straightforward:
 Our documentation is powered by **Mintlify** inside the `docs/` folder. You can run and preview the docs locally with:
 
 ```bash
-npm run docs
+cd docs
+npx --yes mintlify dev
 ```
 
 ---
@@ -84,7 +85,7 @@ npm run docs
 
 ### Prerequisites
 
-- **Node.js**: v20.x or higher
+- **Node.js**: v22.x (matching the application CI)
 - **npm**: v10.x or higher (or compatible package managers)
 - **Git**
 
@@ -110,7 +111,7 @@ git checkout -b feat/your-feature-name
 | `npm run storybook` | Boots the Storybook component workbench on `http://localhost:6006`    |
 | `npm run test`      | Runs the Vitest test suite                                            |
 | `npm run test:e2e`  | Runs Playwright end-to-end browser tests                              |
-| `npm run check`     | Executes full verification (`typecheck` + `lint` + `build`)           |
+| `npm run check`     | Executes full verification (`typecheck` + `lint` + `test` + `build`)  |
 
 ---
 

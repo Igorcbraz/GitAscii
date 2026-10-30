@@ -20,6 +20,8 @@ import React from 'react'
 import { UserMenuDropdown } from '@/components/ui/UserMenuDropdown'
 import { EXTERNAL_LINKS } from '@/constants/links'
 import { useI18n } from '@/i18n'
+import { navigateToGithubLogin } from '@/services/authNavigation'
+import { API_ENDPOINTS } from '@/services/endpoints'
 
 import { ProBadge } from './ProBadge'
 import { useProNav } from './ProNavContext'
@@ -234,8 +236,9 @@ export const ProSidebar: React.FC<ProSidebarProps> = ({
               />
             ) : (
               <Link
-                href={`/api/auth/login?redirect_to=${encodeURIComponent(pathname || '/pro')}`}
+                href={API_ENDPOINTS.AUTH.LOGIN(pathname || '/pro')}
                 prefetch={false}
+                onNavigate={(event) => navigateToGithubLogin(event, pathname || '/pro')}
                 className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#c5ff4a]/10 hover:border-[#c5ff4a]/30 text-xs font-medium text-white hover:text-[#c5ff4a] transition-all cursor-pointer group"
               >
                 <Github className="w-3.5 h-3.5 text-[#7a7a7a] group-hover:text-[#c5ff4a] transition-colors" />

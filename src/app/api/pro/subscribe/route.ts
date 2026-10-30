@@ -32,7 +32,7 @@ function resolvePriceId(acceptLanguage: string | null): string | undefined {
   return priceBrl || priceUsd
 }
 
-export async function POST(request?: Request) {
+export async function POST(request: Request) {
   const session = await getSession()
   if (!session || !session.username) {
     return NextResponse.json({ error: 'Unauthorized. Please login with GitHub.' }, { status: 401 })

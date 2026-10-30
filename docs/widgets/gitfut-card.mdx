@@ -1,0 +1,53 @@
+---
+title: 'GitFut Card'
+description: 'GitFut renderer configuration and publication limits'
+---
+
+Widget ID: `gitfut-card`.
+
+The card uses a remote GitFut image or configured fallback. Remote availability and publication asset processing affect the result. The holographic option is a visual effect, not a ranking metric. See [data sources](/reference/data-sources) for interpretation and asset fallback behavior.
+
+## Configuration
+
+The following property names are read by this renderer or its shared palette helper. Properties are optional in the layout model. Types shown are source assertions or explicit conversions, not runtime validation. Omitted values use renderer/data/style defaults; an empty string or zero can also activate a fallback where the source uses `||`. Use the linked renderer for nested value shapes and conditional defaults.
+
+| Property     | Source type or conversion |
+| :----------- | :------------------------ |
+| `country`    | `string`                  |
+| `enableHolo` | `boolean`                 |
+| `glareX`     | `number`                  |
+| `glareY`     | `number`                  |
+| `intensity`  | `number`                  |
+| `isLoading`  | `boolean`                 |
+| `rotateX`    | `number`                  |
+| `rotateY`    | `number`                  |
+| `scale`      | `number`                  |
+| `shineX`     | `number`                  |
+| `shineY`     | `number`                  |
+
+## Layout example
+
+This instance starts from the renderer defaults. The dimensions are an example, not a promised minimum or editor preset. Add it to the `widgets` array of a [configuration](/api/configuration), then [render the complete layout](/guides/reproduce-editor).
+
+```json
+{
+  "instanceId": "gitfut-card-example",
+  "widgetId": "gitfut-card",
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "width": 600,
+    "height": 360
+  },
+  "config": {},
+  "locked": false,
+  "visible": true,
+  "zIndex": 1
+}
+```
+
+Start with the matching suite's [template](/templates/overview) in the editor to inherit its composition and dimensions. Check both published themes and replace decorative placeholder copy before publishing. Preview interaction does not establish interaction support in GitHub's image embed.
+
+Implementation: [`renderGitFutCard`](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/widgets/renderers/GitFutCardRenderer.ts). See the [full catalog](/widgets/overview) for related widgets.

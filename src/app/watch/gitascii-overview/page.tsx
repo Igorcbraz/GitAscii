@@ -7,7 +7,7 @@ const watchUrl = `${APP_URL}/watch/gitascii-overview`
 const title = 'GitAscii Overview: GitHub Profile README and ASCII Art Demo'
 const description =
   'Watch a 40-second walkthrough of GitAscii: turn a GitHub profile into ASCII art, choose README templates, and edit live SVG widgets.'
-const thumbnailUrl = `${APP_URL}/editor.webp`
+const thumbnailUrl = `${APP_URL}/editor-poster.webp`
 
 export const metadata: Metadata = {
   title,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description,
     url: watchUrl,
     type: 'video.other',
-    images: [{ url: thumbnailUrl, width: 5640, height: 2592, alt: 'GitAscii editor preview' }],
+    images: [{ url: thumbnailUrl, width: 1672, height: 941, alt: 'GitAscii desktop presentation' }],
   },
 }
 
@@ -52,7 +52,7 @@ export default function GitAsciiOverviewPage() {
           controls
           playsInline
           preload="none"
-          poster="/editor.webp"
+          poster="/editor-poster.webp"
           width={1200}
           height={675}
           className="mt-8 aspect-video w-full bg-black"
@@ -60,6 +60,13 @@ export default function GitAsciiOverviewPage() {
           <source src="/presentation.mp4" type="video/mp4" />
           Your browser does not support HTML video.
         </video>
+        <p className="mt-4 text-sm">
+          Watching on a phone?{' '}
+          <Link href="/watch/gitascii-overview-mobile" className="text-signal-lime underline">
+            Watch the portrait version
+          </Link>
+          .
+        </p>
         <p className="mt-8 max-w-3xl text-base leading-relaxed">
           The demo shows the GitAscii studio, where you can customize a GitHub profile README with
           ASCII art, templates, and live SVG widgets. Open the editor from the homepage to try it

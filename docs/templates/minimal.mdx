@@ -1,48 +1,13 @@
 ---
-title: 'Minimal Luxe & Dev Card Presets'
-description: 'Restrained Swiss typography and Neo-brutalist developer cards'
+title: 'Minimal and Bento Layouts'
+description: 'Current minimal_luxe and bento_grid presets'
 ---
 
-# Minimal Luxe & Dev Card Presets
+| Preset ID      | Initial composition                                                         | Base styling                                                          |
+| :------------- | :-------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| `minimal_luxe` | Header, bio, tech stack, repositories, social media, footer.                | Inter Tight, `#080808` background, `#f3f4f6` accent, 8-pixel radius.  |
+| `bento_grid`   | Header, avatar, bio, tech stack, GitHub Readme Stats, Streak Stats, footer. | Inter Tight, `#09090b` background, `#a1a1aa` accent, 12-pixel radius. |
 
-## 1. Minimalist Luxe (`minimal`)
+These are the actual preset IDs. `minimal` and `bento` are decoration-style names, not the IDs passed to `createConfiguration`.
 
-A refined editorial presentation utilizing PT Serif headlines, bone text tones (`#e5e5e5`), subdued border lines (`#333333`), and maximum white space.
-
-```json
-{
-  "templateId": "minimal",
-  "globalStyles": {
-    "backgroundColor": "#0d1117",
-    "textColor": "#e5e5e5",
-    "accentColor": "#ffffff",
-    "borderColor": "#30363d",
-    "fontFamily": "'Inter Tight', sans-serif",
-    "borderRadius": 4,
-    "padding": 24,
-    "templateStyle": "minimal"
-  }
-}
-```
-
----
-
-## 2. Developer Card (`devcard`)
-
-Neo-brutalist presentation with amber `#f59e0b` accents, heavy 2px black borders, and hard-edged offset drop shadows (`drop-shadow(4px 4px 0px #000)`).
-
-```json
-{
-  "templateId": "devcard",
-  "globalStyles": {
-    "backgroundColor": "#18181b",
-    "textColor": "#fafafa",
-    "accentColor": "#f59e0b",
-    "borderColor": "#3f3f46",
-    "fontFamily": "'Inter', sans-serif",
-    "borderRadius": 8,
-    "padding": 24,
-    "templateStyle": "devcard"
-  }
-}
-```
+Bento's external stats cards introduce upstream dependencies during publication. For a layout based only on GitHub data fetched by GitAscii, replace them with native stats widgets. See [external widgets](/widgets/external-widgets) and the [template catalog](/templates/overview).

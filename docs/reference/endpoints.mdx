@@ -3,9 +3,9 @@ title: 'HTTP Endpoints Reference'
 description: 'Profile SVG, configuration, and analytics badge routes'
 ---
 
-# HTTP Endpoints Reference
-
 The standard v2 README embed points to `https://raw.githubusercontent.com/:username/:username/gitascii/profiles/:slug/{dark,light}.svg`. These GitAscii HTTP routes are for previews and custom integrations.
+
+Use the individual contracts for request and response details: [SVG](/api/profile-svg), [configuration](/api/configuration-endpoint), [GitHub data](/api/github-data), [generation](/api/generate), [badges](/api/badges), and [authenticated publication](/api/publication). This page is the compact route index.
 
 ## Profile SVG routes
 
@@ -48,3 +48,11 @@ GET /api/badge/:username?slug=default&style=classic
 ```
 
 Badge styles are `classic`, `compact`, `outline`, and `transparent`. This is a separate image request from the GitHub-hosted profile SVG. Its analytics represent badge fetches observed by GitAscii, usually GitHub Camo refreshes, not individual profile visitors. Publication health is reported separately by the GitHub Action.
+
+## Public health badge
+
+`GET /api/:username/health-badge` returns the account-level publication-health badge. It does not render a profile or count README visitors. See [health score and fallback semantics](/pro/health-monitoring).
+
+## Authenticated publication
+
+`POST /api/github/commit` is the editor publication route and requires the signed-in session plus repository authorization through the GitHub App. It is not an anonymous SVG generation endpoint. Its writes and partial-failure boundaries are covered in [architecture](/architecture/rendering-and-publishing). `POST /api/generate` only returns `{ config, data }`; it does not publish files or install a workflow.

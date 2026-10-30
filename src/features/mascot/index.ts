@@ -27,7 +27,8 @@ export type {
   StrobiSpeechMessage,
 } from './core/types'
 export { ActionPriority } from './core/types'
-export { EditorMascot, EditorMascotInline } from './EditorMascot'
+export { EditorMascot } from './EditorMascot'
+export { EditorMascotInline } from './EditorMascotInline'
 export { useScrollJourney } from './hooks/useScrollJourney'
 export { useStrobi } from './hooks/useStrobi'
 export { useStrobiAnchor } from './hooks/useStrobiAnchor'

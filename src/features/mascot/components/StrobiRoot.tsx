@@ -1,29 +1,15 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import React from 'react'
 
+import { STROBI_SCENE } from '../constants/strobi'
 import { StrobiProvider } from '../core/StrobiContext'
-
-const StrobiHost = dynamic(() => import('./StrobiHost').then((m) => m.StrobiHost), { ssr: false })
+import { StrobiDeferredHost } from './StrobiDeferredHost'
 
 export function StrobiRoot({ children }: { children: React.ReactNode }) {
-  const [shouldMountMascot, setShouldMountMascot] = React.useState(false)
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if ('requestIdleCallback' in window) {
-        ;(window as any).requestIdleCallback(() => setShouldMountMascot(true))
-      } else {
-        setShouldMountMascot(true)
-      }
-    }, 2500)
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
-    <StrobiProvider initialAnchor="hero-cta" initialScene="landing">
-      {shouldMountMascot && <StrobiHost />}
+    <StrobiProvider initialAnchor="hero-cta" initialScene={STROBI_SCENE.LANDING}>
+      <StrobiDeferredHost />
       {children}
     </StrobiProvider>
   )

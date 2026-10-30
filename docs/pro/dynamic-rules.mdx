@@ -3,22 +3,52 @@ title: 'Dynamic Rules & Profile Scheduling'
 description: 'Choose a profile through the optional Pro HTTP API embed'
 ---
 
-# Dynamic Rules & Scheduling
-
 Pro dynamic rules choose a profile when the **default HTTP rendering API** is requested with `?dynamic=1`. Rules do not alter the static `raw.githubusercontent.com` SVGs as a visitor opens the README.
 
-When rules are enabled for the default profile, the editor generates a dark/light `<picture>` whose sources use `https://gitascii.com/api/USERNAME?dynamic=1&theme=dark|light`. That request evaluates the current rule set and renders or redirects to the selected profile. Explicit named slugs continue to refer to that slug.
+When rules are enabled for the default profile, the editor generates a dark/light `<picture>` whose sources use `https://gitascii.com/api/USERNAME?dynamic=1&theme=dark|light`. On an eligible cache miss, the service evaluates the rule set; when a profile is resolved dynamically, it uses the rendering path. Explicit named slugs continue to refer to that slug.
 
 ## Rule types
 
-| Type         | Trigger                                            |
-| :----------- | :------------------------------------------------- |
-| `work_hours` | Configured weekday and time window.                |
-| `weekend`    | Weekend days.                                      |
-| `date_range` | Start and end dates.                               |
-| `event`      | Named event schedule.                              |
-| `custom`     | A custom combination of days, hours, and timezone. |
+| Type         | Trigger                                                      |
+| :----------- | :----------------------------------------------------------- |
+| `work_hours` | Configured weekday and time window.                          |
+| `weekend`    | Weekend days.                                                |
+| `date_range` | Start and end dates.                                         |
+| `event`      | Named event schedule.                                        |
+| `temporary`  | Temporary profile selection until its configured expiration. |
+| `custom`     | A custom combination of days, hours, and timezone.           |
 
-Higher-priority enabled rules are checked first; the configured fallback profile applies when none match. The simulator in `/pro/profiles` lets you test a date and timezone before enabling a rule.
+Higher-priority enabled rules are checked first. When none match, the evaluator prefers the account's profile marked as default, then the configured fallback slug, then the first available profile (or `default` if none exist). The simulator in `/pro/profiles` lets you test a date and timezone before enabling a rule.
 
 Dynamic API responses can be cached, so a rule change may not be visible to every client immediately. If you want a stable GitHub-hosted embed instead, use the published `profiles/[slug]/{dark,light}.svg` URLs.
+
+## Configure and verify a rule
+
+1. Create and publish the target profile in `/pro/profiles`.
+2. Add an enabled rule with the target slug, type, priority, and schedule. Higher priority numbers are evaluated first.
+3. Use the simulator with dates inside and outside the window. Inspect its selected slug, match reason, and fallback result.
+4. Enable the rule set and publish the default profile again so its generated README embed uses the dynamic API URL. An existing raw-file embed does not automatically become dynamic.
+
+For example, these are schedule fields for a weekday work profile, not a complete saved rule record:
+
+```json
+{
+  "name": "Work profile",
+  "targetProfileSlug": "work",
+  "type": "work_hours",
+  "priority": 100,
+  "enabled": true,
+  "daysOfWeek": [1, 2, 3, 4, 5],
+  "startTime": "09:00",
+  "endTime": "18:00",
+  "timezone": "America/Sao_Paulo"
+}
+```
+
+The server adds IDs and timestamps when creating records. Day values are numeric: `0` is Sunday and `6` is Saturday. Time windows include the start and exclude the end; a start later than the end represents a window crossing midnight. Date-range and event rules compare inclusive start/end timestamps. Use explicit ISO timestamps with offsets for those rules to avoid ambiguous date-only expectations. Temporary rules with an expiration remain eligible through that timestamp.
+
+Rule-specific timezone takes precedence over the active evaluation timezone. Use an explicit IANA timezone for predictable schedules and simulate boundary dates around clock changes where relevant. A cached response is not re-evaluated for every viewer.
+
+Types and UI constants also contain names such as viewer country, device, and referrer. The implemented schedule evaluator switches on the six rule types listed above; those other declarations do not establish visitor-personalized README behavior. GitHub's proxy cannot provide reliable viewer identity or local timezone.
+
+Source: [rule model](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/types/profiles.ts) and [evaluator](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/features/pro/server/dynamicRulesStore.ts).

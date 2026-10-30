@@ -1,0 +1,61 @@
+---
+title: 'Storage and Publication Operations'
+description: 'Schema preparation, recovery boundaries, and operational diagnosis'
+---
+
+The application database, Redis, and GitHub repository hold different state. GitHub holds published JSON and SVGs; the database holds application and Pro records; Redis provides caches and additional store operations. Restoring one does not restore all three.
+
+## Prepare the database schema
+
+Schema changes are implemented by `runMigrations()` in `src/lib/db/migrations.ts`. The function records applied versions in `schema_migrations` and uses a time-limited database lock. No production startup caller or dedicated package migration command is established in this repository.
+
+To prepare a configured database explicitly, create a temporary script in the repository root:
+
+```typescript
+// migrate-local.ts
+import { runMigrations } from './src/lib/db/migrations'
+
+console.log(await runMigrations())
+```
+
+Run it from that root with the existing `tsx` dependency:
+
+```bash
+node --env-file=.env.local --import tsx migrate-local.ts
+```
+
+This command **writes database schema**. Review the connection target and arrange a database backup before applying migrations to a live instance. A lock-related skip is not proof that another instance completed every migration. Inspect `schema_migrations` and the process logs before serving traffic that needs new tables. Migration functions are not a documented automatic rollback mechanism.
+
+## Distinguish the two migrations
+
+| Mechanism                      | Purpose                                                                | Operational boundary                                            |
+| :----------------------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| Redis-to-PostgreSQL backfill   | Transfer eligible application records into database tables             | Utility exists; no automatic production invocation was verified |
+| V1-to-V2 publication migration | Create GitHub-native profile artifacts and migration workflow/PR state | Requires repository authorization and the migration runner      |
+
+The internal publication runner is `/api/internal/migration`, protected by `CRON_SECRET` or `MIGRATION_CRON_SECRET`. A route existing in the code does not prove that an external scheduler invokes it. See [migration limits](/architecture/rendering-and-publishing) before treating every account as migrated.
+
+## Diagnose a stale README
+
+1. Open the configured slug's dark and light SVGs on the `gitascii` branch. Confirm the JSON and latest commit match the intended design.
+2. Inspect the workflow on the repository default branch and its latest Actions log. Check permissions, schedule, interval skips, and stale-branch outcomes.
+3. Open the raw SVG URL directly. If the repository file is correct but the README is older, separate raw GitHub and image-proxy caching from a failed render.
+4. Dispatch the workflow manually when a refresh is needed. Manual dispatch bypasses the scheduled interval guard; it does not promise that unchanged SVGs will create another commit.
+
+Use [troubleshooting](/guides/troubleshooting) for user-facing recovery steps. Do not delete published files to force a refresh: a fatal rendering failure preserves the previous SVGs.
+
+## Diagnose missing Pro signals
+
+Check the current account entitlement, database connectivity, and Action OIDC verification. Publication telemetry is best effort, so an absent report does not by itself prove a failed SVG commit. Badge request counts and Action health reports have separate sources. A health-badge fallback can look operational despite a failed lookup; inspect stored reports and logs instead.
+
+For payment activation, inspect the signed Stripe webhook's delivery and persisted entitlement record. The checkout redirect is not an activation receipt. Widget-error alert records currently do not prove email delivery.
+
+## Backup and recovery
+
+Back up the database with the database provider's supported tooling, and keep repository history available for published artifacts. The repository does not include an automated backup scheduler, tested disaster-recovery procedure, or universal restore command.
+
+For a damaged layout, recover its JSON from Git history or a local export, import it into the editor, review it, and publish. To restore only the public image, recover the SVG files on `gitascii` through Git; a later Action run can replace them from the current JSON. Restore configuration as well if that replacement would be unwanted.
+
+Database restoration recovers only records included in that backup. GitHub files, installation permissions, Redis state, and external billing state must be reconciled separately. Do not assume an old Redis entitlement should override PostgreSQL: configured database-backed entitlement lookup is authoritative.
+
+Sources: [schema migrations](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/db/migrations.ts), [backfill utility](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/lib/db/backfill.ts), and [publication migration route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/internal/migration/route.ts).

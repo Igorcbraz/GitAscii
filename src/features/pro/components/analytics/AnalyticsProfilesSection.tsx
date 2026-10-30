@@ -71,8 +71,10 @@ export const AnalyticsProfilesSection: React.FC<AnalyticsProfilesSectionProps> =
                     <span>{prof.name}</span>
                     <span className="text-[11px] font-mono text-[#8a8a8a]">({prof.slug})</span>
                   </td>
-                  <td className="py-3 text-white font-semibold">{prof.views.toLocaleString()}</td>
-                  <td className="py-3 text-emerald-400">{prof.uniques.toLocaleString()}</td>
+                  <td className="py-3 text-white font-semibold">
+                    {prof.views?.toLocaleString() ?? '—'}
+                  </td>
+                  <td className="py-3 text-emerald-400">{prof.uniques?.toLocaleString() ?? '—'}</td>
                   <td className="py-3 text-cyan-400">{prof.cacheHitRatio}%</td>
                   <td className="py-3 text-[#8a8a8a]">{prof.avgLatencyMs}ms</td>
                   <td className="py-3">

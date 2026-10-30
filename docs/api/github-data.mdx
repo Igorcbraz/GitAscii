@@ -1,0 +1,23 @@
+---
+title: 'Read GitHub Data'
+description: 'GET /api/github/:username'
+---
+
+Fetches and normalizes public GitHub profile data. No GitAscii session is required. The `username` path parameter identifies the GitHub account.
+
+```bash
+curl -i https://gitascii.com/api/github/octocat
+```
+
+The `200` JSON body is `NormalizedGitHubData`, without a `data` wrapper. Its structure and data origins are covered in [types](/reference/types) and [data sources](/reference/data-sources). REST profile data and best-effort enrichment do not guarantee that every optional metric is present. Clients should tolerate optional fields and empty collections.
+
+| Status | Body                                                                            |
+| :----- | :------------------------------------------------------------------------------ |
+| `200`  | Normalized GitHub data                                                          |
+| `400`  | `{"error":"Username is required"}` for a missing username passed to the handler |
+| `404`  | `{"error":"<not-found message>"}`                                               |
+| `500`  | `{"error":"<upstream or processing failure>"}`                                  |
+
+Successful responses set `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`. These are shared-cache directives, not a promise that upstream GitHub data is refreshed on every request. The endpoint neither publishes SVGs nor changes repository files.
+
+Source: [GitHub data route](https://github.com/Igorcbraz/GitAscii/blob/f248c939a3ea7810c3d3e331ae904b56a72b998f/src/app/api/github/%5Busername%5D/route.ts).

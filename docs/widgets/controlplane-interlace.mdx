@@ -3,15 +3,16 @@ title: 'Interlace Loom Weave Widget'
 description: 'Quiet project loom thread archive weave layout'
 ---
 
-# Interlace Loom Weave Widget (`controlplane-interlace`)
+Widget ID: `controlplane-interlace`.
 
 The Interlace Loom Weave widget represents active repositories and dependency channels as intersecting woven threads with subtle tension lines and status markers.
+
+These visual meters and connections are decorative; they do not monitor deployments or hardware. See [data sources and display limits](/reference/data-sources).
 
 ## Configuration Schema
 
 ```typescript
 export interface InterlaceConfig {
-  selectedRepos?: string[]
   maxRepos?: number
   accentColor?: string
 }

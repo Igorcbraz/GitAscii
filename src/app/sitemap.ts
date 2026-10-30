@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/terms',
     '/support',
     '/watch/gitascii-overview',
+    '/watch/gitascii-overview-mobile',
   ]
 
   const stackTemplates = [

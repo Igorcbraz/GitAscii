@@ -288,6 +288,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
 
               <div className="w-full max-w-sm space-y-3">
                 <button
+                  data-strobi-pro="pricing"
                   type="button"
                   onClick={onUpgrade}
                   disabled={isUpgrading || upgradeSuccess}
@@ -424,7 +425,10 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
           </div>
         </div>
 
-        <div className="relative overflow-hidden border border-graphite/40 bg-gradient-to-b from-onyx/40 via-carbon to-void-black">
+        <div
+          data-strobi-pro="compare"
+          className="relative overflow-hidden border border-graphite/40 bg-gradient-to-b from-onyx/40 via-carbon to-void-black"
+        >
           <div className="flex items-center gap-3 px-6 sm:px-8 py-4 bg-void-black/60 border-b border-graphite/30">
             <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.22em] text-signal-lime font-medium">
               {t('landing.pricing.table_badge', '[ FREE VS PRO PLAN COMPARISON ]')}
@@ -474,7 +478,7 @@ export const ProPaywall: React.FC<ProPaywallProps> = ({
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div data-strobi-pro="faq" className="space-y-6">
           <div className="flex items-center gap-3 pb-2 border-b border-graphite/30">
             <HelpCircle className="w-4 h-4 text-signal-lime" />
             <span className="font-jetbrains-mono text-[10px] uppercase tracking-[0.2em] text-signal-lime font-medium">

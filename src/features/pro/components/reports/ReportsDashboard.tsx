@@ -67,8 +67,17 @@ export const ReportsDashboard: React.FC = () => {
       const res = await fetch(API_ENDPOINTS.PRO.REPORTS(range))
       if (!res.ok) throw new Error(t('pro.reports.fetch_error', 'Failed to generate report'))
       const data: ReportData = await res.json()
+      if (
+        !data ||
+        !data.metrics ||
+        !Array.isArray(data.profilesSummary) ||
+        !Array.isArray(data.topSources)
+      ) {
+        throw new Error('Invalid report response')
+      }
       setReport(data)
     } catch (err) {
+      setReport(null)
       console.warn('Report fetch error:', err)
     } finally {
       setLoading(false)
@@ -121,7 +130,7 @@ ${report.profilesSummary.map((p) => `• /${p.slug} (${p.name}): ${p.views.toLoc
     return <ReportsDashboardSkeleton />
   }
 
-  const totalProfileViews = report?.profilesSummary.reduce((acc, p) => acc + p.views, 0) || 1
+  const totalProfileViews = report?.profilesSummary?.reduce((acc, p) => acc + p.views, 0) || 1
 
   const rangeSelector = (
     <div className="flex items-center gap-px bg-white/[0.04] p-0.5 rounded border border-white/[0.08]">

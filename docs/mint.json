@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "GitAscii API",
+  "name": "GitAscii",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -42,16 +42,28 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "quickstart"]
+      "pages": [
+        "introduction",
+        "quickstart",
+        "guides/editor",
+        "guides/github-readme-integration",
+        "guides/github-action",
+        "guides/troubleshooting"
+      ]
     },
     {
-      "group": "API",
-      "pages": ["api/overview", "api/rendering", "api/configuration", "api/json"]
+      "group": "Architecture",
+      "pages": ["architecture/rendering-and-publishing"]
+    },
+    {
+      "group": "Engine and Configuration",
+      "pages": ["api/rendering", "api/configuration", "api/json"]
     },
     {
       "group": "GitAscii Pro",
       "pages": [
         "pro/overview",
+        "pro/account-and-limits",
         "pro/telemetry-and-privacy",
         "pro/metrics-and-charts",
         "pro/health-monitoring",
@@ -62,7 +74,7 @@
     },
     {
       "group": "Widgets Overview",
-      "pages": ["widgets/overview"]
+      "pages": ["widgets/overview", "widgets/additional-suites"]
     },
     {
       "group": "Essential Widgets",
@@ -76,12 +88,13 @@
       ]
     },
     {
-      "group": "Interactive & ASCII",
+      "group": "ASCII and Cards",
       "pages": [
         "widgets/ascii-art",
         "widgets/ascii-text",
         "widgets/tech-stack",
-        "widgets/pokemon-card"
+        "widgets/pokemon-card",
+        "widgets/gitfut-card"
       ]
     },
     {
@@ -147,6 +160,53 @@
       "pages": ["widgets/external-widgets"]
     },
     {
+      "group": "Premium ASCII Suite",
+      "pages": [
+        "widgets/premium-ascii-coding-velocity",
+        "widgets/premium-ascii-dev-score",
+        "widgets/premium-ascii-dna",
+        "widgets/premium-ascii-insights",
+        "widgets/premium-ascii-profile-card"
+      ]
+    },
+    {
+      "group": "Surveillance Suite",
+      "pages": [
+        "widgets/surveillance-dossier",
+        "widgets/surveillance-feeds",
+        "widgets/surveillance-field",
+        "widgets/surveillance-header",
+        "widgets/surveillance-loadout",
+        "widgets/surveillance-telemetry",
+        "widgets/surveillance-title",
+        "widgets/surveillance-transmission"
+      ]
+    },
+    {
+      "group": "Windows XP Suite",
+      "pages": [
+        "widgets/winxp-bliss",
+        "widgets/winxp-error-dialog",
+        "widgets/winxp-media-player",
+        "widgets/winxp-minesweeper",
+        "widgets/winxp-paint",
+        "widgets/winxp-system-properties",
+        "widgets/winxp-taskbar",
+        "widgets/winxp-window"
+      ]
+    },
+    {
+      "group": "Minecraft Suite",
+      "pages": [
+        "widgets/minecraft-achievement",
+        "widgets/minecraft-chat",
+        "widgets/minecraft-death-screen",
+        "widgets/minecraft-hud",
+        "widgets/minecraft-inventory",
+        "widgets/minecraft-server"
+      ]
+    },
+    {
       "group": "Templates",
       "pages": [
         "templates/overview",
@@ -156,22 +216,41 @@
       ]
     },
     {
-      "group": "Guides",
+      "group": "Development Guides",
       "pages": [
+        "guides/development",
+        "guides/operations",
         "guides/reproduce-editor",
-        "guides/github-readme-integration",
         "guides/custom-widgets",
-        "guides/ascii-pipeline"
+        "guides/ascii-pipeline",
+        "guides/documentation"
       ]
     },
     {
       "group": "Reference",
       "pages": [
+        "reference/environment",
+        "reference/data-sources",
         "reference/types",
-        "reference/endpoints",
         "reference/animations",
         "reference/design-tokens"
       ]
+    },
+    {
+      "group": "HTTP API",
+      "pages": [
+        "api/overview",
+        "reference/endpoints",
+        "api/profile-svg",
+        "api/configuration-endpoint",
+        "api/github-data",
+        "api/generate",
+        "api/badges"
+      ]
+    },
+    {
+      "group": "Application Interfaces",
+      "pages": ["api/publication"]
     }
   ],
   "footerSocials": {

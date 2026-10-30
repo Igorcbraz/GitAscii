@@ -3,11 +3,11 @@ title: 'Configuration'
 description: 'Specification of SavedConfiguration, WidgetInstance, and GlobalStyles'
 ---
 
-# Configuration Specification
-
-Every layout in GitAscii is represented by the `SavedConfiguration` interface. This structure defines the canvas dimensions, color tokens, font stack, and the full tree of positioned widgets.
+Every layout in GitAscii is represented by the `SavedConfiguration` interface. This structure defines the widget geometry, color tokens, font stack, and the full tree of positioned widgets.
 
 In v2, the default profile configuration is stored as `gitascii.json` on the user's `gitascii` branch. Additional slugs use `gitascii_[slug].json`. The GitHub Action reads these files to refresh `profiles/[slug]/dark.svg` and `light.svg`.
+
+The configuration's `version: 1` is the JSON model version; V2 publication still uses this model. Editor downloads can contain only layout fields; see [JSON configuration and storage](/api/json). Defaults shown below describe common engine values; a selected template or widget can override them.
 
 ## `SavedConfiguration`
 
@@ -49,11 +49,12 @@ export interface SavedConfiguration {
 </ResponseField>
 
 <ResponseField name="templateId" type="string" required>
-  Active template preset identifier (`terminal`, `minimal`, `dracula`, etc.).
+  Active template preset identifier (for example `native`, `minimal_luxe`, or `windows_xp`; see
+  [templates](/templates/overview)).
 </ResponseField>
 
 <ResponseField name="widgets" type="WidgetInstance[]" required>
-  Ordered array of widget instances placed on the canvas.
+  Widget instances placed on the canvas; visible instances are rendered in `zIndex` order.
 </ResponseField>
 
 <ResponseField name="globalStyles" type="GlobalStyles" required>
@@ -94,7 +95,7 @@ export interface GlobalStyles {
 </ResponseField>
 
 <ResponseField name="accentColor" type="string" default="#c5ff4a">
-  Signature highlight color (zkPass Signal Lime `#c5ff4a` by default).
+  Highlight color inherited by renderers that use it.
 </ResponseField>
 
 <ResponseField name="borderColor" type="string" default="#252525">

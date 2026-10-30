@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GitAscii V2 publishing architecture",
+    "locale": "en",
+    "output": "docs/architecture/diagrams/v2/gitascii-v2.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Igorcbraz/GitAscii.git",
+      "revision": "f248c939a3ea7810c3d3e331ae904b56a72b998f",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "editor",
+      "type": "frontend",
+      "label": "Web editor",
+      "sublabel": "Local draft / Publish to GitHub",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        210,
+        70
+      ],
+      "sources": [
+        {
+          "path": "src/features/editor/components/Toolbar/EditorToolbar.tsx",
+          "line": 328,
+          "end_line": 374
+        },
+        {
+          "path": "src/features/editor/store/editorStore.ts",
+          "line": 19,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "publisher",
+      "type": "backend",
+      "label": "GitAscii publisher",
+      "sublabel": "Session + App token; render both themes",
+      "pos": [
+        420,
+        270
+      ],
+      "size": [
+        240,
+        70
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/github/commit/route.ts",
+          "line": 17,
+          "end_line": 181
+        },
+        {
+          "path": "src/lib/migration/branchBootstrap.ts",
+          "line": 108,
+          "end_line": 207
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "Profile persistence",
+      "sublabel": "PostgreSQL; memory / Redis fallback",
+      "pos": [
+        420,
+        65
+      ],
+      "size": [
+        240,
+        70
+      ],
+      "sources": [
+        {
+          "path": "src/lib/profileStorage.ts",
+          "line": 73,
+          "end_line": 91
+        },
+        {
+          "path": "src/lib/db/repositories/profileRepository.ts",
+          "line": 10,
+          "end_line": 46
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "cloud",
+      "label": "GitHub API",
+      "sublabel": "Repository writes + workflow dispatch",
+      "pos": [
+        850,
+        270
+      ],
+      "size": [
+        240,
+        70
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/github/commit/route.ts",
+          "line": 183,
+          "end_line": 286
+        },
+        {
+          "path": "src/lib/migration/branchBootstrap.ts",
+          "line": 131,
+          "end_line": 207
+        }
+      ]
+    },
+    {
+      "id": "repository",
+      "type": "database",
+      "label": "username / username",
+      "sublabel": "gitascii branch + default branch",
+      "pos": [
+        850,
+        520
+      ],
+      "size": [
+        240,
+        85
+      ],
+      "sources": [
+        {
+          "path": "src/lib/migration/branchBootstrap.ts",
+          "line": 33,
+          "end_line": 127
+        },
+        {
+          "path": "src/app/api/github/commit/route.ts",
+          "line": 183,
+          "end_line": 274
+        },
+        {
+          "path": "src/lib/migration/workflowGenerator.ts",
+          "line": 78,
+          "end_line": 103
+        }
+      ]
+    },
+    {
+      "id": "action",
+      "type": "backend",
+      "label": "GitAscii Action",
+      "sublabel": "Fetch data; render; inline assets",
+      "tag": "GITHUB_TOKEN",
+      "pos": [
+        850,
+        800
+      ],
+      "size": [
+        240,
+        85
+      ],
+      "sources": [
+        {
+          "path": "action/action.yml",
+          "line": 35,
+          "end_line": 37
+        },
+        {
+          "path": "action/src/index.ts",
+          "line": 63,
+          "end_line": 210
+        },
+        {
+          "path": "action/src/gitOps.ts",
+          "line": 201,
+          "end_line": 368
+        }
+      ]
+    },
+    {
+      "id": "raw",
+      "type": "cloud",
+      "label": "raw.githubusercontent.com",
+      "sublabel": "Published dark.svg / light.svg",
+      "pos": [
+        420,
+        520
+      ],
+      "size": [
+        240,
+        85
+      ],
+      "sources": [
+        {
+          "path": "src/services/endpoints.ts",
+          "line": 35,
+          "end_line": 38
+        },
+        {
+          "path": "src/lib/migration/markdownGenerator.ts",
+          "line": 12,
+          "end_line": 30
+        }
+      ]
+    },
+    {
+      "id": "readme",
+      "type": "frontend",
+      "label": "GitHub README",
+      "sublabel": "Theme-aware picture; may be cached",
+      "pos": [
+        40,
+        520
+      ],
+      "size": [
+        230,
+        85
+      ],
+      "sources": [
+        {
+          "path": "src/lib/migration/markdownGenerator.ts",
+          "line": 12,
+          "end_line": 30
+        },
+        {
+          "path": "docs/guides/github-readme-integration.mdx",
+          "line": 36,
+          "end_line": 42
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "GitAscii infrastructure",
+      "wraps": [
+        "publisher",
+        "storage"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "GitHub API service",
+      "wraps": [
+        "api"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "User-owned GitHub repository",
+      "wraps": [
+        "repository"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "GitHub Actions runtime",
+      "wraps": [
+        "action"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "README image delivery",
+      "wraps": [
+        "raw",
+        "readme"
+      ],
+      "pad": 24
+    }
+  ],
+  "connections": [
+    {
+      "id": "publish",
+      "from": "editor",
+      "to": "publisher",
+      "label": "POST config",
+      "variant": "emphasis"
+    },
+    {
+      "id": "persist",
+      "from": "publisher",
+      "to": "storage",
+      "label": "save after publish"
+    },
+    {
+      "id": "authorize",
+      "from": "publisher",
+      "to": "api",
+      "label": "App installation token",
+      "variant": "security"
+    },
+    {
+      "id": "initial-write",
+      "from": "api",
+      "to": "repository",
+      "label": "publish + dispatch",
+      "variant": "emphasis"
+    },
+    {
+      "id": "run-workflow",
+      "from": "repository",
+      "to": "action",
+      "label": "schedule / dispatch"
+    },
+    {
+      "id": "refresh",
+      "from": "action",
+      "to": "repository",
+      "label": "SVGs via GitHub API",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          1140,
+          842.5
+        ],
+        [
+          1140,
+          562.5
+        ]
+      ]
+    },
+    {
+      "id": "serve",
+      "from": "repository",
+      "to": "raw",
+      "label": "committed SVGs"
+    },
+    {
+      "id": "display",
+      "from": "raw",
+      "to": "readme",
+      "label": "picture URLs",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Publish now",
+      "items": [
+        "OAuth establishes the session; App token authorizes writes.",
+        "GitAscii renders the first pair and each editor publication."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Repository layout",
+      "items": [
+        "gitascii: gitascii.json + profiles/<slug>/{dark,light}.svg",
+        "Default branch: README.md + .github/workflows/gitascii.yml"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Refresh later",
+      "items": [
+        "Action reads repository config and fetches GitHub data via API.",
+        "Atomic SVG commit; unchanged or stale jobs skip writing."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Delivery boundary",
+      "items": [
+        "README uses published files without a GitAscii render request.",
+        "Optional Pro policy / telemetry and dynamic API mode: see docs."
+      ]
+    }
+  ]
+}

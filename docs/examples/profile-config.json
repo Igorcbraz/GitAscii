@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "githubId": 1,
+  "username": "example-user",
+  "profileSlug": "default",
+  "profileName": "Documentation Example",
+  "templateId": "blank",
+  "globalStyles": {
+    "backgroundColor": "#060606",
+    "textColor": "#e5e5e5",
+    "accentColor": "#c5ff4a",
+    "borderColor": "#252525",
+    "fontFamily": "monospace",
+    "borderRadius": 0,
+    "padding": 24,
+    "themeMode": "dark",
+    "templateStyle": "terminal"
+  },
+  "widgets": [
+    {
+      "instanceId": "stats_example",
+      "widgetId": "stats",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 800, "height": 160 },
+      "config": {},
+      "locked": false,
+      "visible": true,
+      "zIndex": 1
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "schemaVersion": 1,
+    "generatedBy": "manual"
+  }
+}
